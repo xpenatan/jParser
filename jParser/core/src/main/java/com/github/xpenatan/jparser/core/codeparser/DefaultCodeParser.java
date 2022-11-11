@@ -1,4 +1,4 @@
-package com.github.xpenatan.tools.jparser.codeparser;
+package com.github.xpenatan.jparser.core.codeparser;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.TokenRange;
@@ -10,8 +10,8 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
-import com.github.xpenatan.tools.jparser.JParser;
-import com.github.xpenatan.tools.jparser.util.RawCodeBlock;
+import com.github.xpenatan.jparser.core.JParser;
+import com.github.xpenatan.jparser.core.util.RawCodeBlock;
 import java.util.ArrayList;
 import java.util.Optional;
 

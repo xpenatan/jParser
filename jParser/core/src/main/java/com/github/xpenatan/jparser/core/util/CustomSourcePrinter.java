@@ -1,4 +1,4 @@
-package com.github.xpenatan.tools.jparser.util;
+package com.github.xpenatan.jparser.core.util;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.printer.configuration.DefaultConfigurationOption;

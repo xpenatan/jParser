@@ -1,4 +1,4 @@
-package com.github.xpenatan.tools.jparser.idl;
+package com.github.xpenatan.jparser.core.idl;
 
 /**
  * @author xpenatan

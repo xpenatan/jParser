@@ -1,4 +1,4 @@
-package com.github.xpenatan.tools.jparser.codeparser;
+package com.github.xpenatan.jparser.core.codeparser;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;

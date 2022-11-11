@@ -1,4 +1,4 @@
-package com.github.xpenatan.tools.jparser;
+package com.github.xpenatan.jparser.core;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;

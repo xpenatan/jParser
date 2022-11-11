@@ -1,4 +1,4 @@
-package com.github.xpenatan.tools.jparser;
+package com.github.xpenatan.jparser.core;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -7,10 +7,10 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.utils.PositionUtils;
-import com.github.xpenatan.tools.jparser.codeparser.CodeParser;
-import com.github.xpenatan.tools.jparser.codeparser.CodeParserItem;
-import com.github.xpenatan.tools.jparser.util.CustomFileDescriptor;
-import com.github.xpenatan.tools.jparser.util.CustomPrettyPrinter;
+import com.github.xpenatan.jparser.core.codeparser.CodeParser;
+import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
+import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
+import com.github.xpenatan.jparser.core.util.CustomPrettyPrinter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
