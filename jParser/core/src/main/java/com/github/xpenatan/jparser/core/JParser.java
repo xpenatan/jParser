@@ -31,14 +31,14 @@ import java.util.ArrayList;
  */
 public class JParser {
 
-    public final String fileSourceDir;
-    public final String fileGenDir;
+    public final String sourceDir;
+    public final String genDir;
     public ArrayList<JParserItem> unitArray = new ArrayList<>();
 
 
-    private JParser(String fileSourceDir, String fileGenDir) {
-        this.fileSourceDir = fileSourceDir;
-        this.fileGenDir = fileGenDir;
+    private JParser(String sourceDir, String genDir) {
+        this.sourceDir = sourceDir;
+        this.genDir = genDir;
     }
 
     public JParserItem getParserUnitItem(String className) {
