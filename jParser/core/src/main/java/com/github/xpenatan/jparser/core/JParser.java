@@ -80,7 +80,7 @@ public class JParser {
         }
         System.out.println("***** GENERATING CODE *****");
         JParser jParser = new JParser(sourceD, genD);
-        processDirectory(jParser, wrapper, fileSourceDir, fileGenDir, excludes, fileSourceDir);
+        processDirectory(jParser, fileSourceDir, fileGenDir, excludes, fileSourceDir);
         for(int i = 0; i < jParser.unitArray.size(); i++) {
             JParserItem parserItem = jParser.unitArray.get(i);
             String inputPath = parserItem.inputPath;
@@ -88,22 +88,23 @@ public class JParser {
 
             System.out.println(i + " Parsing: " + inputPath);
 
+            wrapper.onParseFileStart(jParser, parserItem);
             String codeParsed = parseJava(jParser, wrapper, parserItem);
             if(codeParsed != null) {
                 generateFile(destinationPath, codeParsed);
-                wrapper.onClassParsed(jParser, parserItem);
             }
+            wrapper.onParseFileEnd(jParser, parserItem);
         }
         System.out.println("********** DONE ***********");
     }
 
-    private static void processDirectory(JParser jParser, CodeParser wrapper, CustomFileDescriptor fileSourceDir, CustomFileDescriptor fileGenDir, String[] excludes, CustomFileDescriptor dir) throws Exception {
+    private static void processDirectory(JParser jParser, CustomFileDescriptor fileSourceDir, CustomFileDescriptor fileGenDir, String[] excludes, CustomFileDescriptor dir) throws Exception {
         CustomFileDescriptor[] files = dir.list();
         for(CustomFileDescriptor file : files) {
             if(file.isDirectory()) {
                 if(file.path().contains(".svn")) continue;
                 if(file.path().contains(".git")) continue;
-                processDirectory(jParser, wrapper, fileSourceDir, fileGenDir, excludes, file);
+                processDirectory(jParser, fileSourceDir, fileGenDir, excludes, file);
             }
             else {
                 if(file.extension().equals("java")) {
