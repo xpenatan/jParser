@@ -35,7 +35,6 @@ public class JParser {
     public final String genDir;
     public ArrayList<JParserItem> unitArray = new ArrayList<>();
 
-
     private JParser(String sourceDir, String genDir) {
         this.sourceDir = sourceDir;
         this.genDir = genDir;
