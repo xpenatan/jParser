@@ -31,10 +31,23 @@ import java.util.ArrayList;
  */
 public class JParser {
 
-    private JParser() {
+    private CustomFileDescriptor fileSourceDir;
+    private CustomFileDescriptor fileGenDir;
+    public ArrayList<JParserItem> unitArray = new ArrayList<>();
+
+
+    private JParser(CustomFileDescriptor fileSourceDir, CustomFileDescriptor fileGenDir) {
+        this.fileSourceDir = fileSourceDir;
+        this.fileGenDir = fileGenDir;
     }
 
-    public ArrayList<JParserItem> unitArray = new ArrayList<>();
+    public CustomFileDescriptor getSourceDir() {
+        return fileSourceDir;
+    }
+
+    public CustomFileDescriptor getGenDir() {
+        return fileGenDir;
+    }
 
     public JParserItem getParserUnitItem(String className) {
         for(int i = 0; i < unitArray.size(); i++) {
@@ -52,8 +65,11 @@ public class JParser {
             + " *-------------------------------------------------------";
 
     public static void generate(CodeParser wrapper, String sourceDir, String genDir, String[] excludes) throws Exception {
-        CustomFileDescriptor fileSourceDir = new CustomFileDescriptor(sourceDir);
-        CustomFileDescriptor fileGenDir = new CustomFileDescriptor(genDir);
+        String sourceD = new File(sourceDir).getCanonicalPath();
+        String genD = new File(genDir).getCanonicalPath();
+
+        CustomFileDescriptor fileSourceDir = new CustomFileDescriptor(sourceD);
+        CustomFileDescriptor fileGenDir = new CustomFileDescriptor(genD);
 
         // check if source directory exists
         if(!fileSourceDir.exists()) {
@@ -62,17 +78,17 @@ public class JParser {
 
         if(!fileGenDir.exists()) {
             if(!fileGenDir.mkdirs()) {
-                throw new Exception("Couldn't create directory '" + genDir + "'");
+                throw new Exception("Couldn't create directory '" + genD + "'");
             }
         }
         else {
             fileGenDir.deleteDirectory();
             if(!fileGenDir.mkdirs()) {
-                throw new Exception("Couldn't create directory '" + genDir + "'");
+                throw new Exception("Couldn't create directory '" + genD + "'");
             }
         }
         System.out.println("***** GENERATING CODE *****");
-        JParser jParser = new JParser();
+        JParser jParser = new JParser(fileSourceDir, fileGenDir);
         processDirectory(jParser, wrapper, fileSourceDir, fileGenDir, excludes, fileSourceDir);
         for(int i = 0; i < jParser.unitArray.size(); i++) {
             JParserItem parserItem = jParser.unitArray.get(i);
@@ -84,7 +100,7 @@ public class JParser {
             String codeParsed = parseJava(jParser, wrapper, parserItem);
             if(codeParsed != null) {
                 generateFile(destinationPath, codeParsed);
-                wrapper.onClassParsed(parserItem);
+                wrapper.onClassParsed(jParser, parserItem);
             }
         }
         System.out.println("********** DONE ***********");

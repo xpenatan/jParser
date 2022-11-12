@@ -18,6 +18,6 @@ public interface CodeParser {
     default void onParseCodeEnd() {
     }
 
-    default void onClassParsed(JParserItem parserItem) {
+    default void onClassParsed(JParser jParser, JParserItem parserItem) {
     }
 }
