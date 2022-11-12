@@ -84,6 +84,7 @@ public class JParser {
             String codeParsed = parseJava(jParser, wrapper, parserItem);
             if(codeParsed != null) {
                 generateFile(destinationPath, codeParsed);
+                wrapper.onClassParsed(parserItem);
             }
         }
         System.out.println("********** DONE ***********");
@@ -181,7 +182,6 @@ public class JParser {
         }
         wrapper.onParseCodeEnd();
         PositionUtils.sortByBeginPosition(unit.getTypes(), false);
-        wrapper.onClassParsed(parserItem);
         return unit.toString();
     }
 
