@@ -75,14 +75,13 @@ public class JParser {
         JParser jParser = new JParser();
         processDirectory(jParser, wrapper, fileSourceDir, fileGenDir, excludes, fileSourceDir);
         for(int i = 0; i < jParser.unitArray.size(); i++) {
-            JParserItem jParserUnitItem = jParser.unitArray.get(i);
-            CompilationUnit unit = jParserUnitItem.unit;
-            String inputPath = jParserUnitItem.inputPath;
-            String destinationPath = jParserUnitItem.destinationPath;
+            JParserItem parserItem = jParser.unitArray.get(i);
+            String inputPath = parserItem.inputPath;
+            String destinationPath = parserItem.destinationPath;
 
             System.out.println(i + " Parsing: " + inputPath);
 
-            String codeParsed = parseJava(jParser, wrapper, unit);
+            String codeParsed = parseJava(jParser, wrapper, parserItem);
             if(codeParsed != null) {
                 generateFile(destinationPath, codeParsed);
             }
@@ -155,8 +154,9 @@ public class JParser {
         return className;
     }
 
-    private static String parseJava(JParser jParser, CodeParser wrapper, CompilationUnit unit) throws Exception {
+    private static String parseJava(JParser jParser, CodeParser wrapper, JParserItem parserItem) throws Exception {
         ArrayList<Node> array = new ArrayList<>();
+        CompilationUnit unit = parserItem.unit;
         array.addAll(unit.getChildNodes());
         PositionUtils.sortByBeginPosition(array, false);
         for(int i = 0; i < array.size(); i++) {
@@ -166,8 +166,8 @@ public class JParser {
                 packageD.setComment(new BlockComment(gen));
             }
 
-            CodeParserItem parserItem = createParserItem(unit, node);
-            wrapper.parseCode(parserItem);
+            CodeParserItem codeParserItem = createParserItem(unit, node);
+            wrapper.parseCode(codeParserItem);
             if(node instanceof ClassOrInterfaceDeclaration) {
                 if(node.getParentNode().isPresent()) {
                     ClassOrInterfaceDeclaration nodeInterface = (ClassOrInterfaceDeclaration)node;
@@ -181,7 +181,7 @@ public class JParser {
         }
         wrapper.onParseCodeEnd();
         PositionUtils.sortByBeginPosition(unit.getTypes(), false);
-
+        wrapper.onClassParsed(parserItem);
         return unit.toString();
     }
 
