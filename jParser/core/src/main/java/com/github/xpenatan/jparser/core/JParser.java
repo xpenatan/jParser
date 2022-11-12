@@ -31,22 +31,14 @@ import java.util.ArrayList;
  */
 public class JParser {
 
-    private CustomFileDescriptor fileSourceDir;
-    private CustomFileDescriptor fileGenDir;
+    public final String fileSourceDir;
+    public final String fileGenDir;
     public ArrayList<JParserItem> unitArray = new ArrayList<>();
 
 
-    private JParser(CustomFileDescriptor fileSourceDir, CustomFileDescriptor fileGenDir) {
+    private JParser(String fileSourceDir, String fileGenDir) {
         this.fileSourceDir = fileSourceDir;
         this.fileGenDir = fileGenDir;
-    }
-
-    public CustomFileDescriptor getSourceDir() {
-        return fileSourceDir;
-    }
-
-    public CustomFileDescriptor getGenDir() {
-        return fileGenDir;
     }
 
     public JParserItem getParserUnitItem(String className) {
@@ -88,7 +80,7 @@ public class JParser {
             }
         }
         System.out.println("***** GENERATING CODE *****");
-        JParser jParser = new JParser(fileSourceDir, fileGenDir);
+        JParser jParser = new JParser(sourceD, genD);
         processDirectory(jParser, wrapper, fileSourceDir, fileGenDir, excludes, fileSourceDir);
         for(int i = 0; i < jParser.unitArray.size(); i++) {
             JParserItem parserItem = jParser.unitArray.get(i);
