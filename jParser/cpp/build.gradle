@@ -5,10 +5,10 @@ def module_name = "jParser-cpp"
 
 dependencies {
     implementation project(":jParser:core")
-    implementation "com.badlogicgames.gdx:gdx-jnigen:2.3.1"
+    implementation "com.badlogicgames.gdx:gdx-jnigen:$project.jniGenVersion"
 
-    testImplementation "com.badlogicgames.gdx:gdx-jnigen-loader:2.3.1"
-    testImplementation "junit:junit:4.12"
+    testImplementation "com.badlogicgames.gdx:gdx-jnigen-loader:$project.jniGenVersion"
+    testImplementation "junit:junit:$project.jUnitVersion"
 }
 
 task fromClasses(type: Jar) {

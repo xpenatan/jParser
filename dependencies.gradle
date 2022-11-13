@@ -5,4 +5,7 @@ project.ext {
     jParserType = "-SNAPSHOT"
 
     javaparserVersion = "3.24.7"
+
+    jniGenVersion = "2.3.1"
+    jUnitVersion = "4.12"
 }
