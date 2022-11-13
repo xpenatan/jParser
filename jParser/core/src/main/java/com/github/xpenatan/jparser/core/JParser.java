@@ -55,6 +55,10 @@ public class JParser {
             + " *\n * Do not make changes to this file\n"
             + " *-------------------------------------------------------";
 
+    public static void generate(CodeParser wrapper, String sourceDir, String genDir) throws Exception {
+        generate(wrapper, sourceDir, genDir, null);
+    }
+
     public static void generate(CodeParser wrapper, String sourceDir, String genDir, String[] excludes) throws Exception {
         String sourceD = new File(sourceDir).getCanonicalPath();
         String genD = new File(genDir).getCanonicalPath();
