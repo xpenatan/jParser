@@ -56,9 +56,17 @@ public class CppCodeParserTest {
                 throw new RuntimeException("Failure to execute mac ant.");
             }
         } else {
-            boolean antExecutionStatus = BuildExecutor.executeAnt("build/jparser/generated/jni/build-windows64.xml", "-v", "-Dhas-compiler=true", "postcompile");
-            if (!antExecutionStatus) {
-                throw new RuntimeException("Failure to execute linux/windows ant.");
+            if (SharedLibraryLoader.isLinux) {
+                boolean antExecutionStatus = BuildExecutor.executeAnt("build/jparser/generated/jni/build-linux64.xml", "-v", "-Dhas-compiler=true", "postcompile");
+                if (!antExecutionStatus) {
+                    throw new RuntimeException("Failure to execute linux/windows ant.");
+                }
+            }
+            else if(SharedLibraryLoader.isWindows) {
+                boolean antExecutionStatus = BuildExecutor.executeAnt("build/jparser/generated/jni/build-windows64.xml", "-v", "-Dhas-compiler=true", "postcompile");
+                if (!antExecutionStatus) {
+                    throw new RuntimeException("Failure to execute linux/windows ant.");
+                }
             }
         }
         boolean antExecutionStatus = BuildExecutor.executeAnt("build/jparser/generated/jni/build.xml", "-v", "compile-natives", "pack-natives");
