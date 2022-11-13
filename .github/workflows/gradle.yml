@@ -16,6 +16,12 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - name: Check Ant
+        run: ant -version
+      - name: Set up MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
       - name: Build classes
