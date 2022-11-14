@@ -100,39 +100,40 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
-        String nameAsString = classOrInterfaceDeclaration.getNameAsString();
-        IDLClass idlClass = idlFile.getClass(nameAsString);
+        if(idlFile != null) {
+            String nameAsString = classOrInterfaceDeclaration.getNameAsString();
+            IDLClass idlClass = idlFile.getClass(nameAsString);
+            if(idlClass != null) {
+                // Create a static temp object for every module class so any generated method can use to store a pointer.
+                // Also generate a boolean constructor if it's not in the original source code.
+                List<ConstructorDeclaration> constructors = classOrInterfaceDeclaration.getConstructors();
 
-        if(idlClass != null) {
-            // Create a static temp object for every module class so any generated method can use to store a pointer.
-            // Also generate a boolean constructor if it's not in the original source code.
-            List<ConstructorDeclaration> constructors = classOrInterfaceDeclaration.getConstructors();
-
-            if(!classOrInterfaceDeclaration.isAbstract()) {
-                String replace = OBJECT_CREATION_TEMPLATE.replace(TEMPLATE_TAG_TYPE, nameAsString);
-                FieldDeclaration bodyDeclaration = (FieldDeclaration)StaticJavaParser.parseBodyDeclaration(replace);
-                classOrInterfaceDeclaration.getMembers().add(0, bodyDeclaration);
-            }
-
-            boolean containsConstructor = false;
-            boolean containsZeroParamConstructor = false;
-            for(int i = 0; i < constructors.size(); i++) {
-                ConstructorDeclaration constructorDeclaration = constructors.get(i);
-                NodeList<Parameter> parameters = constructorDeclaration.getParameters();
-                if(parameters.size() == 1 && JParserHelper.isBoolean(parameters.get(0).getType())) {
-                    containsConstructor = true;
+                if(!classOrInterfaceDeclaration.isAbstract()) {
+                    String replace = OBJECT_CREATION_TEMPLATE.replace(TEMPLATE_TAG_TYPE, nameAsString);
+                    FieldDeclaration bodyDeclaration = (FieldDeclaration)StaticJavaParser.parseBodyDeclaration(replace);
+                    classOrInterfaceDeclaration.getMembers().add(0, bodyDeclaration);
                 }
-                else if(parameters.size() == 0) {
-                    containsZeroParamConstructor = true;
-                }
-            }
 
-            if(!containsConstructor) {
-                ConstructorDeclaration constructorDeclaration = classOrInterfaceDeclaration.addConstructor(Keyword.PUBLIC);
-                constructorDeclaration.addParameter("boolean", "cMemoryOwn");
-            }
-            if(!containsZeroParamConstructor) {
-                classOrInterfaceDeclaration.addConstructor(Keyword.PUBLIC);
+                boolean containsConstructor = false;
+                boolean containsZeroParamConstructor = false;
+                for(int i = 0; i < constructors.size(); i++) {
+                    ConstructorDeclaration constructorDeclaration = constructors.get(i);
+                    NodeList<Parameter> parameters = constructorDeclaration.getParameters();
+                    if(parameters.size() == 1 && JParserHelper.isBoolean(parameters.get(0).getType())) {
+                        containsConstructor = true;
+                    }
+                    else if(parameters.size() == 0) {
+                        containsZeroParamConstructor = true;
+                    }
+                }
+
+                if(!containsConstructor) {
+                    ConstructorDeclaration constructorDeclaration = classOrInterfaceDeclaration.addConstructor(Keyword.PUBLIC);
+                    constructorDeclaration.addParameter("boolean", "cMemoryOwn");
+                }
+                if(!containsZeroParamConstructor) {
+                    classOrInterfaceDeclaration.addConstructor(Keyword.PUBLIC);
+                }
             }
         }
 
