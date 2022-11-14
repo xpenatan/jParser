@@ -18,8 +18,10 @@ public class CPPBuildHelper {
     public static void build(String libName, String projectPath, String sharedLibBaseProject, String sharedLibName) {
         String sharedSrcPath = null;
         try {
+            projectPath = projectPath.replace("\\", File.separator);
             projectPath = new File(projectPath).getCanonicalPath();
             if(sharedLibBaseProject != null) {
+                sharedLibBaseProject = sharedLibBaseProject.replace("\\", File.separator);
                 sharedLibBaseProject = new File(sharedLibBaseProject).getCanonicalPath();
                 sharedSrcPath = sharedLibBaseProject + "/jni/src/";
             }

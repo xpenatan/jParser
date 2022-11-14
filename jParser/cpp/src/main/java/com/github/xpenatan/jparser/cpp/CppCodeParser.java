@@ -7,6 +7,7 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.codeparser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.core.idl.IDLFile;
+import java.io.File;
 
 public class CppCodeParser extends IDLDefaultCodeParser {
 

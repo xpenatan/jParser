@@ -11,6 +11,7 @@ import java.util.ArrayList;
 public class IDLParser {
 
     public static IDLFile parseFile(String path) {
+        path = path.replace("\\", File.separator);
         IDLFile idlFile = new IDLFile();
         File file = new File(path);    //creates a new file instance
         if(file.exists()) {

@@ -80,6 +80,7 @@ public class NativeCPPGenerator implements CppGenerator {
 
     public NativeCPPGenerator(String classpath, String jniDir) {
         try {
+            jniDir = jniDir.replace("\\", File.separator);
             this.jniDir = new CustomFileDescriptor(new File(jniDir).getCanonicalPath());
             this.classpath = classpath;
             if(!this.jniDir.exists()) {
