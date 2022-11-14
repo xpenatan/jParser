@@ -71,11 +71,27 @@ public abstract class DefaultCodeParser implements CodeParser {
             cache.add(standAloneBlockComment);
         }
         if(blockComment != null) {
-            if(CodeParserItem.obtainHeaderCommands(blockComment) != null) {
+            boolean blockParsed = false;
+            String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
+            if(headerCommands != null) {
                 blockComment.remove();
-                parserBlock(node, blockComment);
+                blockParsed = parserBlock(node, blockComment);
             }
-            onParseCodeEnd();
+            for(int i = cache.size()-1; i >= 0; i--) {
+                BlockComment otherTopBlockComment = cache.get(i);
+                if(CodeParserItem.obtainHeaderCommands(otherTopBlockComment) != null) {
+                    if(blockParsed) {
+                        parserBlock(otherTopBlockComment, otherTopBlockComment);
+                    }
+                    else {
+                        if(parserBlock(node, otherTopBlockComment)) {
+                            blockParsed = true;
+                        }
+                    }
+                    otherTopBlockComment.remove();
+                }
+            }
+            cache.clear();
         }
     }
 
