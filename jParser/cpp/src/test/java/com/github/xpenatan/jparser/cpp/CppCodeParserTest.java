@@ -1,9 +1,5 @@
 package com.github.xpenatan.jparser.cpp;
 
-import com.badlogic.gdx.jnigen.AntScriptGenerator;
-import com.badlogic.gdx.jnigen.BuildConfig;
-import com.badlogic.gdx.jnigen.BuildExecutor;
-import com.badlogic.gdx.jnigen.BuildTarget;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.cpp.tests.CppTestClass;
@@ -22,64 +18,17 @@ public class CppCodeParserTest {
         String classpathStr = System.getProperty("java.class.path") + File.pathSeparator;
         System.out.println("classpath: " + classpathStr);
 
-        String jniDir = "build/jparser/generated/jni";
+        String buildPath = "build/jparser/generated";
+        String jniDir = buildPath + "/jni";
+        String genDir = buildPath + "/java";
 
         CppCodeParser parser = new CppCodeParser(classpathStr, jniDir);
 
-        JParser.generate(parser, "src/test/java", "build/jparser/generated/java", null);
+        JParser.generate(parser, "src/test/java", genDir, null);
 
+        CPPBuildHelper.build("test", buildPath);
 
-        // generate build scripts
-        BuildConfig buildConfig = new BuildConfig("test", "../../tmp/gdx-jnigen", "../../jparser/libs", "build/jparser/generated/jni");
-
-        BuildTarget target;
-        if (SharedLibraryLoader.isWindows)
-            target = BuildTarget.newDefaultTarget(BuildTarget.TargetOs.Windows, SharedLibraryLoader.is64Bit);
-        else if (SharedLibraryLoader.isLinux)
-            target = BuildTarget.newDefaultTarget(BuildTarget.TargetOs.Linux, SharedLibraryLoader.is64Bit, SharedLibraryLoader.isARM);
-        else if (SharedLibraryLoader.isMac)
-            target = BuildTarget.newDefaultTarget(BuildTarget.TargetOs.MacOsX, SharedLibraryLoader.is64Bit, SharedLibraryLoader.isARM);
-        else
-            throw new RuntimeException("Unsupported OS to run tests.");
-
-        new AntScriptGenerator().generate(buildConfig, target);
-
-        if (SharedLibraryLoader.isMac) {
-            String scriptToRun;
-            if (SharedLibraryLoader.isARM) {
-                scriptToRun = "build/jparser/generated/jni/build-macosxarm64.xml";
-            } else {
-                scriptToRun = "build/jparser/generated/jni/build-macosx64.xml";
-            }
-            boolean macAntExecutionStatus = BuildExecutor.executeAnt(scriptToRun, "-v");
-            if (!macAntExecutionStatus) {
-                throw new RuntimeException("Failure to execute mac ant.");
-            }
-        } else {
-            if (SharedLibraryLoader.isLinux) {
-                boolean antExecutionStatus = BuildExecutor.executeAnt("build/jparser/generated/jni/build-linux64.xml", "-v", "-Dhas-compiler=true", "postcompile");
-                if (!antExecutionStatus) {
-                    throw new RuntimeException("Failure to execute linux/windows ant.");
-                }
-            }
-            else if(SharedLibraryLoader.isWindows) {
-                boolean antExecutionStatus = BuildExecutor.executeAnt("build/jparser/generated/jni/build-windows64.xml", "-v", "-Dhas-compiler=true", "postcompile");
-                if (!antExecutionStatus) {
-                    throw new RuntimeException("Failure to execute linux/windows ant.");
-                }
-            }
-        }
-        boolean antExecutionStatus = BuildExecutor.executeAnt("build/jparser/generated/jni/build.xml", "-v", "compile-natives", "pack-natives");
-
-
-        // compile and pack natives
-
-        if (!antExecutionStatus) {
-            throw new RuntimeException("Failure to execute ant.");
-        }
-
-        // load the test-natives.jar and from it the shared library, then execute the test.
-        new SharedLibraryLoader("build/jparser/libs/test-natives.jar").load("test");
+        new SharedLibraryLoader(buildPath + "/libs/test-natives.jar").load("test");
     }
 
     @Test
