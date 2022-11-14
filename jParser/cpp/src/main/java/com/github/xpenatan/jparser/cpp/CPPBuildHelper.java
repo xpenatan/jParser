@@ -131,7 +131,7 @@ public class CPPBuildHelper {
 //        mac64.excludeFromMasterBuildFile = true;
         if(libFolder != null) {
             mac64.libraries = "-L" + libFolder + " -l" + sharedLibName;
-            buildConfig.sharedLibs[2] = libFolder;
+            buildConfig.sharedLibs[0] = libFolder;
         }
         mac64.cppFlags += " -std=c++11";
         return mac64;
