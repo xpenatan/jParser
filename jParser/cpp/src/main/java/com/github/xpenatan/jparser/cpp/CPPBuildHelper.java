@@ -32,20 +32,28 @@ public class CPPBuildHelper {
 
         BuildConfig buildConfig = new BuildConfig(libName, "target", "libs", projectPath + "/jni");
 
-        if(sharedLibBaseProject != null) {
-            buildConfig.sharedLibs = new String[3];
-        }
         boolean isWindows = isWindows();
         boolean isUnix = isUnix();
         boolean isMac = isMac();
         ArrayList<BuildTarget> targets = new ArrayList<>();
         if(isWindows || isUnix) {
-            targets.add(genWindows(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName));
             if(isUnix) {
+                if(sharedLibName != null) {
+                    buildConfig.sharedLibs = new String[2];
+                }
                 targets.add(genLinux(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName));
             }
+            else {
+                if(sharedLibName != null) {
+                    buildConfig.sharedLibs = new String[1];
+                }
+            }
+            targets.add(genWindows(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName));
         }
         else if(isMac) {
+            if(sharedLibName != null) {
+                buildConfig.sharedLibs = new String[1];
+            }
             targets.add(genMac(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName));
         }
 
