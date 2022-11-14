@@ -1,2 +1,3 @@
 include ":jParser:core"
 include ":jParser:cpp"
+include ":jParser:teavm"
