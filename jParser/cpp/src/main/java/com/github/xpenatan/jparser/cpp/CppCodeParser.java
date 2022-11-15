@@ -55,11 +55,15 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onParseFileStart(JParser jParser, JParserItem parserItem) {
-        cppGenerator.reset();
     }
 
     @Override
     public void onParseFileEnd(JParser jParser, JParserItem parserItem) {
-        cppGenerator.parseFile(jParser.sourceDir, parserItem.inputPath, parserItem.destinationPath);
+        cppGenerator.addParseFile(jParser.sourceDir, parserItem.inputPath, parserItem.destinationPath);
+    }
+
+    @Override
+    public void onParseEnd(JParser jParser) {
+        cppGenerator.generate();
     }
 }

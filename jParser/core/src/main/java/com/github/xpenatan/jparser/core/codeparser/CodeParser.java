@@ -23,4 +23,10 @@ public interface CodeParser {
 
     default void onParseFileEnd(JParser jParser, JParserItem parserItem) {
     }
+
+    default void onParseStart(JParser jParser) {
+    }
+
+    default void onParseEnd(JParser jParser) {
+    }
 }

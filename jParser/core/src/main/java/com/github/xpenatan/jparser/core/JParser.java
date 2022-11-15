@@ -85,6 +85,7 @@ public class JParser {
         System.out.println("***** GENERATING CODE *****");
         JParser jParser = new JParser(sourceD, genD);
         processDirectory(jParser, fileSourceDir, fileGenDir, excludes, fileSourceDir);
+        wrapper.onParseStart(jParser);
         for(int i = 0; i < jParser.unitArray.size(); i++) {
             JParserItem parserItem = jParser.unitArray.get(i);
             String inputPath = parserItem.inputPath;
@@ -99,6 +100,7 @@ public class JParser {
             }
             wrapper.onParseFileEnd(jParser, parserItem);
         }
+        wrapper.onParseEnd(jParser);
         System.out.println("********** DONE ***********");
     }
 

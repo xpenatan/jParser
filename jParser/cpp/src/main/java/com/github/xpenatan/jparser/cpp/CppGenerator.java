@@ -9,7 +9,7 @@ public interface CppGenerator {
 
     public void addNativeCode(String content, Node node);
 
-    void reset();
+    void addParseFile(String sourceBaseDir, String inputJavaPath, String destinationJavaPath);
 
-    void parseFile(String sourceBaseDir, String inputJavaPath, String destinationJavaPath);
+    void generate();
 }

@@ -77,13 +77,14 @@ public class NativeCPPGenerator implements CppGenerator {
         otherTypes.put("Throwable", JavaMethodParser.ArgumentType.Throwable);
     }
 
+    private ArrayList<CppParserItem> parserItems = new ArrayList<>();
     ArrayList<JavaMethodParser.JavaSegment> javaSegments = new ArrayList<>();
 
     public NativeCPPGenerator(String classpath, String jniDir) {
         try {
             jniDir = jniDir.replace("\\", File.separator);
             this.jniDir = new CustomFileDescriptor(new File(jniDir).getCanonicalPath());
-            this.classpath = classpath;
+            this.classpath = filterClassPath(classpath);
             if(!this.jniDir.exists()) {
                 this.jniDir.mkdirs();
             }
@@ -93,13 +94,44 @@ public class NativeCPPGenerator implements CppGenerator {
         }
     }
 
+    private String filterClassPath(String classpath) {
+        String newClassPath = "";
+        String[] split = classpath.split(";");
+        for(int i = 0; i < split.length; i++) {
+            String path = split[i];
+            if(path.contains("imgui")) {
+                newClassPath += path+";";
+            }
+        }
+        return newClassPath;
+    }
+
     @Override
-    public void reset() {
+    public void addParseFile(String sourceBaseDir, String inputJavaPath, String destinationJavaPath) {
+        CppParserItem parserItem = new CppParserItem();
+        parserItem.sourceBaseDir = sourceBaseDir;
+        parserItem.inputJavaPath = inputJavaPath;
+        parserItem.destinationJavaPath = destinationJavaPath;
+        parserItem.javaSegments.addAll(javaSegments);
+        parserItems.add(parserItem);
         javaSegments.clear();
     }
 
     @Override
-    public void parseFile(String sourceBaseDir, String inputJavaPath, String destinationJavaPath) {
+    public void generate() {
+        for(int i = 0; i < parserItems.size(); i++) {
+            CppParserItem parserItem = parserItems.get(i);
+            if(parserItem.javaSegments.size() != 0) {
+                parseItem(parserItem);
+            }
+        }
+    }
+
+    private void parseItem(CppParserItem parserItem) {
+        String destinationJavaPath = parserItem.destinationJavaPath;
+        String sourceBaseDir = parserItem.sourceBaseDir;
+        String inputJavaPath = parserItem.inputJavaPath;
+        ArrayList<JavaMethodParser.JavaSegment> javaSegments = parserItem.javaSegments;
         try {
             generateHFiles(destinationJavaPath);
             String className = getNativeClassFileName(sourceBaseDir, inputJavaPath);
@@ -122,7 +154,6 @@ public class NativeCPPGenerator implements CppGenerator {
                 }
             });
             generateCppFile(javaSegments, hFiles, cppFile);
-            javaSegments.clear();
         }
         catch(Exception e) {
             throw new RuntimeException(e);
