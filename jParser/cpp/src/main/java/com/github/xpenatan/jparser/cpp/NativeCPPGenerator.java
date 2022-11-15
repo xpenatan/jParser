@@ -123,6 +123,9 @@ public class NativeCPPGenerator implements CppGenerator {
                 if(o1.getStartIndex() < o2.getStartIndex()) {
                     return -1;
                 }
+                else if(o1.getStartIndex() > o2.getStartIndex()) {
+                    return 1;
+                }
                 return 0;
             }
         });
