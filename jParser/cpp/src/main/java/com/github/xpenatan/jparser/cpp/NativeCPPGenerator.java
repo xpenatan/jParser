@@ -108,6 +108,10 @@ public class NativeCPPGenerator implements CppGenerator {
 
     @Override
     public void addParseFile(String sourceBaseDir, String inputJavaPath, String destinationJavaPath) {
+        if(javaSegments.size() == 0) {
+            return;
+        }
+
         CppParserItem parserItem = new CppParserItem();
         parserItem.sourceBaseDir = sourceBaseDir;
         parserItem.inputJavaPath = inputJavaPath;
