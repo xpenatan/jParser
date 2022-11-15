@@ -99,7 +99,7 @@ public class NativeCPPGenerator implements CppGenerator {
         String[] split = classpath.split(";");
         for(int i = 0; i < split.length; i++) {
             String path = split[i];
-            if(path.contains("imgui")) {
+            if(path.contains("/build/") || path.contains("\\build\\")) {
                 newClassPath += path+";";
             }
         }
@@ -113,6 +113,16 @@ public class NativeCPPGenerator implements CppGenerator {
         parserItem.inputJavaPath = inputJavaPath;
         parserItem.destinationJavaPath = destinationJavaPath;
         parserItem.javaSegments.addAll(javaSegments);
+        parserItem.javaSegments.sort(new Comparator<JavaMethodParser.JavaSegment>() {
+            @Override
+            public int compare(JavaMethodParser.JavaSegment o1, JavaMethodParser.JavaSegment o2) {
+                if(o1.getStartIndex() < o2.getStartIndex()) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+
         parserItems.add(parserItem);
         javaSegments.clear();
     }
@@ -144,15 +154,6 @@ public class NativeCPPGenerator implements CppGenerator {
             }
 
             FileDescriptor cppFile = new FileDescriptor(jniDir + "/" + className + ".cpp");
-            javaSegments.sort(new Comparator<JavaMethodParser.JavaSegment>() {
-                @Override
-                public int compare(JavaMethodParser.JavaSegment o1, JavaMethodParser.JavaSegment o2) {
-                    if(o1.getStartIndex() < o2.getStartIndex()) {
-                        return -1;
-                    }
-                    return 0;
-                }
-            });
             generateCppFile(javaSegments, hFiles, cppFile);
         }
         catch(Exception e) {
