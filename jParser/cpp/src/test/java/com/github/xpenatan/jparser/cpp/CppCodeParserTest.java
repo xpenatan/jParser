@@ -32,6 +32,11 @@ public class CppCodeParserTest {
     }
 
     @Test
+    public void testStaticInt() {
+        assertEquals(10, CppTestClass.testStaticInt());
+    }
+
+    @Test
     public void testBoolean() {
         assertTrue(CppTestClass.testBoolean(true));
         assertFalse(CppTestClass.testBoolean(false));
@@ -86,6 +91,11 @@ public class CppCodeParserTest {
     }
 
     @Test
+    public void testInnerStaticBool() {
+        assertTrue(CppTestClass.TestInner.getStaticInnerBool());
+    }
+
+    @Test
     public void testAll() {
         ByteBuffer buffer = ByteBuffer.allocateDirect(1);
         buffer.put(0, (byte)8);
@@ -97,5 +107,11 @@ public class CppCodeParserTest {
                 new float[] { 13 }, new double[] { 14 },
                 null, "Hurray", CppTestClass.class, new RuntimeException(), new CppTestClass()));
     }
+
+    @Test
+    public void testStaticFloat() {
+        assertEquals(33, CppTestClass.getStaticFloat(), 0.01f);
+    }
+
 }
 

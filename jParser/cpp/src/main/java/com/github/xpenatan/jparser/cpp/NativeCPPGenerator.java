@@ -8,6 +8,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.comments.BlockComment;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.io.IOException;
@@ -111,7 +112,15 @@ public class NativeCPPGenerator implements CppGenerator {
             }
 
             FileDescriptor cppFile = new FileDescriptor(jniDir + "/" + className + ".cpp");
-
+            javaSegments.sort(new Comparator<JavaMethodParser.JavaSegment>() {
+                @Override
+                public int compare(JavaMethodParser.JavaSegment o1, JavaMethodParser.JavaSegment o2) {
+                    if(o1.getStartIndex() < o2.getStartIndex()) {
+                        return -1;
+                    }
+                    return 0;
+                }
+            });
             generateCppFile(javaSegments, hFiles, cppFile);
             javaSegments.clear();
         }
@@ -121,11 +130,19 @@ public class NativeCPPGenerator implements CppGenerator {
     }
 
     @Override
-    public void addMethod(String content, MethodDeclaration methodDeclaration) {
+    public void addNativeMethod(String content, MethodDeclaration methodDeclaration) {
         JavaMethodParser.JavaMethod method = createMethod(content, methodDeclaration);
         if(method != null) {
             javaSegments.add(method);
         }
+    }
+
+    @Override
+    public void addNativeCode(String content, Node node) {
+        int startLine = node.getBegin().get().line;
+        int endLine = node.getEnd().get().line;
+        javaSegments.add(new JavaMethodParser.JniSection(content + "\n", startLine, endLine));
+        node.remove();
     }
 
     private JavaMethodParser.JavaMethod createMethod(String content, MethodDeclaration method) {

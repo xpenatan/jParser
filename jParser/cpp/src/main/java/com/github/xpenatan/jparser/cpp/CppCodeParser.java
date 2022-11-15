@@ -1,13 +1,13 @@
 package com.github.xpenatan.jparser.cpp;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.codeparser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.core.idl.IDLFile;
-import java.io.File;
 
 public class CppCodeParser extends IDLDefaultCodeParser {
 
@@ -28,8 +28,19 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
+    public boolean parseCodeBlock(Node node, String headerCommands, String content) {
+        if(!super.parseCodeBlock(node, headerCommands, content)) {
+            if(headerCommands.contains(CMD_NATIVE)) {
+                cppGenerator.addNativeCode(content, node);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     protected void setJavaBodyNativeCMD(String content, MethodDeclaration methodDeclaration) {
-        cppGenerator.addMethod(content, methodDeclaration);
+        cppGenerator.addNativeMethod(content, methodDeclaration);
     }
 
     @Override

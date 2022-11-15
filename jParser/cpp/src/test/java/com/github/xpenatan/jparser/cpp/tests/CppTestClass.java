@@ -5,6 +5,20 @@ import java.nio.Buffer;
 public class CppTestClass {
 
     /*[-cpp;-NATIVE]
+        #include <iostream>
+    */
+
+    /*[-cpp;-NATIVE]
+        static int STATIC_INT = 10;
+    */
+
+    /*[-cpp;-NATIVE]
+        std::cout << "STATIC_INT:" << STATIC_INT << std::endl;
+        return STATIC_INT;
+    */
+    public static native int testStaticInt();
+
+    /*[-cpp;-NATIVE]
         return boolArg;
     */
     public static native boolean testBoolean(boolean boolArg);
@@ -70,9 +84,28 @@ public class CppTestClass {
                                       String string, Class classy, Throwable thr, Object obj);
 
     public static class TestInner {
+
+        /*[-cpp;-NATIVE]
+            static bool STATIC_INNER_BOOL = true;
+        */
+
+        /*[-cpp;-NATIVE]
+            return STATIC_INNER_BOOL;
+        */
+        public static native boolean getStaticInnerBool();
+
         /*[-cpp;-NATIVE]
             return arg + 1;
         */
         public native static int testInner(int arg);
     }
+
+    /*[-cpp;-NATIVE]
+        static float STATIC_FLOAT = 33.0;
+    */
+
+    /*[-cpp;-NATIVE]
+        return STATIC_FLOAT;
+    */
+    public static native float getStaticFloat();
 }

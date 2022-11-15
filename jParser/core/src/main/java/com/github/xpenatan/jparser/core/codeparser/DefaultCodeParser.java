@@ -107,23 +107,27 @@ public abstract class DefaultCodeParser implements CodeParser {
         return false;
     }
 
-    public void parseCodeBlock(Node node, String headerCommands, String content) {
-
+    public boolean parseCodeBlock(Node node, String headerCommands, String content) {
         if(headerCommands.contains(CMD_ADD)) {
             setAddReplaceCMD(node, content, false);
+            return true;
         }
         else if(headerCommands.contains(CMD_REMOVE)) {
             node.remove();
+            return true;
         }
         else if(headerCommands.contains(CMD_REPLACE)) {
             setAddReplaceCMD(node, content, true);
+            return true;
         }
         else if(headerCommands.contains(CMD_NATIVE)) {
             if(node instanceof MethodDeclaration) {
                 MethodDeclaration methodDeclaration = (MethodDeclaration)node;
                 setJavaBodyNativeCMD(content, methodDeclaration);
+                return true;
             }
         }
+        return false;
     }
 
     private void setAddReplaceCMD(Node node, String content, boolean replace) {
