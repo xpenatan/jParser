@@ -37,26 +37,28 @@ public class CPPBuildHelper {
         boolean isWindows = isWindows();
         boolean isUnix = isUnix();
         boolean isMac = isMac();
+
+        if(sharedLibName != null) {
+            buildConfig.sharedLibs = new String[3];
+        }
+
+        BuildTarget windowTarget = genWindows(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName);
+        BuildTarget linuxTarget = genLinux(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName);
+        BuildTarget macTarget = genMac(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName);
+        new AntScriptGenerator().generate(buildConfig,
+                windowTarget,
+                linuxTarget,
+                macTarget);
+
         ArrayList<BuildTarget> targets = new ArrayList<>();
         if(isWindows || isUnix) {
             if(isUnix) {
-                if(sharedLibName != null) {
-                    buildConfig.sharedLibs = new String[2];
-                }
-                targets.add(genLinux(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName));
+                targets.add(linuxTarget);
             }
-            else {
-                if(sharedLibName != null) {
-                    buildConfig.sharedLibs = new String[1];
-                }
-            }
-            targets.add(genWindows(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName));
+            targets.add(windowTarget);
         }
         else if(isMac) {
-            if(sharedLibName != null) {
-                buildConfig.sharedLibs = new String[1];
-            }
-            targets.add(genMac(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName));
+            targets.add(macTarget);
         }
 
         new AntScriptGenerator().generate(buildConfig, targets.toArray(new BuildTarget[targets.size()]));
@@ -133,7 +135,7 @@ public class CPPBuildHelper {
 //        mac64.excludeFromMasterBuildFile = true;
         if(libFolder != null) {
             mac64.libraries = "-L" + libFolder + " -l" + sharedLibName;
-            buildConfig.sharedLibs[0] = libFolder;
+            buildConfig.sharedLibs[2] = libFolder;
         }
         mac64.cppFlags += " -std=c++11";
         return mac64;
