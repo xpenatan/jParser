@@ -92,13 +92,13 @@ public class CPPBuildHelper {
         win64.headerDirs = headerDir;
         win64.linkerFlags = "-Wl,--kill-at -shared -static-libgcc -static-libstdc++ -m64";
 //        win64.excludeFromMasterBuildFile = true;
-        win64.cppFlags += " -std=c++11";
         if(libFolder != null) {
             win64.libraries = "-L" + libFolder + " -l" + sharedLibName;
             buildConfig.sharedLibs[0] = libFolder;
         }
         if(DEBUG_BUILD)
             win64.cppFlags = "-c -Wall -O0 -mfpmath=sse -msse2 -fmessage-length=0 -m64 -g";
+        win64.cppFlags += " -std=c++11";
         return win64;
     }
 
