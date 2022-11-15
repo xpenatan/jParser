@@ -70,6 +70,11 @@ public abstract class DefaultCodeParser implements CodeParser {
             BlockComment standAloneBlockComment = (BlockComment)node;
             cache.add(standAloneBlockComment);
         }
+        else {
+            //If node does not contains a block comment then just parse all cache nodes.
+            onParseCodeEnd();
+            return;
+        }
         if(blockComment != null) {
             boolean blockParsed = false;
             String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);

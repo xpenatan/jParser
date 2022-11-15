@@ -141,7 +141,7 @@ public class NativeCPPGenerator implements CppGenerator {
     public void addNativeCode(String content, Node node) {
         int startLine = node.getBegin().get().line;
         int endLine = node.getEnd().get().line;
-        javaSegments.add(new JavaMethodParser.JniSection(content + "\n", startLine, endLine));
+        javaSegments.add(new JavaMethodParser.JniSection(content + "\n\n", startLine, endLine));
         node.remove();
     }
 
