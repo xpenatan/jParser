@@ -1,9 +1,8 @@
 package com.github.xpenatan.jparser.cpp;
 
-import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.cpp.tests.CppTestClass;
-import com.github.xpenatan.jparser.loader.JParserLoader;
+import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
 import java.io.File;
 import java.nio.ByteBuffer;
 import static org.junit.Assert.assertEquals;
@@ -29,7 +28,7 @@ public class CppCodeParserTest {
 
         CPPBuildHelper.build("test", buildPath);
 
-        new JParserLoader(buildPath + "/libs/test-natives.jar").load("test");
+        new JParserLibraryLoader(buildPath + "/libs/test-natives.jar").load("test");
     }
 
     @Test

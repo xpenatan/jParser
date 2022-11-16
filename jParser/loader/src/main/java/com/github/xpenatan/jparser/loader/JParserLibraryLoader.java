@@ -3,15 +3,15 @@ package com.github.xpenatan.jparser.loader;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import java.io.File;
 
-public class JParserLoader {
+public class JParserLibraryLoader {
 
     private final SharedLibraryLoader loader;
 
-    public JParserLoader() {
+    public JParserLibraryLoader() {
         loader = new SharedLibraryLoader();
     }
 
-    public JParserLoader(String nativesJar) {
+    public JParserLibraryLoader(String nativesJar) {
         loader = new SharedLibraryLoader(nativesJar);
     }
 
