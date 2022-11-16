@@ -22,9 +22,6 @@ public class JParserLibraryLoader {
     public void load(String libraryName, String dependencyLibraryName) {
         if(dependencyLibraryName != null) {
             if(SharedLibraryLoader.isLinux) {
-                if(SharedLibraryLoader.isIos) {
-                    return;
-                }
                 String dirName = "jparser-lib";
                 if(!SharedLibraryLoader.isLoaded(libraryName)) {
                     String lib01Map = loader.mapLibraryName(libraryName);
