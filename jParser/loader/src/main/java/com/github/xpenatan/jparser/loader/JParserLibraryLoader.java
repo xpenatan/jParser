@@ -21,17 +21,12 @@ public class JParserLibraryLoader {
 
     public void load(String libraryName, String dependencyLibraryName) {
         if(dependencyLibraryName != null) {
-            if (SharedLibraryLoader.isWindows) {
-                loader.load(dependencyLibraryName);
-                loader.load(libraryName);
-            } else {
-                if (SharedLibraryLoader.isIos) {
+            if(SharedLibraryLoader.isLinux) {
+                if(SharedLibraryLoader.isIos) {
                     return;
                 }
-
                 String dirName = "jparser-lib";
-
-                if (!SharedLibraryLoader.isLoaded(libraryName)) {
+                if(!SharedLibraryLoader.isLoaded(libraryName)) {
                     String lib01Map = loader.mapLibraryName(libraryName);
                     String lib02Map = loader.mapLibraryName(dependencyLibraryName);
                     try {
@@ -40,15 +35,19 @@ public class JParserLibraryLoader {
                         String fullPath = lib01Path + File.separator + lib01Map;
                         System.load(fullPath);
                         SharedLibraryLoader.setLoaded(libraryName);
-                    } catch (Throwable ex) {
+                    }
+                    catch(Throwable ex) {
                         ex.printStackTrace();
                     }
                 }
+            }
+            else {
+                loader.load(dependencyLibraryName);
+                loader.load(libraryName);
             }
         }
         else {
             loader.load(libraryName);
         }
     }
-
 }
