@@ -7,7 +7,7 @@ dependencies {
     implementation project(":jParser:core")
     implementation "com.badlogicgames.gdx:gdx-jnigen:$project.jniGenVersion"
 
-    testImplementation "com.badlogicgames.gdx:gdx-jnigen-loader:$project.jniGenVersion"
+    testImplementation project(":jParser:loader")
     testImplementation "junit:junit:$project.jUnitVersion"
 }
 

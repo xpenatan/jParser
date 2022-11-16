@@ -5,31 +5,49 @@ import java.io.File;
 
 public class JParserLoader {
 
-    private SharedLibraryLoader loader = new SharedLibraryLoader();
+    private final SharedLibraryLoader loader;
+
+    public JParserLoader() {
+        loader = new SharedLibraryLoader();
+    }
+
+    public JParserLoader(String nativesJar) {
+        loader = new SharedLibraryLoader(nativesJar);
+    }
 
     public void load(String libraryName) {
-        String libCPP = "imgui-cpp";
-        String libCore = "imgui-core";
-        if (SharedLibraryLoader.isWindows) {
-            loader.load(libCPP);
-            loader.load(libCore);
-        } else {
-            if (SharedLibraryLoader.isIos) {
-                return;
-            }
-            if (!SharedLibraryLoader.isLoaded(libCore)) {
-                String coreName = loader.mapLibraryName(libCore);
-                String cppName = loader.mapLibraryName(libCPP);
-                try {
-                    String libPath = loader.extractFile(cppName, "imgui-lib").getParentFile().getAbsolutePath();
-                    loader.extractFile(coreName, "imgui-lib");
-                    String fullPath = libPath + File.separator + coreName;
-                    System.load(fullPath);
-                    SharedLibraryLoader.setLoaded(libCore);
-                } catch (Throwable ex) {
-                    ex.printStackTrace();
+        load(libraryName, null);
+    }
+
+    public void load(String libraryName, String dependencyLibraryName) {
+        if(dependencyLibraryName != null) {
+            if (SharedLibraryLoader.isWindows) {
+                loader.load(dependencyLibraryName);
+                loader.load(libraryName);
+            } else {
+                if (SharedLibraryLoader.isIos) {
+                    return;
+                }
+
+                String dirName = "jparser-lib";
+
+                if (!SharedLibraryLoader.isLoaded(libraryName)) {
+                    String lib01Map = loader.mapLibraryName(libraryName);
+                    String lib02Map = loader.mapLibraryName(dependencyLibraryName);
+                    try {
+                        String lib01Path = loader.extractFile(lib01Map, dirName).getParentFile().getAbsolutePath();
+                        loader.extractFile(lib02Map, dirName);
+                        String fullPath = lib01Path + File.separator + lib01Map;
+                        System.load(fullPath);
+                        SharedLibraryLoader.setLoaded(libraryName);
+                    } catch (Throwable ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
+        }
+        else {
+            loader.load(libraryName);
         }
     }
 
