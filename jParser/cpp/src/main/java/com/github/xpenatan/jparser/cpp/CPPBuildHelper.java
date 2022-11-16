@@ -117,6 +117,7 @@ public class CPPBuildHelper {
             lin64.libraries = "-L" + libFolder + " -l" + sharedLibName;
             buildConfig.sharedLibs[1] = libFolder;
         }
+        lin64.linkerFlags += ",-rpath,'$ORIGIN'";
         return lin64;
     }
 
