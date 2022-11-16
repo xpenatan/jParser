@@ -4,6 +4,7 @@ import com.badlogic.gdx.jnigen.AntScriptGenerator;
 import com.badlogic.gdx.jnigen.BuildConfig;
 import com.badlogic.gdx.jnigen.BuildExecutor;
 import com.badlogic.gdx.jnigen.BuildTarget;
+import com.badlogic.gdx.jnigen.CustomAntScriptGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class CPPBuildHelper {
         BuildTarget windowTarget = genWindows(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName);
         BuildTarget linuxTarget = genLinux(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName);
         BuildTarget macTarget = genMac(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName);
-        new AntScriptGenerator().generate(buildConfig,
+        new CustomAntScriptGenerator().generate(buildConfig,
                 windowTarget,
                 linuxTarget,
                 macTarget);
@@ -60,8 +61,6 @@ public class CPPBuildHelper {
         else if(isMac) {
             targets.add(macTarget);
         }
-
-        new AntScriptGenerator().generate(buildConfig, targets.toArray(new BuildTarget[targets.size()]));
 
         for(int i = 0; i < targets.size(); i++) {
             BuildTarget target = targets.get(i);
