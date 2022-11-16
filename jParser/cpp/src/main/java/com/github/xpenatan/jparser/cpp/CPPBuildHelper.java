@@ -137,6 +137,7 @@ public class CPPBuildHelper {
             buildConfig.sharedLibs[2] = libFolder;
         }
         mac64.cppFlags += " -std=c++11";
+        mac64.linkerFlags += ",-rpath,'$ORIGIN'";
         return mac64;
     }
 
