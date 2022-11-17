@@ -115,8 +115,8 @@ public class CPPBuildHelper {
         if(libFolder != null) {
             lin64.libraries = "-L" + libFolder + " -l" + sharedLibName;
             buildConfig.sharedLibs[1] = libFolder;
+            lin64.linkerFlags += ",-rpath,'$ORIGIN'";
         }
-        lin64.linkerFlags += ",-rpath,'$ORIGIN'";
         return lin64;
     }
 
@@ -135,9 +135,9 @@ public class CPPBuildHelper {
         if(libFolder != null) {
             mac64.libraries = "-L" + libFolder + " -l" + sharedLibName;
             buildConfig.sharedLibs[2] = libFolder;
+            mac64.linkerFlags += " -Wl,-rpath,@loader_path";
         }
         mac64.cppFlags += " -std=c++11";
-        mac64.linkerFlags += " -Wl,-rpath,@loader_path";
         return mac64;
     }
 
