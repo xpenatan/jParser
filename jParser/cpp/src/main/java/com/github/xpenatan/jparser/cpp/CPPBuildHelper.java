@@ -135,7 +135,7 @@ public class CPPBuildHelper {
         if(libFolder != null) {
             mac64.libraries = "-L" + libFolder + " -l" + sharedLibName;
             buildConfig.sharedLibs[2] = libFolder;
-            mac64.linkerFlags += " -Wl,-rpath,@loader_path";
+            mac64.linkerFlags += " -install_name @executable_path/lib" + sharedLibName + ".dylib" ;
         }
         mac64.cppFlags += " -std=c++11";
         return mac64;
