@@ -11,6 +11,12 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class FileCopyHelper {
 
+    public static void copyDir(String src, String dest, String... excludes) throws IOException {
+        Path srcPath = new File(src).toPath();
+        Path destPath = new File(dest).toPath();
+        copyDir(srcPath, destPath, excludes);
+    }
+
     public static void copyDir(Path src, Path dest, String... excludes) throws IOException {
         File directory = dest.toFile();
         if(!directory.exists())

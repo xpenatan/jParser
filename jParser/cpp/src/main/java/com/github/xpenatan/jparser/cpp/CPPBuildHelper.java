@@ -44,7 +44,7 @@ public class CPPBuildHelper {
 
         BuildTarget windowTarget = genWindows(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName);
         BuildTarget linuxTarget = genLinux(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName);
-        BuildTarget macTarget = genMac(buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName);
+        BuildTarget macTarget = genMac(libName, buildConfig, headerDir, includes, sharedLibBaseProject, sharedLibName);
         new CustomAntScriptGenerator().generate(buildConfig,
                 windowTarget,
                 linuxTarget,
@@ -120,22 +120,27 @@ public class CPPBuildHelper {
         return lin64;
     }
 
-    private static BuildTarget genMac(BuildConfig buildConfig, String[] headerDir, String[] includes, String sharedLibBaseProject, String sharedLibName) {
+    private static BuildTarget genMac(String libName, BuildConfig buildConfig, String[] headerDir, String[] includes, String sharedLibBaseProject, String sharedLibName) {
         String libFolder = null;
         if(sharedLibBaseProject != null) {
             libFolder = sharedLibBaseProject + "/libs/macosx64";
         }
 
         BuildTarget mac64 = BuildTarget.newDefaultTarget(BuildTarget.TargetOs.MacOsX, true);
+
+        String libFilename = mac64.getSharedLibFilename(libName);
+
         mac64.cppIncludes = includes;
         mac64.headerDirs = headerDir;
         // for some weird reason adding -v stop getting errors with github actions
         mac64.linkerFlags = "-v -shared -arch x86_64 -mmacosx-version-min=10.7 -stdlib=libc++";
+
+        libName += " -install_name @rpath/" + libFilename;
 //        mac64.excludeFromMasterBuildFile = true;
         if(libFolder != null) {
             mac64.libraries = "-L" + libFolder + " -l" + sharedLibName;
             buildConfig.sharedLibs[2] = libFolder;
-            mac64.linkerFlags += " -install_name @executable_path/lib" + sharedLibName + ".dylib" ;
+            mac64.linkerFlags += " -Wl,-rpath,@loader_path/. -Wl,-rpath,@executable_path/.";
         }
         mac64.cppFlags += " -std=c++11";
         return mac64;
