@@ -135,7 +135,7 @@ public class CPPBuildHelper {
         // for some weird reason adding -v stop getting errors with github actions
         mac64.linkerFlags = "-v -shared -arch x86_64 -mmacosx-version-min=10.7 -stdlib=libc++";
 
-        libName += " -install_name @rpath/" + libFilename;
+        mac64.linkerFlags += " -install_name @rpath/" + libFilename;
 //        mac64.excludeFromMasterBuildFile = true;
         if(libFolder != null) {
             mac64.libraries = "-L" + libFolder + " -l" + sharedLibName;
