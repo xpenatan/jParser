@@ -18,7 +18,7 @@ public class CppCodeParserTest {
         String jniDir = buildPath + "/jni";
         String genDir = buildPath + "/java";
 
-        CppCodeParser parser = new CppCodeParser(CppCodeParser.getClassPath("imgui-core"), jniDir);
+        CppCodeParser parser = new CppCodeParser(CppCodeParser.getClassPath("test"), jniDir);
 
         JParser.generate(parser, "src/test/java", genDir, null);
 
