@@ -3,7 +3,6 @@ package com.github.xpenatan.jparser.cpp;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.cpp.tests.CppTestClass;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
-import java.io.File;
 import java.nio.ByteBuffer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -15,14 +14,11 @@ public class CppCodeParserTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        String classpathStr = System.getProperty("java.class.path") + File.pathSeparator;
-        System.out.println("classpath: " + classpathStr);
-
         String buildPath = "build/jparser/generated";
         String jniDir = buildPath + "/jni";
         String genDir = buildPath + "/java";
 
-        CppCodeParser parser = new CppCodeParser(classpathStr, jniDir);
+        CppCodeParser parser = new CppCodeParser(CppCodeParser.getClassPath("imgui-core"), jniDir);
 
         JParser.generate(parser, "src/test/java", genDir, null);
 

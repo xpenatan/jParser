@@ -8,8 +8,25 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.codeparser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.core.idl.IDLFile;
+import java.io.File;
 
 public class CppCodeParser extends IDLDefaultCodeParser {
+
+    public static String getClassPath(String ... includes) {
+        String classpath = System.getProperty("java.class.path") + File.pathSeparator;
+        String newClassPath = "";
+        String[] split = classpath.split(";");
+        for(int i = 0; i < split.length; i++) {
+            String path = split[i];
+            for(int j = 0; j < includes.length; j++) {
+                String include = includes[j];
+                if(path.contains(include)) {
+                    newClassPath += path+";";
+                }
+            }
+        }
+        return newClassPath;
+    }
 
     CppGenerator cppGenerator;
 

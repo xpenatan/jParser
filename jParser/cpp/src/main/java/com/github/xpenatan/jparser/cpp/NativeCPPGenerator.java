@@ -84,7 +84,7 @@ public class NativeCPPGenerator implements CppGenerator {
         try {
             jniDir = jniDir.replace("\\", File.separator);
             this.jniDir = new CustomFileDescriptor(new File(jniDir).getCanonicalPath());
-            this.classpath = filterClassPath(classpath);
+            this.classpath = classpath;
             if(!this.jniDir.exists()) {
                 this.jniDir.mkdirs();
             }
@@ -92,18 +92,6 @@ public class NativeCPPGenerator implements CppGenerator {
         catch(IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String filterClassPath(String classpath) {
-        String newClassPath = "";
-        String[] split = classpath.split(";");
-        for(int i = 0; i < split.length; i++) {
-            String path = split[i];
-            if(path.contains("/build/") || path.contains("\\build\\")) {
-                newClassPath += path+";";
-            }
-        }
-        return newClassPath;
     }
 
     @Override
