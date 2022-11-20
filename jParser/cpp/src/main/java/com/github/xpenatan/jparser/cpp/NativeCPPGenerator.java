@@ -232,6 +232,7 @@ public class NativeCPPGenerator implements CppGenerator {
         //Use temporary directory to prevent javac from creating class files somewhere we care about.
         File tempClassFilesDirectory = Files.createTempDirectory("gdx-jnigen").toFile();
         String command = "javac -classpath " + classpath + " -d " + tempClassFilesDirectory.getAbsolutePath() + " -h " + jniDir.path() + " " + filePath;
+        System.out.println("JNI Commands: " + command);
         Process process = Runtime.getRuntime().exec(command);
         process.waitFor();
         if(process.exitValue() != 0) {
