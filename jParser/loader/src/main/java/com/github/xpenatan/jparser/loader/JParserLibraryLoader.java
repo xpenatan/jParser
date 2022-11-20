@@ -21,16 +21,20 @@ public class JParserLibraryLoader {
 
     public void load(String libraryName01, String libraryName02) {
         if(libraryName02 != null) {
-            if(SharedLibraryLoader.isLinux || SharedLibraryLoader.isMac) {
+            if(SharedLibraryLoader.isLinux || SharedLibraryLoader.isMac || SharedLibraryLoader.isWindows) {
                 String dirName = "jparser-lib";
                 if(!SharedLibraryLoader.isLoaded(libraryName01)) {
                     String lib01Map = loader.mapLibraryName(libraryName01);
                     String lib02Map = loader.mapLibraryName(libraryName02);
                     try {
                         String lib01Path = loader.extractFile(lib01Map, dirName).getParentFile().getAbsolutePath();
-                        loader.extractFile(lib02Map, dirName);
-                        String fullPath = lib01Path + File.separator + lib01Map;
-                        System.load(fullPath);
+                        String lib02Path = loader.extractFile(lib02Map, dirName).getParentFile().getAbsolutePath();
+
+                        String fullPath01 = lib01Path + File.separator + lib01Map;
+                        String fullPath02 = lib02Path + File.separator + lib02Map;
+
+                        System.load(fullPath02);
+                        System.load(fullPath01);
                         SharedLibraryLoader.setLoaded(libraryName01);
                     }
                     catch(Throwable ex) {
