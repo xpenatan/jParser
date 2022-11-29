@@ -23,7 +23,7 @@ allprojects {
     ext {
         repoUser = System.getenv('USER')
         repoPass = System.getenv('PASSWORD')
-        repoUrl = ''
+        repoUrl = 'https://oss.sonatype.org/content/repositories/releases/'
         repoUrlSnapshot = 'https://oss.sonatype.org/content/repositories/snapshots/'
 
         def localFile = project.rootProject.file("local.properties")
@@ -56,12 +56,6 @@ allprojects {
                     password repoPass
                 }
             }
-        }
-    }
-
-    eclipse {
-        classpath {
-            defaultOutputDir = file('build/classes/java/main')
         }
     }
 }
