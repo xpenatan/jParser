@@ -2,7 +2,7 @@ project.ext {
     groupId = "com.github.xpenatan.jParser"
 
     jParserVersion = "1.0.0"
-    jParserType = "-SNAPSHOT"
+    jParserType = "-b1"
 
     javaparserVersion = "3.24.7"
 
