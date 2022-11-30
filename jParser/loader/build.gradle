@@ -86,5 +86,5 @@ signing {
     def signingKey = System.getenv("signingKey")
     def signingPassword = System.getenv("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
+    sign publishing.publications.maven
 }
