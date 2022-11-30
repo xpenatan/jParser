@@ -1,5 +1,6 @@
 apply plugin: "java"
 apply plugin: 'java-library'
+apply plugin: 'signing'
 
 def module_name = "jParser-cpp"
 
@@ -26,10 +27,6 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
 javadoc {
     options.encoding = 'UTF-8'
     options.addStringOption('Xdoclint:none', '-quiet')
@@ -47,6 +44,38 @@ publishing {
             project.version = project.jParserVersion + project.jParserType
             artifactId module_name
             artifact fromClasses
+            artifact javadocJar
+            artifact sourcesJar
+
+            pom {
+                name = "jParser cpp"
+                description = "Java code parser"
+                url = "http://github.com/xpenatan/jParser"
+                developers {
+                    developer {
+                        id = "Xpe"
+                        name = "Natan"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/xpenatan/jParser.git"
+                    developerConnection = "scm:git:ssh://github.com/xpenatan/jParser.git"
+                    url = "http://github.com/xpenatan/jParser/tree/master"
+                }
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+            }
         }
     }
+}
+
+signing {
+    def signingKey = System.getenv("signingKey")
+    def signingPassword = System.getenv("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
 }
