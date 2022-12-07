@@ -29,11 +29,6 @@ javadoc {
     options.addStringOption('Xdoclint:none', '-quiet')
 }
 
-configurations {
-    provided
-    implementation.extendsFrom provided
-}
-
 publishing {
     publications {
         maven(MavenPublication) {
