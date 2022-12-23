@@ -111,7 +111,23 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 if(!classOrInterfaceDeclaration.isAbstract()) {
                     String replace = OBJECT_CREATION_TEMPLATE.replace(TEMPLATE_TAG_TYPE, nameAsString);
                     FieldDeclaration bodyDeclaration = (FieldDeclaration)StaticJavaParser.parseBodyDeclaration(replace);
-                    classOrInterfaceDeclaration.getMembers().add(0, bodyDeclaration);
+
+                    boolean containsField = false;
+                    for(BodyDeclaration<?> member : classOrInterfaceDeclaration.getMembers()) {
+                        if(member.isFieldDeclaration()) {
+                            FieldDeclaration fieldDeclaration = member.asFieldDeclaration();
+                            String memberMethod = fieldDeclaration.toString();
+                            String newGen = bodyDeclaration.toString();
+                            if(newGen.equals(memberMethod)) {
+                                containsField = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(!containsField) {
+                        classOrInterfaceDeclaration.getMembers().add(0, bodyDeclaration);
+                    }
                 }
 
                 boolean containsConstructor = false;
