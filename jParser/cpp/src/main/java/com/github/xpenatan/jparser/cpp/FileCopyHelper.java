@@ -22,6 +22,8 @@ public class FileCopyHelper {
         if(!directory.exists())
             directory.mkdirs();
 
+        String srcFullPath = src.toFile().getCanonicalPath();
+
         if(Files.exists(src)) {
             Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
                 @Override
@@ -39,8 +41,14 @@ public class FileCopyHelper {
                     }
                     if(!skip) {
                         File file = path.toFile();
-                        String name = file.getName();
-                        Path newDest = dest.resolve(name);
+                        String fullPath = file.getCanonicalPath();
+                        String name = fullPath.replace(srcFullPath, "");
+                        File file1 = new File(dest + name);
+                        File parentFile = file1.getParentFile();
+                        if(!parentFile.exists()) {
+                            parentFile.mkdirs();
+                        }
+                        Path newDest = file1.toPath();
                         Files.copy(path, newDest, StandardCopyOption.REPLACE_EXISTING);
                     }
                     return FileVisitResult.CONTINUE;
