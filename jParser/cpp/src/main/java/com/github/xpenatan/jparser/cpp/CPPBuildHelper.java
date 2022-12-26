@@ -16,10 +16,10 @@ public class CPPBuildHelper {
     }
 
     public static void build(String libName, String projectPath, String sharedLibBaseProject, String sharedLibName, boolean includeToJar) {
-        build(libName, projectPath, "libs", sharedLibBaseProject, sharedLibName, includeToJar);
+        build(libName, projectPath, "libs", sharedLibBaseProject, "/src/", sharedLibName, includeToJar);
     }
 
-    public static void build(String libName, String projectPath, String libsDir, String sharedLibBaseProject, String sharedLibName, boolean includeToJar) {
+    public static void build(String libName, String projectPath, String libsDir, String sharedLibBaseProject, String sourceFolder, String sharedLibName, boolean includeToJar) {
         String sharedSrcPath = null;
         try {
             projectPath = projectPath.replace("\\", File.separator);
@@ -27,7 +27,7 @@ public class CPPBuildHelper {
             if(sharedLibBaseProject != null) {
                 sharedLibBaseProject = sharedLibBaseProject.replace("\\", File.separator);
                 sharedLibBaseProject = new File(sharedLibBaseProject).getCanonicalPath();
-                sharedSrcPath = sharedLibBaseProject + "/jni/src/";
+                sharedSrcPath = sharedLibBaseProject + sourceFolder;
             }
         }
         catch(IOException e) {
@@ -36,7 +36,7 @@ public class CPPBuildHelper {
         String[] headerDir = {"src", sharedSrcPath};
         String[] includes = {"**/*.cpp"};
 
-        BuildConfig buildConfig = new BuildConfig(libName, "target", libsDir, projectPath + "/jni");
+        BuildConfig buildConfig = new BuildConfig(libName, "target", libsDir, projectPath);
 
         boolean isWindows = isWindows();
         boolean isUnix = isUnix();
@@ -69,19 +69,19 @@ public class CPPBuildHelper {
             BuildTarget target = targets.get(i);
             boolean isValid = false;
             if(target.os == BuildTarget.TargetOs.Windows) {
-                isValid = BuildExecutor.executeAnt(projectPath + "/jni/build-windows64.xml", "-v", "-Dhas-compiler=true", "postcompile");
+                isValid = BuildExecutor.executeAnt(projectPath + "/build-windows64.xml", "-v", "-Dhas-compiler=true", "postcompile");
             }
             else if(target.os == BuildTarget.TargetOs.Linux) {
-                isValid = BuildExecutor.executeAnt(projectPath + "/jni/build-linux64.xml", "-v", "-Dhas-compiler=true", "postcompile");
+                isValid = BuildExecutor.executeAnt(projectPath + "/build-linux64.xml", "-v", "-Dhas-compiler=true", "postcompile");
             }
             else if(target.os == BuildTarget.TargetOs.MacOsX) {
-                isValid = BuildExecutor.executeAnt(projectPath + "/jni/build-macosx64.xml", "-v", "-Dhas-compiler=true");
+                isValid = BuildExecutor.executeAnt(projectPath + "/build-macosx64.xml", "-v", "-Dhas-compiler=true");
             }
             if(!isValid) {
                 throw new RuntimeException();
             }
         }
-        if(!BuildExecutor.executeAnt(projectPath + "/jni/build.xml", "-v", "pack-natives"))
+        if(!BuildExecutor.executeAnt(projectPath + "/build.xml", "-v", "pack-natives"))
             throw new RuntimeException();
     }
 

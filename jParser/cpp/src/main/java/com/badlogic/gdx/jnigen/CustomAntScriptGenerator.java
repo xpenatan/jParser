@@ -88,7 +88,7 @@ public class CustomAntScriptGenerator {
 				
 				if (target.os != TargetOs.Android && target.os != TargetOs.IOS) {
 					sharedLibFiles.add(sharedLibFilename);
-					libsDirs.add("../" + libsDir.path().replace('\\', '/'));
+					libsDirs.add(libsDir.path().replace('\\', '/'));
 				}
 			}
 		}
@@ -117,7 +117,7 @@ public class CustomAntScriptGenerator {
 		template = template.replace("%projectName%", config.sharedLibName + "-natives");
 		template = template.replace("<clean/>", clean.toString());
 		template = template.replace("<compile/>", compile.toString());
-		template = template.replace("%packFile%", "../" + config.libsDir.path().replace('\\', '/') + "/" + config.sharedLibName
+		template = template.replace("%packFile%", config.libsDir.path().replace('\\', '/') + "/" + config.sharedLibName
 			+ "-natives.jar");
 		template = template.replace("<pack/>", pack);
 
@@ -201,7 +201,7 @@ public class CustomAntScriptGenerator {
 		// replace template vars with proper values
 		template = template.replace("%projectName%", config.sharedLibName + "-" + target.os + "-" + (target.isARM ? "arm" : "") + (target.is64Bit ? "64" : "32"));
 		template = template.replace("%buildDir%", config.buildDir.child(target.getTargetFolder()).path().replace('\\', '/'));
-		template = template.replace("%libsDir%", "../" + getLibsDirectory(config, target));
+		template = template.replace("%libsDir%", getLibsDirectory(config, target));
 		template = template.replace("%libName%", libName);
 		template = template.replace("%xcframeworkName%", config.sharedLibName);
 		template = template.replace("%jniPlatform%", jniPlatform);
