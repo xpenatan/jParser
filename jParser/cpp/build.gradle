@@ -4,9 +4,14 @@ apply plugin: 'signing'
 
 def module_name = "jParser-cpp"
 
+configurations {
+    includeDep
+    implementation.extendsFrom includeDep
+}
+
 dependencies {
     implementation project(":jParser:core")
-    implementation "com.badlogicgames.gdx:gdx-jnigen:$project.jniGenVersion"
+    includeDep "com.badlogicgames.gdx:gdx-jnigen:$project.jniGenVersion"
 
     testImplementation project(":jParser:loader")
     testImplementation "junit:junit:$project.jUnitVersion"
@@ -66,6 +71,15 @@ publishing {
                     license {
                         name = "The Apache License, Version 2.0"
                         url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                withXml {
+                    def dependencies = asNode().appendNode('dependencies')
+                    configurations.includeDep.allDependencies.each {
+                        def dependencyNode = dependencies.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
                     }
                 }
             }
