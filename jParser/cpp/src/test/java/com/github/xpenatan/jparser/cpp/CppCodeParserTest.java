@@ -22,9 +22,9 @@ public class CppCodeParserTest {
 
         JParser.generate(parser, "src/test/java", genDir, null);
 
-        CPPBuildHelper.build("test", buildPath);
+        CPPBuildHelper.build("test", jniDir);
 
-        new JParserLibraryLoader(buildPath + "/libs/test-natives.jar").load("test");
+        new JParserLibraryLoader(jniDir + "/libs/test-natives.jar").load("test");
     }
 
     @Test
