@@ -11,19 +11,19 @@ import java.util.ArrayList;
 public class CPPBuildHelper {
     public static boolean DEBUG_BUILD = false;
 
-    public static void build(String libName, String projectPath) {
-        build(libName, projectPath, null, null, false);
+    public static void build(String libName, String buildPath) {
+        build(libName, buildPath, null, null, false);
     }
 
-    public static void build(String libName, String projectPath, String sharedLibBaseProject, String sharedLibName, boolean includeToJar) {
-        build(libName, projectPath, "libs", sharedLibBaseProject, "/src/", sharedLibName, includeToJar);
+    public static void build(String libName, String buildPath, String sharedLibBaseProject, String sharedLibName, boolean includeToJar) {
+        build(libName, buildPath, "libs", sharedLibBaseProject, "/src/", sharedLibName, includeToJar);
     }
 
-    public static void build(String libName, String projectPath, String libsDir, String sharedLibBaseProject, String sourceFolder, String sharedLibName, boolean includeToJar) {
+    public static void build(String libName, String buildPath, String libsDir, String sharedLibBaseProject, String sourceFolder, String sharedLibName, boolean includeToJar) {
         String sharedSrcPath = null;
         try {
-            projectPath = projectPath.replace("\\", File.separator);
-            projectPath = new File(projectPath).getCanonicalPath();
+            buildPath = buildPath.replace("\\", File.separator);
+            buildPath = new File(buildPath).getCanonicalPath();
             if(sharedLibBaseProject != null) {
                 sharedLibBaseProject = sharedLibBaseProject.replace("\\", File.separator);
                 sharedLibBaseProject = new File(sharedLibBaseProject).getCanonicalPath();
@@ -36,7 +36,7 @@ public class CPPBuildHelper {
         String[] headerDir = {"src", sharedSrcPath};
         String[] includes = {"**/*.cpp"};
 
-        BuildConfig buildConfig = new BuildConfig(libName, "target", libsDir, projectPath);
+        BuildConfig buildConfig = new BuildConfig(libName, "target", libsDir, buildPath);
 
         boolean isWindows = isWindows();
         boolean isUnix = isUnix();
@@ -69,19 +69,19 @@ public class CPPBuildHelper {
             BuildTarget target = targets.get(i);
             boolean isValid = false;
             if(target.os == BuildTarget.TargetOs.Windows) {
-                isValid = BuildExecutor.executeAnt(projectPath + "/build-windows64.xml", "-v", "-Dhas-compiler=true", "postcompile");
+                isValid = BuildExecutor.executeAnt(buildPath + "/build-windows64.xml", "-v", "-Dhas-compiler=true", "postcompile");
             }
             else if(target.os == BuildTarget.TargetOs.Linux) {
-                isValid = BuildExecutor.executeAnt(projectPath + "/build-linux64.xml", "-v", "-Dhas-compiler=true", "postcompile");
+                isValid = BuildExecutor.executeAnt(buildPath + "/build-linux64.xml", "-v", "-Dhas-compiler=true", "postcompile");
             }
             else if(target.os == BuildTarget.TargetOs.MacOsX) {
-                isValid = BuildExecutor.executeAnt(projectPath + "/build-macosx64.xml", "-v", "-Dhas-compiler=true");
+                isValid = BuildExecutor.executeAnt(buildPath + "/build-macosx64.xml", "-v", "-Dhas-compiler=true");
             }
             if(!isValid) {
                 throw new RuntimeException();
             }
         }
-        if(!BuildExecutor.executeAnt(projectPath + "/build.xml", "-v", "pack-natives"))
+        if(!BuildExecutor.executeAnt(buildPath + "/build.xml", "-v", "pack-natives"))
             throw new RuntimeException();
     }
 
