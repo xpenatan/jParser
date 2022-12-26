@@ -35,7 +35,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     public CppCodeParser(IDLFile idlFile, String classpath, String jniDir) {
-        super("cpp", idlFile);
+        super("C++", idlFile);
         cppGenerator = new NativeCPPGenerator(classpath, jniDir);
     }
 

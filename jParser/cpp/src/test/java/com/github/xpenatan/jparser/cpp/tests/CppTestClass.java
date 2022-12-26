@@ -4,61 +4,61 @@ import java.nio.Buffer;
 
 public class CppTestClass {
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         #include <iostream>
     */
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         static int STATIC_INT = 10;
     */
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         std::cout << "STATIC_INT:" << STATIC_INT << std::endl;
         return STATIC_INT;
     */
     public static native int testStaticInt();
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         return boolArg;
     */
     public static native boolean testBoolean(boolean boolArg);
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         return byteArg;
     */
     public static native byte testByte(byte byteArg);
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         return charArg;
     */
     public static native char testChar(char charArg);
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         return shortArg;
     */
     public static native short testShort(short shortArg);
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         return intArg;
     */
     public static native int testInt(int intArg);
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         return longArg;
     */
     public static native long testLong(long longArg);
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         return floatArg;
     */
     public static native float testFloat(float floatArg);
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         return doubleArg;
     */
     public static native double testDouble(double doubleArg);
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         printf("boolean: %s\n", boolArg ? "true" : "false");
         printf("byte: %d\n", byteArg);
         printf("char: %c\n", charArg);
@@ -85,26 +85,26 @@ public class CppTestClass {
 
     public static class TestInner {
 
-        /*[-cpp;-NATIVE]
+        /*[-C++;-NATIVE]
             static bool STATIC_INNER_BOOL = true;
         */
 
-        /*[-cpp;-NATIVE]
+        /*[-C++;-NATIVE]
             return STATIC_INNER_BOOL;
         */
         public static native boolean getStaticInnerBool();
 
-        /*[-cpp;-NATIVE]
+        /*[-C++;-NATIVE]
             return arg + 1;
         */
         public native static int testInner(int arg);
     }
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         static float STATIC_FLOAT = 33.0;
     */
 
-    /*[-cpp;-NATIVE]
+    /*[-C++;-NATIVE]
         return STATIC_FLOAT;
     */
     public static native float getStaticFloat();
