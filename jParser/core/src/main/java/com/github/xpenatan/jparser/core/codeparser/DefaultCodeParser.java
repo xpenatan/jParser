@@ -23,6 +23,7 @@ public abstract class DefaultCodeParser implements CodeParser {
     static final String CMD_HEADER_START = "[-";
     static final String CMD_HEADER_END = "]";
     public static final String CMD_ADD = "-ADD";
+    public static final String CMD_ADD_RAW = "-ADD_RAW";
     public static final String CMD_REMOVE = "-REMOVE";
     public static final String CMD_REPLACE = "-REPLACE";
     public static final String CMD_NATIVE = "-NATIVE";
@@ -113,8 +114,12 @@ public abstract class DefaultCodeParser implements CodeParser {
     }
 
     public boolean parseCodeBlock(Node node, String headerCommands, String content) {
-        if(headerCommands.contains(CMD_ADD)) {
-            setAddReplaceCMD(node, content, false);
+        if(headerCommands.contains(CMD_ADD_RAW)) {
+            setAddReplaceCMD(node, content, false, true);
+            return true;
+        }
+        else if(headerCommands.contains(CMD_ADD)) {
+            setAddReplaceCMD(node, content, false, false);
             return true;
         }
         else if(headerCommands.contains(CMD_REMOVE)) {
@@ -122,7 +127,7 @@ public abstract class DefaultCodeParser implements CodeParser {
             return true;
         }
         else if(headerCommands.contains(CMD_REPLACE)) {
-            setAddReplaceCMD(node, content, true);
+            setAddReplaceCMD(node, content, true, false);
             return true;
         }
         else if(headerCommands.contains(CMD_NATIVE)) {
@@ -135,7 +140,7 @@ public abstract class DefaultCodeParser implements CodeParser {
         return false;
     }
 
-    private void setAddReplaceCMD(Node node, String content, boolean replace) {
+    private void setAddReplaceCMD(Node node, String content, boolean replace, boolean rawAdd) {
         Node parentNode = null;
         Optional<Node> parentNodeOptional = node.getParentNode();
         if(parentNodeOptional.isPresent()) {
@@ -145,12 +150,23 @@ public abstract class DefaultCodeParser implements CodeParser {
             if(parentNode instanceof TypeDeclaration) {
                 TypeDeclaration<?> typeDeclaration = (TypeDeclaration<?>)parentNode;
                 try {
-                    BodyDeclaration<?> newCode = StaticJavaParser.parseBodyDeclaration(content);
-                    typeDeclaration.getMembers().add(newCode);
+                    if(rawAdd) {
+                        RawCodeBlock newblockComment = new RawCodeBlock();
+                        newblockComment.setContent(content);
+                        Optional<TokenRange> tokenRange = node.getTokenRange();
+                        TokenRange javaTokens = tokenRange.get();
+                        newblockComment.setTokenRange(javaTokens);
+                        typeDeclaration.getMembers().add(newblockComment);
+                    }
+                    else {
+                        BodyDeclaration<?> newCode = StaticJavaParser.parseBodyDeclaration(content);
+                        typeDeclaration.getMembers().add(newCode);
+
+                    }
                 }
                 catch(Throwable t) {
                     String className = typeDeclaration.getNameAsString();
-                    System.err.println("Error Class: " + className + "\n" + content);
+                    System.err.println("Error Class: " + className + "\nError conent: " + content);
                     throw t;
                 }
             }
