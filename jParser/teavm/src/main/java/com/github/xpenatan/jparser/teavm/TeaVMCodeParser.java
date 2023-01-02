@@ -200,7 +200,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
         if(content != null) {
             content = content.replace("\n", "").replace("\r", "").replaceAll("[ ]+", " ");
-            ;
             content = content.trim();
 
             if(!content.isEmpty()) {
@@ -230,7 +229,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     protected void onIDLMethodGenerated(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
-        // IDL parser generated our empty methods with default return values.
+        // IDL parser generate our empty methods with default return values.
         // We now modify it to match teaVM api calls
 
         String idlMethodName = idlMethodDeclaration.getNameAsString();
