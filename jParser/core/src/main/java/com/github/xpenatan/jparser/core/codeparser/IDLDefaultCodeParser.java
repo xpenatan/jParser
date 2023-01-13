@@ -30,6 +30,8 @@ import java.util.Optional;
  */
 public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
 
+    public static final String CMD_IDL_SKIP = "-IDL_SKIP";
+
     protected final IDLFile idlFile;
 
     protected boolean enableAttributeParsing = true;
@@ -41,6 +43,17 @@ public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
 
     @Override
     protected void setJavaBodyNativeCMD(String content, MethodDeclaration methodDeclaration) {
+    }
+
+    @Override
+    protected boolean shouldRemoveCommentBlock(String headerCommands) {
+        if(super.shouldRemoveCommentBlock(headerCommands)) {
+            if(headerCommands.contains(CMD_IDL_SKIP)) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -142,7 +155,7 @@ public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
             getMethodDeclaration.setType(type);
             JParserHelper.addMissingImportType(jParser, unit, type);
             setDefaultReturnValues(jParser, unit, type, getMethodDeclaration);
-            onIDLMethodGenerated(jParser, unit, classOrInterfaceDeclaration, getMethodDeclaration, true);
+            onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, getMethodDeclaration, true);
         }
         if(addSet) {
             if(setMethodDeclaration != null) {
@@ -152,7 +165,7 @@ public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
             Parameter parameter = setMethodDeclaration.addAndGetParameter(type, attributeName);
             Type paramType = parameter.getType();
             JParserHelper.addMissingImportType(jParser, unit, paramType);
-            onIDLMethodGenerated(jParser, unit, classOrInterfaceDeclaration, setMethodDeclaration, true);
+            onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, setMethodDeclaration, true);
         }
     }
 
@@ -167,6 +180,7 @@ public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
         if(containsMethod != null) {
             boolean isNative = containsMethod.isNative();
             boolean isStatic = containsMethod.isStatic();
+            boolean containsBlockComment = false;
             Optional<Comment> optionalComment = containsMethod.getComment();
             if(optionalComment.isPresent()) {
                 Comment comment = optionalComment.get();
@@ -175,18 +189,25 @@ public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
                     String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
                     // Skip if method already exist with header code
                     if(headerCommands != null) {
-                        if(headerCommands.startsWith(CMD_HEADER_START + headerCMD)) {
+                        if(headerCommands.contains(CMD_NATIVE)) {
                             return;
+                        }
+                        else {
+                            if(headerCommands.contains(CMD_IDL_SKIP)) {
+                                //If skip is found then remove the method
+                                containsMethod.remove();
+                                return;
+                            }
                         }
                     }
                 }
             }
-            if(isNative && !isStatic) {
-                // It's a dummy method
+            if(isNative) {
+                // It's a dummy method. Remove it and let IDL generate it again
                 containsMethod.remove();
             }
             if(!isNative && !isStatic) {
-                // if a simple method exist, keep it.
+                // if a simple method exist, keep it and don't let IDL generate the method.
                 return;
             }
         }
@@ -209,7 +230,7 @@ public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
         Type returnType = StaticJavaParser.parseType(idlMethod.returnType);
         methodDeclaration.setType(returnType);
         setDefaultReturnValues(jParser, unit, returnType, methodDeclaration);
-        onIDLMethodGenerated(jParser, unit, classOrInterfaceDeclaration, methodDeclaration, false);
+        onIDLMethodGenerated(jParser, idlClass, idlMethod,  unit, classOrInterfaceDeclaration, methodDeclaration, false);
     }
 
     private void setDefaultReturnValues(JParser jParser, CompilationUnit unit, Type returnType, MethodDeclaration idlMethodDeclaration) {
@@ -238,7 +259,7 @@ public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
         }
     }
 
-    protected abstract void onIDLMethodGenerated(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute);
+    protected abstract void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute);
 
     private MethodDeclaration containsMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLMethod idlMethod) {
         ArrayList<IDLParameter> parameters = idlMethod.parameters;

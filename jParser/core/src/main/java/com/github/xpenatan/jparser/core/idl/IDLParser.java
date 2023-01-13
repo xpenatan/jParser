@@ -28,7 +28,7 @@ public class IDLParser {
                 fr.close();    //closes the stream and release the resources
 
                 ArrayList<IDLClass> classList = new ArrayList<>();
-                parseFile(lines, classList);
+                parseFile(idlFile, lines, classList);
                 idlFile.classArray.addAll(classList);
             }
             catch(Throwable t) {
@@ -38,7 +38,7 @@ public class IDLParser {
         return idlFile;
     }
 
-    private static void parseFile(ArrayList<String> lines, ArrayList<IDLClass> classList) {
+    private static void parseFile(IDLFile idlFile, ArrayList<String> lines, ArrayList<IDLClass> classList) {
         ArrayList<String> classLines = new ArrayList<>();
         boolean foundStartClass = false;
         int size = lines.size();
@@ -71,7 +71,7 @@ public class IDLParser {
                         }
                     }
                     foundStartClass = false;
-                    IDLClass parserLineClass = new IDLClass();
+                    IDLClass parserLineClass = new IDLClass(idlFile);
                     parserLineClass.initClass(classLines);
                     classLines.clear();
                     classList.add(parserLineClass);

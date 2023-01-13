@@ -6,14 +6,20 @@ import java.util.ArrayList;
  * @author xpenatan
  */
 public class IDLClass {
+    public final IDLFile idlFile;
+
     public String name;
-    public String prefixName;
+    public String prefixName = "";
     public String jsImplementation;
 
     public final ArrayList<String> classLines = new ArrayList<>();
     public final ArrayList<IDLConstructor> constructors = new ArrayList<>();
     public final ArrayList<IDLMethod> methods = new ArrayList<>();
     public final ArrayList<IDLAttribute> attributes = new ArrayList<>();
+
+    public IDLClass(IDLFile idlFile) {
+        this.idlFile = idlFile;
+    }
 
     public void initClass(ArrayList<String> lines) {
         classLines.addAll(lines);
@@ -33,13 +39,13 @@ public class IDLClass {
             }
             else {
                 if(line.startsWith("void " + name)) {
-                    IDLConstructor constructor = new IDLConstructor();
+                    IDLConstructor constructor = new IDLConstructor(idlFile);
                     constructor.initConstructor(line);
                     constructors.add(constructor);
                 }
                 else {
                     if(line.contains("(") && line.contains(")")) {
-                        IDLMethod method = new IDLMethod();
+                        IDLMethod method = new IDLMethod(idlFile);
                         method.initMethod(line);
                         methods.add(method);
 
@@ -101,5 +107,9 @@ public class IDLClass {
             }
         }
         return null;
+    }
+
+    public String getName() {
+        return prefixName + name;
     }
 }

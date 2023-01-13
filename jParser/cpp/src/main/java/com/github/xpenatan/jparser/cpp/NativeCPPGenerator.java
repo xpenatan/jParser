@@ -4,11 +4,11 @@ import com.badlogic.gdx.jnigen.FileDescriptor;
 import com.badlogic.gdx.jnigen.parsing.CMethodParser;
 import com.badlogic.gdx.jnigen.parsing.JavaMethodParser;
 import com.badlogic.gdx.jnigen.parsing.JniHeaderCMethodParser;
+import com.github.javaparser.Position;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.comments.BlockComment;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +39,8 @@ public class NativeCPPGenerator implements CppGenerator {
     private static final Map<String, JavaMethodParser.ArgumentType> arrayTypes;
     private static final Map<String, JavaMethodParser.ArgumentType> bufferTypes;
     private static final Map<String, JavaMethodParser.ArgumentType> otherTypes;
+
+    private int startCode = 0;
 
     static {
         plainOldDataTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
@@ -119,6 +121,7 @@ public class NativeCPPGenerator implements CppGenerator {
         });
 
         parserItems.add(parserItem);
+        startCode = 0;
         javaSegments.clear();
     }
 
@@ -166,10 +169,21 @@ public class NativeCPPGenerator implements CppGenerator {
 
     @Override
     public void addNativeCode(String content, Node node) {
-        int startLine = node.getBegin().get().line;
-        int endLine = node.getEnd().get().line;
+        int startLine = startCode;
+        int endLine = 0;
+        startCode++;
         javaSegments.add(new JavaMethodParser.JniSection(content + "\n\n", startLine, endLine));
-        node.remove();
+//        node.remove();
+    }
+
+    @Override
+    public String getClasspath() {
+        return classpath;
+    }
+
+    @Override
+    public void setClasspath(String classpath) {
+        this.classpath = classpath;
     }
 
     private JavaMethodParser.JavaMethod createMethod(String content, MethodDeclaration method) {
@@ -194,8 +208,14 @@ public class NativeCPPGenerator implements CppGenerator {
                 arguments.add(new JavaMethodParser.Argument(getArgumentType(parameter), parameter.getNameAsString()));
             }
         }
-
-        return new JavaMethodParser.JavaMethod(className, name, isStatic, returnType, content, arguments, method.getBegin().get().line, method.getEnd().get().line);
+        Optional<Position> begin = method.getBegin();
+        int lineBegin = 0;
+        int lineEnd = 0;
+        if(begin.isPresent()) {
+            lineBegin = begin.get().line;
+            lineEnd = method.getEnd().get().line;;
+        }
+        return new JavaMethodParser.JavaMethod(className, name, isStatic, returnType, content, arguments, lineBegin, lineEnd);
     }
 
     private JavaMethodParser.ArgumentType getArgumentType(Parameter parameter) {

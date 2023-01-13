@@ -6,20 +6,35 @@ import java.util.ArrayList;
  * @author xpenatan
  */
 public class IDLMethod {
+    public final IDLFile idlFile;
+
     public String line;
     public String paramsLine;
     public String returnType;
     public String name;
     public boolean returnIsArray;
     public boolean skip = false;
+    public boolean isReturnRef;
 
     public final ArrayList<IDLParameter> parameters = new ArrayList<>();
 
+    public IDLMethod(IDLFile idlFile) {
+        this.idlFile = idlFile;
+    }
+
     public void initMethod(String line) {
         this.line = line;
-        paramsLine = IDLMethod.setParameters(line, parameters);
+        paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
         int index = line.indexOf("(");
         String leftSide = line.substring(0, index).trim();
+        String returnInfo = "";
+        if(leftSide.startsWith("[")) {
+            int i = leftSide.indexOf("]") + 1;
+            returnInfo = line.substring(0, i);
+        }
+
+        isReturnRef = returnInfo.contains("Ref");
+
         int endIndex = getLastIndex(leftSide);
         if(endIndex != -1) {
             leftSide = line.substring(endIndex + 1, index).trim();
@@ -63,11 +78,13 @@ public class IDLMethod {
     }
 
     public IDLMethod clone() {
-        IDLMethod clonedMethod = new IDLMethod();
+        IDLMethod clonedMethod = new IDLMethod(idlFile);
         clonedMethod.line = line;
         clonedMethod.paramsLine = paramsLine;
         clonedMethod.returnType = returnType;
         clonedMethod.name = name;
+        clonedMethod.skip = skip;
+        clonedMethod.isReturnRef = isReturnRef;
 
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);
@@ -97,7 +114,7 @@ public class IDLMethod {
         return -1;
     }
 
-    static String setParameters(String line, ArrayList<IDLParameter> out) {
+    static String setParameters(IDLFile idlFile, String line, ArrayList<IDLParameter> out) {
         int firstIdx = line.indexOf("(");
         int lastIdx = line.indexOf(")");
         String params = line.substring(firstIdx, lastIdx + 1);
@@ -110,16 +127,18 @@ public class IDLMethod {
                 cur = cur + text;
 
                 boolean containsTags = text.contains("[") || text.contains("]");
+                boolean isArray = text.contains("[]");
 
-                if(!containsTags) {
-                    IDLParameter parameter = new IDLParameter();
+                if(!containsTags || isArray) {
+                    IDLParameter parameter = new IDLParameter(idlFile);
                     parameter.initParameter(cur.trim());
                     out.add(parameter);
                     cur = "";
                 }
                 else {
+                    // Small logic to keep getting the param if it contains [Const, Ref], [Const] or [Ref]
                     if(text.contains("]")) {
-                        IDLParameter parameter = new IDLParameter();
+                        IDLParameter parameter = new IDLParameter(idlFile);
                         parameter.initParameter(cur.trim());
                         out.add(parameter);
                         cur = "";

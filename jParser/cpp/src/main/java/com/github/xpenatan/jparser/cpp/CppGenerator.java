@@ -12,4 +12,8 @@ public interface CppGenerator {
     void addParseFile(String sourceBaseDir, String inputJavaPath, String destinationJavaPath);
 
     void generate();
+
+    String getClasspath();
+
+    void setClasspath(String classpath);
 }

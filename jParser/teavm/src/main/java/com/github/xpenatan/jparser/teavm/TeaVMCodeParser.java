@@ -32,6 +32,7 @@ import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.codeparser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.core.idl.IDLClass;
 import com.github.xpenatan.jparser.core.idl.IDLFile;
+import com.github.xpenatan.jparser.core.idl.IDLMethod;
 import java.util.List;
 import java.util.Optional;
 
@@ -228,7 +229,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    protected void onIDLMethodGenerated(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
+    protected void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
         // IDL parser generate our empty methods with default return values.
         // We now modify it to match teaVM api calls
 

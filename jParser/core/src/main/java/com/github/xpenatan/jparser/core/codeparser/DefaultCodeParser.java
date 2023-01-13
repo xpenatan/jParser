@@ -6,11 +6,13 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.xpenatan.jparser.core.JParser;
+import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.RawCodeBlock;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -36,6 +38,29 @@ public abstract class DefaultCodeParser implements CodeParser {
         this.headerCMD = headerCMD;
     }
 
+    protected boolean shouldRemoveCommentBlock(String headerCommands) {
+        if(!headerCommands.startsWith(CMD_HEADER_START + headerCMD)) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onParseFileStart(JParser jParser, JParserItem parserItem) {
+        CompilationUnit unit = parserItem.unit;
+        for(Comment allComment : unit.getAllComments()) {
+            if(allComment.isBlockComment()) {
+                BlockComment blockComment = allComment.asBlockComment();
+                String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
+                if(headerCommands != null) {
+                    if(shouldRemoveCommentBlock(headerCommands)) {
+                        blockComment.remove();
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
     }
@@ -50,7 +75,7 @@ public abstract class DefaultCodeParser implements CodeParser {
             BlockComment otherTopBlockComment = cache.get(i);
             if(CodeParserItem.obtainHeaderCommands(otherTopBlockComment) != null) {
                 parserBlock(otherTopBlockComment, otherTopBlockComment);
-                otherTopBlockComment.remove();
+//                otherTopBlockComment.remove();
             }
         }
         cache.clear();
@@ -70,18 +95,17 @@ public abstract class DefaultCodeParser implements CodeParser {
         else if(node instanceof BlockComment) {
             BlockComment standAloneBlockComment = (BlockComment)node;
             cache.add(standAloneBlockComment);
-        }
-        else {
-            //If node does not contains a block comment then just parse all cache nodes.
-            onParseCodeEnd();
             return;
         }
-        if(blockComment != null) {
+
+        if(node instanceof MethodDeclaration) {
             boolean blockParsed = false;
-            String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
-            if(headerCommands != null) {
-                blockComment.remove();
-                blockParsed = parserBlock(node, blockComment);
+            if(blockComment != null) {
+                String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
+                if(headerCommands != null) {
+//                blockComment.remove();
+                    blockParsed = parserBlock(node, blockComment);
+                }
             }
             for(int i = cache.size()-1; i >= 0; i--) {
                 BlockComment otherTopBlockComment = cache.get(i);
@@ -94,10 +118,16 @@ public abstract class DefaultCodeParser implements CodeParser {
                             blockParsed = true;
                         }
                     }
-                    otherTopBlockComment.remove();
+//                    otherTopBlockComment.remove();
                 }
             }
             cache.clear();
+
+        }
+        else {
+            //If node does not contains a block comment then just parse all cache nodes.
+            onParseCodeEnd();
+            return;
         }
     }
 
@@ -133,8 +163,10 @@ public abstract class DefaultCodeParser implements CodeParser {
         else if(headerCommands.contains(CMD_NATIVE)) {
             if(node instanceof MethodDeclaration) {
                 MethodDeclaration methodDeclaration = (MethodDeclaration)node;
-                setJavaBodyNativeCMD(content, methodDeclaration);
-                return true;
+                if(methodDeclaration.isNative()) {
+                    setJavaBodyNativeCMD(content, methodDeclaration);
+                    return true;
+                }
             }
         }
         return false;

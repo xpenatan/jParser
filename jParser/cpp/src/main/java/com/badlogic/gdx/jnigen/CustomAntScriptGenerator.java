@@ -164,7 +164,7 @@ public class CustomAntScriptGenerator {
 			template = new FileDescriptor("com/badlogic/gdx/jnigen/resources/scripts/build-ios.xml.template", FileType.Classpath)
 				.readString();
 		} else {
-			template = new FileDescriptor("com/badlogic/gdx/jnigen/resources/scripts/build-target.xml.template", FileType.Classpath)
+			template = new FileDescriptor("build-target.xml.template", FileType.Classpath)
 				.readString();
 		}
 
