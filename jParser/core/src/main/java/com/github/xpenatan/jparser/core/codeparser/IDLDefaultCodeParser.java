@@ -196,8 +196,8 @@ public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
                             if(headerCommands.contains(CMD_IDL_SKIP)) {
                                 //If skip is found then remove the method
                                 containsMethod.remove();
-                                return;
                             }
+                            return;
                         }
                     }
                 }
