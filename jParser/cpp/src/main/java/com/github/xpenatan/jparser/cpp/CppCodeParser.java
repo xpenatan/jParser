@@ -361,17 +361,24 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 }
 
                 boolean containsConstructor = false;
+                boolean containsZeroParamConstructor = false;
                 for(int i = 0; i < constructors.size(); i++) {
                     ConstructorDeclaration constructorDeclaration = constructors.get(i);
                     NodeList<Parameter> parameters = constructorDeclaration.getParameters();
                     if(parameters.size() == 1 && JParserHelper.isBoolean(parameters.get(0).getType())) {
                         containsConstructor = true;
                     }
+                    else if(parameters.size() == 0) {
+                        containsZeroParamConstructor = true;
+                    }
                 }
 
                 if(!containsConstructor) {
                     ConstructorDeclaration constructorDeclaration = classOrInterfaceDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
                     constructorDeclaration.addParameter("boolean", "cMemoryOwn");
+                }
+                if(!containsZeroParamConstructor) {
+                    classOrInterfaceDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
                 }
             }
         }
