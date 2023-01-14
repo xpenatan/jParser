@@ -76,13 +76,14 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     public static String getClassPath(String ... includes) {
         String classpath = System.getProperty("java.class.path") + File.pathSeparator;
         String newClassPath = "";
-        String[] split = classpath.split(";");
+        String pathSeparator = File.pathSeparator;
+        String[] split = classpath.split(pathSeparator);
         for(int i = 0; i < split.length; i++) {
             String path = split[i];
             for(int j = 0; j < includes.length; j++) {
                 String include = includes[j];
                 if(path.contains(include)) {
-                    newClassPath += path+";";
+                    newClassPath += path + pathSeparator;
                 }
             }
         }
