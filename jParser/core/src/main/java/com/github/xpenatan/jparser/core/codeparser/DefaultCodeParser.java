@@ -125,9 +125,14 @@ public abstract class DefaultCodeParser implements CodeParser {
 
         }
         else {
+            if(blockComment != null) {
+                String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
+                if(headerCommands != null) {
+                    parserBlock(node, blockComment);
+                }
+            }
             //If node does not contains a block comment then just parse all cache nodes.
             onParseCodeEnd();
-            return;
         }
     }
 
