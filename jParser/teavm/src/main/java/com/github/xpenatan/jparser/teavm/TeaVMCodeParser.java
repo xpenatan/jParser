@@ -384,6 +384,10 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                     normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
                 }
                 normalAnnotationExpr.addPair("script", "\"" + content + "\"");
+
+                String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+                String blockComment = header + content;
+                nativeMethod.setBlockComment(blockComment);
             }
         }
     }
