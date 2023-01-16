@@ -375,6 +375,10 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         }
 
         if(content != null) {
+            String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+            String blockComment = header + content;
+            nativeMethod.setBlockComment(blockComment);
+
             content = content.replace("\n", "");
             content = content.trim();
 
@@ -384,10 +388,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                     normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
                 }
                 normalAnnotationExpr.addPair("script", "\"" + content + "\"");
-
-                String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
-                String blockComment = header + content;
-                nativeMethod.setBlockComment(blockComment);
             }
         }
     }
