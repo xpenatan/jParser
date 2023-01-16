@@ -73,17 +73,17 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
      * When a js method returns a js object, we need get its pointer.
      */
     protected static final String GET_JS_METHOD_OBJ_POINTER_TEMPLATE = "" +
-            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "\nvar jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.[METHOD];\n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
     protected static final String GET_JS_METHOD_PRIMITIVE_TEMPLATE = "" +
-            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "\nvar jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.[METHOD];\n" +
             "return returnedJSObj;";
 
     protected static final String GET_JS_METHOD_VOID_TEMPLATE = "" +
-            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "\nvar jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
             "jsObj.[METHOD];";
 
     protected static final String GDX_OBJECT_TEMPLATE = "" +
