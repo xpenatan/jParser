@@ -73,17 +73,17 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
      * When a js method returns a js object, we need get its pointer.
      */
     protected static final String GET_JS_METHOD_OBJ_POINTER_TEMPLATE = "" +
-            "\nvar jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.[METHOD];\n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
     protected static final String GET_JS_METHOD_PRIMITIVE_TEMPLATE = "" +
-            "\nvar jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.[METHOD];\n" +
             "return returnedJSObj;";
 
     protected static final String GET_JS_METHOD_VOID_TEMPLATE = "" +
-            "\nvar jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
             "jsObj.[METHOD];";
 
     protected static final String GDX_OBJECT_TEMPLATE = "" +
@@ -204,11 +204,13 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             content = content.trim();
 
             if(!content.isEmpty()) {
-                NormalAnnotationExpr normalAnnotationExpr = methodDeclaration.addAndGetAnnotation("org.teavm.jso.JSBody");
-                if(!param.isEmpty()) {
-                    normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
+                if(!methodDeclaration.isAnnotationPresent("JSBody")) {
+                    NormalAnnotationExpr normalAnnotationExpr = methodDeclaration.addAndGetAnnotation("org.teavm.jso.JSBody");
+                    if(!param.isEmpty()) {
+                        normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
+                    }
+                    normalAnnotationExpr.addPair("script", "\"" + content + "\"");
                 }
-                normalAnnotationExpr.addPair("script", "\"" + content + "\"");
             }
         }
     }
@@ -376,18 +378,20 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
         if(content != null) {
             String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
-            String blockComment = header + content;
+            String blockComment = header + "\n" + content + "\n";
             nativeMethod.setBlockComment(blockComment);
 
             content = content.replace("\n", "");
             content = content.trim();
 
             if(!content.isEmpty()) {
-                NormalAnnotationExpr normalAnnotationExpr = nativeMethod.addAndGetAnnotation("org.teavm.jso.JSBody");
-                if(!param.isEmpty()) {
-                    normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
+                if(!nativeMethod.isAnnotationPresent("JSBody")) {
+                    NormalAnnotationExpr normalAnnotationExpr = nativeMethod.addAndGetAnnotation("org.teavm.jso.JSBody");
+                    if(!param.isEmpty()) {
+                        normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
+                    }
+                    normalAnnotationExpr.addPair("script", "\"" + content + "\"");
                 }
-                normalAnnotationExpr.addPair("script", "\"" + content + "\"");
             }
         }
     }
