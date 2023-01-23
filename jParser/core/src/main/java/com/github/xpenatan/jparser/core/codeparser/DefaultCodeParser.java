@@ -107,8 +107,15 @@ public abstract class DefaultCodeParser implements CodeParser {
                     blockParsed = parserBlock(node, blockComment);
                 }
             }
-            for(int i = cache.size()-1; i >= 0; i--) {
-                BlockComment otherTopBlockComment = cache.get(i);
+            while(cache.size() > 0) {
+                //get the last cache item to check if it matches. If it has been parsed then change the order
+                BlockComment otherTopBlockComment = null;
+                if(blockParsed) {
+                    otherTopBlockComment = cache.remove(0);
+                }
+                else {
+                    otherTopBlockComment = cache.remove(cache.size()-1);
+                }
                 if(CodeParserItem.obtainHeaderCommands(otherTopBlockComment) != null) {
                     if(blockParsed) {
                         parserBlock(otherTopBlockComment, otherTopBlockComment);
@@ -118,11 +125,8 @@ public abstract class DefaultCodeParser implements CodeParser {
                             blockParsed = true;
                         }
                     }
-//                    otherTopBlockComment.remove();
                 }
             }
-            cache.clear();
-
         }
         else {
             if(blockComment != null) {
