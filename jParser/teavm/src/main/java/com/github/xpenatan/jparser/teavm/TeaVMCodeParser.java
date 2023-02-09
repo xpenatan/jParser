@@ -523,7 +523,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             if(expression.isMethodCallExpr()) {
                 MethodCallExpr methodCallExpr1 = expression.asMethodCallExpr();
                 String nameAsString = methodCallExpr1.getNameAsString();
-                if(nameAsString.equals(CAST_TO_INT_METHOD)) {
+                if(nameAsString.equals(CAST_TO_INT_METHOD) || nameAsString.endsWith(ENDS_WITH_POINTER)) {
                     Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
                     CastExpr intCast = new CastExpr(intType, expression);
                     methodCallExpr.setArgument(i, intCast);
