@@ -1,7 +1,6 @@
 package com.github.xpenatan.jparser.cpp;
 
 import com.badlogic.gdx.jnigen.BuildConfig;
-import com.badlogic.gdx.jnigen.BuildExecutor;
 import com.badlogic.gdx.jnigen.BuildTarget;
 import com.badlogic.gdx.jnigen.CustomAntScriptGenerator;
 import com.badlogic.gdx.jnigen.FileDescriptor;
@@ -10,8 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.List;
 
 public class CPPBuildHelper {
     public static boolean DEBUG_BUILD = false;
@@ -78,19 +77,19 @@ public class CPPBuildHelper {
             BuildTarget target = targets.get(i);
             boolean isValid = false;
             if(target.os == BuildTarget.TargetOs.Windows) {
-                isValid = BuildExecutor.executeAnt(buildPath + "/build-windows64.xml", "-v", "-Dhas-compiler=true", "postcompile");
+                isValid = executeAnt(buildPath + "/build-windows64.xml", "-v", "-Dhas-compiler=true", "postcompile");
             }
             else if(target.os == BuildTarget.TargetOs.Linux) {
-                isValid = BuildExecutor.executeAnt(buildPath + "/build-linux64.xml", "-v", "-Dhas-compiler=true", "postcompile");
+                isValid = executeAnt(buildPath + "/build-linux64.xml", "-v", "-Dhas-compiler=true", "postcompile");
             }
             else if(target.os == BuildTarget.TargetOs.MacOsX) {
-                isValid = BuildExecutor.executeAnt(buildPath + "/build-macosx64.xml", "-v", "-Dhas-compiler=true");
+                isValid = executeAnt(buildPath + "/build-macosx64.xml", "-v", "-Dhas-compiler=true");
             }
             if(!isValid) {
                 throw new RuntimeException();
             }
         }
-        if(!BuildExecutor.executeAnt(buildPath + "/build.xml", "-v", "pack-natives"))
+        if(!executeAnt(buildPath + "/build.xml", "-v", "pack-natives"))
             throw new RuntimeException();
     }
 
@@ -194,9 +193,29 @@ public class CPPBuildHelper {
         return (OS.contains("nix") || OS.contains("nux") || OS.contains("aix") || OS.contains("Linux"));
     }
 
+    public static boolean executeAnt (String buildFile, String... params) {
+        FileDescriptor build = new FileDescriptor(buildFile);
+        String ant = System.getProperty("os.name").contains("Windows") ? "ant.bat" : "ant";
+
+        List<String> command = new ArrayList<>();
+        command.add(ant);
+        command.add("-f");
+        command.add(build.file().getAbsolutePath());
+        command.addAll(Arrays.asList(params));
+
+        String[] args = command.toArray(new String[0]);
+        System.out.println("Executing '" + command + "'");
+        return startProcess(build.parent().file(), args);
+    }
+
     public static boolean startProcess (File directory, String command) {
+        String[] commands = command.split(" ");
+        return startProcess(directory, commands);
+    }
+
+    public static boolean startProcess (File directory, String... commands) {
         try {
-            String[] commands = command.split(" ");
+            System.out.println("Commands: " + Arrays.toString(commands));
             final Process process = new ProcessBuilder(commands)
                     .redirectErrorStream(true)
                     .directory(new File(System.getProperty("user.home")))
@@ -218,72 +237,7 @@ public class CPPBuildHelper {
                 }
 
                 private void printFileLineNumber (String line) {
-                    if (line.contains("warning") || line.contains("error")) {
-                        try {
-                            String fileName = getFileName(line);
-                            String error = getError(line);
-                            int lineNumber = getLineNumber(line) - 1;
-                            if (fileName != null && lineNumber >= 0) {
-                                FileDescriptor file = new FileDescriptor(fileName);
-                                if (file.exists()) {
-                                    String[] content = file.readString().split("\n");
-                                    if (lineNumber < content.length) {
-                                        for (int i = lineNumber; i >= 0; i--) {
-                                            String contentLine = content[i];
-                                            if (contentLine.startsWith("//@line:")) {
-                                                int javaLineNumber = Integer.parseInt(contentLine.split(":")[1].trim());
-                                                System.out.flush();
-                                                if (line.contains("warning")) {
-                                                    System.out.println("(" + file.nameWithoutExtension() + ".java:"
-                                                            + (javaLineNumber + (lineNumber - i) - 1) + "): " + error + ", original: " + line);
-                                                    System.out.flush();
-                                                } else {
-                                                    System.err.println("(" + file.nameWithoutExtension() + ".java:"
-                                                            + (javaLineNumber + (lineNumber - i) - 1) + "): " + error + ", original: " + line);
-                                                    System.err.flush();
-                                                }
-                                                return;
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    System.out.println(line);
-                                }
-                            }
-                        } catch (Throwable t) {
-                            System.out.println(line);
-                            // silent death...
-                        }
-                    } else {
-                        System.out.println(line);
-                    }
-                }
-
-                private String getFileName (String line) {
-                    Pattern pattern = Pattern.compile("(.*):([0-9])+:[0-9]+:");
-                    Matcher matcher = pattern.matcher(line);
-                    matcher.find();
-                    String fileName = matcher.groupCount() >= 2 ? matcher.group(1).trim() : null;
-                    if (fileName == null) return null;
-                    int index = fileName.indexOf(" ");
-                    if (index != -1)
-                        return fileName.substring(index).trim();
-                    else
-                        return fileName;
-                }
-
-                private String getError (String line) {
-                    Pattern pattern = Pattern.compile(":[0-9]+:[0-9]+:(.+)");
-                    Matcher matcher = pattern.matcher(line);
-                    matcher.find();
-                    return matcher.groupCount() >= 1 ? matcher.group(1).trim() : null;
-                }
-
-                private int getLineNumber (String line) {
-                    Pattern pattern = Pattern.compile(":([0-9]+):[0-9]+:");
-                    Matcher matcher = pattern.matcher(line);
-                    matcher.find();
-                    return matcher.groupCount() >= 1 ? Integer.parseInt(matcher.group(1)) : -1;
+                    System.out.println(line);
                 }
             });
             t.setDaemon(true);
