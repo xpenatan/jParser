@@ -1,9 +1,17 @@
 [NoDelete]
 interface NoDeleteClassTest {
-    static readonly attribute unsigned long PHYSICS_VERSION;
-
     [Value] static NormalClassTest GetNormalValueClass();
-    static PxControllerManager Create([Ref] PxScene scene, optional boolean lockingEnabled);
+    [Ref] ExtendClassTest getExtendClass(float floatParam, long intParam, [Const, Ref]NormalClassTest normalClass, float[] vertices);
+
+    static readonly attribute unsigned long ReadOnlyInt;
+    [Const]attribute NormalClassTest constNormalClass;
+    [Value]attribute NormalClassTest valueNormalClass;
+    attribute float floatAttribute;
+    attribute boolean boolAttribute;
+    attribute unsigned long flags;
+    attribute boolean [] arrayBoolean
+    attribute unsigned long[] arrayInt
+    attribute any anyObject;
 };
 
 [Prefix="MyPrefix::"]

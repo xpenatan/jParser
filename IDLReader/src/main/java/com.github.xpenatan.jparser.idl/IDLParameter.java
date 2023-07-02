@@ -13,6 +13,7 @@ public class IDLParameter {
     public String name;
     public boolean isArray;
     public boolean isRef;
+    public boolean isConst;
     public final ArrayList<String> tags = new ArrayList<>();
 
     public boolean optional;
@@ -33,6 +34,7 @@ public class IDLParameter {
         if(!isArray && startIndex != -1 && endIndex != -1) {
             String substring1 = line.substring(startIndex, endIndex + 1);
             isRef = substring1.contains("Ref");
+            isConst = substring1.contains("Const");
             String substring2 = substring1.replace("[", "").replace("]", "");
             String[] s = substring2.split(" ");
             for(int i = 0; i < s.length; i++) {
@@ -57,6 +59,7 @@ public class IDLParameter {
         clonedParam.type = type;
         clonedParam.name = name;
         clonedParam.isRef = isRef;
+        clonedParam.isConst = isConst;
         clonedParam.tags.addAll(tags);
         return clonedParam;
     }

@@ -12,9 +12,11 @@ public class IDLMethod {
     public String paramsLine;
     public String returnType;
     public String name;
-    public boolean returnIsArray;
+    public boolean isReturnArray;
     public boolean skip = false;
     public boolean isReturnRef;
+    public boolean isReturnValue;
+    public boolean isStaticMethod = false;
 
     public final ArrayList<IDLParameter> parameters = new ArrayList<>();
 
@@ -33,8 +35,6 @@ public class IDLMethod {
             returnInfo = line.substring(0, i);
         }
 
-        isReturnRef = returnInfo.contains("Ref");
-
         int endIndex = getLastIndex(leftSide);
         if(endIndex != -1) {
             leftSide = line.substring(endIndex + 1, index).trim();
@@ -42,15 +42,27 @@ public class IDLMethod {
 
         if(leftSide.contains("[]")) {
             leftSide = leftSide.replace("[]", "");
-            returnIsArray = true;
+            isReturnArray = true;
         }
         leftSide = leftSide.trim().replaceAll(" +", " ");
+
+        isReturnRef = returnInfo.contains("Ref");
+        isReturnValue = returnInfo.contains("Value");
+
         String[] s = leftSide.split(" ");
-        returnType = s[0];
+
+        if(s[0].equals("static")) {
+            isStaticMethod = true;
+            returnType = s[1];
+        }
+        else {
+            returnType = s[0];
+        }
+
         if(returnType.equals("long")) {
             returnType = "int";
         }
-        name = s[1];
+        name = s[s.length-1];
 
         if(paramsLine != null && paramsLine.contains("any ")) {
             skip = true;
@@ -84,6 +96,9 @@ public class IDLMethod {
         clonedMethod.returnType = returnType;
         clonedMethod.name = name;
         clonedMethod.skip = skip;
+        clonedMethod.isReturnValue = isReturnValue;
+        clonedMethod.isReturnArray = isReturnArray;
+        clonedMethod.isStaticMethod = isStaticMethod;
         clonedMethod.isReturnRef = isReturnRef;
 
         for(int i = 0; i < parameters.size(); i++) {
