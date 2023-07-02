@@ -1,4 +1,4 @@
-package com.github.xpenatan.jparser.core.idl;
+package com.github.xpenatan.jparser.idl;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,8 +8,29 @@ import java.util.ArrayList;
 /**
  * @author xpenatan
  */
-public class IDLParser {
+public class IDLReader {
 
+    public final ArrayList<IDLFile> fileArray = new ArrayList<>();
+
+    public IDLClass getClass(String name) {
+        for(int i = 0; i < fileArray.size(); i++) {
+            IDLFile idlFile = fileArray.get(i);
+            IDLClass idlClass = idlFile.getClass(name);
+            if(idlClass != null) {
+                return idlClass;
+            }
+        }
+        return null;
+    }
+
+    public static IDLReader readIDL(String path) {
+        IDLReader reader = new IDLReader();
+        IDLFile idlFile = parseFile(path);
+        reader.fileArray.add(idlFile);
+        return reader;
+    }
+
+    @Deprecated
     public static IDLFile parseFile(String path) {
         path = path.replace("\\", File.separator);
         IDLFile idlFile = new IDLFile();
@@ -50,7 +71,7 @@ public class IDLParser {
             boolean justAdded = false;
 
             if(!foundStartClass) {
-                if(line.startsWith("interface ") || line.startsWith("[Prefix") || line.startsWith("[JSImplementation") || line.startsWith("[NoDelete")) {
+                if(line.startsWith("interface ") || IDLClassHeader.isLineHeader(line)) {
                     foundStartClass = true;
                     classLines.clear();
                     justAdded = true;

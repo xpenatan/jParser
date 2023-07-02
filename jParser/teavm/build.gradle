@@ -5,6 +5,7 @@ apply plugin: 'signing'
 def module_name = "jParser-teavm"
 
 dependencies {
+    implementation project(":IDLReader")
     implementation project(":jParser:core")
 }
 

@@ -1,0 +1,41 @@
+[NoDelete]
+interface NoDeleteClassTest {
+    static readonly attribute unsigned long PHYSICS_VERSION;
+
+    [Value] static NormalClassTest GetNormalValueClass();
+    static PxControllerManager Create([Ref] PxScene scene, optional boolean lockingEnabled);
+};
+
+[Prefix="MyPrefix::"]
+interface PrefixClassTest {
+
+};
+
+[Prefix = "MyPrefix::", NoDelete]
+interface PrefixNoDeleteClassTest {
+
+};
+
+[NoDelete, Prefix = "MyPrefix::"]
+interface NoDeletePrefixClassTest {
+
+};
+
+[JSImplementation="NoDeletePrefixClassTest"]
+interface ConcreteJSImplementationClassTest {
+    void ConcreteJSImplementationClassTest();
+};
+
+interface NormalClassTest {
+    long getIntValue();
+    boolean getBoolValue(float floatValue);
+};
+
+interface ExtendClassTest {
+    float getFloatValue();
+}
+ExtendClassTest implements NormalClassTest;
+
+enum EnumTest {
+    "Test_Enum"
+};

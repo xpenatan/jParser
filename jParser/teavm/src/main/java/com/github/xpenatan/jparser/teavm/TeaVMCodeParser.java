@@ -30,9 +30,9 @@ import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.codeparser.IDLDefaultCodeParser;
-import com.github.xpenatan.jparser.core.idl.IDLClass;
-import com.github.xpenatan.jparser.core.idl.IDLFile;
-import com.github.xpenatan.jparser.core.idl.IDLMethod;
+import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLFile;
+import com.github.xpenatan.jparser.idl.IDLMethod;
 import java.util.List;
 import java.util.Optional;
 

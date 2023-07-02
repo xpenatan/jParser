@@ -22,10 +22,10 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.codeparser.IDLDefaultCodeParser;
-import com.github.xpenatan.jparser.core.idl.IDLClass;
-import com.github.xpenatan.jparser.core.idl.IDLFile;
-import com.github.xpenatan.jparser.core.idl.IDLMethod;
-import com.github.xpenatan.jparser.core.idl.IDLParameter;
+import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLFile;
+import com.github.xpenatan.jparser.idl.IDLMethod;
+import com.github.xpenatan.jparser.idl.IDLParameter;
 import java.io.File;
 import java.util.List;
 

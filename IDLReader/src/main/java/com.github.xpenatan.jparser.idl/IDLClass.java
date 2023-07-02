@@ -1,4 +1,4 @@
-package com.github.xpenatan.jparser.core.idl;
+package com.github.xpenatan.jparser.idl;
 
 import java.util.ArrayList;
 
@@ -9,8 +9,8 @@ public class IDLClass {
     public final IDLFile idlFile;
 
     public String name;
-    public String prefixName = "";
-    public String jsImplementation;
+
+    public IDLClassHeader classHeader;
 
     public final ArrayList<String> classLines = new ArrayList<>();
     public final ArrayList<IDLConstructor> constructors = new ArrayList<>();
@@ -23,9 +23,8 @@ public class IDLClass {
 
     public void initClass(ArrayList<String> lines) {
         classLines.addAll(lines);
+        setupHeader();
         setInterfaceName();
-        setPrefixName();
-        setJsImplementation();
         setAttributesAndMethods();
     }
 
@@ -70,20 +69,15 @@ public class IDLClass {
         }
     }
 
-    private void setJsImplementation() {
-        String prefix = "[JSImplementation=";
-        String line = searchLine(prefix, true, false);
-        if(line != null) {
-            jsImplementation = line.replace(prefix, "").replace("]", "").replace("\"", "");
+    private void setupHeader() {
+        String line = "";
+        if(classLines.size() > 0) {
+            String headerLine = classLines.get(0);
+            if(IDLClassHeader.isLineHeader(headerLine)) {
+                line = headerLine;
+            }
         }
-    }
-
-    private void setPrefixName() {
-        String prefix = "[Prefix =";
-        String line = searchLine(prefix, true, false);
-        if(line != null) {
-            prefixName = line.replace(prefix, "").replace("]", "").replace("\"", "");
-        }
+        classHeader = new IDLClassHeader(line, this);
     }
 
     private String searchLine(String text, boolean startsWith, boolean endsWith) {
@@ -110,6 +104,6 @@ public class IDLClass {
     }
 
     public String getName() {
-        return prefixName + name;
+        return classHeader.prefixName + name;
     }
 }
