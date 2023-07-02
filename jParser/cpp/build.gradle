@@ -10,7 +10,7 @@ configurations {
 }
 
 dependencies {
-    implementation project(":IDLReader")
+    api project(":IDLReader")
     implementation project(":jParser:core")
     includeDep "com.badlogicgames.gdx:gdx-jnigen:$project.jniGenVersion"
 
