@@ -387,16 +387,6 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    public void onParseClassEnd(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
-        super.onParseClassEnd(jParser, unit, classOrInterfaceDeclaration);
-    }
-
-    @Override
-    public void onParseFileStart(JParser jParser, JParserItem parserItem) {
-        super.onParseFileStart(jParser, parserItem);
-    }
-
-    @Override
     public void onParseFileEnd(JParser jParser, JParserItem parserItem) {
         cppGenerator.addParseFile(jParser.sourceDir, parserItem.inputPath, parserItem.destinationPath);
     }
