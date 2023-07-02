@@ -86,6 +86,12 @@ public class JParser {
         JParser jParser = new JParser(sourceD, genD);
         processDirectory(jParser, fileSourceDir, fileGenDir, excludes, fileSourceDir);
         wrapper.onParseStart(jParser);
+        parseJavaFiles(jParser, wrapper);
+        wrapper.onParseEnd(jParser);
+        System.out.println("********** DONE ***********");
+    }
+
+    private static void parseJavaFiles(JParser jParser, CodeParser wrapper) throws Exception {
         for(int i = 0; i < jParser.unitArray.size(); i++) {
             JParserItem parserItem = jParser.unitArray.get(i);
             String inputPath = parserItem.inputPath;
@@ -100,8 +106,6 @@ public class JParser {
             }
             wrapper.onParseFileEnd(jParser, parserItem);
         }
-        wrapper.onParseEnd(jParser);
-        System.out.println("********** DONE ***********");
     }
 
     private static void processDirectory(JParser jParser, CustomFileDescriptor fileSourceDir, CustomFileDescriptor fileGenDir, String[] excludes, CustomFileDescriptor dir) throws Exception {
