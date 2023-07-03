@@ -163,6 +163,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
                 setMethodDeclaration.remove();
             }
             setMethodDeclaration = classOrInterfaceDeclaration.addMethod(attributeName, Keyword.PUBLIC);
+            setMethodDeclaration.setStatic(idlAttribute.isStatic);
             Parameter parameter = setMethodDeclaration.addAndGetParameter(type, attributeName);
             Type paramType = parameter.getType();
             JParserHelper.addMissingImportType(jParser, unit, paramType);
@@ -219,6 +220,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
         ArrayList<IDLParameter> parameters = idlMethod.parameters;
         MethodDeclaration methodDeclaration = classOrInterfaceDeclaration.addMethod(methodName, Keyword.PUBLIC);
+        methodDeclaration.setStatic(idlMethod.isStaticMethod);
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter idlParameter = parameters.get(i);
             String paramType = idlParameter.type;
