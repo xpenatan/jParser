@@ -1,6 +1,8 @@
 package com.github.xpenatan.jparser.core.codeparser;
 
 import com.github.xpenatan.jparser.core.JParser;
+import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLReader;
 
 /**
@@ -18,8 +20,14 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
     @Override
     public void onParseStart(JParser jParser) {
 
-//        jParser.
+        for(IDLFile idlFile : idlReader.fileArray) {
+            for(IDLClass idlClass : idlFile.classArray) {
 
+
+            }
+        }
         System.out.println();
     }
+
+
 }

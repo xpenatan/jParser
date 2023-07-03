@@ -1,0 +1,4 @@
+group = project.groupId
+
+dependencies {
+}

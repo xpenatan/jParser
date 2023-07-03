@@ -10,11 +10,12 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String path = "src\\main\\resources\\idl\\Test.idl";
 
-        String bulletPath = new File("build\\gen").getCanonicalPath();
-        String genDir = bulletPath;
+        String basePath = new File(".").getAbsolutePath() + "./example-base/src";
+
+        String genDir = "../example-core/src";
 
         IDLReader idlReader = IDLReader.readIDL(path);
         IDLDefaultCodeParser idlParser = new IDLDefaultCodeParser("IDL-Test", idlReader);
-        JParser.generate(idlParser, null, genDir);
+        JParser.generate(idlParser, basePath, genDir);
     }
 }
