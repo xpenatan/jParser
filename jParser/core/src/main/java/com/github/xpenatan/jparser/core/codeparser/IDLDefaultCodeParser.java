@@ -28,17 +28,14 @@ import java.util.Optional;
 /**
  * @author xpenatan
  */
-public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
+public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
     public static final String CMD_IDL_SKIP = "-IDL_SKIP";
-
-    protected final IDLFile idlFile;
 
     protected boolean enableAttributeParsing = true;
 
     public IDLDefaultCodeParser(String headerCMD, IDLFile idlFile) {
-        super(headerCMD);
-        this.idlFile = idlFile;
+        super(headerCMD, idlFile);
     }
 
     @Override
@@ -259,7 +256,8 @@ public abstract class IDLDefaultCodeParser extends DefaultCodeParser {
         }
     }
 
-    protected abstract void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute);
+    protected void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
+    }
 
     private MethodDeclaration containsMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLMethod idlMethod) {
         ArrayList<IDLParameter> parameters = idlMethod.parameters;

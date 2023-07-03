@@ -60,16 +60,21 @@ public class JParser {
     }
 
     public static void generate(CodeParser wrapper, String sourceDir, String genDir, String[] excludes) throws Exception {
-        String sourceD = new File(sourceDir).getCanonicalPath();
-        String genD = new File(genDir).getCanonicalPath();
+        CustomFileDescriptor fileSourceDir = null;
+        String sourceD = null;
 
-        CustomFileDescriptor fileSourceDir = new CustomFileDescriptor(sourceD);
-        CustomFileDescriptor fileGenDir = new CustomFileDescriptor(genD);
+        if(sourceDir != null) {
+            sourceD = new File(sourceDir).getCanonicalPath();
+            fileSourceDir = new CustomFileDescriptor(sourceD);
 
-        // check if source directory exists
-        if(!fileSourceDir.exists()) {
-            throw new Exception("Java source directory '" + sourceDir + "' does not exist");
+            // check if source directory exists
+            if(!fileSourceDir.exists()) {
+                throw new Exception("Java source directory '" + sourceDir + "' does not exist");
+            }
         }
+
+        String genD = new File(genDir).getCanonicalPath();
+        CustomFileDescriptor fileGenDir = new CustomFileDescriptor(genD);
 
         if(!fileGenDir.exists()) {
             if(!fileGenDir.mkdirs()) {
@@ -109,6 +114,10 @@ public class JParser {
     }
 
     private static void processDirectory(JParser jParser, CustomFileDescriptor fileSourceDir, CustomFileDescriptor fileGenDir, String[] excludes, CustomFileDescriptor dir) throws Exception {
+        if(fileSourceDir == null) {
+            return;
+        }
+
         CustomFileDescriptor[] files = dir.list();
         for(CustomFileDescriptor file : files) {
             if(file.isDirectory()) {

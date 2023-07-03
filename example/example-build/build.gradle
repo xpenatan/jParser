@@ -1,0 +1,18 @@
+apply plugin: "java"
+
+project.ext.mainClassName = "com.github.xpenatan.jparser.example.Main"
+
+dependencies {
+    implementation project(":IDLReader")
+    implementation project(":jParser:core")
+    implementation project(":jParser:teavm")
+    implementation project(":jParser:cpp")
+
+}
+
+tasks.register('generateNativeProject', JavaExec) {
+    setGroup("gen")
+    setDescription("Generate native project")
+    mainClass.set(project.mainClassName)
+    setClasspath(sourceSets.main.runtimeClasspath)
+}
