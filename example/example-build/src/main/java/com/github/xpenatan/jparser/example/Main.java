@@ -2,7 +2,6 @@ package com.github.xpenatan.jparser.example;
 
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.codeparser.IDLDefaultCodeParser;
-import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.io.File;
 
