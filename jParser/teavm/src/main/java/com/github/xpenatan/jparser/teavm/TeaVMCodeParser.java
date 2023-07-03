@@ -31,8 +31,8 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.codeparser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
-import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLMethod;
+import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,16 +94,16 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     private final String module;
 
-    public TeaVMCodeParser(String module, IDLFile idlFile) {
-        super(HEADER_CMD, idlFile);
+    public TeaVMCodeParser(String module, IDLReader idlReader) {
+        super(HEADER_CMD, idlReader);
         this.module = module;
     }
 
     @Override
     public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
-        if(idlFile != null) {
+        if(idlReader != null) {
             String nameAsString = classOrInterfaceDeclaration.getNameAsString();
-            IDLClass idlClass = idlFile.getClass(nameAsString);
+            IDLClass idlClass = idlReader.getClass(nameAsString);
             if(idlClass != null) {
                 // Create a static temp object for every module class so any generated method can use to store a pointer.
                 // Also generate a boolean constructor if it's not in the original source code.

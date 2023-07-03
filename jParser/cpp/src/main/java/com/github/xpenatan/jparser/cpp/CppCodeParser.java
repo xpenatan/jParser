@@ -26,6 +26,7 @@ import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
+import com.github.xpenatan.jparser.idl.IDLReader;
 import java.io.File;
 import java.util.List;
 
@@ -96,8 +97,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         this(null, classpath, jniDir);
     }
 
-    public CppCodeParser(IDLFile idlFile, String classpath, String jniDir) {
-        super(HEADER_CMD, idlFile);
+    public CppCodeParser(IDLReader idlReader, String classpath, String jniDir) {
+        super(HEADER_CMD, idlReader);
         cppGenerator = new NativeCPPGenerator(classpath, jniDir);
         enableAttributeParsing = false;
     }
@@ -332,9 +333,9 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
-        if(idlFile != null) {
+        if(idlReader != null) {
             String nameAsString = classOrInterfaceDeclaration.getNameAsString();
-            IDLClass idlClass = idlFile.getClass(nameAsString);
+            IDLClass idlClass = idlReader.getClass(nameAsString);
             if(idlClass != null) {
                 // Create a static temp object for every module class so any generated method can use to store a pointer.
                 // Also generate a boolean constructor if it's not in the original source code.

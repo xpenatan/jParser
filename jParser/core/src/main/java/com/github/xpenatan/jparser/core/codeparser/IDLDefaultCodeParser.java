@@ -18,9 +18,9 @@ import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
-import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
+import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,8 +34,8 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
     protected boolean enableAttributeParsing = true;
 
-    public IDLDefaultCodeParser(String headerCMD, IDLFile idlFile) {
-        super(headerCMD, idlFile);
+    public IDLDefaultCodeParser(String headerCMD, IDLReader idlReader) {
+        super(headerCMD, idlReader);
     }
 
     @Override
@@ -55,10 +55,10 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
     @Override
     public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
-        if(idlFile != null) {
+        if(idlReader != null) {
             SimpleName name = classOrInterfaceDeclaration.getName();
             String nameStr = name.asString();
-            IDLClass idlClass = idlFile.getClass(nameStr);
+            IDLClass idlClass = idlReader.getClass(nameStr);
             if(idlClass != null) {
                 ArrayList<IDLMethod> methods = idlClass.methods;
                 for(int i = 0; i < methods.size(); i++) {

@@ -14,8 +14,8 @@ public class Main {
         String bulletPath = new File("build\\gen").getCanonicalPath();
         String genDir = bulletPath;
 
-        IDLFile idlFile = IDLReader.parseFile(path);
-        IDLDefaultCodeParser idlParser = new IDLDefaultCodeParser("IDL-Test", idlFile);
+        IDLReader idlReader = IDLReader.readIDL(path);
+        IDLDefaultCodeParser idlParser = new IDLDefaultCodeParser("IDL-Test", idlReader);
         JParser.generate(idlParser, null, genDir);
     }
 }
