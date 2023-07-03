@@ -8,16 +8,13 @@ import java.io.File;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        String path = "src\\main\\resources\\idl\\Test.idl";
-
-        String basePath = new File(".").getAbsolutePath() + "./example-base/src/main/java";
-
+        String basePackage = "com.github.xpenatan.jparser.example";
+        String idlPath = "src\\main\\resources\\idl\\Test.idl";
+        String baseJavaDir = new File(".").getAbsolutePath() + "./example-base/src/main/java";
         String genDir = "../example-core/src/main/java";
 
-        String basePackage = "com.github.xpenatan.jparser.example";
-
-        IDLReader idlReader = IDLReader.readIDL(path);
+        IDLReader idlReader = IDLReader.readIDL(idlPath);
         IDLDefaultCodeParser idlParser = new IDLDefaultCodeParser(basePackage, "IDL-Test", idlReader);
-        JParser.generate(idlParser, basePath, genDir);
+        JParser.generate(idlParser, baseJavaDir, genDir);
     }
 }
