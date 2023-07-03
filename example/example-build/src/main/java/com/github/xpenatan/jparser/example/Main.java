@@ -14,8 +14,10 @@ public class Main {
 
         String genDir = "../example-core/src";
 
+        String basePackage = "com.github.xpenatan.jparser.example";
+
         IDLReader idlReader = IDLReader.readIDL(path);
-        IDLDefaultCodeParser idlParser = new IDLDefaultCodeParser("IDL-Test", idlReader);
+        IDLDefaultCodeParser idlParser = new IDLDefaultCodeParser(basePackage, "IDL-Test", idlReader);
         JParser.generate(idlParser, basePath, genDir);
     }
 }

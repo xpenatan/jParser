@@ -36,7 +36,7 @@ public class IDLReaderTest {
         Assert.assertEquals("ReadOnlyInt", idlAttribute.name);
         Assert.assertTrue(idlClass.attributes.get(0).isStatic);
         Assert.assertTrue(idlClass.attributes.get(0).isReadOnly);
-        Assert.assertEquals("unsigned int", idlClass.attributes.get(0).type);
+        Assert.assertEquals("int", idlClass.attributes.get(0).type);
         Assert.assertTrue(idlClass.attributes.get(1).isConst);
         Assert.assertEquals("constNormalClass", idlClass.attributes.get(1).name);
         Assert.assertEquals("NormalClassTest", idlClass.attributes.get(1).type);
@@ -51,7 +51,7 @@ public class IDLReaderTest {
         Assert.assertEquals("arrayBoolean", idlClass.attributes.get(6).name);
         Assert.assertEquals("boolean[]", idlClass.attributes.get(6).type);
         Assert.assertEquals("arrayInt", idlClass.attributes.get(7).name);
-        Assert.assertEquals("unsigned int[]", idlClass.attributes.get(7).type);
+        Assert.assertEquals("int[]", idlClass.attributes.get(7).type);
         Assert.assertEquals("anyObject", idlClass.attributes.get(8).name);
         Assert.assertEquals("any", idlClass.attributes.get(8).type);
         Assert.assertTrue(idlClass.attributes.get(8).isAny);

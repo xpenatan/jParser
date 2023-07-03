@@ -50,6 +50,10 @@ public class IDLAttribute {
             type = type.replace("long", "int");
         }
 
+        if(type.contains("unsigned")) {
+            type = type.replace("unsigned", "").trim();
+        }
+
         if(type.equals("any")) {
             isAny = true;
         }
