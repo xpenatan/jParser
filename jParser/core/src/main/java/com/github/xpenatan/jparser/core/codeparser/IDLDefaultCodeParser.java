@@ -35,7 +35,11 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     protected boolean enableAttributeParsing = true;
 
     public IDLDefaultCodeParser(String headerCMD, IDLReader idlReader) {
-        super(headerCMD, idlReader);
+        super("", headerCMD, idlReader);
+    }
+
+    public IDLDefaultCodeParser(String basePackage, String headerCMD, IDLReader idlReader) {
+        super(basePackage, headerCMD, idlReader);
     }
 
     @Override

@@ -99,6 +99,11 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         this.module = module;
     }
 
+    public TeaVMCodeParser(String basePackage, String module, IDLReader idlReader) {
+        super(basePackage, HEADER_CMD, idlReader);
+        this.module = module;
+    }
+
     @Override
     public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
         if(idlReader != null) {

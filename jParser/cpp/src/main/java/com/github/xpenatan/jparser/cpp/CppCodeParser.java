@@ -102,6 +102,12 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         enableAttributeParsing = false;
     }
 
+    public CppCodeParser(String basePackage, IDLReader idlReader, String classpath, String jniDir) {
+        super(basePackage, HEADER_CMD, idlReader);
+        cppGenerator = new NativeCPPGenerator(classpath, jniDir);
+        enableAttributeParsing = false;
+    }
+
     @Override
     protected void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
         // IDL parser generate our empty methods with default return values.
