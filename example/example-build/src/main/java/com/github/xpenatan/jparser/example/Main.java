@@ -10,9 +10,9 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String path = "src\\main\\resources\\idl\\Test.idl";
 
-        String basePath = new File(".").getAbsolutePath() + "./example-base/src";
+        String basePath = new File(".").getAbsolutePath() + "./example-base/src/main/java";
 
-        String genDir = "../example-core/src";
+        String genDir = "../example-core/src/main/java";
 
         String basePackage = "com.github.xpenatan.jparser.example";
 
