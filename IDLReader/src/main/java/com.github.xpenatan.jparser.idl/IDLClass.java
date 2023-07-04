@@ -84,7 +84,7 @@ public class IDLClass {
 
     private void setupExtendClass() {
         String line = searchLine(" implements ", false, false);
-        if(line != null) {
+        if(line != null && !line.startsWith("//")) {
             String[] split = line.split("implements");
             extendClass = split[1].trim().replace(";", "");
         }
