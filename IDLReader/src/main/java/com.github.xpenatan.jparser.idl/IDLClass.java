@@ -12,6 +12,7 @@ public class IDLClass {
 
     public IDLClassHeader classHeader;
 
+    public String extendClass = "";
     public final ArrayList<String> classLines = new ArrayList<>();
     public final ArrayList<IDLConstructor> constructors = new ArrayList<>();
     public final ArrayList<IDLMethod> methods = new ArrayList<>();
@@ -25,6 +26,7 @@ public class IDLClass {
         classLines.addAll(lines);
         setupHeader();
         setInterfaceName();
+        setupExtendClass();
         setAttributesAndMethods();
     }
 
@@ -78,6 +80,14 @@ public class IDLClass {
             }
         }
         classHeader = new IDLClassHeader(line, this);
+    }
+
+    private void setupExtendClass() {
+        String line = searchLine(" implements ", false, false);
+        if(line != null) {
+            String[] split = line.split("implements");
+            extendClass = split[1].trim().replace(";", "");
+        }
     }
 
     private String searchLine(String text, boolean startsWith, boolean endsWith) {

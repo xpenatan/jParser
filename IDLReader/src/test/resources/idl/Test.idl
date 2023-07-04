@@ -41,7 +41,7 @@ interface NormalClassTest {
 
 interface ExtendClassTest {
     float getFloatValue();
-}
+};
 ExtendClassTest implements NormalClassTest;
 
 enum EnumTest {

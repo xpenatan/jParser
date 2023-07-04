@@ -147,6 +147,13 @@ public class IDLReaderTest {
         Assert.assertNotNull(idlClass);
     }
 
+    @Test
+    public void test_ExtendClassTest_parent_class() {
+        IDLReader idlReader = IDLReader.readIDL("src\\test\\resources\\idl\\Test.idl");
+        IDLClass idlClass = idlReader.getClass("ExtendClassTest");
+        Assert.assertEquals("NormalClassTest", idlClass.extendClass);
+    }
+
 
 }
 
