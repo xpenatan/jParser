@@ -1,49 +1,9 @@
-[NoDelete]
-interface NoDeleteClassTest {
-    [Value] static NormalClassTest GetNormalValueClass();
-    [Ref] ExtendClassTest getExtendClass(float floatParam, long intParam, [Const, Ref]NormalClassTest normalClass, float[] vertices);
-
-    static readonly attribute unsigned long ReadOnlyInt;
-    [Const]attribute NormalClassTest constNormalClass;
-    [Value]attribute NormalClassTest valueNormalClass;
-    attribute float floatAttribute;
-    attribute boolean boolAttribute;
-    attribute unsigned long flags;
-    attribute boolean [] arrayBoolean
-    attribute unsigned long[] arrayInt
-    attribute any anyObject;
-};
-
-[Prefix="MyPrefix::"]
-interface PrefixClassTest {
-
-};
-
-[Prefix = "MyPrefix::", NoDelete]
-interface PrefixNoDeleteClassTest {
-
-};
-
-[NoDelete, Prefix = "MyPrefix::"]
-interface NoDeletePrefixClassTest {
-
-};
-
-[JSImplementation="NoDeletePrefixClassTest"]
-interface ConcreteJSImplementationClassTest {
-    void ConcreteJSImplementationClassTest();
+interface ParentClassTest {
+    float getFloatValue();
 };
 
 interface NormalClassTest {
     long getIntValue();
     boolean getBoolValue(float floatValue);
 };
-
-interface ExtendClassTest {
-    float getFloatValue();
-}
-ExtendClassTest implements NormalClassTest;
-
-enum EnumTest {
-    "Test_Enum"
-};
+NormalClassTest implements ParentClassTest;

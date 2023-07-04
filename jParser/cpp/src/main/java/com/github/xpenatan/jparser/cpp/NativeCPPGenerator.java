@@ -296,7 +296,7 @@ public class NativeCPPGenerator implements CppGenerator {
                 CMethodParser.CMethod cMethod = findCMethod(javaMethod, cMethods);
                 if(cMethod == null)
                     throw new RuntimeException("Couldn't find C method for Java method '" + javaMethod.getClassName() + "#"
-                            + javaMethod.getName() + "'");
+                                + javaMethod.getName() + "'");
                 emitJavaMethod(buffer, javaMethod, cMethod);
             }
         }
