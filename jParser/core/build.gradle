@@ -5,7 +5,7 @@ apply plugin: 'signing'
 def module_name = "jParser-core"
 
 dependencies {
-    api project(":IDLReader")
+    api project(":jParser:idl")
     api "com.github.javaparser:javaparser-symbol-solver-core:$project.javaparserVersion"
     api "com.github.javaparser:javaparser-core:$project.javaparserVersion"
 }
