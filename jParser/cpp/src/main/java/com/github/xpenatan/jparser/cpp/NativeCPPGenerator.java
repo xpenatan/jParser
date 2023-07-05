@@ -9,6 +9,8 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.xpenatan.jparser.core.JParser;
+import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +27,7 @@ import java.util.Optional;
 /**
  * Modified version of gdx-jnigen NativeCodeGenerator
  */
+@Deprecated
 public class NativeCPPGenerator implements CppGenerator {
 
     private CustomFileDescriptor jniDir;
@@ -97,7 +100,11 @@ public class NativeCPPGenerator implements CppGenerator {
     }
 
     @Override
-    public void addParseFile(String sourceBaseDir, String inputJavaPath, String destinationJavaPath) {
+    public void addParseFile(JParser jParser, JParserItem jParserItem) {
+        String sourceBaseDir = jParser.sourceDir;
+        String inputJavaPath = jParserItem.inputPath;
+        String destinationJavaPath = jParserItem.destinationPath;
+
         if(javaSegments.size() == 0) {
             return;
         }
@@ -126,7 +133,23 @@ public class NativeCPPGenerator implements CppGenerator {
     }
 
     @Override
-    public void generate() {
+    public void generate(JParser jParser) {
+        FileDescriptor cppBuild = FileDescriptor.tempDirectory("cppBuild");
+        String tempPath = cppBuild.file().getAbsolutePath();
+        String classes = "";
+        for(JParserItem item : jParser.unitArray) {
+            classes += item.destinationPath + " ";
+        }
+        File file = new File(jParser.genDir);
+        String command = "javac -cp " + this.classpath + " -d " + tempPath + " " + classes;
+
+        System.out.println("command: " + command);
+        CPPBuildHelper.startProcess(file, command);
+
+        String classpath = this.classpath;
+        classpath += tempPath + ";";
+        this.classpath = classpath;
+
         for(int i = 0; i < parserItems.size(); i++) {
             CppParserItem parserItem = parserItems.get(i);
             if(parserItem.javaSegments.size() != 0) {
@@ -152,6 +175,7 @@ public class NativeCPPGenerator implements CppGenerator {
             }
 
             FileDescriptor cppFile = new FileDescriptor(jniDir + "/" + className + ".cpp");
+            System.out.println("Generating C++: " + cppFile.path());
             generateCppFile(javaSegments, hFiles, cppFile);
         }
         catch(Exception e) {
@@ -160,7 +184,7 @@ public class NativeCPPGenerator implements CppGenerator {
     }
 
     @Override
-    public void addNativeMethod(String content, MethodDeclaration methodDeclaration) {
+    public void addNativeCode(MethodDeclaration methodDeclaration, String content) {
         JavaMethodParser.JavaMethod method = createMethod(content, methodDeclaration);
         if(method != null) {
             javaSegments.add(method);
@@ -168,22 +192,12 @@ public class NativeCPPGenerator implements CppGenerator {
     }
 
     @Override
-    public void addNativeCode(String content, Node node) {
+    public void addNativeCode(Node node, String content) {
         int startLine = startCode;
         int endLine = 0;
         startCode++;
         javaSegments.add(new JavaMethodParser.JniSection(content + "\n\n", startLine, endLine));
-//        node.remove();
-    }
-
-    @Override
-    public String getClasspath() {
-        return classpath;
-    }
-
-    @Override
-    public void setClasspath(String classpath) {
-        this.classpath = classpath;
+        //        node.remove();
     }
 
     private JavaMethodParser.JavaMethod createMethod(String content, MethodDeclaration method) {
@@ -572,5 +586,12 @@ public class NativeCPPGenerator implements CppGenerator {
         buffer.append("\n//@line:");
         buffer.append(line);
         buffer.append("\n");
+    }
+
+    private static class CppParserItem {
+        public String sourceBaseDir;
+        public String inputJavaPath;
+        public String destinationJavaPath;
+        public final ArrayList<JavaMethodParser.JavaSegment> javaSegments = new ArrayList<>();
     }
 }

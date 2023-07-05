@@ -3,6 +3,7 @@ apply plugin: "java"
 project.ext.mainClassName = "com.github.xpenatan.jparser.example.Main"
 
 dependencies {
+    implementation project(":example:example-base")
     implementation project(":IDLReader")
     implementation project(":jParser:core")
     implementation project(":jParser:teavm")

@@ -2,18 +2,15 @@ package com.github.xpenatan.jparser.cpp;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.xpenatan.jparser.core.JParser;
+import com.github.xpenatan.jparser.core.JParserItem;
 
 public interface CppGenerator {
+    void addNativeCode(Node node, String content);
 
-    public void addNativeMethod(String content, MethodDeclaration methodDeclaration);
+    void addNativeCode(MethodDeclaration methodDeclaration, String content);
 
-    public void addNativeCode(String content, Node node);
+    void addParseFile(JParser jParser, JParserItem parserItem);
 
-    void addParseFile(String sourceBaseDir, String inputJavaPath, String destinationJavaPath);
-
-    void generate();
-
-    String getClasspath();
-
-    void setClasspath(String classpath);
+    void generate(JParser jParser);
 }

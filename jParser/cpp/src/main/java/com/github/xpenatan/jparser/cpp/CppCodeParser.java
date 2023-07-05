@@ -90,21 +90,31 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         return newClassPath;
     }
 
-    CppGenerator cppGenerator;
+    private CppGenerator cppGenerator;
 
+    @Deprecated
     public CppCodeParser(String classpath, String jniDir) {
         this(null, classpath, jniDir);
     }
 
+    @Deprecated
     public CppCodeParser(IDLReader idlReader, String classpath, String jniDir) {
         super(HEADER_CMD, idlReader);
         cppGenerator = new NativeCPPGenerator(classpath, jniDir);
         enableAttributeParsing = false;
     }
 
-    public CppCodeParser(String basePackage, IDLReader idlReader, String classpath, String jniDir) {
+    public CppCodeParser(CppGenerator cppGenerator) {
+        this(cppGenerator, null);
+    }
+
+    public CppCodeParser(CppGenerator cppGenerator, IDLReader idlReader) {
+        this(cppGenerator, idlReader, "");
+    }
+
+    public CppCodeParser(CppGenerator cppGenerator, IDLReader idlReader, String basePackage) {
         super(basePackage, HEADER_CMD, idlReader);
-        cppGenerator = new NativeCPPGenerator(classpath, jniDir);
+        this.cppGenerator = cppGenerator;
         enableAttributeParsing = false;
     }
 
@@ -324,7 +334,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     public boolean parseCodeBlock(Node node, String headerCommands, String content) {
         if(!super.parseCodeBlock(node, headerCommands, content)) {
             if(headerCommands.contains(CMD_NATIVE)) {
-                cppGenerator.addNativeCode(content, node);
+                cppGenerator.addNativeCode(node, content);
                 return true;
             }
         }
@@ -333,7 +343,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     @Override
     protected void setJavaBodyNativeCMD(String content, MethodDeclaration methodDeclaration) {
-        cppGenerator.addNativeMethod(content, methodDeclaration);
+        cppGenerator.addNativeCode(methodDeclaration, content);
     }
 
     @Override
@@ -394,26 +404,11 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onParseFileEnd(JParser jParser, JParserItem parserItem) {
-        cppGenerator.addParseFile(jParser.sourceDir, parserItem.inputPath, parserItem.destinationPath);
+        cppGenerator.addParseFile(jParser, parserItem);
     }
 
     @Override
     public void onParseEnd(JParser jParser) {
-        FileDescriptor cppBuild = FileDescriptor.tempDirectory("cppBuild");
-        String tempPath = cppBuild.file().getAbsolutePath();
-        String classes = "";
-        for(JParserItem item : jParser.unitArray) {
-            classes += item.destinationPath + " ";
-        }
-        File file = new File(jParser.genDir);
-        String command = "javac -cp " + cppGenerator.getClasspath() + " -d " + tempPath + " " + classes;
-
-        System.out.println("command: " + command);
-        CPPBuildHelper.startProcess(file, command);
-
-        String classpath = cppGenerator.getClasspath();
-        classpath += tempPath + ";";
-        cppGenerator.setClasspath(classpath);
-        cppGenerator.generate();
+        cppGenerator.generate(jParser);
     }
 }
