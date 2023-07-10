@@ -1,8 +1,8 @@
 package com.github.xpenatan.jparser.example;
 
-public class NormalClassTest {
+public class NormalClass {
     /*[-C++;-NATIVE]
-        #include "NormalClassTest.h"
+        #include "NormalClass.h"
     */
 
 

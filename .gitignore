@@ -29,3 +29,4 @@ out/
 *.ini
 **/webapp/**
 **/example-core/src/**
+**/example-desktop/src/**

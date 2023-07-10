@@ -35,18 +35,16 @@ public class Main {
         String idlPath = "src\\main\\resources\\idl\\Test.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./example-base/src/main/java";
         String genDir = "../example-core/src/main/java";
-        String classPath = CppCodeParser.getClassPath("example-base", "gdx-1", "gdx-jnigen-loader", "jParser-loader");
+        String libsDir = new File("../example-desktop/src/main/resources/").getCanonicalPath();
+        String jniBuildPath = new File("./build/c++/").getCanonicalPath();
 
-        String cppPath = new File("./jni/").getCanonicalPath();
-        String jniBuildPath = cppPath + "/build/c++/";
-        FileCopyHelper.copyDir(cppPath + "/cpp/src/", jniBuildPath + "/src");
+        FileCopyHelper.copyDir( "./jni/cpp/src/", jniBuildPath + "/src");
 
         IDLReader idlReader = IDLReader.readIDL(idlPath);
-
         CppGenerator cppGenerator = new NativeCPPGeneratorV2(jniBuildPath);
         CppCodeParser idlParser = new CppCodeParser(cppGenerator, idlReader, basePackage);
         idlParser.generateClass = true;
         JParser.generate(idlParser, baseJavaDir, genDir);
-//        CPPBuildHelper.build(libName, jniBuildPath);
+        CPPBuildHelper.build(libName, jniBuildPath, libsDir);
     }
 }

@@ -1,9 +1,10 @@
-interface ParentClassTest {
-    float getFloatValue();
+interface ParentClass {
+    float addFloatValue(float a, float b);
+    boolean invertBoolean(boolean value);
 };
 
-interface NormalClassTest {
-    long getIntValue();
-    boolean getBoolValue(float floatValue);
+interface NormalClass {
+    void NormalClassTest();
+    long addIntValue(long a, long b);
 };
-NormalClassTest implements ParentClassTest;
+NormalClass implements ParentClass;

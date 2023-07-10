@@ -19,6 +19,10 @@ public class CPPBuildHelper {
         build(libName, buildPath, null, null, null, false);
     }
 
+    public static void build(String libName, String buildPath, String libsDir) {
+        build(libName, buildPath, libsDir, null, null, null, null, false);
+    }
+
     public static void build(String libName, String buildPath, String [] cppFlags) {
         build(libName, buildPath, cppFlags, null, null, false);
     }
@@ -41,7 +45,15 @@ public class CPPBuildHelper {
         catch(IOException e) {
             throw new RuntimeException(e);
         }
-        String[] headerDir = {"src", sharedSrcPath};
+        String[] headerDir = null;
+        if(sharedSrcPath != null) {
+            String[] headerDirr = {"src", sharedSrcPath};
+            headerDir = headerDirr;
+        }
+        else {
+            String[] headerDirr = {"src"};
+            headerDir = headerDirr;
+        }
         String[] includes = {"**/*.cpp"};
 
         BuildConfig buildConfig = new BuildConfig(libName, "target", libsDir, buildPath);
