@@ -1,13 +1,26 @@
 package com.github.xpenatan.jparser.core.codeparser.idl;
 
+import com.github.javaparser.Position;
+import com.github.javaparser.Range;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.expr.CastExpr;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
@@ -21,6 +34,21 @@ import java.util.List;
 import java.util.Optional;
 
 public class IDLMethodParser {
+
+    static final String GET_OBJECT_TEMPLATE = "" +
+            "{\n" +
+            "    long pointer = [METHOD];\n" +
+            "    [TYPE]_TEMP_GEN_[NUM].setPointer(pointer);\n" +
+            "    return [TYPE]_TEMP_GEN_[NUM];\n" +
+            "}";
+
+    static final String TEMPLATE_TEMP_FIELD = "[TYPE]_TEMP_GEN_[NUM]";
+
+    static final String TEMPLATE_TAG_METHOD = "[METHOD]";
+
+    static final String TEMPLATE_TAG_TYPE = "[TYPE]";
+
+    static final String TEMPLATE_TAG_NUM = "[NUM]";
 
     public static void generateMethods(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass, IDLMethod idlMethod) {
         if(idlMethod.skip) {
@@ -80,7 +108,164 @@ public class IDLMethodParser {
         Type returnType = StaticJavaParser.parseType(idlMethod.returnType);
         methodDeclaration.setType(returnType);
         IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, returnType, methodDeclaration);
-        idlParser.onIDLMethodGenerated(jParser, idlClass, idlMethod,  unit, classOrInterfaceDeclaration, methodDeclaration, false);
+
+        if(!idlParser.generateClass) {
+            idlParser.onIDLMethodGenerated(jParser, idlClass, idlMethod,  unit, classOrInterfaceDeclaration, methodDeclaration, false);
+        }
+        else {
+            setupMethod(idlParser, jParser, idlMethod, classOrInterfaceDeclaration, methodDeclaration);
+        }
+    }
+
+    private static void setupMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
+        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(methodDeclaration);
+        if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
+            //Add native method if it does not exist
+            classDeclaration.getMembers().add(nativeMethodDeclaration);
+            // Now that we have the native method we setup the caller method.
+
+            boolean isStatic = methodDeclaration.isStatic();
+            MethodCallExpr caller = new MethodCallExpr();
+            caller.setName(nativeMethodDeclaration.getNameAsString());
+            if(!isStatic) {
+                caller.addArgument(IDLDefaultCodeParser.CPOINTER_METHOD);
+            }
+
+            NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
+            Type methodReturnType = methodDeclaration.getType();
+
+            for(int i = 0; i < methodParameters.size(); i++) {
+                Parameter parameter = methodParameters.get(i);
+                Type type = parameter.getType();
+                String paramName = parameter.getNameAsString();
+                if(type.isClassOrInterfaceType()) {
+                    //All methods must contain a base class to get its pointer
+                    String typeName = parameter.getType().toString();
+                    paramName = paramName + ".getCPointer()";
+                }
+                caller.addArgument(paramName);
+            }
+
+            if(methodReturnType.isVoidType()) {
+                // void types just call the method.
+                BlockStmt blockStmt = methodDeclaration.getBody().get();
+                blockStmt.addStatement(caller);
+            }
+            else if(methodReturnType.isClassOrInterfaceType()) {
+                // Class object needs to generate some additional code.
+                // Needs to obtain the pointer and return a temp object.
+                BlockStmt blockStmt = generateTempObjects(classDeclaration, methodDeclaration, caller);
+                methodDeclaration.setBody(blockStmt);
+            }
+            else {
+                // Should be a primitive return type.
+                ReturnStmt returnStmt = getReturnStmt(methodDeclaration);
+                returnStmt.setExpression(caller);
+            }
+            idlParser.onIDLMethodGenerated(jParser, idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
+        }
+    }
+
+    private static BlockStmt generateTempObjects(ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodCallExpr caller) {
+        // Will return a temp object.
+        // This variable will be created by checking its class, name and number.
+        // if the temp object already exist it will increment variable number and create it.
+
+        Type methodReturnType = methodDeclaration.getType();
+        String returnTypeName = methodReturnType.toString();
+        String newBody = null;
+
+        for(int i = 0; i < 20; i++) {
+            String fieldName = getFieldName(returnTypeName, i);
+            if(classDeclaration.getFieldByName(fieldName).isEmpty()) {
+                ObjectCreationExpr expression = new ObjectCreationExpr();
+                expression.setType(returnTypeName);
+                expression.addArgument(StaticJavaParser.parseExpression("(byte)1"));
+                FieldDeclaration fieldDeclaration = classDeclaration.addFieldWithInitializer(methodReturnType, fieldName, expression, Modifier.Keyword.PRIVATE, Modifier.Keyword.FINAL);
+
+                Position begin = new Position(0, 0);
+                Position end = new Position(0, 0);
+                Range range = new Range(begin, end);
+                fieldDeclaration.setRange(range);
+                String methodCaller = caller.toString();
+                newBody = GET_OBJECT_TEMPLATE
+                        .replace(TEMPLATE_TAG_METHOD, methodCaller)
+                        .replace(TEMPLATE_TEMP_FIELD, fieldName);
+                break;
+            }
+        }
+
+        BlockStmt body = null;
+        try {
+            BodyDeclaration<?> bodyDeclaration = StaticJavaParser.parseBodyDeclaration(newBody);
+            InitializerDeclaration initializerDeclaration = (InitializerDeclaration)bodyDeclaration;
+            body = initializerDeclaration.getBody();
+        }
+        catch(Throwable t) {
+            String className = classDeclaration.getNameAsString();
+            System.err.println("Error Class: " + className + "\n" + newBody);
+            throw t;
+        }
+        return body;
+    }
+
+    private static String getFieldName(String type, int number) {
+        return TEMPLATE_TEMP_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
+    }
+
+    private static MethodDeclaration generateNativeMethod(MethodDeclaration methodDeclaration) {
+        String methodName = methodDeclaration.getNameAsString();
+        NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
+        Type methodReturnType = methodDeclaration.getType();
+        boolean isStatic = methodDeclaration.isStatic();
+
+        // Clone some generated idl method settings
+        MethodDeclaration nativeMethod = new MethodDeclaration();
+        nativeMethod.setName(methodName + "NATIVE");
+        nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
+        nativeMethod.removeBody();
+
+        if(!isStatic) {
+            // Only generate addr if it's not a static method
+            nativeMethod.addAndGetParameter("long", "addr");
+        }
+
+        for(int i = 0; i < methodParameters.size(); i++) {
+            Parameter parameter = methodParameters.get(i);
+            String nameAsString = parameter.getNameAsString();
+            Type type = parameter.getType();
+            if(type.isPrimitiveType()) {
+                nativeMethod.addParameter(type.clone(), nameAsString);
+            }
+            else {
+                String pointerMethod = nameAsString + "Addr";
+                nativeMethod.addParameter("long", pointerMethod);
+            }
+        }
+        // If the return type is an object we need to return a pointer.
+        if(methodReturnType.isClassOrInterfaceType()) {
+            // Class Object needs to return a pointer
+            Type type = StaticJavaParser.parseType(long.class.getSimpleName());
+            nativeMethod.setType(type);
+        }
+        else {
+            nativeMethod.setType(methodReturnType);
+        }
+        return nativeMethod;
+    }
+
+    private static ReturnStmt getReturnStmt(MethodDeclaration idlMethodDeclaration) {
+        BlockStmt blockStmt = idlMethodDeclaration.getBody().get();
+        NodeList<Statement> statements = blockStmt.getStatements();
+        if(statements.size() > 0) {
+            // Find the return block and add the caller
+            Statement statement = blockStmt.getStatement(0);
+            return (ReturnStmt)statement;
+        }
+        else {
+            // should not go here
+            throw new RuntimeException("Should not go here");
+        }
     }
 
     private static MethodDeclaration containsMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLMethod idlMethod) {

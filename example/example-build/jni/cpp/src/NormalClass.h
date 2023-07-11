@@ -18,6 +18,7 @@ public:
     NormalClass(int c, ParamClass & refParamClass);
     NormalClass(ParamClass * pointerParamClass, ParamClass & refParamClass, ParamClass valueParamClass);
 
+    static int subIntValue(int a, int b);
     int addIntValue(int a, int b);
     ReturnClass getReturnValueClass();
     ReturnClass & getReturnRefClass();

@@ -4,6 +4,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
@@ -79,8 +80,13 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         classDeclaration.setPublic(true);
 
         if(idlClass.classHeader.isNoDelete) {
+            // Class with no delete don't have constructor
             classDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
         }
+
+        // All classes contain a temp constructor so temp objects can be created
+        ConstructorDeclaration constructorDeclaration = classDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
+        constructorDeclaration.addParameter("byte", "temp");
 
         return compilationUnit;
     }

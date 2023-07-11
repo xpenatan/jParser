@@ -90,7 +90,10 @@ public class IDLAttributeParser {
             getMethodDeclaration.setType(type);
             JParserHelper.addMissingImportType(jParser, unit, type);
             IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, type, getMethodDeclaration);
-            idlParser.onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, getMethodDeclaration, true);
+
+            if(!idlParser.generateClass) {
+                idlParser.onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, getMethodDeclaration, true);
+            }
         }
         if(addSet) {
             if(setMethodDeclaration != null) {
@@ -101,7 +104,10 @@ public class IDLAttributeParser {
             Parameter parameter = setMethodDeclaration.addAndGetParameter(type, attributeName);
             Type paramType = parameter.getType();
             JParserHelper.addMissingImportType(jParser, unit, paramType);
-            idlParser.onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, setMethodDeclaration, true);
+
+            if(!idlParser.generateClass) {
+                idlParser.onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, setMethodDeclaration, true);
+            }
         }
     }
 }

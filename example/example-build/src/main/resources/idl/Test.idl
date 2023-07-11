@@ -5,9 +5,10 @@ interface ParentClass {
 
 interface NormalClass {
     void NormalClass();
-//    void NormalClass(long c, [Ref]ParamClass refParamClass);
-//    void NormalClass(ParamClass pointerParamClass, [Ref]ParamClass refParamClass, [Value]ParamClass valueParamClass);
+    void NormalClass(long c, [Ref]ParamClass refParamClass);
+    void NormalClass(ParamClass pointerParamClass, [Ref]ParamClass refParamClass, [Value]ParamClass valueParamClass);
 
+    static long subIntValue(long a, long b);
     long addIntValue(long a, long b);
 //    [Value]ReturnClass getReturnValueClass();
 //    [Ref]ReturnClass getReturnRefClass();

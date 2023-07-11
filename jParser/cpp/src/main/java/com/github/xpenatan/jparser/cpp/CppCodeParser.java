@@ -36,11 +36,23 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
 
+    protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
+
+    protected static final String STATIC_GET_METHOD_VOID_TEMPLATE = "" +
+            "\n[TYPE]::[METHOD];\n";
+
+    protected static final String STATIC_GET_METHOD_OBJ_POINTER_TEMPLATE = "" +
+            "\nreturn (jlong)[TYPE]::[METHOD];\n";
+
+    protected static final String STATIC_GET_METHOD_OBJ_POINTER_REF_TEMPLATE = "" +
+            "\nreturn (jlong)&[TYPE]::[METHOD];\n";
+
+    protected static final String STATIC_GET_METHOD_PRIMITIVE_TEMPLATE = "" +
+            "\nreturn [TYPE]::[METHOD];\n";
+
     protected static final String GET_METHOD_VOID_TEMPLATE = "" +
             "\n[TYPE]* nativeObject = ([TYPE]*)addr;\n" +
             "nativeObject->[METHOD];\n";
-
-    protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
 
     protected static final String GET_METHOD_OBJ_POINTER_TEMPLATE = "" +
             "\n[TYPE]* nativeObject = ([TYPE]*)addr;\n" +
@@ -118,6 +130,11 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
+    public void onIDLMethodGenerated(JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        generateNativeMethodAnnotation(idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration, false);
+    }
+
+    @Override
     public void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
         // IDL parser generate our empty methods with default return values.
         // We now modify it to match C++ api calls
@@ -157,7 +174,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 nativeMethod.setType(idlMethodReturnType);
             }
             //Generate teaVM Annotation
-            generateNativeMethodAnnotation(idlClass, idlMethod, classDeclaration, idlMethodDeclaration, nativeMethod, isAttribute);
+            generateNativeMethodAnnotation(idlMethod, classDeclaration, idlMethodDeclaration, nativeMethod, isAttribute);
         }
         // Check if the generated method does not exist in the original class
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethod)) {
@@ -216,10 +233,11 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         }
     }
 
-    private void generateNativeMethodAnnotation(IDLClass idlClass, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, MethodDeclaration nativeMethod, boolean isAttribute) {
+    private void generateNativeMethodAnnotation(IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, MethodDeclaration nativeMethod, boolean isAttribute) {
         NodeList<Parameter> nativeParameters = nativeMethod.getParameters();
         Type returnType = idlMethodDeclaration.getType();
         String methodName = idlMethodDeclaration.getNameAsString();
+        boolean isStatic = idlMethodDeclaration.isStatic();
 
         String param = "";
         int size = nativeParameters.size();
@@ -229,7 +247,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             Type type = parameter.getType();
             String paramName = parameter.getNameAsString();
             boolean isObject = paramName.endsWith("Addr");
-            if(i > 0) {
+            if(i > 0 || isStatic) {
                 if(isObject && idlMethod != null) {
                     IDLParameter idlParameter = idlMethod.parameters.get(i - 1);
                     String classType = idlParameter.type;
@@ -256,29 +274,52 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String methodCaller = methodName + "(" + param + ")";
 
         String content = null;
+
         if(returnType.isVoidType()) {
 //            if(isAttribute) {
 //                Expression expression = caller.getArguments().get(0);
 //                methodCaller = methodName + " = " + expression.toString();
 //            }
-            content = GET_METHOD_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+
+            if(isStatic) {
+                content = STATIC_GET_METHOD_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+            }
+            else {
+                content = GET_METHOD_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+            }
         }
         else if(returnType.isClassOrInterfaceType()) {
             if(isAttribute) {
                 methodCaller = methodName;
             }
             if(idlMethod != null && idlMethod.isReturnRef) {
-                content = GET_METHOD_OBJ_POINTER_REF_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                if(isStatic) {
+                    content = STATIC_GET_METHOD_OBJ_POINTER_REF_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                }
+                else {
+                    content = GET_METHOD_OBJ_POINTER_REF_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                }
             }
             else {
-                content = GET_METHOD_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                if(isStatic) {
+                    content = STATIC_GET_METHOD_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                }
+                else {
+                    content = GET_METHOD_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                }
             }
         }
         else {
             if(isAttribute) {
                 methodCaller = methodName;
             }
-            content = GET_METHOD_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+
+            if(isStatic) {
+                content = STATIC_GET_METHOD_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+            }
+            else {
+                content = GET_METHOD_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+            }
         }
 
         if(content != null) {

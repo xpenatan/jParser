@@ -26,6 +26,8 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
     protected boolean enableAttributeParsing = true;
 
+    static final String CPOINTER_METHOD = "getCPointer()";
+
     public IDLDefaultCodeParser(String headerCMD, IDLReader idlReader) {
         super("", headerCMD, idlReader);
     }
@@ -104,7 +106,12 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
         }
     }
 
+    @Deprecated
     public void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
+    }
+
+
+    public void onIDLMethodGenerated(JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
 }

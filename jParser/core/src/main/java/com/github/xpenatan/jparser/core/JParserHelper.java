@@ -96,8 +96,11 @@ public class JParserHelper {
     }
 
     public static void addMissingImportType(JParser jParser, CompilationUnit unit, Type type) {
-        String s = type.asString();
-        JParserItem parserUnitItem = jParser.getParserUnitItem(s);
+        addMissingImportType(jParser, unit, type.asString());
+    }
+
+    public static void addMissingImportType(JParser jParser, CompilationUnit unit, String className) {
+        JParserItem parserUnitItem = jParser.getParserUnitItem(className);
         if(parserUnitItem != null) {
             ClassOrInterfaceDeclaration classDeclaration = parserUnitItem.getClassDeclaration();
             if(classDeclaration != null) {

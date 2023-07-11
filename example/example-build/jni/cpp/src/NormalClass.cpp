@@ -30,6 +30,11 @@ NormalClass::NormalClass(ParamClass * pointerParamClass, ParamClass & refParamCl
     d++;
 }
 
+int NormalClass::subIntValue(int a, int b)
+{
+    return (a - b);
+}
+
 int NormalClass::addIntValue(int a, int b)
 {
     return (a + b) * hiddenInt * hiddenParentInt;

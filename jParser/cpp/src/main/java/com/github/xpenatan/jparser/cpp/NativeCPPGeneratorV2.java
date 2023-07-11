@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public class NativeCPPGeneratorV2 implements CppGenerator {
 
@@ -93,7 +94,12 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
     @Override
     public void addNativeCode(Node node, String content) {
-        print(true, content);
+        Scanner scanner = new Scanner(content);
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+            print(true, line);
+        }
+        scanner.close();
     }
 
     @Override
@@ -150,12 +156,8 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
         CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
         String include = "#include <" + cppGlueName + ".h>";
-        cppFile.writeString(include, true);
+        cppFile.writeString(include, false);
     }
-
-//    JNIEXPORT jint JNICALL Java_physx_NativeObject__1_1sizeOfPointer(JNIEnv*, jclass) {
-//        return sizeof(void*);
-//    }
 
     private JavaMethodParser.ArgumentType getArgumentType(Parameter parameter) {
         String[] typeTokens = parameter.getType().toString().split("\\.");
@@ -184,10 +186,4 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         if(otherTypes.containsKey(type)) return otherTypes.get(type);
         return JavaMethodParser.ArgumentType.Object;
     }
-
-//    private static class MethodCPPData {
-//
-//        public String packageName;
-//
-//    }
 }
