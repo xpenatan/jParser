@@ -97,20 +97,33 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             if(!idlClass.extendClass.isEmpty()) {
                 JParserItem parentItem = jParser.getParserUnitItem(idlClass.extendClass);
                 if(parentItem != null) {
-                    CompilationUnit parentUnit = parentItem.unit;
-                    if(parentUnit.getPackageDeclaration().isPresent()) {
-                        String importName = parentUnit.getPackageDeclaration().get().getNameAsString() + "." + idlClass.extendClass;
-                        unit.addImport(importName);
+                    ClassOrInterfaceDeclaration classDeclaration = parentItem.getClassDeclaration();
+                    if(classDeclaration != null) {
+                        if(classOrInterfaceDeclaration.getExtendedTypes().isEmpty()) {
+                            CompilationUnit parentUnit = parentItem.unit;
+                            if(parentUnit.getPackageDeclaration().isPresent()) {
+                                String importName = parentUnit.getPackageDeclaration().get().getNameAsString() + "." + idlClass.extendClass;
+                                unit.addImport(importName);
+                            }
+                            classOrInterfaceDeclaration.addExtendedType(idlClass.extendClass);
+                        }
                     }
-                    classOrInterfaceDeclaration.addExtendedType(idlClass.extendClass);
                 }
             }
             else {
-                if(baseClassUnit.getPackageDeclaration().isPresent()) {
-                    String importName = baseClassUnit.getPackageDeclaration().get().getNameAsString() + "." + BASE_CLASS_NAME;
-                    unit.addImport(importName);
+                JParserItem parentItem = jParser.getParserUnitItem(BASE_CLASS_NAME);
+                if(parentItem != null) {
+                    ClassOrInterfaceDeclaration classDeclaration = parentItem.getClassDeclaration();
+                    if(classDeclaration != null) {
+                        if(classOrInterfaceDeclaration.getExtendedTypes().isEmpty()) {
+                            if(baseClassUnit.getPackageDeclaration().isPresent()) {
+                                String importName = baseClassUnit.getPackageDeclaration().get().getNameAsString() + "." + BASE_CLASS_NAME;
+                                unit.addImport(importName);
+                            }
+                            classOrInterfaceDeclaration.addExtendedType(BASE_CLASS_NAME);
+                        }
+                    }
                 }
-                classOrInterfaceDeclaration.addExtendedType(BASE_CLASS_NAME);
             }
         }
     }
