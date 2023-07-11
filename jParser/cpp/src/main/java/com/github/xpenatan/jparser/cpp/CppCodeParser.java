@@ -1,6 +1,5 @@
 package com.github.xpenatan.jparser.cpp;
 
-import com.badlogic.gdx.jnigen.FileDescriptor;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
@@ -21,7 +20,7 @@ import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
-import com.github.xpenatan.jparser.core.codeparser.IDLDefaultCodeParser;
+import com.github.xpenatan.jparser.core.codeparser.idl.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
@@ -119,7 +118,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    protected void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
+    public void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
         // IDL parser generate our empty methods with default return values.
         // We now modify it to match C++ api calls
 

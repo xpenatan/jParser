@@ -22,8 +22,8 @@ import java.util.Optional;
  */
 public abstract class DefaultCodeParser implements CodeParser {
 
-    static final String CMD_HEADER_START = "[-";
-    static final String CMD_HEADER_END = "]";
+    public static final String CMD_HEADER_START = "[-";
+    public static final String CMD_HEADER_END = "]";
     public static final String CMD_ADD = "-ADD";
     public static final String CMD_ADD_RAW = "-ADD_RAW";
     public static final String CMD_REMOVE = "-REMOVE";

@@ -1,12 +1,11 @@
 package com.github.xpenatan.jparser.example;
 
 import com.github.xpenatan.jparser.core.JParser;
-import com.github.xpenatan.jparser.core.codeparser.IDLDefaultCodeParser;
+import com.github.xpenatan.jparser.core.codeparser.idl.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.cpp.CPPBuildHelper;
 import com.github.xpenatan.jparser.cpp.CppCodeParser;
 import com.github.xpenatan.jparser.cpp.CppGenerator;
 import com.github.xpenatan.jparser.cpp.FileCopyHelper;
-import com.github.xpenatan.jparser.cpp.NativeCPPGenerator;
 import com.github.xpenatan.jparser.cpp.NativeCPPGeneratorV2;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.io.File;
