@@ -10,10 +10,12 @@ ParentClass::ParentClass()
 
 float ParentClass::addFloatValue(float a, float b)
 {
-    return (a + b) * hiddenParentInt;
+//    return (a + b) * hiddenParentInt;
+    return (a + b);
 }
 
 bool ParentClass::invertBoolean(bool value)
 {
-    return !(bool)(value * hiddenParentInt);
+//    return !(bool)(value * hiddenParentInt);
+    return !value;
 }
