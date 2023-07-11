@@ -104,6 +104,8 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         String packageName = compilationUnit.getPackageDeclaration().get().getNameAsString();
         String className = classDeclaration.getNameAsString();
         String packageNameCPP = packageName.replace(".", "_");
+        String returnTypeStr = methodDeclaration.getType().toString();
+        JavaMethodParser.ArgumentType returnType = getType(returnTypeStr);
 
         String params = "(JNIEnv* env, jclass clazz";
 
@@ -122,7 +124,7 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
         params += ")";
 
-        print("JNIEXPORT jint JNICALL Java_" + packageNameCPP + "_" + className + "_" + methodName + params + " {");
+        print("JNIEXPORT " + returnType.getJniType() + " JNICALL Java_" + packageNameCPP + "_" + className + "_" + methodName + params + " {");
         content = "\t" + content.replace("\n", "\n\t");
         print(content);
         print("}");
@@ -158,6 +160,10 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     private JavaMethodParser.ArgumentType getArgumentType(Parameter parameter) {
         String[] typeTokens = parameter.getType().toString().split("\\.");
         String type = typeTokens[typeTokens.length - 1];
+        return getType(type);
+    }
+
+    private JavaMethodParser.ArgumentType getType(String type) {
         int arrayDim = 0;
         for(int i = 0; i < type.length(); i++) {
             if(type.charAt(i) == '[') arrayDim++;
