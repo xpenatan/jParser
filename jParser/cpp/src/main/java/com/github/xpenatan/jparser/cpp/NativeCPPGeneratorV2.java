@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -140,8 +141,8 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         print("}");
         String code = printer.toString();
 
-        cppGlueHPath = jniDir + "\\" + cppGlueName + ".h";
-        String cppGluePath = jniDir + "\\" + cppGlueName + ".cpp";
+        cppGlueHPath = jniDir + File.separator + cppGlueName + ".h";
+        String cppGluePath = jniDir + File.separator + cppGlueName + ".cpp";
         CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);
         fileDescriptor.writeString(code, false);
 
