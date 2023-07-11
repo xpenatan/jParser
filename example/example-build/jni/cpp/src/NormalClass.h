@@ -7,6 +7,7 @@ class NormalClass : public ParentClass
 {
     int hiddenInt = 1;
 public:
+    NormalClass();
     int addIntValue(int a, int b);
 };
 

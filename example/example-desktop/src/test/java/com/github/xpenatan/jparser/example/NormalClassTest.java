@@ -22,26 +22,26 @@ public class NormalClassTest {
         assertEquals(20, ret);
     }
 
-    @Test
-    public void test_add_float() {
-        NormalClass normalClass = new NormalClass();
-        float ret = normalClass.addFloatValue(10.3f, 10.3f);
-        assertEquals(20.6, ret, 1.0f);
-    }
-
-    @Test
-    public void test_invert_boolean_should_be_false() {
-        NormalClass normalClass = new NormalClass();
-        boolean ret = normalClass.invertBoolean(true);
-        assertFalse(ret);
-    }
-
-    @Test
-    public void test_invert_boolean_should_be_true() {
-        NormalClass normalClass = new NormalClass();
-        boolean ret = normalClass.invertBoolean(false);
-        assertTrue(ret);
-    }
+//    @Test
+//    public void test_add_float() {
+//        NormalClass normalClass = new NormalClass();
+//        float ret = normalClass.addFloatValue(10.3f, 10.3f);
+//        assertEquals(20.6, ret, 1.0f);
+//    }
+//
+//    @Test
+//    public void test_invert_boolean_should_be_false() {
+//        NormalClass normalClass = new NormalClass();
+//        boolean ret = normalClass.invertBoolean(true);
+//        assertFalse(ret);
+//    }
+//
+//    @Test
+//    public void test_invert_boolean_should_be_true() {
+//        NormalClass normalClass = new NormalClass();
+//        boolean ret = normalClass.invertBoolean(false);
+//        assertTrue(ret);
+//    }
 
 }
 

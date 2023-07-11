@@ -6,7 +6,10 @@ public class NormalClass extends ParentClass {
     */
 
     public NormalClass() {
-        initObject(createNative(), true);
+        System.out.println("POINTER BEFORE: " + cPointer);
+        long aNative = createNative();
+        initObject(aNative, true);
+        System.out.println("POINTER AFTER: " + cPointer);
     }
 
     /*[-C++;-NATIVE]
