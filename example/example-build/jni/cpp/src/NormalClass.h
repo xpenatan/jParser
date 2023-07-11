@@ -1,8 +1,11 @@
+#include "ParentClass.h"
+
 #ifndef NORMALCLASS_H
 #define NORMALCLASS_H
 
-class NormalClass
+class NormalClass : public ParentClass
 {
+    int hiddenInt = 1;
 public:
     int addIntValue(int a, int b);
 };

@@ -3,6 +3,8 @@
 
 class ParentClass
 {
+protected:
+    int hiddenParentInt = 1;
 public:
     float addFloatValue(float a, float b);
     bool invertBoolean(bool value);

@@ -45,6 +45,7 @@ public class Main {
         CppCodeParser idlParser = new CppCodeParser(cppGenerator, idlReader, basePackage);
         idlParser.generateClass = true;
         JParser.generate(idlParser, baseJavaDir, genDir);
+        CPPBuildHelper.DEBUG_BUILD = true;
         CPPBuildHelper.build(libName, jniBuildPath, libsDir);
     }
 }
