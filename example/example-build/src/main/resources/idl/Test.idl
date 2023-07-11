@@ -4,7 +4,25 @@ interface ParentClass {
 };
 
 interface NormalClass {
-    void NormalClassTest();
+    void NormalClass();
+//    void NormalClass(long c, [Ref]ParamClass refParamClass);
+//    void NormalClass(ParamClass pointerParamClass, [Ref]ParamClass refParamClass, [Value]ParamClass valueParamClass);
+
     long addIntValue(long a, long b);
+//    [Value]ReturnClass getReturnValueClass();
+//    [Ref]ReturnClass getReturnRefClass();
+//    ReturnClass getReturnPointerClass();
+//    ReturnClass getReturnNullPointerClass();
+//    void refParam([Ref]ParamClass paramClass);
+//    void pointerParam(ParamClass paramClass);
+//    void valueParam([Value]ParamClass paramClass);
 };
 NormalClass implements ParentClass;
+
+interface ParamClass {
+    void ParamClass();
+};
+
+interface ReturnClass {
+    void ReturnClass();
+};

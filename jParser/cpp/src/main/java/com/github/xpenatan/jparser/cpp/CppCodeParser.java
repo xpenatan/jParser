@@ -350,7 +350,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         if(idlReader != null) {
             String nameAsString = classOrInterfaceDeclaration.getNameAsString();
             IDLClass idlClass = idlReader.getClass(nameAsString);
-            if(idlClass != null) {
+            if(idlClass != null && !generateClass) {
                 // Create a static temp object for every module class so any generated method can use to store a pointer.
                 // Also generate a boolean constructor if it's not in the original source code.
                 List<ConstructorDeclaration> constructors = classOrInterfaceDeclaration.getConstructors();
