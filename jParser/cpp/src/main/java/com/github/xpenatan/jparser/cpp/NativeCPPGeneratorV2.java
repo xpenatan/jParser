@@ -7,12 +7,14 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.xpenatan.jparser.core.JParser;
+import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class NativeCPPGeneratorV2 implements CppGenerator {
@@ -21,8 +23,20 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     private static final Map<String, JavaMethodParser.ArgumentType> arrayTypes;
     private static final Map<String, JavaMethodParser.ArgumentType> bufferTypes;
     private static final Map<String, JavaMethodParser.ArgumentType> otherTypes;
+    private static final Map<String, String> valueTypes;
 
     static {
+        valueTypes = new HashMap<>();
+        valueTypes.put(JavaMethodParser.ArgumentType.Boolean.getJniType(), "Z");
+        valueTypes.put(JavaMethodParser.ArgumentType.Byte.getJniType(), "B");
+        valueTypes.put(JavaMethodParser.ArgumentType.Char.getJniType(), "C");
+        valueTypes.put(JavaMethodParser.ArgumentType.Short.getJniType(), "S");
+        valueTypes.put(JavaMethodParser.ArgumentType.Integer.getJniType(), "I");
+        valueTypes.put(JavaMethodParser.ArgumentType.Long.getJniType(), "J");
+        valueTypes.put(JavaMethodParser.ArgumentType.Float.getJniType(), "F");
+        valueTypes.put(JavaMethodParser.ArgumentType.Double.getJniType(), "D");
+        valueTypes.put(JavaMethodParser.ArgumentType.Object.getJniType(), "L");
+
         plainOldDataTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
         plainOldDataTypes.put("boolean", JavaMethodParser.ArgumentType.Boolean);
         plainOldDataTypes.put("byte", JavaMethodParser.ArgumentType.Byte);
@@ -111,26 +125,34 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         String className = classDeclaration.getNameAsString();
         String packageNameCPP = packageName.replace(".", "_");
         String returnTypeStr = methodDeclaration.getType().toString();
-        JavaMethodParser.ArgumentType returnType = getType(returnTypeStr);
+        String returnType = returnTypeStr.equals("void") ? returnTypeStr : getType(returnTypeStr).getJniType();
 
         String params = "(JNIEnv* env, jclass clazz";
 
-        ArrayList<JavaMethodParser.Argument> arguments = new ArrayList<JavaMethodParser.Argument>();
+        ArrayList<Argument> arguments = new ArrayList<Argument>();
         if(methodDeclaration.getParameters() != null) {
             for(Parameter parameter : methodDeclaration.getParameters()) {
-                JavaMethodParser.ArgumentType argumentType = getArgumentType(parameter);
-                arguments.add(new JavaMethodParser.Argument(argumentType, parameter.getNameAsString()));
+                Argument argument = getArgument(parameter);
+                arguments.add(argument);
             }
         }
 
+        String paramsType = "";
+
         for(int i = 0; i < arguments.size(); i++) {
-            JavaMethodParser.Argument argument = arguments.get(i);
+            Argument argument = arguments.get(i);
+            paramsType+= argument.getValueType();
             params += ", " + argument.getType().getJniType() + " " + argument.getName();
+        }
+
+        if(!paramsType.isEmpty()) {
+            paramsType = "__" + paramsType;
         }
 
         params += ")";
 
-        print("JNIEXPORT " + returnType.getJniType() + " JNICALL Java_" + packageNameCPP + "_" + className + "_" + methodName + params + " {");
+        String fullMethodName =  packageNameCPP + "_" + className + "_" + methodName + paramsType + params;
+        print("JNIEXPORT " + returnType + " JNICALL Java_" + fullMethodName + " {");
         content = "\t" + content.replace("\n", "\n\t");
         print(content);
         print("}");
@@ -159,10 +181,12 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         cppFile.writeString(include, false);
     }
 
-    private JavaMethodParser.ArgumentType getArgumentType(Parameter parameter) {
+    private Argument getArgument(Parameter parameter) {
         String[] typeTokens = parameter.getType().toString().split("\\.");
         String type = typeTokens[typeTokens.length - 1];
-        return getType(type);
+        JavaMethodParser.ArgumentType argumentType = getType(type);
+        String valueType = valueTypes.get(argumentType.getJniType());
+        return new Argument(argumentType, parameter.getNameAsString(), valueType);
     }
 
     private JavaMethodParser.ArgumentType getType(String type) {
@@ -185,5 +209,34 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         if(bufferTypes.containsKey(type)) return bufferTypes.get(type);
         if(otherTypes.containsKey(type)) return otherTypes.get(type);
         return JavaMethodParser.ArgumentType.Object;
+    }
+
+    public static class Argument {
+        final JavaMethodParser.ArgumentType type;
+        private final String name;
+        private final String valueType;
+
+        public Argument (JavaMethodParser.ArgumentType type, String name, String valueType) {
+            this.type = type;
+            this.name = name;
+            this.valueType = valueType;
+        }
+
+        public JavaMethodParser.ArgumentType getType () {
+            return type;
+        }
+
+        public String getName () {
+            return name;
+        }
+
+        public String getValueType() {
+            return valueType;
+        }
+
+        @Override
+        public String toString () {
+            return "Argument [type=" + type + ", name=" + name + ", valueType=" + valueType + "]";
+        }
     }
 }

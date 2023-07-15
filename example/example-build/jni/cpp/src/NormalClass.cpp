@@ -30,9 +30,9 @@ NormalClass::NormalClass(ParamClass * pointerParamClass, ParamClass & refParamCl
     d++;
 }
 
-int NormalClass::subIntValue(int a, int b)
+int NormalClass::subIntValue(int a, int b, int subValue)
 {
-    return (a - b);
+    return (a - b) - subValue;
 }
 
 int NormalClass::addIntValue(int a, int b)
@@ -40,7 +40,13 @@ int NormalClass::addIntValue(int a, int b)
     return (a + b) * hiddenInt * hiddenParentInt;
 }
 
-ReturnClass NormalClass::getReturnValueClass()
+ReturnClass NormalClass::getStaticReturnValueClass(ParamClass * paramClass)
+{
+    ReturnClass temp;
+    return temp;
+}
+
+ReturnClass NormalClass::getReturnValueClass(ParamClass * paramClass)
 {
     return valueReturnClass;
 }

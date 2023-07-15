@@ -26,6 +26,7 @@ import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CppCodeParser extends IDLDefaultCodeParser {
@@ -37,6 +38,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
 
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
+
+    protected static final String TEMPLATE_TAG_COPY_TYPE = "[COPY_TYPE]";
+
+    protected static final String TEMPLATE_TAG_COPY_PARAM = "[COPY_PARAM]";
 
     protected static final String STATIC_GET_METHOD_VOID_TEMPLATE = "" +
             "\n[TYPE]::[METHOD];\n";
@@ -51,19 +56,26 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             "\nreturn [TYPE]::[METHOD];\n";
 
     protected static final String GET_METHOD_VOID_TEMPLATE = "" +
-            "\n[TYPE]* nativeObject = ([TYPE]*)addr;\n" +
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[METHOD];\n";
 
     protected static final String GET_METHOD_OBJ_POINTER_TEMPLATE = "" +
-            "\n[TYPE]* nativeObject = ([TYPE]*)addr;\n" +
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return (jlong)nativeObject->[METHOD];\n";
 
     protected static final String GET_METHOD_OBJ_POINTER_REF_TEMPLATE = "" +
-            "\n[TYPE]* nativeObject = ([TYPE]*)addr;\n" +
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return (jlong)&nativeObject->[METHOD];\n";
 
+    protected static final String COPY_METHOD_VALUE_TEMPLATE = "" +
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "*(([COPY_TYPE]*)[COPY_PARAM]) = nativeObject->[METHOD];\n";
+
+    protected static final String COPY_STATIC_METHOD_VALUE_TEMPLATE = "" +
+            "\n*(([COPY_TYPE]*)[COPY_PARAM]) = [TYPE]::[METHOD];\n";
+
     protected static final String GET_METHOD_PRIMITIVE_TEMPLATE = "" +
-            "\n[TYPE]* nativeObject = ([TYPE]*)addr;\n" +
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return nativeObject->[METHOD];\n";
 
     protected static final String GET_OBJECT_TEMPLATE = "" +
@@ -131,7 +143,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLMethodGenerated(JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
-        generateNativeMethodAnnotation(idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration, false);
+        generateNativeAnnotation(idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
     }
 
     @Override
@@ -150,7 +162,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             nativeMethod.setName(idlMethodName + "NATIVE");
             nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
             nativeMethod.removeBody();
-            nativeMethod.addAndGetParameter("long", "addr");
+            nativeMethod.addAndGetParameter("long", "this_addr");
 
             for(int i = 0; i < idlMethodParameters.size(); i++) {
                 Parameter parameter = idlMethodParameters.get(i);
@@ -160,7 +172,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                     nativeMethod.addParameter(type.clone(), nameAsString);
                 }
                 else {
-                    String pointerMethod = nameAsString + "Addr";
+                    String pointerMethod = nameAsString + "_addr";
                     nativeMethod.addParameter("long", pointerMethod);
                 }
             }
@@ -173,8 +185,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             else {
                 nativeMethod.setType(idlMethodReturnType);
             }
-            //Generate teaVM Annotation
-            generateNativeMethodAnnotation(idlMethod, classDeclaration, idlMethodDeclaration, nativeMethod, isAttribute);
+            generateNativeAnnotation(idlMethod, classDeclaration, idlMethodDeclaration, nativeMethod);
         }
         // Check if the generated method does not exist in the original class
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethod)) {
@@ -233,44 +244,15 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         }
     }
 
-    private void generateNativeMethodAnnotation(IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, MethodDeclaration nativeMethod, boolean isAttribute) {
+    private void generateNativeAnnotation(IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, MethodDeclaration nativeMethod) {
         NodeList<Parameter> nativeParameters = nativeMethod.getParameters();
         Type returnType = idlMethodDeclaration.getType();
         String methodName = idlMethodDeclaration.getNameAsString();
         boolean isStatic = idlMethodDeclaration.isStatic();
+        boolean isReturnValue = idlMethod.isReturnValue;
 
-        String param = "";
-        int size = nativeParameters.size();
-
-        for(int i = 0; i < size; i++) {
-            Parameter parameter = nativeParameters.get(i);
-            Type type = parameter.getType();
-            String paramName = parameter.getNameAsString();
-            boolean isObject = paramName.endsWith("Addr");
-            if(i > 0 || isStatic) {
-                if(isObject && idlMethod != null) {
-                    IDLParameter idlParameter = idlMethod.parameters.get(i - 1);
-                    String classType = idlParameter.type;
-                    IDLClass paramClass = idlParameter.idlFile.getClass(classType);
-                    if(paramClass != null) {
-                        classType = paramClass.getName();
-                    }
-                    if(idlParameter.isRef) {
-                        paramName = "*((" + classType + "* )" + paramName + ")";
-                    }
-                    else {
-                        paramName = "(" + classType + "* )" + paramName;
-                    }
-                }
-
-                param += paramName;
-                if(i < size - 1) {
-                    param += ", ";
-                }
-            }
-        }
-
-        String returnTypeName = classDeclaration.getNameAsString();
+        String param = getParams(idlMethod, idlMethodDeclaration);
+        String classTypeName = classDeclaration.getNameAsString();
         String methodCaller = methodName + "(" + param + ")";
 
         String content = null;
@@ -282,43 +264,57 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 //            }
 
             if(isStatic) {
-                content = STATIC_GET_METHOD_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                content = STATIC_GET_METHOD_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
             }
             else {
-                content = GET_METHOD_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                content = GET_METHOD_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
             }
         }
         else if(returnType.isClassOrInterfaceType()) {
-            if(isAttribute) {
-                methodCaller = methodName;
-            }
-            if(idlMethod != null && idlMethod.isReturnRef) {
+            if(idlMethod.isReturnRef) {
                 if(isStatic) {
-                    content = STATIC_GET_METHOD_OBJ_POINTER_REF_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                    content = STATIC_GET_METHOD_OBJ_POINTER_REF_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 }
                 else {
-                    content = GET_METHOD_OBJ_POINTER_REF_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                    content = GET_METHOD_OBJ_POINTER_REF_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
+            }
+            else if(idlMethod.isReturnValue) {
+                // For temporary c++ object, the class needs to contains assignment operator
+                if(isStatic) {
+                    String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
+                    String copyParam = "copy_addr";
+                    content = COPY_STATIC_METHOD_VALUE_TEMPLATE
+                            .replace(TEMPLATE_TAG_METHOD, methodCaller)
+                            .replace(TEMPLATE_TAG_TYPE, classTypeName)
+                            .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)
+                            .replace(TEMPLATE_TAG_COPY_PARAM, copyParam);
+                }
+                else {
+                    String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
+                    String copyParam = "copy_addr";
+                    content = COPY_METHOD_VALUE_TEMPLATE
+                            .replace(TEMPLATE_TAG_METHOD, methodCaller)
+                            .replace(TEMPLATE_TAG_TYPE, classTypeName)
+                            .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)
+                            .replace(TEMPLATE_TAG_COPY_PARAM, copyParam);
                 }
             }
             else {
                 if(isStatic) {
-                    content = STATIC_GET_METHOD_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                    content = STATIC_GET_METHOD_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 }
                 else {
-                    content = GET_METHOD_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                    content = GET_METHOD_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 }
             }
         }
         else {
-            if(isAttribute) {
-                methodCaller = methodName;
-            }
-
             if(isStatic) {
-                content = STATIC_GET_METHOD_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                content = STATIC_GET_METHOD_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
             }
             else {
-                content = GET_METHOD_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+                content = GET_METHOD_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
             }
         }
 
@@ -327,6 +323,41 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             String blockComment = header + content;
             nativeMethod.setBlockComment(blockComment);
         }
+    }
+
+    private static String getParams(IDLMethod idlMethod, MethodDeclaration methodDeclaration) {
+        String param = "";
+
+        NodeList<Parameter> parameters = methodDeclaration.getParameters();
+        ArrayList<IDLParameter> idParameters = idlMethod.parameters;
+
+        for(int i = 0; i < parameters.size(); i++) {
+            Parameter parameter = parameters.get(i);
+            IDLParameter idlParameter = idParameters.get(i);
+            String paramName = idlParameter.name;
+            Type type = parameter.getType();
+            boolean isObject = type.isClassOrInterfaceType();
+            if(isObject) {
+                paramName += "_addr";
+                String classType = idlParameter.type;
+                IDLClass paramClass = idlParameter.idlFile.getClass(classType);
+                if(paramClass != null) {
+                    classType = paramClass.getName();
+                }
+                if(idlParameter.isRef || idlParameter.isValue) {
+                    paramName = "*((" + classType + "* )" + paramName + ")";
+                }
+                else {
+                    paramName = "(" + classType + "* )" + paramName;
+                }
+            }
+
+            if(i > 0) {
+                param += ", ";
+            }
+            param += paramName;
+        }
+        return param;
     }
 
     protected BlockStmt generateObjectPointerReturnType(CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, MethodCallExpr caller) {

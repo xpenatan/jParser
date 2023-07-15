@@ -14,6 +14,7 @@ public class IDLParameter {
     public boolean isArray;
     public boolean isRef;
     public boolean isConst;
+    public boolean isValue;
     public final ArrayList<String> tags = new ArrayList<>();
 
     public boolean optional;
@@ -35,6 +36,7 @@ public class IDLParameter {
             String substring1 = line.substring(startIndex, endIndex + 1);
             isRef = substring1.contains("Ref");
             isConst = substring1.contains("Const");
+            isValue = substring1.contains("Value");
             String substring2 = substring1.replace("[", "").replace("]", "");
             String[] s = substring2.split(" ");
             for(int i = 0; i < s.length; i++) {
@@ -50,6 +52,9 @@ public class IDLParameter {
             type = "int";
         }
 
+        if(type.equals("DOMString")) {
+            type = "String";
+        }
         name = s1[s1.length - 1];
     }
 

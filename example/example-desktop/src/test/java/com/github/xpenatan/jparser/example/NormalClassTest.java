@@ -29,6 +29,12 @@ public class NormalClassTest {
     }
 
     @Test
+    public void test_static_sub_int_subValue() {
+        int ret = NormalClass.subIntValue(11, 10, 1);
+        assertEquals(0, ret);
+    }
+
+    @Test
     public void test_add_float() {
         NormalClass normalClass = new NormalClass();
         float ret = normalClass.addFloatValue(10.3f, 10.3f);

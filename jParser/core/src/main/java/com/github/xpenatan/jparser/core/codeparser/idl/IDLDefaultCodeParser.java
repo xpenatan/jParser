@@ -58,10 +58,13 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
             String nameStr = name.asString();
             IDLClass idlClass = idlReader.getClass(nameStr);
             if(idlClass != null) {
-                ArrayList<IDLConstructor> constructors = idlClass.constructors;
-                for(int i = 0; i < constructors.size(); i++) {
-                    IDLConstructor idlConstructor = constructors.get(i);
-                    IDLConstructorParser.generateConstructor(this, jParser, unit, classOrInterfaceDeclaration, idlClass, idlConstructor);
+
+                if(generateClass) {
+                    ArrayList<IDLConstructor> constructors = idlClass.constructors;
+                    for(int i = 0; i < constructors.size(); i++) {
+                        IDLConstructor idlConstructor = constructors.get(i);
+                        IDLConstructorParser.generateConstructor(this, jParser, unit, classOrInterfaceDeclaration, idlClass, idlConstructor);
+                    }
                 }
 
                 ArrayList<IDLMethod> methods = idlClass.methods;
@@ -112,6 +115,14 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
 
     public void onIDLMethodGenerated(JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    }
+
+    /**
+     * true to accept the idl method
+     */
+    @Deprecated
+    public boolean filterIDLMethod(IDLClass idlClass, IDLMethod idlMethod) {
+        return true;
     }
 
 }

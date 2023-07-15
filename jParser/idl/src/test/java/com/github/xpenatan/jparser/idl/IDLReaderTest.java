@@ -26,6 +26,7 @@ public class IDLReaderTest {
         Assert.assertEquals("GetNormalValueClass", idlMethod.name);
         Assert.assertEquals("NormalClassTest", idlMethod.returnType);
         Assert.assertEquals(true, idlMethod.isReturnValue);
+        Assert.assertEquals(true, idlMethod.isStaticMethod);
     }
 
     @Test

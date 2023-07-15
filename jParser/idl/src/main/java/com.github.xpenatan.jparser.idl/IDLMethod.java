@@ -62,6 +62,9 @@ public class IDLMethod {
         if(returnType.equals("long")) {
             returnType = "int";
         }
+        if(returnType.equals("DOMString")) {
+            returnType = "String";
+        }
         name = s[s.length-1];
 
         if(paramsLine != null && paramsLine.contains("any ")) {
