@@ -1,7 +1,7 @@
 apply plugin: "java"
 apply plugin: 'signing'
 
-def module_name = "IDLReader"
+def module_name = "jParser-idl"
 
 dependencies {
     testImplementation "junit:junit:$project.jUnitVersion"
