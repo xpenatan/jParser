@@ -36,6 +36,7 @@ import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.List;
 import java.util.Optional;
 
+@Deprecated
 public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     private static final String HEADER_CMD = "teaVM";

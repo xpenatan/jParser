@@ -3,7 +3,7 @@ package com.github.xpenatan.jparser.example;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.codeparser.idl.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.cpp.CPPBuildHelper;
-import com.github.xpenatan.jparser.cpp.CppCodeParser;
+import com.github.xpenatan.jparser.cpp.CppCodeParserV2;
 import com.github.xpenatan.jparser.cpp.CppGenerator;
 import com.github.xpenatan.jparser.cpp.FileCopyHelper;
 import com.github.xpenatan.jparser.cpp.NativeCPPGeneratorV2;
@@ -41,7 +41,7 @@ public class Main {
 
         IDLReader idlReader = IDLReader.readIDL(idlPath);
         CppGenerator cppGenerator = new NativeCPPGeneratorV2(jniBuildPath);
-        CppCodeParser idlParser = new CppCodeParser(cppGenerator, idlReader, basePackage);
+        CppCodeParserV2 idlParser = new CppCodeParserV2(cppGenerator, idlReader, basePackage);
         idlParser.generateClass = true;
         JParser.generate(idlParser, baseJavaDir, genDir);
         CPPBuildHelper.DEBUG_BUILD = true;

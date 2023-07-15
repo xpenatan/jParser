@@ -29,8 +29,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-@Deprecated
-public class CppCodeParser extends IDLDefaultCodeParser {
+public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
     private static final String HEADER_CMD = "C++";
 
@@ -117,26 +116,26 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     private CppGenerator cppGenerator;
 
     @Deprecated
-    public CppCodeParser(String classpath, String jniDir) {
+    public CppCodeParserV2(String classpath, String jniDir) {
         this(null, classpath, jniDir);
     }
 
     @Deprecated
-    public CppCodeParser(IDLReader idlReader, String classpath, String jniDir) {
+    public CppCodeParserV2(IDLReader idlReader, String classpath, String jniDir) {
         super(HEADER_CMD, idlReader);
         cppGenerator = new NativeCPPGenerator(classpath, jniDir);
         enableAttributeParsing = false;
     }
 
-    public CppCodeParser(CppGenerator cppGenerator) {
+    public CppCodeParserV2(CppGenerator cppGenerator) {
         this(cppGenerator, null);
     }
 
-    public CppCodeParser(CppGenerator cppGenerator, IDLReader idlReader) {
+    public CppCodeParserV2(CppGenerator cppGenerator, IDLReader idlReader) {
         this(cppGenerator, idlReader, "");
     }
 
-    public CppCodeParser(CppGenerator cppGenerator, IDLReader idlReader, String basePackage) {
+    public CppCodeParserV2(CppGenerator cppGenerator, IDLReader idlReader, String basePackage) {
         super(basePackage, HEADER_CMD, idlReader);
         this.cppGenerator = cppGenerator;
         enableAttributeParsing = false;
