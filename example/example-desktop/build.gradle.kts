@@ -15,7 +15,7 @@ tasks.named("clean") {
     }
 }
 
-tasks.register<GradleBuild>("prepareTest") {
+val tasksOrder = tasks.register<GradleBuild>("prepareTest") {
     tasks = listOf(
             ":example:example-build:clean",
             ":example:example-core:clean",
@@ -25,5 +25,6 @@ tasks.register<GradleBuild>("prepareTest") {
 }
 
 tasks.named("test") {
-    dependsOn(tasks.named("prepareTest"))
+    dependsOn(tasksOrder)
+    mustRunAfter(tasksOrder)
 }
