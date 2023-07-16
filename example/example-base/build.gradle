@@ -1,4 +1,2 @@
-group = project.groupId
-
 dependencies {
 }
