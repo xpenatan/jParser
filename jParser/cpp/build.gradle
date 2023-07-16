@@ -1,7 +1,7 @@
 apply plugin: "java"
 apply plugin: 'java-library'
 
-def module_name = "cpp"
+def module_name = "jParser-cpp"
 
 dependencies {
     api project(":jParser:idl")

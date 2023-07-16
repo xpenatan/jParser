@@ -1,7 +1,7 @@
 apply plugin: "java"
 apply plugin: 'java-library'
 
-def module_name = "loader"
+def module_name = "jParser-loader"
 
 dependencies {
     api "com.badlogicgames.gdx:gdx-jnigen-loader:$project.jniGenVersion"
