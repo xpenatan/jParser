@@ -37,6 +37,7 @@ configure(libProjects) {
     apply plugin: 'signing'
 
     group = project.groupId
+    version = project.jParserVersion
 
     publishing {
         repositories {

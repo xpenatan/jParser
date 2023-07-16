@@ -1,8 +1,14 @@
 project.ext {
     groupId = "com.github.xpenatan.jParser"
 
-    jParserVersion = "1.0.0"
-    jParserType = "-SNAPSHOT"
+    var isRelease = System.getenv('RELEASE')
+    if(isRelease != null && isRelease.toBoolean()) {
+        jParserVersion = "1.0.0-b3"
+    }
+    else {
+        jParserVersion = "1.0.0-SNAPSHOT"
+    }
+    System.out.println("jParser Version: " + jParserVersion)
 
     javaparserVersion = "3.24.7"
 
