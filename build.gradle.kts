@@ -38,6 +38,7 @@ var libProjects = mutableSetOf( project(":jParser:core"),
     project(":jParser:teavm"))
 
 configure(libProjects) {
+    apply(plugin = "signing")
 
     group = LibExt.groupId
     version = LibExt.libVersion
@@ -73,24 +74,24 @@ configure(libProjects) {
     publishing.publications.configureEach {
         if (this is MavenPublication) {
             pom {
-                name = "jParser"
-                description = "Java JNI code parser"
-                url = "http://github.com/xpenatan/jParser"
+                name.set("jParser")
+                description.set("Java JNI code parser")
+                url.set("http://github.com/xpenatan/jParser")
                 developers {
                     developer {
-                        id = "Xpe"
-                        name = "Natan"
+                        id.set("Xpe")
+                        name.set("Natan")
                     }
                 }
                 scm {
-                    connection = "scm:git:git://github.com/xpenatan/jParser.git"
-                    developerConnection = "scm:git:ssh://github.com/xpenatan/jParser.git"
-                    url = "http://github.com/xpenatan/jParser/tree/master"
+                    connection.set("scm:git:git://github.com/xpenatan/jParser.git")
+                    developerConnection.set("scm:git:ssh://github.com/xpenatan/jParser.git")
+                    url.set("http://github.com/xpenatan/jParser/tree/master")
                 }
                 licenses {
                     license {
-                        name = "The Apache License, Version 2.0"
-                        url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                        name.set("The Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                     }
                 }
             }
