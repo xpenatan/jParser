@@ -38,5 +38,5 @@ jobs:
         env:
           USER: ${{ secrets.USER }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          signingKey: ${{ secrets.PGP_SECRET }}
-          signingPassword: ${{ secrets.PGP_PASSPHRASE }}
+          SIGNING_KEY: ${{ secrets.PGP_SECRET }}
+          SIGNING_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}

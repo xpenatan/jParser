@@ -10,30 +10,10 @@ buildscript {
 }
 
 allprojects {
-    apply plugin: "eclipse"
-    apply plugin: "idea"
-    apply plugin: 'maven-publish'
     apply plugin: 'java'
 
     sourceCompatibility = 11
     targetCompatibility = 11
-
-    group = project.groupId
-
-    ext {
-        repoUser = System.getenv('USER')
-        repoPass = System.getenv('PASSWORD')
-        repoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-        repoUrlSnapshot = 'https://oss.sonatype.org/content/repositories/snapshots/'
-
-        def localFile = project.rootProject.file("local.properties")
-        if (localFile.exists()) {
-            Properties properties = new Properties()
-            properties.load(project.rootProject.file("local.properties").newDataInputStream())
-            repoUser = properties.getProperty("xUser")
-            repoPass = properties.getProperty("xPass")
-        }
-    }
 
     repositories {
         mavenLocal()
@@ -42,6 +22,21 @@ allprojects {
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     }
+}
+
+var libProjects = [
+        project(":jParser:core"),
+        project(":jParser:idl"),
+        project(":jParser:loader"),
+        project(":jParser:cpp"),
+        project(":jParser:teavm")
+]
+
+configure(libProjects) {
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
+    group = project.groupId
 
     publishing {
         repositories {
@@ -49,12 +44,61 @@ allprojects {
                 url {
                     def ver = project.version.toString()
                     def isSnapshot = ver.toUpperCase().contains("SNAPSHOT")
+                    def repoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                    def repoUrlSnapshot = "https://oss.sonatype.org/content/repositories/snapshots/"
                     isSnapshot ? repoUrlSnapshot : repoUrl
                 }
                 credentials {
-                    username repoUser
-                    password repoPass
+                    username = System.getenv('USER')
+                    password = System.getenv('PASSWORD')
                 }
+            }
+        }
+    }
+
+    javadoc {
+        options.encoding = 'UTF-8'
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+
+    publishing.publications.configureEach { mav ->
+        pom {
+            name = "jParser"
+            description = "Java JNI code parser"
+            url = "http://github.com/xpenatan/jParser"
+            developers {
+                developer {
+                    id = "Xpe"
+                    name = "Natan"
+                }
+            }
+            scm {
+                connection = "scm:git:git://github.com/xpenatan/jParser.git"
+                developerConnection = "scm:git:ssh://github.com/xpenatan/jParser.git"
+                url = "http://github.com/xpenatan/jParser/tree/master"
+            }
+            licenses {
+                license {
+                    name = "The Apache License, Version 2.0"
+                    url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                }
+            }
+        }
+    }
+
+    def signingKey = System.getenv("SIGNING_KEY")
+    def signingPassword = System.getenv("SIGNING_PASSWORD")
+    if(signingKey != null && signingPassword != null) {
+        signing {
+            useInMemoryPgpKeys(signingKey, signingPassword)
+            publishing.publications.configureEach { pub ->
+                sign pub
             }
         }
     }

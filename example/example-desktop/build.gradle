@@ -3,8 +3,6 @@ apply plugin: "java"
 group = project.groupId
 version = "1.0.0"
 
-def module_name = "example-core"
-
 dependencies {
     testImplementation project(":jParser:loader")
     testImplementation project(":example:example-core")
@@ -14,15 +12,6 @@ dependencies {
 clean.doFirst {
     def srcPath = projectDir.toString() + "/src/main/"
     project.delete(files(srcPath))
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifactId = module_name
-            from components.java
-        }
-    }
 }
 
 tasks.register("prepareTest", GradleBuild) {
