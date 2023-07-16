@@ -1,4 +1,4 @@
-package com.github.xpenatan.jparser.core.codeparser.idl;
+package com.github.xpenatan.jparser.idl.parser;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;

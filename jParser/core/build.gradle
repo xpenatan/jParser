@@ -4,7 +4,6 @@ apply plugin: 'java-library'
 def module_name = "core"
 
 dependencies {
-    api project(":jParser:idl")
     api "com.github.javaparser:javaparser-symbol-solver-core:$project.javaparserVersion"
     api "com.github.javaparser:javaparser-core:$project.javaparserVersion"
 }

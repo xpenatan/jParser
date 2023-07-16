@@ -1,4 +1,4 @@
-package com.github.xpenatan.jparser.core.codeparser.idl;
+package com.github.xpenatan.jparser.idl.parser;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.Range;

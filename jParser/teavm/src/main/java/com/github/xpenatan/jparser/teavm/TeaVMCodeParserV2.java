@@ -1,6 +1,6 @@
 package com.github.xpenatan.jparser.teavm;
 
-import com.github.xpenatan.jparser.core.codeparser.idl.IDLDefaultCodeParser;
+import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLReader;
 
 public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {

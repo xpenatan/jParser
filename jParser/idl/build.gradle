@@ -3,6 +3,7 @@ apply plugin: "java"
 def module_name = "idl"
 
 dependencies {
+    implementation project(":jParser:core")
     testImplementation "junit:junit:$project.jUnitVersion"
 }
 

@@ -1,7 +1,7 @@
 package com.github.xpenatan.jparser.example;
 
 import com.github.xpenatan.jparser.core.JParser;
-import com.github.xpenatan.jparser.core.codeparser.idl.IDLDefaultCodeParser;
+import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.cpp.CPPBuildHelper;
 import com.github.xpenatan.jparser.cpp.CppCodeParserV2;
 import com.github.xpenatan.jparser.cpp.CppGenerator;
