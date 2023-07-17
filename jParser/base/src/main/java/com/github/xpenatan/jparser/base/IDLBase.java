@@ -1,3 +1,5 @@
+package com.github.xpenatan.jparser.base;
+
 /**
  * @author xpenatan
  */

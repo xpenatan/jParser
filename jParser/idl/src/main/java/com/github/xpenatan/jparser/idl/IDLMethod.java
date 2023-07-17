@@ -44,7 +44,7 @@ public class IDLMethod {
             leftSide = leftSide.replace("[]", "");
             isReturnArray = true;
         }
-        leftSide = leftSide.trim().replaceAll(" +", " ");
+        leftSide = IDLHelper.removeMultipleSpaces(leftSide.trim());
 
         isReturnRef = returnInfo.contains("Ref");
         isReturnValue = returnInfo.contains("Value");

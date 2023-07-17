@@ -24,6 +24,7 @@ public class IDLParameter {
     }
 
     public void initParameter(String line) {
+        line = IDLHelper.removeMultipleSpaces(line);
         this.line = line;
         String tmpLine = line;
 
@@ -45,11 +46,24 @@ public class IDLParameter {
             }
             tmpLine = tmpLine.replace(substring1, "").trim();
         }
+
+        if(isArray) {
+            tmpLine = IDLHelper.removeMultipleSpaces(tmpLine.replace("[]", ""));
+        }
+
         String[] s1 = tmpLine.split(" ");
         type = s1[s1.length - 2];
 
+        if(isArray) {
+            type = type + "[]";
+        }
+
         if(type.equals("long")) {
             type = "int";
+        }
+
+        if(type.equals("long[]")) {
+            type = "int[]";
         }
 
         if(type.equals("DOMString")) {

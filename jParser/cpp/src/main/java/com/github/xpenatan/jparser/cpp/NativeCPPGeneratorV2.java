@@ -7,14 +7,13 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.xpenatan.jparser.core.JParser;
-import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Scanner;
 
 public class NativeCPPGeneratorV2 implements CppGenerator {
@@ -24,6 +23,8 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     private static final Map<String, JavaMethodParser.ArgumentType> bufferTypes;
     private static final Map<String, JavaMethodParser.ArgumentType> otherTypes;
     private static final Map<String, String> valueTypes;
+
+    private static String helperName = "IDLHelper.h";
 
     static {
         valueTypes = new HashMap<>();
@@ -94,6 +95,7 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         if(init) {
             init = false;
             printerHeader.append("#include <jni.h>\n");
+            printerHeader.append("#include <" + helperName + ">\n");
             printer.append("\n");
             printer.append("extern \"C\" {\n");
             printer.append("\n");
@@ -162,7 +164,10 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
     @Override
     public void addParseFile(JParser jParser, JParserItem parserItem) {
-        System.out.println();
+
+//        String cppInclude = "";
+//
+//        print(true, cppInclude);
     }
 
     @Override
@@ -170,6 +175,11 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         printer.insert(0, printerHeader);
         print("}");
         String code = printer.toString();
+
+        InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
+        String helperPath = jniDir + File.separator + helperName;
+        CustomFileDescriptor helperFile = new CustomFileDescriptor(helperPath);
+        helperFile.write(idlHelperClass, false);
 
         cppGlueHPath = jniDir + File.separator + cppGlueName + ".h";
         String cppGluePath = jniDir + File.separator + cppGlueName + ".cpp";

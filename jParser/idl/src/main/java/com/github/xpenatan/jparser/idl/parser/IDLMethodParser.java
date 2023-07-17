@@ -189,6 +189,9 @@ public class IDLMethodParser {
                 //All methods must contain a base class to get its pointer
                 paramName = paramName + ".getCPointer()";
             }
+            else if(type.isArrayType()) {
+                //TODO implement array call
+            }
             caller.addArgument(paramName);
         }
     }

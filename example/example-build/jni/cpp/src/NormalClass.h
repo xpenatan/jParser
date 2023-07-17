@@ -30,6 +30,7 @@ public:
     void refParam(ParamClass & refParamClass);
     void pointerParam(ParamClass * pointerParamClass);
     void valueParam(ParamClass valueParamClass);
+    void addIntArrayItems(int* array, int valueToAdd);
 };
 
 #endif  //NORMALCLASS_H

@@ -1,10 +1,16 @@
 plugins {
-    id("java")
+    id("java-library")
 }
 
 val moduleName = "jParser-idl"
 
+sourceSets["main"].resources.setSrcDirs(arrayListOf(
+    "../base/src/main/java/",
+    "../base/src/main/resources/"
+))
+
 dependencies {
+    api(project(":jParser:base"))
     implementation(project(":jParser:core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }

@@ -77,3 +77,9 @@ void NormalClass::pointerParam(ParamClass * pointerParamClass)
 void NormalClass::valueParam(ParamClass valueParamClass)
 {
 }
+
+void NormalClass::addIntArrayItems(int* array, int valueToAdd)
+{
+    int value = array[0];
+    array[0] = value + valueToAdd;
+}

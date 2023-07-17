@@ -20,6 +20,8 @@ interface NormalClass {
     void refParam([Ref]ParamClass paramClass);
     void pointerParam(ParamClass paramClass);
     void valueParam([Value]ParamClass paramClass);
+
+//    void addIntArrayItems(long [] array);
 };
 NormalClass implements ParentClass;
 

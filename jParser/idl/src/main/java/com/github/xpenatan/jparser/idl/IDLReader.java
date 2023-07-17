@@ -2,7 +2,10 @@ package com.github.xpenatan.jparser.idl;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 /**
@@ -30,23 +33,38 @@ public class IDLReader {
         return reader;
     }
 
-    @Deprecated
     public static IDLFile parseFile(String path) {
+        return parseFile(path, "");
+    }
+
+    public static IDLFile parseFile(String path, String subPackage) {
         path = path.replace("\\", File.separator);
-        IDLFile idlFile = new IDLFile();
         File file = new File(path);    //creates a new file instance
         if(file.exists()) {
             try {
-                FileReader fr = new FileReader(file);   //reads the file
-                BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
-                StringBuffer sb = new StringBuffer();    //constructs a string buffer with no characters
+                InputStreamReader fr = new FileReader(file);
+                return parseFile(fr, subPackage);
+            } catch(FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
 
+    public static IDLFile parseFile(InputStreamReader inputStreamReader) {
+        return parseFile(inputStreamReader, "");
+    }
+
+    public static IDLFile parseFile(InputStreamReader inputStreamReader, String subPackage) {
+        IDLFile idlFile = new IDLFile(subPackage);
+            try {
+                BufferedReader br = new BufferedReader(inputStreamReader);  //creates a buffering character input stream
                 ArrayList<String> lines = new ArrayList<>();
                 String line;
                 while((line = br.readLine()) != null) {
                     lines.add(line);
                 }
-                fr.close();    //closes the stream and release the resources
+                inputStreamReader.close();    //closes the stream and release the resources
 
                 ArrayList<IDLClass> classList = new ArrayList<>();
                 parseFile(idlFile, lines, classList);
@@ -55,7 +73,6 @@ public class IDLReader {
             catch(Throwable t) {
                 t.printStackTrace();
             }
-        }
         return idlFile;
     }
 
