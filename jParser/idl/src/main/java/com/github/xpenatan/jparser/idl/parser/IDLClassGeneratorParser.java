@@ -61,16 +61,16 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
         // Generate class if it does not exist
         String packagePath = File.separator + basePackage.replace(".", File.separator);
-        String basePath = new File(jParser.genDir + packagePath).getAbsolutePath();
+        String genPath = new File(jParser.genDir + packagePath).getAbsolutePath();
 
-        String baseClassPath = basePath + File.separator + BASE_CLASS_NAME + ".java";
+        String genBaseClassPath = genPath + File.separator + BASE_CLASS_NAME + ".java";
         baseClassUnit.setPackageDeclaration(basePackage);
-        jParser.unitArray.add(new JParserItem(baseClassUnit, baseClassPath, baseClassPath));
+        jParser.unitArray.add(new JParserItem(baseClassUnit, genBaseClassPath, genBaseClassPath));
 
-        generateIDLJavaClasses(jParser, basePath);
+        generateIDLJavaClasses(jParser, genPath);
     }
 
-    private void generateIDLJavaClasses(JParser jParser, String basePath) {
+    private void generateIDLJavaClasses(JParser jParser, String genPath) {
         for(IDLFile idlFile : idlReader.fileArray) {
             for(IDLClass idlClass : idlFile.classArray) {
                 String className = idlClass.name;
@@ -84,7 +84,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                             subPackage += s + File.separator;
                         }
                     }
-                    String classPath = basePath + File.separator + subPackage + className + ".java";
+                    String classPath = genPath + File.separator + subPackage + className + ".java";
                     CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(classPath);
                     CompilationUnit compilationUnit = setupClass(idlClass);
                     String code = compilationUnit.toString();
