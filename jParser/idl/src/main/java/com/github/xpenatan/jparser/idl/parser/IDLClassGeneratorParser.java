@@ -29,7 +29,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
     protected final IDLReader idlReader;
     private String basePackage;
 
-    protected final CompilationUnit baseClassUnit;
+    protected CompilationUnit baseClassUnit;
 
     private static String BASE_CLASS_NAME = "-";
 
@@ -37,14 +37,6 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         super(headerCMD);
         this.basePackage = basePackage;
         this.idlReader = idlReader;
-
-        try {
-            BASE_CLASS_NAME = IDLBase.class.getSimpleName();
-            String basePath = IDLBase.class.getName().replaceAll("\\.", "/") + ".java";
-            baseClassUnit = StaticJavaParser.parseResource(basePath);
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -63,11 +55,22 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         String packagePath = File.separator + basePackage.replace(".", File.separator);
         String genPath = new File(jParser.genDir + packagePath).getAbsolutePath();
 
+        createBaseUnitFromResources(jParser, genPath);
+        generateIDLJavaClasses(jParser, genPath);
+    }
+
+    private void createBaseUnitFromResources(JParser jParser, String genPath) {
+        try {
+            BASE_CLASS_NAME = IDLBase.class.getSimpleName();
+            String basePath = IDLBase.class.getName().replaceAll("\\.", "/") + ".java";
+            baseClassUnit = StaticJavaParser.parseResource(basePath);
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        }
+
         String genBaseClassPath = genPath + File.separator + BASE_CLASS_NAME + ".java";
         baseClassUnit.setPackageDeclaration(basePackage);
         jParser.unitArray.add(new JParserItem(baseClassUnit, genBaseClassPath, genBaseClassPath));
-
-        generateIDLJavaClasses(jParser, genPath);
     }
 
     private void generateIDLJavaClasses(JParser jParser, String genPath) {
