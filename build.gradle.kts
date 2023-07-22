@@ -37,7 +37,8 @@ var libProjects = mutableSetOf(
     project(":jParser:idl"),
     project(":jParser:loader"),
     project(":jParser:cpp"),
-    project(":jParser:teavm"))
+    project(":jParser:teavm")
+)
 
 configure(libProjects) {
     apply(plugin = "signing")
@@ -50,7 +51,7 @@ configure(libProjects) {
             maven {
                 url = uri {
                     val ver = project.version.toString()
-                    val isSnapshot = ver.toUpperCase().contains("SNAPSHOT")
+                    val isSnapshot = ver.uppercase().contains("SNAPSHOT")
                     val repoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
                     val repoUrlSnapshot = "https://oss.sonatype.org/content/repositories/snapshots/"
                     if(isSnapshot) repoUrlSnapshot else repoUrl

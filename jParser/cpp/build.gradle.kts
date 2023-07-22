@@ -5,7 +5,7 @@ plugins {
 val moduleName = "jParser-cpp"
 
 dependencies {
-    api(project(":jParser:idl"))
+    implementation(project(":jParser:idl"))
     implementation(project(":jParser:core"))
     implementation("com.badlogicgames.gdx:gdx-jnigen:${LibExt.jniGenVersion}")
 

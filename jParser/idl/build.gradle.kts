@@ -10,7 +10,7 @@ sourceSets["main"].resources.setSrcDirs(arrayListOf(
 ))
 
 dependencies {
-    api(project(":jParser:base"))
+    implementation(project(":jParser:base"))
     implementation(project(":jParser:core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }

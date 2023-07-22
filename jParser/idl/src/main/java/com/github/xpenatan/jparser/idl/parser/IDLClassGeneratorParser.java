@@ -38,12 +38,6 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         this.basePackage = basePackage;
         this.idlReader = idlReader;
 
-        String baseIDLPath = "IDLHelper.idl";
-        InputStream resourceAsStream = IDLBase.class.getClassLoader().getResourceAsStream(baseIDLPath);
-        InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
-        IDLFile baseIDLFile = IDLReader.parseFile(streamReader, "helper");
-        idlReader.fileArray.add(baseIDLFile);
-
         try {
             BASE_CLASS_NAME = IDLBase.class.getSimpleName();
             String basePath = IDLBase.class.getName().replaceAll("\\.", "/") + ".java";
@@ -58,6 +52,12 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         if(!generateClass) {
             return;
         }
+
+        String baseIDLPath = "IDLHelper.idl";
+        InputStream resourceAsStream = IDLBase.class.getClassLoader().getResourceAsStream(baseIDLPath);
+        InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
+        IDLFile baseIDLFile = IDLReader.parseFile(streamReader, "helper");
+        idlReader.fileArray.add(baseIDLFile);
 
         // Generate class if it does not exist
         String packagePath = File.separator + basePackage.replace(".", File.separator);
