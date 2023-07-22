@@ -67,6 +67,10 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         baseClassUnit.setPackageDeclaration(basePackage);
         jParser.unitArray.add(new JParserItem(baseClassUnit, baseClassPath, baseClassPath));
 
+        generateIDLJavaClasses(jParser, basePath);
+    }
+
+    private void generateIDLJavaClasses(JParser jParser, String basePath) {
         for(IDLFile idlFile : idlReader.fileArray) {
             for(IDLClass idlClass : idlFile.classArray) {
                 String className = idlClass.name;
