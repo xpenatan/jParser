@@ -4,11 +4,6 @@ plugins {
 
 val moduleName = "jParser-idl"
 
-sourceSets["main"].resources.setSrcDirs(arrayListOf(
-    "../base/src/main/java/",
-    "../base/src/main/resources/"
-))
-
 dependencies {
     implementation(project(":jParser:base"))
     implementation(project(":jParser:core"))

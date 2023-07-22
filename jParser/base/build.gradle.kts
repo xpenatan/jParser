@@ -4,6 +4,13 @@ plugins {
 
 val moduleName = "jParser-base"
 
+tasks {
+    withType<Jar> {
+        from(sourceSets["main"].allSource)
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+}
+
 dependencies {
 }
 

@@ -14,10 +14,13 @@ import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLReader;
+import com.github.xpenatan.jparser.idl.ResourceList;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collection;
+import java.util.regex.Pattern;
 
 /**
  * @author xpenatan
@@ -55,22 +58,24 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         String packagePath = File.separator + basePackage.replace(".", File.separator);
         String genPath = new File(jParser.genDir + packagePath).getAbsolutePath();
 
-        createBaseUnitFromResources(jParser, genPath);
+        createBaseUnitFromResources(jParser);
         generateIDLJavaClasses(jParser, genPath);
     }
 
-    private void createBaseUnitFromResources(JParser jParser, String genPath) {
-        try {
-            BASE_CLASS_NAME = IDLBase.class.getSimpleName();
-            String basePath = IDLBase.class.getName().replaceAll("\\.", "/") + ".java";
-            baseClassUnit = StaticJavaParser.parseResource(basePath);
-        } catch(IOException e) {
-            throw new RuntimeException(e);
+    private void createBaseUnitFromResources(JParser jParser) {
+        BASE_CLASS_NAME = IDLBase.class.getSimpleName();
+        Collection<String> resources = ResourceList.getResources(Pattern.compile("/*.*/*.java"));
+        for(String resource : resources) {
+            try {
+                CompilationUnit compilationUnit = StaticJavaParser.parseResource(resource);
+                String genBaseClassPath = jParser.genDir + File.separator + resource;
+                jParser.unitArray.add(new JParserItem(compilationUnit, genBaseClassPath, genBaseClassPath));
+            } catch(IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-
-        String genBaseClassPath = genPath + File.separator + BASE_CLASS_NAME + ".java";
-        baseClassUnit.setPackageDeclaration(basePackage);
-        jParser.unitArray.add(new JParserItem(baseClassUnit, genBaseClassPath, genBaseClassPath));
+        JParserItem parserUnitItem = jParser.getParserUnitItem(BASE_CLASS_NAME);
+        baseClassUnit = parserUnitItem.unit;
     }
 
     private void generateIDLJavaClasses(JParser jParser, String genPath) {
