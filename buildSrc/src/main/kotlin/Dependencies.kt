@@ -4,6 +4,7 @@ object LibExt {
     const val javaparserVersion = "3.24.7"
     const val jUnitVersion = "4.12"
     const val groupId = "com.github.xpenatan.jParser"
+    const val exampleUseRepoLibs = true
 
     private fun getVersion(): String {
         var isRelease = System.getenv("RELEASE")

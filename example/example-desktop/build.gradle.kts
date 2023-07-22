@@ -3,7 +3,12 @@ plugins {
 }
 
 dependencies {
-    testImplementation(project(":jParser:loader"))
+    if(LibExt.exampleUseRepoLibs) {
+        testImplementation("com.github.xpenatan.jParser:jParser-loader:${LibExt.libVersion}")
+    }
+    else {
+        testImplementation(project(":jParser:loader"))
+    }
     testImplementation(project(":example:example-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
