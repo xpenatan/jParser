@@ -64,15 +64,10 @@ configure(libProjects) {
         }
     }
 
-//    javadoc {
-//        options.encoding = 'UTF-8'
-//        options.addStringOption('Xdoclint:none', '-quiet')
-//    }
-////
-//    java {
-//        withJavadocJar()
-//        withSourcesJar()
-//    }
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
 
     publishing.publications.configureEach {
         if (this is MavenPublication) {
