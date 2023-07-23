@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
+    implementation("org.teavm:teavm-jso:0.9.0-dev-7")
+
     if(LibExt.exampleUseRepoLibs) {
         testImplementation("com.github.xpenatan.jParser:jParser-loader:${LibExt.libVersion}")
     }

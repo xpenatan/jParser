@@ -11,8 +11,8 @@ public class NormalClassTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        String libDir = "src/main/resources/example-test-natives.jar";
-        new JParserLibraryLoader(libDir).load("example-test");
+        String libDir = "src/main/resources/exampleLib-natives.jar";
+        new JParserLibraryLoader(libDir).load("exampleLib");
     }
 
     @Test

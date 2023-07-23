@@ -20,7 +20,7 @@ public class Main {
 
     private static void generateClassOnly() throws Exception {
         String basePackage = "com.github.xpenatan.jparser.example";
-        String idlPath = "src\\main\\resources\\idl\\Test.idl";
+        String idlPath = "cpp\\Test.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./example-base/src/main/java";
         String genDir = "../example-core/src/main/java";
 
@@ -31,9 +31,9 @@ public class Main {
     }
 
     private static void generate() throws Exception {
-        String libName = "example-test";
+        String libName = "exampleLib";
         String basePackage = "com.github.xpenatan.jparser.example";
-        String idlPath = "src\\main\\resources\\idl\\Test.idl";
+        String idlPath = "cpp\\Test.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./example-base/src/main/java";
 
         IDLReader idlReader = IDLReader.readIDL(idlPath);
@@ -50,17 +50,17 @@ public class Main {
     ) throws Exception {
         String libsDir = new File("../example-desktop/src/main/resources/").getCanonicalPath();
         String genDir = "../example-core/src/main/java";
-        String jniBuildPath = new File("./build/c++/").getCanonicalPath();
-        String jniSourcePath = jniBuildPath + "/src";
+        String libBuildPath = new File("./build/c++/").getCanonicalPath();
+        String libSourcePath = libBuildPath + "/src";
 
-        FileCopyHelper.copyDir( "./jni/cpp/src/", jniSourcePath);
+        FileCopyHelper.copyDir( "./cpp/exampleLib/src/", libSourcePath);
 
-        CppGenerator cppGenerator = new NativeCPPGeneratorV2(jniSourcePath);
+        CppGenerator cppGenerator = new NativeCPPGeneratorV2(libSourcePath);
         CppCodeParserV2 cppParser = new CppCodeParserV2(cppGenerator, idlReader, basePackage);
         cppParser.generateClass = true;
         JParser.generate(cppParser, baseJavaDir, genDir);
         CPPBuildHelper.DEBUG_BUILD = true;
-        CPPBuildHelper.build(libName, jniBuildPath, libsDir);
+        CPPBuildHelper.build(libName, libBuildPath, libsDir);
     }
 
     public static void generateTeaVM(IDLReader idlReader, String libName, String basePackage, String baseJavaDir) throws Exception {
