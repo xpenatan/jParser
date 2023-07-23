@@ -10,7 +10,7 @@ object LibExt {
         var isRelease = System.getenv("RELEASE")
         var libVersion = "1.0.0-SNAPSHOT"
         if(isRelease != null && isRelease.toBoolean()) {
-            libVersion = "1.0.0-b3"
+            libVersion = "1.0.0-b4"
         }
         System.out.println("jParser Version: " + libVersion)
         return libVersion
