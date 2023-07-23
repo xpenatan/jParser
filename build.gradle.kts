@@ -64,6 +64,11 @@ configure(libProjects) {
         }
     }
 
+    tasks.withType<Javadoc> {
+        options.encoding = "UTF-8"
+        (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+    }
+
     java {
         withJavadocJar()
         withSourcesJar()
