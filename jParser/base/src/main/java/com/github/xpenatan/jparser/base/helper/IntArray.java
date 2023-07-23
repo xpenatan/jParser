@@ -14,5 +14,4 @@ public class IntArray extends IDLBase {
 
     public native void setValue(int index, int value);
     public native void resize(int size);
-    public native int getSize();
 }

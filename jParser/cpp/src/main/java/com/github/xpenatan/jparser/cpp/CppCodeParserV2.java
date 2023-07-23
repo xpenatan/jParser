@@ -124,7 +124,6 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     public CppCodeParserV2(IDLReader idlReader, String classpath, String jniDir) {
         super(HEADER_CMD, idlReader);
         cppGenerator = new NativeCPPGenerator(classpath, jniDir);
-        enableAttributeParsing = false;
     }
 
     public CppCodeParserV2(CppGenerator cppGenerator) {
@@ -138,7 +137,6 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     public CppCodeParserV2(CppGenerator cppGenerator, IDLReader idlReader, String basePackage) {
         super(basePackage, HEADER_CMD, idlReader);
         this.cppGenerator = cppGenerator;
-        enableAttributeParsing = false;
     }
 
     @Override

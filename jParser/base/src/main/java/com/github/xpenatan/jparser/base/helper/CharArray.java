@@ -14,5 +14,4 @@ public class CharArray extends IDLBase {
 
     public native void setValue(int index, char value);
     public native void resize(int size);
-    public native int getSize();
 }

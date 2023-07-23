@@ -1,49 +1,44 @@
 interface BoolArray {
-    attribute long size;
-
     void BoolArray(long size);
     void resize(long size);
     boolean getValue(long index);
     void setValue(long index, boolean value);
     any getPointer();
+    long getSize();
 };
 
 interface IntArray {
-    attribute long size;
-
     void IntArray(long size);
     void resize(long size);
     long getValue(long index);
     void setValue(long index, long value);
     any getPointer();
+    long getSize();
 };
 
 interface FloatArray {
-    attribute long size;
-
     void FloatArray(long size);
     void resize(long size);
     float getValue(long index);
     void setValue(long index, float value);
     any getPointer();
+    long getSize();
 };
 
 interface DoubleArray {
-    attribute long size;
-
     void DoubleArray(long size);
     void resize(long size);
     double getValue(long index);
     void setValue(long index, double value);
     any getPointer();
+    long getSize();
 };
 
 interface CharArray {
-    attribute long size;
-
     void CharArray(long size);
     void resize(long size);
     byte getValue(long index);
     void setValue(long index, byte value);
     any getPointer();
+    long getSize();
 };

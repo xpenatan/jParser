@@ -7,10 +7,10 @@
 #endif
 
 class BoolArray {
-    public:
+    private:
         bool * data;
         int size;
-
+    public:
         BoolArray(int size) { data = NULL; resize(size); }
         ~BoolArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
@@ -31,13 +31,14 @@ class BoolArray {
         bool getValue(int index) { return data[index]; }
         void setValue(int index, bool value) { data[index] = value; }
         void* getPointer() { return (void*)data; }
+        int getSize() { return size; }
 };
 
 class IntArray {
-    public:
+    private:
         int * data;
         int size;
-
+    public:
         IntArray(int size) { data = NULL; resize(size); }
         ~IntArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
@@ -58,13 +59,14 @@ class IntArray {
         int getValue(int index) { return data[index]; }
         void setValue(int index, int value) { data[index] = value; }
         void* getPointer() { return (void*)data; }
+        int getSize() { return size; }
 };
 
 class FloatArray {
-    public:
+    private:
         float * data;
         int size;
-
+    public:
         FloatArray(int size) { data = NULL; resize(size); }
         ~FloatArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
@@ -85,13 +87,14 @@ class FloatArray {
         float getValue(int index) { return data[index]; }
         void setValue(int index, float value) { data[index] = value; }
         void* getPointer() { return (void*)data; }
+        int getSize() { return size; }
 };
 
 class DoubleArray {
-    public:
+    private:
         double * data;
         int size;
-
+    public:
         DoubleArray(int size) { data = NULL; resize(size); }
         ~DoubleArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
@@ -112,13 +115,14 @@ class DoubleArray {
         double getValue(int index) { return data[index]; }
         void setValue(int index, double value) { data[index] = value; }
         void* getPointer() { return (void*)data; }
+        int getSize() { return size; }
 };
 
 class CharArray {
-    public:
+    private:
         char * data;
         int size;
-
+    public:
         CharArray(int size) { data = NULL; resize(size); }
         ~CharArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
@@ -139,4 +143,5 @@ class CharArray {
         char getValue(int index) { return data[index]; }
         void setValue(int index, char value) { data[index] = value; }
         void* getPointer() { return (void*)data; }
+        int getSize() { return size; }
 };
