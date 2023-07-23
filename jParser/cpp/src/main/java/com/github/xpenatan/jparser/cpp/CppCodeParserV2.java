@@ -23,7 +23,6 @@ import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,23 +90,6 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
     protected static final String OBJECT_CREATION_TEMPLATE = "" +
             "public static [TYPE] WRAPPER_GEN_01 = new [TYPE](false);";
-
-    public static String getClassPath(String ... includes) {
-        String classpath = System.getProperty("java.class.path") + File.pathSeparator;
-        String newClassPath = "";
-        String pathSeparator = File.pathSeparator;
-        String[] split = classpath.split(pathSeparator);
-        for(int i = 0; i < split.length; i++) {
-            String path = split[i];
-            for(int j = 0; j < includes.length; j++) {
-                String include = includes[j];
-                if(path.contains(include)) {
-                    newClassPath += path + pathSeparator;
-                }
-            }
-        }
-        return newClassPath;
-    }
 
     private CppGenerator cppGenerator;
 
