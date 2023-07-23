@@ -204,8 +204,9 @@ public class IDLMethodParser {
 
         boolean isReturnValue = idlMethod.isReturnValue;
         boolean isStatic = methodDeclaration.isStatic();
+        boolean isTemp = !isReturnValue;
 
-        String fieldName = generateFieldName(classDeclaration, returnTypeName, isReturnValue, isStatic);
+        String fieldName = generateFieldName(classDeclaration, returnTypeName, isTemp, isStatic);
 
         setupCallerParam(idlMethod, caller, methodDeclaration, fieldName);
 
@@ -242,7 +243,7 @@ public class IDLMethodParser {
         // if the temp object already exist it will increment variable number and create it.
         // isTemp true will create an object to use a c++ pointer. cMemOwn = false
         // isTemp false will actually create a c++ object by using the default constructor. cMemOwn = true
-        // When isTemp is false, the c++ class must have the assignment operator
+        // When isTemp is false, the c++ class must have default constructor and the assignment operator
 
         for(int i = 0; i < 20; i++) {
             String fieldName = getFieldName(returnTypeName, i, isTemp, isStatic);
