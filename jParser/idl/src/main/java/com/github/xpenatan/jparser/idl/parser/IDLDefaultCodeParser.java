@@ -12,7 +12,6 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
-import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.ArrayList;
@@ -22,6 +21,9 @@ import java.util.ArrayList;
  */
 public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
+    /**
+     * Remove method and don't generate a new method
+     */
     public static final String CMD_IDL_SKIP = "-IDL_SKIP";
 
     protected boolean enableAttributeParsing = true;
@@ -44,6 +46,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     protected boolean shouldRemoveCommentBlock(String headerCommands) {
         if(super.shouldRemoveCommentBlock(headerCommands)) {
             if(headerCommands.contains(CMD_IDL_SKIP)) {
+                //Keep comment if its idl skip
                 return false;
             }
             return true;
@@ -53,6 +56,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
     @Override
     public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+        super.onParseClassStart(jParser, unit, classOrInterfaceDeclaration);
         if(idlReader != null) {
             SimpleName name = classOrInterfaceDeclaration.getName();
             String nameStr = name.asString();
@@ -60,11 +64,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
             if(idlClass != null) {
 
                 if(generateClass) {
-                    ArrayList<IDLConstructor> constructors = idlClass.constructors;
-                    for(int i = 0; i < constructors.size(); i++) {
-                        IDLConstructor idlConstructor = constructors.get(i);
-                        IDLConstructorParser.generateConstructor(this, jParser, unit, classOrInterfaceDeclaration, idlClass, idlConstructor);
-                    }
+                    IDLConstructorParser.generateConstructor(this, jParser, unit, classOrInterfaceDeclaration, idlClass);
                 }
 
                 ArrayList<IDLMethod> methods = idlClass.methods;

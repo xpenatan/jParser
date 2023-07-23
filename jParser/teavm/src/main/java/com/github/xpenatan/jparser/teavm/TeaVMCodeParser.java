@@ -107,6 +107,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+        super.onParseClassStart(jParser, unit, classOrInterfaceDeclaration);
         if(idlReader != null) {
             String nameAsString = classOrInterfaceDeclaration.getNameAsString();
             IDLClass idlClass = idlReader.getClass(nameAsString);
@@ -159,8 +160,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 }
             }
         }
-
-        super.onParseClassStart(jParser, unit, classOrInterfaceDeclaration);
     }
 
     @Override

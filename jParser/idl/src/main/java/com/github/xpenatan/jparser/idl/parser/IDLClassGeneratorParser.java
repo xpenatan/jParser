@@ -5,7 +5,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.xpenatan.jparser.base.IDLBase;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
@@ -98,8 +97,8 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                     String code = compilationUnit.toString();
                     fileDescriptor.writeString(code, false);
 
-                    JParserItem item = new JParserItem(compilationUnit, classPath, classPath);
-                    jParser.unitArray.add(item);
+                    parserItem = new JParserItem(compilationUnit, classPath, classPath);
+                    jParser.unitArray.add(parserItem);
                 }
             }
         }
@@ -121,15 +120,11 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             classDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
         }
 
-        // All classes contain a temp constructor so temp objects can be created
-        ConstructorDeclaration constructorDeclaration = classDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
-        constructorDeclaration.addParameter("byte", "temp");
-
         return compilationUnit;
     }
 
     @Override
-    public void onParseClassEnd(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+    public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
         if(!generateClass) {
             return;
         }

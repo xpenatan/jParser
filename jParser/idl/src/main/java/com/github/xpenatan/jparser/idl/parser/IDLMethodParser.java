@@ -91,7 +91,8 @@ public class IDLMethodParser {
                 }
             }
             if(isNative) {
-                // It's a dummy method. Remove it and let IDL generate it again
+                // It's a dummy method. Remove it and let IDL generate it again.
+                // This is useful to use a base method as an interface and let the generator create the real method.
                 containsMethod.remove();
             }
             if(!isNative && !isStatic) {
