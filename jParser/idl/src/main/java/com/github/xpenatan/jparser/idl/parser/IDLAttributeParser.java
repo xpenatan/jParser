@@ -8,6 +8,9 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
@@ -16,6 +19,7 @@ import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLMethod;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,6 +98,9 @@ public class IDLAttributeParser {
             if(!idlParser.generateClass) {
                 idlParser.onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, getMethodDeclaration, true);
             }
+            else {
+                setupAttributeMethod(idlParser, jParser, idlAttribute, classOrInterfaceDeclaration, getMethodDeclaration);
+            }
         }
         if(addSet) {
             if(setMethodDeclaration != null) {
@@ -108,6 +115,16 @@ public class IDLAttributeParser {
             if(!idlParser.generateClass) {
                 idlParser.onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, setMethodDeclaration, true);
             }
+            else {
+                setupAttributeMethod(idlParser, jParser, idlAttribute, classOrInterfaceDeclaration, setMethodDeclaration);
+            }
+        }
+    }
+
+    private static void setupAttributeMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLAttribute idlAttribute, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, idlAttribute.isValue, classDeclaration, methodDeclaration);
+        if(nativeMethodDeclaration != null) {
+            idlParser.onIDLAttributeGenerated(jParser, idlAttribute, classDeclaration, methodDeclaration, nativeMethodDeclaration);
         }
     }
 }

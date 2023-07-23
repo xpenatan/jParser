@@ -54,6 +54,14 @@ public class NormalClassTest {
         boolean ret = normalClass.invertBoolean(false);
         assertTrue(ret);
     }
+//
+//    @Test
+//    public void test_attribute() {
+//        NormalClass normalClass = new NormalClass();
+//        normalClass.hiddenInt(10);
+//        int retValue = normalClass.hiddenInt();
+//        assertEquals(10, retValue);
+//    }
 
 }
 

@@ -130,7 +130,14 @@ public class IDLMethodParser {
     }
 
     private static void setupMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
-        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(idlMethod, classDeclaration, methodDeclaration);
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlMethod.isStaticMethod, idlMethod.isReturnValue, classDeclaration, methodDeclaration);
+        if(nativeMethodDeclaration != null) {
+            idlParser.onIDLMethodGenerated(jParser, idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
+        }
+    }
+
+    public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
+        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, classDeclaration, methodDeclaration);
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             //Add native method if it does not exist
             classDeclaration.getMembers().add(nativeMethodDeclaration);
@@ -142,36 +149,35 @@ public class IDLMethodParser {
 
             if(methodReturnType.isVoidType()) {
                 // void types just call the method.
-                setupCallerParam(idlMethod, caller, methodDeclaration, null);
+                IDLMethodParser.setupCallerParam(isStatic, false, caller, methodDeclaration, null);
                 BlockStmt blockStmt = methodDeclaration.getBody().get();
                 blockStmt.addStatement(caller);
             }
             else if(methodReturnType.isClassOrInterfaceType()) {
                 // Class object needs to generate some additional code.
                 // Needs to obtain the pointer and return a temp object.
-                BlockStmt blockStmt = generateTempObjects(idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration, caller);
+                BlockStmt blockStmt = IDLMethodParser.generateTempObjects(isReturnValue, classDeclaration, methodDeclaration, nativeMethodDeclaration, caller);
                 methodDeclaration.setBody(blockStmt);
             }
             else {
                 // Should be a primitive return type.
-                ReturnStmt returnStmt = getReturnStmt(methodDeclaration);
-                setupCallerParam(idlMethod, caller, methodDeclaration, null);
+                ReturnStmt returnStmt = IDLMethodParser.getReturnStmt(methodDeclaration);
+                IDLMethodParser.setupCallerParam(isStatic, false, caller, methodDeclaration, null);
                 returnStmt.setExpression(caller);
             }
-            idlParser.onIDLMethodGenerated(jParser, idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
+            return nativeMethodDeclaration;
         }
+        return null;
     }
 
-    private static MethodCallExpr createCaller(MethodDeclaration nativeMethodDeclaration) {
+    public static MethodCallExpr createCaller(MethodDeclaration nativeMethodDeclaration) {
         String nativeMethodName = nativeMethodDeclaration.getNameAsString();
         MethodCallExpr caller = new MethodCallExpr();
         caller.setName(nativeMethodName);
         return caller;
     }
 
-    private static void setupCallerParam(IDLMethod idlMethod, MethodCallExpr caller, MethodDeclaration methodDeclaration, String tempFieldName) {
-        boolean isStatic = idlMethod.isStaticMethod;
-        boolean isReturnValue = idlMethod.isReturnValue;
+    public static void setupCallerParam(boolean isStatic, boolean isReturnValue, MethodCallExpr caller, MethodDeclaration methodDeclaration, String tempFieldName) {
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
 
         if(isReturnValue && tempFieldName != null) {
@@ -197,18 +203,17 @@ public class IDLMethodParser {
         }
     }
 
-    private static BlockStmt generateTempObjects(IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration, MethodCallExpr caller) {
+    public static BlockStmt generateTempObjects(boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration, MethodCallExpr caller) {
         Type methodReturnType = methodDeclaration.getType();
         String returnTypeName = methodReturnType.toString();
         String newBody = null;
 
-        boolean isReturnValue = idlMethod.isReturnValue;
         boolean isStatic = methodDeclaration.isStatic();
         boolean isTemp = !isReturnValue;
 
         String fieldName = generateFieldName(classDeclaration, returnTypeName, isTemp, isStatic);
 
-        setupCallerParam(idlMethod, caller, methodDeclaration, fieldName);
+        IDLMethodParser.setupCallerParam(isStatic, isReturnValue, caller, methodDeclaration, fieldName);
 
         String methodCaller = caller.toString();
 
@@ -290,12 +295,11 @@ public class IDLMethodParser {
         }
     }
 
-    private static MethodDeclaration generateNativeMethod(IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
+    public static MethodDeclaration generateNativeMethod(boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
         String methodName = methodDeclaration.getNameAsString();
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
         Type methodReturnType = methodDeclaration.getType();
         boolean isStatic = methodDeclaration.isStatic();
-        boolean isReturnValue = idlMethod.isReturnValue;
         boolean isClassOrInterfaceType = methodReturnType.isClassOrInterfaceType();
 
         // Clone some generated idl method settings
@@ -346,7 +350,7 @@ public class IDLMethodParser {
         return nativeMethod;
     }
 
-    private static ReturnStmt getReturnStmt(MethodDeclaration idlMethodDeclaration) {
+    public static ReturnStmt getReturnStmt(MethodDeclaration idlMethodDeclaration) {
         BlockStmt blockStmt = idlMethodDeclaration.getBody().get();
         NodeList<Statement> statements = blockStmt.getStatements();
         if(statements.size() > 0) {

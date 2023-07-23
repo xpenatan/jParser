@@ -7,13 +7,12 @@
 
 class NormalClass : public ParentClass
 {
+public:
     int hiddenInt = 1;
-
     ReturnClass valueReturnClass;
     ReturnClass * pointerReturnClass;
     ReturnClass * nullPointerReturnClass;
 
-public:
     NormalClass();
     NormalClass(int c, ParamClass & refParamClass);
     NormalClass(ParamClass * pointerParamClass, ParamClass & refParamClass, ParamClass valueParamClass);

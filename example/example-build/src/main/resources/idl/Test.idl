@@ -4,6 +4,10 @@ interface ParentClass {
 };
 
 interface NormalClass {
+//    attribute long hiddenInt;
+//    attribute ReturnClass pointerReturnClass;
+//    [Value]attribute ReturnClass valueReturnClass;
+
     void NormalClass();
     void NormalClass(long c, [Ref]ParamClass refParamClass);
     void NormalClass(ParamClass pointerParamClass, [Ref]ParamClass refParamClass, [Value]ParamClass valueParamClass);
