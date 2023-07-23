@@ -30,3 +30,4 @@ out/
 **/webapp/**
 **/example-core/src/**
 **/example-desktop/src/**
+**/example-teavm/src/**

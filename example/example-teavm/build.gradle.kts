@@ -11,6 +11,9 @@ dependencies {
     }
     testImplementation(project(":example:example-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testImplementation("org.teavm:teavm-core:0.9.0-dev-7")
+    testImplementation("org.teavm:teavm-classlib:0.9.0-dev-7")
+    testImplementation("org.teavm:teavm-junit:0.9.0-dev-7")
 }
 
 tasks.named("clean") {
@@ -22,9 +25,7 @@ tasks.named("clean") {
 
 val tasksOrder = tasks.register<GradleBuild>("prepareTest") {
     tasks = listOf(
-            ":example:example-build:clean",
-            ":example:example-core:clean",
-            ":example:example-build:generateNativeProject",
+            ":example:example-desktop:test",
             "compileTestJava"
     )
 }
@@ -32,4 +33,14 @@ val tasksOrder = tasks.register<GradleBuild>("prepareTest") {
 tasks.named("test") {
     dependsOn(tasksOrder)
     mustRunAfter(tasksOrder)
+}
+
+tasks.test {
+    systemProperty("teavm.junit.target", "${project.buildDir.absolutePath }/js-tests")
+    systemProperty("teavm.junit.js.runner", "browser-firefox")
+    systemProperty("teavm.junit.threads", "1")
+    systemProperty("teavm.junit.minified", false)
+    systemProperty("teavm.junit.optimized", false)
+    systemProperty("teavm.junit.js.decodeStack", false)
+    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
 }

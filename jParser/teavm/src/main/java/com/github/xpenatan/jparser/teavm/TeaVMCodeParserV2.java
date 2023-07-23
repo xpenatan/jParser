@@ -9,13 +9,9 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
 
     private final String module;
 
-    public TeaVMCodeParserV2(String module, IDLReader idlReader) {
-        super(HEADER_CMD, idlReader);
-        this.module = module;
-    }
-
-    public TeaVMCodeParserV2(String basePackage, String module, IDLReader idlReader) {
+    public TeaVMCodeParserV2(IDLReader idlReader, String module, String basePackage) {
         super(basePackage, HEADER_CMD, idlReader);
         this.module = module;
+        generateClass = true;
     }
 }
