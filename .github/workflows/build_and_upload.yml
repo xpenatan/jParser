@@ -1,9 +1,17 @@
-name: Deploy Libs
+name: Build and Upload
 
 on:
-  push:
-    branches:
-      - master
+  workflow_call:
+    inputs:
+      isRelease:
+        required: true
+        type: boolean
+      shouldUpload:
+        required: true
+        type: boolean
+
+env:
+  RELEASE: ${{ inputs.isRelease }}
 
 jobs:
   build_Linux:
@@ -34,6 +42,7 @@ jobs:
         run: ./gradlew build
 
       - name: Upload to repository
+        if: ${{ inputs.shouldUpload }}
         run: ./gradlew publish
         env:
           USER: ${{ secrets.USER }}
