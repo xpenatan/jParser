@@ -14,8 +14,6 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ReturnStmt;
-import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
@@ -32,8 +30,6 @@ import java.util.List;
 public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
     private static final String HEADER_CMD = "C++";
-
-    private static final String CPOINTER = "cPointer";
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
 
@@ -144,104 +140,6 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
         generateNativeAnnotation(idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
     }
 
-    @Override
-    public void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
-        // IDL parser generate our empty methods with default return values.
-        // We now modify it to match C++ api calls
-
-        String idlMethodName = idlMethodDeclaration.getNameAsString();
-        NodeList<Parameter> idlMethodParameters = idlMethodDeclaration.getParameters();
-        Type idlMethodReturnType = idlMethodDeclaration.getType();
-        MethodDeclaration nativeMethod = null;
-
-        {
-            // Clone some generated idl method settings
-            nativeMethod = new MethodDeclaration();
-            nativeMethod.setName(idlMethodName + "NATIVE");
-            nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
-            nativeMethod.removeBody();
-            nativeMethod.addAndGetParameter("long", "this_addr");
-
-            for(int i = 0; i < idlMethodParameters.size(); i++) {
-                Parameter parameter = idlMethodParameters.get(i);
-                String nameAsString = parameter.getNameAsString();
-                Type type = parameter.getType();
-                if(type.isPrimitiveType()) {
-                    nativeMethod.addParameter(type.clone(), nameAsString);
-                }
-                else {
-                    String pointerMethod = nameAsString + "_addr";
-                    nativeMethod.addParameter("long", pointerMethod);
-                }
-            }
-            // If the return type is an object we need to return a pointer.
-            if(idlMethodReturnType.isClassOrInterfaceType()) {
-                // Class Object needs to return a pointer
-                Type type = StaticJavaParser.parseType(long.class.getSimpleName());
-                nativeMethod.setType(type);
-            }
-            else {
-                nativeMethod.setType(idlMethodReturnType);
-            }
-            generateNativeAnnotation(idlMethod, classDeclaration, idlMethodDeclaration, nativeMethod);
-        }
-        // Check if the generated method does not exist in the original class
-        if(!JParserHelper.containsMethod(classDeclaration, nativeMethod)) {
-            MethodCallExpr caller = null;
-            {
-                // Generate the method caller
-                caller = new MethodCallExpr();
-                caller.setName(nativeMethod.getNameAsString());
-                caller.addArgument(CPOINTER);
-                for(int i = 0; i < idlMethodParameters.size(); i++) {
-                    Parameter parameter = idlMethodParameters.get(i);
-                    Type type = parameter.getType();
-                    String paramName = parameter.getNameAsString();
-                    if(type.isClassOrInterfaceType()) {
-                        String typeName = parameter.getType().toString();
-                        paramName = paramName + ".getCPointer()";
-                    }
-                    caller.addArgument(paramName);
-                }
-            }
-
-            if(idlMethodReturnType.isVoidType()) {
-                // void types just call the method.
-                BlockStmt blockStmt = idlMethodDeclaration.getBody().get();
-                blockStmt.addStatement(caller);
-            }
-            else if(idlMethodReturnType.isClassOrInterfaceType()) {
-                // Class object needs to generate some code.
-                BlockStmt blockStmt = generateObjectPointerReturnType(unit, classDeclaration, idlMethodDeclaration, caller);
-                idlMethodDeclaration.setBody(blockStmt);
-            }
-            else {
-                // Should be a primitive return type.
-                ReturnStmt returnStmt = getReturnStmt(idlMethodDeclaration);
-                returnStmt.setExpression(caller);
-            }
-            classDeclaration.getMembers().add(nativeMethod);
-            generateGdxMethod(unit, classDeclaration, idlMethodDeclaration, nativeMethod, caller);
-        }
-    }
-
-    protected void generateGdxMethod(CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, MethodDeclaration nativeMethod, MethodCallExpr caller) {
-    }
-
-    private ReturnStmt getReturnStmt(MethodDeclaration idlMethodDeclaration) {
-        BlockStmt blockStmt = idlMethodDeclaration.getBody().get();
-        NodeList<Statement> statements = blockStmt.getStatements();
-        if(statements.size() > 0) {
-            // Find the return block and add the caller
-            Statement statement = blockStmt.getStatement(0);
-            return (ReturnStmt)statement;
-        }
-        else {
-            // should not go here
-            throw new RuntimeException("Should not go here");
-        }
-    }
-
     private void generateNativeAnnotation(IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, MethodDeclaration nativeMethod) {
         NodeList<Parameter> nativeParameters = nativeMethod.getParameters();
         Type returnType = idlMethodDeclaration.getType();
@@ -256,11 +154,6 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
         String content = null;
 
         if(returnType.isVoidType()) {
-//            if(isAttribute) {
-//                Expression expression = caller.getArguments().get(0);
-//                methodCaller = methodName + " = " + expression.toString();
-//            }
-
             if(isStatic) {
                 content = STATIC_GET_METHOD_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
             }
