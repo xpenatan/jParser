@@ -225,5 +225,5 @@ public abstract class DefaultCodeParser implements CodeParser {
         }
     }
 
-    protected abstract void setJavaBodyNativeCMD(String content, MethodDeclaration methodDeclaration);
+    protected abstract void setJavaBodyNativeCMD(String content, MethodDeclaration nativeMethodDeclaration);
 }

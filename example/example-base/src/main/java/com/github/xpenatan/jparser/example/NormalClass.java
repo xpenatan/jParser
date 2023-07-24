@@ -10,6 +10,10 @@ public class NormalClass extends ParentClass {
         initObject(aNative, true);
     }
 
+    /*[-teaVM;-NATIVE]
+        var jsObj = new exampleLib.NormalClass();
+        return exampleLib.getPointer(jsObj);
+    */
     /*[-C++;-NATIVE]
         return (jlong)new NormalClass();
     */

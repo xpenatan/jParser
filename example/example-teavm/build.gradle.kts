@@ -14,6 +14,7 @@ dependencies {
     testImplementation(project(":example:example-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
     testImplementation("org.teavm:teavm-core:0.9.0-dev-7")
+    testImplementation("org.teavm:teavm-jso-apis:0.9.0-dev-7")
     testImplementation("org.teavm:teavm-classlib:0.9.0-dev-7")
     testImplementation("org.teavm:teavm-junit:0.9.0-dev-7")
 }
@@ -40,6 +41,7 @@ tasks.named("test") {
 tasks.test {
     systemProperty("teavm.junit.target", "${project.buildDir.absolutePath }/js-tests")
     systemProperty("teavm.junit.js.runner", "browser-firefox")
+//    systemProperty("teavm.junit.js.runner", "browser")
     systemProperty("teavm.junit.threads", "1")
     systemProperty("teavm.junit.minified", false)
     systemProperty("teavm.junit.optimized", false)

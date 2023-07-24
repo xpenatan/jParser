@@ -1,17 +1,24 @@
 package com.github.xpenatan.jparser.teavm;
 
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.CastExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
+import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLReader;
+import java.util.List;
 
 public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
 
@@ -47,9 +54,62 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
     }
 
     @Override
+    protected void setJavaBodyNativeCMD(String content, MethodDeclaration nativeMethodDeclaration) {
+        convertNativeMethodLongToInt(nativeMethodDeclaration);
+
+        NodeList<Parameter> parameters = nativeMethodDeclaration.getParameters();
+        int size = parameters.size();
+
+        String param = "";
+
+        for(int i = 0; i < size; i++) {
+            Parameter parameter = parameters.get(i);
+            SimpleName name = parameter.getName();
+            param += name;
+            if(i < size - 1) {
+                param += "\", \"";
+            }
+        }
+
+        convertJavaPrimitiveArrayToJavaScriptReferenceArray(parameters);
+
+        if(content != null) {
+            content = content.replace("\n", "").replace("\r", "").replaceAll("[ ]+", " ");
+            content = content.trim();
+
+            if(!content.isEmpty()) {
+                if(!nativeMethodDeclaration.isAnnotationPresent("JSBody")) {
+                    NormalAnnotationExpr normalAnnotationExpr = nativeMethodDeclaration.addAndGetAnnotation("org.teavm.jso.JSBody");
+                    if(!param.isEmpty()) {
+                        normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
+                    }
+                    normalAnnotationExpr.addPair("script", "\"" + content + "\"");
+                }
+            }
+        }
+    }
+
+    private void convertJavaPrimitiveArrayToJavaScriptReferenceArray(NodeList<Parameter> parameters) {
+        // If you send an array to module and it writes to it, the JSbyRef annotation is required.
+        int size = parameters.size();
+        for(int i = 0; i < size; i++) {
+            Parameter parameter = parameters.get(i);
+            Type type = parameter.getType();
+            if(type.isArrayType()) {
+                ArrayType arrayType = (ArrayType)type;
+                if(arrayType.getComponentType().isPrimitiveType()) {
+                    parameter.addAndGetAnnotation("org.teavm.jso.JSByRef");
+                }
+            }
+        }
+    }
+
+    @Override
     public void onIDLMethodGenerated(JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         // IDL parser generate our empty methods with default return values.
         // We now modify it to match teavm native calls
+
+        convertLongToInt(methodDeclaration, nativeMethod);
 
         NodeList<Parameter> nativeParameters = nativeMethod.getParameters();
         String methodName = methodDeclaration.getNameAsString();
@@ -108,4 +168,39 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
         }
     }
 
+    private static void convertLongToInt(MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
+        //Convert native method params that contains long to int when calling native methods.
+
+        convertNativeMethodLongToInt(nativeMethod);
+
+        BlockStmt blockStmt = methodDeclaration.getBody().get();
+        List<MethodCallExpr> all = blockStmt.findAll(MethodCallExpr.class);
+        for(MethodCallExpr methodCallExpr : all) {
+            NodeList<Expression> arguments = methodCallExpr.getArguments();
+            for(int i = 0; i < arguments.size(); i++) {
+                Expression argument = arguments.get(i);
+                if(argument.isMethodCallExpr()) {
+                    MethodCallExpr methodCall = argument.asMethodCallExpr();
+                    String methodName = methodCall.getNameAsString();
+
+                    if(methodName.contains("getCPointer")) {
+                        Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
+                        CastExpr intCast = new CastExpr(intType, argument);
+                        methodCallExpr.setArgument(i, intCast);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void convertNativeMethodLongToInt(MethodDeclaration nativeMethod) {
+        if(JParserHelper.isLong(nativeMethod.getType())) {
+            nativeMethod.setType(int.class);
+        }
+        for(Parameter parameter : nativeMethod.getParameters()) {
+            if(JParserHelper.isLong(parameter.getType())) {
+                parameter.setType(int.class);
+            }
+        }
+    }
 }
