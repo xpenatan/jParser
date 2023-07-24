@@ -10,7 +10,9 @@ interface NormalClass {
 
     void NormalClass();
     void NormalClass(long c, [Ref]ParamClass refParamClass);
-    void NormalClass(ParamClass pointerParamClass, [Ref]ParamClass refParamClass, [Value]ParamClass valueParamClass);
+
+// Emscripten don't allow param by value
+//    void NormalClass(ParamClass pointerParamClass, [Ref]ParamClass refParamClass, [Value]ParamClass valueParamClass);
 
 //    static DOMString addString(DOMString text);
     [Value] static ReturnClass getStaticReturnValueClass(ParamClass paramClass);
@@ -23,7 +25,9 @@ interface NormalClass {
     ReturnClass getReturnNullPointerClass();
     void refParam([Ref]ParamClass paramClass);
     void pointerParam(ParamClass paramClass);
-    void valueParam([Value]ParamClass paramClass);
+
+    // Emscripten don't allow param by value
+//    void valueParam([Value]ParamClass paramClass);
 
 //    void addIntArrayItems(long [] array);
 };

@@ -20,7 +20,7 @@ public class Main {
 
     private static void generateClassOnly() throws Exception {
         String basePackage = "com.github.xpenatan.jparser.example";
-        String idlPath = "cpp\\Test.idl";
+        String idlPath = "cpp\\exampleLib.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./example-base/src/main/java";
         String genDir = "../example-core/src/main/java";
 
@@ -33,7 +33,7 @@ public class Main {
     private static void generate() throws Exception {
         String libName = "exampleLib";
         String basePackage = "com.github.xpenatan.jparser.example";
-        String idlPath = "cpp\\Test.idl";
+        String idlPath = "cpp\\exampleLib.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./example-base/src/main/java";
 
         IDLReader idlReader = IDLReader.readIDL(idlPath);

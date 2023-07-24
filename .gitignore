@@ -3,7 +3,6 @@
 .*.swp
 .DS_STORE
 *.cache
-*.js
 
 bin/
 target/
