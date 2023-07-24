@@ -28,5 +28,5 @@ out/
 *.ini
 **/webapp/**
 **/lib/core/src/**
-**/lib/desktop/src/**
+**/lib/desktop/src/main/**
 **/lib/teavm/src/main/**
