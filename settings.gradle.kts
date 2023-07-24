@@ -4,8 +4,13 @@ include(":jParser:idl")
 include(":jParser:loader")
 include(":jParser:cpp")
 include(":jParser:teavm")
+
 include(":example:lib:lib-example-build")
 include(":example:lib:lib-example-base")
 include(":example:lib:lib-example-core")
 include(":example:lib:lib-example-desktop")
 include(":example:lib:lib-example-teavm")
+
+include(":example:app:core")
+include(":example:app:desktop")
+include(":example:app:teavm")
