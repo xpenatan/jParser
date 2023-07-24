@@ -48,7 +48,7 @@ public class Main {
             String basePackage,
             String baseJavaDir
     ) throws Exception {
-        String libsDir = new File("../desktop/src/main/resources/").getCanonicalPath();
+        String libsDir = new File("./build/c++/desktop/").getCanonicalPath();
         String genDir = "../core/src/main/java";
         String libBuildPath = new File("./build/c++/").getCanonicalPath();
         String libSourcePath = libBuildPath + "/src";

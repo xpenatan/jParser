@@ -2,6 +2,12 @@ plugins {
     id("java")
 }
 
+val jarFile = "$projectDir/../generator/build/c++/desktop/exampleLib-natives.jar"
+
+tasks.jar {
+    from(zipTree(jarFile))
+}
+
 dependencies {
     if(LibExt.exampleUseRepoLibs) {
         testImplementation("com.github.xpenatan.jParser:jParser-loader:${LibExt.libVersion}")
