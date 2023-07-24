@@ -1,5 +1,5 @@
 dependencies {
-    implementation(project(":example:lib:lib-example-core"))
+    implementation(project(":example:lib:core"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
 }

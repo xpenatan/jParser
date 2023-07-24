@@ -9,7 +9,7 @@ dependencies {
     else {
         testImplementation(project(":jParser:loader"))
     }
-    testImplementation(project(":example:lib:lib-example-core"))
+    testImplementation(project(":example:lib:core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 
@@ -22,9 +22,9 @@ tasks.named("clean") {
 
 val tasksOrder = tasks.register<GradleBuild>("prepareTest") {
     tasks = listOf(
-            ":example:lib:lib-example-build:clean",
-            ":example:lib:lib-example-core:clean",
-            ":example:lib:lib-example-build:generateNativeProject",
+            ":example:lib:generator:clean",
+            ":example:lib:core:clean",
+            ":example:lib:generator:generateNativeProject",
             "compileTestJava"
     )
 }

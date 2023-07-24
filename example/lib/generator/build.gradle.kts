@@ -5,7 +5,7 @@ plugins {
 val mainClassName = "com.github.xpenatan.jparser.example.Main"
 
 dependencies {
-    implementation(project(":example:lib:lib-example-base"))
+    implementation(project(":example:lib:base"))
     if(LibExt.exampleUseRepoLibs) {
         implementation("com.github.xpenatan.jParser:jParser-core:${LibExt.libVersion}")
         implementation("com.github.xpenatan.jParser:jParser-idl:${LibExt.libVersion}")

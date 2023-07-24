@@ -1,6 +1,6 @@
 dependencies {
     implementation(project(":example:app:core"))
-    implementation(project(":example:lib:lib-example-desktop"))
+    implementation(project(":example:lib:desktop"))
 
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl:${LibExt.gdxVersion}")
