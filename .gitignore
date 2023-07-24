@@ -27,6 +27,6 @@ local.properties
 out/
 *.ini
 **/webapp/**
-**/example-core/src/**
-**/example-desktop/src/**
-**/example-teavm/src/main/**
+**/lib-example-core/src/**
+**/lib-example-desktop/src/**
+**/lib-example-teavm/src/main/**

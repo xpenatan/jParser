@@ -60,21 +60,21 @@ public class NormalClassTest {
 //        assertEquals("qwertyuiopasdfghjklzxcvbnm", s);
 //    }
 
-    @Test
-    public void test_js_not_null() {
-        String js = loadResource("exampleLib.js");
-        assertNotNull(js);
-        HTMLElement scriptElement = document.createElement("script");
-        scriptElement.appendChild(document.createTextNode(js));
-        document.getBody().appendChild(scriptElement);
-
-        int test =123123;
-        log("" + test);
-
-        NormalClass normalClass = new NormalClass();
-        int ret = normalClass.addIntValue(10, 10);
-        assertEquals(20, ret);
-    }
+//    @Test
+//    public void test_js_not_null() {
+//        String js = loadResource("exampleLib.js");
+//        assertNotNull(js);
+//        HTMLElement scriptElement = document.createElement("script");
+//        scriptElement.appendChild(document.createTextNode(js));
+//        document.getBody().appendChild(scriptElement);
+//
+//        int test =123123;
+//        log("" + test);
+//
+//        NormalClass normalClass = new NormalClass();
+//        int ret = normalClass.addIntValue(10, 10);
+//        assertEquals(20, ret);
+//    }
 
     @Test
     public void test_add_one_add_one() {

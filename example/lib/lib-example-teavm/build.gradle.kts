@@ -11,7 +11,7 @@ dependencies {
     else {
         testImplementation(project(":jParser:loader"))
     }
-    testImplementation(project(":example:example-core"))
+    testImplementation(project(":example:lib:lib-example-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
     testImplementation("org.teavm:teavm-core:0.9.0-dev-7")
     testImplementation("org.teavm:teavm-jso-apis:0.9.0-dev-7")
@@ -28,7 +28,7 @@ tasks.named("clean") {
 
 val tasksOrder = tasks.register<GradleBuild>("prepareTest") {
     tasks = listOf(
-            ":example:example-desktop:test",
+            ":example:lib:lib-example-desktop:test",
             "compileTestJava"
     )
 }
