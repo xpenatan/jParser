@@ -34,6 +34,7 @@ val tasksOrder = tasks.register<GradleBuild>("tasksOrder") {
 tasks.register("run-app") {
     group = "example-teavm"
     description = "Run teavm app"
-    dependsOn(tasksOrder)
-    mustRunAfter(tasksOrder)
+    val list = listOf("build-app", "jettyRun")
+    dependsOn(list)
+    mustRunAfter(list)
 }

@@ -64,7 +64,7 @@ public class Main {
     }
 
     public static void generateTeaVM(IDLReader idlReader, String libName, String basePackage, String baseJavaDir) throws Exception {
-        String genDir = "../teavm/src/main/java";
+        String genDir = "../teavm/src/main/java/emu/";
         TeaVMCodeParserV2 teavmParser = new TeaVMCodeParserV2(idlReader, libName, basePackage);
         JParser.generate(teavmParser, baseJavaDir, genDir);
     }
