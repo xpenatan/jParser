@@ -116,3 +116,21 @@ configure(libProjects) {
         }
     }
 }
+
+tasks.register("generateFiles") {
+    dependsOn(":example:lib:generator:generateNativeProject")
+    mustRunAfter(":example:lib:generator:generateNativeProject")
+}
+
+tasks.register("buildEmscrip") {
+    dependsOn(":example:lib:generator:buildEmscripten")
+    mustRunAfter(":example:lib:generator:buildEmscripten")
+}
+
+tasks.register("buildAll") {
+    dependsOn("generateFiles", "buildEmscrip")
+    group = "gen"
+    description = "Generate javascript"
+
+    tasks.findByName("buildEmscrip")?.mustRunAfter("generateFiles")
+}
