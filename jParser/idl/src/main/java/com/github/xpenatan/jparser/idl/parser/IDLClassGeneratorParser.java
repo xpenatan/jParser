@@ -53,12 +53,8 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         IDLFile baseIDLFile = IDLReader.parseFile(streamReader, "helper");
         idlReader.fileArray.add(baseIDLFile);
 
-        // Generate class if it does not exist
-        String packagePath = File.separator + basePackage.replace(".", File.separator);
-        String genPath = new File(jParser.genDir + packagePath).getAbsolutePath();
-
         createBaseUnitFromResources(jParser);
-        generateIDLJavaClasses(jParser, genPath);
+        generateIDLJavaClasses(jParser, jParser.genDir);
     }
 
     private void createBaseUnitFromResources(JParser jParser) {
@@ -68,7 +64,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             try {
                 CompilationUnit compilationUnit = StaticJavaParser.parseResource(resource);
                 String genBaseClassPath = jParser.genDir + File.separator + resource;
-                jParser.unitArray.add(new JParserItem(compilationUnit, genBaseClassPath, genBaseClassPath));
+                jParser.unitArray.add(new JParserItem(compilationUnit, genBaseClassPath, jParser.genDir));
             } catch(IOException e) {
                 throw new RuntimeException(e);
             }
@@ -83,21 +79,8 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 String className = idlClass.name;
                 JParserItem parserItem = jParser.getParserUnitItem(className);
                 if(parserItem == null) {
-                    String subPackage = "";
-                    String idlSubPackage = idlFile.subPackage;
-                    if(idlSubPackage != null && !idlSubPackage.trim().isEmpty()) {
-                        String[] split = idlSubPackage.trim().split("\\.");
-                        for(String s : split) {
-                            subPackage += s + File.separator;
-                        }
-                    }
-                    String classPath = genPath + File.separator + subPackage + className + ".java";
-                    CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(classPath);
                     CompilationUnit compilationUnit = setupClass(idlClass);
-                    String code = compilationUnit.toString();
-                    fileDescriptor.writeString(code, false);
-
-                    parserItem = new JParserItem(compilationUnit, classPath, classPath);
+                    parserItem = new JParserItem(compilationUnit, genPath, genPath);
                     jParser.unitArray.add(parserItem);
                 }
             }

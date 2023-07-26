@@ -1,7 +1,7 @@
 package com.github.xpenatan.jparser.example.app;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.github.xpenatan.jparser.example.NormalClass;
+import com.github.xpenatan.jparser.example.lib.NormalClass;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
 
 public class AppTest extends ApplicationAdapter {
@@ -14,7 +14,7 @@ public class AppTest extends ApplicationAdapter {
         int a = 1;
         int b = 1;
         int ret = normalClass.addIntValue(a, b);
-        System.out.println(a + " + "  + b + " = " + ret);
+        System.out.println("addIntValue " + a + " + "  + b + " = " + ret);
     }
 
     @Override

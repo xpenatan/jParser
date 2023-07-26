@@ -1,8 +1,12 @@
+import org.gradle.process.internal.ExecActionFactory
+import java.lang.Thread.sleep
+
 plugins {
     id("java")
+    id("net.freudasoft.gradle-cmake-plugin") version("0.0.2")
 }
 
-val mainClassName = "com.github.xpenatan.jparser.example.Main"
+val mainClassName = "Main"
 
 dependencies {
     implementation(project(":example:lib:base"))
@@ -25,4 +29,34 @@ tasks.register<JavaExec>("generateNativeProject") {
     description = "Generate native project"
     mainClass.set(mainClassName)
     classpath = sourceSets["main"].runtimeClasspath
+    dependsOn("clean")
+    mustRunAfter("clean")
+}
+
+cmake {
+    generator.set("MinGW Makefiles")
+
+    sourceFolder.set(file("$projectDir/src/main/cpp"))
+
+    buildConfig.set("Release")
+    buildTarget.set("install")
+    buildClean.set(true)
+}
+
+tasks.register("buildEmscripten") {
+    dependsOn("cmakeBuild")
+    mustRunAfter("cmakeBuild")
+    group = "gen"
+    description = "Generate javascript"
+
+    doLast {
+        copy{
+            from(
+                "$buildDir/cmake/exampleLib.js",
+                "$buildDir/cmake/exampleLib.wasm.js",
+                "$buildDir/cmake/exampleLib.wasm.wasm"
+            )
+            into("$projectDir/../teavm/src/main/resources")
+        }
+    }
 }

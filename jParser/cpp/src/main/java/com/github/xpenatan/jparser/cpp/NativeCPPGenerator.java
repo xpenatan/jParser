@@ -103,7 +103,7 @@ public class NativeCPPGenerator implements CppGenerator {
     public void addParseFile(JParser jParser, JParserItem jParserItem) {
         String sourceBaseDir = jParser.sourceDir;
         String inputJavaPath = jParserItem.inputPath;
-        String destinationJavaPath = jParserItem.destinationPath;
+        String destinationJavaPath = jParserItem.getFullDestinationPath();
 
         if(javaSegments.size() == 0) {
             return;
@@ -138,7 +138,7 @@ public class NativeCPPGenerator implements CppGenerator {
         String tempPath = cppBuild.file().getAbsolutePath();
         String classes = "";
         for(JParserItem item : jParser.unitArray) {
-            classes += item.destinationPath + " ";
+            classes += item.getFullDestinationPath() + " ";
         }
         File file = new File(jParser.genDir);
         String command = "javac -cp " + this.classpath + " -d " + tempPath + " " + classes;

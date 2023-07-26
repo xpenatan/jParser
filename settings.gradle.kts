@@ -1,9 +1,10 @@
 include(":jParser:core")
 include(":jParser:base")
 include(":jParser:idl")
-include(":jParser:loader")
 include(":jParser:cpp")
 include(":jParser:teavm")
+include(":jParser:loader:loader-core")
+include(":jParser:loader:loader-teavm")
 
 include(":example:lib:generator")
 include(":example:lib:base")

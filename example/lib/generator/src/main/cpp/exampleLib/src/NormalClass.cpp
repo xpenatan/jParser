@@ -1,4 +1,5 @@
 #include "NormalClass.h"
+#include <iostream>
 
 NormalClass::NormalClass()
 {
@@ -8,6 +9,7 @@ NormalClass::NormalClass()
     int b = 2;
     int c = a + b;
     c++;
+    hiddenInt = 2;
 }
 
 NormalClass::NormalClass(int c, ParamClass & refParamClass)
@@ -18,6 +20,7 @@ NormalClass::NormalClass(int c, ParamClass & refParamClass)
     int b = 2;
     int d = a + b + c;
     d++;
+    hiddenInt = 2;
 }
 
 NormalClass::NormalClass(ParamClass * pointerParamClass, ParamClass & refParamClass, ParamClass valueParamClass)
@@ -28,6 +31,7 @@ NormalClass::NormalClass(ParamClass * pointerParamClass, ParamClass & refParamCl
     int b = 2;
     int d = a + b;
     d++;
+    hiddenInt = 2;
 }
 
 int NormalClass::subIntValue(int a, int b, int subValue)
@@ -37,7 +41,12 @@ int NormalClass::subIntValue(int a, int b, int subValue)
 
 int NormalClass::addIntValue(int a, int b)
 {
-    return (a + b) * hiddenInt * hiddenParentInt;
+    std::cout << "hiddenInt: " << hiddenInt << std::endl;
+    std::cout << "hiddenParentInt: " << hiddenParentInt << std::endl;
+    hiddenInt = 20;
+    std::cout << "hiddenInt: " << hiddenInt << std::endl;
+//    return (a + b) * hiddenInt * hiddenParentInt;
+    return (a + b);
 }
 
 ReturnClass NormalClass::getStaticReturnValueClass(ParamClass * paramClass)

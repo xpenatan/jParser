@@ -1,24 +1,34 @@
 package com.github.xpenatan.jparser.teavm;
 
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.CastExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ArrayType;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
+import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLReader;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
 
@@ -200,6 +210,66 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
         for(Parameter parameter : nativeMethod.getParameters()) {
             if(JParserHelper.isLong(parameter.getType())) {
                 parameter.setType(int.class);
+            }
+        }
+    }
+
+    @Override
+    public void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
+        String prefix = "";
+        String packagePrefix = "gen.";
+
+        String packagePrefixPath = packagePrefix.replace(".", File.separator);
+        // Rename all classes to a prefix
+        for(int i = 0; i < parserItems.size(); i++) {
+            JParserItem parserItem = parserItems.get(i);
+            String className = parserItem.className;
+            ClassOrInterfaceDeclaration classDeclaration = parserItem.getClassDeclaration();
+            String newName = prefix + className;
+            parserItem.packagePathName = packagePrefixPath + parserItem.packagePathName;
+            parserItem.className = newName;
+            classDeclaration.setName(newName);
+        }
+
+        // Rename all class inside class names.
+        for(int i = 0; i < parserItems.size(); i++) {
+            JParserItem parserItem = parserItems.get(i);
+            CompilationUnit unit = parserItem.unit;
+            for(ImportDeclaration anImport : unit.getImports()) {
+                Name name = anImport.getName();
+                String importPath = "";
+                Optional<Name> qualifier = name.getQualifier();
+                if(qualifier.isPresent()) {
+                    importPath = qualifier.get().asString();
+                }
+                String identifier = name.getIdentifier();
+                JParserItem parserUnitItem = jParser.getParserUnitItem(prefix + identifier);
+                if(parserUnitItem != null) {
+                    String newImport = packagePrefix + importPath + ".";
+                    anImport.setName(newImport + prefix + identifier);
+                }
+            }
+
+            PackageDeclaration packageDeclaration = unit.getPackageDeclaration().get();
+            String nameAsString1 = packageDeclaration.getNameAsString();
+            packageDeclaration.setName(packagePrefix + nameAsString1);
+
+            for(ConstructorDeclaration constructorDeclaration : unit.findAll(ConstructorDeclaration.class)) {
+                String nameAsString = constructorDeclaration.getNameAsString();
+                JParserItem parserUnitItem = jParser.getParserUnitItem(prefix + nameAsString);
+                if(parserUnitItem != null) {
+                    constructorDeclaration.setName(prefix + nameAsString);
+                }
+            }
+            for(Type type : unit.findAll(Type.class)) {
+                if(type.isClassOrInterfaceType()) {
+                    ClassOrInterfaceType classOrInterfaceType = type.asClassOrInterfaceType();
+                    String nameAsString = classOrInterfaceType.getNameAsString();
+                    JParserItem parserUnitItem = jParser.getParserUnitItem(prefix + nameAsString);
+                    if(parserUnitItem != null) {
+                        classOrInterfaceType.setName(prefix + nameAsString);
+                    }
+                }
             }
         }
     }

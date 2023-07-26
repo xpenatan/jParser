@@ -1,5 +1,3 @@
-package com.github.xpenatan.jparser.example;
-
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.cpp.CPPBuildHelper;
@@ -19,8 +17,8 @@ public class Main {
     }
 
     private static void generateClassOnly() throws Exception {
-        String basePackage = "com.github.xpenatan.jparser.example";
-        String idlPath = "cpp\\exampleLib.idl";
+        String basePackage = "com.github.xpenatan.jparser.example.lib";
+        String idlPath = "src\\main\\cpp\\exampleLib.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
         String genDir = "../core/src/main/java";
 
@@ -32,8 +30,8 @@ public class Main {
 
     private static void generate() throws Exception {
         String libName = "exampleLib";
-        String basePackage = "com.github.xpenatan.jparser.example";
-        String idlPath = "cpp\\exampleLib.idl";
+        String basePackage = "com.github.xpenatan.jparser.example.lib";
+        String idlPath = "src\\main\\cpp\\exampleLib.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
 
         IDLReader idlReader = IDLReader.readIDL(idlPath);
@@ -53,7 +51,7 @@ public class Main {
         String libBuildPath = new File("./build/c++/").getCanonicalPath();
         String libSourcePath = libBuildPath + "/src";
 
-        FileCopyHelper.copyDir( "./cpp/exampleLib/src/", libSourcePath);
+        FileCopyHelper.copyDir( "./src/main/cpp/exampleLib/src/", libSourcePath);
 
         CppGenerator cppGenerator = new NativeCPPGeneratorV2(libSourcePath);
         CppCodeParserV2 cppParser = new CppCodeParserV2(cppGenerator, idlReader, basePackage);
@@ -64,7 +62,7 @@ public class Main {
     }
 
     public static void generateTeaVM(IDLReader idlReader, String libName, String basePackage, String baseJavaDir) throws Exception {
-        String genDir = "../teavm/src/main/java/emu/";
+        String genDir = "../teavm/src/main/java/";
         TeaVMCodeParserV2 teavmParser = new TeaVMCodeParserV2(idlReader, libName, basePackage);
         JParser.generate(teavmParser, baseJavaDir, genDir);
     }

@@ -1,5 +1,3 @@
-package com.github.xpenatan.jparser.example.app;
-
 import com.github.xpenatan.gdx.backends.teavm.TeaBuildConfiguration;
 import com.github.xpenatan.gdx.backends.teavm.TeaBuilder;
 import com.github.xpenatan.gdx.backends.teavm.gen.SkipClass;

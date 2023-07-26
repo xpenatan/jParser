@@ -3,20 +3,21 @@ plugins {
 }
 
 dependencies {
-    implementation("org.teavm:teavm-jso:0.9.0-dev-7")
+    implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
+    implementation(project(":jParser:loader:loader-teavm"))
 
     if(LibExt.exampleUseRepoLibs) {
-        testImplementation("com.github.xpenatan.jParser:jParser-loader:${LibExt.libVersion}")
+        testImplementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
     }
     else {
-        testImplementation(project(":jParser:loader"))
+        testImplementation(project(":jParser:loader:loader-core"))
     }
     testImplementation(project(":example:lib:core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
-    testImplementation("org.teavm:teavm-core:0.9.0-dev-7")
-    testImplementation("org.teavm:teavm-jso-apis:0.9.0-dev-7")
-    testImplementation("org.teavm:teavm-classlib:0.9.0-dev-7")
-    testImplementation("org.teavm:teavm-junit:0.9.0-dev-7")
+    testImplementation("org.teavm:teavm-core:${LibExt.teaVMVersion}")
+    testImplementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
+    testImplementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
+    testImplementation("org.teavm:teavm-junit:${LibExt.teaVMVersion}")
 }
 
 tasks.named("clean") {

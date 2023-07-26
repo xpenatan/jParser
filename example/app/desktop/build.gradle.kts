@@ -8,7 +8,7 @@ dependencies {
 
 val mainClassName = "com.github.xpenatan.jparser.example.app.Main"
 
-tasks.register<JavaExec>("run-app") {
+tasks.register<JavaExec>("run-app-desktop") {
     group = "example-desktop"
     description = "Run desktop app"
     mainClass.set(mainClassName)

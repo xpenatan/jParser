@@ -10,10 +10,10 @@ tasks.jar {
 
 dependencies {
     if(LibExt.exampleUseRepoLibs) {
-        testImplementation("com.github.xpenatan.jParser:jParser-loader:${LibExt.libVersion}")
+        testImplementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
     }
     else {
-        testImplementation(project(":jParser:loader"))
+        testImplementation(project(":jParser:loader:loader-core"))
     }
     testImplementation(project(":example:lib:core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
