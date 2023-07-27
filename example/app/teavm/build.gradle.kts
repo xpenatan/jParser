@@ -27,7 +27,7 @@ tasks.register<JavaExec>("build-app-teavm") {
 tasks.register("run-app-teavm") {
     group = "example-teavm"
     description = "Run teavm app"
-    val list = listOf("build-app-teavm", "jettyRun")
+    val list = listOf(":buildAll", "jettyRun")
     dependsOn(list)
     shouldRunAfter (list)
 }

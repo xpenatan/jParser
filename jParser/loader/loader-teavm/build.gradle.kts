@@ -7,9 +7,7 @@ val moduleName = "loader-teavm"
 dependencies {
     api("com.badlogicgames.gdx:gdx-jnigen-loader:${LibExt.jniGenVersion}")
     implementation("org.teavm:teavm-core:${LibExt.teaVMVersion}")
-//    implementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
-//    implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
-//    implementation("org.teavm:teavm-junit:${LibExt.teaVMVersion}")
+    implementation("com.github.xpenatan.gdx-teavm:backend-teavm:1.0.0-SNAPSHOT")
 }
 
 publishing {

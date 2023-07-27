@@ -33,6 +33,11 @@ allprojects  {
             isAllowInsecureProtocol = true
         }
     }
+
+    configurations.configureEach {
+        // Check for updates every sync
+        resolutionStrategy.cacheChangingModulesFor(0, "seconds")
+    }
 }
 
 var libProjects = mutableSetOf(

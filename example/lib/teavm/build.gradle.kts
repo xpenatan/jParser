@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
     implementation(project(":jParser:loader:loader-teavm"))
+    implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 
     if(LibExt.exampleUseRepoLibs) {
         testImplementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
@@ -22,7 +23,7 @@ dependencies {
 
 tasks.named("clean") {
     doFirst {
-        val srcPath = "$projectDir/src/main/java"
+        val srcPath = "$projectDir/src/main/java/gen"
         project.delete(files(srcPath))
     }
 }
