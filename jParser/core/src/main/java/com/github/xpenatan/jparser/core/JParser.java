@@ -82,12 +82,6 @@ public class JParser {
                 throw new Exception("Couldn't create directory '" + genD + "'");
             }
         }
-        else {
-            fileGenDir.deleteDirectory();
-            if(!fileGenDir.mkdirs()) {
-                throw new Exception("Couldn't create directory '" + genD + "'");
-            }
-        }
         System.out.println("***** GENERATING CODE *****");
         JParser jParser = new JParser(sourceD, genD);
         processDirectory(jParser, fileSourceDir, fileGenDir, excludes, fileSourceDir);
