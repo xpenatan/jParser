@@ -50,8 +50,7 @@ tasks.register("buildEmscripten") {
         copy{
             from(
                 "$buildDir/cmake/exampleLib.js",
-                "$buildDir/cmake/exampleLib.wasm.js",
-                "$buildDir/cmake/exampleLib.wasm.wasm"
+                "$buildDir/cmake/exampleLib.wasm.js"
             )
             into("$projectDir/../teavm/src/main/resources")
         }
