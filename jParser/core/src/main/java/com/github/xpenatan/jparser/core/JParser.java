@@ -100,6 +100,7 @@ public class JParser {
             wrapper.onParseFileStart(jParser, parserItem);
             CompilationUnit compilationUnit = parseJava(jParser, wrapper, parserItem);
             if(compilationUnit != null) {
+                wrapper.onParseFileEnd(jParser, parserItem);
                 parserItems.add(parserItem);
             }
         }
@@ -116,7 +117,6 @@ public class JParser {
             if(codeParsed != null) {
                 generateFile(destinationPath, codeParsed);
             }
-            wrapper.onParseFileEnd(jParser, parserItem);
         }
     }
 

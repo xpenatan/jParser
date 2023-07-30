@@ -22,6 +22,9 @@ public interface CodeParser {
     default void onParseFileStart(JParser jParser, JParserItem parserItem) {
     }
 
+    /**
+     * Called only when the file is ready to save.
+     */
     default void onParseFileEnd(JParser jParser, JParserItem parserItem) {
     }
 
@@ -32,7 +35,7 @@ public interface CodeParser {
     }
 
     /**
-     * Called when parsing is complete and is ready to save to file.
+     * Called when all parsing is complete and is ready to save to file.
      */
     default void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
     }
