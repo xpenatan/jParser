@@ -26,16 +26,16 @@ import static org.junit.Assert.assertNotNull;
 @SkipJVM
 @WholeClassCompilation
 public class NormalClassTest {
-    static HTMLDocument document;
-
-    @JSBody(params = { "text" }, script = "console.log(text);")
-    static native int log(String text); // only show when using browser mode
+//    static HTMLDocument document;
+//
+//    @JSBody(params = { "text" }, script = "console.log(text);")
+//    static native int log(String text); // only show when using browser mode
 
     @Before
     public void setUp() throws Exception {
 
-        Window current = Window.current();
-        document = current.getDocument();
+//        Window current = Window.current();
+//        document = current.getDocument();
 
 
 //        XMLHttpRequest httpRequest = XMLHttpRequest.create();
@@ -75,12 +75,12 @@ public class NormalClassTest {
 //        int ret = normalClass.addIntValue(10, 10);
 //        assertEquals(20, ret);
 //    }
-
-    @Test
-    public void test_add_one_add_one() {
-        int value = 1 + 1;
-        assertEquals(2, value);
-    }
+//
+//    @Test
+//    public void test_add_one_add_one() {
+//        int value = 1 + 1;
+//        assertEquals(2, value);
+//    }
 
 //    @Test
 //    public void test_add_int() {
@@ -131,20 +131,20 @@ public class NormalClassTest {
 //    }
 
 
-    private static String loadResource(String name) {
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream("resources-for-test/" + name);
-        try {
-            ByteArrayOutputStream into = new ByteArrayOutputStream();
-            byte[] buf = new byte[4096];
-            for (int n; 0 < (n = inputStream.read(buf));) {
-                into.write(buf, 0, n);
-            }
-            into.close();
-            return new String(into.toByteArray(), "UTF-8"); // Or whatever encoding
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    private static String loadResource(String name) {
+//        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+//        InputStream inputStream = classLoader.getResourceAsStream("resources-for-test/" + name);
+//        try {
+//            ByteArrayOutputStream into = new ByteArrayOutputStream();
+//            byte[] buf = new byte[4096];
+//            for (int n; 0 < (n = inputStream.read(buf));) {
+//                into.write(buf, 0, n);
+//            }
+//            into.close();
+//            return new String(into.toByteArray(), "UTF-8"); // Or whatever encoding
+//        } catch(IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 }
 

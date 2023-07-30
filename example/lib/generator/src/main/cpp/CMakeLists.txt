@@ -25,7 +25,7 @@ set(INITIAL_MEMORY 67108864 CACHE STRING "Total Memory")
 set(ALLOW_MEMORY_GROWTH 0 CACHE STRING "Allow Memory Growth")
 
 set(EMCC_ARGS
-  -O3
+  -O0
   -g0 -Wall
   --llvm-lto 1
   --post-js glue.js

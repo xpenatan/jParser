@@ -1,5 +1,3 @@
-async function asyncCall() {
-    window.exampleLib = await exampleLib();
-}
-
-asyncCall();
+exampleLib().then(function(r){
+    window.exampleLib = r;
+});

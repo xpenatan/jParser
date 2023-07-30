@@ -1,9 +1,9 @@
 plugins {
     id("org.gretty") version("3.1.0")
 }
-//
+
 gretty {
-    contextPath = '/'
+    contextPath = "/"
     extraResourceBase("build/dist/webapp")
 }
 
@@ -27,7 +27,9 @@ tasks.register<JavaExec>("build-app-teavm") {
 tasks.register("run-app-teavm") {
     group = "example-teavm"
     description = "Run teavm app"
-    val list = listOf(":buildAll", "jettyRun")
+    val list = listOf(":buildAll", "build-app-teavm", "jettyRun")
     dependsOn(list)
-    shouldRunAfter (list)
+
+    tasks.findByName("build-app-teavm")?.mustRunAfter(":buildAll")
+    tasks.findByName("jettyRun")?.mustRunAfter("build-app-teavm")
 }

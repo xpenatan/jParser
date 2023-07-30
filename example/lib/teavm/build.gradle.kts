@@ -8,10 +8,10 @@ dependencies {
     implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 
     if(LibExt.exampleUseRepoLibs) {
-        testImplementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
     }
     else {
-        testImplementation(project(":jParser:loader:loader-core"))
+        implementation(project(":jParser:loader:loader-core"))
     }
     testImplementation(project(":example:lib:core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
@@ -30,7 +30,7 @@ tasks.named("clean") {
 
 val tasksOrder = tasks.register<GradleBuild>("prepareTest") {
     tasks = listOf(
-            ":example:lib:lib-example-desktop:test",
+            ":example:lib:desktop:prepareTest",
             "compileTestJava"
     )
 }

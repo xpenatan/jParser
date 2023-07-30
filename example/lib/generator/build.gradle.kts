@@ -1,6 +1,3 @@
-import org.gradle.process.internal.ExecActionFactory
-import java.lang.Thread.sleep
-
 plugins {
     id("java")
     id("net.freudasoft.gradle-cmake-plugin") version("0.0.2")

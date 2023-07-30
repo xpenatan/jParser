@@ -3,6 +3,12 @@ plugins {
 }
 
 dependencies {
+    if(LibExt.exampleUseRepoLibs) {
+        implementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
+    }
+    else {
+        implementation(project(":jParser:loader:loader-core"))
+    }
 }
 
 tasks.named("clean") {

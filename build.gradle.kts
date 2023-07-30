@@ -132,10 +132,20 @@ tasks.register("buildEmscrip") {
     mustRunAfter(":example:lib:generator:buildEmscripten")
 }
 
+tasks.register("removeBuild") {
+    dependsOn(
+        ":example:lib:generator:clean",
+        ":example:lib:teavm:clean",
+        ":example:lib:desktop:clean",
+        ":example:lib:core:clean"
+    )
+}
+
 tasks.register("buildAll") {
-    dependsOn("generateFiles", "buildEmscrip")
+    dependsOn("generateFiles", "removeBuild", "buildEmscrip")
     group = "gen"
     description = "Generate javascript"
 
     tasks.findByName("buildEmscrip")?.mustRunAfter("generateFiles")
+    tasks.findByName("generateFiles")?.mustRunAfter("removeBuild")
 }
