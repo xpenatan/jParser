@@ -44,7 +44,8 @@ var libProjects = mutableSetOf(
     project(":jParser:core"),
     project(":jParser:base"),
     project(":jParser:idl"),
-    project(":jParser:loader"),
+    project(":jParser:loader:loader-core"),
+    project(":jParser:loader:loader-teavm"),
     project(":jParser:cpp"),
     project(":jParser:teavm")
 )
