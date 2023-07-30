@@ -29,10 +29,12 @@ public class ResourceList {
             final Pattern pattern){
         final ArrayList<String> retval = new ArrayList<String>();
         final File file = new File(element);
-        if(file.isDirectory()){
-            retval.addAll(getResourcesFromDirectory(file, pattern));
-        } else{
-            retval.addAll(getResourcesFromJarFile(file, pattern));
+        if(file.exists()) {
+            if(file.isDirectory()){
+                retval.addAll(getResourcesFromDirectory(file, pattern));
+            } else{
+                retval.addAll(getResourcesFromJarFile(file, pattern));
+            }
         }
         return retval;
     }
