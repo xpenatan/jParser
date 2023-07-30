@@ -108,6 +108,9 @@ public class JParser {
 
         for(int i = 0; i < parserItems.size(); i++) {
             JParserItem parserItem = parserItems.get(i);
+            if(parserItem.notAllowed) {
+                continue;
+            }
             String destinationPath = parserItem.getFullDestinationPath();
             String codeParsed = parserItem.unit.toString();
             if(codeParsed != null) {
