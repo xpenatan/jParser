@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import java.io.File;
 import java.util.List;
@@ -24,13 +25,20 @@ public class JParserItem {
         this.unit = unit;
         this.inputPath = inputPath;
         this.destinationBaseDir = destinationBaseDir;
-
+        List<EnumDeclaration> allEnum = unit.findAll(EnumDeclaration.class);
         List<ClassOrInterfaceDeclaration> all = unit.findAll(ClassOrInterfaceDeclaration.class);
+
         if(all.size() > 0) {
             className = all.get(0).getNameAsString();
             String packageName = unit.getPackageDeclaration().get().getNameAsString();
             this.packagePathName = packageName.replace(".", File.separator);
         }
+        //TODO support enum
+//        else if(allEnum.size() > 0) {
+//            className = allEnum.get(0).getNameAsString();
+//            String packageName = unit.getPackageDeclaration().get().getNameAsString();
+//            this.packagePathName = packageName.replace(".", File.separator);
+//        }
         else {
             notAllowed = true;
             List<CompilationUnit> compiAll = unit.findAll(CompilationUnit.class);
