@@ -13,30 +13,27 @@ public class ExampleLib {
 
     /*[-teaVM;-REPLACE]
      public static void init(Runnable run) {
-        Runnable runnable = new Runnable() {
+        JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
+        OnInitFunction onInitFunction = new OnInitFunction() {
             @Override
-            public void run() {
-                OnInitFunction onInitFunction = new OnInitFunction() {
-                    @Override
-                    public void onInit() {
-                        run.run();
-                    }
-                };
-                load(onInitFunction);
+            public void onInit() {
+                run.run();
             }
         };
-        JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
-        libraryLoader.load("exampleLib.wasm", runnable);
+        setOnLoadInit(onInitFunction);
+        libraryLoader.load("exampleLib");
     }
     */
     public static void init(Runnable run) {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
-        libraryLoader.load("exampleLib", run);
+        libraryLoader.load("exampleLib");
+        run.run();
     }
 
     /*[-teaVM;-REPLACE]
-        @org.teavm.jso.JSBody(params = { "onInitFunction" }, script = "window.exampleLibOnInit = onInitFunction;")
-        private static native void load(OnInitFunction onInitFunction);
+        @org.teavm.jso.JSBody(params = { "onInitFunction" }, script = "window.ExampleLibOnInit = onInitFunction;")
+        private static native void setOnLoadInit(OnInitFunction onInitFunction);
     */
-    public static native void load();
+    /*[-C++;-REMOVE] */
+    public static native void setOnLoadInit();
 }

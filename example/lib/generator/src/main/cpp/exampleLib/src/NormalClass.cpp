@@ -10,6 +10,7 @@ NormalClass::NormalClass()
     int c = a + b;
     c++;
     hiddenInt = 2;
+    std::cout << "constructor hiddenInt: " << hiddenInt << std::endl;
 }
 
 NormalClass::NormalClass(int c, ParamClass & refParamClass)

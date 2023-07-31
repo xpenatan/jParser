@@ -15,21 +15,11 @@ public class JParserLibraryLoader {
         loader = new SharedLibraryLoader(nativesJar);
     }
 
-    @Deprecated
     public void load(String libraryName) {
-        load(libraryName, null, null);
+        load(libraryName, null);
     }
 
-    @Deprecated
     public void load(String libraryName01, String libraryName02) {
-        load(libraryName01, libraryName02, null);
-    }
-
-    public void load(String libraryName, Runnable runnable) {
-        load(libraryName, null, runnable);
-    }
-
-    public void load(String libraryName01, String libraryName02, Runnable runnable) {
         if(libraryName02 != null) {
             if(SharedLibraryLoader.isLinux || SharedLibraryLoader.isMac || SharedLibraryLoader.isWindows) {
                 String dirName = "jparser-lib";
@@ -65,6 +55,5 @@ public class JParserLibraryLoader {
         else {
             loader.load(libraryName01);
         }
-        runnable.run();
     }
 }
