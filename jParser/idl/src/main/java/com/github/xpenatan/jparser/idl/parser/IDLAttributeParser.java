@@ -8,9 +8,6 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
@@ -19,7 +16,6 @@ import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
-import com.github.xpenatan.jparser.idl.IDLMethod;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +25,8 @@ public class IDLAttributeParser {
         if(idlAttribute.skip) {
             return;
         }
+        MethodDeclaration containsSetMethod = containsSetMethod(classOrInterfaceDeclaration, idlAttribute);
+        MethodDeclaration containsGetMethod = containsGetMethod(classOrInterfaceDeclaration, idlAttribute);
 
         String attributeName = idlAttribute.name;
         String attributeType = idlAttribute.type;
@@ -86,7 +84,7 @@ public class IDLAttributeParser {
                 }
             }
         }
-        if(addGet) {
+        if(addGet && !shouldSkipMethod(containsGetMethod)) {
             if(getMethodDeclaration != null) {
                 getMethodDeclaration.remove();
             }
@@ -102,7 +100,7 @@ public class IDLAttributeParser {
                 setupAttributeMethod(idlParser, jParser, idlAttribute, classOrInterfaceDeclaration, getMethodDeclaration);
             }
         }
-        if(addSet) {
+        if(addSet && !shouldSkipMethod(containsSetMethod)) {
             if(setMethodDeclaration != null) {
                 setMethodDeclaration.remove();
             }
@@ -126,5 +124,65 @@ public class IDLAttributeParser {
         if(nativeMethodDeclaration != null) {
             idlParser.onIDLAttributeGenerated(jParser, idlAttribute, classDeclaration, methodDeclaration, nativeMethodDeclaration);
         }
+    }
+
+    public static boolean shouldSkipMethod(MethodDeclaration containsMethod) {
+        if(containsMethod != null) {
+            boolean isNative = containsMethod.isNative();
+            boolean isStatic = containsMethod.isStatic();
+            boolean containsBlockComment = false;
+            Optional<Comment> optionalComment = containsMethod.getComment();
+            if(optionalComment.isPresent()) {
+                Comment comment = optionalComment.get();
+                if(comment instanceof BlockComment) {
+                    BlockComment blockComment = (BlockComment)optionalComment.get();
+                    String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
+                    // Skip if method already exist with header code
+                    if(headerCommands != null) {
+                        if(headerCommands.contains(DefaultCodeParser.CMD_NATIVE)) {
+                            return true;
+                        }
+                        else {
+                            if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
+                                //If skip is found then remove the method
+                                containsMethod.remove();
+                            }
+                            return true;
+                        }
+                    }
+                }
+            }
+            if(isNative) {
+                // It's a dummy method. Remove it and let IDL generate it again.
+                // This is useful to use a base method as an interface and let the generator create the real method.
+                containsMethod.remove();
+            }
+            if(!isNative && !isStatic) {
+                // if a simple method exist, keep it and don't let IDL generate the method.
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static MethodDeclaration containsSetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
+        String[] paramTypes = new String[1];
+        paramTypes[0] = idlAttribute.type;
+        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(idlAttribute.name, paramTypes);
+
+        if(methods.size() > 0) {
+            return methods.get(0);
+        }
+        return null;
+    }
+
+    private static MethodDeclaration containsGetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
+        String[] paramTypes = new String[0];
+        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(idlAttribute.name, paramTypes);
+
+        if(methods.size() > 0) {
+            return methods.get(0);
+        }
+        return null;
     }
 }

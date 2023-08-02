@@ -44,30 +44,30 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
      * When a js method returns a js object, we need get its pointer.
      */
     protected static final String GET_JS_METHOD_OBJ_POINTER_TEMPLATE = "" +
-            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.[METHOD];\n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
     protected static final String GET_JS_METHOD_PRIMITIVE_TEMPLATE = "" +
-            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.[METHOD];\n" +
             "return returnedJSObj;";
 
     protected static final String GET_JS_METHOD_VOID_TEMPLATE = "" +
-            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.[METHOD];";
 
     protected static final String GET_ATTRIBUTE_PRIMITIVE_TEMPLATE = "" +
-            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "return jsObj.get_[ATTRIBUTE]();";
 
     protected static final String GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE = "" +
-            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.get_[ATTRIBUTE]();\n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
     protected static final String SET_ATTRIBUTE_VOID_TEMPLATE = "" +
-            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
 
     private final String module;
@@ -247,6 +247,10 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
 
         BlockStmt blockStmt = methodDeclaration.getBody().get();
         List<MethodCallExpr> all = blockStmt.findAll(MethodCallExpr.class);
+        convertCallerLongToInt(all);
+    }
+
+    public static void convertCallerLongToInt(List<MethodCallExpr> all) {
         for(MethodCallExpr methodCallExpr : all) {
             NodeList<Expression> arguments = methodCallExpr.getArguments();
             for(int i = 0; i < arguments.size(); i++) {
@@ -333,6 +337,10 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
                     }
                 }
             }
+
+            //cast cpointer to int
+            List<MethodCallExpr> all = unit.findAll(MethodCallExpr.class);
+            convertCallerLongToInt(all);
         }
     }
 }
