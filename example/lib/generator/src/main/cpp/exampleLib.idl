@@ -9,7 +9,7 @@ interface NormalClass {
 //    [Value]attribute ReturnClass valueReturnClass;
 
     void NormalClass();
-//    void NormalClass(long c, [Ref]ParamClass refParamClass);
+    void NormalClass(long c, [Ref]ParamClass refParamClass);
 
 // Emscripten don't allow param by value
 //    void NormalClass(ParamClass pointerParamClass, [Ref]ParamClass refParamClass, [Value]ParamClass valueParamClass);

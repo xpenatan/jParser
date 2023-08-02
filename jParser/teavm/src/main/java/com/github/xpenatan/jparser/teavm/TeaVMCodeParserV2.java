@@ -23,6 +23,7 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
+import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLReader;
@@ -129,11 +130,16 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
     }
 
     @Override
+    public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        convertLongToInt(constructorDeclaration.getBody(), nativeMethodDeclaration);
+    }
+
+    @Override
     public void onIDLMethodGenerated(JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         // IDL parser generate our empty methods with default return values.
         // We now modify it to match teavm native calls
 
-        convertLongToInt(methodDeclaration, nativeMethod);
+        convertLongToInt(methodDeclaration.getBody().get(), nativeMethod);
 
         NodeList<Parameter> nativeParameters = nativeMethod.getParameters();
         String methodName = methodDeclaration.getNameAsString();
@@ -193,7 +199,7 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
-        convertLongToInt(methodDeclaration, nativeMethodDeclaration);
+        convertLongToInt(methodDeclaration.getBody().get(), nativeMethodDeclaration);
 
         String returnTypeName = classDeclaration.getNameAsString();
         String attributeName = idlAttribute.name;
@@ -240,12 +246,10 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
         }
     }
 
-    private static void convertLongToInt(MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
+    private static void convertLongToInt(BlockStmt blockStmt, MethodDeclaration nativeMethod) {
         //Convert native method params that contains long to int when calling native methods.
 
         convertNativeMethodLongToInt(nativeMethod);
-
-        BlockStmt blockStmt = methodDeclaration.getBody().get();
         List<MethodCallExpr> all = blockStmt.findAll(MethodCallExpr.class);
         convertCallerLongToInt(all);
     }

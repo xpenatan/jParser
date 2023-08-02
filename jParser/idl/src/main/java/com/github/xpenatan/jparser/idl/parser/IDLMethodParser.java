@@ -137,7 +137,7 @@ public class IDLMethodParser {
     }
 
     public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
-        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, classDeclaration, methodDeclaration);
+        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, methodDeclaration);
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             //Add native method if it does not exist
             classDeclaration.getMembers().add(nativeMethodDeclaration);
@@ -179,6 +179,10 @@ public class IDLMethodParser {
 
     public static void setupCallerParam(boolean isStatic, boolean isReturnValue, MethodCallExpr caller, MethodDeclaration methodDeclaration, String tempFieldName) {
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
+        setupCallerParam(isStatic, isReturnValue, caller, methodParameters, tempFieldName);
+    }
+
+    public static void setupCallerParam(boolean isStatic, boolean isReturnValue, MethodCallExpr caller, NodeList<Parameter> methodParameters, String tempFieldName) {
 
         if(isReturnValue && tempFieldName != null) {
             caller.addArgument(tempFieldName + "." + IDLDefaultCodeParser.CPOINTER_METHOD);
@@ -295,11 +299,16 @@ public class IDLMethodParser {
         }
     }
 
-    public static MethodDeclaration generateNativeMethod(boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
+    public static MethodDeclaration generateNativeMethod(boolean isReturnValue, MethodDeclaration methodDeclaration) {
         String methodName = methodDeclaration.getNameAsString();
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
         Type methodReturnType = methodDeclaration.getType();
         boolean isStatic = methodDeclaration.isStatic();
+
+        return generateNativeMethod(isReturnValue, methodName, methodParameters, methodReturnType, isStatic);
+    }
+
+    public static MethodDeclaration generateNativeMethod(boolean isReturnValue, String methodName, NodeList<Parameter> methodParameters, Type methodReturnType, boolean isStatic) {
         boolean isClassOrInterfaceType = methodReturnType.isClassOrInterfaceType();
 
         // Clone some generated idl method settings
