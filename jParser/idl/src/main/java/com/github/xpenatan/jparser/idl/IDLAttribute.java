@@ -4,6 +4,7 @@ package com.github.xpenatan.jparser.idl;
  * @author xpenatan
  */
 public class IDLAttribute {
+    public IDLFile idlFile;
     public String line;
     public String type;
     public String name;
@@ -14,6 +15,10 @@ public class IDLAttribute {
     public boolean isConst = false;
     public boolean isValue = false;
     public boolean isArray = false;
+
+    public IDLAttribute(IDLFile idlFile) {
+        this.idlFile = idlFile;
+    }
 
     public void initAttribute(String line) {
         this.line = line;

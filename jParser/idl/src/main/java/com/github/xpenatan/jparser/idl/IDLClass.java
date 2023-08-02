@@ -34,7 +34,7 @@ public class IDLClass {
         for(int i = 1; i < classLines.size(); i++) {
             String line = classLines.get(i);
             if(line.contains("attribute ")) {
-                IDLAttribute attribute = new IDLAttribute();
+                IDLAttribute attribute = new IDLAttribute(idlFile);
                 attribute.initAttribute(line);
                 attributes.add(attribute);
             }

@@ -25,13 +25,13 @@ set(INITIAL_MEMORY 67108864 CACHE STRING "Total Memory")
 set(ALLOW_MEMORY_GROWTH 0 CACHE STRING "Allow Memory Growth")
 
 set(EMCC_ARGS
-  -O0
-  -g0 -Wall
+  -O3
+  -std=c++14
   --llvm-lto 1
   --post-js glue.js
   --extern-post-js ../../src/main/cpp/post.js
   --closure 1
-  -s ALLOW_MEMORY_GROWTH=${ALLOW_MEMORY_GROWTH}
+  -s ALLOW_MEMORY_GROWTH=1
   -s ALLOW_TABLE_GROWTH=1
   -s EXPORT_NAME="exampleLib"
   -s MODULARIZE=1
@@ -42,14 +42,11 @@ set(EMCC_ARGS
 )
 
 set(EMCC_JS_ARGS ${EMCC_ARGS}
-  -s AGGRESSIVE_VARIABLE_ELIMINATION=1
-  -s ELIMINATE_DUPLICATE_FUNCTIONS=1
   -s SINGLE_FILE=1
   -s WASM=0
 )
 
 set(EMCC_WASM_ARGS ${EMCC_ARGS}
-  -s BINARYEN_IGNORE_IMPLICIT_TRAPS=1
   -s WASM=1
   -s SINGLE_FILE=1
 )

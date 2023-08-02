@@ -22,6 +22,7 @@ import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
+import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLReader;
@@ -36,6 +37,7 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
+    protected static final String TEMPLATE_TAG_ATTRIBUTE = "[ATTRIBUTE]";
     protected static final String TEMPLATE_TAG_MODULE = "[MODULE]";
 
     /**
@@ -55,6 +57,19 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
             "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
             "jsObj.[METHOD];";
 
+    protected static final String GET_ATTRIBUTE_PRIMITIVE_TEMPLATE = "" +
+            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "return jsObj.get_[ATTRIBUTE]();";
+
+    protected static final String GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE = "" +
+            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "var returnedJSObj = jsObj.get_[ATTRIBUTE]();\n" +
+            "return [MODULE].getPointer(returnedJSObj);";
+
+    protected static final String SET_ATTRIBUTE_VOID_TEMPLATE = "" +
+            "var jsObj = [MODULE].wrapPointer(addr, [MODULE].[TYPE]);\n" +
+            "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
+
     private final String module;
 
     public TeaVMCodeParserV2(IDLReader idlReader, String module, String basePackage) {
@@ -67,11 +82,10 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
     protected void setJavaBodyNativeCMD(String content, MethodDeclaration nativeMethodDeclaration) {
         convertNativeMethodLongToInt(nativeMethodDeclaration);
 
-        NodeList<Parameter> parameters = nativeMethodDeclaration.getParameters();
-        int size = parameters.size();
 
         String param = "";
-
+        NodeList<Parameter> parameters = nativeMethodDeclaration.getParameters();
+        int size = parameters.size();
         for(int i = 0; i < size; i++) {
             Parameter parameter = parameters.get(i);
             SimpleName name = parameter.getName();
@@ -142,7 +156,6 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
             }
         }
 
-
         String returnTypeName = classDeclaration.getNameAsString();
         String methodCaller = caller.toString();
 
@@ -174,6 +187,55 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
                     }
                     normalAnnotationExpr.addPair("script", "\"" + content + "\"");
                 }
+            }
+        }
+    }
+
+    @Override
+    public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        convertLongToInt(methodDeclaration, nativeMethodDeclaration);
+
+        String returnTypeName = classDeclaration.getNameAsString();
+        String attributeName = idlAttribute.name;
+        Type returnType = methodDeclaration.getType();
+
+        String param = "";
+        NodeList<Parameter> parameters = nativeMethodDeclaration.getParameters();
+        int size = parameters.size();
+        for(int i = 0; i < size; i++) {
+            Parameter parameter = parameters.get(i);
+            SimpleName name = parameter.getName();
+            param += name;
+            if(i < size - 1) {
+                param += "\", \"";
+            }
+        }
+
+        String content = null;
+        if(returnType.isVoidType()) {
+            content = SET_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+        }
+        else if(returnType.isClassOrInterfaceType()) {
+            content = GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+        }
+        else {
+            content = GET_ATTRIBUTE_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+        }
+
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String blockComment = header + "\n" + content + "\n";
+        nativeMethodDeclaration.setBlockComment(blockComment);
+
+        content = content.replace("\n", "");
+        content = content.trim();
+
+        if(!content.isEmpty()) {
+            if(!nativeMethodDeclaration.isAnnotationPresent("JSBody")) {
+                NormalAnnotationExpr normalAnnotationExpr = nativeMethodDeclaration.addAndGetAnnotation("org.teavm.jso.JSBody");
+                if(!param.isEmpty()) {
+                    normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
+                }
+                normalAnnotationExpr.addPair("script", "\"" + content + "\"");
             }
         }
     }

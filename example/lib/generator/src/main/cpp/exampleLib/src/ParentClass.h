@@ -4,7 +4,7 @@
 class ParentClass
 {
 protected:
-    int hiddenParentInt = 1;
+//    int hiddenParentInt = 1;
 public:
     ParentClass();
     float addFloatValue(float a, float b);

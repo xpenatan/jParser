@@ -21,7 +21,7 @@ public class ExampleLib {
             }
         };
         setOnLoadInit(onInitFunction);
-        libraryLoader.load("exampleLib");
+        libraryLoader.load("exampleLib.wasm");
     }
     */
     public static void init(Runnable run) {

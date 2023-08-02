@@ -4,34 +4,33 @@ interface ParentClass {
 };
 
 interface NormalClass {
-//    attribute long hiddenInt;
+    attribute long hiddenInt;
 //    attribute ReturnClass pointerReturnClass;
 //    [Value]attribute ReturnClass valueReturnClass;
 
     void NormalClass();
-    void NormalClass(long c, [Ref]ParamClass refParamClass);
+//    void NormalClass(long c, [Ref]ParamClass refParamClass);
 
 // Emscripten don't allow param by value
 //    void NormalClass(ParamClass pointerParamClass, [Ref]ParamClass refParamClass, [Value]ParamClass valueParamClass);
 
 //    static DOMString addString(DOMString text);
-    [Value] static ReturnClass getStaticReturnValueClass(ParamClass paramClass);
-    [Value]ReturnClass getReturnValueClass(ParamClass paramClass);
+//    [Value] static ReturnClass getStaticReturnValueClass(ParamClass paramClass);
+//    [Value]ReturnClass getReturnValueClass(ParamClass paramClass);
 
-    static long subIntValue(long a, long b, optional long subValue);
+//    static long subIntValue(long a, long b, optional long subValue);
     long addIntValue(long a, long b);
-    [Ref]ReturnClass getReturnRefClass();
-    ReturnClass getReturnPointerClass();
-    ReturnClass getReturnNullPointerClass();
-    void refParam([Ref]ParamClass paramClass);
-    void pointerParam(ParamClass paramClass);
+//    [Ref]ReturnClass getReturnRefClass();
+//    ReturnClass getReturnPointerClass();
+//    ReturnClass getReturnNullPointerClass();
+//    void refParam([Ref]ParamClass paramClass);
+//    void pointerParam(ParamClass paramClass);
 
     // Emscripten don't allow param by value
 //    void valueParam([Value]ParamClass paramClass);
 
 //    void addIntArrayItems(long [] array);
 };
-NormalClass implements ParentClass;
 
 interface ParamClass {
     void ParamClass();

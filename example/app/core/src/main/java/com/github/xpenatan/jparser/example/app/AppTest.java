@@ -15,6 +15,13 @@ public class AppTest extends ApplicationAdapter {
                 int b = 1;
                 int ret = normalClass.addIntValue(a, b);
                 System.out.println("addIntValue " + a + " + "  + b + " = " + ret);
+
+                int i = normalClass.hiddenInt();
+                System.out.println("hiddenInt() before: " + i);
+                normalClass.hiddenInt(19);
+                int i2 = normalClass.hiddenInt();
+                System.out.println("hiddenInt() after: " + i2);
+
             }
         });
     }
