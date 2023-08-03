@@ -16,12 +16,14 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
+import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
+import com.github.xpenatan.jparser.idl.parser.IDLMethodParser;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +40,11 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     protected static final String TEMPLATE_TAG_COPY_TYPE = "[COPY_TYPE]";
 
     protected static final String TEMPLATE_TAG_COPY_PARAM = "[COPY_PARAM]";
+
+    protected static final String TEMPLATE_TAG_CONSTRUCTOR = "[CONSTRUCTOR]";
+
+    protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE = "" +
+            "\nreturn (jlong)new [CONSTRUCTOR];\n";
 
     protected static final String STATIC_SET_ATTRIBUTE_VOID_TEMPLATE = "" +
             "\n[TYPE]::[ATTRIBUTE] = [ATTRIBUTE];\n";
@@ -122,6 +129,22 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     public CppCodeParserV2(CppGenerator cppGenerator, IDLReader idlReader, String basePackage) {
         super(basePackage, HEADER_CMD, idlReader);
         this.cppGenerator = cppGenerator;
+    }
+
+    @Override
+    public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        String classTypeName = classDeclaration.getNameAsString();
+
+        NodeList<Parameter> parameters = constructorDeclaration.getParameters();
+        ArrayList<IDLParameter> idParameters = idlConstructor.parameters;
+        String params = getParams(parameters, idParameters);
+
+        String constructor = classTypeName + "(" + params + ")";
+        String content = GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_CONSTRUCTOR, constructor);
+
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String blockComment = header + content;
+        nativeMethodDeclaration.setBlockComment(blockComment);
     }
 
     @Override
@@ -238,9 +261,13 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     }
 
     private static String getParams(IDLMethod idlMethod, MethodDeclaration methodDeclaration) {
-        String param = "";
         NodeList<Parameter> parameters = methodDeclaration.getParameters();
         ArrayList<IDLParameter> idParameters = idlMethod.parameters;
+        return getParams(parameters, idParameters);
+    }
+
+    private static String getParams(NodeList<Parameter> parameters, ArrayList<IDLParameter> idParameters ) {
+        String param = "";
         for(int i = 0; i < parameters.size(); i++) {
             Parameter parameter = parameters.get(i);
             IDLParameter idlParameter = idParameters.get(i);

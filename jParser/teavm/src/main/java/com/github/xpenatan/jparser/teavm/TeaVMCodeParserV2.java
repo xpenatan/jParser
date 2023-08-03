@@ -40,6 +40,11 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
     protected static final String TEMPLATE_TAG_ATTRIBUTE = "[ATTRIBUTE]";
     protected static final String TEMPLATE_TAG_MODULE = "[MODULE]";
+    protected static final String TEMPLATE_TAG_CONSTRUCTOR = "[CONSTRUCTOR]";
+
+    protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE = "" +
+            "var jsObj = new [MODULE].[CONSTRUCTOR];\n" +
+            "return [MODULE].getPointer(jsObj);";
 
     /**
      * When a js method returns a js object, we need get its pointer.
@@ -132,6 +137,47 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
     @Override
     public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
         convertLongToInt(constructorDeclaration.getBody(), nativeMethodDeclaration);
+
+        String param = "";
+
+        String className = classDeclaration.getNameAsString();
+        MethodCallExpr caller = new MethodCallExpr();
+        caller.setName(className);
+
+        NodeList<Parameter> nativeParameters = nativeMethodDeclaration.getParameters();
+
+        int size = nativeParameters.size();
+        for(int i = 0; i < size; i++) {
+            Parameter parameter = nativeParameters.get(i);
+            String paramName = parameter.getNameAsString();
+            caller.addArgument(paramName);
+            param += paramName;
+            if(i < size - 1) {
+                param += "\", \"";
+            }
+        }
+        String constructor = caller.toString();
+
+        String content = null;
+
+        content = GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_CONSTRUCTOR, constructor).replace(TEMPLATE_TAG_MODULE, module);
+
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String blockComment = header + "\n" + content + "\n";
+        nativeMethodDeclaration.setBlockComment(blockComment);
+
+        content = content.replace("\n", "");
+        content = content.trim();
+
+        if(!content.isEmpty()) {
+            if(!nativeMethodDeclaration.isAnnotationPresent("JSBody")) {
+                NormalAnnotationExpr normalAnnotationExpr = nativeMethodDeclaration.addAndGetAnnotation("org.teavm.jso.JSBody");
+                if(!param.isEmpty()) {
+                    normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
+                }
+                normalAnnotationExpr.addPair("script", "\"" + content + "\"");
+            }
+        }
     }
 
     @Override
