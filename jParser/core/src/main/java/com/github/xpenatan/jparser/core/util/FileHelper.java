@@ -1,4 +1,4 @@
-package com.github.xpenatan.jparser.cpp;
+package com.github.xpenatan.jparser.core.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
-public class FileCopyHelper {
+public class FileHelper {
 
     public static ArrayList<String> copyDir(String src, String dest, String... excludes) throws IOException {
         Path srcPath = new File(src).toPath();

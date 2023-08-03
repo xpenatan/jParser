@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
+import com.github.xpenatan.jparser.core.util.FileHelper;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -176,7 +177,7 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     @Override
     public void generate(JParser jParser) {
         try {
-            ArrayList<String> outPath = FileCopyHelper.copyDir(cppSourceDir, cppDestinationDir);
+            ArrayList<String> outPath = FileHelper.copyDir(cppSourceDir, cppDestinationDir);
             for(String path : outPath) {
                 if(!path.endsWith(".h"))
                     continue;

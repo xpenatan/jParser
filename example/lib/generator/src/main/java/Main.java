@@ -3,7 +3,6 @@ import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.cpp.CPPBuildHelper;
 import com.github.xpenatan.jparser.cpp.CppCodeParserV2;
 import com.github.xpenatan.jparser.cpp.CppGenerator;
-import com.github.xpenatan.jparser.cpp.FileCopyHelper;
 import com.github.xpenatan.jparser.cpp.NativeCPPGeneratorV2;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.teavm.TeaVMCodeParserV2;
