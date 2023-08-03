@@ -167,11 +167,6 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
     @Override
     public void addParseFile(JParser jParser, JParserItem parserItem) {
-
-        System.out.println();
-//        String cppInclude = "";
-//
-//        print(true, cppInclude);
     }
 
     @Override
