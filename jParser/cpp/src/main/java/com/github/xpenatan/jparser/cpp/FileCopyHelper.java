@@ -8,16 +8,18 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 
 public class FileCopyHelper {
 
-    public static void copyDir(String src, String dest, String... excludes) throws IOException {
+    public static ArrayList<String> copyDir(String src, String dest, String... excludes) throws IOException {
         Path srcPath = new File(src).toPath();
         Path destPath = new File(dest).toPath();
-        copyDir(srcPath, destPath, excludes);
+        return copyDir(srcPath, destPath, excludes);
     }
 
-    public static void copyDir(Path src, Path dest, String... excludes) throws IOException {
+    public static ArrayList<String> copyDir(Path src, Path dest, String... excludes) throws IOException {
+        ArrayList<String> outPath = new ArrayList<>();
         File directory = dest.toFile();
         if(!directory.exists())
             directory.mkdirs();
@@ -49,6 +51,8 @@ public class FileCopyHelper {
                             parentFile.mkdirs();
                         }
                         Path newDest = file1.toPath();
+                        String canonicalPath = file1.getCanonicalPath();
+                        outPath.add(canonicalPath);
                         Files.copy(path, newDest, StandardCopyOption.REPLACE_EXISTING);
                     }
                     return FileVisitResult.CONTINUE;
@@ -60,5 +64,7 @@ public class FileCopyHelper {
                 }
             });
         }
+
+        return outPath;
     }
 }

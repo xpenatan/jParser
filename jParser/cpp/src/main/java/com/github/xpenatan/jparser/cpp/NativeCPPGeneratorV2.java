@@ -86,8 +86,12 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     private boolean init = true;
 
     public NativeCPPGeneratorV2(String cppSourceDir, String cppDestinationDir) {
-        this.cppSourceDir = cppSourceDir;
-        this.cppDestinationDir = cppDestinationDir;
+        try {
+            this.cppSourceDir = new File(cppSourceDir).getCanonicalPath();
+            this.cppDestinationDir = new File(cppDestinationDir).getCanonicalPath() + File.separator;
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void print(String text) {
@@ -171,12 +175,20 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
     @Override
     public void generate(JParser jParser) {
-        printer.insert(0, printerHeader);
-        print("}");
-        String code = printer.toString();
-
         try {
-            FileCopyHelper.copyDir(cppSourceDir , cppDestinationDir);
+            ArrayList<String> outPath = FileCopyHelper.copyDir(cppSourceDir, cppDestinationDir);
+            for(String path : outPath) {
+                if(!path.endsWith(".h"))
+                    continue;
+                String out = path.replace(cppDestinationDir, "");
+                print(true, "#include <" + out + ">");
+            }
+
+
+
+            printer.insert(0, printerHeader);
+            print("}");
+            String code = printer.toString();
 
             InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
             String helperPath = cppDestinationDir + File.separator + helperName;
@@ -191,6 +203,8 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
             CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
             String include = "#include <" + cppGlueName + ".h>";
             cppFile.writeString(include, false);
+
+
 
         } catch(IOException e) {
             throw new RuntimeException(e);
