@@ -23,7 +23,6 @@ import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
-import com.github.xpenatan.jparser.idl.parser.IDLMethodParser;
 import java.util.ArrayList;
 import java.util.List;
 

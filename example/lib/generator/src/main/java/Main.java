@@ -49,11 +49,10 @@ public class Main {
         String libsDir = new File("./build/c++/desktop/").getCanonicalPath();
         String genDir = "../core/src/main/java";
         String libBuildPath = new File("./build/c++/").getCanonicalPath();
-        String libSourcePath = libBuildPath + "/src";
+        String cppDestinationPath = libBuildPath + "/src";
+        String cppSourceDir = new File("./src/main/cpp/exampleLib/src/").getCanonicalPath();
 
-        FileCopyHelper.copyDir( "./src/main/cpp/exampleLib/src/", libSourcePath);
-
-        CppGenerator cppGenerator = new NativeCPPGeneratorV2(libSourcePath);
+        CppGenerator cppGenerator = new NativeCPPGeneratorV2(cppSourceDir, cppDestinationPath);
         CppCodeParserV2 cppParser = new CppCodeParserV2(cppGenerator, idlReader, basePackage);
         cppParser.generateClass = true;
         JParser.generate(cppParser, baseJavaDir, genDir);

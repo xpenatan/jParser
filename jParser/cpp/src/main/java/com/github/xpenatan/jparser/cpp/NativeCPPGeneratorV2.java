@@ -10,6 +10,7 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,7 +75,8 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         otherTypes.put("Throwable", JavaMethodParser.ArgumentType.Throwable);
     }
 
-    private String jniDir;
+    private String cppSourceDir;
+    private String cppDestinationDir;
     private String cppGlueName = "JNIGlue";
     private String cppGlueHPath;
 
@@ -83,8 +85,9 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
     private boolean init = true;
 
-    public NativeCPPGeneratorV2(String jniDir) {
-        this.jniDir = jniDir;
+    public NativeCPPGeneratorV2(String cppSourceDir, String cppDestinationDir) {
+        this.cppSourceDir = cppSourceDir;
+        this.cppDestinationDir = cppDestinationDir;
     }
 
     private void print(String text) {
@@ -165,6 +168,7 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     @Override
     public void addParseFile(JParser jParser, JParserItem parserItem) {
 
+        System.out.println();
 //        String cppInclude = "";
 //
 //        print(true, cppInclude);
@@ -176,19 +180,26 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         print("}");
         String code = printer.toString();
 
-        InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
-        String helperPath = jniDir + File.separator + helperName;
-        CustomFileDescriptor helperFile = new CustomFileDescriptor(helperPath);
-        helperFile.write(idlHelperClass, false);
+        try {
+            FileCopyHelper.copyDir(cppSourceDir , cppDestinationDir);
 
-        cppGlueHPath = jniDir + File.separator + cppGlueName + ".h";
-        String cppGluePath = jniDir + File.separator + cppGlueName + ".cpp";
-        CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);
-        fileDescriptor.writeString(code, false);
+            InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
+            String helperPath = cppDestinationDir + File.separator + helperName;
+            CustomFileDescriptor helperFile = new CustomFileDescriptor(helperPath);
+            helperFile.write(idlHelperClass, false);
 
-        CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
-        String include = "#include <" + cppGlueName + ".h>";
-        cppFile.writeString(include, false);
+            cppGlueHPath = cppDestinationDir + File.separator + cppGlueName + ".h";
+            String cppGluePath = cppDestinationDir + File.separator + cppGlueName + ".cpp";
+            CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);
+            fileDescriptor.writeString(code, false);
+
+            CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
+            String include = "#include <" + cppGlueName + ".h>";
+            cppFile.writeString(include, false);
+
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Argument getArgument(Parameter parameter) {
