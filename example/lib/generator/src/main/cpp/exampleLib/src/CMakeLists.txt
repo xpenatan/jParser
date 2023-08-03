@@ -5,14 +5,14 @@ INCLUDE_DIRECTORIES(
 
 SET(CPP_SRCS
     NormalClass.cpp
-    ParamClass.cpp
+    subpackage/ParamClass.cpp
     ParentClass.cpp
     ReturnClass.cpp
 )
 
 SET(CPP_HDRS
     NormalClass.h
-    ParamClass.h
+    subpackage/ParamClass.h
     ParentClass.h
     ReturnClass.h
 )
