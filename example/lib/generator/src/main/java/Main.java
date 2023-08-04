@@ -20,8 +20,9 @@ public class Main {
         String idlPath = "src\\main\\cpp\\exampleLib.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
         String genDir = "../core/src/main/java";
+        String cppSourceDir = new File("./src/main/cpp/exampleLib/src/").getCanonicalPath();
 
-        IDLReader idlReader = IDLReader.readIDL(idlPath);
+        IDLReader idlReader = IDLReader.readIDL(idlPath, cppSourceDir);
         IDLDefaultCodeParser idlParser = new IDLDefaultCodeParser(basePackage, "IDL-Test", idlReader);
         idlParser.generateClass = true;
         JParser.generate(idlParser, baseJavaDir, genDir);
@@ -32,10 +33,11 @@ public class Main {
         String basePackage = "com.github.xpenatan.jparser.example.lib";
         String idlPath = "src\\main\\cpp\\exampleLib.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
+        String cppSourceDir = new File("./src/main/cpp/exampleLib/src/").getCanonicalPath();
 
-        IDLReader idlReader = IDLReader.readIDL(idlPath);
+        IDLReader idlReader = IDLReader.readIDL(idlPath, cppSourceDir);
 
-        generateCPP(idlReader, libName, basePackage, baseJavaDir);
+        generateCPP(idlReader, libName, basePackage, baseJavaDir, cppSourceDir);
         generateTeaVM(idlReader, libName, basePackage, baseJavaDir);
     }
 
@@ -43,13 +45,13 @@ public class Main {
             IDLReader idlReader,
             String libName,
             String basePackage,
-            String baseJavaDir
+            String baseJavaDir,
+            String cppSourceDir
     ) throws Exception {
         String libsDir = new File("./build/c++/desktop/").getCanonicalPath();
         String genDir = "../core/src/main/java";
         String libBuildPath = new File("./build/c++/").getCanonicalPath();
         String cppDestinationPath = libBuildPath + "/src";
-        String cppSourceDir = new File("./src/main/cpp/exampleLib/src/").getCanonicalPath();
 
         CppGenerator cppGenerator = new NativeCPPGeneratorV2(cppSourceDir, cppDestinationPath);
         CppCodeParserV2 cppParser = new CppCodeParserV2(cppGenerator, idlReader, basePackage);

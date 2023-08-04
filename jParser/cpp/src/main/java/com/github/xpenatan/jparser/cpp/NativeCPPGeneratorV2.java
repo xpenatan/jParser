@@ -185,8 +185,6 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
                 print(true, "#include <" + out + ">");
             }
 
-
-
             printer.insert(0, printerHeader);
             print("}");
             String code = printer.toString();

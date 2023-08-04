@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
@@ -14,6 +14,19 @@ import java.util.ArrayList;
 public class IDLReader {
 
     public final ArrayList<IDLFile> fileArray = new ArrayList<>();
+
+    public final String cppDir;
+
+    public IDLReader(String cppDir) {
+        String srcPath = null;
+        if(cppDir != null) {
+            try {
+                srcPath = new File(cppDir).getCanonicalPath() + File.separator;
+            } catch(IOException e) {
+            }
+        }
+        this.cppDir = srcPath;
+    }
 
     public IDLClass getClass(String name) {
         for(int i = 0; i < fileArray.size(); i++) {
@@ -26,24 +39,24 @@ public class IDLReader {
         return null;
     }
 
-    public static IDLReader readIDL(String path) {
-        IDLReader reader = new IDLReader();
-        IDLFile idlFile = parseFile(path);
+    public static IDLReader readIDL(String idlDir) {
+        return readIDL(idlDir, null);
+    }
+
+    public static IDLReader readIDL(String idlDir, String cppDir) {
+        IDLReader reader = new IDLReader(cppDir);
+        IDLFile idlFile = parseFile(idlDir);
         reader.fileArray.add(idlFile);
         return reader;
     }
 
     public static IDLFile parseFile(String path) {
-        return parseFile(path, "");
-    }
-
-    public static IDLFile parseFile(String path, String subPackage) {
         path = path.replace("\\", File.separator);
         File file = new File(path);    //creates a new file instance
         if(file.exists()) {
             try {
                 InputStreamReader fr = new FileReader(file);
-                return parseFile(fr, subPackage);
+                return parseFile(fr);
             } catch(FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -52,11 +65,7 @@ public class IDLReader {
     }
 
     public static IDLFile parseFile(InputStreamReader inputStreamReader) {
-        return parseFile(inputStreamReader, "");
-    }
-
-    public static IDLFile parseFile(InputStreamReader inputStreamReader, String subPackage) {
-        IDLFile idlFile = new IDLFile(subPackage);
+        IDLFile idlFile = new IDLFile();
             try {
                 BufferedReader br = new BufferedReader(inputStreamReader);  //creates a buffering character input stream
                 ArrayList<String> lines = new ArrayList<>();

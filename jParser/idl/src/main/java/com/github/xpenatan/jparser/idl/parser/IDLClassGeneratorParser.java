@@ -9,7 +9,7 @@ import com.github.xpenatan.jparser.base.IDLBase;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
-import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
+import com.github.xpenatan.jparser.core.util.FileHelper;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLReader;
@@ -18,7 +18,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -50,7 +54,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         String baseIDLPath = "IDLHelper.idl";
         InputStream resourceAsStream = IDLBase.class.getClassLoader().getResourceAsStream(baseIDLPath);
         InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
-        IDLFile baseIDLFile = IDLReader.parseFile(streamReader, "helper");
+        IDLFile baseIDLFile = IDLReader.parseFile(streamReader);
         idlReader.fileArray.add(baseIDLFile);
 
         createBaseUnitFromResources(jParser);
@@ -74,12 +78,17 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
     }
 
     private void generateIDLJavaClasses(JParser jParser, String genPath) {
+        HashMap<String, String> mapPackage = getClassPackage();
         for(IDLFile idlFile : idlReader.fileArray) {
             for(IDLClass idlClass : idlFile.classArray) {
                 String className = idlClass.name;
                 JParserItem parserItem = jParser.getParserUnitItem(className);
                 if(parserItem == null) {
-                    CompilationUnit compilationUnit = setupClass(idlClass);
+                    String subPackage = "";
+                    if(mapPackage.containsKey(className)) {
+                        subPackage = mapPackage.get(className).replace(File.separator, ".");
+                    }
+                    CompilationUnit compilationUnit = setupClass(idlClass, subPackage);
                     parserItem = new JParserItem(compilationUnit, genPath, genPath);
                     jParser.unitArray.add(parserItem);
                 }
@@ -87,10 +96,32 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         }
     }
 
-    private CompilationUnit setupClass(IDLClass idlClass) {
+    private HashMap<String, String> getClassPackage() {
+        HashMap<String, String> mapPackage = new HashMap<>();
+        String cppDir = idlReader.cppDir;
+        if(cppDir != null) {
+            ArrayList<String> filesFromDir = FileHelper.getFilesFromDir(cppDir);
+            for(String path : filesFromDir) {
+                if(!path.endsWith(".h"))
+                    continue;
+                String out = path.replace(cppDir, "").replace(".h", "");
+
+                Path p = Paths.get(out);
+                Path parent = p.getParent();
+                String className = p.getFileName().toString();
+                String subpackage = "";
+                if(parent != null) {
+                    subpackage = parent.toString();
+                }
+                mapPackage.put(className, subpackage);
+            }
+        }
+        return mapPackage;
+    }
+
+    private CompilationUnit setupClass(IDLClass idlClass, String subPackage) {
         String className = idlClass.name;
         CompilationUnit compilationUnit = new CompilationUnit();
-        String subPackage = idlClass.idlFile.subPackage;
         if(subPackage != null && !subPackage.isEmpty()) {
             subPackage = "." + subPackage;
         }

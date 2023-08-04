@@ -64,6 +64,38 @@ public class FileHelper {
                 }
             });
         }
+        return outPath;
+    }
+
+    public static ArrayList<String> getFilesFromDir(String src) {
+        Path srcPath = new File(src).toPath();
+        try {
+            return copyDir(srcPath);
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static ArrayList<String> copyDir(Path src) throws IOException {
+        ArrayList<String> outPath = new ArrayList<>();
+        String srcFullPath = src.toFile().getCanonicalPath();
+        if(Files.exists(src)) {
+            Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+                    File file = path.toFile();
+                    String fullPath = file.getCanonicalPath();
+                    String name = fullPath.replace(srcFullPath, "");
+                    outPath.add(file.getCanonicalPath());
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path directory, IOException ioException) throws IOException {
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
 
         return outPath;
     }

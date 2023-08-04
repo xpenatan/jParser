@@ -6,12 +6,7 @@ import java.util.ArrayList;
  * @author xpenatan
  */
 public class IDLFile {
-    public final String subPackage;
     public final ArrayList<IDLClass> classArray = new ArrayList<>();
-
-    public IDLFile(String subPackage) {
-        this.subPackage = subPackage;
-    }
 
     public IDLClass getClass(String name) {
         int size = classArray.size();
