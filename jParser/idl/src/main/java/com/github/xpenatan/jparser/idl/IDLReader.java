@@ -46,7 +46,9 @@ public class IDLReader {
     public static IDLReader readIDL(String idlDir, String cppDir) {
         IDLReader reader = new IDLReader(cppDir);
         IDLFile idlFile = parseFile(idlDir);
-        reader.fileArray.add(idlFile);
+        if(idlFile != null) {
+            reader.fileArray.add(idlFile);
+        }
         return reader;
     }
 
