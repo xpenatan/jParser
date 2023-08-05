@@ -1,20 +1,18 @@
 package com.github.xpenatan.jparser.cpp;
 
-import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.Position;
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
-import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
+import com.github.xpenatan.jparser.core.util.RawCodeBlock;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLFile;
@@ -24,7 +22,6 @@ import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.ArrayList;
-import java.util.List;
 
 public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
@@ -100,9 +97,6 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     protected static final String GET_METHOD_PRIMITIVE_TEMPLATE = "" +
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return nativeObject->[METHOD];\n";
-
-    protected static final String OBJECT_CREATION_TEMPLATE = "" +
-            "public static [TYPE] WRAPPER_GEN_01 = new [TYPE](false);";
 
     private CppGenerator cppGenerator;
 
@@ -316,57 +310,24 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
     @Override
     public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
-        super.onParseClassStart(jParser, unit, classOrInterfaceDeclaration);
-        if(idlReader != null) {
-            String nameAsString = classOrInterfaceDeclaration.getNameAsString();
-            IDLClass idlClass = idlReader.getClass(nameAsString);
-            if(idlClass != null && !generateClass) {
-                // Create a static temp object for every module class so any generated method can use to store a pointer.
-                // Also generate a boolean constructor if it's not in the original source code.
-                List<ConstructorDeclaration> constructors = classOrInterfaceDeclaration.getConstructors();
+        String nameAsString = classOrInterfaceDeclaration.getNameAsString();
 
-                if(!classOrInterfaceDeclaration.isAbstract()) {
-                    String replace = OBJECT_CREATION_TEMPLATE.replace(TEMPLATE_TAG_TYPE, nameAsString);
-                    FieldDeclaration bodyDeclaration = (FieldDeclaration)StaticJavaParser.parseBodyDeclaration(replace);
-
-                    boolean containsField = false;
-                    for(BodyDeclaration<?> member : classOrInterfaceDeclaration.getMembers()) {
-                        if(member.isFieldDeclaration()) {
-                            FieldDeclaration fieldDeclaration = member.asFieldDeclaration();
-                            if(fieldDeclaration.equals(bodyDeclaration)) {
-                                containsField = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if(!containsField) {
-                        classOrInterfaceDeclaration.getMembers().add(0, bodyDeclaration);
-                    }
-                }
-
-                boolean containsConstructor = false;
-                boolean containsZeroParamConstructor = false;
-                for(int i = 0; i < constructors.size(); i++) {
-                    ConstructorDeclaration constructorDeclaration = constructors.get(i);
-                    NodeList<Parameter> parameters = constructorDeclaration.getParameters();
-                    if(parameters.size() == 1 && JParserHelper.isBoolean(parameters.get(0).getType())) {
-                        containsConstructor = true;
-                    }
-                    else if(parameters.size() == 0) {
-                        containsZeroParamConstructor = true;
-                    }
-                }
-
-                if(!containsConstructor) {
-                    ConstructorDeclaration constructorDeclaration = classOrInterfaceDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
-                    constructorDeclaration.addParameter("boolean", "cMemoryOwn");
-                }
-                if(!containsZeroParamConstructor) {
-                    classOrInterfaceDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
-                }
-            }
+        String include = classCppPath.get(nameAsString);
+        if(include != null) {
+            String comment = "" +
+                    "/*[-C++;-NATIVE]\n" +
+                    "       #include <" + include + ">\n" +
+                    "    */";
+            Position begin = new Position(0, 0);
+            Position end = new Position(0, 0);
+            Range range = new Range(begin, end);
+            RawCodeBlock blockComment = new RawCodeBlock();
+            blockComment.setRange(range);
+            blockComment.setContent(comment);
+            classOrInterfaceDeclaration.getMembers().add(0, blockComment);
         }
+
+        super.onParseClassStart(jParser, unit, classOrInterfaceDeclaration);
     }
 
     @Override

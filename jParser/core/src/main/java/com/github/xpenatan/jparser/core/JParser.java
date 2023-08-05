@@ -95,7 +95,7 @@ public class JParser {
         ArrayList<JParserItem> parserItems = new ArrayList<>();
         for(int i = 0; i < jParser.unitArray.size(); i++) {
             JParserItem parserItem = jParser.unitArray.get(i);
-            String inputPath = parserItem.inputPath;
+            String inputPath = parserItem.getFullDestinationPath();
             System.out.println(i + " Parsing: " + inputPath);
             wrapper.onParseFileStart(jParser, parserItem);
             CompilationUnit compilationUnit = parseJava(jParser, wrapper, parserItem);

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -86,6 +87,8 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
     private boolean init = true;
 
+    private HashSet<String> includes = new HashSet<>();
+
     public NativeCPPGeneratorV2(String cppSourceDir, String cppDestinationDir) {
         try {
             this.cppSourceDir = new File(cppSourceDir).getCanonicalPath();
@@ -121,7 +124,20 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         Scanner scanner = new Scanner(content);
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
-            print(true, line);
+            if(line.startsWith("#include")) {
+                line = line.replace("\\", "/");
+                line = line.replace("/", File.separator);
+                line = line.replaceFirst("\"", "<");
+                line = line.replace("\"", ">");
+
+                if(!includes.contains(line)) {
+                    includes.add(line);
+                    print(true, line);
+                }
+            }
+            else {
+                print(false, line);
+            }
         }
         scanner.close();
     }
@@ -167,7 +183,6 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         print(content);
         print("}");
         print("");
-        System.out.println();
     }
 
     @Override
@@ -177,13 +192,13 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     @Override
     public void generate(JParser jParser) {
         try {
-            ArrayList<String> outPath = FileHelper.copyDir(cppSourceDir, cppDestinationDir);
-            for(String path : outPath) {
-                if(!path.endsWith(".h"))
-                    continue;
-                String out = path.replace(cppDestinationDir, "");
-                print(true, "#include <" + out + ">");
-            }
+            FileHelper.copyDir(cppSourceDir, cppDestinationDir);
+//            for(String path : outPath) {
+//                if(!path.endsWith(".h"))
+//                    continue;
+//                String out = path.replace(cppDestinationDir, "");
+//                print(true, "#include <" + out + ">");
+//            }
 
             printer.insert(0, printerHeader);
             print("}");
@@ -202,9 +217,6 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
             CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
             String include = "#include <" + cppGlueName + ".h>";
             cppFile.writeString(include, false);
-
-
-
         } catch(IOException e) {
             throw new RuntimeException(e);
         }

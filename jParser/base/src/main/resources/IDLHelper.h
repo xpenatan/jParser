@@ -118,13 +118,13 @@ class DoubleArray {
         int getSize() { return size; }
 };
 
-class CharArray {
+class ByteArray {
     private:
         char * data;
         int size;
     public:
-        CharArray(int size) { data = NULL; resize(size); }
-        ~CharArray() { if(data != NULL) { deleteData(); } }
+        ByteArray(int size) { data = NULL; resize(size); }
+        ~ByteArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();

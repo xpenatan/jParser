@@ -14,6 +14,7 @@ interface NormalClass {
 // Emscripten don't allow param by value
 //    void NormalClass(ParamClass pointerParamClass, [Ref]ParamClass refParamClass, [Value]ParamClass valueParamClass);
 
+//    void setString(DOMString text);
 //    static DOMString addString(DOMString text);
 //    [Value] static ReturnClass getStaticReturnValueClass(ParamClass paramClass);
 //    [Value]ReturnClass getReturnValueClass(ParamClass paramClass);

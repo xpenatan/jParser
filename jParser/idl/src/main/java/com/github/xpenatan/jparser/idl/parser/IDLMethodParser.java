@@ -47,9 +47,9 @@ public class IDLMethodParser {
             "}";
 
     static final String TEMPLATE_TEMP_FIELD = "[TYPE]_TEMP_GEN_[NUM]";
-    static final String TEMPLATE_NEW_FIELD = "[TYPE]_NEW_GEN_[NUM]";
+    static final String TEMPLATE_VALUE_FIELD = "[TYPE]_VALUE_GEN_[NUM]";
     static final String TEMPLATE_TEMP_STATIC_FIELD = "[TYPE]_TEMP_STATIC_GEN_[NUM]";
-    static final String TEMPLATE_NEW_STATIC_FIELD = "[TYPE]_NEW_STATIC_GEN_[NUM]";
+    static final String TEMPLATE_VALUE_STATIC_FIELD = "[TYPE]_VALUE_STATIC_GEN_[NUM]";
 
     static final String TEMPLATE_TAG_METHOD = "[METHOD]";
 
@@ -291,10 +291,10 @@ public class IDLMethodParser {
         }
         else {
             if(isStatic) {
-                return TEMPLATE_NEW_STATIC_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
+                return TEMPLATE_VALUE_STATIC_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
             }
             else {
-                return TEMPLATE_NEW_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
+                return TEMPLATE_VALUE_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
             }
         }
     }

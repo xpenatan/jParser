@@ -19,6 +19,11 @@ NormalClass::NormalClass(ParamClass * pointerParamClass, ParamClass & refParamCl
     pointerReturnClass = new ReturnClass();
 }
 
+void NormalClass::setString(char* text)
+{
+
+}
+
 int NormalClass::subIntValue(int a, int b, int subValue)
 {
     return (a - b) - subValue;

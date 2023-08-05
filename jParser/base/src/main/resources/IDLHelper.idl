@@ -34,8 +34,8 @@ interface DoubleArray {
     long getSize();
 };
 
-interface CharArray {
-    void CharArray(long size);
+interface ByteArray {
+    void ByteArray(long size);
     void resize(long size);
     byte getValue(long index);
     void setValue(long index, byte value);

@@ -128,7 +128,7 @@ public class CPPBuildHelper {
             }
         }
         if(DEBUG_BUILD)
-            win64.cppFlags = "-c -Wall -O0 -mfpmath=sse -msse2 -fmessage-length=0 -m64 -g";
+            win64.cppFlags += " -c -Wall -O0 -mfpmath=sse -msse2 -fmessage-length=0 -m64 -g";
         win64.cppFlags += " -std=c++11";
         return win64;
     }
