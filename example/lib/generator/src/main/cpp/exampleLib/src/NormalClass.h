@@ -26,6 +26,7 @@ public:
 
     static ReturnClass getStaticReturnValueClass(ParamClass * paramClass);
     ReturnClass getReturnValueClass(ParamClass * paramClass);
+    ReturnClass getReturnValueObject();
 
     ReturnClass & getReturnRefClass();
     ReturnClass * getReturnPointerClass();

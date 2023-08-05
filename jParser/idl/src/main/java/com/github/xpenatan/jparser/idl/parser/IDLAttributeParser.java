@@ -123,14 +123,13 @@ public class IDLAttributeParser {
 
     private static void setupAttributeMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
         boolean isValue = idlAttribute.isValue;
-
-        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, isValue, classDeclaration, methodDeclaration);
+        boolean addCopyParam = false;
+        if(isValue && !isSet) {
+            //  When it's a get attribute method we pass a temp c++ object to copy to the returned temp c++ object.
+            addCopyParam = true;
+        }
+        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, isValue, addCopyParam, classDeclaration, methodDeclaration);
         if(nativeMethod != null) {
-            if(isValue && !isSet) {
-                //  When it's a get attribute method we pass a temp c++ object to copy to the returned temp c++ object.
-                String pointerTempObject = "copy_addr";
-                nativeMethod.addParameter("long", pointerTempObject);
-            }
             idlParser.onIDLAttributeGenerated(jParser, idlAttribute, isSet, classDeclaration, methodDeclaration, nativeMethod);
         }
     }

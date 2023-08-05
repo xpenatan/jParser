@@ -22,6 +22,7 @@ interface NormalClass {
 //    static long subIntValue(long a, long b, optional long subValue);
     long addIntValue(long a, long b);
 //    [Ref]ReturnClass getReturnRefClass();
+    [Value]ReturnClass getReturnValueObject();
 //    ReturnClass getReturnPointerClass();
 //    ReturnClass getReturnNullPointerClass();
 //    void refParam([Ref]ParamClass paramClass);

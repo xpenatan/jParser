@@ -76,7 +76,7 @@ public class IDLConstructorParser {
         Type type = StaticJavaParser.parseType(classDeclaration.getNameAsString());
 
         boolean isStatic = true;
-        MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(false, "create", parameters, type, isStatic);
+        MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(false, false, "create", parameters, type, isStatic);
 
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethod)) {
             //Add native method if it does not exist

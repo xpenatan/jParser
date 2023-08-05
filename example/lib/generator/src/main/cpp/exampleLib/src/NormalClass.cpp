@@ -45,6 +45,11 @@ ReturnClass NormalClass::getReturnValueClass(ParamClass * paramClass)
     return valueReturnClass;
 }
 
+ReturnClass NormalClass::getReturnValueObject()
+{
+    return valueReturnClass;
+}
+
 ReturnClass & NormalClass::getReturnRefClass()
 {
     return valueReturnClass;
