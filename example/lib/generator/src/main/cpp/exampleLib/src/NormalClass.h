@@ -31,7 +31,7 @@ public:
     ReturnClass & getReturnRefClass();
     ReturnClass * getReturnPointerClass();
     ReturnClass * getReturnNullPointerClass();
-    void refParam(ParamClass & refParamClass);
+    void refParam(ParamClass & refParamOne, ParamClass & refParamTwo, ParamClass & refParamThree);
     void pointerParam(ParamClass * pointerParamClass);
     void valueParam(ParamClass valueParamClass);
     void addIntArrayItems(int* array, int valueToAdd);

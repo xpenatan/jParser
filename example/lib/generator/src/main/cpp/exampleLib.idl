@@ -17,7 +17,7 @@ interface NormalClass {
 //    void setString(DOMString text);
 //    static DOMString addString(DOMString text);
 //    [Value] static ReturnClass getStaticReturnValueClass(ParamClass paramClass);
-//    [Value]ReturnClass getReturnValueClass(ParamClass paramClass);
+    [Value]ReturnClass getReturnValueClass(ParamClass paramClass);
 
 //    static long subIntValue(long a, long b, optional long subValue);
     long addIntValue(long a, long b);
@@ -25,7 +25,7 @@ interface NormalClass {
     [Value]ReturnClass getReturnValueObject();
 //    ReturnClass getReturnPointerClass();
 //    ReturnClass getReturnNullPointerClass();
-//    void refParam([Ref]ParamClass paramClass);
+    void refParam([Ref]ParamClass refParamOne, [Ref]ParamClass refParamTwo, [Ref]ParamClass refParamThree);
 //    void pointerParam(ParamClass paramClass);
 
     // Emscripten don't allow param by value

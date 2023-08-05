@@ -65,7 +65,7 @@ ReturnClass * NormalClass::getReturnNullPointerClass()
     return nullPointerReturnClass;
 }
 
-void NormalClass::refParam(ParamClass & refParamClass)
+void NormalClass::refParam(ParamClass & refParamOne, ParamClass & refParamTwo, ParamClass & refParamThree)
 {
 }
 
