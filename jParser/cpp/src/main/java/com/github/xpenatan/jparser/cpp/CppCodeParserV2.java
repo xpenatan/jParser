@@ -125,17 +125,6 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
     private final CppGenerator cppGenerator;
 
-    @Deprecated
-    public CppCodeParserV2(String classpath, String jniDir) {
-        this(null, classpath, jniDir);
-    }
-
-    @Deprecated
-    public CppCodeParserV2(IDLReader idlReader, String classpath, String jniDir) {
-        super(HEADER_CMD, idlReader);
-        cppGenerator = new NativeCPPGenerator(classpath, jniDir);
-    }
-
     public CppCodeParserV2(CppGenerator cppGenerator) {
         this(cppGenerator, null);
     }
