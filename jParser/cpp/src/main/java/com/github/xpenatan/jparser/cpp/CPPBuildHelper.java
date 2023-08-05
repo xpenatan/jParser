@@ -27,6 +27,10 @@ public class CPPBuildHelper {
         build(libName, buildPath, cppFlags, null, null, false);
     }
 
+    public static void build(String libName, String buildPath, String libsDir, String [] cppFlags) {
+        build(libName, buildPath, libsDir, cppFlags, null, null, null, false);
+    }
+
     public static void build(String libName, String buildPath, String[] cppFlags, String sharedLibBaseProject, String sharedLibName, boolean includeToJar) {
         build(libName, buildPath, "libs", cppFlags, sharedLibBaseProject, "/src/", sharedLibName, includeToJar);
     }
