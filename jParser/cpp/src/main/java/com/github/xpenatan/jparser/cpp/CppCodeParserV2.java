@@ -16,6 +16,7 @@ import com.github.xpenatan.jparser.core.util.RawCodeBlock;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLFile;
+import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLMethod;
@@ -44,45 +45,45 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
             "\nreturn (jlong)new [CONSTRUCTOR];\n";
 
-    protected static final String STATIC_SET_ATTRIBUTE_VOID_TEMPLATE =
+    protected static final String ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE =
             "\n[TYPE]::[ATTRIBUTE] = [ATTRIBUTE];\n";
 
-    protected static final String SET_ATTRIBUTE_VOID_TEMPLATE =
+    protected static final String ATTRIBUTE_SET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = [ATTRIBUTE];\n";
 
-    protected static final String STATIC_SET_POINTER_ATTRIBUTE_VOID_TEMPLATE =
+    protected static final String ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE =
             "\n[TYPE]::[ATTRIBUTE] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
 
-    protected static final String SET_POINTER_ATTRIBUTE_VOID_TEMPLATE =
+    protected static final String ATTRIBUTE_SET_OBJECT_POINTER_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
 
-    protected static final String STATIC_GET_VALUE_ATTRIBUTE_VOID_TEMPLATE =
+    protected static final String ATTRIBUTE_GET_OBJECT_VALUE_STATIC_TEMPLATE =
             "*(([ATTRIBUTE_TYPE]*)copy_addr) = [TYPE]::[ATTRIBUTE];\n";
 
-    protected static final String GET_VALUE_ATTRIBUTE_VOID_TEMPLATE =
+    protected static final String ATTRIBUTE_GET_OBJECT_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "*(([ATTRIBUTE_TYPE]*)copy_addr) = nativeObject->[ATTRIBUTE];\n";
 
-    protected static final String STATIC_SET_VALUE_ATTRIBUTE_VOID_TEMPLATE =
+    protected static final String ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE =
             "[TYPE]::[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
 
-    protected static final String SET_VALUE_ATTRIBUTE_VOID_TEMPLATE =
+    protected static final String ATTRIBUTE_SET_OBJECT_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
 
-    protected static final String STATIC_GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE =
+    protected static final String ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE =
             "\nreturn (jlong)[TYPE]::[ATTRIBUTE];\n";
 
-    protected static final String GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE =
+    protected static final String ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return (jlong)nativeObject->[ATTRIBUTE];\n";
 
-    protected static final String STATIC_GET_ATTRIBUTE_PRIMITIVE_TEMPLATE =
+    protected static final String ATTRIBUTE_GET_PRIMITIVE_STATIC_TEMPLATE =
             "\nreturn [TYPE]::[ATTRIBUTE];\n";
 
-    protected static final String GET_ATTRIBUTE_PRIMITIVE_TEMPLATE =
+    protected static final String ATTRIBUTE_GET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return nativeObject->[ATTRIBUTE];\n";
 
@@ -171,84 +172,67 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
-        boolean isStatic = methodDeclaration.isStatic();
-        NodeList<Parameter> parameters = methodDeclaration.getParameters();
         String attributeName = idlAttribute.name;
-        boolean isValue = idlAttribute.isValue;
         String classTypeName = classDeclaration.getNameAsString();
-        Type returnType = methodDeclaration.getType();
-        Type nativeReturnType = nativeMethod.getType();
         String attributeType = idlAttribute.type;
-        String content;
-
-        if(nativeReturnType.isVoidType() && isValue) {
-            if(isSet) {
-                if(isStatic) {
-                    content = STATIC_SET_VALUE_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
-                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
-                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
-                }
-                else {
-                    content = SET_VALUE_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
-                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
-                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
-                }
-            }
-            else {
-                if(isStatic) {
-                    content = STATIC_GET_VALUE_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
-                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
-                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
-                }
-                else {
-                    content = GET_VALUE_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
-                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
-                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
-                }
-            }
-        }
-        else if(returnType.isVoidType()) {
-            if(isSet && parameters.size() == 1 && parameters.get(0).getType().isClassOrInterfaceType()) {
-                if(isStatic) {
-                    content = STATIC_SET_POINTER_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
-                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
-                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
-                }
-                else {
-                    content = SET_POINTER_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
-                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
-                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
-                }
-            }
-            else {
-                if(isStatic) {
-                    content = STATIC_SET_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
-                }
-                else {
-                    content = SET_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
-                }
-            }
-        }
-        else if(returnType.isClassOrInterfaceType()) {
-            if(isStatic) {
-                content = STATIC_GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
-            }
-            else {
-                content = GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
-            }
-        }
-        else {
-            if(isStatic) {
-                content = STATIC_GET_ATTRIBUTE_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
-            }
-            else {
-                content = GET_ATTRIBUTE_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
-            }
+        String content = null;
+        IDLAttributeOperation.Op attributeOperation = IDLAttributeOperation.getEnum(isSet, idlAttribute, methodDeclaration, nativeMethod);
+        switch(attributeOperation) {
+            case SET_OBJECT_VALUE:
+                content = ATTRIBUTE_SET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case SET_OBJECT_VALUE_STATIC:
+                content = ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case GET_OBJECT_VALUE:
+                content = ATTRIBUTE_GET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case GET_OBJECT_VALUE_STATIC:
+                content = ATTRIBUTE_GET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case SET_OBJECT_POINTER:
+                content = ATTRIBUTE_SET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case SET_OBJECT_POINTER_STATIC:
+                content = ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case GET_OBJECT_POINTER:
+                content = ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case GET_OBJECT_POINTER_STATIC:
+                content = ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case SET_PRIMITIVE:
+                content = ATTRIBUTE_SET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case SET_PRIMITIVE_STATIC:
+                content = ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case GET_PRIMITIVE:
+                content = ATTRIBUTE_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case GET_PRIMITIVE_STATIC:
+                content = ATTRIBUTE_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
         }
 
-        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
-        String blockComment = header + content;
-        nativeMethod.setBlockComment(blockComment);
+        if(content != null) {
+            String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+            String blockComment = header + content;
+            nativeMethod.setBlockComment(blockComment);
+        }
     }
 
     private void setupMethodGenerated(boolean isReturnRef, boolean isReturnValue, String param, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
