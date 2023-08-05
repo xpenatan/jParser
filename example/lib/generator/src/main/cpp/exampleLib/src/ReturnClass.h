@@ -3,6 +3,8 @@
 
 class ReturnClass
 {
+public:
+    ReturnClass& operator=(const ReturnClass& other);
 };
 
 #endif  //RETURNCLASS_H

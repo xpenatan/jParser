@@ -183,13 +183,12 @@ public class IDLMethodParser {
     }
 
     public static void setupCallerParam(boolean isStatic, boolean isReturnValue, MethodCallExpr caller, NodeList<Parameter> methodParameters, String tempFieldName) {
+        if(!isStatic) {
+            caller.addArgument(IDLDefaultCodeParser.CPOINTER_METHOD);
+        }
 
         if(isReturnValue && tempFieldName != null) {
             caller.addArgument(tempFieldName + "." + IDLDefaultCodeParser.CPOINTER_METHOD);
-        }
-
-        if(!isStatic) {
-            caller.addArgument(IDLDefaultCodeParser.CPOINTER_METHOD);
         }
 
         for(int i = 0; i < methodParameters.size(); i++) {
@@ -280,7 +279,6 @@ public class IDLMethodParser {
     }
 
     private static String getFieldName(String type, int number,  boolean isTemp, boolean isStatic) {
-
         if(isTemp) {
             if(isStatic) {
                 return TEMPLATE_TEMP_STATIC_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
@@ -316,12 +314,6 @@ public class IDLMethodParser {
         nativeMethod.setName(methodName + "NATIVE");
         nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
         nativeMethod.removeBody();
-
-        if(isReturnValue) {
-            // We pass a temp c++ object to copy the returned temp c++ object
-            String pointerTempObject = "copy_addr";
-            nativeMethod.addParameter("long", pointerTempObject);
-        }
 
         if(!isStatic) {
             // Only generate addr if it's not a static method

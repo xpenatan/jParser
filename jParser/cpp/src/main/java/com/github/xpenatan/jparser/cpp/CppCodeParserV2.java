@@ -33,6 +33,8 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
     protected static final String TEMPLATE_TAG_ATTRIBUTE = "[ATTRIBUTE]";
 
+    protected static final String TEMPLATE_TAG_ATTRIBUTE_TYPE = "[ATTRIBUTE_TYPE]";
+
     protected static final String TEMPLATE_TAG_COPY_TYPE = "[COPY_TYPE]";
 
     protected static final String TEMPLATE_TAG_COPY_PARAM = "[COPY_PARAM]";
@@ -48,6 +50,27 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     protected static final String SET_ATTRIBUTE_VOID_TEMPLATE = "" +
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = [ATTRIBUTE];\n";
+
+    protected static final String STATIC_SET_POINTER_ATTRIBUTE_VOID_TEMPLATE = "" +
+            "\n[TYPE]::[ATTRIBUTE] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
+
+    protected static final String SET_POINTER_ATTRIBUTE_VOID_TEMPLATE = "" +
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "nativeObject->[ATTRIBUTE] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
+
+    protected static final String STATIC_GET_VALUE_ATTRIBUTE_VOID_TEMPLATE = "" +
+            "*(([ATTRIBUTE_TYPE]*)copy_addr) = [TYPE]::[ATTRIBUTE];\n";
+
+    protected static final String GET_VALUE_ATTRIBUTE_VOID_TEMPLATE = "" +
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "*(([ATTRIBUTE_TYPE]*)copy_addr) = nativeObject->[ATTRIBUTE];\n";
+
+    protected static final String STATIC_SET_VALUE_ATTRIBUTE_VOID_TEMPLATE = "" +
+            "[TYPE]::[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
+
+    protected static final String SET_VALUE_ATTRIBUTE_VOID_TEMPLATE = "" +
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "nativeObject->[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
 
     protected static final String STATIC_GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE = "" +
             "\nreturn (jlong)[TYPE]::[ATTRIBUTE];\n";
@@ -143,22 +166,67 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     @Override
     public void onIDLMethodGenerated(JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
         String param = getParams(idlMethod, methodDeclaration);
-        generateNativeAnnotation(idlMethod.isReturnRef, idlMethod.isReturnValue, param, classDeclaration, methodDeclaration, nativeMethodDeclaration);
+        setupMethodGenerated(idlMethod.isReturnRef, idlMethod.isReturnValue, param, classDeclaration, methodDeclaration, nativeMethodDeclaration);
     }
 
     @Override
-    public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         boolean isStatic = methodDeclaration.isStatic();
+        NodeList<Parameter> parameters = methodDeclaration.getParameters();
         String attributeName = idlAttribute.name;
+        boolean isValue = idlAttribute.isValue;
         String classTypeName = classDeclaration.getNameAsString();
         Type returnType = methodDeclaration.getType();
+        Type nativeReturnType = nativeMethod.getType();
+        String attributeType = idlAttribute.type;
         String content;
-        if(returnType.isVoidType()) {
-            if(isStatic) {
-                content = STATIC_SET_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+
+        if(nativeReturnType.isVoidType() && isValue) {
+            if(isSet) {
+                if(isStatic) {
+                    content = STATIC_SET_VALUE_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
+                else {
+                    content = SET_VALUE_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
             }
             else {
-                content = SET_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                if(isStatic) {
+                    content = STATIC_GET_VALUE_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
+                else {
+                    content = GET_VALUE_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
+            }
+        }
+        else if(returnType.isVoidType()) {
+            if(isSet && parameters.size() == 1 && parameters.get(0).getType().isClassOrInterfaceType()) {
+                if(isStatic) {
+                    content = STATIC_SET_POINTER_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
+                else {
+                    content = SET_POINTER_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                            .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                            .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
+            }
+            else {
+                if(isStatic) {
+                    content = STATIC_SET_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
+                else {
+                    content = SET_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
             }
         }
         else if(returnType.isClassOrInterfaceType()) {
@@ -180,10 +248,10 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + content;
-        nativeMethodDeclaration.setBlockComment(blockComment);
+        nativeMethod.setBlockComment(blockComment);
     }
 
-    private void generateNativeAnnotation(boolean isReturnRef, boolean isReturnValue, String param, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
+    private void setupMethodGenerated(boolean isReturnRef, boolean isReturnValue, String param, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         Type returnType = methodDeclaration.getType();
         String methodName = methodDeclaration.getNameAsString();
         boolean isStatic = methodDeclaration.isStatic();

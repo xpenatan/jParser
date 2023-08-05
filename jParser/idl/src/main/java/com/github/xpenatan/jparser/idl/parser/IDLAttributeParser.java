@@ -88,7 +88,8 @@ public class IDLAttributeParser {
             if(getMethodDeclaration != null) {
                 getMethodDeclaration.remove();
             }
-            getMethodDeclaration = classOrInterfaceDeclaration.addMethod(attributeName, Modifier.Keyword.PUBLIC);
+            String getMethodName = "get_" + attributeName;
+            getMethodDeclaration = classOrInterfaceDeclaration.addMethod(getMethodName, Modifier.Keyword.PUBLIC);
             getMethodDeclaration.setType(type);
             JParserHelper.addMissingImportType(jParser, unit, type);
             IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, type, getMethodDeclaration);
@@ -97,14 +98,15 @@ public class IDLAttributeParser {
                 idlParser.onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, getMethodDeclaration, true);
             }
             else {
-                setupAttributeMethod(idlParser, jParser, idlAttribute, classOrInterfaceDeclaration, getMethodDeclaration);
+                setupAttributeMethod(idlParser, jParser, idlAttribute, false, classOrInterfaceDeclaration, getMethodDeclaration);
             }
         }
         if(addSet && !shouldSkipMethod(containsSetMethod)) {
             if(setMethodDeclaration != null) {
                 setMethodDeclaration.remove();
             }
-            setMethodDeclaration = classOrInterfaceDeclaration.addMethod(attributeName, Modifier.Keyword.PUBLIC);
+            String setMethodName = "set_" + attributeName;
+            setMethodDeclaration = classOrInterfaceDeclaration.addMethod(setMethodName, Modifier.Keyword.PUBLIC);
             setMethodDeclaration.setStatic(idlAttribute.isStatic);
             Parameter parameter = setMethodDeclaration.addAndGetParameter(type, attributeName);
             Type paramType = parameter.getType();
@@ -114,15 +116,22 @@ public class IDLAttributeParser {
                 idlParser.onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, setMethodDeclaration, true);
             }
             else {
-                setupAttributeMethod(idlParser, jParser, idlAttribute, classOrInterfaceDeclaration, setMethodDeclaration);
+                setupAttributeMethod(idlParser, jParser, idlAttribute, true, classOrInterfaceDeclaration, setMethodDeclaration);
             }
         }
     }
 
-    private static void setupAttributeMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLAttribute idlAttribute, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
-        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, idlAttribute.isValue, classDeclaration, methodDeclaration);
-        if(nativeMethodDeclaration != null) {
-            idlParser.onIDLAttributeGenerated(jParser, idlAttribute, classDeclaration, methodDeclaration, nativeMethodDeclaration);
+    private static void setupAttributeMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
+        boolean isValue = idlAttribute.isValue;
+
+        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, isValue, classDeclaration, methodDeclaration);
+        if(nativeMethod != null) {
+            if(isValue && !isSet) {
+                //  When it's a get attribute method we pass a temp c++ object to copy to the returned temp c++ object.
+                String pointerTempObject = "copy_addr";
+                nativeMethod.addParameter("long", pointerTempObject);
+            }
+            idlParser.onIDLAttributeGenerated(jParser, idlAttribute, isSet, classDeclaration, methodDeclaration, nativeMethod);
         }
     }
 
