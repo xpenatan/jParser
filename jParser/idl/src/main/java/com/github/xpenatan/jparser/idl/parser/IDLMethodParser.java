@@ -33,14 +33,14 @@ import java.util.Optional;
 
 public class IDLMethodParser {
 
-    static final String GET_OBJECT_TEMPLATE = "" +
+    static final String GET_OBJECT_TEMPLATE =
             "{\n" +
             "    long pointer = [METHOD];\n" +
             "    [TYPE]_TEMP_GEN_[NUM].setPointer(pointer);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
 
-    static final String GET_TEMP_OBJECT_TEMPLATE = "" +
+    static final String GET_TEMP_OBJECT_TEMPLATE =
             "{\n" +
             "    [METHOD];\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +

@@ -41,87 +41,87 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
     protected static final String TEMPLATE_TAG_CONSTRUCTOR = "[CONSTRUCTOR]";
 
-    protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE = "" +
+    protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
             "\nreturn (jlong)new [CONSTRUCTOR];\n";
 
-    protected static final String STATIC_SET_ATTRIBUTE_VOID_TEMPLATE = "" +
+    protected static final String STATIC_SET_ATTRIBUTE_VOID_TEMPLATE =
             "\n[TYPE]::[ATTRIBUTE] = [ATTRIBUTE];\n";
 
-    protected static final String SET_ATTRIBUTE_VOID_TEMPLATE = "" +
+    protected static final String SET_ATTRIBUTE_VOID_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = [ATTRIBUTE];\n";
 
-    protected static final String STATIC_SET_POINTER_ATTRIBUTE_VOID_TEMPLATE = "" +
+    protected static final String STATIC_SET_POINTER_ATTRIBUTE_VOID_TEMPLATE =
             "\n[TYPE]::[ATTRIBUTE] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
 
-    protected static final String SET_POINTER_ATTRIBUTE_VOID_TEMPLATE = "" +
+    protected static final String SET_POINTER_ATTRIBUTE_VOID_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
 
-    protected static final String STATIC_GET_VALUE_ATTRIBUTE_VOID_TEMPLATE = "" +
+    protected static final String STATIC_GET_VALUE_ATTRIBUTE_VOID_TEMPLATE =
             "*(([ATTRIBUTE_TYPE]*)copy_addr) = [TYPE]::[ATTRIBUTE];\n";
 
-    protected static final String GET_VALUE_ATTRIBUTE_VOID_TEMPLATE = "" +
+    protected static final String GET_VALUE_ATTRIBUTE_VOID_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "*(([ATTRIBUTE_TYPE]*)copy_addr) = nativeObject->[ATTRIBUTE];\n";
 
-    protected static final String STATIC_SET_VALUE_ATTRIBUTE_VOID_TEMPLATE = "" +
+    protected static final String STATIC_SET_VALUE_ATTRIBUTE_VOID_TEMPLATE =
             "[TYPE]::[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
 
-    protected static final String SET_VALUE_ATTRIBUTE_VOID_TEMPLATE = "" +
+    protected static final String SET_VALUE_ATTRIBUTE_VOID_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
 
-    protected static final String STATIC_GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE = "" +
+    protected static final String STATIC_GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE =
             "\nreturn (jlong)[TYPE]::[ATTRIBUTE];\n";
 
-    protected static final String GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE = "" +
+    protected static final String GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return (jlong)nativeObject->[ATTRIBUTE];\n";
 
-    protected static final String STATIC_GET_ATTRIBUTE_PRIMITIVE_TEMPLATE = "" +
+    protected static final String STATIC_GET_ATTRIBUTE_PRIMITIVE_TEMPLATE =
             "\nreturn [TYPE]::[ATTRIBUTE];\n";
 
-    protected static final String GET_ATTRIBUTE_PRIMITIVE_TEMPLATE = "" +
+    protected static final String GET_ATTRIBUTE_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return nativeObject->[ATTRIBUTE];\n";
 
-    protected static final String COPY_METHOD_VALUE_TEMPLATE = "" +
+    protected static final String COPY_METHOD_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "*(([COPY_TYPE]*)[COPY_PARAM]) = nativeObject->[METHOD];\n";
 
-    protected static final String COPY_STATIC_METHOD_VALUE_TEMPLATE = "" +
+    protected static final String COPY_STATIC_METHOD_VALUE_TEMPLATE =
             "\n*(([COPY_TYPE]*)[COPY_PARAM]) = [TYPE]::[METHOD];\n";
 
-    protected static final String STATIC_CALL_METHOD_VOID_TEMPLATE = "" +
+    protected static final String STATIC_CALL_METHOD_VOID_TEMPLATE =
             "\n[TYPE]::[METHOD];\n";
 
-    protected static final String CALL_METHOD_VOID_TEMPLATE = "" +
+    protected static final String CALL_METHOD_VOID_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[METHOD];\n";
 
-    protected static final String STATIC_GET_METHOD_OBJ_POINTER_TEMPLATE = "" +
+    protected static final String STATIC_GET_METHOD_OBJ_POINTER_TEMPLATE =
             "\nreturn (jlong)[TYPE]::[METHOD];\n";
 
-    protected static final String GET_METHOD_OBJ_POINTER_TEMPLATE = "" +
+    protected static final String GET_METHOD_OBJ_POINTER_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return (jlong)nativeObject->[METHOD];\n";
 
-    protected static final String STATIC_GET_METHOD_OBJ_POINTER_REF_TEMPLATE = "" +
+    protected static final String STATIC_GET_METHOD_OBJ_POINTER_REF_TEMPLATE =
             "\nreturn (jlong)&[TYPE]::[METHOD];\n";
 
-    protected static final String GET_METHOD_OBJ_POINTER_REF_TEMPLATE = "" +
+    protected static final String GET_METHOD_OBJ_POINTER_REF_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return (jlong)&nativeObject->[METHOD];\n";
 
-    protected static final String STATIC_GET_METHOD_PRIMITIVE_TEMPLATE = "" +
+    protected static final String STATIC_GET_METHOD_PRIMITIVE_TEMPLATE =
             "\nreturn [TYPE]::[METHOD];\n";
 
-    protected static final String GET_METHOD_PRIMITIVE_TEMPLATE = "" +
+    protected static final String GET_METHOD_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return nativeObject->[METHOD];\n";
 
-    private CppGenerator cppGenerator;
+    private final CppGenerator cppGenerator;
 
     @Deprecated
     public CppCodeParserV2(String classpath, String jniDir) {

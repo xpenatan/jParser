@@ -42,37 +42,37 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
     protected static final String TEMPLATE_TAG_MODULE = "[MODULE]";
     protected static final String TEMPLATE_TAG_CONSTRUCTOR = "[CONSTRUCTOR]";
 
-    protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE = "" +
+    protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
             "var jsObj = new [MODULE].[CONSTRUCTOR];\n" +
             "return [MODULE].getPointer(jsObj);";
 
     /**
      * When a js method returns a js object, we need get its pointer.
      */
-    protected static final String GET_JS_METHOD_OBJ_POINTER_TEMPLATE = "" +
+    protected static final String GET_JS_METHOD_OBJ_POINTER_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.[METHOD];\n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
-    protected static final String GET_JS_METHOD_PRIMITIVE_TEMPLATE = "" +
+    protected static final String GET_JS_METHOD_PRIMITIVE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.[METHOD];\n" +
             "return returnedJSObj;";
 
-    protected static final String GET_JS_METHOD_VOID_TEMPLATE = "" +
+    protected static final String GET_JS_METHOD_VOID_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.[METHOD];";
 
-    protected static final String GET_ATTRIBUTE_PRIMITIVE_TEMPLATE = "" +
+    protected static final String GET_ATTRIBUTE_PRIMITIVE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "return jsObj.get_[ATTRIBUTE]();";
 
-    protected static final String GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE = "" +
+    protected static final String GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.get_[ATTRIBUTE]();\n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
-    protected static final String SET_ATTRIBUTE_VOID_TEMPLATE = "" +
+    protected static final String SET_ATTRIBUTE_VOID_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
 
@@ -87,8 +87,6 @@ public class TeaVMCodeParserV2 extends IDLDefaultCodeParser {
     @Override
     protected void setJavaBodyNativeCMD(String content, MethodDeclaration nativeMethodDeclaration) {
         convertNativeMethodLongToInt(nativeMethodDeclaration);
-
-
         String param = "";
         NodeList<Parameter> parameters = nativeMethodDeclaration.getParameters();
         int size = parameters.size();
