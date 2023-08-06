@@ -82,8 +82,9 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     private String cppGlueName = "JNIGlue";
     private String cppGlueHPath;
 
-    StringBuilder printer = new StringBuilder();
-    StringBuilder printerHeader = new StringBuilder();
+    StringBuilder mainPrinter = new StringBuilder();
+    StringBuilder headerPrinter = new StringBuilder();
+    StringBuilder codePrinter = new StringBuilder();
 
     private boolean init = true;
 
@@ -98,24 +99,23 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         }
     }
 
-    private void print(String text) {
-        print(false, text);
-    }
-
-    private void print(boolean header, String text) {
+    private void print(PrintType type, String text) {
         if(init) {
             init = false;
-            printerHeader.append("#include <jni.h>\n");
-            printerHeader.append("#include <" + helperName + ">\n");
-            printer.append("\n");
-            printer.append("extern \"C\" {\n");
-            printer.append("\n");
+            headerPrinter.append("#include <jni.h>\n");
+            headerPrinter.append("#include <" + helperName + ">\n");
+            mainPrinter.append("\n");
+            mainPrinter.append("extern \"C\" {\n");
+            mainPrinter.append("\n");
         }
-        if(header) {
-            printerHeader.append(text + "\n");
+        if(type == PrintType.HEADER) {
+            headerPrinter.append(text + "\n");
         }
-        else {
-            printer.append(text + "\n");
+        else if(type == PrintType.MAIN) {
+            mainPrinter.append(text + "\n");
+        }
+        else if(type == PrintType.CODE) {
+            codePrinter.append(text + "\n");
         }
     }
 
@@ -132,11 +132,11 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
                 if(!includes.contains(line)) {
                     includes.add(line);
-                    print(true, line);
+                    print(PrintType.HEADER, line);
                 }
             }
             else {
-                print(false, line);
+                print(PrintType.CODE, line);
             }
         }
         scanner.close();
@@ -184,11 +184,11 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         params += ")";
 
         String fullMethodName =  packageNameCPP + "_" + className + "_" + methodName + paramsType + params;
-        print("JNIEXPORT " + returnType + " JNICALL Java_" + fullMethodName + " {");
+        print(PrintType.MAIN, "JNIEXPORT " + returnType + " JNICALL Java_" + fullMethodName + " {");
         content = "\t" + content.replace("\n", "\n\t");
-        print(content);
-        print("}");
-        print("");
+        print(PrintType.MAIN, content);
+        print(PrintType.MAIN, "}");
+        print(PrintType.MAIN, "");
     }
 
     @Override
@@ -199,16 +199,13 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     public void generate(JParser jParser) {
         try {
             FileHelper.copyDir(cppSourceDir, cppDestinationDir);
-//            for(String path : outPath) {
-//                if(!path.endsWith(".h"))
-//                    continue;
-//                String out = path.replace(cppDestinationDir, "");
-//                print(true, "#include <" + out + ">");
-//            }
 
-            printer.insert(0, printerHeader);
-            print("}");
-            String code = printer.toString();
+            headerPrinter.append("\n");
+
+            mainPrinter.insert(0, codePrinter);
+            mainPrinter.insert(0, headerPrinter);
+            print(PrintType.MAIN, "}");
+            String code = mainPrinter.toString();
 
             InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
             String helperPath = cppDestinationDir + File.separator + helperName;
@@ -285,5 +282,11 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         public String toString () {
             return "Argument [type=" + type + ", name=" + name + ", valueType=" + valueType + "]";
         }
+    }
+
+    enum PrintType {
+        HEADER,
+        CODE,
+        MAIN
     }
 }
