@@ -163,6 +163,8 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
             }
         }
 
+        // https://docs.oracle.com/en/java/javase/17/docs/specs/jni/design.html#native-method-arguments
+
         String paramsType = "";
 
         for(int i = 0; i < arguments.size(); i++) {
