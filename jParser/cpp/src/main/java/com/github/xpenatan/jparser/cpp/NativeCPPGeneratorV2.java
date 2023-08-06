@@ -174,6 +174,10 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         if(!paramsType.isEmpty()) {
             paramsType = "__" + paramsType;
         }
+        else {
+            // Not tested in all cases
+            paramsType += "__";
+        }
 
         params += ")";
 
