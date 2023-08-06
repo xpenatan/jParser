@@ -95,7 +95,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         Path parent = p.getParent();
                         if(parent != null) {
                             String string = parent.toString();
-                            subPackage = string.replace(File.separator, ".");
+                            subPackage = string.replace(File.separator, ".").toLowerCase();
                         }
                     }
                     CompilationUnit compilationUnit = setupClass(idlClass, subPackage);
