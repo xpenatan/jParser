@@ -8,11 +8,8 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
@@ -56,8 +53,14 @@ public class IDLConstructorParser {
             parentName = parent.get().getNameAsString();
         }
         if(!parentName.equals("IDLBase")) {
-            Statement statement = StaticJavaParser.parseStatement("super((byte)1);");
-            constructorDeclaration.getBody().addStatement(0, statement);
+            BlockStmt body = constructorDeclaration.getBody();
+            Optional<Statement> first = body.getStatements().getFirst();
+            if(first.isPresent()) {
+                if(!first.get().isExplicitConstructorInvocationStmt()) {
+                    Statement statement = StaticJavaParser.parseStatement("super((byte)1);");
+                    constructorDeclaration.getBody().addStatement(0, statement);
+                }
+            }
         }
     }
 
