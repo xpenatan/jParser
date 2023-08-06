@@ -142,6 +142,11 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
         String classTypeName = classDeclaration.getNameAsString();
 
+        IDLClass idlClass = idlConstructor.idlFile.getClass(classTypeName);
+        if(idlClass != null) {
+            classTypeName = idlClass.classHeader.prefixName + classTypeName;
+        }
+
         NodeList<Parameter> parameters = constructorDeclaration.getParameters();
         ArrayList<IDLParameter> idParameters = idlConstructor.parameters;
         String params = getParams(parameters, idParameters);
@@ -164,6 +169,11 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
     public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         String attributeName = idlAttribute.name;
         String classTypeName = classDeclaration.getNameAsString();
+        IDLClass idlClass = idlAttribute.idlFile.getClass(classTypeName);
+        if(idlClass != null) {
+            classTypeName = idlClass.classHeader.prefixName + classTypeName;
+        }
+
         String attributeType = idlAttribute.type;
         String content = null;
         IDLAttributeOperation.Op op = IDLAttributeOperation.getEnum(isSet, idlAttribute, methodDeclaration, nativeMethod);
