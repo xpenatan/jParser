@@ -55,11 +55,15 @@ public class IDLConstructorParser {
         if(!parentName.equals("IDLBase")) {
             BlockStmt body = constructorDeclaration.getBody();
             Optional<Statement> first = body.getStatements().getFirst();
+            boolean addSuperByte = true;
             if(first.isPresent()) {
-                if(!first.get().isExplicitConstructorInvocationStmt()) {
-                    Statement statement = StaticJavaParser.parseStatement("super((byte)1);");
-                    constructorDeclaration.getBody().addStatement(0, statement);
+                if(first.get().isExplicitConstructorInvocationStmt()) {
+                    addSuperByte = false;
                 }
+            }
+            if(addSuperByte) {
+                Statement statement = StaticJavaParser.parseStatement("super((byte)1);");
+                constructorDeclaration.getBody().addStatement(0, statement);
             }
         }
     }
