@@ -33,11 +33,15 @@ public class IDLConstructorParser {
             generateConstructor(idlParser, jParser, unit, classOrInterfaceDeclaration, idlConstructor);
         }
 
-        // All classes contain a temp constructor so temp objects can be created
+        // All classes contain a temp constructor so temp objects can be reused
         if(idlParser.baseClassUnit != unit) {
             ClassOrInterfaceDeclaration classDeclaration = JParserHelper.getClassDeclaration(unit);
-            ConstructorDeclaration constructorDeclaration = classDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
-            constructorDeclaration.addParameter("byte", "temp");
+            Optional<ConstructorDeclaration> constructorDeclarationOptional = classDeclaration.getConstructorByParameterTypes("byte");
+            if(constructorDeclarationOptional.isEmpty()) {
+                //Only add temp constructor if it does not exist
+                ConstructorDeclaration constructorDeclaration = classDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
+                constructorDeclaration.addParameter("byte", "temp");
+            }
         }
 
         for(ConstructorDeclaration constructor : classOrInterfaceDeclaration.getConstructors()) {
