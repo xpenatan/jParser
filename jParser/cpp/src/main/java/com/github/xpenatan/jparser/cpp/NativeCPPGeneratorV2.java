@@ -143,21 +143,27 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     }
 
     @Override
-    public void addNativeCode(MethodDeclaration methodDeclaration, String content) {
-        String methodName = methodDeclaration.getNameAsString();
-        ClassOrInterfaceDeclaration classDeclaration = (ClassOrInterfaceDeclaration)methodDeclaration.getParentNode().get();
+    public void addNativeCode(MethodDeclaration nativeMethod, String content) {
+        String methodName = nativeMethod.getNameAsString();
+        boolean isStatic = nativeMethod.isStatic();
+        ClassOrInterfaceDeclaration classDeclaration = (ClassOrInterfaceDeclaration)nativeMethod.getParentNode().get();
         CompilationUnit compilationUnit = classDeclaration.findCompilationUnit().get();
         String packageName = compilationUnit.getPackageDeclaration().get().getNameAsString();
         String className = classDeclaration.getNameAsString();
         String packageNameCPP = packageName.replace(".", "_");
-        String returnTypeStr = methodDeclaration.getType().toString();
+        String returnTypeStr = nativeMethod.getType().toString();
         String returnType = returnTypeStr.equals("void") ? returnTypeStr : getType(returnTypeStr).getJniType();
-
-        String params = "(JNIEnv* env, jclass clazz";
+        String params = "(JNIEnv* env, ";
+        if(isStatic) {
+            params += "jclass clazz";
+        }
+        else {
+            params += "jobject object";
+        }
 
         ArrayList<Argument> arguments = new ArrayList<Argument>();
-        if(methodDeclaration.getParameters() != null) {
-            for(Parameter parameter : methodDeclaration.getParameters()) {
+        if(nativeMethod.getParameters() != null) {
+            for(Parameter parameter : nativeMethod.getParameters()) {
                 Argument argument = getArgument(parameter);
                 arguments.add(argument);
             }
