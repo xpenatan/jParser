@@ -229,6 +229,11 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
         Type returnType = methodDeclaration.getType();
         String methodName = methodDeclaration.getNameAsString();
         String classTypeName = classDeclaration.getNameAsString();
+        IDLClass idlClass = idlMethod.idlFile.getClass(classTypeName);
+        if(idlClass != null) {
+            classTypeName = idlClass.classHeader.prefixName + classTypeName;
+        }
+
         String methodCaller = methodName + "(" + param + ")";
         String content = null;
         IDLMethodOperation.Op op = IDLMethodOperation.getEnum(idlMethod, methodDeclaration, nativeMethod);
