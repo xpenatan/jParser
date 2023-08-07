@@ -88,6 +88,12 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 String className = idlClass.name;
                 JParserItem parserItem = jParser.getParserUnitItem(className);
                 if(parserItem == null) {
+                    String jsImplementation = idlClass.classHeader.jsImplementation;
+                    if(jsImplementation != null) {
+                        //Don't generate class if its js implementation
+                        continue;
+                    }
+
                     String subPackage = "";
                     if(classCppPath.containsKey(className)) {
                         String includeClass = classCppPath.get(className);
