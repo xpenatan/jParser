@@ -4,6 +4,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.comments.BlockComment;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -11,12 +13,16 @@ import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
+import com.github.xpenatan.jparser.core.JParserItem;
+import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
+import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * @author xpenatan
@@ -64,6 +70,26 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
             String nameStr = name.asString();
             IDLClass idlClass = idlReader.getClass(nameStr);
             if(idlClass != null) {
+                Optional<Comment> optionalComment = classOrInterfaceDeclaration.getComment();
+                if(optionalComment.isPresent()) {
+                    Comment comment = optionalComment.get();
+                    if(comment instanceof BlockComment) {
+                        BlockComment blockComment = (BlockComment)optionalComment.get();
+                        String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
+                        // Skip if method already exist with header code
+                        if(headerCommands != null) {
+                            if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
+                                //If skip is found then remove the method
+                                classOrInterfaceDeclaration.remove();
+                                JParserItem parserUnitItem = jParser.getParserUnitItem(nameStr);
+                                if(parserUnitItem != null) {
+                                    parserUnitItem.notAllowed = true;
+                                }
+                                return;
+                            }
+                        }
+                    }
+                }
 
                 if(generateClass) {
                     IDLConstructorParser.generateConstructor(this, jParser, unit, classOrInterfaceDeclaration, idlClass);
