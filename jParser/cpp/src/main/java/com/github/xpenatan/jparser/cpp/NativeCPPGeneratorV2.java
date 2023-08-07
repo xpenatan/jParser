@@ -39,6 +39,14 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         valueTypes.put(JavaMethodParser.ArgumentType.Long.getJniType(), "J");
         valueTypes.put(JavaMethodParser.ArgumentType.Float.getJniType(), "F");
         valueTypes.put(JavaMethodParser.ArgumentType.Double.getJniType(), "D");
+        valueTypes.put(JavaMethodParser.ArgumentType.FloatArray.getJniType(), "_3F");
+        valueTypes.put(JavaMethodParser.ArgumentType.IntegerArray.getJniType(), "_3I");
+        valueTypes.put(JavaMethodParser.ArgumentType.DoubleArray.getJniType(), "_3D");
+        valueTypes.put(JavaMethodParser.ArgumentType.LongArray.getJniType(), "_3J");
+        valueTypes.put(JavaMethodParser.ArgumentType.ShortArray.getJniType(), "_3S");
+        valueTypes.put(JavaMethodParser.ArgumentType.CharArray.getJniType(), "_3C");
+        valueTypes.put(JavaMethodParser.ArgumentType.ByteArray.getJniType(), "_3B");
+        valueTypes.put(JavaMethodParser.ArgumentType.BooleanArray.getJniType(), "_3Z");
         valueTypes.put(JavaMethodParser.ArgumentType.Object.getJniType(), "L");
 
         plainOldDataTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
@@ -175,7 +183,8 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
         for(int i = 0; i < arguments.size(); i++) {
             Argument argument = arguments.get(i);
-            paramsType+= argument.getValueType();
+            String valueType = argument.getValueType();
+            paramsType += valueType;
             params += ", " + argument.getType().getJniType() + " " + argument.getName();
         }
 
@@ -235,7 +244,8 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         String[] typeTokens = parameter.getType().toString().split("\\.");
         String type = typeTokens[typeTokens.length - 1];
         JavaMethodParser.ArgumentType argumentType = getType(type);
-        String valueType = valueTypes.get(argumentType.getJniType());
+        String jniType = argumentType.getJniType();
+        String valueType = valueTypes.get(jniType);
         return new Argument(argumentType, parameter.getNameAsString(), valueType);
     }
 
