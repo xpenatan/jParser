@@ -6,7 +6,7 @@ set(PYTHON ${Python3_EXECUTABLE} CACHE STRING "Python path")
 set(EMSCRIPTEN_ROOT $ENV{EMSDK}/upstream/emscripten CACHE STRING "Emscripten path")
 set(CMAKE_TOOLCHAIN_FILE ${EMSCRIPTEN_ROOT}/cmake/Modules/Platform/Emscripten.cmake)
 set(WEBIDL_BINDER_SCRIPT ${EMSCRIPTEN_ROOT}/tools/webidl_binder.py)
-set(LIB_HEADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/exampleLib.h)
+set(LIB_HEADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Include.h)
 set(LIB_IDL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/exampleLib.idl)
 set(LIB_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/exampleLib/src)
 

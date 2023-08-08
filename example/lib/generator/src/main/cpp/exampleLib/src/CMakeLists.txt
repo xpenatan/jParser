@@ -5,16 +5,18 @@ INCLUDE_DIRECTORIES(
 
 SET(CPP_SRCS
     NormalClass.cpp
-    subpackage/ParamClass.cpp
+    subpackage/ParamData.cpp
     ParentClass.cpp
     ReturnClass.cpp
 )
 
 SET(CPP_HDRS
     NormalClass.h
-    subpackage/ParamClass.h
+    subpackage/ParamData.h
     ParentClass.h
     ReturnClass.h
+    InterfaceClass.h
+    DefaultInterface.h
 )
 
 ADD_LIBRARY(ExampleLib ${CPP_SRCS} ${CPP_HDRS})

@@ -9,15 +9,15 @@ interface NormalClass {
     [Value]attribute ReturnClass valueReturnClass;
 
     void NormalClass();
-    void NormalClass(long c, [Ref]ParamClass refParamClass);
+    void NormalClass(long c, [Ref]ParamData refParamClass);
 
 // Emscripten don't allow param by value
-//    void NormalClass(ParamClass pointerParamClass, [Ref]ParamClass refParamClass, [Value]ParamClass valueParamClass);
+//    void NormalClass(ParamData pointerParamData, [Ref]ParamData refParamData, [Value]ParamData valueParamData);
 
 //    void setString(DOMString text);
 //    static DOMString addString(DOMString text);
-//    [Value] static ReturnClass getStaticReturnValueClass(ParamClass paramClass);
-    [Value]ReturnClass getReturnValueClass(ParamClass paramClass);
+//    [Value] static ReturnClass getStaticReturnValueClass(ParamData paramData);
+    [Value]ReturnClass getReturnValueClass(ParamData paramData);
 
 //    static long subIntValue(long a, long b, optional long subValue);
     long addIntValue(long a, long b);
@@ -25,19 +25,39 @@ interface NormalClass {
     [Value]ReturnClass getReturnValueObject();
 //    ReturnClass getReturnPointerClass();
 //    ReturnClass getReturnNullPointerClass();
-    void refParam([Ref]ParamClass refParamOne, [Ref]ParamClass refParamTwo, [Ref]ParamClass refParamThree);
-//    void pointerParam(ParamClass paramClass);
+    void refParam([Ref]ParamData refParamOne, [Ref]ParamData refParamTwo, [Ref]ParamData refParamThree);
+//    void pointerParam(ParamData paramData);
 
     // Emscripten don't allow param by value
-//    void valueParam([Value]ParamClass paramClass);
+//    void valueParam([Value]ParamData paramData);
 
 //    void addIntArrayItems(long [] array);
-};
 
-interface ParamClass {
-    void ParamClass();
+    void callInterface([Ref]InterfaceClass obj);
 };
+NormalClass implements ParentClass;
 
 interface ReturnClass {
     void ReturnClass();
 };
+
+interface ParamData {
+    void ParamData();
+    attribute long intData;
+    attribute float floatData;
+};
+
+interface InterfaceClass {
+    void onParamCall([Ref]ParamData data);
+};
+
+[JSImplementation="InterfaceClass"]
+interface InterfaceClassImpl {
+    void InterfaceClassImpl();
+    [Const] void onParamCall([Ref]ParamData data);
+};
+
+interface DefaultInterface {
+    void DefaultInterface();
+};
+DefaultInterface implements InterfaceClass;
