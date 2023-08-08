@@ -80,11 +80,6 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
                         if(headerCommands != null) {
                             if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
                                 //If skip is found then remove the method
-                                classOrInterfaceDeclaration.remove();
-                                JParserItem parserUnitItem = jParser.getParserUnitItem(nameStr);
-                                if(parserUnitItem != null) {
-                                    parserUnitItem.notAllowed = true;
-                                }
                                 return;
                             }
                         }
