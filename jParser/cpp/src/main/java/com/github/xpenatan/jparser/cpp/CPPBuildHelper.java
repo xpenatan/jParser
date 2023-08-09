@@ -15,27 +15,16 @@ import java.util.List;
 public class CPPBuildHelper {
     public static boolean DEBUG_BUILD = false;
 
-    public static void build(String libName, String buildPath) {
-        build(libName, buildPath, null, null, null, false);
-    }
+    public static void build(Config config) {
+        String libName = config.libName;
+        String buildPath = config.buildPath;
+        String libsDir = config.libsDir;
+        String[] cppFlags = config.cppFlags;
+        String sharedLibBaseProject = config.sharedLibBaseProject;
+        String sourceFolder = config.sourceFolder;
+        String sharedLibName = config.sharedLibName;
+        boolean includeToJar = config.includeToJar;
 
-    public static void build(String libName, String buildPath, String libsDir) {
-        build(libName, buildPath, libsDir, null, null, null, null, false);
-    }
-
-    public static void build(String libName, String buildPath, String [] cppFlags) {
-        build(libName, buildPath, cppFlags, null, null, false);
-    }
-
-    public static void build(String libName, String buildPath, String libsDir, String [] cppFlags) {
-        build(libName, buildPath, libsDir, cppFlags, null, null, null, false);
-    }
-
-    public static void build(String libName, String buildPath, String[] cppFlags, String sharedLibBaseProject, String sharedLibName, boolean includeToJar) {
-        build(libName, buildPath, "libs", cppFlags, sharedLibBaseProject, "/src/", sharedLibName, includeToJar);
-    }
-
-    public static void build(String libName, String buildPath, String libsDir, String[] cppFlags, String sharedLibBaseProject, String sourceFolder, String sharedLibName, boolean includeToJar) {
         String sharedSrcPath = null;
         try {
             buildPath = buildPath.replace("\\", File.separator);
@@ -50,13 +39,20 @@ public class CPPBuildHelper {
             throw new RuntimeException(e);
         }
         String[] headerDir = null;
-        if(sharedSrcPath != null) {
-            String[] headerDirr = {"src", sharedSrcPath};
-            headerDir = headerDirr;
+
+        if(config.headerDir.isEmpty()) {
+            if(sharedSrcPath != null) {
+                String[] headerDirr = {"src", sharedSrcPath};
+                headerDir = headerDirr;
+            }
+            else {
+                String[] headerDirr = {"src"};
+                headerDir = headerDirr;
+            }
         }
         else {
-            String[] headerDirr = {"src"};
-            headerDir = headerDirr;
+            headerDir = new String[config.headerDir.size()];
+            config.headerDir.toArray(headerDir);
         }
         String[] includes = {"**/*.cpp"};
 
@@ -265,5 +261,17 @@ public class CPPBuildHelper {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static class Config {
+        public String libName;
+        public String buildPath;
+        public String libsDir = "libs";
+        public final ArrayList<String> headerDir = new ArrayList<>();
+        public String[] cppFlags;
+        public String sharedLibBaseProject;
+        public String sourceFolder = "/src/";
+        public String sharedLibName;
+        public boolean includeToJar;
     }
 }
