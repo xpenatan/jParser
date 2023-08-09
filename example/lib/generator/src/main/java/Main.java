@@ -58,7 +58,11 @@ public class Main {
         cppParser.generateClass = true;
         JParser.generate(cppParser, baseJavaDir, genDir);
         CPPBuildHelper.DEBUG_BUILD = true;
-        CPPBuildHelper.build(libName, libBuildPath, libsDir);
+        CPPBuildHelper.Config config = new CPPBuildHelper.Config();
+        config.libName = libName;
+        config.buildPath = libBuildPath;
+        config.libsDir = libsDir;
+        CPPBuildHelper.build(config);
     }
 
     public static void generateTeaVM(IDLReader idlReader, String libName, String basePackage, String baseJavaDir) throws Exception {
