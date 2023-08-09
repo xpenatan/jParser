@@ -111,7 +111,7 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         if(init) {
             init = false;
             headerPrinter.append("#include <jni.h>\n");
-            headerPrinter.append("#include <" + helperName + ">\n");
+            headerPrinter.append("#include \"" + helperName + "\"\n");
             mainPrinter.append("\n");
             mainPrinter.append("extern \"C\" {\n");
             mainPrinter.append("\n");
@@ -233,7 +233,7 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
             fileDescriptor.writeString(code, false);
 
             CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
-            String include = "#include <" + cppGlueName + ".h>";
+            String include = "#include \"" + cppGlueName + ".h\"";
             cppFile.writeString(include, false);
         } catch(IOException e) {
             throw new RuntimeException(e);

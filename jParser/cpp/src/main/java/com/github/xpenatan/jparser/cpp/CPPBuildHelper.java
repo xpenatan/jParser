@@ -115,6 +115,10 @@ public class CPPBuildHelper {
         win64.cppIncludes = includes;
         win64.headerDirs = headerDir;
         win64.linkerFlags = "-Wl,--kill-at -shared -static-libgcc -static-libstdc++ -m64";
+
+        if(DEBUG_BUILD)
+            win64.cppFlags = " -c -Wall -O0 -mfpmath=sse -msse2 -fmessage-length=0 -m64 -g";
+
         if(cppFlags != null) {
             for(String cppFlag : cppFlags) {
                 win64.cppFlags += cppFlag;
@@ -127,8 +131,6 @@ public class CPPBuildHelper {
                 buildConfig.sharedLibs[0] = libFolder;
             }
         }
-        if(DEBUG_BUILD)
-            win64.cppFlags += " -c -Wall -O0 -mfpmath=sse -msse2 -fmessage-length=0 -m64 -g";
         win64.cppFlags += " -std=c++11";
         return win64;
     }
