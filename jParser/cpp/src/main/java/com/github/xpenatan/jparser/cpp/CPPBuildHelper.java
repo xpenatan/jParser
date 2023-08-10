@@ -39,11 +39,9 @@ public class CPPBuildHelper {
             throw new RuntimeException(e);
         }
         String[] headerDir = null;
-
         if(config.headerDir.isEmpty()) {
             if(sharedSrcPath != null) {
-                String[] headerDirr = {"src", sharedSrcPath};
-                headerDir = headerDirr;
+                headerDir = new String[]{"src", sharedSrcPath};
             }
             else {
                 String[] headerDirr = {"src"};
@@ -54,7 +52,14 @@ public class CPPBuildHelper {
             headerDir = new String[config.headerDir.size()];
             config.headerDir.toArray(headerDir);
         }
-        String[] includes = {"**/*.cpp"};
+        String[] includes = null;
+        if(config.cppIncludes.isEmpty()) {
+            includes = new String[]{"**/*.cpp"};
+        }
+        else {
+            includes = new String[config.cppIncludes.size()];
+            config.cppIncludes.toArray(includes);
+        }
 
         BuildConfig buildConfig = new BuildConfig(libName, "target", libsDir, buildPath);
 
@@ -270,6 +275,7 @@ public class CPPBuildHelper {
         public String buildPath;
         public String libsDir = "libs";
         public final ArrayList<String> headerDir = new ArrayList<>();
+        public final ArrayList<String> cppIncludes = new ArrayList<>();
         public String[] cppFlags;
         public String sharedLibBaseProject;
         public String sourceFolder = "/src/";
