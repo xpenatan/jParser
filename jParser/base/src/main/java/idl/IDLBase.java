@@ -1,4 +1,4 @@
-package com.github.xpenatan.jparser.base;
+package idl;
 
 /**
  * @author xpenatan
@@ -103,7 +103,7 @@ public abstract class IDLBase {
     }
 
     /**
-     * Deletes the bullet object this class encapsulates. Do not call directly, instead use the {@link #dispose()} method.
+     * Deletes the IDL object this class encapsulates. Do not call directly, instead use the {@link #dispose()} method.
      */
     protected void deleteNative() {
 
@@ -111,7 +111,7 @@ public abstract class IDLBase {
 
     public void dispose() {
         if(refCount > 0 && USE_REF_COUNTING && ENABLE_LOGGING) {
-            error("Bullet", "Disposing " + toString() + " while it still has " + refCount + " references.");
+            error("IDL", "Disposing " + toString() + " while it still has " + refCount + " references.");
         }
         if(cMemOwn) {
             // Don't try to delete if this object did not create the pointer
@@ -136,25 +136,25 @@ public abstract class IDLBase {
     protected void destroy() {
         try {
             if(destroyed && ENABLE_LOGGING) {
-                error("Bullet", "Already destroyed " + toString());
+                error("IDL", "Already destroyed " + toString());
             }
             destroyed = true;
 
             if(cMemOwn && !disposed) {
                 if(ENABLE_LOGGING) {
-                    error("Bullet", "Disposing " + toString() + " due to garbage collection.");
+                    error("IDL", "Disposing " + toString() + " due to garbage collection.");
                 }
                 dispose();
             }
         } catch(Throwable e) {
-            error("Bullet", "Exception while destroying " + toString(), e);
+            error("IDL", "Exception while destroying " + toString(), e);
         }
     }
 
     @Override
     protected void finalize() throws Throwable {
         if(!destroyed && ENABLE_LOGGING) {
-            error("Bullet", "The " + getClass().getSimpleName() + " class does not override the finalize method.");
+            error("IDL", "The " + getClass().getSimpleName() + " class does not override the finalize method.");
         }
         super.finalize();
     }

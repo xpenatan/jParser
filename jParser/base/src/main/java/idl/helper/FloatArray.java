@@ -1,6 +1,6 @@
-package com.github.xpenatan.jparser.base.helper;
+package idl.helper;
 
-import com.github.xpenatan.jparser.base.IDLBase;
+import idl.IDLBase;
 
 public class FloatArray extends IDLBase {
     public void copy(float [] array) {

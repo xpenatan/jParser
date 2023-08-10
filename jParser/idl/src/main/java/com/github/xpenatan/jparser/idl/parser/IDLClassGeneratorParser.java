@@ -5,7 +5,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.xpenatan.jparser.base.IDLBase;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
@@ -15,6 +14,7 @@ import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.ResourceList;
+import idl.IDLBase;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,8 +71,13 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             try {
                 CompilationUnit compilationUnit = StaticJavaParser.parseResource(resource);
                 compilationUnit.printer(new CustomPrettyPrinter());
-                String genBaseClassPath = jParser.genDir + File.separator + resource;
-                jParser.unitArray.add(new JParserItem(compilationUnit, genBaseClassPath, jParser.genDir));
+                String originalPackage = compilationUnit.getPackageDeclaration().get().getNameAsString();
+                if(basePackage != null && !basePackage.isEmpty()) {
+                    originalPackage = "." + originalPackage;
+                }
+                String newPackage = basePackage + originalPackage;
+                compilationUnit.setPackageDeclaration(newPackage);
+                jParser.unitArray.add(new JParserItem(compilationUnit, jParser.genDir, jParser.genDir));
             } catch(IOException e) {
                 throw new RuntimeException(e);
             }
