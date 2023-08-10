@@ -38,28 +38,19 @@ public class CPPBuildHelper {
         catch(IOException e) {
             throw new RuntimeException(e);
         }
-        String[] headerDir = null;
-        if(config.headerDir.isEmpty()) {
-            if(sharedSrcPath != null) {
-                headerDir = new String[]{"src", sharedSrcPath};
-            }
-            else {
-                String[] headerDirr = {"src"};
-                headerDir = headerDirr;
-            }
+        String[] headerDirs = null;
+        String[] cppIncludes = null;
+        String[] cIncludes = null;
+
+        if(sharedSrcPath != null) {
+            config.headerDir.add(sharedSrcPath);
         }
-        else {
-            headerDir = new String[config.headerDir.size()];
-            config.headerDir.toArray(headerDir);
-        }
-        String[] includes = null;
-        if(config.cppIncludes.isEmpty()) {
-            includes = new String[]{"**/*.cpp"};
-        }
-        else {
-            includes = new String[config.cppIncludes.size()];
-            config.cppIncludes.toArray(includes);
-        }
+        headerDirs = new String[config.headerDir.size()];
+        config.headerDir.toArray(headerDirs);
+        cppIncludes = new String[config.cppIncludes.size()];
+        config.cppIncludes.toArray(cppIncludes);
+        cIncludes = new String[config.cIncludes.size()];
+        config.cIncludes.toArray(cIncludes);
 
         BuildConfig buildConfig = new BuildConfig(libName, "target", libsDir, buildPath);
 
@@ -71,9 +62,9 @@ public class CPPBuildHelper {
             buildConfig.sharedLibs = new String[3];
         }
 
-        BuildTarget windowTarget = genWindows(buildConfig, headerDir, includes, cppFlags, sharedLibBaseProject, sharedLibName, includeToJar);
-        BuildTarget linuxTarget = genLinux(buildConfig, headerDir, includes, cppFlags, sharedLibBaseProject, sharedLibName, includeToJar);
-        BuildTarget macTarget = genMac(libName, buildConfig, headerDir, includes, cppFlags, sharedLibBaseProject, sharedLibName, includeToJar);
+        BuildTarget windowTarget = genWindows(buildConfig, headerDirs, cIncludes, cppIncludes, cppFlags, sharedLibBaseProject, sharedLibName, includeToJar);
+        BuildTarget linuxTarget = genLinux(buildConfig, headerDirs, cIncludes, cppIncludes, cppFlags, sharedLibBaseProject, sharedLibName, includeToJar);
+        BuildTarget macTarget = genMac(libName, buildConfig, headerDirs, cIncludes, cppIncludes, cppFlags, sharedLibBaseProject, sharedLibName, includeToJar);
         new CustomAntScriptGenerator().generate(buildConfig,
                 windowTarget,
                 linuxTarget,
@@ -110,15 +101,24 @@ public class CPPBuildHelper {
             throw new RuntimeException();
     }
 
-    private static BuildTarget genWindows(BuildConfig buildConfig, String[] headerDir, String[] includes, String[] cppFlags, String sharedLibBaseProject, String sharedLibName, boolean includeToJar) {
+    private static BuildTarget genWindows(
+            BuildConfig buildConfig,
+            String[] headerDirs,
+            String[] cIncludes,
+            String[] cppIncludes,
+            String[] cppFlags,
+            String sharedLibBaseProject,
+            String sharedLibName,
+            boolean includeToJar
+    ) {
         String libFolder = null;
         if(sharedLibBaseProject != null) {
             libFolder = sharedLibBaseProject + "/libs/windows64";
         }
         BuildTarget win64 = BuildTarget.newDefaultTarget(BuildTarget.TargetOs.Windows, true);
-
-        win64.cppIncludes = includes;
-        win64.headerDirs = headerDir;
+        win64.cIncludes = cIncludes;
+        win64.cppIncludes = cppIncludes;
+        win64.headerDirs = headerDirs;
         win64.linkerFlags = "-Wl,--kill-at -shared -static-libgcc -static-libstdc++ -m64";
 
         if(DEBUG_BUILD)
@@ -140,15 +140,25 @@ public class CPPBuildHelper {
         return win64;
     }
 
-    private static BuildTarget genLinux(BuildConfig buildConfig, String[] headerDir, String[] includes, String[] cppFlags, String sharedLibBaseProject, String sharedLibName, boolean includeToJar) {
+    private static BuildTarget genLinux(
+            BuildConfig buildConfig,
+            String[] headerDirs,
+            String[] cIncludes,
+            String[] cppIncludes,
+            String[] cppFlags,
+            String sharedLibBaseProject,
+            String sharedLibName,
+            boolean includeToJar
+    ) {
         String libFolder = null;
         if(sharedLibBaseProject != null) {
             libFolder = sharedLibBaseProject + "/libs/linux64";
         }
 
         BuildTarget lin64 = BuildTarget.newDefaultTarget(BuildTarget.TargetOs.Linux, true);
-        lin64.cppIncludes = includes;
-        lin64.headerDirs = headerDir;
+        lin64.cIncludes = cIncludes;
+        lin64.cppIncludes = cppIncludes;
+        lin64.headerDirs = headerDirs;
         if(cppFlags != null) {
             for(String cppFlag : cppFlags) {
                 lin64.cppFlags += cppFlag;
@@ -165,21 +175,30 @@ public class CPPBuildHelper {
         return lin64;
     }
 
-    private static BuildTarget genMac(String libName, BuildConfig buildConfig, String[] headerDir, String[] includes, String[] cppFlags, String sharedLibBaseProject, String sharedLibName, boolean includeToJar) {
+    private static BuildTarget genMac(
+            String libName,
+            BuildConfig buildConfig,
+            String[] headerDirs,
+            String[] cIncludes,
+            String[] cppIncludes,
+            String[] cppFlags,
+            String sharedLibBaseProject,
+            String sharedLibName,
+            boolean includeToJar
+    ) {
         String libFolder = null;
         if(sharedLibBaseProject != null) {
             libFolder = sharedLibBaseProject + "/libs/macosx64";
         }
 
         BuildTarget mac64 = BuildTarget.newDefaultTarget(BuildTarget.TargetOs.MacOsX, true);
-
-        String libFilename = mac64.getSharedLibFilename(libName);
-
-        mac64.cppIncludes = includes;
-        mac64.headerDirs = headerDir;
+        mac64.cIncludes = cIncludes;
+        mac64.cppIncludes = cppIncludes;
+        mac64.headerDirs = headerDirs;
         // for some weird reason adding -v stop getting errors with github actions
         mac64.linkerFlags = "-v -shared -arch x86_64 -mmacosx-version-min=10.7 -stdlib=libc++";
 
+        String libFilename = mac64.getSharedLibFilename(libName);
         mac64.linkerFlags += " -install_name @rpath/" + libFilename;
         if(cppFlags != null) {
             for(String cppFlag : cppFlags) {
@@ -276,6 +295,7 @@ public class CPPBuildHelper {
         public String libsDir = "libs";
         public final ArrayList<String> headerDir = new ArrayList<>();
         public final ArrayList<String> cppIncludes = new ArrayList<>();
+        public final ArrayList<String> cIncludes = new ArrayList<>();
         public String[] cppFlags;
         public String sharedLibBaseProject;
         public String sourceFolder = "/src/";
