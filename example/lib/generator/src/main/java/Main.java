@@ -62,6 +62,11 @@ public class Main {
         config.libName = libName;
         config.buildPath = libBuildPath;
         config.libsDir = libsDir;
+
+        config.headerDir.add("src/");
+        config.cppIncludes.add("src/**/*.cpp");
+        config.cppIncludes.add("src/JNIGlue.cpp");
+
         CPPBuildHelper.build(config);
     }
 
