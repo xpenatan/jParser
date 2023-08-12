@@ -124,13 +124,13 @@ configure(libProjects) {
 }
 
 tasks.register("generateFiles") {
-    dependsOn(":example:lib:generator:generateNativeProject")
-    mustRunAfter(":example:lib:generator:generateNativeProject")
+    dependsOn(":example:lib:generator:build_project")
+    mustRunAfter(":example:lib:generator:build_project")
 }
 
 tasks.register("buildEmscrip") {
-    dependsOn(":example:lib:generator:buildEmscripten")
-    mustRunAfter(":example:lib:generator:buildEmscripten")
+    dependsOn(":example:lib:generator:build_emscripten")
+    mustRunAfter(":example:lib:generator:build_emscripten")
 }
 
 tasks.register("removeBuild") {
@@ -143,10 +143,7 @@ tasks.register("removeBuild") {
 }
 
 tasks.register("buildAll") {
-    dependsOn("generateFiles", "removeBuild", "buildEmscrip")
+    dependsOn("generateFiles", "buildEmscrip")
     group = "gen"
     description = "Generate javascript"
-
-    tasks.findByName("buildEmscrip")?.mustRunAfter("generateFiles")
-    tasks.findByName("generateFiles")?.mustRunAfter("removeBuild")
 }

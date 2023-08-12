@@ -21,7 +21,7 @@ dependencies {
     }
 }
 
-tasks.register<JavaExec>("generateNativeProject") {
+tasks.register<JavaExec>("build_project") {
     group = "gen"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -33,16 +33,24 @@ tasks.register<JavaExec>("generateNativeProject") {
 cmake {
     generator.set("MinGW Makefiles")
 
-    sourceFolder.set(file("$projectDir/src/main/cpp"))
+    sourceFolder.set(file("$buildDir/exampleLib/"))
 
     buildConfig.set("Release")
     buildTarget.set("install")
     buildClean.set(true)
 }
 
-tasks.register("buildEmscripten") {
-    dependsOn("cmakeBuild")
-    mustRunAfter("cmakeBuild")
+tasks.register("copy_emscripten_files") {
+    copy {
+        from("$projectDir/src/main/cpp/idl", "$projectDir/src/main/cpp/source")
+        into("$buildDir/exampleLib/")
+    }
+}
+
+tasks.register("build_emscripten") {
+    dependsOn("copy_emscripten_files", "cmakeBuild")
+    tasks.findByName("cmakeBuild")?.mustRunAfter("copy_emscripten_files")
+
     group = "gen"
     description = "Generate javascript"
 

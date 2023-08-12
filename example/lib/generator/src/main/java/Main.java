@@ -17,7 +17,7 @@ public class Main {
 
     private static void generateClassOnly() throws Exception {
         String basePackage = "com.github.xpenatan.jparser.example.lib";
-        String idlPath = "src\\main\\cpp\\exampleLib.idl";
+        String idlPath = "src\\main\\cpp\\idl\\exampleLib.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
         String genDir = "../core/src/main/java";
         String cppSourceDir = new File("./src/main/cpp/exampleLib/src/").getCanonicalPath();
@@ -31,9 +31,9 @@ public class Main {
     private static void generate() throws Exception {
         String libName = "exampleLib";
         String basePackage = "com.github.xpenatan.jparser.example.lib";
-        String idlPath = "src\\main\\cpp\\exampleLib.idl";
+        String idlPath = "src\\main\\cpp\\idl\\exampleLib.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
-        String cppSourceDir = new File("./src/main/cpp/exampleLib/src/").getCanonicalPath();
+        String cppSourceDir = new File("./src/main/cpp/source/exampleLib/src/").getCanonicalPath();
 
         IDLReader idlReader = IDLReader.readIDL(idlPath, cppSourceDir);
 

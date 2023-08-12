@@ -63,7 +63,9 @@ public class IDLReader {
                 throw new RuntimeException(e);
             }
         }
-        return null;
+        else {
+            throw new RuntimeException("IDL file does not exist: " + path);
+        }
     }
 
     public static IDLFile parseFile(InputStreamReader inputStreamReader) {
