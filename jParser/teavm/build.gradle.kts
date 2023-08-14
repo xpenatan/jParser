@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "jParser-teavm"
+val moduleName = "teavm"
 
 dependencies {
     api(project(":jParser:idl"))
