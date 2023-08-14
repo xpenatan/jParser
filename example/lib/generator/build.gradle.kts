@@ -18,6 +18,7 @@ dependencies {
         implementation(project(":jParser:idl"))
         implementation(project(":jParser:teavm"))
         implementation(project(":jParser:cpp"))
+        implementation(project(":jParser:builder"))
     }
 }
 

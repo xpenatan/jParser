@@ -2,10 +2,10 @@ plugins {
     id("java")
 }
 
-val jarFile = "$projectDir/../generator/build/c++/desktop/exampleLib-natives.jar"
+val windowsFile = "$projectDir/../generator/build/c++/desktop/exampleLib64.dll"
 
 tasks.jar {
-    from(zipTree(jarFile))
+    from(windowsFile)
 }
 
 dependencies {

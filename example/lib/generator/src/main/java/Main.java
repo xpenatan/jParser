@@ -1,3 +1,7 @@
+import com.github.xpenatan.jparser.builder.BuildConfig;
+import com.github.xpenatan.jparser.builder.JBuilder;
+import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
+import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.cpp.CPPBuildHelper;
@@ -7,6 +11,7 @@ import com.github.xpenatan.jparser.cpp.NativeCPPGeneratorV2;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.teavm.TeaVMCodeParserV2;
 import java.io.File;
+import java.nio.file.FileSystem;
 
 public class Main {
 
@@ -67,7 +72,14 @@ public class Main {
         config.cppIncludes.add("src/**/*.cpp");
         config.cppIncludes.add("src/JNIGlue.cpp");
 
-        CPPBuildHelper.build(config);
+//        CPPBuildHelper.build(config);
+
+        BuildConfig buildConfig = new BuildConfig(cppDestinationPath, libBuildPath, libsDir, libName);
+        WindowsTarget windowsTarget = new WindowsTarget();
+        windowsTarget.headerDirs.add("src/");
+        windowsTarget.cppIncludes.add("src**/*.cpp");
+        windowsTarget.cppIncludes.add("src/JNIGlue.cpp");
+        JBuilder.build(buildConfig, windowsTarget);
     }
 
     public static void generateTeaVM(IDLReader idlReader, String libName, String basePackage, String baseJavaDir) throws Exception {
