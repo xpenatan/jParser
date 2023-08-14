@@ -153,7 +153,7 @@ public abstract class BuildTarget {
             Path of = Path.of(path);
             boolean remove = true;
             for(String cppInclude : cppIncludes) {
-                PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:**" + cppInclude);
+                PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + cppInclude);
                 boolean matches = pathMatcher.matches(of);
                 if(matches) {
                     remove = false;

@@ -77,8 +77,7 @@ public class Main {
         BuildConfig buildConfig = new BuildConfig(cppDestinationPath, libBuildPath, libsDir, libName);
         WindowsTarget windowsTarget = new WindowsTarget();
         windowsTarget.headerDirs.add("src/");
-        windowsTarget.cppIncludes.add("src**/*.cpp");
-        windowsTarget.cppIncludes.add("src/JNIGlue.cpp");
+        windowsTarget.cppIncludes.add("**/src/**.cpp");
         JBuilder.build(buildConfig, windowsTarget);
     }
 
