@@ -30,6 +30,5 @@ tasks.register("run-app-teavm") {
     val list = listOf("build-app-teavm", "jettyRun")
     dependsOn(list)
 
-    tasks.findByName("build-app-teavm")?.mustRunAfter(":buildAll")
     tasks.findByName("jettyRun")?.mustRunAfter("build-app-teavm")
 }

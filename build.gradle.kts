@@ -123,28 +123,3 @@ configure(libProjects) {
         }
     }
 }
-
-tasks.register("generateFiles") {
-    dependsOn(":example:lib:generator:build_project")
-    mustRunAfter(":example:lib:generator:build_project")
-}
-
-tasks.register("buildEmscrip") {
-    dependsOn(":example:lib:generator:build_emscripten")
-    mustRunAfter(":example:lib:generator:build_emscripten")
-}
-
-tasks.register("removeBuild") {
-    dependsOn(
-        ":example:lib:generator:clean",
-        ":example:lib:teavm:clean",
-        ":example:lib:desktop:clean",
-        ":example:lib:core:clean"
-    )
-}
-
-tasks.register("buildAll") {
-    dependsOn("generateFiles", "buildEmscrip")
-    group = "gen"
-    description = "Generate javascript"
-}
