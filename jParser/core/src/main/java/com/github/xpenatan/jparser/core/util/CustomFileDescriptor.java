@@ -405,7 +405,7 @@ public class CustomFileDescriptor {
         return deleteDirectory(file());
     }
 
-    public void copyTo(CustomFileDescriptor dest) {
+    public void copyTo(CustomFileDescriptor dest, boolean createChildFolder) {
         if(!isDirectory()) {
             if(dest.isDirectory()) dest = dest.child(name());
             copyFile(this, dest);
@@ -418,13 +418,15 @@ public class CustomFileDescriptor {
             dest.mkdirs();
             if(!dest.isDirectory()) throw new RuntimeException("Destination directory cannot be created: " + dest);
         }
-        dest = dest.child(name());
+        if(createChildFolder) {
+            dest = dest.child(name());
+        }
         copyDirectory(this, dest);
     }
 
     public void moveTo(CustomFileDescriptor dest) {
         if(type == FileType.Classpath) throw new RuntimeException("Cannot move a classpath file: " + file);
-        copyTo(dest);
+        copyTo(dest, true);
         delete();
     }
 

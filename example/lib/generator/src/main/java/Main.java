@@ -1,6 +1,6 @@
 import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.JBuilder;
-import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
+import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
@@ -11,13 +11,12 @@ import com.github.xpenatan.jparser.cpp.NativeCPPGeneratorV2;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.teavm.TeaVMCodeParserV2;
 import java.io.File;
-import java.nio.file.FileSystem;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
 //        generateClassOnly();
-        generate();
+        generateAndBuild();
     }
 
     private static void generateClassOnly() throws Exception {
@@ -33,27 +32,17 @@ public class Main {
         JParser.generate(idlParser, baseJavaDir, genDir);
     }
 
-    private static void generate() throws Exception {
+    private static void generateAndBuild() throws Exception {
         String libName = "exampleLib";
         String basePackage = "com.github.xpenatan.jparser.example.lib";
-        String idlPath = "src\\main\\cpp\\idl\\exampleLib.idl";
+        String emscriptenCustomCodePath = new File("src\\main\\cpp\\idl").getCanonicalPath();
+        String idlPath = new File(emscriptenCustomCodePath + "\\exampleLib.idl").getCanonicalPath();
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
         String cppSourceDir = new File("./src/main/cpp/source/exampleLib/src/").getCanonicalPath();
 
         IDLReader idlReader = IDLReader.readIDL(idlPath, cppSourceDir);
 
-        generateCPP(idlReader, libName, basePackage, baseJavaDir, cppSourceDir);
-        generateTeaVM(idlReader, libName, basePackage, baseJavaDir);
-    }
-
-    private static void generateCPP(
-            IDLReader idlReader,
-            String libName,
-            String basePackage,
-            String baseJavaDir,
-            String cppSourceDir
-    ) throws Exception {
-        String libsDir = new File("./build/c++/desktop/").getCanonicalPath();
+        String libsDir = new File("./build/c++/libs/").getCanonicalPath();
         String genDir = "../core/src/main/java";
         String libBuildPath = new File("./build/c++/").getCanonicalPath();
         String cppDestinationPath = libBuildPath + "/src";
@@ -75,16 +64,28 @@ public class Main {
 
 //        CPPBuildHelper.build(config);
 
-        BuildConfig buildConfig = new BuildConfig(cppDestinationPath, libBuildPath, libsDir, libName);
-        WindowsTarget windowsTarget = new WindowsTarget();
-        windowsTarget.headerDirs.add("src/exampleLib");
-        windowsTarget.cppIncludes.add("**/src/**.cpp");
-        JBuilder.build(buildConfig, windowsTarget);
-    }
+        BuildConfig buildConfig = new BuildConfig(
+                cppDestinationPath,
+                libBuildPath,
+                libsDir,
+                libName,
+                emscriptenCustomCodePath
+        );
 
-    public static void generateTeaVM(IDLReader idlReader, String libName, String basePackage, String baseJavaDir) throws Exception {
-        String genDir = "../teavm/src/main/java/";
+        WindowsTarget windowsTarget = new WindowsTarget();
+        windowsTarget.headerDirs.add("-Isrc/exampleLib");
+        windowsTarget.cppIncludes.add("**/src/**.cpp");
+
+        String teaVMgenDir = "../teavm/src/main/java/";
         TeaVMCodeParserV2 teavmParser = new TeaVMCodeParserV2(idlReader, libName, basePackage);
-        JParser.generate(teavmParser, baseJavaDir, genDir);
+        JParser.generate(teavmParser, baseJavaDir, teaVMgenDir);
+        EmscriptenTarget teaVMTarget = new EmscriptenTarget(idlPath);
+        teaVMTarget.headerDirs.add("-Isrc/exampleLib");
+        teaVMTarget.headerDirs.add("-include src/jsglue/Include.h");
+        teaVMTarget.headerDirs.add("-include src/jsglue/custom_glue.cpp");
+        teaVMTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+        teaVMTarget.cppIncludes.add("**/src/jsglue/glue.cpp");
+
+        JBuilder.build(buildConfig, windowsTarget, teaVMTarget);
     }
 }

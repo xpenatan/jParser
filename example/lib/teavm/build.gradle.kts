@@ -2,6 +2,13 @@ plugins {
     id("java")
 }
 
+val emscriptenFile = "$projectDir/../generator/build/c++/libs/exampleLib.wasm.js"
+
+tasks.jar {
+    from(emscriptenFile)
+}
+
+
 dependencies {
     implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
     implementation(project(":jParser:loader:loader-teavm"))

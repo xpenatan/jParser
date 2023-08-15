@@ -31,7 +31,7 @@ public class ExampleLib {
     }
 
     /*[-teaVM;-REPLACE]
-        @org.teavm.jso.JSBody(params = { "onInitFunction" }, script = "window.ExampleLibOnInit = onInitFunction;")
+        @org.teavm.jso.JSBody(params = { "onInitFunction" }, script = "window.exampleLibOnInit = onInitFunction;")
         private static native void setOnLoadInit(OnInitFunction onInitFunction);
     */
     /*[-C++;-REMOVE] */

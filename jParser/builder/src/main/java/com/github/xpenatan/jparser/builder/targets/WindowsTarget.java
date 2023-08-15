@@ -8,7 +8,7 @@ public class WindowsTarget extends BuildTarget {
 
         cFlags.add("-c -Wall -O2 -mfpmath=sse -msse2 -fmessage-length=0 -m64");
         cppFlags.add("-c -Wall -O2 -mfpmath=sse -msse2 -fmessage-length=0 -m64 -std=c++11");
-        linkerFlags = "-Wl,--kill-at -shared -static -static-libgcc -static-libstdc++ -m64";
+        linkerFlags.add("-Wl,--kill-at -shared -static -static-libgcc -static-libstdc++ -m64");
         libSuffix = "64.dll";
 
         addJNIHeadersAndGlueCode();

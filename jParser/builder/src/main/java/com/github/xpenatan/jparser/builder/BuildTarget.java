@@ -31,7 +31,7 @@ public abstract class BuildTarget {
     public String cCompiler = "x86_64-w64-mingw32-gcc";
     public final ArrayList<String> cppFlags = new ArrayList<>();
     public final ArrayList<String> cFlags = new ArrayList<>();
-    public String linkerFlags = "";
+    public final ArrayList<String> linkerFlags = new ArrayList<>();
     public String libSuffix;
 
     protected BuildTarget() {
@@ -40,9 +40,6 @@ public abstract class BuildTarget {
     protected void setup(BuildConfig config, ArrayList<CustomFileDescriptor> cppFiles) {}
 
     protected boolean build(BuildConfig config) {
-
-        copyJniHeaders(config.buildDir);
-
         CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
         if(childTarget.exists()) {
             childTarget.delete();
@@ -80,7 +77,7 @@ public abstract class BuildTarget {
 
             String headers = "";
             for(String headerDir : headerDirs) {
-                headers += "-I" + headerDir + " ";
+                headers += headerDir + " ";
             }
 
             String cppFlag = "";
@@ -115,42 +112,36 @@ public abstract class BuildTarget {
         getAllFiles(childTarget, files, ".o");
 
         String compiledPaths = "";
-
         for(CustomFileDescriptor file : files) {
             String path = file.path();
             compiledPaths = compiledPaths + " " + path;
         }
 
+        String linkerFlag = "";
+        for(String flag : linkerFlags) {
+            linkerFlag = linkerFlag + " " + flag;
+        }
+        linkerFlag = linkerFlag.replaceAll("\\s+", " ").trim();
+
         String command = cppCompiler;
-        command = command + " " + linkerFlags;
-        command = command + " -o " + libPath;
         command = command + " " + compiledPaths;
+        command = command + " " + linkerFlag;
+        command = command + " -o " + libPath;
         System.out.println("##### LINK #####");
         return JProcess.startProcess(childTarget.file(), command);
     }
 
-    private void copyJniHeaders (CustomFileDescriptor buildDir) {
-        final String pack = "headers";
-        String files[] = {"classfile_constants.h", "jawt.h", "jdwpTransport.h", "jni.h", "linux/jawt_md.h", "linux/jni_md.h",
-                "mac/jni_md.h", "win32/jawt_md.h", "win32/jni_md.h"};
-
-        for (String file : files) {
-            CustomFileDescriptor child = buildDir.child("jni-headers").child(file);
-            new CustomFileDescriptor(pack, CustomFileDescriptor.FileType.Classpath).child(file).copyTo(child);
-        }
-    }
-
     protected void addJNIHeadersAndGlueCode() {
         cppIncludes.add("**/jniglue/JNIGlue.cpp");
-        headerDirs.add("jni-headers/");
+        headerDirs.add("-Ijni-headers/");
         if(isWindows()) {
-            headerDirs.add("jni-headers/win32");
+            headerDirs.add("-Ijni-headers/win32");
         }
         else if(isMac()) {
-            headerDirs.add("jni-headers/mac");
+            headerDirs.add("-Ijni-headers/mac");
         }
         else if(isUnix()) {
-            headerDirs.add("jni-headers/linux");
+            headerDirs.add("-Ijni-headers/linux");
         }
     }
 
