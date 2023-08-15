@@ -88,7 +88,6 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     private String cppSourceDir;
     private String cppDestinationDir;
     private String cppGlueName = "JNIGlue";
-    private String cppGlueHPath;
 
     StringBuilder mainPrinter = new StringBuilder();
     StringBuilder headerPrinter = new StringBuilder();
@@ -227,8 +226,9 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
             CustomFileDescriptor helperFile = new CustomFileDescriptor(helperPath);
             helperFile.write(idlHelperClass, false);
 
-            cppGlueHPath = cppDestinationDir + File.separator + cppGlueName + ".h";
-            String cppGluePath = cppDestinationDir + File.separator + cppGlueName + ".cpp";
+            String gluePath = cppDestinationDir + File.separator + ".." + File.separator + "jniglue" + File.separator;
+            String cppGlueHPath = gluePath + cppGlueName + ".h";
+            String cppGluePath = gluePath + cppGlueName + ".cpp";
             CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);
             fileDescriptor.writeString(code, false);
 

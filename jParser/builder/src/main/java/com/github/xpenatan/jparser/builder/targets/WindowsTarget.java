@@ -10,10 +10,7 @@ public class WindowsTarget extends BuildTarget {
         cppFlags = "-c -Wall -O2 -mfpmath=sse -msse2 -fmessage-length=0 -m64 -std=c++11";
         linkerFlags = "-Wl,--kill-at -shared -static -static-libgcc -static-libstdc++ -m64";
         libSuffix = "64.dll";
-    }
 
-    @Override
-    protected void setup() {
-
+        addJNIHeadersAndGlueCode();
     }
 }

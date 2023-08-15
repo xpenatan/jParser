@@ -37,7 +37,7 @@ public abstract class BuildTarget {
     protected BuildTarget() {
     }
 
-    protected abstract void setup();
+    protected void setup(BuildConfig config, ArrayList<CustomFileDescriptor> cppFiles) {}
 
     protected boolean build(BuildConfig config) {
 
@@ -49,7 +49,10 @@ public abstract class BuildTarget {
         }
         childTarget.mkdirs();
 
-        if(compile(config, childTarget)) {
+        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.sourceDir, cppIncludes);
+        setup(config, cppFiles);
+
+        if(compile(config, childTarget, cppFiles)) {
             return link(config, childTarget);
         }
         else {
@@ -57,10 +60,10 @@ public abstract class BuildTarget {
         }
     }
 
-    private boolean compile(BuildConfig config, CustomFileDescriptor childTarget) {
+    private boolean compile(BuildConfig config, CustomFileDescriptor childTarget, ArrayList<CustomFileDescriptor> cppFiles) {
         System.out.println("##### COMPILE #####");
         boolean retFlag = false;
-        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.sourceDir, cppIncludes);
+
         for(CustomFileDescriptor file : cppFiles) {
             String path = file.path();
             String sourceBasePath = config.sourceDir.path();
@@ -71,22 +74,11 @@ public abstract class BuildTarget {
             String p = toCopy.path();
             if(!toCopy.exists()) {
                 toCopy.mkdirs();
-                p += "/";
             }
+            p += "/";
             String compiledPath = p + file.nameWithoutExtension() + ".o";
 
             String headers = "";
-            headers += "-I" + "jni-headers/" + " ";
-
-            if(isWindows()) {
-                headers += "-I" + "jni-headers/win32" + " ";
-            }
-            else if(isMac()) {
-                headers += "-I" + "jni-headers/mac" + " ";
-            }
-            else if(isUnix()) {
-                headers += "-I" + "jni-headers/linux" + " ";
-            }
             for(String headerDir : headerDirs) {
                 headers += "-I" + headerDir + " ";
             }
@@ -140,6 +132,20 @@ public abstract class BuildTarget {
         for (String file : files) {
             CustomFileDescriptor child = buildDir.child("jni-headers").child(file);
             new CustomFileDescriptor(pack, CustomFileDescriptor.FileType.Classpath).child(file).copyTo(child);
+        }
+    }
+
+    protected void addJNIHeadersAndGlueCode() {
+        cppIncludes.add("**/jniglue/JNIGlue.cpp");
+        headerDirs.add("jni-headers/");
+        if(isWindows()) {
+            headerDirs.add("jni-headers/win32");
+        }
+        else if(isMac()) {
+            headerDirs.add("jni-headers/mac");
+        }
+        else if(isUnix()) {
+            headerDirs.add("jni-headers/linux");
         }
     }
 

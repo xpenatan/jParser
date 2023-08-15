@@ -57,8 +57,9 @@ public class Main {
         String genDir = "../core/src/main/java";
         String libBuildPath = new File("./build/c++/").getCanonicalPath();
         String cppDestinationPath = libBuildPath + "/src";
+        String libDestinationPath = cppDestinationPath + "/exampleLib";
 
-        CppGenerator cppGenerator = new NativeCPPGeneratorV2(cppSourceDir, cppDestinationPath);
+        CppGenerator cppGenerator = new NativeCPPGeneratorV2(cppSourceDir, libDestinationPath);
         CppCodeParserV2 cppParser = new CppCodeParserV2(cppGenerator, idlReader, basePackage);
         cppParser.generateClass = true;
         JParser.generate(cppParser, baseJavaDir, genDir);
@@ -76,7 +77,7 @@ public class Main {
 
         BuildConfig buildConfig = new BuildConfig(cppDestinationPath, libBuildPath, libsDir, libName);
         WindowsTarget windowsTarget = new WindowsTarget();
-        windowsTarget.headerDirs.add("src/");
+        windowsTarget.headerDirs.add("src/exampleLib");
         windowsTarget.cppIncludes.add("**/src/**.cpp");
         JBuilder.build(buildConfig, windowsTarget);
     }

@@ -9,9 +9,4 @@ public class AndroidTarget extends BuildTarget {
         cFlags = "-O2 -Wall -D__ANDROID__";
         cppFlags = "-O2 -Wall -D__ANDROID__";
     }
-
-    @Override
-    protected void setup() {
-
-    }
 }
