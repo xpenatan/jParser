@@ -29,8 +29,8 @@ public abstract class BuildTarget {
     public final ArrayList<String> cppIncludes = new ArrayList<>();
     public String cppCompiler = "x86_64-w64-mingw32-g++";
     public String cCompiler = "x86_64-w64-mingw32-gcc";
-    public String cppFlags = "";
-    public String cFlags = "";
+    public final ArrayList<String> cppFlags = new ArrayList<>();
+    public final ArrayList<String> cFlags = new ArrayList<>();
     public String linkerFlags = "";
     public String libSuffix;
 
@@ -83,8 +83,13 @@ public abstract class BuildTarget {
                 headers += "-I" + headerDir + " ";
             }
 
+            String cppFlag = "";
+            for(String flag : cppFlags) {
+                cppFlag = cppFlag + " " + flag;
+            }
+            cppFlag = cppFlag.replaceAll("\\s+", " ").trim();
             String command = cppCompiler;
-            command = command + " " + cppFlags;
+            command = command + " " + cppFlag;
             command = command + " " + headers;
             command = command + " " + path;
             command = command + " -o " + compiledPath;

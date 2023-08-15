@@ -6,7 +6,7 @@ public class AndroidTarget extends BuildTarget {
     public AndroidTarget() {
         this.tempBuildDir = "target/android";
 
-        cFlags = "-O2 -Wall -D__ANDROID__";
-        cppFlags = "-O2 -Wall -D__ANDROID__";
+        cFlags.add("-O2 -Wall -D__ANDROID__");
+        cppFlags.add("-O2 -Wall -D__ANDROID__");
     }
 }
