@@ -31,7 +31,6 @@ public class EmscriptenTarget extends BuildTarget {
         linkerFlags.add("--closure 1");
         linkerFlags.add("-s ALLOW_MEMORY_GROWTH=1");
         linkerFlags.add("-s ALLOW_TABLE_GROWTH=1");
-        linkerFlags.add("-s EXPORT_NAME='exampleLib'");
         linkerFlags.add("-s MODULARIZE=1");
         linkerFlags.add("-s NO_FILESYSTEM=1");
         linkerFlags.add("-s INITIAL_MEMORY=" + initialMemory);
@@ -76,6 +75,7 @@ public class EmscriptenTarget extends BuildTarget {
 
         linkerFlags.add("--post-js " + jsGluePath + "glue.js");
         linkerFlags.add("--extern-post-js " + postPath);
+        linkerFlags.add("-s EXPORT_NAME='" + config.libName + "'");
 
         String generateGlueCommand = "python " + WEBIDL_BINDER_SCRIPT + " " + idlFile + " glue";
         if(!JProcess.startProcess(jsglueDir.file(), generateGlueCommand)) {

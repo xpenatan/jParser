@@ -114,8 +114,11 @@ public abstract class BuildTarget {
         String compiledPaths = "";
         for(CustomFileDescriptor file : files) {
             String path = file.path();
-            compiledPaths = compiledPaths + " " + path;
+            compiledPaths = compiledPaths + "\n" + path;
         }
+        CustomFileDescriptor objList = childTarget.child("objs.txt");
+        objList.writeString(compiledPaths.trim(), false);
+
 
         String linkerFlag = "";
         for(String flag : linkerFlags) {
@@ -124,7 +127,7 @@ public abstract class BuildTarget {
         linkerFlag = linkerFlag.replaceAll("\\s+", " ").trim();
 
         String command = cppCompiler;
-        command = command + " " + compiledPaths;
+        command = command + " @" + objList.path();
         command = command + " " + linkerFlag;
         command = command + " -o " + libPath;
         System.out.println("##### LINK #####");
