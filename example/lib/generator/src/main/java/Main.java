@@ -21,7 +21,7 @@ public class Main {
 
     private static void generateClassOnly() throws Exception {
         String basePackage = "com.github.xpenatan.jparser.example.lib";
-        String idlPath = "src\\main\\cpp\\idl\\exampleLib.idl";
+        String idlPath = "src\\main\\cpp\\emscripten\\exampleLib.idl";
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
         String genDir = "../core/src/main/java";
         String cppSourceDir = new File("./src/main/cpp/exampleLib/src/").getCanonicalPath();
@@ -35,7 +35,7 @@ public class Main {
     private static void generateAndBuild() throws Exception {
         String libName = "exampleLib";
         String basePackage = "com.github.xpenatan.jparser.example.lib";
-        String emscriptenCustomCodePath = new File("src\\main\\cpp\\idl").getCanonicalPath();
+        String emscriptenCustomCodePath = new File("src\\main\\cpp\\emscripten").getCanonicalPath();
         String idlPath = new File(emscriptenCustomCodePath + "\\exampleLib.idl").getCanonicalPath();
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
         String cppSourceDir = new File("./src/main/cpp/source/exampleLib/src/").getCanonicalPath();
