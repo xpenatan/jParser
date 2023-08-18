@@ -9,14 +9,17 @@ import java.util.ArrayList;
 
 public class EmscriptenTarget extends BuildTarget {
 
-    private String idlFile;
+    private CustomFileDescriptor idlFile;
 
     String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "upstream/emscripten/";
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
 
     public EmscriptenTarget(String idlFile) {
         this.tempBuildDir = "target/emscripten";
-        this.idlFile = idlFile;
+        this.idlFile = new CustomFileDescriptor(idlFile);
+        if(!this.idlFile.exists()) {
+            throw new RuntimeException("IDL file does not exist: " + idlFile);
+        }
 
         long initialMemory = 64 * 1024 * 1024;
 
@@ -63,6 +66,14 @@ public class EmscriptenTarget extends BuildTarget {
 
         config.emscriptenCustomCodeDir.copyTo(jsglueDir, false);
 
+        CustomFileDescriptor mergedIDLFile = mergeIDLFile(jsglueDir);
+
+        CustomFileDescriptor idlHelperCPP = new CustomFileDescriptor("IDLHelper.h", CustomFileDescriptor.FileType.Classpath);
+        idlHelperCPP.copyTo(jsglueDir, false);
+
+        CustomFileDescriptor cppFile = jsglueDir.child(idlHelperCPP.name());
+        headerDirs.add("-include" + cppFile.path());
+
         String jsGluePath = jsglueDir.path() + File.separator;
 
         CustomFileDescriptor postFile = new CustomFileDescriptor("emscripten/post.js", CustomFileDescriptor.FileType.Classpath);
@@ -77,7 +88,7 @@ public class EmscriptenTarget extends BuildTarget {
         linkerFlags.add("--extern-post-js " + postPath);
         linkerFlags.add("-s EXPORT_NAME='" + config.libName + "'");
 
-        String generateGlueCommand = "python " + WEBIDL_BINDER_SCRIPT + " " + idlFile + " glue";
+        String generateGlueCommand = "python " + WEBIDL_BINDER_SCRIPT + " " + mergedIDLFile + " glue";
         if(!JProcess.startProcess(jsglueDir.file(), generateGlueCommand)) {
             return false;
         }
@@ -85,5 +96,15 @@ public class EmscriptenTarget extends BuildTarget {
         cppFlags.add("-c");
 
         return super.build(config);
+    }
+
+    private CustomFileDescriptor mergeIDLFile(CustomFileDescriptor jsglueDir) {
+        String idlStr = idlFile.readString();
+        CustomFileDescriptor idlHelper = new CustomFileDescriptor("IDLHelper.idl", CustomFileDescriptor.FileType.Classpath);
+        String idlHelperStr = idlHelper.readString();
+        String mergedIdlStr = idlStr + "\n\n" + idlHelperStr;
+        CustomFileDescriptor mergedIdlFile = jsglueDir.child(idlFile.name());
+        mergedIdlFile.writeString(mergedIdlStr, false);
+        return mergedIdlFile;
     }
 }

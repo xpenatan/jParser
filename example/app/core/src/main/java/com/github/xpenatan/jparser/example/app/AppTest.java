@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jparser.example.lib.ExampleLib;
 import com.github.xpenatan.jparser.example.lib.NormalClass;
+import com.github.xpenatan.jparser.example.lib.idl.helper.FloatArray;
 
 public class AppTest extends ApplicationAdapter {
 
@@ -37,6 +38,11 @@ public class AppTest extends ApplicationAdapter {
         NormalClass normalClass = new NormalClass();
         ret1 = normalClass.addIntValue(a1, b1);
         System.out.println("addIntValue " + a1 + " + " + b1 + " = " + ret1);
+
+        FloatArray array = new FloatArray(1);
+        array.setValue(0, 10);
+        float value = array.getValue(0);
+        System.out.println("VALUE: " + value);
     }
 
     @Override

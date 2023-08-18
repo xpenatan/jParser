@@ -6,6 +6,7 @@ val moduleName = "compiler"
 
 dependencies {
     implementation(project(":jParser:core"))
+    implementation(project(":jParser:base"))
 }
 
 publishing {
