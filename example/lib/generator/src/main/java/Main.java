@@ -1,5 +1,6 @@
 import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.JBuilder;
+import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.core.JParser;
@@ -86,6 +87,11 @@ public class Main {
         teaVMTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
         teaVMTarget.cppIncludes.add("**/src/jsglue/glue.cpp");
 
-        JBuilder.build(buildConfig, windowsTarget, teaVMTarget);
+        AndroidTarget androidTarget = new AndroidTarget();
+        androidTarget.headerDirs.add("-Isrc/exampleLib");
+        androidTarget.cppIncludes.add("**/src/**.cpp");
+
+//        JBuilder.build(buildConfig, windowsTarget, teaVMTarget);
+        JBuilder.build(buildConfig, androidTarget);
     }
 }

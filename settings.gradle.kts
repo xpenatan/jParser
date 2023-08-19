@@ -16,6 +16,8 @@ include(":example:lib:teavm")
 include(":example:app:core")
 include(":example:app:desktop")
 include(":example:app:teavm")
+include(":example:app:android")
+
 
 //includeBuild("E:\\Dev\\Projects\\java\\gdx-teavm") {
 //    dependencySubstitution {

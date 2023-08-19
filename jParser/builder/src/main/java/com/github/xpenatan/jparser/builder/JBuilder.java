@@ -7,7 +7,7 @@ public class JBuilder {
             BuildTarget target = targets[i];
             if(target != null) {
                 String targetName = target.getClass().getSimpleName();
-                System.out.println("##### Building: " + targetName + "#####");
+                System.out.println("##### Building: " + targetName + " #####");
                 if(!target.build(config)) {
                     throw new RuntimeException();
                 }

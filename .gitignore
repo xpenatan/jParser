@@ -32,3 +32,4 @@ out/
 **/lib/teavm/src/main/java/emu/**
 **/lib/teavm/src/main/resources/*.js
 **/lib/teavm/src/main/resources/*.wasm
+**/app/android/libs/

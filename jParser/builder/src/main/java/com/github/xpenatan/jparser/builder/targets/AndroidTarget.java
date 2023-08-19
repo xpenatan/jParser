@@ -1,6 +1,10 @@
 package com.github.xpenatan.jparser.builder.targets;
 
+import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildTarget;
+import com.github.xpenatan.jparser.builder.JProcess;
+import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
+import com.github.xpenatan.jparser.core.util.CustomFileDescriptor.FileType;
 
 public class AndroidTarget extends BuildTarget {
     public AndroidTarget() {
@@ -8,5 +12,68 @@ public class AndroidTarget extends BuildTarget {
 
         cFlags.add("-O2 -Wall -D__ANDROID__");
         cppFlags.add("-O2 -Wall -D__ANDROID__");
+        linkerFlags.add("-lm");
+    }
+
+    @Override
+    protected boolean build(BuildConfig config) {
+        CustomFileDescriptor androidDir = config.buildDir;
+        if(!androidDir.exists()) {
+            androidDir.mkdirs();
+        }
+
+        CustomFileDescriptor applicationTemplate = new CustomFileDescriptor("android/Application.mk", FileType.Classpath);
+        String applicationStr = applicationTemplate.readString();
+        String androidABIS = "";
+        String androidPlatform = "android-9";
+        applicationStr = applicationStr.replace("%androidABIs%", androidABIS);
+        applicationStr = applicationStr.replace("%androidPlat%", androidPlatform);
+        CustomFileDescriptor applicationFile = androidDir.child(applicationTemplate.name());
+        applicationFile.writeString(applicationStr, false);
+
+        CustomFileDescriptor androidTemplate = new CustomFileDescriptor("android/Android.mk", FileType.Classpath);
+        String androidStr = androidTemplate.readString();
+
+        String headerDirsStr = "";
+        for(String headerDir : headerDirs) {
+            headerDirsStr += headerDir + " ";
+        }
+        headerDirsStr = headerDirsStr.trim();
+
+        String cppFlagsStr = "";
+
+        for(String cppFlag : cppFlags) {
+            cppFlagsStr += cppFlag + " ";
+        }
+        cppFlagsStr = cppFlagsStr.trim();
+
+        String linkerFlagsStr = "";
+
+        for(String linkerFlag : linkerFlags) {
+            linkerFlagsStr += linkerFlag + " ";
+        }
+        linkerFlagsStr = linkerFlagsStr.trim();
+
+        androidStr = androidStr.replace("%libName%", config.libName);
+        androidStr = androidStr.replace("%headerDirs%", headerDirsStr);
+        androidStr = androidStr.replace("%cppFlags%", cppFlagsStr);
+        androidStr = androidStr.replace("%linkerFlags%", linkerFlagsStr);
+
+        CustomFileDescriptor androidFile = androidDir.child(androidTemplate.name());
+        androidFile.writeString(androidStr, false);
+
+        String ndkHome = System.getenv("NDK_HOME");
+
+        String androidCommand = ndkHome + "/ndk-build";
+        if(isWindows()) {
+            androidCommand += ".cmd";
+        }
+
+        String command = androidCommand;
+        command += " NDK_PROJECT_PATH=. NDK_APPLICATION_MK=Application.mk";
+        if(!JProcess.startProcess(androidDir.file(), command)) {
+            return false;
+        }
+        return true;
     }
 }
