@@ -15,7 +15,7 @@ public class AndroidTarget extends BuildTarget {
         cppFlags.add("-O2 -Wall -D__ANDROID__");
         linkerFlags.add("-lm");
 
-        cppIncludes.add("jniglue/JNIGlue.cpp");
+        cppIncludes.add("**/jniglue/JNIGlue.cpp");
         headerDirs.add("jni-headers/");
         headerDirs.add("jni-headers/linux");
     }
@@ -29,7 +29,7 @@ public class AndroidTarget extends BuildTarget {
 
         CustomFileDescriptor applicationTemplate = new CustomFileDescriptor("android/Application.mk", FileType.Classpath);
         String applicationStr = applicationTemplate.readString();
-        String androidABIS = "all";
+        String androidABIS = "arm64-v8a";
         String androidPlatform = "android-19";
         applicationStr = applicationStr.replace("%androidABIs%", androidABIS);
         applicationStr = applicationStr.replace("%androidPlat%", androidPlatform);
