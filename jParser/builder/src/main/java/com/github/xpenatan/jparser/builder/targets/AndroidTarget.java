@@ -71,16 +71,6 @@ public class AndroidTarget extends BuildTarget {
             srcFilesStr += "FILE_LIST += $(wildcard $(LOCAL_PATH)/" + pathWithoutBase + ")\n";
         }
 
-//        FILE_LIST += $(wildcard $(LOCAL_PATH)/src/exampleLib/NormalClass.cpp)
-//        FILE_LIST += $(wildcard $(LOCAL_PATH)/src/exampleLib/ParentClass.cpp)
-//        FILE_LIST += $(wildcard $(LOCAL_PATH)/src/exampleLib/ReturnClass.cpp)
-//        FILE_LIST += $(wildcard $(LOCAL_PATH)/src/exampleLib/subpackage/ParamData.cpp)
-//        FILE_LIST += $(wildcard $(LOCAL_PATH)/src/jniglue/JNIGlue.cpp)
-
-//        for(String cppInclude : cppIncludes) {
-//            srcFilesStr += "FILE_LIST += $(wildcard $(LOCAL_PATH)/" + cppInclude + ")\n";
-//        }
-
         srcFilesStr = srcFilesStr.trim();
 
         androidStr = androidStr.replace("%libName%", config.libName);
