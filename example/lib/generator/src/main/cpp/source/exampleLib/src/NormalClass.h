@@ -25,6 +25,7 @@ public:
     NormalClass(int c, ParamData & refParamData);
     NormalClass(ParamData * pointerParamData, ParamData & refParamData, ParamData valueParamData);
 
+    int getVersion();
     void setString(char* text);
     static int subIntValue(int a, int b, int subValue = 0);
     int addIntValue(int a, int b);

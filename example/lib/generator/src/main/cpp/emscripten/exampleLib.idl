@@ -11,6 +11,7 @@ interface NormalClass {
     void NormalClass();
     void NormalClass(long c, [Ref]ParamData refParamClass);
 
+    long getVersion();
 // Emscripten don't allow param by value
 //    void NormalClass(ParamData pointerParamData, [Ref]ParamData refParamData, [Value]ParamData valueParamData);
 

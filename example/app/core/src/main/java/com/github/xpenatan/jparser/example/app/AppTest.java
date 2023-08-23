@@ -36,6 +36,10 @@ public class AppTest extends ApplicationAdapter {
         initLib = true;
 
         NormalClass normalClass = new NormalClass();
+
+        int version = normalClass.getVersion();
+        System.out.println("Version " + version);
+
         ret1 = normalClass.addIntValue(a1, b1);
         System.out.println("addIntValue " + a1 + " + " + b1 + " = " + ret1);
 

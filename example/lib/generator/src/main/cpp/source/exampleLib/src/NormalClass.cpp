@@ -19,6 +19,11 @@ NormalClass::NormalClass(ParamData * pointerParamData, ParamData & refParamData,
     pointerReturnClass = new ReturnClass();
 }
 
+int NormalClass::getVersion()
+{
+    return 7;
+}
+
 void NormalClass::setString(char* text)
 {
 
