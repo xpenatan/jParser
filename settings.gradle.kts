@@ -12,6 +12,7 @@ include(":example:lib:base")
 include(":example:lib:core")
 include(":example:lib:desktop")
 include(":example:lib:teavm")
+include(":example:lib:android")
 
 include(":example:app:core")
 include(":example:app:desktop")

@@ -1,5 +1,6 @@
 package com.github.xpenatan.jparser.builder;
 
+import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.nio.file.FileSystems;
@@ -137,14 +138,14 @@ public abstract class BuildTarget {
     protected void addJNIHeadersAndGlueCode() {
         cppIncludes.add("**/jniglue/JNIGlue.cpp");
         headerDirs.add("-Ijni-headers/");
-        if(isWindows()) {
+        if(isUnix()) {
+            headerDirs.add("-Ijni-headers/linux");
+        }
+        else if(isWindows()) {
             headerDirs.add("-Ijni-headers/win32");
         }
         else if(isMac()) {
             headerDirs.add("-Ijni-headers/mac");
-        }
-        else if(isUnix()) {
-            headerDirs.add("-Ijni-headers/linux");
         }
     }
 

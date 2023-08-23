@@ -5,7 +5,6 @@ import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
-import com.github.xpenatan.jparser.cpp.CPPBuildHelper;
 import com.github.xpenatan.jparser.cpp.CppCodeParserV2;
 import com.github.xpenatan.jparser.cpp.CppGenerator;
 import com.github.xpenatan.jparser.cpp.NativeCPPGeneratorV2;
@@ -53,17 +52,6 @@ public class Main {
         CppCodeParserV2 cppParser = new CppCodeParserV2(cppGenerator, idlReader, basePackage);
         cppParser.generateClass = true;
         JParser.generate(cppParser, baseJavaDir, genDir);
-        CPPBuildHelper.DEBUG_BUILD = true;
-        CPPBuildHelper.Config config = new CPPBuildHelper.Config();
-        config.libName = libName;
-        config.buildPath = libBuildPath;
-        config.libsDir = libsDir;
-
-        config.headerDir.add("src/");
-        config.cppIncludes.add("src/**/*.cpp");
-        config.cppIncludes.add("src/JNIGlue.cpp");
-
-//        CPPBuildHelper.build(config);
 
         BuildConfig buildConfig = new BuildConfig(
                 cppDestinationPath,
@@ -88,7 +76,7 @@ public class Main {
         teaVMTarget.cppIncludes.add("**/src/jsglue/glue.cpp");
 
         AndroidTarget androidTarget = new AndroidTarget();
-        androidTarget.headerDirs.add("-Isrc/exampleLib");
+        androidTarget.headerDirs.add("src/exampleLib");
         androidTarget.cppIncludes.add("**/src/**.cpp");
 
 //        JBuilder.build(buildConfig, windowsTarget, teaVMTarget);

@@ -43,7 +43,7 @@ allprojects()  {
     }
 }
 
-configure(allprojects - project(":example:app:android")) {
+configure(allprojects - project(":example:app:android") - project(":example:lib:android")) {
     apply {
         plugin("java")
     }
