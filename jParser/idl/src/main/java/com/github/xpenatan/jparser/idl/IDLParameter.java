@@ -61,14 +61,30 @@ public class IDLParameter {
         if(type.equals("long")) {
             type = "int";
         }
-
         if(type.equals("long[]")) {
             type = "int[]";
         }
-
         if(type.equals("DOMString")) {
             type = "String";
         }
+
+        // Convert to array object
+        if(type.equals("int[]")) {
+            type = "IntArray";
+        }
+        else if(type.equals("float[]")) {
+            type = "FloatArray";
+        }
+        else if(type.equals("byte[]")) {
+            type = "ByteArray";
+        }
+        else if(type.equals("boolean[]")) {
+            type = "BoolArray";
+        }
+        else if(type.equals("double[]")) {
+            type = "DoubleArray";
+        }
+
         name = s1[s1.length - 1];
     }
 
