@@ -25,6 +25,7 @@ import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import java.util.ArrayList;
@@ -197,8 +198,10 @@ public class IDLMethodParser {
             Type type = parameter.getType();
             String paramName = parameter.getNameAsString();
             if(type.isClassOrInterfaceType()) {
-                //All methods must contain a base class to get its pointer
-                paramName = paramName + ".getCPointer()";
+                if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
+                    //All methods must contain a base class to get its pointer
+                    paramName = paramName + ".getCPointer()";
+                }
             }
             else if(type.isArrayType()) {
                 //TODO implement array call
@@ -332,7 +335,7 @@ public class IDLMethodParser {
             Parameter parameter = methodParameters.get(i);
             String nameAsString = parameter.getNameAsString();
             Type type = parameter.getType();
-            if(type.isPrimitiveType()) {
+            if(type.isPrimitiveType() || IDLHelper.isString(type)) {
                 nativeMethod.addParameter(type.clone(), nameAsString);
             }
             else {
