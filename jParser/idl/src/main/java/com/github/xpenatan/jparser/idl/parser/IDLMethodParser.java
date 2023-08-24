@@ -254,9 +254,11 @@ public class IDLMethodParser {
         // isTemp false will actually create a c++ object by using the default constructor. cMemOwn = true
         // When isTemp is false, the c++ class must have default constructor and the assignment operator
 
-        for(int i = 0; i < 20; i++) {
+        int i = 0;
+        while(true) {
             String fieldName = getFieldName(returnTypeName, i, isTemp, isStatic);
-            if(classDeclaration.getFieldByName(fieldName).isEmpty()) {
+            Optional<FieldDeclaration> fieldByName = classDeclaration.getFieldByName(fieldName);
+            if(fieldByName.isEmpty()) {
                 ObjectCreationExpr expression = new ObjectCreationExpr();
                 expression.setType(returnTypeName);
                 if(isTemp) {
@@ -275,8 +277,8 @@ public class IDLMethodParser {
                 fieldDeclaration.setRange(range);
                 return fieldName;
             }
+            i++;
         }
-        return null;
     }
 
     private static String getFieldName(String type, int number,  boolean isTemp, boolean isStatic) {
