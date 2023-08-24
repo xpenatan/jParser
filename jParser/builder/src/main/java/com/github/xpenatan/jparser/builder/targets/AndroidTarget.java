@@ -8,6 +8,10 @@ import com.github.xpenatan.jparser.core.util.CustomFileDescriptor.FileType;
 import java.util.ArrayList;
 
 public class AndroidTarget extends BuildTarget {
+
+    public String androidABIS = "all";
+    public String androidPlatform = "android-19";
+
     public AndroidTarget() {
         this.tempBuildDir = "target/android";
 
@@ -29,8 +33,6 @@ public class AndroidTarget extends BuildTarget {
 
         CustomFileDescriptor applicationTemplate = new CustomFileDescriptor("android/Application.mk", FileType.Classpath);
         String applicationStr = applicationTemplate.readString();
-        String androidABIS = "arm64-v8a";
-        String androidPlatform = "android-19";
         applicationStr = applicationStr.replace("%androidABIs%", androidABIS);
         applicationStr = applicationStr.replace("%androidPlat%", androidPlatform);
         CustomFileDescriptor applicationFile = androidDir.child(applicationTemplate.name());
@@ -58,7 +60,6 @@ public class AndroidTarget extends BuildTarget {
             linkerFlagsStr += linkerFlag + " ";
         }
         linkerFlagsStr = linkerFlagsStr.trim();
-
 
         ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.sourceDir, cppIncludes);
 
