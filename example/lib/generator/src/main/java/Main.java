@@ -85,6 +85,6 @@ public class Main {
         iosTarget.cppIncludes.add("**/src/**.cpp");
 
 //        JBuilder.build(buildConfig, windowsTarget, teaVMTarget, androidTarget);
-        JBuilder.build(buildConfig, iosTarget);
+        JBuilder.build(buildConfig, windowsTarget);
     }
 }

@@ -1,6 +1,5 @@
 package com.github.xpenatan.jparser.cpp;
 
-import com.badlogic.gdx.jnigen.parsing.JavaMethodParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -21,68 +20,68 @@ import java.util.Scanner;
 
 public class NativeCPPGeneratorV2 implements CppGenerator {
 
-    private static final Map<String, JavaMethodParser.ArgumentType> plainOldDataTypes;
-    private static final Map<String, JavaMethodParser.ArgumentType> arrayTypes;
-    private static final Map<String, JavaMethodParser.ArgumentType> bufferTypes;
-    private static final Map<String, JavaMethodParser.ArgumentType> otherTypes;
+    private static final Map<String, ArgumentType> plainOldDataTypes;
+    private static final Map<String, ArgumentType> arrayTypes;
+    private static final Map<String, ArgumentType> bufferTypes;
+    private static final Map<String, ArgumentType> otherTypes;
     private static final Map<String, String> valueTypes;
 
     private static String helperName = "IDLHelper.h";
 
     static {
         valueTypes = new HashMap<>();
-        valueTypes.put(JavaMethodParser.ArgumentType.Boolean.getJniType(), "Z");
-        valueTypes.put(JavaMethodParser.ArgumentType.Byte.getJniType(), "B");
-        valueTypes.put(JavaMethodParser.ArgumentType.Char.getJniType(), "C");
-        valueTypes.put(JavaMethodParser.ArgumentType.Short.getJniType(), "S");
-        valueTypes.put(JavaMethodParser.ArgumentType.Integer.getJniType(), "I");
-        valueTypes.put(JavaMethodParser.ArgumentType.Long.getJniType(), "J");
-        valueTypes.put(JavaMethodParser.ArgumentType.Float.getJniType(), "F");
-        valueTypes.put(JavaMethodParser.ArgumentType.Double.getJniType(), "D");
-        valueTypes.put(JavaMethodParser.ArgumentType.FloatArray.getJniType(), "_3F");
-        valueTypes.put(JavaMethodParser.ArgumentType.IntegerArray.getJniType(), "_3I");
-        valueTypes.put(JavaMethodParser.ArgumentType.DoubleArray.getJniType(), "_3D");
-        valueTypes.put(JavaMethodParser.ArgumentType.LongArray.getJniType(), "_3J");
-        valueTypes.put(JavaMethodParser.ArgumentType.ShortArray.getJniType(), "_3S");
-        valueTypes.put(JavaMethodParser.ArgumentType.CharArray.getJniType(), "_3C");
-        valueTypes.put(JavaMethodParser.ArgumentType.ByteArray.getJniType(), "_3B");
-        valueTypes.put(JavaMethodParser.ArgumentType.BooleanArray.getJniType(), "_3Z");
-        valueTypes.put(JavaMethodParser.ArgumentType.Object.getJniType(), "L");
+        valueTypes.put(ArgumentType.Boolean.getJniType(), "Z");
+        valueTypes.put(ArgumentType.Byte.getJniType(), "B");
+        valueTypes.put(ArgumentType.Char.getJniType(), "C");
+        valueTypes.put(ArgumentType.Short.getJniType(), "S");
+        valueTypes.put(ArgumentType.Integer.getJniType(), "I");
+        valueTypes.put(ArgumentType.Long.getJniType(), "J");
+        valueTypes.put(ArgumentType.Float.getJniType(), "F");
+        valueTypes.put(ArgumentType.Double.getJniType(), "D");
+        valueTypes.put(ArgumentType.FloatArray.getJniType(), "_3F");
+        valueTypes.put(ArgumentType.IntegerArray.getJniType(), "_3I");
+        valueTypes.put(ArgumentType.DoubleArray.getJniType(), "_3D");
+        valueTypes.put(ArgumentType.LongArray.getJniType(), "_3J");
+        valueTypes.put(ArgumentType.ShortArray.getJniType(), "_3S");
+        valueTypes.put(ArgumentType.CharArray.getJniType(), "_3C");
+        valueTypes.put(ArgumentType.ByteArray.getJniType(), "_3B");
+        valueTypes.put(ArgumentType.BooleanArray.getJniType(), "_3Z");
+        valueTypes.put(ArgumentType.Object.getJniType(), "L");
 
-        plainOldDataTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
-        plainOldDataTypes.put("boolean", JavaMethodParser.ArgumentType.Boolean);
-        plainOldDataTypes.put("byte", JavaMethodParser.ArgumentType.Byte);
-        plainOldDataTypes.put("char", JavaMethodParser.ArgumentType.Char);
-        plainOldDataTypes.put("short", JavaMethodParser.ArgumentType.Short);
-        plainOldDataTypes.put("int", JavaMethodParser.ArgumentType.Integer);
-        plainOldDataTypes.put("long", JavaMethodParser.ArgumentType.Long);
-        plainOldDataTypes.put("float", JavaMethodParser.ArgumentType.Float);
-        plainOldDataTypes.put("double", JavaMethodParser.ArgumentType.Double);
+        plainOldDataTypes = new HashMap<String, ArgumentType>();
+        plainOldDataTypes.put("boolean", ArgumentType.Boolean);
+        plainOldDataTypes.put("byte", ArgumentType.Byte);
+        plainOldDataTypes.put("char", ArgumentType.Char);
+        plainOldDataTypes.put("short", ArgumentType.Short);
+        plainOldDataTypes.put("int", ArgumentType.Integer);
+        plainOldDataTypes.put("long", ArgumentType.Long);
+        plainOldDataTypes.put("float", ArgumentType.Float);
+        plainOldDataTypes.put("double", ArgumentType.Double);
 
-        arrayTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
-        arrayTypes.put("boolean", JavaMethodParser.ArgumentType.BooleanArray);
-        arrayTypes.put("byte", JavaMethodParser.ArgumentType.ByteArray);
-        arrayTypes.put("char", JavaMethodParser.ArgumentType.CharArray);
-        arrayTypes.put("short", JavaMethodParser.ArgumentType.ShortArray);
-        arrayTypes.put("int", JavaMethodParser.ArgumentType.IntegerArray);
-        arrayTypes.put("long", JavaMethodParser.ArgumentType.LongArray);
-        arrayTypes.put("float", JavaMethodParser.ArgumentType.FloatArray);
-        arrayTypes.put("double", JavaMethodParser.ArgumentType.DoubleArray);
+        arrayTypes = new HashMap<String, ArgumentType>();
+        arrayTypes.put("boolean", ArgumentType.BooleanArray);
+        arrayTypes.put("byte", ArgumentType.ByteArray);
+        arrayTypes.put("char", ArgumentType.CharArray);
+        arrayTypes.put("short", ArgumentType.ShortArray);
+        arrayTypes.put("int", ArgumentType.IntegerArray);
+        arrayTypes.put("long", ArgumentType.LongArray);
+        arrayTypes.put("float", ArgumentType.FloatArray);
+        arrayTypes.put("double", ArgumentType.DoubleArray);
 
-        bufferTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
-        bufferTypes.put("Buffer", JavaMethodParser.ArgumentType.Buffer);
-        bufferTypes.put("ByteBuffer", JavaMethodParser.ArgumentType.ByteBuffer);
-        bufferTypes.put("CharBuffer", JavaMethodParser.ArgumentType.CharBuffer);
-        bufferTypes.put("ShortBuffer", JavaMethodParser.ArgumentType.ShortBuffer);
-        bufferTypes.put("IntBuffer", JavaMethodParser.ArgumentType.IntBuffer);
-        bufferTypes.put("LongBuffer", JavaMethodParser.ArgumentType.LongBuffer);
-        bufferTypes.put("FloatBuffer", JavaMethodParser.ArgumentType.FloatBuffer);
-        bufferTypes.put("DoubleBuffer", JavaMethodParser.ArgumentType.DoubleBuffer);
+        bufferTypes = new HashMap<String, ArgumentType>();
+        bufferTypes.put("Buffer", ArgumentType.Buffer);
+        bufferTypes.put("ByteBuffer", ArgumentType.ByteBuffer);
+        bufferTypes.put("CharBuffer", ArgumentType.CharBuffer);
+        bufferTypes.put("ShortBuffer", ArgumentType.ShortBuffer);
+        bufferTypes.put("IntBuffer", ArgumentType.IntBuffer);
+        bufferTypes.put("LongBuffer", ArgumentType.LongBuffer);
+        bufferTypes.put("FloatBuffer", ArgumentType.FloatBuffer);
+        bufferTypes.put("DoubleBuffer", ArgumentType.DoubleBuffer);
 
-        otherTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
-        otherTypes.put("String", JavaMethodParser.ArgumentType.String);
-        otherTypes.put("Class", JavaMethodParser.ArgumentType.Class);
-        otherTypes.put("Throwable", JavaMethodParser.ArgumentType.Throwable);
+        otherTypes = new HashMap<String, ArgumentType>();
+        otherTypes.put("String", ArgumentType.String);
+        otherTypes.put("Class", ArgumentType.Class);
+        otherTypes.put("Throwable", ArgumentType.Throwable);
     }
 
     private String cppSourceDir;
@@ -244,13 +243,13 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
     private Argument getArgument(Parameter parameter) {
         String[] typeTokens = parameter.getType().toString().split("\\.");
         String type = typeTokens[typeTokens.length - 1];
-        JavaMethodParser.ArgumentType argumentType = getType(type);
+        ArgumentType argumentType = getType(type);
         String jniType = argumentType.getJniType();
         String valueType = valueTypes.get(jniType);
         return new Argument(argumentType, parameter.getNameAsString(), valueType);
     }
 
-    private JavaMethodParser.ArgumentType getType(String type) {
+    private ArgumentType getType(String type) {
         int arrayDim = 0;
         for(int i = 0; i < type.length(); i++) {
             if(type.charAt(i) == '[') arrayDim++;
@@ -258,10 +257,10 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         type = type.replace("[", "").replace("]", "");
 
         if(arrayDim >= 1) {
-            if(arrayDim > 1) return JavaMethodParser.ArgumentType.ObjectArray;
-            JavaMethodParser.ArgumentType arrayType = arrayTypes.get(type);
+            if(arrayDim > 1) return ArgumentType.ObjectArray;
+            ArgumentType arrayType = arrayTypes.get(type);
             if(arrayType == null) {
-                return JavaMethodParser.ArgumentType.ObjectArray;
+                return ArgumentType.ObjectArray;
             }
             return arrayType;
         }
@@ -269,21 +268,85 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
         if(plainOldDataTypes.containsKey(type)) return plainOldDataTypes.get(type);
         if(bufferTypes.containsKey(type)) return bufferTypes.get(type);
         if(otherTypes.containsKey(type)) return otherTypes.get(type);
-        return JavaMethodParser.ArgumentType.Object;
+        return ArgumentType.Object;
+    }
+
+    public enum ArgumentType {
+        Boolean("jboolean"), Byte("jbyte"), Char("jchar"), Short("jshort"), Integer("jint"), Long("jlong"), Float("jfloat"), Double(
+                "jdouble"), Buffer("jobject"), ByteBuffer("jobject"), CharBuffer("jobject"), ShortBuffer("jobject"), IntBuffer("jobject"), LongBuffer(
+                "jobject"), FloatBuffer("jobject"), DoubleBuffer("jobject"), BooleanArray("jbooleanArray"), ByteArray("jbyteArray"), CharArray(
+                "jcharArray"), ShortArray("jshortArray"), IntegerArray("jintArray"), LongArray("jlongArray"), FloatArray("jfloatArray"), DoubleArray(
+                "jdoubleArray"), String("jstring"), Class("jclass"), Throwable("jthrowable"), Object("jobject"), ObjectArray("jobjectArray");
+
+        private final String jniType;
+
+        ArgumentType (String jniType) {
+            this.jniType = jniType;
+        }
+
+        public boolean isPrimitiveArray () {
+            return toString().endsWith("Array") && this != ObjectArray;
+        }
+
+        public boolean isBuffer () {
+            return toString().endsWith("Buffer");
+        }
+
+        public boolean isObject () {
+            return toString().equals("Object") || this == ObjectArray;
+        }
+
+        public boolean isString () {
+            return toString().equals("String");
+        }
+
+        public boolean isPlainOldDataType () {
+            return !isString() && !isPrimitiveArray() && !isBuffer() && !isObject();
+        }
+
+        public String getBufferCType () {
+            if (!this.isBuffer()) throw new RuntimeException("ArgumentType " + this + " is not a Buffer!");
+            if (this == Buffer) return "unsigned char*";
+            if (this == ByteBuffer) return "char*";
+            if (this == CharBuffer) return "unsigned short*";
+            if (this == ShortBuffer) return "short*";
+            if (this == IntBuffer) return "int*";
+            if (this == LongBuffer) return "long long*";
+            if (this == FloatBuffer) return "float*";
+            if (this == DoubleBuffer) return "double*";
+            throw new RuntimeException("Unknown Buffer type " + this);
+        }
+
+        public String getArrayCType () {
+            if (!this.isPrimitiveArray()) throw new RuntimeException("ArgumentType " + this + " is not an Array!");
+            if (this == BooleanArray) return "bool*";
+            if (this == ByteArray) return "char*";
+            if (this == CharArray) return "unsigned short*";
+            if (this == ShortArray) return "short*";
+            if (this == IntegerArray) return "int*";
+            if (this == LongArray) return "long long*";
+            if (this == FloatArray) return "float*";
+            if (this == DoubleArray) return "double*";
+            throw new RuntimeException("Unknown Array type " + this);
+        }
+
+        public String getJniType () {
+            return jniType;
+        }
     }
 
     public static class Argument {
-        final JavaMethodParser.ArgumentType type;
+        final ArgumentType type;
         private final String name;
         private final String valueType;
 
-        public Argument (JavaMethodParser.ArgumentType type, String name, String valueType) {
+        public Argument (ArgumentType type, String name, String valueType) {
             this.type = type;
             this.name = name;
             this.valueType = valueType;
         }
 
-        public JavaMethodParser.ArgumentType getType () {
+        public ArgumentType getType () {
             return type;
         }
 
