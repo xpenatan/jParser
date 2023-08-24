@@ -53,10 +53,10 @@ public class IDLMethod {
 
         if(s[0].equals("static")) {
             isStaticMethod = true;
-            returnType = s[1];
+            returnType = s[s.length-2];
         }
         else {
-            returnType = s[0];
+            returnType = s[s.length-2];
         }
 
         if(returnType.equals("long")) {
