@@ -25,7 +25,7 @@ import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
 import java.util.ArrayList;
 
-public class CppCodeParserV2 extends IDLDefaultCodeParser {
+public class CppCodeParser extends IDLDefaultCodeParser {
 
     private static final String HEADER_CMD = "C++";
 
@@ -125,15 +125,15 @@ public class CppCodeParserV2 extends IDLDefaultCodeParser {
 
     private final CppGenerator cppGenerator;
 
-    public CppCodeParserV2(CppGenerator cppGenerator) {
+    public CppCodeParser(CppGenerator cppGenerator) {
         this(cppGenerator, null);
     }
 
-    public CppCodeParserV2(CppGenerator cppGenerator, IDLReader idlReader) {
+    public CppCodeParser(CppGenerator cppGenerator, IDLReader idlReader) {
         this(cppGenerator, idlReader, "");
     }
 
-    public CppCodeParserV2(CppGenerator cppGenerator, IDLReader idlReader, String basePackage) {
+    public CppCodeParser(CppGenerator cppGenerator, IDLReader idlReader, String basePackage) {
         super(basePackage, HEADER_CMD, idlReader);
         this.cppGenerator = cppGenerator;
     }

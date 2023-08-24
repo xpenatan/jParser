@@ -6,9 +6,9 @@ import com.github.xpenatan.jparser.builder.targets.IOSTarget;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
-import com.github.xpenatan.jparser.cpp.CppCodeParserV2;
+import com.github.xpenatan.jparser.cpp.CppCodeParser;
 import com.github.xpenatan.jparser.cpp.CppGenerator;
-import com.github.xpenatan.jparser.cpp.NativeCPPGeneratorV2;
+import com.github.xpenatan.jparser.cpp.NativeCPPGenerator;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.teavm.TeaVMCodeParserV2;
 import java.io.File;
@@ -49,8 +49,8 @@ public class Main {
         String cppDestinationPath = libBuildPath + "/src";
         String libDestinationPath = cppDestinationPath + "/exampleLib";
 
-        CppGenerator cppGenerator = new NativeCPPGeneratorV2(cppSourceDir, libDestinationPath);
-        CppCodeParserV2 cppParser = new CppCodeParserV2(cppGenerator, idlReader, basePackage);
+        CppGenerator cppGenerator = new NativeCPPGenerator(cppSourceDir, libDestinationPath);
+        CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage);
         cppParser.generateClass = true;
         JParser.generate(cppParser, baseJavaDir, genDir);
 

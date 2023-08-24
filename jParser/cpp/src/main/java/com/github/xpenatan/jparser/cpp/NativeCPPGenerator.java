@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 
-public class NativeCPPGeneratorV2 implements CppGenerator {
+public class NativeCPPGenerator implements CppGenerator {
 
     private static final Map<String, ArgumentType> plainOldDataTypes;
     private static final Map<String, ArgumentType> arrayTypes;
@@ -96,7 +96,7 @@ public class NativeCPPGeneratorV2 implements CppGenerator {
 
     private HashSet<String> includes = new HashSet<>();
 
-    public NativeCPPGeneratorV2(String cppSourceDir, String cppDestinationDir) {
+    public NativeCPPGenerator(String cppSourceDir, String cppDestinationDir) {
         try {
             this.cppSourceDir = new File(cppSourceDir).getCanonicalPath();
             this.cppDestinationDir = new File(cppDestinationDir).getCanonicalPath() + File.separator;
