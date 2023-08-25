@@ -15,4 +15,13 @@ public class IDLHelper {
     public static boolean isString(Type type) {
         return type.toString().equals("String");
     }
+
+    public static String convertEnumToInt(IDLReader idlReader, String type) {
+        IDLEnum idlEnum = idlReader.getEnum(type);
+        if(idlEnum != null) {
+            // if parameter is enum then convert to int.
+            type = "int";
+        }
+        return type;
+    }
 }

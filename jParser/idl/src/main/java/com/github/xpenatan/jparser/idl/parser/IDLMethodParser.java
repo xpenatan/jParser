@@ -66,7 +66,7 @@ public class IDLMethodParser {
 
         String methodName = idlMethod.name;
 
-        MethodDeclaration containsMethod = containsMethod(classOrInterfaceDeclaration, idlMethod);
+        MethodDeclaration containsMethod = containsMethod(idlParser, classOrInterfaceDeclaration, idlMethod);
         if(containsMethod != null) {
             boolean isNative = containsMethod.isNative();
             boolean isStatic = containsMethod.isStatic();
@@ -114,12 +114,7 @@ public class IDLMethodParser {
             IDLParameter idlParameter = parameters.get(i);
             String paramType = idlParameter.type;
             String paramName = idlParameter.name;
-
-            IDLEnum idlEnum = idlParser.idlReader.getEnum(paramType);
-            if(idlEnum != null) {
-                // if parameter is enum then convert to int.
-                paramType = "int";
-            }
+            paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
             Parameter parameter = methodDeclaration.addAndGetParameter(paramType, paramName);
             Type type = parameter.getType();
             JParserHelper.addMissingImportType(jParser, unit, type);
@@ -383,13 +378,14 @@ public class IDLMethodParser {
         }
     }
 
-    private static MethodDeclaration containsMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLMethod idlMethod) {
+    private static MethodDeclaration containsMethod(IDLDefaultCodeParser idlParser, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLMethod idlMethod) {
         ArrayList<IDLParameter> parameters = idlMethod.parameters;
         String[] paramTypes = new String[parameters.size()];
 
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);
             String paramType = parameter.type;
+            paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
             paramTypes[i] = paramType;
         }
         List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsByName(idlMethod.name);
