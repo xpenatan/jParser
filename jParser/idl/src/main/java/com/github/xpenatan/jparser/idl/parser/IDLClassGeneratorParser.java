@@ -181,6 +181,13 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             if(parentItem != null) {
                 ClassOrInterfaceDeclaration classDeclaration = parentItem.getClassDeclaration();
                 if(classDeclaration != null) {
+                    for(ImportDeclaration anImport : unit.getImports()) {
+                        String nameAsString = anImport.getNameAsString();
+                        if(nameAsString.contains(IDLENUM_CLASS_NAME)) {
+                            unit.remove(anImport);
+                            break;
+                        }
+                    }
                     String importName = enumClassUnit.getPackageDeclaration().get().getNameAsString() + "." + IDLENUM_CLASS_NAME;
                     unit.addImport(importName);
                     if(classOrInterfaceDeclaration.getImplementedTypes().isEmpty()) {
