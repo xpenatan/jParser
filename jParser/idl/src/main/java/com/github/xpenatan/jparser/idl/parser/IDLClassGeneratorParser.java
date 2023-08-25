@@ -4,7 +4,9 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
@@ -204,6 +206,19 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 if(parentItem != null) {
                     ClassOrInterfaceDeclaration classDeclaration = parentItem.getClassDeclaration();
                     if(classDeclaration != null) {
+                        for(ImportDeclaration anImport : unit.getImports()) {
+                            String nameAsString = anImport.getNameAsString();
+                            if(nameAsString.contains(BASE_CLASS_NAME)) {
+                                unit.remove(anImport);
+                                break;
+                            }
+                        }
+                        NodeList<ClassOrInterfaceType> extendedTypes = classOrInterfaceDeclaration.getExtendedTypes();
+                        if(!extendedTypes.isEmpty() && extendedTypes.get(0).getNameAsString().contains(BASE_CLASS_NAME)) {
+                            String importName = baseClassUnit.getPackageDeclaration().get().getNameAsString() + "." + BASE_CLASS_NAME;
+                            unit.addImport(importName);
+                        }
+
                         if(classOrInterfaceDeclaration.getExtendedTypes().isEmpty()) {
                             CompilationUnit parentUnit = parentItem.unit;
                             if(parentUnit.getPackageDeclaration().isPresent()) {
