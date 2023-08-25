@@ -385,10 +385,26 @@ public class IDLMethodParser {
             String paramType = parameter.type;
             paramTypes[i] = paramType;
         }
-        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(idlMethod.name, paramTypes);
+        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsByName(idlMethod.name);
 
         if(methods.size() > 0) {
-            return methods.get(0);
+            for(MethodDeclaration method : methods) {
+                NodeList<Parameter> methodParams = method.getParameters();
+                int methodParamsSize = methodParams.size();
+                if(methodParamsSize == paramTypes.length) {
+                    for(int i = 0; i < methodParamsSize; i++) {
+                        Parameter parameter = methodParams.get(i);
+                        String paramType = paramTypes[i];
+                        String nameAsString = parameter.getType().asString();
+                        // remove package from type if exist
+                        String[] split = nameAsString.split("\\.");
+                        String type = split[split.length-1];
+                        if(type.equals(paramType)) {
+                            return method;
+                        }
+                    }
+                }
+            }
         }
         return null;
     }
