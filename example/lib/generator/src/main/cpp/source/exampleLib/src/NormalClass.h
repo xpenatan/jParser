@@ -42,6 +42,13 @@ public:
     void valueParam(ParamData valueParamData);
     void addIntArrayItems(int* array, int valueToAdd);
     void callInterface(InterfaceClass & obj);
+    void enumParam(EnumLib value);
+
+};
+
+enum EnumLib : int {
+    FIRST = 1,
+    SECOND = 2,
 };
 
 #endif  //NORMALCLASS_H

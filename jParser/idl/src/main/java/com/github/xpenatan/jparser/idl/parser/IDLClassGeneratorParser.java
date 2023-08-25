@@ -11,6 +11,8 @@ import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.core.util.CustomPrettyPrinter;
 import com.github.xpenatan.jparser.core.util.FileHelper;
 import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLClassOrEnum;
+import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.ResourceList;
@@ -37,8 +39,10 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
     private String basePackage;
 
     protected CompilationUnit baseClassUnit;
+    protected CompilationUnit enumClassUnit;
 
     private static String BASE_CLASS_NAME = "-";
+    private static String IDLENUM_CLASS_NAME = "-";
 
     protected HashMap<String, String> classCppPath;
 
@@ -66,6 +70,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     private void createBaseUnitFromResources(JParser jParser) {
         BASE_CLASS_NAME = IDLBase.class.getSimpleName();
+        IDLENUM_CLASS_NAME = IDLEnum.class.getSimpleName();
         Collection<String> resources = ResourceList.getResources(Pattern.compile("/*.*/*.java"));
         for(String resource : resources) {
             try {
@@ -84,19 +89,24 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         }
         JParserItem parserUnitItem = jParser.getParserUnitItem(BASE_CLASS_NAME);
         baseClassUnit = parserUnitItem.unit;
+
+        JParserItem parserEnumItem = jParser.getParserUnitItem(IDLENUM_CLASS_NAME);
+        enumClassUnit = parserEnumItem.unit;
     }
 
     private void generateIDLJavaClasses(JParser jParser, String genPath) {
         classCppPath = getClassCppPath();
         for(IDLFile idlFile : idlReader.fileArray) {
-            for(IDLClass idlClass : idlFile.classArray) {
-                String className = idlClass.name;
+            for(IDLClassOrEnum idlClassOrEnum : idlFile.classArray) {
+                String className = idlClassOrEnum.name;
                 JParserItem parserItem = jParser.getParserUnitItem(className);
                 if(parserItem == null) {
-                    String jsImplementation = idlClass.classHeader.jsImplementation;
-                    if(jsImplementation != null) {
-                        //Don't generate class if its js implementation
-                        continue;
+                    if(idlClassOrEnum.isClass()) {
+                        String jsImplementation = idlClassOrEnum.asClass().classHeader.jsImplementation;
+                        if(jsImplementation != null) {
+                            //Don't generate class if its js implementation
+                            continue;
+                        }
                     }
 
                     String subPackage = "";
@@ -109,7 +119,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                             subPackage = string.replace(File.separator, ".").toLowerCase();
                         }
                     }
-                    CompilationUnit compilationUnit = setupClass(idlClass, subPackage);
+                    CompilationUnit compilationUnit = setupClass(idlClassOrEnum, subPackage);
                     parserItem = new JParserItem(compilationUnit, genPath, genPath);
                     jParser.unitArray.add(parserItem);
                 }
@@ -136,7 +146,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         return mapPackage;
     }
 
-    private CompilationUnit setupClass(IDLClass idlClass, String subPackage) {
+    private CompilationUnit setupClass(IDLClassOrEnum idlClass, String subPackage) {
         String className = idlClass.name;
         CompilationUnit compilationUnit = new CompilationUnit();
         compilationUnit.printer(new CustomPrettyPrinter());
@@ -147,9 +157,11 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         ClassOrInterfaceDeclaration classDeclaration = compilationUnit.addClass(className);
         classDeclaration.setPublic(true);
 
-        if(idlClass.classHeader.isNoDelete) {
-            // Class with no delete don't have constructor
-            classDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
+        if(idlClass.isClass()) {
+            if(idlClass.asClass().classHeader.isNoDelete) {
+                // Class with no delete don't have constructor
+                classDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
+            }
         }
 
         return compilationUnit;
@@ -162,6 +174,22 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         }
 
         String className = classOrInterfaceDeclaration.getName().toString();
+
+        IDLEnum idlEnum = idlReader.getEnum(className);
+        if(idlEnum != null) {
+            JParserItem parentItem = jParser.getParserUnitItem(IDLENUM_CLASS_NAME);
+            if(parentItem != null) {
+                ClassOrInterfaceDeclaration classDeclaration = parentItem.getClassDeclaration();
+                if(classDeclaration != null) {
+                    String importName = enumClassUnit.getPackageDeclaration().get().getNameAsString() + "." + IDLENUM_CLASS_NAME;
+                    unit.addImport(importName);
+                    if(classOrInterfaceDeclaration.getImplementedTypes().isEmpty()) {
+                        classOrInterfaceDeclaration.addImplementedType(IDLENUM_CLASS_NAME);
+                    }
+                }
+            }
+        }
+
         IDLClass idlClass = idlReader.getClass(className);
         if(idlClass != null) {
             if(!idlClass.extendClass.isEmpty()) {

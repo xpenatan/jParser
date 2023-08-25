@@ -39,6 +39,17 @@ public class IDLReader {
         return null;
     }
 
+    public IDLEnum getEnum(String name) {
+        for(int i = 0; i < fileArray.size(); i++) {
+            IDLFile idlFile = fileArray.get(i);
+            IDLEnum idlEnum = idlFile.getEnum(name);
+            if(idlEnum != null) {
+                return idlEnum;
+            }
+        }
+        return null;
+    }
+
     public static IDLReader readIDL(String idlDir) {
         return readIDL(idlDir, null);
     }
@@ -79,7 +90,7 @@ public class IDLReader {
                 }
                 inputStreamReader.close();    //closes the stream and release the resources
 
-                ArrayList<IDLClass> classList = new ArrayList<>();
+                ArrayList<IDLClassOrEnum> classList = new ArrayList<>();
                 parseFile(idlFile, lines, classList);
                 idlFile.classArray.addAll(classList);
             }
@@ -89,9 +100,10 @@ public class IDLReader {
         return idlFile;
     }
 
-    private static void parseFile(IDLFile idlFile, ArrayList<String> lines, ArrayList<IDLClass> classList) {
+    private static void parseFile(IDLFile idlFile, ArrayList<String> lines, ArrayList<IDLClassOrEnum> classList) {
         ArrayList<String> classLines = new ArrayList<>();
         boolean foundStartClass = false;
+        boolean foundStartEnum = false;
         int size = lines.size();
         for(int i = 0; i < size; i++) {
             String line = lines.get(i).trim();
@@ -99,6 +111,25 @@ public class IDLReader {
                 continue;
 
             boolean justAdded = false;
+
+            if(!foundStartEnum) {
+                if(line.startsWith("enum ")) {
+                    foundStartEnum = true;
+                    classLines.clear();
+                }
+            }
+
+            if(foundStartEnum) {
+                classLines.add(line);
+
+                if(line.endsWith("};")) {
+                    foundStartEnum = false;
+                    IDLEnum parserLineEnum = new IDLEnum(idlFile);
+                    parserLineEnum.initEnum(classLines);
+                    classLines.clear();
+                    classList.add(parserLineEnum);
+                }
+            }
 
             if(!foundStartClass) {
                 if(line.startsWith("interface ") || IDLClassHeader.isLineHeader(line)) {

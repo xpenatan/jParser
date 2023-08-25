@@ -16,8 +16,8 @@ import java.io.File;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-//        generateClassOnly();
-        generateAndBuild();
+        generateClassOnly();
+//        generateAndBuild();
     }
 
     private static void generateClassOnly() throws Exception {

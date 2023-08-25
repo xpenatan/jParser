@@ -92,3 +92,7 @@ void NormalClass::callInterface(InterfaceClass & obj)
 {
     obj.onParamCall(data);
 }
+
+void NormalClass::enumParam(EnumLib value)
+{
+}

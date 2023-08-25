@@ -5,10 +5,8 @@ import java.util.ArrayList;
 /**
  * @author xpenatan
  */
-public class IDLClass {
+public class IDLClass extends IDLClassOrEnum {
     public final IDLFile idlFile;
-
-    public String name;
 
     public IDLClassHeader classHeader;
 

@@ -35,6 +35,8 @@ interface NormalClass {
 //    void addIntArrayItems(long [] array);
 
     void callInterface([Ref]InterfaceClass obj);
+
+    void enumParam(EnumLib value);
 };
 NormalClass implements ParentClass;
 
@@ -62,3 +64,8 @@ interface DefaultInterface {
     void DefaultInterface();
 };
 DefaultInterface implements InterfaceClass;
+
+enum EnumLib {
+    "FIRST",
+    "SECOND"
+};
