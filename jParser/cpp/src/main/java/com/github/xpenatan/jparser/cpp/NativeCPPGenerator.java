@@ -196,6 +196,15 @@ public class NativeCPPGenerator implements CppGenerator {
 
         params += ")";
 
+        if(methodName.contains("_")) {
+            String newMethodName = "";
+            String[] split = methodName.split("_");
+            for(String s : split) {
+                newMethodName += s + "_1";
+            }
+            methodName = newMethodName;
+        }
+
         String fullMethodName =  packageNameCPP + "_" + className + "_" + methodName + paramsType + params;
         print(PrintType.MAIN, "JNIEXPORT " + returnType + " JNICALL Java_" + fullMethodName + " {");
         content = "\t" + content.replace("\n", "\n\t");
