@@ -197,12 +197,7 @@ public class NativeCPPGenerator implements CppGenerator {
         params += ")";
 
         if(methodName.contains("_")) {
-            String newMethodName = "";
-            String[] split = methodName.split("_");
-            for(String s : split) {
-                newMethodName += s + "_1";
-            }
-            methodName = newMethodName;
+            methodName = methodName.replace("_", "_1");
         }
 
         String fullMethodName =  packageNameCPP + "_" + className + "_" + methodName + paramsType + params;
