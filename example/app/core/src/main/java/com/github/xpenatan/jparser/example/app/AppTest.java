@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.github.xpenatan.jparser.example.lib.EnumLib;
 import com.github.xpenatan.jparser.example.lib.ExampleLib;
 import com.github.xpenatan.jparser.example.lib.NormalClass;
 import com.github.xpenatan.jparser.example.lib.idl.helper.FloatArray;
@@ -47,6 +48,13 @@ public class AppTest extends ApplicationAdapter {
         array.setValue(0, 10);
         float value = array.getValue(0);
         System.out.println("VALUE: " + value);
+
+        System.out.println("ENUM FIRST: " + EnumLib.FIRST);
+        System.out.println("ENUM SECOND: " + EnumLib.SECOND);
+        System.out.println("ENUMPARAM FIRST: " + normalClass.enumParam(EnumLib.FIRST));
+        System.out.println("ENUMPARAM SECOND: " + normalClass.enumParam(EnumLib.SECOND));
+        ;
+
     }
 
     @Override

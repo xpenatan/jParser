@@ -93,6 +93,13 @@ void NormalClass::callInterface(InterfaceClass & obj)
     obj.onParamCall(data);
 }
 
-void NormalClass::enumParam(EnumLib value)
+int NormalClass::enumParam(EnumLib value)
 {
+    if(value == FIRST) {
+        return 11;
+    }
+    if(value == SECOND) {
+        return 22;
+    }
+    return 0;
 }

@@ -16,8 +16,8 @@ import java.io.File;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        generateClassOnly();
-//        generateAndBuild();
+//        generateClassOnly();
+        generateAndBuild();
     }
 
     private static void generateClassOnly() throws Exception {
@@ -78,13 +78,13 @@ public class Main {
 
         AndroidTarget androidTarget = new AndroidTarget();
         androidTarget.headerDirs.add("src/exampleLib");
-        androidTarget.cppIncludes.add("**/src/**.cpp");
+        androidTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
         IOSTarget iosTarget = new IOSTarget();
         iosTarget.headerDirs.add("-Isrc/exampleLib");
-        iosTarget.cppIncludes.add("**/src/**.cpp");
+        iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
-//        JBuilder.build(buildConfig, windowsTarget, teaVMTarget, androidTarget);
-        JBuilder.build(buildConfig, windowsTarget);
+        JBuilder.build(buildConfig, windowsTarget, teaVMTarget, androidTarget);
+//        JBuilder.build(buildConfig, windowsTarget);
     }
 }
