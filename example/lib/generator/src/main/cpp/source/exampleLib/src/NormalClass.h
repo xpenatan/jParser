@@ -9,8 +9,9 @@
 #define NORMALCLASS_H
 
 enum EnumLib : int {
-    FIRST = 1,
-    SECOND = 2,
+    DEFAULT = 10,
+    FIRST,
+    SECOND,
 };
 
 class NormalClass : public ParentClass
@@ -48,7 +49,8 @@ public:
     void addIntArrayItems(int* array, int valueToAdd);
     void callInterface(InterfaceClass & obj);
     int enumParam(EnumLib value);
-
+    void enumVoidParam(EnumLib value);
+    EnumLib enumReturn(int value);
 };
 
 #endif  //NORMALCLASS_H

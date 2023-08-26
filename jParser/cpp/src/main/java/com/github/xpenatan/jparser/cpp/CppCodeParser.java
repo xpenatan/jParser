@@ -7,6 +7,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.Type;
@@ -15,6 +16,7 @@ import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.RawCodeBlock;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
+import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
@@ -30,17 +32,12 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     private static final String HEADER_CMD = "C++";
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
-
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
-
     protected static final String TEMPLATE_TAG_ATTRIBUTE = "[ATTRIBUTE]";
-
+    protected static final String TEMPLATE_TAG_ENUM = "[ENUM]";
     protected static final String TEMPLATE_TAG_ATTRIBUTE_TYPE = "[ATTRIBUTE_TYPE]";
-
     protected static final String TEMPLATE_TAG_COPY_TYPE = "[COPY_TYPE]";
-
     protected static final String TEMPLATE_TAG_COPY_PARAM = "[COPY_PARAM]";
-
     protected static final String TEMPLATE_TAG_CONSTRUCTOR = "[CONSTRUCTOR]";
 
     protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
@@ -122,6 +119,9 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     protected static final String METHOD_GET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return nativeObject->[METHOD];\n";
+
+    protected static final String ENUM_GET_INT_TEMPLATE =
+            "\nreturn (jlong)[ENUM];\n";
 
     private final CppGenerator cppGenerator;
 
@@ -235,6 +235,15 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         }
     }
 
+    @Override
+    public void onIDLEnumMethodGenerated(JParser jParser, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        String content  = "";
+        content = ENUM_GET_INT_TEMPLATE.replace(TEMPLATE_TAG_ENUM, enumStr);
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String blockComment = header + content;
+        nativeMethodDeclaration.setBlockComment(blockComment);
+    }
+
     private void setupMethodGenerated(IDLMethod idlMethod, String param, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         Type returnType = methodDeclaration.getType();
         String methodName = methodDeclaration.getNameAsString();
@@ -334,6 +343,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             else {
                 paramName = "(" + classType + "* )" + paramName;
             }
+        }
+        IDLEnum anEnum = idlFile.getEnum(classType);
+        if(anEnum != null) {
+            paramName = "(" + classType + ")" + paramName;
         }
         return paramName;
     }

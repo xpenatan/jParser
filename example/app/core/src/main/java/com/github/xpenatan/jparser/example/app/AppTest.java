@@ -53,8 +53,7 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("ENUM SECOND: " + EnumLib.SECOND);
         System.out.println("ENUMPARAM FIRST: " + normalClass.enumParam(EnumLib.FIRST));
         System.out.println("ENUMPARAM SECOND: " + normalClass.enumParam(EnumLib.SECOND));
-        ;
-
+        normalClass.enumVoidParam(EnumLib.FIRST);
     }
 
     @Override

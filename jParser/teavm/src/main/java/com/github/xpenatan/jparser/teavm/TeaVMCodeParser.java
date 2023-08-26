@@ -7,6 +7,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.CastExpr;
@@ -41,6 +42,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     protected static final String TEMPLATE_TAG_ATTRIBUTE = "[ATTRIBUTE]";
     protected static final String TEMPLATE_TAG_MODULE = "[MODULE]";
     protected static final String TEMPLATE_TAG_CONSTRUCTOR = "[CONSTRUCTOR]";
+    protected static final String TEMPLATE_TAG_ENUM = "[ENUM]";
 
     protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
             "var jsObj = new [MODULE].[CONSTRUCTOR];\n" +
@@ -75,6 +77,9 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     protected static final String SET_ATTRIBUTE_VOID_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
+
+    protected static final String ENUM_GET_INT_TEMPLATE =
+            "\nreturn [MODULE].[ENUM];\n";
 
     private final String module;
 
@@ -287,6 +292,24 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 }
                 normalAnnotationExpr.addPair("script", "\"" + content + "\"");
             }
+        }
+    }
+
+    @Override
+    public void onIDLEnumMethodGenerated(JParser jParser, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        String content  = "";
+        if(enumStr.contains("::")) {
+            enumStr = enumStr.split("::")[1];
+        }
+        content = ENUM_GET_INT_TEMPLATE.replace(TEMPLATE_TAG_ENUM, enumStr).replace(TEMPLATE_TAG_MODULE, module);
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String blockComment = header + content;
+        nativeMethodDeclaration.setBlockComment(blockComment);
+        content = content.replace("\n", "");
+        content = content.trim();
+        if(!nativeMethodDeclaration.isAnnotationPresent("JSBody")) {
+            NormalAnnotationExpr normalAnnotationExpr = nativeMethodDeclaration.addAndGetAnnotation("org.teavm.jso.JSBody");
+            normalAnnotationExpr.addPair("script", "\"" + content + "\"");
         }
     }
 

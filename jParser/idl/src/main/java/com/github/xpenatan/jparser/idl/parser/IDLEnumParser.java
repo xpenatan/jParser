@@ -37,7 +37,7 @@ public class IDLEnumParser {
             nativeMethod.removeBody();
             nativeMethod.setType(intType);
             classDeclaration.getMembers().add(nativeMethod);
-            idlParser.onIDLEnumMethodGenerated(jParser, classDeclaration, fieldDeclaration, nativeMethod);
+            idlParser.onIDLEnumMethodGenerated(jParser, classDeclaration, enumStr, fieldDeclaration, nativeMethod);
         }
     }
 }

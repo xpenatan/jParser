@@ -37,6 +37,10 @@ interface NormalClass {
     void callInterface([Ref]InterfaceClass obj);
 
     long enumParam(EnumLib value);
+
+    void enumVoidParam(EnumLib value);
+
+//    EnumLib enumReturn();
 };
 NormalClass implements ParentClass;
 

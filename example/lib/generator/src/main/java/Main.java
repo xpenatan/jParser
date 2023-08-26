@@ -1,4 +1,5 @@
 import com.github.xpenatan.jparser.builder.BuildConfig;
+import com.github.xpenatan.jparser.builder.JBuilder;
 import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jparser.builder.targets.IOSTarget;
@@ -83,7 +84,7 @@ public class Main {
         iosTarget.headerDirs.add("-Isrc/exampleLib");
         iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
-//        JBuilder.build(buildConfig, windowsTarget, teaVMTarget, androidTarget);
+        JBuilder.build(buildConfig, windowsTarget, teaVMTarget, androidTarget);
 //        JBuilder.build(buildConfig, windowsTarget);
     }
 }

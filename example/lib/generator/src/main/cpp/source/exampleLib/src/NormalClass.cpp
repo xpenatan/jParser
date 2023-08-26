@@ -96,10 +96,25 @@ void NormalClass::callInterface(InterfaceClass & obj)
 int NormalClass::enumParam(EnumLib value)
 {
     if(value == FIRST) {
-        return 11;
+        return 111;
     }
     if(value == SECOND) {
-        return 22;
+        return 222;
     }
     return 0;
+}
+
+void NormalClass::enumVoidParam(EnumLib value)
+{
+}
+
+EnumLib NormalClass::enumReturn(int value)
+{
+    if(value == 1) {
+        return FIRST;
+    }
+    if(value == 2) {
+        return SECOND;
+    }
+    return DEFAULT;
 }
