@@ -4,7 +4,6 @@ import idl.IDLEnum;
 
 public class EnumLib implements IDLEnum {
     public static int FIRST = FIRST_NATIVE();
-    public static int SECOND = SECOND_NATIVE();
 
     /*[-C++;-NATIVE]
         return (jlong)FIRST;
@@ -13,12 +12,4 @@ public class EnumLib implements IDLEnum {
         return exampleLib.FIRST;
     */
     private static native int FIRST_NATIVE();
-
-    /*[-C++;-NATIVE]
-        return (jlong)SECOND;
-    */
-    /*[-teaVM;-NATIVE]
-        return exampleLib.SECOND;
-    */
-    private static native int SECOND_NATIVE();
 }
