@@ -101,10 +101,6 @@ public class IDLMethodParser {
             }
         }
 
-        if(!idlParser.filterIDLMethod(idlClass, idlMethod)) {
-            return;
-        }
-
         ArrayList<IDLParameter> parameters = idlMethod.parameters;
         MethodDeclaration methodDeclaration = classOrInterfaceDeclaration.addMethod(methodName, Modifier.Keyword.PUBLIC);
         methodDeclaration.setStatic(idlMethod.isStaticMethod);
@@ -122,10 +118,7 @@ public class IDLMethodParser {
         methodDeclaration.setType(returnType);
         IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, returnType, methodDeclaration);
 
-        if(!idlParser.generateClass) {
-            idlParser.onIDLMethodGenerated(jParser, idlClass, idlMethod,  unit, classOrInterfaceDeclaration, methodDeclaration, false);
-        }
-        else {
+        if(idlParser.generateClass) {
             setupMethod(idlParser, jParser, idlMethod, classOrInterfaceDeclaration, methodDeclaration);
         }
     }

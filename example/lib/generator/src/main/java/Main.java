@@ -1,5 +1,4 @@
 import com.github.xpenatan.jparser.builder.BuildConfig;
-import com.github.xpenatan.jparser.builder.JBuilder;
 import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jparser.builder.targets.IOSTarget;
@@ -10,7 +9,7 @@ import com.github.xpenatan.jparser.cpp.CppCodeParser;
 import com.github.xpenatan.jparser.cpp.CppGenerator;
 import com.github.xpenatan.jparser.cpp.NativeCPPGenerator;
 import com.github.xpenatan.jparser.idl.IDLReader;
-import com.github.xpenatan.jparser.teavm.TeaVMCodeParserV2;
+import com.github.xpenatan.jparser.teavm.TeaVMCodeParser;
 import java.io.File;
 
 public class Main {
@@ -67,7 +66,7 @@ public class Main {
         windowsTarget.cppIncludes.add("**/src/**.cpp");
 
         String teaVMgenDir = "../teavm/src/main/java/";
-        TeaVMCodeParserV2 teavmParser = new TeaVMCodeParserV2(idlReader, libName, basePackage);
+        TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage);
         JParser.generate(teavmParser, baseJavaDir, teaVMgenDir);
         EmscriptenTarget teaVMTarget = new EmscriptenTarget(idlPath);
         teaVMTarget.headerDirs.add("-Isrc/exampleLib");
@@ -84,7 +83,7 @@ public class Main {
         iosTarget.headerDirs.add("-Isrc/exampleLib");
         iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
-        JBuilder.build(buildConfig, windowsTarget, teaVMTarget, androidTarget);
+//        JBuilder.build(buildConfig, windowsTarget, teaVMTarget, androidTarget);
 //        JBuilder.build(buildConfig, windowsTarget);
     }
 }

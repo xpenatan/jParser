@@ -104,9 +104,11 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
                 }
             }
             else {
-                IDLEnum idlEnum = idlReader.getEnum(nameStr);
-                if(idlEnum != null) {
-                    IDLEnumParser.generateEnum(this, jParser, unit, classOrInterfaceDeclaration, idlEnum);
+                if(generateClass) {
+                    IDLEnum idlEnum = idlReader.getEnum(nameStr);
+                    if(idlEnum != null) {
+                        IDLEnumParser.generateEnum(this, jParser, unit, classOrInterfaceDeclaration, idlEnum);
+                    }
                 }
             }
         }
@@ -138,10 +140,6 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
         }
     }
 
-    @Deprecated
-    public void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
-    }
-
     public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
@@ -152,14 +150,6 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     }
 
     public void onIDLEnumMethodGenerated(JParser jParser, ClassOrInterfaceDeclaration classDeclaration, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
-    }
-
-    /**
-     * true to accept the idl method
-     */
-    @Deprecated
-    public boolean filterIDLMethod(IDLClass idlClass, IDLMethod idlMethod) {
-        return true;
     }
 
 }
