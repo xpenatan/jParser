@@ -21,15 +21,20 @@ public class IDLEnumParser {
     }
 
     private static void generateField(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, String enumStr) {
-        Optional<FieldDeclaration> fieldByName = classDeclaration.getFieldByName(enumStr);
+        String enumVar = enumStr;
+        if(enumVar.contains("::")) {
+            enumVar = enumVar.split("::")[1];
+        }
+
+        Optional<FieldDeclaration> fieldByName = classDeclaration.getFieldByName(enumVar);
         if(fieldByName.isEmpty()) {
             Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
             MethodCallExpr expression = new MethodCallExpr();
 
-            String nativeMethodName = enumStr + "_NATIVE";
+            String nativeMethodName = enumVar + "_NATIVE";
 
             expression.setName(nativeMethodName);
-            FieldDeclaration fieldDeclaration = classDeclaration.addFieldWithInitializer(intType, enumStr, expression, Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
+            FieldDeclaration fieldDeclaration = classDeclaration.addFieldWithInitializer(intType, enumVar, expression, Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
 
             MethodDeclaration nativeMethod = new MethodDeclaration();
             nativeMethod.setName(nativeMethodName);

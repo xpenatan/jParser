@@ -73,3 +73,7 @@ enum EnumLib {
     "FIRST",
     "SECOND"
 };
+
+//enum NormalClass_EnumWithinClass {
+//  "NormalClass::e_val"
+//};

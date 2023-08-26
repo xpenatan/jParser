@@ -21,6 +21,10 @@ private:
     ParamData data;
 
 public:
+    enum EnumWithinClass {
+        e_val = 34
+    };
+
     int hiddenInt = 1;
 
     ReturnClass valueReturnClass;
