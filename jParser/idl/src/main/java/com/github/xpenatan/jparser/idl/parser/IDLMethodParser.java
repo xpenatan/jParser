@@ -25,7 +25,6 @@ import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
-import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
@@ -70,7 +69,6 @@ public class IDLMethodParser {
         if(containsMethod != null) {
             boolean isNative = containsMethod.isNative();
             boolean isStatic = containsMethod.isStatic();
-            boolean containsBlockComment = false;
             Optional<Comment> optionalComment = containsMethod.getComment();
             if(optionalComment.isPresent()) {
                 Comment comment = optionalComment.get();
