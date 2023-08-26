@@ -39,6 +39,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     protected static final String TEMPLATE_TAG_COPY_TYPE = "[COPY_TYPE]";
     protected static final String TEMPLATE_TAG_COPY_PARAM = "[COPY_PARAM]";
     protected static final String TEMPLATE_TAG_CONSTRUCTOR = "[CONSTRUCTOR]";
+    protected static final String TEMPLATE_TAG_CAST = "[CAST]";
 
     protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
             "\nreturn (jlong)new [CONSTRUCTOR];\n";
@@ -118,7 +119,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     protected static final String METHOD_GET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
-            "return nativeObject->[METHOD];\n";
+            "return [CAST]nativeObject->[METHOD];\n";
 
     protected static final String ENUM_GET_INT_TEMPLATE =
             "\nreturn (jlong)[ENUM];\n";
@@ -246,14 +247,19 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     private void setupMethodGenerated(IDLMethod idlMethod, String param, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         Type returnType = methodDeclaration.getType();
+        String returnTypeStr = idlMethod.returnType;
         String methodName = methodDeclaration.getNameAsString();
         String classTypeName = classDeclaration.getNameAsString();
         IDLClass idlClass = idlMethod.idlFile.getClass(classTypeName);
         if(idlClass != null) {
             classTypeName = idlClass.classHeader.prefixName + classTypeName;
         }
-
+        String returnCastStr = "";
         String methodCaller = methodName + "(" + param + ")";
+        if(idlMethod.idlFile.getEnum(returnTypeStr) != null) {
+            returnCastStr = "(int)";
+
+        }
         String content = null;
         IDLMethodOperation.Op op = IDLMethodOperation.getEnum(idlMethod, methodDeclaration, nativeMethod);
         switch(op) {
@@ -299,7 +305,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 content = METHOD_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case GET_PRIMITIVE:
-                content = METHOD_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                content = METHOD_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);
                 break;
         }
 

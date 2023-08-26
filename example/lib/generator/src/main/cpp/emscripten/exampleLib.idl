@@ -40,7 +40,7 @@ interface NormalClass {
 
     void enumVoidParam(EnumLib value);
 
-//    EnumLib enumReturn();
+    EnumLib enumReturn(long value);
 };
 NormalClass implements ParentClass;
 

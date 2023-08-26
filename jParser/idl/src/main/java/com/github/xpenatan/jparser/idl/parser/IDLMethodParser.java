@@ -25,6 +25,7 @@ import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
@@ -114,7 +115,8 @@ public class IDLMethodParser {
             JParserHelper.addMissingImportType(jParser, unit, type);
         }
 
-        Type returnType = StaticJavaParser.parseType(idlMethod.returnType);
+        String returnTypeStr = IDLHelper.convertEnumToInt(idlParser.idlReader, idlMethod.returnType);
+        Type returnType = StaticJavaParser.parseType(returnTypeStr);
         methodDeclaration.setType(returnType);
         IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, returnType, methodDeclaration);
 
