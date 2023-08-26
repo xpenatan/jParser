@@ -258,7 +258,6 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String methodCaller = methodName + "(" + param + ")";
         if(idlMethod.idlFile.getEnum(returnTypeStr) != null) {
             returnCastStr = "(int)";
-
         }
         String content = null;
         IDLMethodOperation.Op op = IDLMethodOperation.getEnum(idlMethod, methodDeclaration, nativeMethod);
