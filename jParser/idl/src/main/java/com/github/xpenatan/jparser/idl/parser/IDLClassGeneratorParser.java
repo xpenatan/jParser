@@ -6,6 +6,7 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
@@ -248,6 +249,41 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                             classOrInterfaceDeclaration.addExtendedType(BASE_CLASS_NAME);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
+        // Fix existing IDL imports if it's used in base.
+
+        for(int i = 0; i < parserItems.size(); i++) {
+            JParserItem parserItem = parserItems.get(i);
+            CompilationUnit unit = parserItem.unit;
+
+            NodeList<ImportDeclaration> imports = unit.getImports();
+
+            ArrayList<ImportDeclaration> importsToRemove = new ArrayList<>();
+
+            for(ImportDeclaration anImport : imports) {
+                Name name = anImport.getName();
+                String identifier = name.getIdentifier();
+                JParserItem parserUnitItem = jParser.getParserUnitItem(identifier);
+                if(parserUnitItem != null) {
+                    importsToRemove.add(anImport);
+                }
+            }
+
+            for(ImportDeclaration anImport : importsToRemove) {
+                Name name = anImport.getName();
+                String identifier = name.getIdentifier();
+                JParserItem parserUnitItem = jParser.getParserUnitItem(identifier);
+                if(parserUnitItem != null) {
+                    CompilationUnit importUnit = parserUnitItem.unit;
+                    anImport.remove();
+                    String importName = importUnit.getPackageDeclaration().get().getNameAsString() + "." + parserUnitItem.className;
+                    unit.addImport(importName);
                 }
             }
         }

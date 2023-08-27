@@ -1,6 +1,7 @@
 package com.github.xpenatan.jparser.example.lib;
 
 import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
+import idl.helper.ByteArray;
 
 public class ExampleLib {
 
@@ -27,6 +28,9 @@ public class ExampleLib {
     public static void init(Runnable run) {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
         libraryLoader.load("exampleLib");
+
+        ByteArray test = new ByteArray(1);
+        test.setValue(0, (byte)1);
         run.run();
     }
 

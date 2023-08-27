@@ -353,6 +353,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
+        super.onParserComplete(jParser, parserItems);
         String prefix = "";
         String packagePrefix = "gen.";
 
