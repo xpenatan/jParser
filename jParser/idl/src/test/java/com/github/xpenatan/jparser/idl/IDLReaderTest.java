@@ -6,7 +6,6 @@ import org.junit.Test;
 
 public class IDLReaderTest {
 
-
     @BeforeClass
     public static void setUp() throws Exception {
     }
@@ -27,6 +26,9 @@ public class IDLReaderTest {
         Assert.assertEquals("NormalClassTest", idlMethod.returnType);
         Assert.assertEquals(true, idlMethod.isReturnValue);
         Assert.assertEquals(true, idlMethod.isStaticMethod);
+        IDLMethod styleMethod = idlClass.getMethod("GetStyle");
+        Assert.assertEquals(true, styleMethod.isStaticMethod);
+        Assert.assertEquals(true, styleMethod.isReturnRef);
     }
 
     @Test
@@ -59,7 +61,7 @@ public class IDLReaderTest {
     }
 
     @Test
-    public void test_NoDeleteClassTest_method_with_params() {
+    public void test_NoDeleteClassTest_methods() {
         IDLReader idlReader = IDLReader.readIDL("src\\test\\resources\\idl\\Test.idl");
         IDLClass idlClass = idlReader.getClass("NoDeleteClassTest");
         IDLMethod idlMethod = idlClass.methods.get(1);
@@ -69,11 +71,13 @@ public class IDLReaderTest {
         Assert.assertEquals("int", idlMethod.parameters.get(1).type);
         Assert.assertEquals("NormalClassTest", idlMethod.parameters.get(2).type);
         Assert.assertEquals("normalClass", idlMethod.parameters.get(2).name);
-        Assert.assertEquals("float[]", idlMethod.parameters.get(3).type);
+        Assert.assertEquals("FloatArray", idlMethod.parameters.get(3).type);
         Assert.assertTrue(idlMethod.parameters.get(3).isArray);
         Assert.assertEquals("vertices", idlMethod.parameters.get(3).name);
         Assert.assertTrue(idlMethod.parameters.get(2).isRef);
         Assert.assertTrue(idlMethod.parameters.get(2).isConst);
+        IDLMethod flagsMethod = idlClass.getMethod("GetFlags");
+        Assert.assertEquals("int", flagsMethod.returnType);
     }
 
     @Test

@@ -114,4 +114,13 @@ public class IDLClass extends IDLClassOrEnum {
     public String getName() {
         return classHeader.prefixName + name;
     }
+
+    public IDLMethod getMethod(String methodName) {
+        for(IDLMethod method : methods) {
+            if(method.name.equals(methodName)) {
+                return method;
+            }
+        }
+        return null;
+    }
 }

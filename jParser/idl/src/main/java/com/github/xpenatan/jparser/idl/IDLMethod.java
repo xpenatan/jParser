@@ -29,15 +29,13 @@ public class IDLMethod {
         paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
         int index = line.indexOf("(");
         String leftSide = line.substring(0, index).trim();
-        String returnInfo = "";
-        if(leftSide.startsWith("[")) {
-            int i = leftSide.indexOf("]") + 1;
-            returnInfo = line.substring(0, i);
-        }
 
-        int endIndex = getLastIndex(leftSide);
-        if(endIndex != -1) {
-            leftSide = line.substring(endIndex + 1, index).trim();
+        int startIndex = leftSide.indexOf("[");
+        int endIndex = leftSide.indexOf("]");
+        if(startIndex != -1 && endIndex != -1 && startIndex + 2 < endIndex) {
+            String tagsStr = leftSide.substring(startIndex, endIndex + 1);
+            isReturnRef = tagsStr.contains("Ref");
+            isReturnValue = tagsStr.contains("Value");
         }
 
         if(leftSide.contains("[]")) {
@@ -46,18 +44,13 @@ public class IDLMethod {
         }
         leftSide = IDLHelper.removeMultipleSpaces(leftSide.trim());
 
-        isReturnRef = returnInfo.contains("Ref");
-        isReturnValue = returnInfo.contains("Value");
+        if(leftSide.contains("static")) {
+            isStaticMethod = true;
+        }
 
         String[] s = leftSide.split(" ");
-
-        if(s[0].equals("static")) {
-            isStaticMethod = true;
-            returnType = s[s.length-2];
-        }
-        else {
-            returnType = s[s.length-2];
-        }
+        name = s[s.length-1];
+        returnType = s[s.length-2];
 
         if(returnType.equals("long")) {
             returnType = "int";
@@ -65,7 +58,6 @@ public class IDLMethod {
         if(returnType.equals("DOMString")) {
             returnType = "String";
         }
-        name = s[s.length-1];
 
         if(paramsLine != null && paramsLine.contains("any ")) {
             skip = true;

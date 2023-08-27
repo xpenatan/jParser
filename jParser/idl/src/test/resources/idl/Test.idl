@@ -12,6 +12,9 @@ interface NoDeleteClassTest {
     attribute boolean [] arrayBoolean
     attribute unsigned long[] arrayInt
     attribute any anyObject;
+
+    [Ref] static float GetStyle(long paramInt);
+    unsigned long GetFlags();
 };
 
 [Prefix="MyPrefix::"]
