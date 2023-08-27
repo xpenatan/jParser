@@ -119,7 +119,8 @@ EnumLib NormalClass::enumReturn(int value)
     return DEFAULT;
 }
 
-void NormalClass::printText(int dummyParam, const char* text)
+bool NormalClass::printText(int dummyParam, const char* text)
 {
     std::cout << text << std::endl;
+    return true;
 }

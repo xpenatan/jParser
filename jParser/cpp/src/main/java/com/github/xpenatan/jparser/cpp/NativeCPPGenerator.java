@@ -213,6 +213,11 @@ public class NativeCPPGenerator implements CppGenerator {
             methodName = methodName.replace("_", "_1");
         }
 
+        if(content.contains("return")) {
+            content = content.replace("return", returnType + " returnValue =");
+            suffixCode += "return returnValue;";
+        }
+
         content = prefixCode + "\n" + content + "\n" + suffixCode;
 
         String fullMethodName =  packageNameCPP + "_" + className + "_" + methodName + paramsType + params;

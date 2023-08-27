@@ -42,7 +42,7 @@ interface NormalClass {
 
     EnumLib enumReturn(long value);
 
-    void printText(long dummyParam, [Const]DOMString text);
+    boolean printText(long dummyParam, [Const]DOMString text);
 };
 NormalClass implements ParentClass;
 
