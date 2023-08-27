@@ -170,7 +170,8 @@ public class IDLAttributeParser {
     private static MethodDeclaration containsSetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
         String[] paramTypes = new String[1];
         paramTypes[0] = idlAttribute.type;
-        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(idlAttribute.name, paramTypes);
+        String methodName = "set_" + idlAttribute.name;
+        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
 
         if(methods.size() > 0) {
             return methods.get(0);
@@ -180,7 +181,8 @@ public class IDLAttributeParser {
 
     private static MethodDeclaration containsGetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
         String[] paramTypes = new String[0];
-        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(idlAttribute.name, paramTypes);
+        String methodName = "get_" + idlAttribute.name;
+        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
 
         if(methods.size() > 0) {
             return methods.get(0);
