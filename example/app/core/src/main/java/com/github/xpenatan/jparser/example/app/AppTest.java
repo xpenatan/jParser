@@ -57,6 +57,8 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("ENUM Return FIRST: " + normalClass.enumReturn(1));
         System.out.println("ENUM Return SECOND: " + normalClass.enumReturn(2));
         System.out.println("ENUM Return DEFAULT: " + normalClass.enumReturn(99));
+
+        normalClass.printText(10, "printText HELLO");
     }
 
     @Override

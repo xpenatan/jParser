@@ -336,7 +336,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     private static String getParam(IDLFile idlFile, boolean isObject, String paramName, String classType, boolean isRef, boolean isValue) {
-        if(isObject) {
+        if(isObject && !classType.equals("String")) {
             paramName += "_addr";
             IDLClass paramClass = idlFile.getClass(classType);
             if(paramClass != null) {

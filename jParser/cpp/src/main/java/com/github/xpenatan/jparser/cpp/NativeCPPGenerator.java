@@ -47,6 +47,7 @@ public class NativeCPPGenerator implements CppGenerator {
         valueTypes.put(ArgumentType.ByteArray.getJniType(), "_3B");
         valueTypes.put(ArgumentType.BooleanArray.getJniType(), "_3Z");
         valueTypes.put(ArgumentType.Object.getJniType(), "L");
+        valueTypes.put(ArgumentType.String.getJniType(), "Ljava_lang_String_2");
 
         plainOldDataTypes = new HashMap<String, ArgumentType>();
         plainOldDataTypes.put("boolean", ArgumentType.Boolean);
@@ -179,11 +180,23 @@ public class NativeCPPGenerator implements CppGenerator {
 
         String paramsType = "";
 
+        String prefixCode = "";
+        String suffixCode = "";
+
         for(int i = 0; i < arguments.size(); i++) {
             Argument argument = arguments.get(i);
+            ArgumentType type = argument.getType();
+            String typeName = type.name();
+            String paramName = argument.getName();
+            String newParamName = paramName;
             String valueType = argument.getValueType();
             paramsType += valueType;
-            params += ", " + argument.getType().getJniType() + " " + argument.getName();
+            if(typeName.equals("String")) {
+                newParamName = newParamName + "_string";
+                prefixCode += "char* " + paramName + " = (char*)env->GetStringUTFChars(" + newParamName + ", 0);\n";
+                suffixCode += "env->ReleaseStringUTFChars(" + newParamName + ", " + paramName  + ");\n";
+            }
+            params += ", " + type.getJniType() + " " + newParamName;
         }
 
         if(!paramsType.isEmpty()) {
@@ -199,6 +212,8 @@ public class NativeCPPGenerator implements CppGenerator {
         if(methodName.contains("_")) {
             methodName = methodName.replace("_", "_1");
         }
+
+        content = prefixCode + "\n" + content + "\n" + suffixCode;
 
         String fullMethodName =  packageNameCPP + "_" + className + "_" + methodName + paramsType + params;
         print(PrintType.MAIN, "JNIEXPORT " + returnType + " JNICALL Java_" + fullMethodName + " {");

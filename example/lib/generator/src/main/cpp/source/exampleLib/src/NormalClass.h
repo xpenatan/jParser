@@ -55,6 +55,7 @@ public:
     int enumParam(EnumLib value);
     void enumVoidParam(EnumLib value);
     EnumLib enumReturn(int value);
+    void printText(int dummyParam, const char* text);
 };
 
 #endif  //NORMALCLASS_H
