@@ -7,10 +7,10 @@ val mainClassName = "Main"
 dependencies {
     implementation(project(":example:lib:base"))
     if(LibExt.exampleUseRepoLibs) {
-        implementation("com.github.xpenatan.jParser:jParser-core:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:jParser-idl:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:jParser-teavm:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:jParser-cpp:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:core:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:idl:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:teavm:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:cpp:${LibExt.libVersion}")
     }
     else {
         implementation(project(":jParser:core"))

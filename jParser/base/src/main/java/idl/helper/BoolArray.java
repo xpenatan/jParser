@@ -3,6 +3,10 @@ package idl.helper;
 import idl.IDLBase;
 
 public class BoolArray extends IDLBase {
+
+    public BoolArray(int size) {
+    }
+
     public void copy(boolean [] array) {
         int length = array.length;
         resize(length);

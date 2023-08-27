@@ -3,6 +3,10 @@ package idl.helper;
 import idl.IDLBase;
 
 public class IntArray extends IDLBase {
+
+    public IntArray(int size) {
+    }
+
     public void copy(int[] array) {
         int length = array.length;
         resize(length);

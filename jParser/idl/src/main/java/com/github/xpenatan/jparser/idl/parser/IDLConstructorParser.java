@@ -78,6 +78,9 @@ public class IDLConstructorParser {
                 JParserHelper.addMissingImportType(jParser, unit, parameter.type);
                 constructorDeclaration.addAndGetParameter(parameter.type, parameter.name);
             }
+        }
+
+        if(constructorDeclaration.getBody().isEmpty()) {
             setupConstructor(idlParser, jParser, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration);
         }
     }

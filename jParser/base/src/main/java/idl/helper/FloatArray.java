@@ -3,6 +3,10 @@ package idl.helper;
 import idl.IDLBase;
 
 public class FloatArray extends IDLBase {
+
+    public FloatArray(int size) {
+    }
+
     public void copy(float [] array) {
         int length = array.length;
         resize(length);
