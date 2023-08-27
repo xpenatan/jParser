@@ -36,6 +36,7 @@ public class IDLMethod {
             String tagsStr = leftSide.substring(startIndex, endIndex + 1);
             isReturnRef = tagsStr.contains("Ref");
             isReturnValue = tagsStr.contains("Value");
+            leftSide = leftSide.replace(tagsStr, "");
         }
 
         if(leftSide.contains("[]")) {
