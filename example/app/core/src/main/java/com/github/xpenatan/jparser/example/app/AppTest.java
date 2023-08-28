@@ -59,6 +59,11 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("ENUM Return DEFAULT: " + normalClass.enumReturn(99));
 
         normalClass.printText(10, "printText HELLO");
+        FloatArray floatArray = new FloatArray(1);
+        long pointer = floatArray.getPointer();
+        System.out.println("pointer: " + pointer);
+        normalClass.setArray(floatArray);
+        System.out.println("setArray: " + floatArray.getValue(0));
     }
 
     @Override

@@ -18,4 +18,6 @@ public class BoolArray extends IDLBase {
 
     public native void setValue(int index, boolean value);
     public native void resize(int size);
+    public native boolean getValue(int index);
+    public native long getPointer();
 }

@@ -56,6 +56,7 @@ public:
     void enumVoidParam(EnumLib value);
     EnumLib enumReturn(int value);
     bool printText(int dummyParam, const char* text);
+    void setArray(float* array);
 };
 
 #endif  //NORMALCLASS_H

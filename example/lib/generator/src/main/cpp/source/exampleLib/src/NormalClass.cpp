@@ -124,3 +124,8 @@ bool NormalClass::printText(int dummyParam, const char* text)
     std::cout << text << std::endl;
     return true;
 }
+
+void NormalClass::setArray(float* array)
+{
+    array[0] = 1.2;
+}

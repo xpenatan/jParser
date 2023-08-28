@@ -330,7 +330,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                     MethodCallExpr methodCall = argument.asMethodCallExpr();
                     String methodName = methodCall.getNameAsString();
 
-                    if(methodName.contains("getCPointer")) {
+                    if(methodName.contains("getCPointer") || methodName.contains("getPointer")) {
                         Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
                         CastExpr intCast = new CastExpr(intType, argument);
                         methodCallExpr.setArgument(i, intCast);

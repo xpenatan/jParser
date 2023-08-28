@@ -25,7 +25,6 @@ import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
-import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
@@ -65,6 +64,7 @@ public class IDLMethodParser {
         }
 
         String methodName = idlMethod.name;
+        Type returnType = null;
 
         MethodDeclaration containsMethod = containsMethod(idlParser, classOrInterfaceDeclaration, idlMethod);
         if(containsMethod != null) {
@@ -94,6 +94,7 @@ public class IDLMethodParser {
             if(isNative) {
                 // It's a dummy method. Remove it and let IDL generate it again.
                 // This is useful to use a base method as an interface and let the generator create the real method.
+                returnType = containsMethod.getType();
                 containsMethod.remove();
             }
             if(!isNative && !isStatic) {
@@ -115,8 +116,10 @@ public class IDLMethodParser {
             JParserHelper.addMissingImportType(jParser, unit, type);
         }
 
-        String returnTypeStr = IDLHelper.convertEnumToInt(idlParser.idlReader, idlMethod.returnType);
-        Type returnType = StaticJavaParser.parseType(returnTypeStr);
+        if(returnType == null) {
+            String returnTypeStr = IDLHelper.convertEnumToInt(idlParser.idlReader, idlMethod.returnType);
+            returnType = StaticJavaParser.parseType(returnTypeStr);
+        }
         methodDeclaration.setType(returnType);
         IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, returnType, methodDeclaration);
 
@@ -193,7 +196,10 @@ public class IDLMethodParser {
             Type type = parameter.getType();
             String paramName = parameter.getNameAsString();
             if(type.isClassOrInterfaceType()) {
-                if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
+                if(IDLHelper.getCArray(type.asClassOrInterfaceType().getNameAsString()) != null) {
+                    paramName = paramName + ".getPointer()";
+                }
+                else if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
                     //All methods must contain a base class to get its pointer
                     paramName = paramName + ".getCPointer()";
                 }
@@ -388,6 +394,9 @@ public class IDLMethodParser {
                 NodeList<Parameter> methodParams = method.getParameters();
                 int methodParamsSize = methodParams.size();
                 if(methodParamsSize == paramTypes.length) {
+                    if(methodParamsSize == 0) {
+                        return method;
+                    }
                     for(int i = 0; i < methodParamsSize; i++) {
                         Parameter parameter = methodParams.get(i);
                         String paramType = paramTypes[i];

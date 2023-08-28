@@ -19,4 +19,5 @@ public class ByteArray extends IDLBase {
     public native void setValue(int index, byte value);
     public native void resize(int size);
     public native byte getValue(int index);
+    public native long getPointer();
 }

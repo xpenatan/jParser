@@ -18,6 +18,7 @@ import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
+import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
@@ -339,14 +340,20 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         if(isObject && !classType.equals("String")) {
             paramName += "_addr";
             IDLClass paramClass = idlFile.getClass(classType);
-            if(paramClass != null) {
-                classType = paramClass.getName();
-            }
-            if(isRef || isValue) {
-                paramName = "*((" + classType + "* )" + paramName + ")";
+            String cArray = IDLHelper.getCArray(classType);
+            if(cArray != null) {
+                paramName = "(" + cArray + ")" + paramName;
             }
             else {
-                paramName = "(" + classType + "* )" + paramName;
+                if(paramClass != null) {
+                    classType = paramClass.getName();
+                }
+                if(isRef || isValue) {
+                    paramName = "*((" + classType + "* )" + paramName + ")";
+                }
+                else {
+                    paramName = "(" + classType + "* )" + paramName;
+                }
             }
         }
         IDLEnum anEnum = idlFile.getEnum(classType);

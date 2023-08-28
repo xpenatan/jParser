@@ -30,7 +30,7 @@ class BoolArray {
         void deleteData() { delete data; }
         bool getValue(int index) { return data[index]; }
         void setValue(int index, bool value) { data[index] = value; }
-        void* getPointer() { return (void*)data; }
+        intptr_t getPointer() { return (intptr_t)data; }
         int getSize() { return size; }
 };
 
@@ -58,7 +58,7 @@ class IntArray {
         void deleteData() { delete data; }
         int getValue(int index) { return data[index]; }
         void setValue(int index, int value) { data[index] = value; }
-        void* getPointer() { return (void*)data; }
+        intptr_t getPointer() { return (intptr_t)data; }
         int getSize() { return size; }
 };
 
@@ -86,7 +86,7 @@ class FloatArray {
         void deleteData() { delete data; }
         float getValue(int index) { return data[index]; }
         void setValue(int index, float value) { data[index] = value; }
-        void* getPointer() { return (void*)data; }
+        intptr_t getPointer() { return (intptr_t)data; }
         int getSize() { return size; }
 };
 
@@ -114,7 +114,7 @@ class DoubleArray {
         void deleteData() { delete data; }
         double getValue(int index) { return data[index]; }
         void setValue(int index, double value) { data[index] = value; }
-        void* getPointer() { return (void*)data; }
+        intptr_t getPointer() { return (intptr_t)data; }
         int getSize() { return size; }
 };
 
@@ -142,6 +142,6 @@ class ByteArray {
         void deleteData() { delete data; }
         char getValue(int index) { return data[index]; }
         void setValue(int index, char value) { data[index] = value; }
-        void* getPointer() { return (void*)data; }
+        intptr_t getPointer() { return (intptr_t)data; }
         int getSize() { return size; }
 };

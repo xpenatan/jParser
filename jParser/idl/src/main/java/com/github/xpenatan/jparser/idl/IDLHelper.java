@@ -12,6 +12,25 @@ public class IDLHelper {
         return classOrInterfaceType.getNameAsString().equals("String");
     }
 
+    public static String getCArray(String type) {
+        if(type.equals("BoolArray")) {
+            return "bool *";
+        }
+        else if(type.equals("IntArray")) {
+            return "int *";
+        }
+        else if(type.equals("FloatArray")) {
+            return "float *";
+        }
+        else if(type.equals("DoubleArray")) {
+            return "double *";
+        }
+        else if(type.equals("ByteArray")) {
+            return "char *";
+        }
+        return null;
+    }
+
     public static boolean isString(Type type) {
         return type.toString().equals("String");
     }

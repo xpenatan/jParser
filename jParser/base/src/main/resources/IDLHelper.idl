@@ -3,7 +3,7 @@ interface BoolArray {
     void resize(long size);
     boolean getValue(long index);
     void setValue(long index, boolean value);
-    any getPointer();
+    long getPointer();
     long getSize();
 };
 
@@ -12,7 +12,7 @@ interface IntArray {
     void resize(long size);
     long getValue(long index);
     void setValue(long index, long value);
-    any getPointer();
+    long getPointer();
     long getSize();
 };
 
@@ -21,7 +21,7 @@ interface FloatArray {
     void resize(long size);
     float getValue(long index);
     void setValue(long index, float value);
-    any getPointer();
+    long getPointer();
     long getSize();
 };
 
@@ -30,7 +30,7 @@ interface DoubleArray {
     void resize(long size);
     double getValue(long index);
     void setValue(long index, double value);
-    any getPointer();
+    long getPointer();
     long getSize();
 };
 
@@ -39,6 +39,6 @@ interface ByteArray {
     void resize(long size);
     byte getValue(long index);
     void setValue(long index, byte value);
-    any getPointer();
+    long getPointer();
     long getSize();
 };
