@@ -8,9 +8,9 @@
 
 class BoolArray {
     private:
-        bool * data;
         int size;
     public:
+        bool * data;
         BoolArray(int size) { data = NULL; resize(size); }
         ~BoolArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
@@ -36,9 +36,9 @@ class BoolArray {
 
 class IntArray {
     private:
-        int * data;
         int size;
     public:
+        int * data;
         IntArray(int size) { data = NULL; resize(size); }
         ~IntArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
@@ -64,9 +64,9 @@ class IntArray {
 
 class FloatArray {
     private:
-        float * data;
         int size;
     public:
+        float * data;
         FloatArray(int size) { data = NULL; resize(size); }
         ~FloatArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
@@ -92,9 +92,9 @@ class FloatArray {
 
 class DoubleArray {
     private:
-        double * data;
         int size;
     public:
+        double * data;
         DoubleArray(int size) { data = NULL; resize(size); }
         ~DoubleArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
@@ -120,9 +120,9 @@ class DoubleArray {
 
 class ByteArray {
     private:
-        char * data;
         int size;
     public:
+        char * data;
         ByteArray(int size) { data = NULL; resize(size); }
         ~ByteArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
