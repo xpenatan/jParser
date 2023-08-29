@@ -38,8 +38,11 @@ public class IDLEnum extends IDLClassOrEnum {
     private void setEnumValues() {
         for(int i = 1; i < classLines.size()-1; i++) {
             String enumLine = classLines.get(i);
-            enumLine = enumLine.replace(",", "").replace("\"", "");
-            enums.add(enumLine);
+            String[] split = enumLine.split(",");
+            for(String s : split) {
+                enumLine = s.replace("\"", "").trim();
+                enums.add(enumLine);
+            }
         }
     }
 
