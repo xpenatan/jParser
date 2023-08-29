@@ -136,7 +136,7 @@ public abstract class BuildTarget {
     }
 
     protected void addJNIHeadersAndGlueCode() {
-        cppIncludes.add("**/jniglue/JNIGlue.cpp");
+        cppIncludes.add("**/jniglue/*.cpp");
         headerDirs.add("-Ijni-headers/");
         if(isUnix()) {
             headerDirs.add("-Ijni-headers/linux");
