@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jparser.example.lib.EnumLib;
+import com.github.xpenatan.jparser.example.lib.EnumTwoLib;
 import com.github.xpenatan.jparser.example.lib.ExampleLib;
 import com.github.xpenatan.jparser.example.lib.NormalClass;
 import com.github.xpenatan.jparser.example.lib.idl.helper.FloatArray;
@@ -64,6 +65,9 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("pointer: " + pointer);
         normalClass.setArray(floatArray);
         System.out.println("setArray: " + floatArray.getValue(0));
+
+        System.out.println("EnumTwoLib THIRD: " + EnumTwoLib.THIRD);
+        System.out.println("EnumTwoLib FOURTH: " + EnumTwoLib.FOURTH);
     }
 
     @Override

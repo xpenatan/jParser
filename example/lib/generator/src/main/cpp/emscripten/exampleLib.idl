@@ -42,6 +42,8 @@ interface NormalClass {
 
     EnumLib enumReturn(long value);
 
+    void enumTwoVoidParam(EnumTwoLib value);
+
     boolean printText(long dummyParam, [Const]DOMString text);
 
     void setArray(float[] array);
@@ -76,6 +78,11 @@ DefaultInterface implements InterfaceClass;
 enum EnumLib {
     "FIRST",
     "SECOND"
+};
+
+enum EnumTwoLib {
+    "THIRD",
+    "FOURTH"
 };
 
 //enum NormalClass_EnumWithinClass {

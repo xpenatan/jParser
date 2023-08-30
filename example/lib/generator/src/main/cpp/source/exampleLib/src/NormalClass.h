@@ -14,6 +14,13 @@ enum EnumLib : int {
     SECOND,
 };
 
+typedef int EnumTwoLib;
+
+enum EnumTwoLib_ {
+    THIRD = 15,
+    FOURTH
+};
+
 class NormalClass : public ParentClass
 {
 
@@ -55,6 +62,7 @@ public:
     int enumParam(EnumLib value);
     void enumVoidParam(EnumLib value);
     EnumLib enumReturn(int value);
+    void enumTwoVoidParam(EnumTwoLib value);
     bool printText(int dummyParam, const char* text);
     void setArray(float* array);
 };

@@ -119,6 +119,10 @@ EnumLib NormalClass::enumReturn(int value)
     return DEFAULT;
 }
 
+void NormalClass::enumTwoVoidParam(EnumTwoLib value)
+{
+}
+
 bool NormalClass::printText(int dummyParam, const char* text)
 {
     std::cout << text << std::endl;
