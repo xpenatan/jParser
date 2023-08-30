@@ -1,6 +1,5 @@
 package com.github.xpenatan.jparser.builder;
 
-import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.nio.file.FileSystems;

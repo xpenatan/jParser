@@ -42,6 +42,8 @@ public class EmscriptenTarget extends BuildTarget {
         linkerFlags.add("-s SINGLE_FILE=1");
 
         libSuffix = ".wasm.js";
+
+        cppIncludes.add("**/jsglue/*.cpp");
     }
 
     @Override

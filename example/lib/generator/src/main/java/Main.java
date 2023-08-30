@@ -71,10 +71,8 @@ public class Main {
         JParser.generate(teavmParser, baseJavaDir, teaVMgenDir);
         EmscriptenTarget teaVMTarget = new EmscriptenTarget(idlPath);
         teaVMTarget.headerDirs.add("-Isrc/exampleLib");
-        teaVMTarget.headerDirs.add("-include src/jsglue/Include.h");
-        teaVMTarget.headerDirs.add("-include src/jsglue/custom_glue.cpp");
+        teaVMTarget.headerDirs.add("-includesrc/jsglue/Include.h");
         teaVMTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
-        teaVMTarget.cppIncludes.add("**/src/jsglue/glue.cpp");
 
         AndroidTarget androidTarget = new AndroidTarget();
         androidTarget.headerDirs.add("src/exampleLib");

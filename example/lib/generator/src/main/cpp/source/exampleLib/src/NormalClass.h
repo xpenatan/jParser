@@ -17,8 +17,8 @@ enum EnumLib : int {
 typedef int EnumTwoLib;
 
 enum EnumTwoLib_ {
-    THIRD = 15,
-    FOURTH
+    EnumTwoLib_THIRD = 15,
+    EnumTwoLib_FOURTH
 };
 
 class NormalClass : public ParentClass

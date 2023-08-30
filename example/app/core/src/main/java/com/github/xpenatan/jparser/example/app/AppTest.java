@@ -66,8 +66,8 @@ public class AppTest extends ApplicationAdapter {
         normalClass.setArray(floatArray);
         System.out.println("setArray: " + floatArray.getValue(0));
 
-        System.out.println("EnumTwoLib THIRD: " + EnumTwoLib.THIRD);
-        System.out.println("EnumTwoLib FOURTH: " + EnumTwoLib.FOURTH);
+        System.out.println("EnumTwoLib THIRD: " + EnumTwoLib.EnumTwoLib_THIRD);
+        System.out.println("EnumTwoLib FOURTH: " + EnumTwoLib.EnumTwoLib_FOURTH);
     }
 
     @Override
