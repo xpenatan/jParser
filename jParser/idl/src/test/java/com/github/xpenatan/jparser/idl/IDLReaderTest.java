@@ -78,6 +78,19 @@ public class IDLReaderTest {
         Assert.assertTrue(idlMethod.parameters.get(2).isConst);
         IDLMethod flagsMethod = idlClass.getMethod("GetFlags");
         Assert.assertEquals("int", flagsMethod.returnType);
+        IDLMethod copyNormalClassMethod = idlClass.getMethod("copyNormalClass");
+        Assert.assertTrue(copyNormalClassMethod.isReturnRef);
+        Assert.assertEquals("=", copyNormalClassMethod.operator);
+        IDLMethod multiNormalClassMethod = idlClass.getMethod("multiNormalClass");
+        Assert.assertTrue(multiNormalClassMethod.isReturnRef);
+        Assert.assertEquals("*=", multiNormalClassMethod.operator);
+        IDLMethod addIntMethod = idlClass.getMethod("addInt");
+        Assert.assertEquals("+=", addIntMethod.operator);
+        IDLMethod subFloatMethod = idlClass.getMethod("subFloat");
+        Assert.assertEquals("-=", subFloatMethod.operator);
+        IDLMethod getArrayItemMethod = idlClass.getMethod("getArrayItem");
+        Assert.assertTrue(getArrayItemMethod.isReturnRef);
+        Assert.assertEquals("[]", getArrayItemMethod.operator);
     }
 
     @Test

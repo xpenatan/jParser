@@ -15,6 +15,11 @@ interface NoDeleteClassTest {
 
     [Ref] static float GetStyle(long paramInt);
     unsigned long GetFlags();
+    [Operator="=", Ref] NormalClassTest copyNormalClass([Const, Ref]NormalClassTest value);
+    [Operator="*=", Ref] NormalClassTest multiNormalClass([Const, Ref]NormalClassTest value);
+    [Operator="+="] long addInt(long value);
+    [Operator="-="] float subFloat(float value);
+    [Operator="[]", Ref] NormalClassTest getArrayItem(long index);
 };
 
 [Prefix="MyPrefix::"]
