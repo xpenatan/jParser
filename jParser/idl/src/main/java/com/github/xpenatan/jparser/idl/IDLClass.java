@@ -123,4 +123,13 @@ public class IDLClass extends IDLClassOrEnum {
         }
         return null;
     }
+
+    public IDLMethod getOperatorMethod(String operator) {
+        for(IDLMethod method : methods) {
+            if(method.operator.equals(operator)) {
+                return method;
+            }
+        }
+        return null;
+    }
 }
