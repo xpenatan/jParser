@@ -2,6 +2,7 @@
 #include "subpackage/ParamData.h"
 #include "ReturnClass.h"
 #include "InterfaceClass.h"
+#include "OperatorClass.h"
 #include <stdio.h>
 #include <stdlib.h>
 

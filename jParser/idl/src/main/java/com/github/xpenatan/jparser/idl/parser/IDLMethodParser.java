@@ -47,6 +47,12 @@ public class IDLMethodParser {
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
 
+    static final String OPERATOR_OBJECT_TEMPLATE =
+            "{\n" +
+            "    [METHOD];\n" +
+            "    return this;\n" +
+            "}";
+
     static final String TEMPLATE_TEMP_FIELD = "[TYPE]_TEMP_GEN_[NUM]";
     static final String TEMPLATE_VALUE_FIELD = "[TYPE]_VALUE_GEN_[NUM]";
     static final String TEMPLATE_TEMP_STATIC_FIELD = "[TYPE]_TEMP_STATIC_GEN_[NUM]";
@@ -58,7 +64,7 @@ public class IDLMethodParser {
 
     static final String TEMPLATE_TAG_NUM = "[NUM]";
 
-    public static void generateMethods(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass, IDLMethod idlMethod) {
+    public static void generateMethod(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass, IDLMethod idlMethod) {
         if(idlMethod.skip) {
             return;
         }
@@ -130,13 +136,13 @@ public class IDLMethodParser {
 
     private static void setupMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
         boolean addCopyParam = idlMethod.isReturnValue;
-        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlMethod.isStaticMethod, idlMethod.isReturnValue, addCopyParam, classDeclaration, methodDeclaration);
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlMethod.isStaticMethod, idlMethod.isReturnValue, addCopyParam, classDeclaration, methodDeclaration, idlMethod.operator);
         if(nativeMethodDeclaration != null) {
             idlParser.onIDLMethodGenerated(jParser, idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
         }
     }
 
-    public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, boolean addCopyParam, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
+    public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, boolean addCopyParam, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String operator) {
         MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, addCopyParam, methodDeclaration);
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             //Add native method if it does not exist
@@ -156,7 +162,7 @@ public class IDLMethodParser {
             else if(methodReturnType.isClassOrInterfaceType()) {
                 // Class object needs to generate some additional code.
                 // Needs to obtain the pointer and return a temp object.
-                BlockStmt blockStmt = IDLMethodParser.generateTempObjects(isReturnValue, classDeclaration, methodDeclaration, nativeMethodDeclaration, caller);
+                BlockStmt blockStmt = IDLMethodParser.generateTempObjects(isReturnValue, classDeclaration, methodDeclaration, nativeMethodDeclaration, caller, operator);
                 methodDeclaration.setBody(blockStmt);
             }
             else {
@@ -211,29 +217,45 @@ public class IDLMethodParser {
         }
     }
 
-    public static BlockStmt generateTempObjects(boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration, MethodCallExpr caller) {
+    public static BlockStmt generateTempObjects(boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration, MethodCallExpr caller, String operator) {
         Type methodReturnType = methodDeclaration.getType();
+        String className = classDeclaration.getNameAsString();
         String returnTypeName = methodReturnType.toString();
         String newBody = null;
 
         boolean isStatic = methodDeclaration.isStatic();
         boolean isTemp = !isReturnValue;
 
-        String fieldName = generateFieldName(classDeclaration, returnTypeName, isTemp, isStatic);
+        boolean isRetSameAsClass = false;
+
+        if(!operator.isEmpty() && className.equals(returnTypeName)) {
+            // if its operator and return type is same as class name don't create temp object
+            isRetSameAsClass = true;
+        }
+        String fieldName =  "";
+        if(!isRetSameAsClass) {
+            fieldName = generateFieldName(classDeclaration, returnTypeName, isTemp, isStatic);
+        }
 
         IDLMethodParser.setupCallerParam(isStatic, isReturnValue, caller, methodDeclaration, fieldName);
 
         String methodCaller = caller.toString();
 
-        if(isReturnValue) {
-            newBody = GET_TEMP_OBJECT_TEMPLATE
-                    .replace(TEMPLATE_TAG_METHOD, methodCaller)
-                    .replace(TEMPLATE_TEMP_FIELD, fieldName);
+        if(isRetSameAsClass) {
+            newBody = OPERATOR_OBJECT_TEMPLATE
+                    .replace(TEMPLATE_TAG_METHOD, methodCaller);
         }
         else {
-            newBody = GET_OBJECT_TEMPLATE
-                    .replace(TEMPLATE_TAG_METHOD, methodCaller)
-                    .replace(TEMPLATE_TEMP_FIELD, fieldName);
+            if(isReturnValue) {
+                newBody = GET_TEMP_OBJECT_TEMPLATE
+                        .replace(TEMPLATE_TAG_METHOD, methodCaller)
+                        .replace(TEMPLATE_TEMP_FIELD, fieldName);
+            }
+            else {
+                newBody = GET_OBJECT_TEMPLATE
+                        .replace(TEMPLATE_TAG_METHOD, methodCaller)
+                        .replace(TEMPLATE_TEMP_FIELD, fieldName);
+            }
         }
 
         BlockStmt body = null;
@@ -243,7 +265,6 @@ public class IDLMethodParser {
             body = initializerDeclaration.getBody();
         }
         catch(Throwable t) {
-            String className = classDeclaration.getNameAsString();
             System.err.println("Error Class: " + className + "\n" + newBody);
             throw t;
         }

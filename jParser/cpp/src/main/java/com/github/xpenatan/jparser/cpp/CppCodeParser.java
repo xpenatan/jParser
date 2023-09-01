@@ -34,6 +34,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
+    protected static final String TEMPLATE_TAG_OPERATOR = "[OPERATOR]";
     protected static final String TEMPLATE_TAG_ATTRIBUTE = "[ATTRIBUTE]";
     protected static final String TEMPLATE_TAG_ENUM = "[ENUM]";
     protected static final String TEMPLATE_TAG_ATTRIBUTE_TYPE = "[ATTRIBUTE_TYPE]";
@@ -114,6 +115,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     protected static final String METHOD_GET_REF_OBJ_POINTER_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return (jlong)&nativeObject->[METHOD];\n";
+
+    protected static final String METHOD_GET_REF_OBJ_POINTER_OPERATOR_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "return (jlong)&[OPERATOR];\n";
 
     protected static final String METHOD_GET_PRIMITIVE_STATIC_TEMPLATE =
             "\nreturn [TYPE]::[METHOD];\n";
@@ -260,6 +265,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         if(idlMethod.idlFile.getEnum(returnTypeStr) != null) {
             returnCastStr = "(int)";
         }
+        String operator = getOperation(idlMethod.operator, param);
         String content = null;
         IDLMethodOperation.Op op = IDLMethodOperation.getEnum(idlMethod, methodDeclaration, nativeMethod);
         switch(op) {
@@ -273,7 +279,12 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 content = METHOD_GET_REF_OBJ_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case GET_REF_OBJ_POINTER:
-                content = METHOD_GET_REF_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                if(operator.isEmpty()) {
+                    content = METHOD_GET_REF_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
+                else {
+                    content = METHOD_GET_REF_OBJ_POINTER_OPERATOR_TEMPLATE.replace(TEMPLATE_TAG_OPERATOR, operator).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                }
                 break;
             case COPY_VALUE_STATIC: {
                     String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
@@ -312,6 +323,29 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + content;
         nativeMethod.setBlockComment(blockComment);
+    }
+
+    private static String getOperation(String operatorCode, String param) {
+        String oper = "";
+        if(!operatorCode.isEmpty()) {
+            if(operatorCode.equals("[]")) {
+                oper = "nativeObject[" + param + "]";
+            }
+            else if(operatorCode.equals("=")){
+                oper = "(*nativeObject = " + param + ")";
+            }
+            //TODO add more operator c++ code
+//            else if(operatorCode.equals("+=")){
+//                oper = " += " + param;
+//            }
+//            else if(operatorCode.equals("-=")){
+//                oper = " -= " + param;
+//            }
+//            else if(operatorCode.equals("*=")){
+//                oper = " *= " + param;
+//            }
+        }
+        return oper;
     }
 
     private static String getParams(IDLMethod idlMethod, MethodDeclaration methodDeclaration) {

@@ -8,6 +8,7 @@ import com.github.xpenatan.jparser.example.lib.EnumLib;
 import com.github.xpenatan.jparser.example.lib.EnumTwoLib;
 import com.github.xpenatan.jparser.example.lib.ExampleLib;
 import com.github.xpenatan.jparser.example.lib.NormalClass;
+import com.github.xpenatan.jparser.example.lib.OperatorClass;
 import com.github.xpenatan.jparser.example.lib.idl.helper.FloatArray;
 
 public class AppTest extends ApplicationAdapter {
@@ -65,9 +66,18 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("pointer: " + pointer);
         normalClass.setArray(floatArray);
         System.out.println("setArray: " + floatArray.getValue(0));
-
         System.out.println("EnumTwoLib THIRD: " + EnumTwoLib.EnumTwoLib_THIRD);
         System.out.println("EnumTwoLib FOURTH: " + EnumTwoLib.EnumTwoLib_FOURTH);
+        System.out.println("NormalClass.subIntValue: " + NormalClass.subIntValue(2, 1));
+
+        OperatorClass operatorClass1 = new OperatorClass();
+        operatorClass1.set_value(41);
+        OperatorClass operatorClass2 = new OperatorClass();
+        operatorClass2.set_value(3);
+        operatorClass1.copy(operatorClass2);
+
+        System.out.println("operatorClass1 copy: " + operatorClass1.get_value());
+
     }
 
     @Override

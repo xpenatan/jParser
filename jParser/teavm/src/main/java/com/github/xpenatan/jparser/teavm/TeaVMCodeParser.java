@@ -28,6 +28,7 @@ import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLReader;
+import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,19 +52,31 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     /**
      * When a js method returns a js object, we need get its pointer.
      */
-    protected static final String GET_JS_METHOD_OBJ_POINTER_TEMPLATE =
+    protected static final String METHOD_GET_OBJ_POINTER_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.[METHOD];\n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
-    protected static final String GET_JS_METHOD_PRIMITIVE_TEMPLATE =
+    protected static final String METHOD_GET_OBJ_POINTER_STATIC_TEMPLATE =
+            "var returnedJSObj = [MODULE].[TYPE].prototype.[METHOD];\n" +
+            "return [MODULE].getPointer(returnedJSObj);";
+
+    protected static final String METHOD_GET_PRIMITIVE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.[METHOD];\n" +
             "return returnedJSObj;";
 
-    protected static final String GET_JS_METHOD_VOID_TEMPLATE =
+    protected static final String METHOD_GET_PRIMITIVE_STATIC_TEMPLATE =
+            "var returnedJSObj = [MODULE].[TYPE].prototype.[METHOD];\n" +
+            "return returnedJSObj;";
+
+    protected static final String METHOD_CALL_VOID_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.[METHOD];";
+
+    protected static final String METHOD_CALL_VOID_STATIC_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "[MODULE].[TYPE].prototype.[METHOD];";
 
     protected static final String GET_ATTRIBUTE_PRIMITIVE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
@@ -216,15 +229,63 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
         String content = null;
 
-        if(returnType.isVoidType()) {
-            content = GET_JS_METHOD_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+        IDLMethodOperation.Op op = IDLMethodOperation.getEnum(idlMethod, methodDeclaration, nativeMethod);
+        switch(op) {
+            case CALL_VOID_STATIC:
+                content = METHOD_CALL_VOID_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case CALL_VOID:
+                content = METHOD_CALL_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_REF_OBJ_POINTER_STATIC:
+                content = METHOD_GET_OBJ_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_REF_OBJ_POINTER:
+                content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case COPY_VALUE_STATIC: {
+//                String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
+//                String copyParam = "copy_addr";
+//                content = METHOD_COPY_VALUE_STATIC_TEMPLATE
+//                        .replace(TEMPLATE_TAG_METHOD, methodCaller)
+//                        .replace(TEMPLATE_TAG_TYPE, classTypeName)
+//                        .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)
+//                        .replace(TEMPLATE_TAG_COPY_PARAM, copyParam);
+            }
+            break;
+            case COPY_VALUE: {
+//                String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
+//                String copyParam = "copy_addr";
+//                content = METHOD_COPY_VALUE_TEMPLATE
+//                        .replace(TEMPLATE_TAG_METHOD, methodCaller)
+//                        .replace(TEMPLATE_TAG_TYPE, classTypeName)
+//                        .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)
+//                        .replace(TEMPLATE_TAG_COPY_PARAM, copyParam);
+            }
+            break;
+            case GET_OBJ_POINTER_STATIC:
+                content = METHOD_GET_OBJ_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_OBJ_POINTER:
+                content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_PRIMITIVE_STATIC:
+                content = METHOD_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_PRIMITIVE:
+                content = METHOD_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
         }
-        else if(returnType.isClassOrInterfaceType()) {
-            content = GET_JS_METHOD_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
-        }
-        else {
-            content = GET_JS_METHOD_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
-        }
+
+//        if(returnType.isVoidType()) {
+//            content = METHOD_CALL_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+//        }
+//        else if(returnType.isClassOrInterfaceType()) {
+//            content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+//        }
+//        else {
+//            content = METHOD_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+//        }
 
         if(content != null) {
             String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
@@ -267,6 +328,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         }
 
         String content = null;
+
         if(returnType.isVoidType()) {
             content = SET_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
         }

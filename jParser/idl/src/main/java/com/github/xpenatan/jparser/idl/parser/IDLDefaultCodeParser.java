@@ -93,7 +93,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
                 ArrayList<IDLMethod> methods = idlClass.methods;
                 for(int i = 0; i < methods.size(); i++) {
                     IDLMethod idlMethod = methods.get(i);
-                    IDLMethodParser.generateMethods(this, jParser, unit, classOrInterfaceDeclaration, idlClass, idlMethod);
+                    IDLMethodParser.generateMethod(this, jParser, unit, classOrInterfaceDeclaration, idlClass, idlMethod);
                 }
                 if(enableAttributeParsing) {
                     ArrayList<IDLAttribute> attributes = idlClass.attributes;
