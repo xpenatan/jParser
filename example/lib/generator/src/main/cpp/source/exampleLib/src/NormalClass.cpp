@@ -3,18 +3,21 @@
 
 NormalClass::NormalClass()
 {
+    valueReturnClass.value = 10;
     nullPointerReturnClass = 0;
     pointerReturnClass = new ReturnClass();
 }
 
 NormalClass::NormalClass(int c, ParamData & refParamData)
 {
+    valueReturnClass.value = 10;
     nullPointerReturnClass = 0;
     pointerReturnClass = new ReturnClass();
 }
 
 NormalClass::NormalClass(ParamData * pointerParamData, ParamData & refParamData, ParamData valueParamData)
 {
+    valueReturnClass.value = 10;
     nullPointerReturnClass = 0;
     pointerReturnClass = new ReturnClass();
 }

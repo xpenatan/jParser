@@ -9,6 +9,7 @@ import com.github.xpenatan.jparser.example.lib.EnumTwoLib;
 import com.github.xpenatan.jparser.example.lib.ExampleLib;
 import com.github.xpenatan.jparser.example.lib.NormalClass;
 import com.github.xpenatan.jparser.example.lib.OperatorClass;
+import com.github.xpenatan.jparser.example.lib.ReturnClass;
 import com.github.xpenatan.jparser.example.lib.idl.helper.FloatArray;
 
 public class AppTest extends ApplicationAdapter {
@@ -59,6 +60,9 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("ENUM Return FIRST: " + normalClass.enumReturn(1));
         System.out.println("ENUM Return SECOND: " + normalClass.enumReturn(2));
         System.out.println("ENUM Return DEFAULT: " + normalClass.enumReturn(99));
+
+        ReturnClass returnValueObject = normalClass.getReturnValueObject();
+        System.out.println("returnValueObject: " + returnValueObject.get_value());
 
         normalClass.printText(10, "printText HELLO");
         FloatArray floatArray = new FloatArray(1);

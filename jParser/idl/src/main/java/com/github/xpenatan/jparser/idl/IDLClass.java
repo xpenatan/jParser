@@ -44,7 +44,7 @@ public class IDLClass extends IDLClassOrEnum {
                 }
                 else {
                     if(line.contains("(") && line.contains(")")) {
-                        IDLMethod method = new IDLMethod(idlFile);
+                        IDLMethod method = new IDLMethod(this, idlFile);
                         method.initMethod(line);
                         methods.add(method);
 

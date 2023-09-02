@@ -50,6 +50,9 @@ NormalClass implements ParentClass;
 
 interface ReturnClass {
     void ReturnClass();
+
+    attribute float value;
+
     [Operator="=", Ref] ReturnClass copy([Ref]ReturnClass value);
 };
 

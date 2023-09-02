@@ -24,8 +24,11 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
+import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
+import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLMethod;
+import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
@@ -44,10 +47,23 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     protected static final String TEMPLATE_TAG_MODULE = "[MODULE]";
     protected static final String TEMPLATE_TAG_CONSTRUCTOR = "[CONSTRUCTOR]";
     protected static final String TEMPLATE_TAG_ENUM = "[ENUM]";
+    protected static final String TEMPLATE_TAG_OPERATOR = "[OPERATOR]";
+    protected static final String TEMPLATE_TAG_OPERATOR_TYPE = "[OPERATOR_TYPE]";
 
     protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
             "var jsObj = new [MODULE].[CONSTRUCTOR];\n" +
             "return [MODULE].getPointer(jsObj);";
+
+    protected static final String METHOD_COPY_VALUE_STATIC_TEMPLATE =
+            "var returnedJSObj = [MODULE].[TYPE].prototype.[METHOD];\n" +
+            "var operatorObj = [MODULE].wrapPointer(copy_addr, [MODULE].[OPERATOR_TYPE]);\n" +
+            "operatorObj.[MODULE].[OPERATOR](returnedJSObj);";
+
+    protected static final String METHOD_COPY_VALUE_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "var operatorObj = [MODULE].wrapPointer(copy_addr, [MODULE].[OPERATOR_TYPE]);\n" +
+            "var returnedJSObj = jsObj.[METHOD];\n" +
+            "operatorObj.[OPERATOR](returnedJSObj);";
 
     /**
      * When a js method returns a js object, we need get its pointer.
@@ -202,30 +218,24 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         // We now modify it to match teavm native calls
 
         convertLongToInt(methodDeclaration.getBody().get(), nativeMethod);
+        String returnType = idlMethod.returnType;
+        String methodName = methodDeclaration.getNameAsString();
+        String param = getParams(idlMethod, methodDeclaration);
+        String annotationParam = "";
 
         NodeList<Parameter> nativeParameters = nativeMethod.getParameters();
-        String methodName = methodDeclaration.getNameAsString();
-        Type returnType = methodDeclaration.getType();
-        MethodCallExpr caller = new MethodCallExpr();
-        caller.setName(methodName);
-        String param = "";
-
         int size = nativeParameters.size();
         for(int i = 0; i < size; i++) {
             Parameter parameter = nativeParameters.get(i);
             String paramName = parameter.getNameAsString();
-            if(i > 0) {
-                caller.addArgument(paramName);
-            }
-
-            param += paramName;
+            annotationParam += paramName;
             if(i < size - 1) {
-                param += "\", \"";
+                annotationParam += "\", \"";
             }
         }
 
         String returnTypeName = classDeclaration.getNameAsString();
-        String methodCaller = caller.toString();
+        String methodCaller = methodName + "(" + param + ")";
 
         String content = null;
 
@@ -244,23 +254,25 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
             case COPY_VALUE_STATIC: {
-//                String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
-//                String copyParam = "copy_addr";
-//                content = METHOD_COPY_VALUE_STATIC_TEMPLATE
-//                        .replace(TEMPLATE_TAG_METHOD, methodCaller)
-//                        .replace(TEMPLATE_TAG_TYPE, classTypeName)
-//                        .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)
-//                        .replace(TEMPLATE_TAG_COPY_PARAM, copyParam);
+                IDLClass returnTypeClass = idlMethod.idlFile.getClass(idlMethod.returnType);
+                if(returnTypeClass != null) {
+                    IDLMethod operatorMethod = returnTypeClass.getOperatorMethod("=");
+                    if(operatorMethod != null) {
+                        String operatorMethodName = operatorMethod.name;
+                        content = METHOD_COPY_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_OPERATOR, operatorMethodName).replace(TEMPLATE_TAG_OPERATOR_TYPE, returnType);
+                    }
+                }
             }
             break;
             case COPY_VALUE: {
-//                String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
-//                String copyParam = "copy_addr";
-//                content = METHOD_COPY_VALUE_TEMPLATE
-//                        .replace(TEMPLATE_TAG_METHOD, methodCaller)
-//                        .replace(TEMPLATE_TAG_TYPE, classTypeName)
-//                        .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)
-//                        .replace(TEMPLATE_TAG_COPY_PARAM, copyParam);
+                IDLClass returnTypeClass = idlMethod.idlFile.getClass(idlMethod.returnType);
+                if(returnTypeClass != null) {
+                    IDLMethod operatorMethod = returnTypeClass.getOperatorMethod("=");
+                    if(operatorMethod != null) {
+                        String operatorMethodName = operatorMethod.name;
+                        content = METHOD_COPY_VALUE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_OPERATOR, operatorMethodName).replace(TEMPLATE_TAG_OPERATOR_TYPE, returnType);
+                    }
+                }
             }
             break;
             case GET_OBJ_POINTER_STATIC:
@@ -277,16 +289,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 break;
         }
 
-//        if(returnType.isVoidType()) {
-//            content = METHOD_CALL_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
-//        }
-//        else if(returnType.isClassOrInterfaceType()) {
-//            content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
-//        }
-//        else {
-//            content = METHOD_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
-//        }
-
         if(content != null) {
             String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
             String blockComment = header + "\n" + content + "\n";
@@ -298,13 +300,42 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             if(!content.isEmpty()) {
                 if(!nativeMethod.isAnnotationPresent("JSBody")) {
                     NormalAnnotationExpr normalAnnotationExpr = nativeMethod.addAndGetAnnotation("org.teavm.jso.JSBody");
-                    if(!param.isEmpty()) {
-                        normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
+                    if(!annotationParam.isEmpty()) {
+                        normalAnnotationExpr.addPair("params", "{\"" + annotationParam + "\"}");
                     }
                     normalAnnotationExpr.addPair("script", "\"" + content + "\"");
                 }
             }
         }
+    }
+
+    private static String getParams(IDLMethod idlMethod, MethodDeclaration methodDeclaration) {
+        NodeList<Parameter> parameters = methodDeclaration.getParameters();
+        ArrayList<IDLParameter> idParameters = idlMethod.parameters;
+        return getParams(parameters, idParameters);
+    }
+
+    private static String getParams(NodeList<Parameter> parameters, ArrayList<IDLParameter> idParameters ) {
+        String param = "";
+        for(int i = 0; i < parameters.size(); i++) {
+            Parameter parameter = parameters.get(i);
+            IDLParameter idlParameter = idParameters.get(i);
+            Type type = parameter.getType();
+            boolean isObject = type.isClassOrInterfaceType();
+            String paramName = getParam(idlParameter.idlFile, isObject, idlParameter.name, idlParameter.type, idlParameter.isRef, idlParameter.isValue);
+            if(i > 0) {
+                param += ", ";
+            }
+            param += paramName;
+        }
+        return param;
+    }
+
+    private static String getParam(IDLFile idlFile, boolean isObject, String paramName, String classType, boolean isRef, boolean isValue) {
+        if(isObject && !classType.equals("String")) {
+            paramName += "_addr";
+        }
+        return paramName;
     }
 
     @Override

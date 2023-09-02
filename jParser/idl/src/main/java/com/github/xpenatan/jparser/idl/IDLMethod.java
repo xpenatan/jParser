@@ -7,6 +7,7 @@ import java.util.ArrayList;
  */
 public class IDLMethod {
     public final IDLFile idlFile;
+    public final IDLClass idlClass;
 
     public String line;
     public String paramsLine;
@@ -21,7 +22,8 @@ public class IDLMethod {
 
     public final ArrayList<IDLParameter> parameters = new ArrayList<>();
 
-    public IDLMethod(IDLFile idlFile) {
+    public IDLMethod(IDLClass idlClass, IDLFile idlFile) {
+        this.idlClass = idlClass;
         this.idlFile = idlFile;
     }
 
@@ -94,7 +96,7 @@ public class IDLMethod {
     }
 
     public IDLMethod clone() {
-        IDLMethod clonedMethod = new IDLMethod(idlFile);
+        IDLMethod clonedMethod = new IDLMethod(idlClass, idlFile);
         clonedMethod.line = line;
         clonedMethod.paramsLine = paramsLine;
         clonedMethod.returnType = returnType;
