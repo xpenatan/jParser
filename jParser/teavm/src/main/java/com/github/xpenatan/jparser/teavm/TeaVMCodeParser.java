@@ -91,7 +91,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             "jsObj.[METHOD];";
 
     protected static final String METHOD_CALL_VOID_STATIC_TEMPLATE =
-            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "[MODULE].[TYPE].prototype.[METHOD];";
 
     protected static final String GET_ATTRIBUTE_PRIMITIVE_TEMPLATE =
