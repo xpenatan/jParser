@@ -29,6 +29,7 @@ import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
+import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
@@ -93,16 +94,22 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     protected static final String METHOD_CALL_VOID_STATIC_TEMPLATE =
             "[MODULE].[TYPE].prototype.[METHOD];";
 
-    protected static final String GET_ATTRIBUTE_PRIMITIVE_TEMPLATE =
+    protected static final String ATTRIBUTE_GET_PRIMITIVE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "return jsObj.get_[ATTRIBUTE]();";
 
-    protected static final String GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE =
+    protected static final String ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "var returnedJSObj = jsObj.get_[ATTRIBUTE]();\n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
-    protected static final String SET_ATTRIBUTE_VOID_TEMPLATE =
+    protected static final String ATTRIBUTE_COPY_OBJECT_VALUE_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "var operatorObj = [MODULE].wrapPointer(copy_addr, [MODULE].[OPERATOR_TYPE]);\n" +
+            "var returnedJSObj = jsObj.get_[ATTRIBUTE]();\n" +
+            "operatorObj.[OPERATOR](returnedJSObj);";
+
+    protected static final String ATTRIBUTE_SET_VALUE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
 
@@ -338,15 +345,15 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
-        convertLongToInt(methodDeclaration.getBody().get(), nativeMethodDeclaration);
+    public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
+        convertLongToInt(methodDeclaration.getBody().get(), nativeMethod);
 
         String returnTypeName = classDeclaration.getNameAsString();
         String attributeName = idlAttribute.name;
-        Type returnType = methodDeclaration.getType();
+        String returnType = idlAttribute.type;
 
         String param = "";
-        NodeList<Parameter> parameters = nativeMethodDeclaration.getParameters();
+        NodeList<Parameter> parameters = nativeMethod.getParameters();
         int size = parameters.size();
         for(int i = 0; i < size; i++) {
             Parameter parameter = parameters.get(i);
@@ -359,30 +366,63 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
         String content = null;
 
-        if(returnType.isVoidType()) {
-            content = SET_ATTRIBUTE_VOID_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
-        }
-        else if(returnType.isClassOrInterfaceType()) {
-            content = GET_ATTRIBUTE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
-        }
-        else {
-            content = GET_ATTRIBUTE_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
-        }
-
-        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
-        String blockComment = header + "\n" + content + "\n";
-        nativeMethodDeclaration.setBlockComment(blockComment);
-
-        content = content.replace("\n", "");
-        content = content.trim();
-
-        if(!content.isEmpty()) {
-            if(!nativeMethodDeclaration.isAnnotationPresent("JSBody")) {
-                NormalAnnotationExpr normalAnnotationExpr = nativeMethodDeclaration.addAndGetAnnotation("org.teavm.jso.JSBody");
-                if(!param.isEmpty()) {
-                    normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
+        IDLAttributeOperation.Op op = IDLAttributeOperation.getEnum(isSet, idlAttribute, methodDeclaration, nativeMethod);
+        switch(op) {
+            case SET_OBJECT_VALUE:
+                content = ATTRIBUTE_SET_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case SET_OBJECT_VALUE_STATIC:
+                break;
+            case GET_OBJECT_VALUE:
+                IDLClass returnTypeClass = idlAttribute.idlFile.getClass(idlAttribute.type);
+                if(returnTypeClass != null) {
+                    IDLMethod operatorMethod = returnTypeClass.getOperatorMethod("=");
+                    if(operatorMethod != null) {
+                        String operatorMethodName = operatorMethod.name;
+                        content = ATTRIBUTE_COPY_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_OPERATOR, operatorMethodName).replace(TEMPLATE_TAG_OPERATOR_TYPE, returnType);
+                    }
                 }
-                normalAnnotationExpr.addPair("script", "\"" + content + "\"");
+                break;
+            case GET_OBJECT_VALUE_STATIC:
+                break;
+            case SET_OBJECT_POINTER:
+                content = ATTRIBUTE_SET_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case SET_OBJECT_POINTER_STATIC:
+                break;
+            case GET_OBJECT_POINTER:
+                content = ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_OBJECT_POINTER_STATIC:
+                break;
+            case SET_PRIMITIVE:
+                content = ATTRIBUTE_SET_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case SET_PRIMITIVE_STATIC:
+                break;
+            case GET_PRIMITIVE:
+                content = ATTRIBUTE_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_PRIMITIVE_STATIC:
+                break;
+        }
+
+        if(content != null) {
+            String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+            String blockComment = header + "\n" + content + "\n";
+            nativeMethod.setBlockComment(blockComment);
+
+            content = content.replace("\n", "");
+            content = content.trim();
+
+            if(!content.isEmpty()) {
+                if(!nativeMethod.isAnnotationPresent("JSBody")) {
+                    NormalAnnotationExpr normalAnnotationExpr = nativeMethod.addAndGetAnnotation("org.teavm.jso.JSBody");
+                    if(!param.isEmpty()) {
+                        normalAnnotationExpr.addPair("params", "{\"" + param + "\"}");
+                    }
+                    normalAnnotationExpr.addPair("script", "\"" + content + "\"");
+                }
             }
         }
     }
