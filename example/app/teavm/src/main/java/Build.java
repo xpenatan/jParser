@@ -1,4 +1,4 @@
-import com.github.xpenatan.gdx.backends.teavm.TeaBuildConfiguration;
+import com.github.xpenatan.gdx.backends.teavm.config.TeaBuildConfiguration;
 import com.github.xpenatan.gdx.backends.teavm.config.TeaBuilder;
 import com.github.xpenatan.gdx.backends.teavm.gen.SkipClass;
 import java.io.File;
