@@ -20,4 +20,5 @@ public class FloatArray extends IDLBase {
     public native void resize(int size);
     public native float getValue(int index);
     public native long getPointer();
+    public native int getSize();
 }

@@ -20,4 +20,5 @@ public class IntArray extends IDLBase {
     public native void resize(int size);
     public native int getValue(int index);
     public native long getPointer();
+    public native int getSize();
 }

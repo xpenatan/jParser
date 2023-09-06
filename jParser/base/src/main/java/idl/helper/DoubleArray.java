@@ -20,4 +20,5 @@ public class DoubleArray extends IDLBase {
     public native void resize(int size);
     public native double getValue(int index);
     public native long getPointer();
+    public native int getSize();
 }

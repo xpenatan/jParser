@@ -20,4 +20,5 @@ public class BoolArray extends IDLBase {
     public native void resize(int size);
     public native boolean getValue(int index);
     public native long getPointer();
+    public native int getSize();
 }
