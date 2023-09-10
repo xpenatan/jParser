@@ -37,7 +37,7 @@ public class Main {
         String libName = "exampleLib";
         String basePackage = "com.github.xpenatan.jparser.example.lib";
         String emscriptenCustomCodePath = new File("src\\main\\cpp\\emscripten").getCanonicalPath();
-        String idlPath = new File(emscriptenCustomCodePath + "\\exampleLib.idl").getCanonicalPath();
+        String idlPath = new File(emscriptenCustomCodePath + "/exampleLib.idl").getCanonicalPath();
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
         String cppSourceDir = new File("./src/main/cpp/source/exampleLib/src/").getCanonicalPath();
 
