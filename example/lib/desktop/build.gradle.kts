@@ -26,13 +26,17 @@ tasks.named("clean") {
     }
 }
 
+val testTasks = listOf(
+    ":example:lib:core:clean",
+    ":example:lib:generator:clean",
+    ":example:lib:generator:build_project",
+    ":example:lib:core:build",
+    "jar",
+    "compileTestJava"
+)
+
 val tasksOrder = tasks.register<GradleBuild>("prepareTest") {
-    tasks = listOf(
-            ":example:lib:generator:clean",
-            ":example:lib:core:clean",
-            ":example:lib:generator:generateNativeProject",
-            "compileTestJava"
-    )
+    tasks = testTasks
 }
 
 tasks.named("test") {
