@@ -103,7 +103,7 @@ public class IDLMethodParser {
                 returnType = containsMethod.getType();
                 containsMethod.remove();
             }
-            if(!isNative && !isStatic) {
+            if(!isNative) {
                 // if a simple method exist, keep it and don't let IDL generate the method.
                 return;
             }

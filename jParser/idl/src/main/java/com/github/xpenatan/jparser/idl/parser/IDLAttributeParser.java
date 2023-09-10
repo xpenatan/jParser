@@ -159,7 +159,7 @@ public class IDLAttributeParser {
                 // This is useful to use a base method as an interface and let the generator create the real method.
                 containsMethod.remove();
             }
-            if(!isNative && !isStatic) {
+            if(!isNative) {
                 // if a simple method exist, keep it and don't let IDL generate the method.
                 return true;
             }
