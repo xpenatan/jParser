@@ -85,7 +85,14 @@ public class AndroidTarget extends BuildTarget {
 
         String ndkHome = System.getenv("NDK_HOME");
 
-        String androidCommand = ndkHome + "/ndk-build";
+        if(ndkHome != null) {
+            ndkHome += "/";
+        }
+        else {
+            ndkHome = "";
+        }
+
+        String androidCommand = ndkHome + "ndk-build";
         if(isWindows()) {
             androidCommand += ".cmd";
         }
