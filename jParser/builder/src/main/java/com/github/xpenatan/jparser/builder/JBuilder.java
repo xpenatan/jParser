@@ -1,6 +1,16 @@
 package com.github.xpenatan.jparser.builder;
 
+import java.util.ArrayList;
+
 public class JBuilder {
+
+    public static void build(BuildConfig config, ArrayList<BuildTarget> targets) {
+        BuildTarget [] targetsArray = new BuildTarget[targets.size()];
+        for(int i = 0; i < targets.size(); i++) {
+            targetsArray[i] = targets.get(i);
+        }
+        build(config, targetsArray);
+    }
 
     public static void build(BuildConfig config, BuildTarget ... targets) {
         for(int i = 0; i < targets.length; i++) {
