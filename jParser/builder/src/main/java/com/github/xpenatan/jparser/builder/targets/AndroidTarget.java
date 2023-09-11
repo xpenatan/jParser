@@ -83,7 +83,7 @@ public class AndroidTarget extends BuildTarget {
         CustomFileDescriptor androidFile = androidDir.child(androidTemplate.name());
         androidFile.writeString(androidStr, false);
 
-        String ndkHome = System.getenv("NDK_HOME");
+        String ndkHome = System.getenv("ANDROID_NDK_HOME");
 
         if(ndkHome != null) {
             ndkHome += "/";
