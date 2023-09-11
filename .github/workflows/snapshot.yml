@@ -3,7 +3,7 @@ name: Build Snapshot
 on:
   push:
     branches:
-      - 'master'
+      - "master"
 
 jobs:
   build-and-upload:
