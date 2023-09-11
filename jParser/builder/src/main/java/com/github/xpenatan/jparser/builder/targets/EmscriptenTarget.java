@@ -11,7 +11,7 @@ public class EmscriptenTarget extends BuildTarget {
 
     private CustomFileDescriptor idlFile;
 
-    String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "upstream/emscripten/";
+    String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
 
     public EmscriptenTarget(String idlFile) {
