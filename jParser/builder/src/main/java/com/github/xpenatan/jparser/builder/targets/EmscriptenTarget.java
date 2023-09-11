@@ -89,7 +89,12 @@ public class EmscriptenTarget extends BuildTarget {
         linkerFlags.add("--extern-post-js " + postPath);
         linkerFlags.add("-s EXPORT_NAME='" + config.libName + "'");
 
-        String generateGlueCommand = "python " + WEBIDL_BINDER_SCRIPT + " " + mergedIDLFile + " glue";
+        String pythonCmd = "python";
+        if(isUnix()) {
+            pythonCmd = "python3";
+        }
+
+        String generateGlueCommand = pythonCmd + " " + WEBIDL_BINDER_SCRIPT + " " + mergedIDLFile + " glue";
         if(!JProcess.startProcess(jsglueDir.file(), generateGlueCommand)) {
             return false;
         }
