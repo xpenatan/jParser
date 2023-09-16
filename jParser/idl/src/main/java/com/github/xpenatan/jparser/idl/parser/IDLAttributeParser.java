@@ -90,6 +90,7 @@ public class IDLAttributeParser {
             }
             String getMethodName = "get_" + attributeName;
             getMethodDeclaration = classOrInterfaceDeclaration.addMethod(getMethodName, Modifier.Keyword.PUBLIC);
+            getMethodDeclaration.setStatic(idlAttribute.isStatic);
             getMethodDeclaration.setType(type);
             JParserHelper.addMissingImportType(jParser, unit, type);
             IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, type, getMethodDeclaration);
@@ -98,6 +99,11 @@ public class IDLAttributeParser {
                 setupAttributeMethod(idlParser, jParser, idlAttribute, false, classOrInterfaceDeclaration, getMethodDeclaration);
             }
         }
+
+        if(idlAttribute.isReadOnly) {
+            addSet = false;
+        }
+
         if(addSet && !shouldSkipMethod(containsSetMethod)) {
             if(setMethodDeclaration != null) {
                 setMethodDeclaration.remove();
