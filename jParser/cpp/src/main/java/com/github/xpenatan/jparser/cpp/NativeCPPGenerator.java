@@ -97,8 +97,15 @@ public class NativeCPPGenerator implements CppGenerator {
 
     private HashSet<String> includes = new HashSet<>();
 
+    private boolean exportJNIMethodsOnly;
+
     public NativeCPPGenerator(String cppSourceDir, String cppDestinationDir) {
+        this(cppSourceDir, cppDestinationDir, true);
+    }
+
+    public NativeCPPGenerator(String cppSourceDir, String cppDestinationDir, boolean exportJNIMethodsOnly) {
         try {
+            this.exportJNIMethodsOnly = exportJNIMethodsOnly;
             this.cppSourceDir = new File(cppSourceDir).getCanonicalPath();
             this.cppDestinationDir = new File(cppDestinationDir).getCanonicalPath() + File.separator;
         } catch(IOException e) {
@@ -225,7 +232,14 @@ public class NativeCPPGenerator implements CppGenerator {
         content = prefixCode + "\n" + content + "\n" + suffixCode;
 
         String fullMethodName =  packageNameCPP + "_" + className + "_" + methodName + paramsType + params;
-        print(PrintType.MAIN, "JNIEXPORT " + returnType + " JNICALL Java_" + fullMethodName + " {");
+
+        String JNIExport = "";
+
+        if(exportJNIMethodsOnly) {
+            JNIExport = "JNIEXPORT ";
+        }
+
+        print(PrintType.MAIN, JNIExport + returnType + " JNICALL Java_" + fullMethodName + " {");
         content = "\t" + content.replace("\n", "\n\t");
         print(PrintType.MAIN, content);
         print(PrintType.MAIN, "}");

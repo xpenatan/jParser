@@ -47,12 +47,6 @@ public class EmscriptenTarget extends BuildTarget {
     }
 
     @Override
-    protected void setup(BuildConfig config, ArrayList<CustomFileDescriptor> cppFiles) {
-
-
-    }
-
-    @Override
     protected boolean build(BuildConfig config) {
         CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
         if(childTarget.exists()) {

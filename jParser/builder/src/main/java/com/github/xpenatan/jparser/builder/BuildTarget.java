@@ -37,7 +37,7 @@ public abstract class BuildTarget {
     protected BuildTarget() {
     }
 
-    protected void setup(BuildConfig config, ArrayList<CustomFileDescriptor> cppFiles) {}
+    protected void setup(BuildConfig config) {}
 
     protected boolean build(BuildConfig config) {
         CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
@@ -46,8 +46,9 @@ public abstract class BuildTarget {
         }
         childTarget.mkdirs();
 
+        setup(config);
+
         ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.sourceDir, cppIncludes);
-        setup(config, cppFiles);
 
         if(compile(config, childTarget, cppFiles)) {
             return link(config, childTarget);
