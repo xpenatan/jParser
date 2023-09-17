@@ -418,6 +418,7 @@ public class IDLMethodParser {
                     if(methodParamsSize == 0) {
                         return method;
                     }
+                    int equalsCount = 0;
                     for(int i = 0; i < methodParamsSize; i++) {
                         Parameter parameter = methodParams.get(i);
                         String paramType = paramTypes[i];
@@ -426,8 +427,11 @@ public class IDLMethodParser {
                         String[] split = nameAsString.split("\\.");
                         String type = split[split.length-1];
                         if(type.equals(paramType)) {
-                            return method;
+                            equalsCount++;
                         }
+                    }
+                    if(equalsCount == methodParamsSize) {
+                        return method;
                     }
                 }
             }
