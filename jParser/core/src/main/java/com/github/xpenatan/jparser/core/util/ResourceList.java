@@ -1,4 +1,4 @@
-package com.github.xpenatan.jparser.idl;
+package com.github.xpenatan.jparser.core.util;
 
 import java.io.File;
 import java.io.IOException;

@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.xpenatan.jparser.core.JParser;
+import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.core.util.CustomPrettyPrinter;
@@ -18,7 +19,7 @@ import com.github.xpenatan.jparser.idl.IDLClassOrEnum;
 import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLReader;
-import com.github.xpenatan.jparser.idl.ResourceList;
+import com.github.xpenatan.jparser.core.util.ResourceList;
 import idl.IDLBase;
 import java.io.File;
 import java.io.IOException;
@@ -67,10 +68,9 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
             IDLFile baseIDLFile = IDLReader.parseFile(streamReader);
             idlReader.fileArray.add(baseIDLFile);
-
-            createBaseUnitFromResources(jParser);
-            generateIDLJavaClasses(jParser, jParser.genDir);
         }
+        createBaseUnitFromResources(jParser);
+        generateIDLJavaClasses(jParser, jParser.genDir);
     }
 
     private void createBaseUnitFromResources(JParser jParser) {
@@ -87,7 +87,11 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 }
                 String newPackage = basePackage + originalPackage;
                 compilationUnit.setPackageDeclaration(newPackage);
-                jParser.unitArray.add(new JParserItem(compilationUnit, jParser.genDir, jParser.genDir));
+                JParserItem jParserItem = new JParserItem(compilationUnit, jParser.genDir, jParser.genDir);
+                if(!JParser.CREATE_IDL_HELPER) {
+                    jParserItem.notAllowed = true;
+                }
+                jParser.unitArray.add(jParserItem);
             } catch(IOException e) {
                 throw new RuntimeException(e);
             }
@@ -185,13 +189,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             if(parentItem != null) {
                 ClassOrInterfaceDeclaration classDeclaration = parentItem.getClassDeclaration();
                 if(classDeclaration != null) {
-                    for(ImportDeclaration anImport : unit.getImports()) {
-                        String nameAsString = anImport.getNameAsString();
-                        if(nameAsString.contains(IDLENUM_CLASS_NAME)) {
-                            unit.remove(anImport);
-                            break;
-                        }
-                    }
+                    JParserHelper.removeImport(unit, IDLENUM_CLASS_NAME);
                     String importName = enumClassUnit.getPackageDeclaration().get().getNameAsString() + "." + IDLENUM_CLASS_NAME;
                     unit.addImport(importName);
                     if(classOrInterfaceDeclaration.getImplementedTypes().isEmpty()) {
@@ -208,13 +206,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 if(parentItem != null) {
                     ClassOrInterfaceDeclaration classDeclaration = parentItem.getClassDeclaration();
                     if(classDeclaration != null) {
-                        for(ImportDeclaration anImport : unit.getImports()) {
-                            String nameAsString = anImport.getNameAsString();
-                            if(nameAsString.contains(BASE_CLASS_NAME)) {
-                                unit.remove(anImport);
-                                break;
-                            }
-                        }
+                        JParserHelper.removeImport(unit, BASE_CLASS_NAME);
                         NodeList<ClassOrInterfaceType> extendedTypes = classOrInterfaceDeclaration.getExtendedTypes();
                         if(!extendedTypes.isEmpty() && extendedTypes.get(0).getNameAsString().contains(BASE_CLASS_NAME)) {
                             String importName = baseClassUnit.getPackageDeclaration().get().getNameAsString() + "." + BASE_CLASS_NAME;
@@ -237,13 +229,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 if(parentItem != null) {
                     ClassOrInterfaceDeclaration classDeclaration = parentItem.getClassDeclaration();
                     if(classDeclaration != null) {
-                        for(ImportDeclaration anImport : unit.getImports()) {
-                            String nameAsString = anImport.getNameAsString();
-                            if(nameAsString.contains(BASE_CLASS_NAME)) {
-                                unit.remove(anImport);
-                                break;
-                            }
-                        }
+                        JParserHelper.removeImport(unit, BASE_CLASS_NAME);
                         String importName = baseClassUnit.getPackageDeclaration().get().getNameAsString() + "." + BASE_CLASS_NAME;
                         unit.addImport(importName);
                         if(classOrInterfaceDeclaration.getExtendedTypes().isEmpty()) {
@@ -283,10 +269,55 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 if(parserUnitItem != null) {
                     CompilationUnit importUnit = parserUnitItem.unit;
                     anImport.remove();
-                    String importName = importUnit.getPackageDeclaration().get().getNameAsString() + "." + parserUnitItem.className;
-                    unit.addImport(importName);
+
+                    boolean skipUnit = false;
+
+                    if(!JParser.CREATE_IDL_HELPER) {
+                        // Hack to look for idl classes that was generated with the main lib
+                        ArrayList<String> baseIDLClasses = getBaseIDLClasses();
+                        for(String baseIDLClass : baseIDLClasses) {
+                            String[] split = baseIDLClass.split("\\.");
+                            String s = split[split.length - 1];
+                            if(s.equals(identifier)) {
+                                unit.addImport(baseIDLClass);
+                                skipUnit = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(!skipUnit) {
+                        String importName = importUnit.getPackageDeclaration().get().getNameAsString() + "." + parserUnitItem.className;
+                        unit.addImport(importName);
+                    }
                 }
             }
         }
+    }
+
+    public static ArrayList<String> getBaseIDLClasses() {
+        ArrayList<String> classes = new ArrayList<>();
+        Collection<String> resources = ResourceList.getResources(Pattern.compile("/*.*/*.java"));
+
+        for(String resource : resources) {
+            resource = resource.replace("/", ".");
+            String classNameAndPath = resource.replace(".java", "");
+            String[] split = classNameAndPath.split("/.");
+            String name = split[split.length - 1];
+            Collection<String> compiledClass = ResourceList.getResources(Pattern.compile("/*.*/" + name + ".class"));
+            if(compiledClass != null) {
+                for(String aClass : compiledClass) {
+                    aClass = aClass.replace("/", ".").replace(".class", "");
+                    if(!aClass.startsWith(classNameAndPath)) {
+                        classes.add(aClass);
+                        break;
+                    }
+                }
+            }
+            else {
+                classes.add(classNameAndPath);
+            }
+        }
+        return classes;
     }
 }

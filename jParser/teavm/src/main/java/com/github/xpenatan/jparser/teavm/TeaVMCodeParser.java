@@ -498,7 +498,10 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             String newName = prefix + className;
             parserItem.packagePathName = packagePrefixPath + parserItem.packagePathName;
             parserItem.className = newName;
-            classDeclaration.setName(newName);
+
+            if(classDeclaration != null) {
+                classDeclaration.setName(newName);
+            }
         }
 
         // Rename all class inside class names.
@@ -513,10 +516,26 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                     importPath = qualifier.get().asString();
                 }
                 String identifier = name.getIdentifier();
-                JParserItem parserUnitItem = jParser.getParserUnitItem(prefix + identifier);
-                if(parserUnitItem != null) {
-                    String newImport = packagePrefix + importPath + ".";
-                    anImport.setName(newImport + prefix + identifier);
+
+                boolean skipUnit = false;
+                if(!JParser.CREATE_IDL_HELPER) {
+                    // Hack to skip the generated lib and use the main one
+                    ArrayList<String> baseIDLClasses = getBaseIDLClasses();
+                    for(String baseIDLClass : baseIDLClasses) {
+                        String[] split = baseIDLClass.split("\\.");
+                        String s = split[split.length - 1];
+                        if(s.equals(identifier)) {
+                            skipUnit = true;
+                            break;
+                        }
+                    }
+                }
+                if(!skipUnit) {
+                    JParserItem parserUnitItem = jParser.getParserUnitItem(prefix + identifier);
+                    if(parserUnitItem != null) {
+                        String newImport = packagePrefix + importPath + ".";
+                        anImport.setName(newImport + prefix + identifier);
+                    }
                 }
             }
 

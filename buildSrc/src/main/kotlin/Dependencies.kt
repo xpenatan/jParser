@@ -7,7 +7,6 @@ object LibExt {
     const val exampleUseRepoLibs = false
     const val gdxVersion = "1.12.0"
     const val teaVMVersion = "0.9.0-dev-7"
-    const val reflectionVersion = "0.10.2"
 
     private fun getVersion(): String {
         var isRelease = System.getenv("RELEASE")

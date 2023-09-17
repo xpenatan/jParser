@@ -95,6 +95,16 @@ public class JParserHelper {
         return false;
     }
 
+    public static void removeImport(CompilationUnit unit, String importToRemove) {
+        for(ImportDeclaration anImport : unit.getImports()) {
+            String nameAsString = anImport.getNameAsString();
+            if(nameAsString.contains(importToRemove)) {
+                unit.remove(anImport);
+                break;
+            }
+        }
+    }
+
     public static void addMissingImportType(JParser jParser, CompilationUnit unit, Type type) {
         addMissingImportType(jParser, unit, type.asString());
     }
