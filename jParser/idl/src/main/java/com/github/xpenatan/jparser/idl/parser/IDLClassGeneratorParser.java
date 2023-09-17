@@ -60,15 +60,17 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         if(!generateClass) {
             return;
         }
+        classCppPath = getClassCppPath();
+        if(JParser.CREATE_IDL_HELPER) {
+            String baseIDLPath = "IDLHelper.idl";
+            InputStream resourceAsStream = IDLBase.class.getClassLoader().getResourceAsStream(baseIDLPath);
+            InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
+            IDLFile baseIDLFile = IDLReader.parseFile(streamReader);
+            idlReader.fileArray.add(baseIDLFile);
 
-        String baseIDLPath = "IDLHelper.idl";
-        InputStream resourceAsStream = IDLBase.class.getClassLoader().getResourceAsStream(baseIDLPath);
-        InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
-        IDLFile baseIDLFile = IDLReader.parseFile(streamReader);
-        idlReader.fileArray.add(baseIDLFile);
-
-        createBaseUnitFromResources(jParser);
-        generateIDLJavaClasses(jParser, jParser.genDir);
+            createBaseUnitFromResources(jParser);
+            generateIDLJavaClasses(jParser, jParser.genDir);
+        }
     }
 
     private void createBaseUnitFromResources(JParser jParser) {
@@ -98,7 +100,6 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
     }
 
     private void generateIDLJavaClasses(JParser jParser, String genPath) {
-        classCppPath = getClassCppPath();
         for(IDLFile idlFile : idlReader.fileArray) {
             for(IDLClassOrEnum idlClassOrEnum : idlFile.classArray) {
                 String className = idlClassOrEnum.name;

@@ -41,6 +41,9 @@ public class JParser {
     public final String genDir;
     public ArrayList<JParserItem> unitArray = new ArrayList<>();
 
+
+    public static boolean CREATE_IDL_HELPER = true;
+
     private JParser(String sourceDir, String genDir) {
         this.sourceDir = sourceDir;
         this.genDir = genDir;

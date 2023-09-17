@@ -3,6 +3,7 @@ package com.github.xpenatan.jparser.builder.targets;
 import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildTarget;
 import com.github.xpenatan.jparser.builder.JProcess;
+import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.util.ArrayList;
@@ -100,6 +101,11 @@ public class EmscriptenTarget extends BuildTarget {
 
     private CustomFileDescriptor mergeIDLFile(CustomFileDescriptor jsglueDir) {
         String idlStr = idlFile.readString();
+
+        if(!JParser.CREATE_IDL_HELPER) {
+            return idlFile;
+        }
+
         CustomFileDescriptor idlHelper = new CustomFileDescriptor("IDLHelper.idl", CustomFileDescriptor.FileType.Classpath);
         String idlHelperStr = idlHelper.readString();
         String mergedIdlStr = idlStr + "\n\n" + idlHelperStr;
