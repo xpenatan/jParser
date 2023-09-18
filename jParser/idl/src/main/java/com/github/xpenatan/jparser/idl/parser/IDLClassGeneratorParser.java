@@ -6,8 +6,12 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
@@ -30,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -289,6 +294,42 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                     if(!skipUnit) {
                         String importName = importUnit.getPackageDeclaration().get().getNameAsString() + "." + parserUnitItem.className;
                         unit.addImport(importName);
+                    }
+                }
+            }
+            ClassOrInterfaceDeclaration classDeclaration = parserItem.getClassDeclaration();
+            if(classDeclaration != null) {
+                // add import by looking into fields and methods
+                List<FieldDeclaration> fields = classDeclaration.getFields();
+                for(FieldDeclaration field : fields) {
+                    Type elementType = field.getElementType();
+                    addImport(jParser, unit, elementType);
+                }
+
+                List<MethodDeclaration> methods = classDeclaration.getMethods();
+                for(MethodDeclaration method : methods) {
+                    Type returnType = method.getType();
+                    addImport(jParser, unit, returnType);
+                    NodeList<Parameter> parameters = method.getParameters();
+                    for(Parameter parameter : parameters) {
+                        Type type = parameter.getType();
+                        addImport(jParser, unit, returnType);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void addImport(JParser jParser, CompilationUnit unit, Type elementType) {
+        if(elementType.isClassOrInterfaceType()) {
+            if(!JParserHelper.addMissingImportType(jParser, unit, elementType)) {
+                // class type not found. Try to get from resources.
+                String typeStr = elementType.asString();
+                Collection<String> resources = ResourceList.getResources(Pattern.compile("/*.*/" + typeStr + ".class"));
+                for(String resource : resources) {
+                    resource = resource.replace("/", ".").replace(".class", "");
+                    if(!JParserHelper.containsImport(unit, typeStr, false)) {
+                        unit.addImport(resource);
                     }
                 }
             }

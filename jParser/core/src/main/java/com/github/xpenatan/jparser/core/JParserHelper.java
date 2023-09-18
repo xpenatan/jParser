@@ -84,13 +84,17 @@ public class JParserHelper {
         return false;
     }
 
-    public static boolean containsImport(CompilationUnit unit, String fullyQualifiedName) {
+    public static boolean containsImport(CompilationUnit unit, String classPath, boolean useEqual) {
         NodeList<ImportDeclaration> imports = unit.getImports();
         for(int i = 0; i < imports.size(); i++) {
             ImportDeclaration importDeclaration = imports.get(i);
             String importName = importDeclaration.getName().asString();
-            if(fullyQualifiedName.equals(importName))
+            if(useEqual && classPath.equals(importName)) {
                 return true;
+            }
+            else if(importName.contains(classPath)) {
+                return true;
+            }
         }
         return false;
     }
@@ -105,11 +109,12 @@ public class JParserHelper {
         }
     }
 
-    public static void addMissingImportType(JParser jParser, CompilationUnit unit, Type type) {
-        addMissingImportType(jParser, unit, type.asString());
+    public static boolean addMissingImportType(JParser jParser, CompilationUnit unit, Type type) {
+        String typeStr = type.asString();
+        return addMissingImportType(jParser, unit, typeStr);
     }
 
-    public static void addMissingImportType(JParser jParser, CompilationUnit unit, String className) {
+    public static boolean addMissingImportType(JParser jParser, CompilationUnit unit, String className) {
         JParserItem parserUnitItem = jParser.getParserUnitItem(className);
         if(parserUnitItem != null) {
             ClassOrInterfaceDeclaration classDeclaration = parserUnitItem.getClassDeclaration();
@@ -117,8 +122,9 @@ public class JParserHelper {
                 Optional<String> optionalFullyQualifiedName = classDeclaration.getFullyQualifiedName();
                 if(optionalFullyQualifiedName.isPresent()) {
                     String fullyQualifiedName = optionalFullyQualifiedName.get();
-                    if(!JParserHelper.containsImport(unit, fullyQualifiedName)) {
+                    if(!JParserHelper.containsImport(unit, fullyQualifiedName, true)) {
                         unit.addImport(fullyQualifiedName);
+                        return true;
                     }
                 }
             }
@@ -126,6 +132,7 @@ public class JParserHelper {
                 // TODO enum classes come here
             }
         }
+        return false;
     }
 
     public static ClassOrInterfaceDeclaration getClassDeclaration(CompilationUnit unit) {
