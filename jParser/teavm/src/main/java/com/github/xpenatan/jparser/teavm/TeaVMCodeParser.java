@@ -3,6 +3,7 @@ package com.github.xpenatan.jparser.teavm;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -456,17 +457,14 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     public static void convertCallerLongToInt(List<MethodCallExpr> all) {
         for(MethodCallExpr methodCallExpr : all) {
             NodeList<Expression> arguments = methodCallExpr.getArguments();
-            for(int i = 0; i < arguments.size(); i++) {
-                Expression argument = arguments.get(i);
-                if(argument.isMethodCallExpr()) {
-                    MethodCallExpr methodCall = argument.asMethodCallExpr();
-                    String methodName = methodCall.getNameAsString();
-
-                    if(methodName.contains("getCPointer") || methodName.contains("getPointer")) {
-                        Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
-                        CastExpr intCast = new CastExpr(intType, argument);
-                        methodCallExpr.setArgument(i, intCast);
-                    }
+            String methodNameStr = methodCallExpr.getNameAsString();
+            if(methodNameStr.equals("getCPointer") || methodNameStr.contains("getPointer")) {
+                Optional<Node> parentNode = methodCallExpr.getParentNode();
+                if(parentNode.isPresent()) {
+                    Node node = parentNode.get();
+                    Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
+                    CastExpr intCast = new CastExpr(intType, methodCallExpr);
+                    node.replace(methodCallExpr, intCast);
                 }
             }
         }

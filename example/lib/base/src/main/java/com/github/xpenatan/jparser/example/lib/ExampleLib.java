@@ -25,6 +25,7 @@ public class ExampleLib {
         libraryLoader.load("exampleLib.wasm");
     }
     */
+
     public static void init(Runnable run) {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
         libraryLoader.load("exampleLib");

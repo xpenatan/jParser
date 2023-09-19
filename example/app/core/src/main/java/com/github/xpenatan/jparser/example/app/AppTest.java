@@ -86,7 +86,7 @@ public class AppTest extends ApplicationAdapter {
 
     @Override
     public void render() {
-        ScreenUtils.clear(0, 0, 0, 1);
+        ScreenUtils.clear(0.4f, 0.4f, 0.4f, 1);
         if(!initLib) {
             return;
         }
