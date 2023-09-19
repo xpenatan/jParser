@@ -14,8 +14,10 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -201,20 +203,25 @@ public class IDLMethodParser {
         for(int i = 0; i < methodParameters.size(); i++) {
             Parameter parameter = methodParameters.get(i);
             Type type = parameter.getType();
+            SimpleName name = parameter.getName();
+            String variableName = name.getIdentifier();
             String paramName = parameter.getNameAsString();
             if(type.isClassOrInterfaceType()) {
                 if(IDLHelper.getCArray(type.asClassOrInterfaceType().getNameAsString()) != null) {
-                    paramName = paramName + ".getPointer()";
+                    String methodCall = paramName + ".getPointer()";
+                    paramName =  variableName +"!= null ? " + methodCall + " : 0";
                 }
                 else if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
                     //All methods must contain a base class to get its pointer
-                    paramName = paramName + ".getCPointer()";
+                    String methodCall = paramName + ".getCPointer()";
+                    paramName =  variableName +"!= null ? " + methodCall + " : 0";
                 }
             }
             else if(type.isArrayType()) {
                 //TODO implement array call
             }
-            caller.addArgument(paramName);
+            Expression expression = StaticJavaParser.parseExpression(paramName);
+            caller.addArgument(expression);
         }
     }
 
