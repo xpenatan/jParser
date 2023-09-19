@@ -37,6 +37,7 @@ public class IDLMethodParser {
     static final String GET_OBJECT_TEMPLATE =
             "{\n" +
             "    long pointer = [METHOD];\n" +
+            "    if(pointer == 0) return null;" +
             "    [TYPE]_TEMP_GEN_[NUM].setPointer(pointer);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
