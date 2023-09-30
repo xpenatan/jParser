@@ -3,6 +3,8 @@ plugins {
     kotlin("android")
 }
 
+group = "jparser.lib.android"
+
 android {
     namespace = "com.github.xpenatan.jparser.example.lib"
     compileSdk = 33
