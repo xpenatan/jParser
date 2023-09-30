@@ -10,7 +10,7 @@ public class WindowsTarget extends BuildTarget {
         this.tempBuildDir = "target/windows";
 
         cFlags.add("-c -Wall -O2 -mfpmath=sse -msse2 -fmessage-length=0 -m64");
-        cppFlags.add("-c -Wall -O2 -mfpmath=sse -msse2 -fmessage-length=0 -m64 -std=c++11");
+        cppFlags.add("-c -Wall -O2 -mfpmath=sse -msse2 -fmessage-length=0 -m64 -std=c++17");
         cppFlags.add("-Wno-unused-variable");
         cppFlags.add("-Wno-unused-but-set-variable");
         linkerFlags.add("-Wl,--kill-at -shared -static -static-libgcc -static-libstdc++ -m64");

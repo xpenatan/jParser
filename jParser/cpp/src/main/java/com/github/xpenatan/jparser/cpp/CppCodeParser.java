@@ -60,19 +60,19 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
 
-    protected static final String ATTRIBUTE_GET_OBJECT_VALUE_STATIC_TEMPLATE =
-            "*(([ATTRIBUTE_TYPE]*)copy_addr) = [TYPE]::[ATTRIBUTE];\n";
-
-    protected static final String ATTRIBUTE_GET_OBJECT_VALUE_TEMPLATE =
-            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
-            "*(([ATTRIBUTE_TYPE]*)copy_addr) = nativeObject->[ATTRIBUTE];\n";
-
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE =
-            "[TYPE]::[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
+            "\n[TYPE]::[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
 
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
+
+    protected static final String ATTRIBUTE_GET_OBJECT_VALUE_STATIC_TEMPLATE =
+            "\nreturn (jlong)&[TYPE]::[ATTRIBUTE];\n";
+
+    protected static final String ATTRIBUTE_GET_OBJECT_VALUE_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "return (jlong)&nativeObject->[ATTRIBUTE];\n";
 
     protected static final String ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE =
             "\nreturn (jlong)[TYPE]::[ATTRIBUTE];\n";

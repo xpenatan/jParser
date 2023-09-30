@@ -30,7 +30,7 @@ public class EmscriptenTarget extends BuildTarget {
         }
 
         linkerFlags.add("-O3");
-        linkerFlags.add("-std=c++14");
+        linkerFlags.add("-std=c++17");
         linkerFlags.add("--llvm-lto 1");
         linkerFlags.add("-s ALLOW_MEMORY_GROWTH=1");
         linkerFlags.add("-s ALLOW_TABLE_GROWTH=1");

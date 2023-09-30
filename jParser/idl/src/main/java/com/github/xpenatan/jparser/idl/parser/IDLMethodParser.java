@@ -138,15 +138,14 @@ public class IDLMethodParser {
     }
 
     private static void setupMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
-        boolean addCopyParam = idlMethod.isReturnValue;
-        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlMethod.isStaticMethod, idlMethod.isReturnValue, addCopyParam, classDeclaration, methodDeclaration, idlMethod.operator);
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlMethod.isStaticMethod, idlMethod.isReturnValue, classDeclaration, methodDeclaration, idlMethod.operator);
         if(nativeMethodDeclaration != null) {
             idlParser.onIDLMethodGenerated(jParser, idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
         }
     }
 
-    public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, boolean addCopyParam, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String operator) {
-        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, addCopyParam, methodDeclaration);
+    public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String operator) {
+        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, methodDeclaration);
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             //Add native method if it does not exist
             classDeclaration.getMembers().add(nativeMethodDeclaration);
@@ -333,15 +332,15 @@ public class IDLMethodParser {
         }
     }
 
-    public static MethodDeclaration generateNativeMethod(boolean isReturnValue, boolean addCopyParam, MethodDeclaration methodDeclaration) {
+    public static MethodDeclaration generateNativeMethod(boolean isReturnValue, MethodDeclaration methodDeclaration) {
         String methodName = methodDeclaration.getNameAsString();
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
         Type methodReturnType = methodDeclaration.getType();
         boolean isStatic = methodDeclaration.isStatic();
-        return generateNativeMethod(isReturnValue, addCopyParam, methodName, methodParameters, methodReturnType, isStatic);
+        return generateNativeMethod(isReturnValue, methodName, methodParameters, methodReturnType, isStatic);
     }
 
-    public static MethodDeclaration generateNativeMethod(boolean isReturnValue, boolean addCopyParam, String methodName, NodeList<Parameter> methodParameters, Type methodReturnType, boolean isStatic) {
+    public static MethodDeclaration generateNativeMethod(boolean isReturnValue, String methodName, NodeList<Parameter> methodParameters, Type methodReturnType, boolean isStatic) {
         boolean isClassOrInterfaceType = methodReturnType.isClassOrInterfaceType();
 
         // Clone some generated idl method settings
@@ -355,7 +354,7 @@ public class IDLMethodParser {
             nativeMethod.addParameter("long", "this_addr");
         }
 
-        if(addCopyParam) {
+        if(isReturnValue) {
             // We pass a temp c++ object to copy the returned temp c++ object
             String pointerTempObject = "copy_addr";
             nativeMethod.addParameter("long", pointerTempObject);

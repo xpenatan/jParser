@@ -82,6 +82,42 @@ public class AppTest extends ApplicationAdapter {
 
         System.out.println("operatorClass1 copy: " + operatorClass1.get_value());
 
+        testPrimitive();
+    }
+
+    private void testPrimitive() {
+        System.out.println("########## TESTING ATTRIBUTES ##########");
+
+        NormalClass.set_hiddenInt_static(22);
+        int hiddenIntStatic = NormalClass.get_hiddenInt_static();
+        System.out.println("hiddenIntStatic: " + hiddenIntStatic);
+
+        ReturnClass nullPointerReturnClassStatic = NormalClass.get_nullPointerReturnClass_static();
+        System.out.println("nullPointerReturnClassStatic: " + nullPointerReturnClassStatic);
+
+        ReturnClass pointerReturnClassStatic = NormalClass.get_pointerReturnClass_static();
+        pointerReturnClassStatic.set_value(51);
+        System.out.println("pointerReturnClassStatic: " + pointerReturnClassStatic.get_value());
+
+        ReturnClass valueReturnClassStatic = NormalClass.get_valueReturnClass_static();
+        System.out.println("valueReturnClassStatic: " + valueReturnClassStatic.get_value());
+
+        NormalClass normalClass = new NormalClass();
+
+        normalClass.set_hiddenInt(4);
+        int hiddenInt = normalClass.get_hiddenInt();
+        System.out.println("hiddenInt: " + hiddenInt);
+
+        ReturnClass pointerReturnClass = normalClass.get_pointerReturnClass();
+        pointerReturnClass.set_value(11);
+        System.out.println("pointerReturnClass: " + pointerReturnClass.get_value());
+
+        ReturnClass valueReturnClass = normalClass.get_valueReturnClass();
+        valueReturnClass.set_value(12);
+        System.out.println("valueReturnClass: " + valueReturnClass.get_value());
+
+        ReturnClass nullPointerReturnClass = normalClass.get_nullPointerReturnClass();
+        System.out.println("nullPointerReturnClass: " + nullPointerReturnClass);
     }
 
     @Override

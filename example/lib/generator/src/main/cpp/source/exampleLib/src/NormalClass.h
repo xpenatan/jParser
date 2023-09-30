@@ -39,6 +39,11 @@ public:
     ReturnClass * pointerReturnClass;
     ReturnClass * nullPointerReturnClass;
 
+    inline static int hiddenInt_static = 0;
+    inline static ReturnClass valueReturnClass_static;
+    inline static ReturnClass * pointerReturnClass_static = new ReturnClass();
+    inline static ReturnClass * nullPointerReturnClass_static = NULL;
+
     NormalClass();
     NormalClass(int c, ParamData & refParamData);
     NormalClass(ParamData * pointerParamData, ParamData & refParamData, ParamData valueParamData);

@@ -15,16 +15,40 @@ public class IDLAttributeOperation {
         Type returnType = methodDeclaration.getType();
         NodeList<Parameter> parameters = methodDeclaration.getParameters();
 
-        if(nativeReturnType.isVoidType() && isValue) {
-            if(isSet) {
-                if(isStatic) {
-                    return Op.SET_OBJECT_VALUE_STATIC;
+        if(returnType.isVoidType()) {
+            if(parameters.size() == 1) {
+                //Set
+                if(parameters.get(0).getType().isClassOrInterfaceType()) {
+                    if(isValue) {
+                        if(isStatic) {
+                            return Op.SET_OBJECT_VALUE_STATIC;
+                        }
+                        else {
+                            return Op.SET_OBJECT_VALUE;
+                        }
+                    }
+                    else {
+                        // is pointer
+                        if(isStatic) {
+                            return Op.SET_OBJECT_POINTER_STATIC;
+                        }
+                        else {
+                            return Op.SET_OBJECT_POINTER;
+                        }
+                    }
                 }
                 else {
-                    return Op.SET_OBJECT_VALUE;
+                    if(isStatic) {
+                        return Op.SET_PRIMITIVE_STATIC;
+                    }
+                    else {
+                        return Op.SET_PRIMITIVE;
+                    }
                 }
             }
-            else {
+        }
+        else if(returnType.isClassOrInterfaceType()) {
+            if(isValue) {
                 if(isStatic) {
                     return Op.GET_OBJECT_VALUE_STATIC;
                 }
@@ -32,31 +56,13 @@ public class IDLAttributeOperation {
                     return Op.GET_OBJECT_VALUE;
                 }
             }
-        }
-        else if(returnType.isVoidType()) {
-            if(isSet && parameters.size() == 1 && parameters.get(0).getType().isClassOrInterfaceType()) {
-                if(isStatic) {
-                    return Op.SET_OBJECT_POINTER_STATIC;
-                }
-                else {
-                    return Op.SET_OBJECT_POINTER;
-                }
-            }
             else {
                 if(isStatic) {
-                    return Op.SET_PRIMITIVE_STATIC;
+                    return Op.GET_OBJECT_POINTER_STATIC;
                 }
                 else {
-                    return Op.SET_PRIMITIVE;
+                    return Op.GET_OBJECT_POINTER;
                 }
-            }
-        }
-        else if(returnType.isClassOrInterfaceType()) {
-            if(isStatic) {
-                return Op.GET_OBJECT_POINTER_STATIC;
-            }
-            else {
-                return Op.GET_OBJECT_POINTER;
             }
         }
         else {
@@ -67,6 +73,7 @@ public class IDLAttributeOperation {
                 return Op.GET_PRIMITIVE;
             }
         }
+        return null;
     }
 
     public enum Op {

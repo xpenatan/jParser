@@ -5,8 +5,14 @@ interface ParentClass {
 
 interface NormalClass {
     attribute long hiddenInt;
+    [Value] attribute ReturnClass valueReturnClass;
     attribute ReturnClass pointerReturnClass;
-    [Value]attribute ReturnClass valueReturnClass;
+    attribute ReturnClass nullPointerReturnClass;
+
+    static attribute long hiddenInt_static;
+    [Value] static attribute ReturnClass valueReturnClass_static;
+    static attribute ReturnClass pointerReturnClass_static;
+    static attribute ReturnClass nullPointerReturnClass_static;
 
     void NormalClass();
     void NormalClass(long c, [Ref]ParamData refParamClass);
