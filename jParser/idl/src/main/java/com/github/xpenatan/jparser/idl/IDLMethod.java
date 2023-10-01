@@ -70,9 +70,6 @@ public class IDLMethod {
             returnType = "String";
         }
 
-        if(paramsLine != null && paramsLine.contains("any ")) {
-            skip = true;
-        }
         if(returnType.contains("any")) {
             skip = true;
         }

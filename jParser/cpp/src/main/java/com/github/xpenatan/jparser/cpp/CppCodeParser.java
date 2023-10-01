@@ -361,7 +361,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             IDLParameter idlParameter = idParameters.get(i);
             Type type = parameter.getType();
             boolean isObject = type.isClassOrInterfaceType();
-            String paramName = getParam(idlParameter.idlFile, isObject, idlParameter.name, idlParameter.type, idlParameter.isRef, idlParameter.isValue);
+            String paramName = getParam(idlParameter.idlFile, isObject, idlParameter.name, idlParameter.type, idlParameter.isAny, idlParameter.isRef, idlParameter.isValue);
             if(i > 0) {
                 param += ", ";
             }
@@ -370,7 +370,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         return param;
     }
 
-    private static String getParam(IDLFile idlFile, boolean isObject, String paramName, String classType, boolean isRef, boolean isValue) {
+    private static String getParam(IDLFile idlFile, boolean isObject, String paramName, String classType, boolean isAny, boolean isRef, boolean isValue) {
         if(isObject && !classType.equals("String")) {
             paramName += "_addr";
             IDLClass paramClass = idlFile.getClass(classType);
@@ -390,6 +390,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 }
             }
         }
+        else if(isAny) {
+            paramName = "( void* )" + paramName;
+        }
+
         IDLEnum anEnum = idlFile.getEnum(classType);
         if(anEnum != null) {
             paramName = "(" + classType + ")" + paramName;

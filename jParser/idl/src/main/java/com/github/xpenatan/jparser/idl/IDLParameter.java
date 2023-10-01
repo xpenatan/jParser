@@ -15,6 +15,7 @@ public class IDLParameter {
     public boolean isRef;
     public boolean isConst;
     public boolean isValue;
+    public boolean isAny;
     public final ArrayList<String> tags = new ArrayList<>();
 
     public boolean optional;
@@ -58,6 +59,11 @@ public class IDLParameter {
             type = type + "[]";
         }
 
+        if(type.equals("any")) {
+            type = "int";
+            isAny = true;
+        }
+
         if(type.equals("long")) {
             type = "int";
         }
@@ -94,6 +100,9 @@ public class IDLParameter {
         clonedParam.type = type;
         clonedParam.name = name;
         clonedParam.isRef = isRef;
+        clonedParam.isAny = isAny;
+        clonedParam.isArray = isArray;
+        clonedParam.isValue = isValue;
         clonedParam.isConst = isConst;
         clonedParam.tags.addAll(tags);
         return clonedParam;
