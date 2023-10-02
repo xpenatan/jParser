@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jparser.example.lib.EnumLib;
 import com.github.xpenatan.jparser.example.lib.EnumTwoLib;
-import com.github.xpenatan.jparser.example.lib.ExampleLib;
+import com.github.xpenatan.jparser.example.lib.ExampleLibLoader;
 import com.github.xpenatan.jparser.example.lib.NormalClass;
 import com.github.xpenatan.jparser.example.lib.OperatorClass;
 import com.github.xpenatan.jparser.example.lib.ReturnClass;
@@ -25,7 +25,7 @@ public class AppTest extends ApplicationAdapter {
 
     @Override
     public void create() {
-        ExampleLib.init(new Runnable() {
+        ExampleLibLoader.init(new Runnable() {
             @Override
             public void run() {
                 initLib();

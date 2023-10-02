@@ -3,7 +3,18 @@ package com.github.xpenatan.jparser.example.lib;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
 import idl.helper.ByteArray;
 
-public class ExampleLib {
+public class ExampleLibLoader {
+
+    /*[-C++;-NATIVE]
+        #include "ReturnClass.h"
+        #include "ParentClass.h"
+        #include "OperatorClass.h"
+        #include "NormalClass.h"
+        #include "InterfaceClass.h"
+        #include "DefaultInterface.h"
+        #include "subpackage/ParamData.h"
+    */
+
 
     /*[-teaVM;-ADD]
         @org.teavm.jso.JSFunctor
