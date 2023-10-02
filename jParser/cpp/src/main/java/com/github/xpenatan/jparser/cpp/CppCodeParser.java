@@ -287,6 +287,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 break;
             case GET_OBJ_VALUE_STATIC: {
                     String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
+                    IDLClass retTypeClass = idlMethod.idlFile.getClass(returnTypeName);
+                    if(retTypeClass != null) {
+                        returnTypeName = retTypeClass.classHeader.prefixName + returnTypeName;
+                    }
                     String copyParam = "copy_addr";
                     content = METHOD_GET_OBJ_VALUE_STATIC_TEMPLATE
                             .replace(TEMPLATE_TAG_METHOD, methodCaller)
@@ -297,6 +301,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 break;
             case GET_OBJ_VALUE: {
                     String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
+                    IDLClass retTypeClass = idlMethod.idlFile.getClass(returnTypeName);
+                    if(retTypeClass != null) {
+                        returnTypeName = retTypeClass.classHeader.prefixName + returnTypeName;
+                    }
                     String copyParam = "copy_addr";
                     content = METHOD_GET_OBJ_VALUE_TEMPLATE
                             .replace(TEMPLATE_TAG_METHOD, methodCaller)
