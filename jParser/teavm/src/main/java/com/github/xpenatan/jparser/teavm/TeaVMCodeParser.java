@@ -280,34 +280,18 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             case CALL_VOID:
                 content = METHOD_CALL_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
-            case GET_REF_OBJ_POINTER_STATIC:
+            case GET_OBJ_REF_POINTER_STATIC:
                 content = METHOD_GET_OBJ_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
-            case GET_REF_OBJ_POINTER:
+            case GET_OBJ_REF_POINTER:
                 content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
-            case COPY_VALUE_STATIC: {
-                IDLClass returnTypeClass = idlMethod.idlFile.getClass(idlMethod.returnType);
-                if(returnTypeClass != null) {
-                    IDLMethod operatorMethod = returnTypeClass.getOperatorMethod("=");
-                    if(operatorMethod != null) {
-                        String operatorMethodName = operatorMethod.name;
-                        content = METHOD_COPY_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_OPERATOR, operatorMethodName).replace(TEMPLATE_TAG_OPERATOR_TYPE, returnType);
-                    }
-                }
-            }
-            break;
-            case COPY_VALUE: {
-                IDLClass returnTypeClass = idlMethod.idlFile.getClass(idlMethod.returnType);
-                if(returnTypeClass != null) {
-                    IDLMethod operatorMethod = returnTypeClass.getOperatorMethod("=");
-                    if(operatorMethod != null) {
-                        String operatorMethodName = operatorMethod.name;
-                        content = METHOD_COPY_VALUE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_OPERATOR, operatorMethodName).replace(TEMPLATE_TAG_OPERATOR_TYPE, returnType);
-                    }
-                }
-            }
-            break;
+            case GET_OBJ_VALUE_STATIC:
+                content = METHOD_GET_OBJ_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_OBJ_VALUE:
+                content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case GET_OBJ_POINTER_STATIC:
                 content = METHOD_GET_OBJ_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;

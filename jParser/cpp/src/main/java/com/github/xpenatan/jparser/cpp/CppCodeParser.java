@@ -1,7 +1,5 @@
 package com.github.xpenatan.jparser.cpp;
 
-import com.github.javaparser.Position;
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -13,7 +11,6 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
-import com.github.xpenatan.jparser.core.util.RawCodeBlock;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLEnum;
@@ -88,12 +85,14 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return nativeObject->[ATTRIBUTE];\n";
 
-    protected static final String METHOD_COPY_VALUE_TEMPLATE =
+    protected static final String METHOD_GET_OBJ_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
-            "*(([COPY_TYPE]*)[COPY_PARAM]) = nativeObject->[METHOD];\n";
+            "static [COPY_TYPE] [COPY_PARAM] = nativeObject->[METHOD];\n" +
+            "return (jlong)&[COPY_PARAM];";
 
-    protected static final String METHOD_COPY_VALUE_STATIC_TEMPLATE =
-            "\n*(([COPY_TYPE]*)[COPY_PARAM]) = [TYPE]::[METHOD];\n";
+    protected static final String METHOD_GET_OBJ_VALUE_STATIC_TEMPLATE =
+            "\nstatic [COPY_TYPE] [COPY_PARAM] = [TYPE]::[METHOD];\n" +
+            "return (jlong)&[COPY_PARAM];";
 
     protected static final String METHOD_CALL_VOID_STATIC_TEMPLATE =
             "\n[TYPE]::[METHOD];\n";
@@ -275,10 +274,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             case CALL_VOID:
                 content = METHOD_CALL_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
-            case GET_REF_OBJ_POINTER_STATIC:
+            case GET_OBJ_REF_POINTER_STATIC:
                 content = METHOD_GET_REF_OBJ_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
-            case GET_REF_OBJ_POINTER:
+            case GET_OBJ_REF_POINTER:
                 if(operator.isEmpty()) {
                     content = METHOD_GET_REF_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 }
@@ -286,20 +285,20 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                     content = METHOD_GET_REF_OBJ_POINTER_OPERATOR_TEMPLATE.replace(TEMPLATE_TAG_OPERATOR, operator).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 }
                 break;
-            case COPY_VALUE_STATIC: {
+            case GET_OBJ_VALUE_STATIC: {
                     String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
                     String copyParam = "copy_addr";
-                    content = METHOD_COPY_VALUE_STATIC_TEMPLATE
+                    content = METHOD_GET_OBJ_VALUE_STATIC_TEMPLATE
                             .replace(TEMPLATE_TAG_METHOD, methodCaller)
                             .replace(TEMPLATE_TAG_TYPE, classTypeName)
                             .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)
                             .replace(TEMPLATE_TAG_COPY_PARAM, copyParam);
                 }
                 break;
-            case COPY_VALUE: {
+            case GET_OBJ_VALUE: {
                     String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
                     String copyParam = "copy_addr";
-                    content = METHOD_COPY_VALUE_TEMPLATE
+                    content = METHOD_GET_OBJ_VALUE_TEMPLATE
                             .replace(TEMPLATE_TAG_METHOD, methodCaller)
                             .replace(TEMPLATE_TAG_TYPE, classTypeName)
                             .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)

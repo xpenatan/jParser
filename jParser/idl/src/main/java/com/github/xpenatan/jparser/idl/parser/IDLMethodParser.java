@@ -195,10 +195,6 @@ public class IDLMethodParser {
             caller.addArgument(IDLDefaultCodeParser.CPOINTER_METHOD);
         }
 
-        if(isReturnValue && tempFieldName != null) {
-            caller.addArgument(tempFieldName + "." + IDLDefaultCodeParser.CPOINTER_METHOD);
-        }
-
         for(int i = 0; i < methodParameters.size(); i++) {
             Parameter parameter = methodParameters.get(i);
             Type type = parameter.getType();
@@ -231,7 +227,7 @@ public class IDLMethodParser {
         String newBody = null;
 
         boolean isStatic = methodDeclaration.isStatic();
-        boolean isTemp = !isReturnValue;
+        boolean isTemp = true; // Deprecated. Not allocating objects anymore
 
         boolean isRetSameAsClass = false;
 
@@ -253,16 +249,9 @@ public class IDLMethodParser {
                     .replace(TEMPLATE_TAG_METHOD, methodCaller);
         }
         else {
-            if(isReturnValue) {
-                newBody = GET_TEMP_OBJECT_TEMPLATE
-                        .replace(TEMPLATE_TAG_METHOD, methodCaller)
-                        .replace(TEMPLATE_TEMP_FIELD, fieldName);
-            }
-            else {
-                newBody = GET_OBJECT_TEMPLATE
-                        .replace(TEMPLATE_TAG_METHOD, methodCaller)
-                        .replace(TEMPLATE_TEMP_FIELD, fieldName);
-            }
+            newBody = GET_OBJECT_TEMPLATE
+                    .replace(TEMPLATE_TAG_METHOD, methodCaller)
+                    .replace(TEMPLATE_TEMP_FIELD, fieldName);
         }
 
         BlockStmt body = null;
@@ -278,7 +267,7 @@ public class IDLMethodParser {
         return body;
     }
 
-    public static String generateFieldName(ClassOrInterfaceDeclaration classDeclaration, String returnTypeName, boolean isTemp, boolean isStatic) {
+    private static String generateFieldName(ClassOrInterfaceDeclaration classDeclaration, String returnTypeName, boolean isTemp, boolean isStatic) {
         // Will return a temp object.
         // Java variable will be created by checking its class, name and number.
         // if the temp object already exist it will increment variable number and create it.
@@ -354,12 +343,6 @@ public class IDLMethodParser {
             nativeMethod.addParameter("long", "this_addr");
         }
 
-        if(isReturnValue) {
-            // We pass a temp c++ object to copy the returned temp c++ object
-            String pointerTempObject = "copy_addr";
-            nativeMethod.addParameter("long", pointerTempObject);
-        }
-
         for(int i = 0; i < methodParameters.size(); i++) {
             Parameter parameter = methodParameters.get(i);
             String nameAsString = parameter.getNameAsString();
@@ -374,15 +357,7 @@ public class IDLMethodParser {
         }
         if(isClassOrInterfaceType) {
             // If the return type is an object we need to return a pointer.
-            // If it's a value set to void
-            Type type;
-            if(isReturnValue) {
-                type = StaticJavaParser.parseType("void");
-            }
-            else {
-                // If c++ is not a value and is a class object, return pointer
-                type = StaticJavaParser.parseType(long.class.getSimpleName());
-            }
+            Type type = StaticJavaParser.parseType(long.class.getSimpleName());
             nativeMethod.setType(type);
         }
         else {

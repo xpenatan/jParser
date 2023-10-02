@@ -26,19 +26,18 @@ public class IDLMethodOperation {
         else if(returnType.isClassOrInterfaceType()) {
             if(isReturnRef) {
                 if(isStatic) {
-                    return Op.GET_REF_OBJ_POINTER_STATIC;
+                    return Op.GET_OBJ_REF_POINTER_STATIC;
                 }
                 else {
-                    return Op.GET_REF_OBJ_POINTER;
+                    return Op.GET_OBJ_REF_POINTER;
                 }
             }
             else if(isReturnValue) {
-                // For temporary c++ object, the class needs to contains assignment operator
                 if(isStatic) {
-                    return Op.COPY_VALUE_STATIC;
+                    return Op.GET_OBJ_VALUE_STATIC;
                 }
                 else {
-                    return Op.COPY_VALUE;
+                    return Op.GET_OBJ_VALUE;
                 }
             }
             else {
@@ -63,10 +62,10 @@ public class IDLMethodOperation {
     public enum Op {
         CALL_VOID_STATIC,
         CALL_VOID,
-        GET_REF_OBJ_POINTER_STATIC,
-        GET_REF_OBJ_POINTER,
-        COPY_VALUE_STATIC,
-        COPY_VALUE,
+        GET_OBJ_REF_POINTER_STATIC,
+        GET_OBJ_REF_POINTER,
+        GET_OBJ_VALUE_STATIC,
+        GET_OBJ_VALUE,
         GET_OBJ_POINTER_STATIC,
         GET_OBJ_POINTER,
         GET_PRIMITIVE_STATIC,
