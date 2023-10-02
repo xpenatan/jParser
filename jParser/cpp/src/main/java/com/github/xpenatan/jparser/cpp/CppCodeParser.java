@@ -422,19 +422,21 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String nameAsString = classOrInterfaceDeclaration.getNameAsString();
 
         String include = classCppPath.get(nameAsString);
-        if(include != null) {
-            String comment = "" +
-                    "/*[-C++;-NATIVE]\n" +
-                    "       #include <" + include + ">\n" +
-                    "    */";
-            Position begin = new Position(0, 0);
-            Position end = new Position(0, 0);
-            Range range = new Range(begin, end);
-            RawCodeBlock blockComment = new RawCodeBlock();
-            blockComment.setRange(range);
-            blockComment.setContent(comment);
-            classOrInterfaceDeclaration.getMembers().add(0, blockComment);
-        }
+
+        //TODO fix this. Disable auto include because path may be wrong.
+//        if(include != null) {
+//            String comment = "" +
+//                    "/*[-C++;-NATIVE]\n" +
+//                    "       #include <" + include + ">\n" +
+//                    "    */";
+//            Position begin = new Position(0, 0);
+//            Position end = new Position(0, 0);
+//            Range range = new Range(begin, end);
+//            RawCodeBlock blockComment = new RawCodeBlock();
+//            blockComment.setRange(range);
+//            blockComment.setContent(comment);
+//            classOrInterfaceDeclaration.getMembers().add(0, blockComment);
+//        }
 
         super.onParseClassStart(jParser, unit, classOrInterfaceDeclaration);
     }
