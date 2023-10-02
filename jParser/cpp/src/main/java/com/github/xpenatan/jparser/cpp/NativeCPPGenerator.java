@@ -8,7 +8,6 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
-import com.github.xpenatan.jparser.core.util.FileHelper;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,7 +84,6 @@ public class NativeCPPGenerator implements CppGenerator {
         otherTypes.put("Throwable", ArgumentType.Throwable);
     }
 
-    private String cppSourceDir;
     private String cppDestinationDir;
     private String cppGlueName = "JNIGlue";
 
@@ -99,14 +97,13 @@ public class NativeCPPGenerator implements CppGenerator {
 
     private boolean exportJNIMethodsOnly;
 
-    public NativeCPPGenerator(String cppSourceDir, String cppDestinationDir) {
-        this(cppSourceDir, cppDestinationDir, true);
+    public NativeCPPGenerator(String cppDestinationDir) {
+        this(cppDestinationDir, true);
     }
 
-    public NativeCPPGenerator(String cppSourceDir, String cppDestinationDir, boolean exportJNIMethodsOnly) {
+    public NativeCPPGenerator(String cppDestinationDir, boolean exportJNIMethodsOnly) {
         try {
             this.exportJNIMethodsOnly = exportJNIMethodsOnly;
-            this.cppSourceDir = new File(cppSourceDir).getCanonicalPath();
             this.cppDestinationDir = new File(cppDestinationDir).getCanonicalPath() + File.separator;
         } catch(IOException e) {
             throw new RuntimeException(e);
@@ -252,34 +249,28 @@ public class NativeCPPGenerator implements CppGenerator {
 
     @Override
     public void generate(JParser jParser) {
-        try {
-            FileHelper.copyDir(cppSourceDir, cppDestinationDir);
+        headerPrinter.append("\n");
 
-            headerPrinter.append("\n");
+        mainPrinter.insert(0, codePrinter);
+        mainPrinter.insert(0, headerPrinter);
+        print(PrintType.MAIN, "}");
+        String code = mainPrinter.toString();
 
-            mainPrinter.insert(0, codePrinter);
-            mainPrinter.insert(0, headerPrinter);
-            print(PrintType.MAIN, "}");
-            String code = mainPrinter.toString();
+        String gluePathStr = cppDestinationDir + File.separator + ".." + File.separator + "jniglue" + File.separator;
+        CustomFileDescriptor gluePath = new CustomFileDescriptor(gluePathStr);
 
-            String gluePathStr = cppDestinationDir + File.separator + ".." + File.separator + "jniglue" + File.separator;
-            CustomFileDescriptor gluePath = new CustomFileDescriptor(gluePathStr);
+        InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
+        CustomFileDescriptor helperFile = gluePath.child(helperName);
+        helperFile.write(idlHelperClass, false);
 
-            InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
-            CustomFileDescriptor helperFile = gluePath.child(helperName);
-            helperFile.write(idlHelperClass, false);
+        String cppGlueHPath = gluePathStr + cppGlueName + ".h";
+        String cppGluePath = gluePathStr + cppGlueName + ".cpp";
+        CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);
+        fileDescriptor.writeString(code, false);
 
-            String cppGlueHPath = gluePathStr + cppGlueName + ".h";
-            String cppGluePath = gluePathStr + cppGlueName + ".cpp";
-            CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);
-            fileDescriptor.writeString(code, false);
-
-            CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
-            String include = "#include \"" + cppGlueName + ".h\"";
-            cppFile.writeString(include, false);
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
+        CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
+        String include = "#include \"" + cppGlueName + ".h\"";
+        cppFile.writeString(include, false);
     }
 
     private Argument getArgument(Parameter parameter) {
