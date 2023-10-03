@@ -16,7 +16,6 @@ import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
@@ -39,7 +38,8 @@ public class IDLMethodParser {
     static final String GET_OBJECT_TEMPLATE =
             "{\n" +
             "    long pointer = [METHOD];\n" +
-            "    if(pointer == 0) return null;" +
+            "    if(pointer == 0) return null;\n" +
+            "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1);\n" +
             "    [TYPE]_TEMP_GEN_[NUM].setPointer(pointer);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
@@ -57,9 +57,7 @@ public class IDLMethodParser {
             "}";
 
     static final String TEMPLATE_TEMP_FIELD = "[TYPE]_TEMP_GEN_[NUM]";
-    static final String TEMPLATE_VALUE_FIELD = "[TYPE]_VALUE_GEN_[NUM]";
     static final String TEMPLATE_TEMP_STATIC_FIELD = "[TYPE]_TEMP_STATIC_GEN_[NUM]";
-    static final String TEMPLATE_VALUE_STATIC_FIELD = "[TYPE]_VALUE_STATIC_GEN_[NUM]";
 
     static final String TEMPLATE_TAG_METHOD = "[METHOD]";
 
@@ -157,7 +155,7 @@ public class IDLMethodParser {
 
             if(methodReturnType.isVoidType()) {
                 // void types just call the method.
-                IDLMethodParser.setupCallerParam(isStatic, false, caller, methodDeclaration, null);
+                IDLMethodParser.setupCallerParam(isStatic, false, caller, methodDeclaration);
                 BlockStmt blockStmt = methodDeclaration.getBody().get();
                 blockStmt.addStatement(caller);
             }
@@ -170,7 +168,7 @@ public class IDLMethodParser {
             else {
                 // Should be a primitive return type.
                 ReturnStmt returnStmt = IDLMethodParser.getReturnStmt(methodDeclaration);
-                IDLMethodParser.setupCallerParam(isStatic, false, caller, methodDeclaration, null);
+                IDLMethodParser.setupCallerParam(isStatic, false, caller, methodDeclaration);
                 returnStmt.setExpression(caller);
             }
             return nativeMethodDeclaration;
@@ -185,12 +183,12 @@ public class IDLMethodParser {
         return caller;
     }
 
-    public static void setupCallerParam(boolean isStatic, boolean isReturnValue, MethodCallExpr caller, MethodDeclaration methodDeclaration, String tempFieldName) {
+    public static void setupCallerParam(boolean isStatic, boolean isReturnValue, MethodCallExpr caller, MethodDeclaration methodDeclaration) {
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
-        setupCallerParam(isStatic, isReturnValue, caller, methodParameters, tempFieldName);
+        setupCallerParam(isStatic, isReturnValue, caller, methodParameters);
     }
 
-    public static void setupCallerParam(boolean isStatic, boolean isReturnValue, MethodCallExpr caller, NodeList<Parameter> methodParameters, String tempFieldName) {
+    public static void setupCallerParam(boolean isStatic, boolean isReturnValue, MethodCallExpr caller, NodeList<Parameter> methodParameters) {
         if(!isStatic) {
             caller.addArgument(IDLDefaultCodeParser.CPOINTER_METHOD);
         }
@@ -227,7 +225,6 @@ public class IDLMethodParser {
         String newBody = null;
 
         boolean isStatic = methodDeclaration.isStatic();
-        boolean isTemp = true; // Deprecated. Not allocating objects anymore
 
         boolean isRetSameAsClass = false;
 
@@ -237,10 +234,10 @@ public class IDLMethodParser {
         }
         String fieldName =  "";
         if(!isRetSameAsClass) {
-            fieldName = generateFieldName(classDeclaration, returnTypeName, isTemp, isStatic);
+            fieldName = generateFieldName(classDeclaration, returnTypeName, isStatic);
         }
 
-        IDLMethodParser.setupCallerParam(isStatic, isReturnValue, caller, methodDeclaration, fieldName);
+        IDLMethodParser.setupCallerParam(isStatic, isReturnValue, caller, methodDeclaration);
 
         String methodCaller = caller.toString();
 
@@ -251,7 +248,8 @@ public class IDLMethodParser {
         else {
             newBody = GET_OBJECT_TEMPLATE
                     .replace(TEMPLATE_TAG_METHOD, methodCaller)
-                    .replace(TEMPLATE_TEMP_FIELD, fieldName);
+                    .replace(TEMPLATE_TEMP_FIELD, fieldName)
+                    .replace(TEMPLATE_TAG_TYPE, returnTypeName);
         }
 
         BlockStmt body = null;
@@ -267,7 +265,7 @@ public class IDLMethodParser {
         return body;
     }
 
-    private static String generateFieldName(ClassOrInterfaceDeclaration classDeclaration, String returnTypeName, boolean isTemp, boolean isStatic) {
+    private static String generateFieldName(ClassOrInterfaceDeclaration classDeclaration, String returnTypeName, boolean isStatic) {
         // Will return a temp object.
         // Java variable will be created by checking its class, name and number.
         // if the temp object already exist it will increment variable number and create it.
@@ -277,20 +275,15 @@ public class IDLMethodParser {
 
         int i = 0;
         while(true) {
-            String fieldName = getFieldName(returnTypeName, i, isTemp, isStatic);
+            String fieldName = getFieldName(returnTypeName, i, isStatic);
             Optional<FieldDeclaration> fieldByName = classDeclaration.getFieldByName(fieldName);
             if(fieldByName.isEmpty()) {
-                ObjectCreationExpr expression = new ObjectCreationExpr();
-                expression.setType(returnTypeName);
-                if(isTemp) {
-                    expression.addArgument(StaticJavaParser.parseExpression("(byte)1"));
-                }
                 FieldDeclaration fieldDeclaration;
                 if(isStatic) {
-                    fieldDeclaration = classDeclaration.addFieldWithInitializer(returnTypeName, fieldName, expression, Modifier.Keyword.STATIC, Modifier.Keyword.PRIVATE, Modifier.Keyword.FINAL);
+                    fieldDeclaration = classDeclaration.addField(returnTypeName, fieldName, Modifier.Keyword.STATIC, Modifier.Keyword.PRIVATE);
                 }
                 else {
-                    fieldDeclaration = classDeclaration.addFieldWithInitializer(returnTypeName, fieldName, expression, Modifier.Keyword.PRIVATE, Modifier.Keyword.FINAL);
+                    fieldDeclaration = classDeclaration.addField(returnTypeName, fieldName, Modifier.Keyword.PRIVATE);
                 }
                 Position begin = new Position(0, 0);
                 Position end = new Position(0, 0);
@@ -302,22 +295,12 @@ public class IDLMethodParser {
         }
     }
 
-    private static String getFieldName(String type, int number,  boolean isTemp, boolean isStatic) {
-        if(isTemp) {
-            if(isStatic) {
-                return TEMPLATE_TEMP_STATIC_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
-            }
-            else {
-                return TEMPLATE_TEMP_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
-            }
+    private static String getFieldName(String type, int number, boolean isStatic) {
+        if(isStatic) {
+            return TEMPLATE_TEMP_STATIC_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
         }
         else {
-            if(isStatic) {
-                return TEMPLATE_VALUE_STATIC_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
-            }
-            else {
-                return TEMPLATE_VALUE_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
-            }
+            return TEMPLATE_TEMP_FIELD.replace(TEMPLATE_TAG_TYPE, type).replace(TEMPLATE_TAG_NUM, String.valueOf(number));
         }
     }
 
