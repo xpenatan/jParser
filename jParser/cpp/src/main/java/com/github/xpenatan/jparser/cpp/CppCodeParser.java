@@ -181,6 +181,12 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         }
 
         String attributeType = idlAttribute.type;
+
+        IDLClass retTypeClass = idlAttribute.idlFile.getClass(attributeType);
+        if(retTypeClass != null) {
+            attributeType = retTypeClass.classHeader.prefixName + attributeType;
+        }
+
         String content = null;
         IDLAttributeOperation.Op op = IDLAttributeOperation.getEnum(isSet, idlAttribute, methodDeclaration, nativeMethod);
         switch(op) {
