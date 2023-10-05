@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jparser.example.lib.EnumLib;
 import com.github.xpenatan.jparser.example.lib.EnumTwoLib;
+import com.github.xpenatan.jparser.example.lib.EnumWithinClass;
 import com.github.xpenatan.jparser.example.lib.ExampleLibLoader;
 import com.github.xpenatan.jparser.example.lib.NormalClass;
 import com.github.xpenatan.jparser.example.lib.OperatorClass;
@@ -60,6 +61,7 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("ENUM Return FIRST: " + normalClass.enumReturn(1));
         System.out.println("ENUM Return SECOND: " + normalClass.enumReturn(2));
         System.out.println("ENUM Return DEFAULT: " + normalClass.enumReturn(99));
+        System.out.println("EnumWithinClass e_val: " + EnumWithinClass.e_val);
 
         ReturnClass returnValueObject = normalClass.getReturnValueObject();
         System.out.println("returnValueObject: " + returnValueObject.get_value());
