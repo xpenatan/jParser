@@ -6,14 +6,13 @@ public class BuildConfig {
     public CustomFileDescriptor buildDir;
     public CustomFileDescriptor sourceDir;
     public CustomFileDescriptor libsDir;
-    public CustomFileDescriptor emscriptenCustomCodeDir;
     public String libName;
 
-    public BuildConfig(String sourceDir, String buildDir, String libsDir, String libName, String emscriptenCustomCodeDir) {
+    public BuildConfig(String sourceDir, String buildDir, String libsDir, String libName) {
         this.sourceDir = new CustomFileDescriptor(sourceDir);
         this.buildDir = new CustomFileDescriptor(buildDir);
         this.libsDir = new CustomFileDescriptor(libsDir);
-        this.emscriptenCustomCodeDir = new CustomFileDescriptor(emscriptenCustomCodeDir);
+
         this.libName = libName;
 
         copyJniHeaders(this.buildDir);

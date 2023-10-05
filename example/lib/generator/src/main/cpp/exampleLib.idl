@@ -101,6 +101,6 @@ enum EnumTwoLib {
     "EnumTwoLib_FOURTH"
 };
 
-//enum NormalClass_EnumWithinClass {
-//  "NormalClass::e_val"
-//};
+enum EnumWithinClass {
+  "NormalClass::e_val"
+};

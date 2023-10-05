@@ -23,7 +23,7 @@ public class Main {
 
     private static void generateClassOnly() throws Exception {
         String basePackage = "com.github.xpenatan.jparser.example.lib";
-        String idlPath = new File("src/main/cpp/emscripten/exampleLib.idl").getCanonicalPath();
+        String idlPath = new File("src/main/cpp/exampleLib.idl").getCanonicalPath();
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
         String genDir = "../core/src/main/java";
         String cppSourceDir = new File("./src/main/cpp/exampleLib/src/").getCanonicalPath();
@@ -37,10 +37,10 @@ public class Main {
     private static void generateAndBuild() throws Exception {
         String libName = "exampleLib";
         String basePackage = "com.github.xpenatan.jparser.example.lib";
-        String emscriptenCustomCodePath = new File("src/main/cpp/emscripten").getCanonicalPath();
-        String idlPath = new File(emscriptenCustomCodePath + "/exampleLib.idl").getCanonicalPath();
+        String idlPath = new File("src/main/cpp/exampleLib.idl").getCanonicalPath();
         String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
         String cppSourceDir = new File("./src/main/cpp/source/exampleLib/src/").getCanonicalPath();
+        String customSourceDir = new File("./src/main/cpp/custom/").getCanonicalPath();
 
         IDLReader idlReader = IDLReader.readIDL(idlPath, cppSourceDir);
 
@@ -50,7 +50,11 @@ public class Main {
         String cppDestinationPath = libBuildPath + "/src";
         String libDestinationPath = cppDestinationPath + "/exampleLib";
 
+        // Move original source code to destination build directory
         FileHelper.copyDir(cppSourceDir, libDestinationPath);
+
+        // Move custom code to destination build directory
+        FileHelper.copyDir(customSourceDir, libDestinationPath);
 
         CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath);
         CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage);
@@ -61,8 +65,7 @@ public class Main {
                 cppDestinationPath,
                 libBuildPath,
                 libsDir,
-                libName,
-                emscriptenCustomCodePath
+                libName
         );
 
         WindowsTarget windowsTarget = new WindowsTarget();
@@ -74,7 +77,7 @@ public class Main {
         JParser.generate(teavmParser, baseJavaDir, teaVMgenDir);
         EmscriptenTarget teaVMTarget = new EmscriptenTarget(idlPath);
         teaVMTarget.headerDirs.add("-Isrc/exampleLib");
-        teaVMTarget.headerDirs.add("-includesrc/jsglue/Include.h");
+        teaVMTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
         teaVMTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
         AndroidTarget androidTarget = new AndroidTarget();

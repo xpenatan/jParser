@@ -6,7 +6,6 @@ import com.github.xpenatan.jparser.builder.JProcess;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
-import java.util.ArrayList;
 
 public class EmscriptenTarget extends BuildTarget {
 
@@ -18,6 +17,7 @@ public class EmscriptenTarget extends BuildTarget {
     public EmscriptenTarget(String idlFile) {
         this.tempBuildDir = "target/emscripten";
         this.idlFile = new CustomFileDescriptor(idlFile);
+
         if(!this.idlFile.exists()) {
             throw new RuntimeException("IDL file does not exist: " + idlFile);
         }
@@ -59,8 +59,6 @@ public class EmscriptenTarget extends BuildTarget {
         if(!jsglueDir.exists()) {
             jsglueDir.mkdirs();
         }
-
-        config.emscriptenCustomCodeDir.copyTo(jsglueDir, false);
 
         CustomFileDescriptor mergedIDLFile = mergeIDLFile(jsglueDir);
 
