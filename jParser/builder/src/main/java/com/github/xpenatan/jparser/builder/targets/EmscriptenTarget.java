@@ -6,6 +6,7 @@ import com.github.xpenatan.jparser.builder.JProcess;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
+import java.util.ArrayList;
 
 public class EmscriptenTarget extends BuildTarget {
 
@@ -24,23 +25,38 @@ public class EmscriptenTarget extends BuildTarget {
 
         long initialMemory = 64 * 1024 * 1024;
 
-        cppCompiler = EMSCRIPTEN_ROOT + "em++";
+        cppCompiler.clear();
+        linkerCompiler.clear();
+
+        String cppCompilerr = EMSCRIPTEN_ROOT + "em++";
         if(isWindows()) {
-            cppCompiler += ".bat";
+            cppCompilerr += ".bat";
         }
+        cppCompiler.add(cppCompilerr);
+        linkerCompiler.add(cppCompilerr);
 
         linkerFlags.add("-O3");
         linkerFlags.add("-std=c++17");
-        linkerFlags.add("--llvm-lto 1");
-        linkerFlags.add("-s ALLOW_MEMORY_GROWTH=1");
-        linkerFlags.add("-s ALLOW_TABLE_GROWTH=1");
-        linkerFlags.add("-s MODULARIZE=1");
-        linkerFlags.add("-s NO_FILESYSTEM=1");
-        linkerFlags.add("-s INITIAL_MEMORY=" + initialMemory);
-        linkerFlags.add("-s EXPORTED_FUNCTIONS=['_free','_malloc']");
-        linkerFlags.add("-s EXPORTED_RUNTIME_METHODS=['UTF8ToString']");
-        linkerFlags.add("-s WASM=1");
-        linkerFlags.add("-s SINGLE_FILE=1");
+        linkerFlags.add("--llvm-lto");
+        linkerFlags.add("1");
+        linkerFlags.add("-s");
+        linkerFlags.add("ALLOW_MEMORY_GROWTH=1");
+        linkerFlags.add("-s");
+        linkerFlags.add("ALLOW_TABLE_GROWTH=1");
+        linkerFlags.add("-s");
+        linkerFlags.add("MODULARIZE=1");
+        linkerFlags.add("-s");
+        linkerFlags.add("NO_FILESYSTEM=1");
+        linkerFlags.add("-s");
+        linkerFlags.add("INITIAL_MEMORY=" + initialMemory);
+        linkerFlags.add("-s");
+        linkerFlags.add("EXPORTED_FUNCTIONS=['_free','_malloc']");
+        linkerFlags.add("-s");
+        linkerFlags.add("EXPORTED_RUNTIME_METHODS=['UTF8ToString']");
+        linkerFlags.add("-s");
+        linkerFlags.add("WASM=1");
+        linkerFlags.add("-s");
+        linkerFlags.add("SINGLE_FILE=1");
 
         libSuffix = ".wasm.js";
 
@@ -78,16 +94,23 @@ public class EmscriptenTarget extends BuildTarget {
         postJS.writeString(s, false);
         String postPath = postJS.path();
 
-        linkerFlags.add("--post-js " + jsGluePath + "glue.js");
-        linkerFlags.add("--extern-post-js " + postPath);
-        linkerFlags.add("-s EXPORT_NAME='" + config.libName + "'");
+        linkerFlags.add("--post-js");
+        linkerFlags.add(jsGluePath + "glue.js");
+        linkerFlags.add("--extern-post-js");
+        linkerFlags.add(postPath);
+        linkerFlags.add("-s");
+        linkerFlags.add("EXPORT_NAME='" + config.libName + "'");
 
         String pythonCmd = "python";
         if(isUnix()) {
             pythonCmd = "python3";
         }
 
-        String generateGlueCommand = pythonCmd + " " + WEBIDL_BINDER_SCRIPT + " " + mergedIDLFile + " glue";
+        ArrayList<String> generateGlueCommand = new ArrayList<>();
+        generateGlueCommand.add(pythonCmd);
+        generateGlueCommand.add(WEBIDL_BINDER_SCRIPT);
+        generateGlueCommand.add(mergedIDLFile.toString());
+        generateGlueCommand.add("glue");
         if(!JProcess.startProcess(jsglueDir.file(), generateGlueCommand)) {
             return false;
         }

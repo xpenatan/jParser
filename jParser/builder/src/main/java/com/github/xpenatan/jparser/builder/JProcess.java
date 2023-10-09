@@ -5,25 +5,31 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public class JProcess {
 
     public static void executeNdk (String directory) {
         CustomFileDescriptor build = new CustomFileDescriptor(directory);
         String command = "ndk-build";
-        startProcess(build.file(), command);
+        String [] array = new String[1];
+        array[0] = command;
+        startProcess(build.file(), array);
     }
 
-    public static boolean startProcess (String command) {
-        return startProcess(new File(System.getProperty("user.home")), command);
+    public static boolean startProcess (ArrayList<String> command) {
+        String [] array = new String[command.size()];
+        command.toArray(array);
+        return startProcess(new File(System.getProperty("user.home")), array);
     }
 
-    public static boolean startProcess (File directory, String command) {
-        String[] commands = command.replaceAll("\\s+", " ").split(" ");
-        return startProcess(directory, commands);
+    public static boolean startProcess (File directory, ArrayList<String> command) {
+        String [] array = new String[command.size()];
+        command.toArray(array);
+        return startProcess(directory, array);
     }
 
-    public static boolean startProcess (File directory, String... commands) {
+    public static boolean startProcess (File directory, String[] commands) {
         try {
             System.out.println("Command: " + commands[0]);
             for(int i = 1; i < commands.length; i++) {

@@ -24,17 +24,24 @@ public abstract class BuildTarget {
     }
 
     public String tempBuildDir;
+
+    private final ArrayList<String> compilerCommands = new ArrayList<>();
+    private final ArrayList<String> linkerCommands = new ArrayList<>();
+
     public final ArrayList<String> headerDirs = new ArrayList<>();
-    public final ArrayList<String> cIncludes = new ArrayList<>();
     public final ArrayList<String> cppIncludes = new ArrayList<>();
-    public String cppCompiler = "x86_64-w64-mingw32-g++";
+    public ArrayList<String> cppCompiler = new ArrayList<>();
+    public ArrayList<String> linkerCompiler = new ArrayList<>();
+    public String compilerOutputCommand = "-o";
+    public String linkerOutputCommand = "-o";
     public String cCompiler = "x86_64-w64-mingw32-gcc";
     public final ArrayList<String> cppFlags = new ArrayList<>();
-    public final ArrayList<String> cFlags = new ArrayList<>();
     public final ArrayList<String> linkerFlags = new ArrayList<>();
     public String libSuffix;
 
     protected BuildTarget() {
+        cppCompiler.add("x86_64-w64-mingw32-g++");
+        linkerCompiler.add("x86_64-w64-mingw32-g++");
     }
 
     protected void setup(BuildConfig config) {}
@@ -76,22 +83,14 @@ public abstract class BuildTarget {
             p += "/";
             String compiledPath = p + file.nameWithoutExtension() + ".o";
 
-            String headers = "";
-            for(String headerDir : headerDirs) {
-                headers += headerDir + " ";
-            }
+            compilerCommands.clear();
+            compilerCommands.addAll(cppCompiler);
+            compilerCommands.addAll(cppFlags);
+            compilerCommands.addAll(headerDirs);
+            compilerCommands.add(path);
+            compilerCommands.add(compilerOutputCommand + compiledPath);
 
-            String cppFlag = "";
-            for(String flag : cppFlags) {
-                cppFlag = cppFlag + " " + flag;
-            }
-            cppFlag = cppFlag.replaceAll("\\s+", " ").trim();
-            String command = cppCompiler;
-            command = command + " " + cppFlag;
-            command = command + " " + headers;
-            command = command + " " + path;
-            command = command + " -o " + compiledPath;
-            boolean flag = JProcess.startProcess(config.buildDir.file(), command);
+            boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
             if(!flag) {
                 return false;
             }
@@ -110,7 +109,7 @@ public abstract class BuildTarget {
         String libPath = libsDir + File.separator + libName;
 
         ArrayList<CustomFileDescriptor> files = new ArrayList<>();
-        getAllFiles(childTarget, files, ".o");
+        getAllFiles(childTarget, files, "");
 
         String compiledPaths = "";
         for(CustomFileDescriptor file : files) {
@@ -120,19 +119,14 @@ public abstract class BuildTarget {
         CustomFileDescriptor objList = childTarget.child("objs.txt");
         objList.writeString(compiledPaths.trim(), false);
 
+        linkerCommands.clear();
+        linkerCommands.addAll(linkerCompiler);
+        linkerCommands.add("@" + objList.path());
+        linkerCommands.addAll(linkerFlags);
+        linkerCommands.add(linkerOutputCommand + libPath);
 
-        String linkerFlag = "";
-        for(String flag : linkerFlags) {
-            linkerFlag = linkerFlag + " " + flag;
-        }
-        linkerFlag = linkerFlag.replaceAll("\\s+", " ").trim();
-
-        String command = cppCompiler;
-        command = command + " @" + objList.path();
-        command = command + " " + linkerFlag;
-        command = command + " -o " + libPath;
         System.out.println("##### LINK #####");
-        return JProcess.startProcess(childTarget.file(), command);
+        return JProcess.startProcess(childTarget.file(), linkerCommands);
     }
 
     protected void addJNIHeadersAndGlueCode() {

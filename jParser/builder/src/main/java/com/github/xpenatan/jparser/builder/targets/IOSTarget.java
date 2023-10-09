@@ -6,16 +6,21 @@ public class IOSTarget extends BuildTarget {
     public IOSTarget() {
         this.tempBuildDir = "target/ios";
 
-        cFlags.add("-c -Wall -O2 -stdlib=libc++");
-        cppFlags.add("-c -Wall -O2 -stdlib=libc++");
-        linkerFlags.add("-shared -stdlib=libc++");
+        cppFlags.add("-c");
+        cppFlags.add("-Wall");
+        cppFlags.add("-O2");
+        cppFlags.add("-stdlib=libc++");
+        linkerFlags.add("-shared");
+        linkerFlags.add("-stdlib=libc++");
 
         cppIncludes.add("**/jniglue/JNIGlue.cpp");
         headerDirs.add("jni-headers/");
         headerDirs.add("jni-headers/mac");
 
         cCompiler = "clang";
-        cppCompiler = "clang++";
+        cppCompiler.clear();
+        linkerCompiler.clear();
+        cppCompiler.add("clang++");
         libSuffix = "64.dylib";
     }
 }
