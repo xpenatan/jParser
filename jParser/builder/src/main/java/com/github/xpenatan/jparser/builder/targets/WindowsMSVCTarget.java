@@ -26,6 +26,7 @@ public class WindowsMSVCTarget extends BuildTarget {
         linkerCompiler.add("&");
         linkerCompiler.add("link");
         linkerCompiler.add("/DLL");
+        linkerCompiler.add("/NOLOGO");
         linkerCompiler.add("/MACHINE:X64");
         libSuffix = "64.dll";
 
