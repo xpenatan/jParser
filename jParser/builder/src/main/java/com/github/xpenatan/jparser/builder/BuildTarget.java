@@ -37,7 +37,8 @@ public abstract class BuildTarget {
     public String cCompiler = "x86_64-w64-mingw32-gcc";
     public final ArrayList<String> cppFlags = new ArrayList<>();
     public final ArrayList<String> linkerFlags = new ArrayList<>();
-    public String libSuffix;
+    public String libSuffix = "";
+    public String libPrefix = "";
 
     protected BuildTarget() {
         cppCompiler.add("x86_64-w64-mingw32-g++");
@@ -105,7 +106,7 @@ public abstract class BuildTarget {
         }
 
         String libsDir = config.libsDir.path();
-        String libName = config.libName + libSuffix;
+        String libName = libPrefix + config.libName + libSuffix;
         String libPath = libsDir + File.separator + libName;
 
         ArrayList<CustomFileDescriptor> files = new ArrayList<>();
