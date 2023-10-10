@@ -17,7 +17,6 @@ public class IOSTarget extends BuildTarget {
         headerDirs.add("jni-headers/");
         headerDirs.add("jni-headers/mac");
 
-        cCompiler = "clang";
         cppCompiler.clear();
         linkerCompiler.clear();
         cppCompiler.add("clang++");

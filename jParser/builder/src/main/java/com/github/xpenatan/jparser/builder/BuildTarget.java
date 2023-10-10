@@ -34,7 +34,6 @@ public abstract class BuildTarget {
     public ArrayList<String> linkerCompiler = new ArrayList<>();
     public String compilerOutputCommand = "-o";
     public String linkerOutputCommand = "-o";
-    public String cCompiler = "x86_64-w64-mingw32-gcc";
     public final ArrayList<String> cppFlags = new ArrayList<>();
     public final ArrayList<String> linkerFlags = new ArrayList<>();
     public String libSuffix = "";
