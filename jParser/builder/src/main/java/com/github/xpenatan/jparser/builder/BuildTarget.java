@@ -1,7 +1,6 @@
 package com.github.xpenatan.jparser.builder;
 
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
-import java.io.File;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -38,6 +37,10 @@ public abstract class BuildTarget {
     public final ArrayList<String> linkerFlags = new ArrayList<>();
     public String libSuffix = "";
     public String libPrefix = "";
+    public String libName = "";
+
+    public boolean isCompile = true;
+    public boolean isLink = true;
 
     protected BuildTarget() {
         cppCompiler.add("x86_64-w64-mingw32-g++");
@@ -49,7 +52,7 @@ public abstract class BuildTarget {
     protected boolean build(BuildConfig config) {
         CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
         if(childTarget.exists()) {
-            childTarget.delete();
+            childTarget.deleteDirectory();
         }
         childTarget.mkdirs();
 
@@ -57,7 +60,13 @@ public abstract class BuildTarget {
 
         ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.sourceDir, cppIncludes);
 
-        if(compile(config, childTarget, cppFiles)) {
+        if(isCompile && isLink && compile(config, childTarget, cppFiles)) {
+            return link(config, childTarget);
+        }
+        else if(isCompile && !isLink) {
+            return compile(config, childTarget, cppFiles);
+        }
+        else if(!isCompile && isLink) {
             return link(config, childTarget);
         }
         else {
@@ -103,10 +112,15 @@ public abstract class BuildTarget {
         if(!config.libsDir.exists()) {
             config.libsDir.mkdirs();
         }
+        String libName = this.libName;
+
+        if(libName.isEmpty()) {
+            libName = config.libName;
+        }
 
         String libsDir = config.libsDir.path();
-        String libName = libPrefix + config.libName + libSuffix;
-        String libPath = libsDir + File.separator + libName;
+        String fullLibName = libPrefix + libName + libSuffix;
+        String libPath = libsDir + "/" + fullLibName;
 
         ArrayList<CustomFileDescriptor> files = new ArrayList<>();
         getAllFiles(childTarget, files, "");

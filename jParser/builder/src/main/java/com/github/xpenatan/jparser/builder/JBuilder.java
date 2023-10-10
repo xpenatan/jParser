@@ -24,4 +24,15 @@ public class JBuilder {
             }
         }
     }
+
+    public static void build(BuildConfig config, BuildMultiTarget ... targets) {
+        for(int i = 0; i < targets.length; i++) {
+            BuildMultiTarget target = targets[i];
+            if(target != null) {
+                for(BuildTarget buildTarget : target.multiTarget) {
+                    build(config, buildTarget);
+                }
+            }
+        }
+    }
 }
