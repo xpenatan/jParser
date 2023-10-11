@@ -31,6 +31,7 @@ public class JProcess {
 
     public static boolean startProcess (File directory, String[] commands) {
         try {
+            System.out.println("Directory: " + directory.getPath());
             System.out.println("Command: " + commands[0]);
             for(int i = 1; i < commands.length; i++) {
                 String command = commands[i];

@@ -1,12 +1,14 @@
 package com.github.xpenatan.jparser.builder.targets;
 
+import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildTarget;
 
-public class WindowsMSVCTarget extends BuildTarget {
+public class WindowsMSVSTarget extends BuildTarget {
 
     public boolean addJNI = true;
+    public boolean isStatic = false;
 
-    public WindowsMSVCTarget() {
+    public WindowsMSVSTarget() {
         this.tempBuildDir = "target/windows";
 
         cppCompiler.clear();
@@ -20,15 +22,22 @@ public class WindowsMSVCTarget extends BuildTarget {
         compilerOutputCommand = "-Fo:";
         cppFlags.add("-std:c++17");
         cppFlags.add("-c");
-
         linkerOutputCommand = "/OUT:";
+        libSuffix = "64.dll";
+    }
+
+    @Override
+    protected void setup(BuildConfig config) {
         linkerCompiler.add("vcvars64.bat");
         linkerCompiler.add("&");
-        linkerCompiler.add("link");
-        linkerCompiler.add("/DLL");
+        if(isStatic) {
+            linkerCompiler.add("lib");
+        }
+        else {
+            linkerCompiler.add("link");
+        }
         linkerCompiler.add("/NOLOGO");
         linkerCompiler.add("/MACHINE:X64");
-        libSuffix = "64.dll";
 
         if(addJNI) {
             addJNIHeadersAndGlueCode();

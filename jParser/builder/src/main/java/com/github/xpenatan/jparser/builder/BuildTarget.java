@@ -75,7 +75,6 @@ public abstract class BuildTarget {
     }
 
     private boolean compile(BuildConfig config, CustomFileDescriptor childTarget, ArrayList<CustomFileDescriptor> cppFiles) {
-        System.out.println("##### COMPILE #####");
         boolean retFlag = false;
 
         for(CustomFileDescriptor file : cppFiles) {
@@ -98,7 +97,7 @@ public abstract class BuildTarget {
             compilerCommands.addAll(headerDirs);
             compilerCommands.add(path);
             compilerCommands.add(compilerOutputCommand + compiledPath);
-
+            System.out.println("##### COMPILE #####");
             boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
             if(!flag) {
                 return false;

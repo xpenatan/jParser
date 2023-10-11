@@ -1,5 +1,6 @@
 package com.github.xpenatan.jparser.builder.targets;
 
+import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildTarget;
 
 public class WindowsTarget extends BuildTarget {
@@ -26,7 +27,10 @@ public class WindowsTarget extends BuildTarget {
         linkerFlags.add("-static-libstdc++");
         linkerFlags.add("-m64");
         libSuffix = "64.dll";
+    }
 
+    @Override
+    protected void setup(BuildConfig config) {
         if(addJNI) {
             addJNIHeadersAndGlueCode();
         }
