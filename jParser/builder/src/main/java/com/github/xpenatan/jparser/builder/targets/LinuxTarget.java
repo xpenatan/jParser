@@ -7,6 +7,7 @@ public class LinuxTarget extends BuildTarget {
     public boolean addJNI = true;
 
     public LinuxTarget() {
+        this.libDirSuffix = "linux/";
         this.tempBuildDir = "target/linux";
 
         cppFlags.add("-c");

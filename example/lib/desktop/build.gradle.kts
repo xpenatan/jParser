@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-val windowsFile = "$projectDir/../generator/build/c++/libs/exampleLib64.dll"
+val windowsFile = "$projectDir/../generator/build/c++/libs/windows/exampleLib64.dll"
 
 tasks.jar {
     from(windowsFile)

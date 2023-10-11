@@ -16,6 +16,7 @@ public class EmscriptenTarget extends BuildTarget {
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
 
     public EmscriptenTarget(String idlFile) {
+        this.libDirSuffix = "emscripten/";
         this.tempBuildDir = "target/emscripten";
         this.idlFile = new CustomFileDescriptor(idlFile);
 

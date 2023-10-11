@@ -13,6 +13,7 @@ public class AndroidTarget extends BuildTarget {
     public String androidPlatform = "android-19";
 
     public AndroidTarget() {
+        this.libDirSuffix = "android/";
         this.tempBuildDir = "target/android";
 
         cppFlags.add("-O2");
@@ -99,7 +100,7 @@ public class AndroidTarget extends BuildTarget {
             androidCommand += ".cmd";
         }
 
-        CustomFileDescriptor childTarget = config.libsDir.child("android");
+        CustomFileDescriptor childTarget = config.libDir.child("android");
         ArrayList<String> commands = new ArrayList<>();
         commands.add(androidCommand);
         commands.add("NDK_PROJECT_PATH=.");

@@ -38,6 +38,7 @@ public abstract class BuildTarget {
     public String libSuffix = "";
     public String libPrefix = "";
     public String libName = "";
+    public String libDirSuffix = "";
 
     public boolean isCompile = true;
     public boolean isLink = true;
@@ -108,8 +109,9 @@ public abstract class BuildTarget {
     }
 
     private boolean link(BuildConfig config, CustomFileDescriptor childTarget) {
-        if(!config.libsDir.exists()) {
-            config.libsDir.mkdirs();
+        CustomFileDescriptor libDir = config.libDir.child(libDirSuffix);
+        if(!libDir.exists()) {
+            libDir.mkdirs();
         }
         String libName = this.libName;
 
@@ -117,7 +119,7 @@ public abstract class BuildTarget {
             libName = config.libName;
         }
 
-        String libsDir = config.libsDir.path();
+        String libsDir = libDir.path();
         String fullLibName = libPrefix + libName + libSuffix;
         String libPath = libsDir + "/" + fullLibName;
 

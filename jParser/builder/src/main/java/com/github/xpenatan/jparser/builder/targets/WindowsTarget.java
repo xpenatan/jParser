@@ -8,6 +8,7 @@ public class WindowsTarget extends BuildTarget {
     public boolean addJNI = true;
 
     public WindowsTarget() {
+        this.libDirSuffix = "windows/";
         this.tempBuildDir = "target/windows";
 
         cppFlags.add("-c");
