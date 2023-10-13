@@ -59,7 +59,7 @@ public class IDLParameter {
             type = type + "[]";
         }
 
-        if(type.equals("any")) {
+        if(type.equals("any") || type.equals("VoidPtr")) {
             type = "int";
             isAny = true;
         }
@@ -72,6 +72,9 @@ public class IDLParameter {
         }
         if(type.equals("DOMString")) {
             type = "String";
+        }
+        if(type.equals("octet")) {
+            type = "byte";
         }
 
         // Convert to array object

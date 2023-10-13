@@ -16,6 +16,7 @@ import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLHelper;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +31,8 @@ public class IDLAttributeParser {
 
         String attributeName = idlAttribute.name;
         String attributeType = idlAttribute.type;
+
+        attributeType = IDLHelper.convertEnumToInt(idlParser.idlReader, attributeType);
 
         Type type = null;
         try {

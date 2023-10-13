@@ -15,6 +15,7 @@ public class IDLMethod {
     public String name;
     public boolean isReturnArray;
     public boolean skip = false;
+    public boolean isAny = false;
     public boolean isReturnRef;
     public boolean isReturnValue;
     public boolean isStaticMethod = false;
@@ -70,8 +71,9 @@ public class IDLMethod {
             returnType = "String";
         }
 
-        if(returnType.contains("any")) {
-            skip = true;
+        if(returnType.contains("any") || returnType.contains("VoidPtr")) {
+            isAny = true;
+            returnType = "int";
         }
     }
 
@@ -99,6 +101,7 @@ public class IDLMethod {
         clonedMethod.returnType = returnType;
         clonedMethod.name = name;
         clonedMethod.skip = skip;
+        clonedMethod.isAny = isAny;
         clonedMethod.isReturnValue = isReturnValue;
         clonedMethod.isReturnArray = isReturnArray;
         clonedMethod.isStaticMethod = isStaticMethod;
