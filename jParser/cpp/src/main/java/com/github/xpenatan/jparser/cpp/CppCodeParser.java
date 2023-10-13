@@ -48,7 +48,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     protected static final String ATTRIBUTE_SET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
-            "nativeObject->[ATTRIBUTE] = [ATTRIBUTE];\n";
+            "nativeObject->[ATTRIBUTE] = [CAST][ATTRIBUTE];\n";
 
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE =
             "\n[TYPE]::[ATTRIBUTE] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
@@ -187,6 +187,18 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             attributeType = retTypeClass.classHeader.prefixName + attributeType;
         }
 
+        String attributeReturnCast = "";
+
+        IDLEnum idlEnum = idlAttribute.idlFile.getEnum(attributeType);
+        if(idlEnum != null) {
+            if(idlEnum.typePrefix.equals(attributeType)) {
+                attributeReturnCast = "(" + attributeType + ")";
+            }
+            else {
+                attributeReturnCast = "(" + idlEnum.typePrefix + "::" + attributeType + ")";
+            }
+        }
+
         String content = null;
         IDLAttributeOperation.Op op = IDLAttributeOperation.getEnum(isSet, idlAttribute, methodDeclaration, nativeMethod);
         switch(op) {
@@ -227,7 +239,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 content = ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case SET_PRIMITIVE:
-                content = ATTRIBUTE_SET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                content = ATTRIBUTE_SET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, attributeReturnCast);
                 break;
             case SET_PRIMITIVE_STATIC:
                 content = ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
@@ -409,7 +421,6 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
         IDLEnum anEnum = idlFile.getEnum(classType);
         if(anEnum != null) {
-
             if(anEnum.typePrefix.equals(classType)) {
                 paramName = "(" + classType + ")" + paramName;
             }
