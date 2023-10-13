@@ -2,3 +2,4 @@
 #include "DefaultInterface.h"
 
 typedef NormalClass::EnumWithinClass EnumWithinClass;
+typedef EnumNamespace::EnumInNamespace EnumInNamespace;

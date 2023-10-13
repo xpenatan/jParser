@@ -149,7 +149,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
-    public void onIDLEnumMethodGenerated(JParser jParser, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
 }

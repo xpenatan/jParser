@@ -25,8 +25,8 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
-import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
+import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
@@ -442,11 +442,10 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    public void onIDLEnumMethodGenerated(JParser jParser, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
         String content  = "";
         if(enumStr.contains("::")) {
-            boolean isNameSpaceEnum = false;
-            // TODO find a way to know if its a class or namespace enum
+            boolean isNameSpaceEnum = idlEnum.isNameSpace;
             if(isNameSpaceEnum) {
                 enumStr = enumStr.split("::")[1];
             }

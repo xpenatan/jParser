@@ -10,6 +10,9 @@ public class IDLEnum extends IDLClassOrEnum {
 
     public final ArrayList<String> classLines = new ArrayList<>();
     public final ArrayList<String> enums = new ArrayList<>();
+    public ArrayList<String> settings = new ArrayList<>();
+
+    public boolean isNameSpace;
 
     public IDLEnum(IDLFile idlFile) {
         this.idlFile = idlFile;
@@ -17,11 +20,12 @@ public class IDLEnum extends IDLClassOrEnum {
 
     public void initEnum(ArrayList<String> lines) {
         classLines.addAll(lines);
-        setInterfaceName();
-        setEnumValues();
+        setupInterfaceName();
+        setupEnumValues();
+        setupSettings();
     }
 
-    private void setInterfaceName() {
+    private void setupInterfaceName() {
         String nameLine = null;
         for(int i = 0; i < classLines.size(); i++) {
             String line = classLines.get(i);
@@ -35,13 +39,21 @@ public class IDLEnum extends IDLClassOrEnum {
         }
     }
 
-    private void setEnumValues() {
+    private void setupEnumValues() {
         for(int i = 1; i < classLines.size()-1; i++) {
             String enumLine = classLines.get(i);
             String[] split = enumLine.split(",");
             for(String s : split) {
                 enumLine = s.replace("\"", "").trim();
                 enums.add(enumLine);
+            }
+        }
+    }
+
+    private void setupSettings() {
+        for(String option : settings) {
+            if(option.equals("[-NAMESPACE]")) {
+                isNameSpace = true;
             }
         }
     }

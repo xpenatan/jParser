@@ -22,6 +22,12 @@ enum EnumTwoLib_ {
     EnumTwoLib_FOURTH
 };
 
+namespace EnumNamespace {
+  enum EnumInNamespace {
+    e_namespace_val = 78
+  };
+};
+
 class NormalClass : public ParentClass
 {
 

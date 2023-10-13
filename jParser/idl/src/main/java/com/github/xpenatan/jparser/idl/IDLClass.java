@@ -15,6 +15,7 @@ public class IDLClass extends IDLClassOrEnum {
     public final ArrayList<IDLConstructor> constructors = new ArrayList<>();
     public final ArrayList<IDLMethod> methods = new ArrayList<>();
     public final ArrayList<IDLAttribute> attributes = new ArrayList<>();
+    public ArrayList<String> settings = new ArrayList<>();
 
     public IDLClass(IDLFile idlFile) {
         this.idlFile = idlFile;

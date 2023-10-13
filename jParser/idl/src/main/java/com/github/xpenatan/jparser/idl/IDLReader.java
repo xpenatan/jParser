@@ -104,11 +104,19 @@ public class IDLReader {
         ArrayList<String> classLines = new ArrayList<>();
         boolean foundStartClass = false;
         boolean foundStartEnum = false;
+        ArrayList<String> settings = new ArrayList<>();
         int size = lines.size();
         for(int i = 0; i < size; i++) {
             String line = lines.get(i).trim();
-            if(line.startsWith("//") || line.isEmpty())
+            if(line.startsWith("//") || line.isEmpty()) {
+                if(foundStartClass || foundStartEnum) {
+                    String cmd = line.replace("//", "").trim();
+                    if(cmd.startsWith("[-") && cmd.endsWith("]")) {
+                        settings.add(cmd);
+                    }
+                }
                 continue;
+            }
 
             boolean justAdded = false;
 
@@ -125,9 +133,11 @@ public class IDLReader {
                 if(line.endsWith("};")) {
                     foundStartEnum = false;
                     IDLEnum parserLineEnum = new IDLEnum(idlFile);
+                    parserLineEnum.settings.addAll(settings);
                     parserLineEnum.initEnum(classLines);
                     classLines.clear();
                     classList.add(parserLineEnum);
+                    settings.clear();
                 }
             }
 
@@ -154,9 +164,11 @@ public class IDLReader {
                     }
                     foundStartClass = false;
                     IDLClass parserLineClass = new IDLClass(idlFile);
+                    parserLineClass.settings.addAll(settings);
                     parserLineClass.initClass(classLines);
                     classLines.clear();
                     classList.add(parserLineClass);
+                    settings.clear();
                 }
             }
         }

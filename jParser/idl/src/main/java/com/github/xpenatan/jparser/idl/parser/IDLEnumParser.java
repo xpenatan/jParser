@@ -16,11 +16,11 @@ public class IDLEnumParser {
 
     public static void generateEnum(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, IDLEnum idlEnum) {
         for(String anEnum : idlEnum.enums) {
-            generateField(idlParser, jParser, unit, classDeclaration, anEnum);
+            generateField(idlParser, jParser, idlEnum, unit, classDeclaration, anEnum);
         }
     }
 
-    private static void generateField(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, String enumStr) {
+    private static void generateField(IDLDefaultCodeParser idlParser, JParser jParser, IDLEnum idlEnum, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, String enumStr) {
         String enumVar = enumStr;
         if(enumVar.contains("::")) {
             enumVar = enumVar.split("::")[1];
@@ -42,7 +42,7 @@ public class IDLEnumParser {
             nativeMethod.removeBody();
             nativeMethod.setType(intType);
             classDeclaration.getMembers().add(nativeMethod);
-            idlParser.onIDLEnumMethodGenerated(jParser, classDeclaration, enumStr, fieldDeclaration, nativeMethod);
+            idlParser.onIDLEnumMethodGenerated(jParser, idlEnum, classDeclaration, enumStr, fieldDeclaration, nativeMethod);
         }
     }
 }

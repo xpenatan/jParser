@@ -104,3 +104,8 @@ enum EnumTwoLib {
 enum EnumWithinClass {
   "NormalClass::e_val"
 };
+
+enum EnumInNamespace {
+// [-NAMESPACE]
+  "EnumNamespace::e_namespace_val"
+};
