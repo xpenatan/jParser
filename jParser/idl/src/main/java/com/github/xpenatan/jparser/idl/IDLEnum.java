@@ -48,7 +48,7 @@ public class IDLEnum extends IDLClassOrEnum {
             for(String s : split) {
                 enumLine = s.replace("\"", "").trim();
                 if(typePrefix.isEmpty() && enumLine.contains("::")) {
-                    typePrefix = enumLine.split("::")[0] + "::";
+                    typePrefix = enumLine.split("::")[0];
                 }
                 enums.add(enumLine);
             }
