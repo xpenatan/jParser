@@ -51,6 +51,7 @@ public:
     inline static ReturnClass * nullPointerReturnClass_static = NULL;
 
     NormalClass();
+    NormalClass(EnumNamespace::EnumInNamespace);
     NormalClass(int c, ParamData & refParamData);
     NormalClass(ParamData * pointerParamData, ParamData & refParamData, ParamData valueParamData);
 

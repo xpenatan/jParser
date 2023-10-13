@@ -8,6 +8,11 @@ NormalClass::NormalClass()
     pointerReturnClass = new ReturnClass();
 }
 
+NormalClass::NormalClass(EnumNamespace::EnumInNamespace enumParam)
+{
+
+}
+
 NormalClass::NormalClass(int c, ParamData & refParamData)
 {
     valueReturnClass.value = 10;

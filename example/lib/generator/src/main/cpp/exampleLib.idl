@@ -16,6 +16,7 @@ interface NormalClass {
 
     void NormalClass();
     void NormalClass(long c, [Ref]ParamData refParamClass);
+    void NormalClass(EnumInNamespace nameSpaceEnum);
 
     long getVersion();
 // Emscripten don't allow param by value

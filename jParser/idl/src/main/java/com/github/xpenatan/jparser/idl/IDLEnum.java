@@ -14,6 +14,8 @@ public class IDLEnum extends IDLClassOrEnum {
 
     public boolean isNameSpace;
 
+    public String typePrefix = "";
+
     public IDLEnum(IDLFile idlFile) {
         this.idlFile = idlFile;
     }
@@ -45,6 +47,9 @@ public class IDLEnum extends IDLClassOrEnum {
             String[] split = enumLine.split(",");
             for(String s : split) {
                 enumLine = s.replace("\"", "").trim();
+                if(typePrefix.isEmpty() && enumLine.contains("::")) {
+                    typePrefix = enumLine.split("::")[0] + "::";
+                }
                 enums.add(enumLine);
             }
         }

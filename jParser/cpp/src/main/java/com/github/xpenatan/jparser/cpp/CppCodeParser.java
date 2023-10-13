@@ -409,7 +409,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
         IDLEnum anEnum = idlFile.getEnum(classType);
         if(anEnum != null) {
-            paramName = "(" + classType + ")" + paramName;
+            paramName = "(" + anEnum.typePrefix + classType + ")" + paramName;
         }
         return paramName;
     }

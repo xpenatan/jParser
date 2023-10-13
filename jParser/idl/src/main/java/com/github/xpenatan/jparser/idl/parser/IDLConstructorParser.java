@@ -17,6 +17,7 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
+import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -75,8 +76,10 @@ public class IDLConstructorParser {
             ArrayList<IDLParameter> parameters = idlConstructor.parameters;
             for(int i = 0; i < parameters.size(); i++) {
                 IDLParameter parameter = parameters.get(i);
-                JParserHelper.addMissingImportType(jParser, unit, parameter.type);
-                constructorDeclaration.addAndGetParameter(parameter.type, parameter.name);
+                String paramType = parameter.type;
+                paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
+                JParserHelper.addMissingImportType(jParser, unit, paramType);
+                constructorDeclaration.addAndGetParameter(paramType, parameter.name);
             }
         }
 
