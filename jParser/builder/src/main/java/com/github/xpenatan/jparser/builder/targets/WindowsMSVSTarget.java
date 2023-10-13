@@ -36,6 +36,7 @@ public class WindowsMSVSTarget extends BuildTarget {
         }
         else {
             linkerCompiler.add("link");
+            linkerFlags.add("-DLL");
         }
         linkerCompiler.add("/NOLOGO");
         linkerCompiler.add("/MACHINE:X64");

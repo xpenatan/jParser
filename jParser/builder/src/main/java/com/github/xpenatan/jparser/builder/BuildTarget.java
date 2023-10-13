@@ -78,33 +78,62 @@ public abstract class BuildTarget {
     private boolean compile(BuildConfig config, CustomFileDescriptor childTarget, ArrayList<CustomFileDescriptor> cppFiles) {
         boolean retFlag = false;
 
+        String compiledPaths = "";
         for(CustomFileDescriptor file : cppFiles) {
             String path = file.path();
-            String sourceBasePath = config.sourceDir.path();
-            String pathWithoutBase = file.path().replace(sourceBasePath, "");
-            String pathName = file.name();
-            String parent = pathWithoutBase.replace(pathName, "");
-            CustomFileDescriptor toCopy = childTarget.child(parent);
-            String p = toCopy.path();
-            if(!toCopy.exists()) {
-                toCopy.mkdirs();
-            }
-            p += "/";
-            String compiledPath = p + file.nameWithoutExtension() + ".o";
-
-            compilerCommands.clear();
-            compilerCommands.addAll(cppCompiler);
-            compilerCommands.addAll(cppFlags);
-            compilerCommands.addAll(headerDirs);
-            compilerCommands.add(path);
-            compilerCommands.add(compilerOutputCommand + compiledPath);
-            System.out.println("##### COMPILE #####");
-            boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
-            if(!flag) {
-                return false;
-            }
-            retFlag = true;
+            compiledPaths = compiledPaths + "\n" + path;
         }
+        CustomFileDescriptor cppList = childTarget.child("cpp.txt");
+        cppList.writeString(compiledPaths.trim(), false);
+
+        compilerCommands.clear();
+        compilerCommands.addAll(cppCompiler);
+        compilerCommands.addAll(cppFlags);
+        compilerCommands.addAll(headerDirs);
+        compilerCommands.add("@" + cppList.path());
+        System.out.println("##### COMPILE #####");
+        boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
+        cppList.delete();
+        if(!flag) {
+            return false;
+        }
+        retFlag = true;
+
+        // Manually Move object files to target
+        ArrayList<CustomFileDescriptor> files = new ArrayList<>();
+        getObjectFiles(config.buildDir, files);
+        for(CustomFileDescriptor file : files) {
+            file.moveTo(childTarget);
+        }
+
+//        for(CustomFileDescriptor file : cppFiles) {
+//            String path = file.path();
+//            String sourceBasePath = config.sourceDir.path();
+//            String pathWithoutBase = file.path().replace(sourceBasePath, "");
+//            String pathName = file.name();
+//            String parent = pathWithoutBase.replace(pathName, "");
+//            CustomFileDescriptor toCopy = childTarget.child(parent);
+//            String p = toCopy.path();
+//            if(!toCopy.exists()) {
+//                toCopy.mkdirs();
+//            }
+//            p += "/";
+//            String compiledPath = p + file.nameWithoutExtension() + ".o";
+//
+//            compilerCommands.clear();
+//            compilerCommands.addAll(cppCompiler);
+//            compilerCommands.addAll(cppFlags);
+//            compilerCommands.addAll(headerDirs);
+//            compilerCommands.add(path);
+//            compilerCommands.add(compilerOutputCommand + compiledPath);
+//
+//            System.out.println("##### COMPILE #####");
+//            boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
+//            if(!flag) {
+//                return false;
+//            }
+//            retFlag = true;
+//        }
         return retFlag;
     }
 
@@ -196,6 +225,18 @@ public abstract class BuildTarget {
                     }
                 }
                 else {
+                    out.add(fileDescriptor);
+                }
+            }
+        }
+    }
+
+    public static void getObjectFiles(CustomFileDescriptor file, ArrayList<CustomFileDescriptor> out) {
+        CustomFileDescriptor[] list = file.list();
+        for(CustomFileDescriptor fileDescriptor : list) {
+            if(!fileDescriptor.isDirectory()) {
+                String path = fileDescriptor.path();
+                if(path.endsWith(".o") || path.endsWith(".obj")) {
                     out.add(fileDescriptor);
                 }
             }
