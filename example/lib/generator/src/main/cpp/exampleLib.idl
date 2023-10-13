@@ -107,5 +107,5 @@ enum EnumWithinClass {
 
 enum EnumInNamespace {
 // [-NAMESPACE]
-  "EnumNamespace::e_namespace_val"
+    "EnumNamespace::e_namespace_val"
 };
