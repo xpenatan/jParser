@@ -73,6 +73,7 @@ public class IDLMethod {
 
         if(returnType.contains("any") || returnType.contains("VoidPtr")) {
             isAny = true;
+            skip = true;
             returnType = "int";
         }
     }
