@@ -96,24 +96,24 @@ public class IDLMethod {
     }
 
     public IDLMethod clone() {
-        IDLMethod clonedMethod = new IDLMethod(idlClass, idlFile);
-        clonedMethod.line = line;
-        clonedMethod.paramsLine = paramsLine;
-        clonedMethod.returnType = returnType;
-        clonedMethod.name = name;
-        clonedMethod.skip = skip;
-        clonedMethod.isAny = isAny;
-        clonedMethod.isReturnValue = isReturnValue;
-        clonedMethod.isReturnArray = isReturnArray;
-        clonedMethod.isStaticMethod = isStaticMethod;
-        clonedMethod.isReturnRef = isReturnRef;
+        IDLMethod cloned = new IDLMethod(idlClass, idlFile);
+        cloned.line = line;
+        cloned.paramsLine = paramsLine;
+        cloned.returnType = returnType;
+        cloned.name = name;
+        cloned.skip = skip;
+        cloned.isAny = isAny;
+        cloned.isReturnValue = isReturnValue;
+        cloned.isReturnArray = isReturnArray;
+        cloned.isStaticMethod = isStaticMethod;
+        cloned.isReturnRef = isReturnRef;
 
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);
             IDLParameter clonedParam = parameter.clone();
-            clonedMethod.parameters.add(clonedParam);
+            cloned.parameters.add(clonedParam);
         }
-        return clonedMethod;
+        return cloned;
     }
 
     private String getTags(String leftSide) {

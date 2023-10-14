@@ -55,6 +55,12 @@ interface NormalClass {
 };
 NormalClass implements ParentClass;
 
+interface DefaultParamsClass {
+    void DefaultParamsClass(long a, long b, optional float c, optional float d);
+
+    void defaultMethodParams(long a, long b, optional float c, optional float d);
+};
+
 interface ReturnClass {
     void ReturnClass();
 

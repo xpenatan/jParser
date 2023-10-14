@@ -6,15 +6,8 @@ import idl.helper.ByteArray;
 public class ExampleLibLoader {
 
     /*[-C++;-NATIVE]
-        #include "ReturnClass.h"
-        #include "ParentClass.h"
-        #include "OperatorClass.h"
-        #include "NormalClass.h"
-        #include "InterfaceClass.h"
-        #include "DefaultInterface.h"
-        #include "subpackage/ParamData.h"
+        #include "CustomCode.h"
     */
-
 
     /*[-teaVM;-ADD]
         @org.teavm.jso.JSFunctor

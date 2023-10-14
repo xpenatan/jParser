@@ -42,6 +42,15 @@ public class IDLClass extends IDLClassOrEnum {
                     IDLConstructor constructor = new IDLConstructor(idlFile);
                     constructor.initConstructor(line);
                     constructors.add(constructor);
+
+                    int totalOptionalParams = constructor.getTotalOptionalParams();
+                    if(totalOptionalParams > 0) {
+                        for(int j = 0; j < totalOptionalParams; j++) {
+                            IDLConstructor clone = constructor.clone();
+                            clone.removeLastParam(j + 1);
+                            constructors.add(clone);
+                        }
+                    }
                 }
                 else {
                     if(line.contains("(") && line.contains(")")) {
