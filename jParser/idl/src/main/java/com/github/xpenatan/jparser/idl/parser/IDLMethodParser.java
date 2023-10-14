@@ -291,7 +291,7 @@ public class IDLMethodParser {
                     ObjectCreationExpr expression = new ObjectCreationExpr();
                     expression.setType(fieldType);
                     expression.addArgument(StaticJavaParser.parseExpression("(byte)1"));
-                    fieldDeclaration = classDeclaration.addFieldWithInitializer(fieldType, fieldName, expression, Modifier.Keyword.STATIC, Modifier.Keyword.PRIVATE, Modifier.Keyword.FINAL);
+                    fieldDeclaration = classDeclaration.addFieldWithInitializer(fieldType, fieldName, expression, Modifier.Keyword.STATIC, keyword, Modifier.Keyword.FINAL);
                 }
                 else {
                     fieldDeclaration = classDeclaration.addField(fieldType, fieldName, Modifier.Keyword.STATIC, keyword);
