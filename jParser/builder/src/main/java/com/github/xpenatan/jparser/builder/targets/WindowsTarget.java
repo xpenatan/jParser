@@ -21,19 +21,42 @@ public class WindowsTarget extends BuildTarget {
         cppFlags.add("-std=c++17");
         cppFlags.add("-Wno-unused-variable");
         cppFlags.add("-Wno-unused-but-set-variable");
-        linkerFlags.add("-Wl,--kill-at");
-        linkerFlags.add("-shared");
-        linkerFlags.add("-static");
-        linkerFlags.add("-static-libgcc");
-        linkerFlags.add("-static-libstdc++");
-        linkerFlags.add("-m64");
-        libSuffix = "64.dll";
     }
 
     @Override
     protected void setup(BuildConfig config) {
+        if(isStatic) {
+            linkerCompiler.clear();
+            linkerCompiler.add("ar");
+            linkerFlags.add("rcs");
+            libSuffix = "64.a";
+        }
+        else {
+            linkerFlags.add("-fPIC");
+            linkerFlags.add("-shared");
+            linkerFlags.add("-static");
+            linkerFlags.add("-static-libgcc");
+            linkerFlags.add("-static-libstdc++");
+            linkerFlags.add("-Wl,--kill-at");
+            linkerFlags.add("-m64");
+            libSuffix = "64.dll";
+        }
+
         if(addJNI) {
             addJNIHeadersAndGlueCode();
+        }
+    }
+
+    @Override
+    protected void onLink(String objFilePath, String libPath) {
+        if(isStatic) {
+            linkerCommands.addAll(linkerCompiler);
+            linkerCommands.addAll(linkerFlags);
+            linkerCommands.add(libPath);
+            linkerCommands.add("@" + objFilePath);
+        }
+        else {
+            super.onLink(objFilePath, libPath);
         }
     }
 }

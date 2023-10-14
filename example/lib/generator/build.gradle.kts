@@ -26,6 +26,4 @@ tasks.register<JavaExec>("build_project") {
     description = "Generate native project"
     mainClass.set(mainClassName)
     classpath = sourceSets["main"].runtimeClasspath
-    dependsOn("clean")
-    mustRunAfter("clean")
 }

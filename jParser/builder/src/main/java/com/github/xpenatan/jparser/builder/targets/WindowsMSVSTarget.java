@@ -5,9 +5,6 @@ import com.github.xpenatan.jparser.builder.BuildTarget;
 
 public class WindowsMSVSTarget extends BuildTarget {
 
-    public boolean addJNI = true;
-    public boolean isStatic = false;
-
     public WindowsMSVSTarget() {
         this.libDirSuffix = "windows/";
         this.tempBuildDir = "target/windows";

@@ -1,4 +1,5 @@
 import com.github.xpenatan.jparser.builder.BuildConfig;
+import com.github.xpenatan.jparser.builder.BuildMultiTarget;
 import com.github.xpenatan.jparser.builder.JBuilder;
 import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
@@ -68,28 +69,58 @@ public class Main {
                 libName
         );
 
-//        WindowsMSVCTarget windowsTarget = new WindowsMSVCTarget();
-        WindowsTarget windowsTarget = new WindowsTarget();
-        windowsTarget.headerDirs.add("-Isrc/exampleLib");
-        windowsTarget.cppIncludes.add("**/src/**.cpp");
-
         String teaVMgenDir = "../teavm/src/main/java/";
         TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage);
         JParser.generate(teavmParser, baseJavaDir, teaVMgenDir);
-        EmscriptenTarget teaVMTarget = new EmscriptenTarget(idlPath);
-        teaVMTarget.headerDirs.add("-Isrc/exampleLib");
-        teaVMTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-        teaVMTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+
+//        IOSTarget iosTarget = new IOSTarget();
+//        iosTarget.headerDirs.add("-Isrc/exampleLib");
+//        iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+
+//        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlPath), getAndroidTarget());
+        JBuilder.build(buildConfig, getWindowTarget());
+    }
+
+    private static BuildMultiTarget getWindowTarget() {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+
+        WindowsTarget windowsTarget = new WindowsTarget();
+        windowsTarget.isStatic = true;
+        windowsTarget.addJNI = false;
+        windowsTarget.headerDirs.add("-Isrc/exampleLib");
+        windowsTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+        multiTarget.add(windowsTarget);
+
+        WindowsTarget glueTarget = new WindowsTarget();
+        glueTarget.linkerFlags.add("../../libs/windows/exampleLib64.a");
+        glueTarget.headerDirs.add("-Isrc/exampleLib");
+        multiTarget.add(glueTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getEmscriptenTarget(String idlPath) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+
+        EmscriptenTarget emscriptenTarget = new EmscriptenTarget(idlPath);
+        emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
+        emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+        emscriptenTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+
+        multiTarget.add(emscriptenTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getAndroidTarget() {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
 
         AndroidTarget androidTarget = new AndroidTarget();
         androidTarget.headerDirs.add("src/exampleLib");
         androidTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
-        IOSTarget iosTarget = new IOSTarget();
-        iosTarget.headerDirs.add("-Isrc/exampleLib");
-        iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+        multiTarget.add(androidTarget);
 
-        JBuilder.build(buildConfig, windowsTarget, teaVMTarget, androidTarget);
-//        JBuilder.build(buildConfig, windowsTarget);
+        return multiTarget;
     }
 }

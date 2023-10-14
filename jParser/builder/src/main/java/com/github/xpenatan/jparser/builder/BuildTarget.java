@@ -25,7 +25,7 @@ public abstract class BuildTarget {
     public String tempBuildDir;
 
     private final ArrayList<String> compilerCommands = new ArrayList<>();
-    private final ArrayList<String> linkerCommands = new ArrayList<>();
+    protected final ArrayList<String> linkerCommands = new ArrayList<>();
 
     public final ArrayList<String> headerDirs = new ArrayList<>();
     public final ArrayList<String> cppIncludes = new ArrayList<>();
@@ -42,6 +42,9 @@ public abstract class BuildTarget {
 
     public boolean isCompile = true;
     public boolean isLink = true;
+
+    public boolean addJNI = true;
+    public boolean isStatic = false;
 
     protected BuildTarget() {
         cppCompiler.add("x86_64-w64-mingw32-g++");
@@ -164,13 +167,17 @@ public abstract class BuildTarget {
         objList.writeString(compiledPaths.trim(), false);
 
         linkerCommands.clear();
-        linkerCommands.addAll(linkerCompiler);
-        linkerCommands.add("@" + objList.path());
-        linkerCommands.addAll(linkerFlags);
-        linkerCommands.add(linkerOutputCommand + libPath);
+        onLink(objList.path(), libPath);
 
         System.out.println("##### LINK #####");
         return JProcess.startProcess(childTarget.file(), linkerCommands);
+    }
+
+    protected void onLink(String objFilePath, String libPath) {
+        linkerCommands.addAll(linkerCompiler);
+        linkerCommands.add("@" + objFilePath);
+        linkerCommands.addAll(linkerFlags);
+        linkerCommands.add(linkerOutputCommand + libPath);
     }
 
     protected void addJNIHeadersAndGlueCode() {
