@@ -16,6 +16,7 @@ import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
@@ -265,34 +266,47 @@ public class IDLMethodParser {
         return body;
     }
 
-    private static String generateFieldName(ClassOrInterfaceDeclaration classDeclaration, String returnTypeName, boolean isStatic) {
+    private static String generateFieldName(ClassOrInterfaceDeclaration classDeclaration, String fieldType, boolean isStatic) {
         // Will return a temp object.
         // Java variable will be created by checking its class, name and number.
         // if the temp object already exist it will increment variable number and create it.
-        // isTemp true will create an object to use a c++ pointer. cMemOwn = false
-        // isTemp false will actually create a c++ object by using the default constructor. cMemOwn = true
-        // When isTemp is false, the c++ class must have default constructor and the assignment operator
 
         int i = 0;
         while(true) {
-            String fieldName = getFieldName(returnTypeName, i, isStatic);
-            Optional<FieldDeclaration> fieldByName = classDeclaration.getFieldByName(fieldName);
-            if(fieldByName.isEmpty()) {
-                FieldDeclaration fieldDeclaration;
-                if(isStatic) {
-                    fieldDeclaration = classDeclaration.addField(returnTypeName, fieldName, Modifier.Keyword.STATIC, Modifier.Keyword.PRIVATE);
-                }
-                else {
-                    fieldDeclaration = classDeclaration.addField(returnTypeName, fieldName, Modifier.Keyword.PRIVATE);
-                }
-                Position begin = new Position(0, 0);
-                Position end = new Position(0, 0);
-                Range range = new Range(begin, end);
-                fieldDeclaration.setRange(range);
-                return fieldName;
+            String fieldName = getFieldName(fieldType, i, isStatic);
+            String name = generateFieldName(fieldName, classDeclaration, fieldType, isStatic, Modifier.Keyword.PRIVATE, false);
+            if(!name.isEmpty()) {
+                return name;
             }
             i++;
         }
+    }
+
+    public static String generateFieldName(String fieldName, ClassOrInterfaceDeclaration classDeclaration, String fieldType, boolean isStatic, Modifier.Keyword keyword, boolean initializeStatic) {
+        Optional<FieldDeclaration> fieldByName = classDeclaration.getFieldByName(fieldName);
+        if(fieldByName.isEmpty()) {
+            FieldDeclaration fieldDeclaration;
+            if(isStatic) {
+                if(initializeStatic) {
+                    ObjectCreationExpr expression = new ObjectCreationExpr();
+                    expression.setType(fieldType);
+                    expression.addArgument(StaticJavaParser.parseExpression("(byte)1"));
+                    fieldDeclaration = classDeclaration.addFieldWithInitializer(fieldType, fieldName, expression, Modifier.Keyword.STATIC, Modifier.Keyword.PRIVATE, Modifier.Keyword.FINAL);
+                }
+                else {
+                    fieldDeclaration = classDeclaration.addField(fieldType, fieldName, Modifier.Keyword.STATIC, keyword);
+                }
+            }
+            else {
+                fieldDeclaration = classDeclaration.addField(fieldType, fieldName, keyword);
+            }
+            Position begin = new Position(0, 0);
+            Position end = new Position(0, 0);
+            Range range = new Range(begin, end);
+            fieldDeclaration.setRange(range);
+            return fieldName;
+        }
+        return "";
     }
 
     private static String getFieldName(String type, int number, boolean isStatic) {

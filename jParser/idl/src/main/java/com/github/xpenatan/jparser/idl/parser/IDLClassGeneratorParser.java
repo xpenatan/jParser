@@ -175,6 +175,10 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 // Class with no delete don't have constructor
                 classDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
             }
+            // For every class we generate empty object that can be used when needed.
+            IDLMethodParser.generateFieldName("T_01", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
+            IDLMethodParser.generateFieldName("T_02", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
+            IDLMethodParser.generateFieldName("T_03", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
         }
 
         return compilationUnit;
