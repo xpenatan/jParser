@@ -77,8 +77,8 @@ public class Main {
 //        iosTarget.headerDirs.add("-Isrc/exampleLib");
 //        iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
-//        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlPath), getAndroidTarget());
-        JBuilder.build(buildConfig, getWindowTarget());
+        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlPath), getAndroidTarget());
+//        JBuilder.build(buildConfig, getWindowTarget());
     }
 
     private static BuildMultiTarget getWindowTarget() {
