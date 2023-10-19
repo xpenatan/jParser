@@ -2,6 +2,7 @@ import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildMultiTarget;
 import com.github.xpenatan.jparser.builder.JBuilder;
 import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
+import com.github.xpenatan.jparser.builder.targets.EmscriptenLibTarget;
 import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jparser.builder.targets.IOSTarget;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
@@ -77,8 +78,8 @@ public class Main {
 //        iosTarget.headerDirs.add("-Isrc/exampleLib");
 //        iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
-        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlPath), getAndroidTarget());
-//        JBuilder.build(buildConfig, getWindowTarget());
+//        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlPath), getAndroidTarget());
+        JBuilder.build(buildConfig, getEmscriptenTarget(idlPath));
     }
 
     private static BuildMultiTarget getWindowTarget() {
@@ -102,12 +103,29 @@ public class Main {
     private static BuildMultiTarget getEmscriptenTarget(String idlPath) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
-        EmscriptenTarget emscriptenTarget = new EmscriptenTarget(idlPath);
-        emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
-        emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-        emscriptenTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+//        EmscriptenLibTarget emscriptenTarget = new EmscriptenLibTarget(idlPath);
+//        emscriptenTarget.libName = "exampleLibside";
+//        emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
+//        emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+//        emscriptenTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+//        emscriptenTarget.cppFlags.add("-v");
+//        emscriptenTarget.cppFlags.add("-fPIC");
+//        emscriptenTarget.cppFlags.add("-sSIDE_MODULE=1");
+//        emscriptenTarget.cppFlags.add("-sEXPORT_ALL=1");
+//        emscriptenTarget.linkerFlags.add("-v");
+//        emscriptenTarget.linkerFlags.add("-fPIC");
+//        emscriptenTarget.linkerFlags.add("-sSIDE_MODULE=1");
+//        emscriptenTarget.linkerFlags.add("-sEXPORT_ALL=1");
+//        emscriptenTarget.libSuffix = ".wasm";
 
-        multiTarget.add(emscriptenTarget);
+//        multiTarget.add(emscriptenTarget);
+
+        EmscriptenTarget mainTarget = new EmscriptenTarget(idlPath);
+        mainTarget.headerDirs.add("-Isrc/exampleLib");
+        mainTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+        mainTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+        multiTarget.add(mainTarget);
+
 
         return multiTarget;
     }
