@@ -15,7 +15,8 @@ import com.github.xpenatan.jparser.example.lib.ReturnClass;
 import com.github.xpenatan.jparser.example.lib.idl.helper.FloatArray;
 
 public class AppTest extends ApplicationAdapter {
-
+    long time = 0;
+    private boolean init = false;
     private boolean initLib = false;
 
     private SpriteBatch batch;
@@ -30,7 +31,8 @@ public class AppTest extends ApplicationAdapter {
         ExampleLibLoader.init(new Runnable() {
             @Override
             public void run() {
-                initLib();
+                time = System.currentTimeMillis();
+                init = true;
             }
         });
 
@@ -39,6 +41,9 @@ public class AppTest extends ApplicationAdapter {
     }
 
     private void initLib() {
+        if(initLib) {
+            return;
+        }
         initLib = true;
 
         NormalClass normalClass = new NormalClass();
@@ -99,9 +104,9 @@ public class AppTest extends ApplicationAdapter {
         ReturnClass nullPointerReturnClassStatic = NormalClass.get_nullPointerReturnClass_static();
         System.out.println("nullPointerReturnClassStatic: " + nullPointerReturnClassStatic);
 
-        ReturnClass pointerReturnClassStatic = NormalClass.get_pointerReturnClass_static();
-        pointerReturnClassStatic.set_value(51);
-        System.out.println("pointerReturnClassStatic: " + pointerReturnClassStatic.get_value());
+//        ReturnClass pointerReturnClassStatic = NormalClass.get_pointerReturnClass_static();
+//        pointerReturnClassStatic.set_value(51);
+//        System.out.println("pointerReturnClassStatic: " + pointerReturnClassStatic.get_value());
 
         ReturnClass valueReturnClassStatic = NormalClass.get_valueReturnClass_static();
         System.out.println("valueReturnClassStatic: " + valueReturnClassStatic.get_value());
@@ -127,6 +132,14 @@ public class AppTest extends ApplicationAdapter {
     @Override
     public void render() {
         ScreenUtils.clear(0.4f, 0.4f, 0.4f, 1);
+
+        if(init) {
+            long timeNow = System.currentTimeMillis();
+            if((timeNow - time) > 5000) {
+                initLib();
+            }
+        }
+
         if(!initLib) {
             return;
         }
