@@ -89,7 +89,13 @@ public class EmscriptenTarget extends BuildTarget {
 
         CustomFileDescriptor postFile = new CustomFileDescriptor("emscripten/post.js", CustomFileDescriptor.FileType.Classpath);
         String s = postFile.readString();
-        s = s.replace("[MODULE_NAME]", config.libName);
+
+        String libName = this.libName;
+        if(libName.isEmpty()) {
+            libName = config.libName;
+        }
+
+        s = s.replace("[MODULE_NAME]", libName);
 
         CustomFileDescriptor postJS = new CustomFileDescriptor(jsGluePath + "post.js");
         postJS.writeString(s, false);
@@ -100,7 +106,7 @@ public class EmscriptenTarget extends BuildTarget {
         linkerFlags.add("--extern-post-js");
         linkerFlags.add(postPath);
         linkerFlags.add("-s");
-        linkerFlags.add("EXPORT_NAME='" + config.libName + "'");
+        linkerFlags.add("EXPORT_NAME='" + libName + "'");
 
         String pythonCmd = "python";
         if(isUnix()) {
