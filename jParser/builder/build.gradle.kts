@@ -7,6 +7,7 @@ val moduleName = "builder"
 dependencies {
     implementation(project(":jParser:core"))
     implementation(project(":jParser:base"))
+    implementation(project(":jParser:idl"))
 }
 
 publishing {

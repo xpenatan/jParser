@@ -38,12 +38,12 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
     protected static final String CPOINTER_METHOD = "getCPointer()";
 
-    public IDLDefaultCodeParser(String headerCMD, IDLReader idlReader) {
-        super("", headerCMD, idlReader);
+    public IDLDefaultCodeParser(String headerCMD, IDLReader idlReader, String cppDir) {
+        super("", headerCMD, idlReader, cppDir);
     }
 
-    public IDLDefaultCodeParser(String basePackage, String headerCMD, IDLReader idlReader) {
-        super(basePackage, headerCMD, idlReader);
+    public IDLDefaultCodeParser(String basePackage, String headerCMD, IDLReader idlReader, String cppDir) {
+        super(basePackage, headerCMD, idlReader, cppDir);
     }
 
     @Override

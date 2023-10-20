@@ -30,8 +30,8 @@ public class Main {
         String genDir = "../core/src/main/java";
         String cppSourceDir = new File("./src/main/cpp/exampleLib/src/").getCanonicalPath();
 
-        IDLReader idlReader = IDLReader.readIDL(idlPath, cppSourceDir);
-        IDLDefaultCodeParser idlParser = new IDLDefaultCodeParser(basePackage, "IDL-Test", idlReader);
+        IDLReader idlReader = IDLReader.readIDL(idlPath);
+        IDLDefaultCodeParser idlParser = new IDLDefaultCodeParser(basePackage, "IDL-Test", idlReader, cppSourceDir);
         idlParser.generateClass = true;
         JParser.generate(idlParser, baseJavaDir, genDir);
     }
@@ -44,7 +44,7 @@ public class Main {
         String cppSourceDir = new File("./src/main/cpp/source/exampleLib/src/").getCanonicalPath();
         String customSourceDir = new File("./src/main/cpp/custom/").getCanonicalPath();
 
-        IDLReader idlReader = IDLReader.readIDL(idlPath, cppSourceDir);
+        IDLReader idlReader = IDLReader.readIDL(idlPath);
 
         String libsDir = new File("./build/c++/libs/").getCanonicalPath();
         String genDir = "../core/src/main/java";
@@ -59,7 +59,7 @@ public class Main {
         FileHelper.copyDir(customSourceDir, libDestinationPath);
 
         CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath);
-        CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage);
+        CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, customSourceDir);
         cppParser.generateClass = true;
         JParser.generate(cppParser, baseJavaDir, genDir);
 
@@ -71,15 +71,15 @@ public class Main {
         );
 
         String teaVMgenDir = "../teavm/src/main/java/";
-        TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage);
+        TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, customSourceDir);
         JParser.generate(teavmParser, baseJavaDir, teaVMgenDir);
 
 //        IOSTarget iosTarget = new IOSTarget();
 //        iosTarget.headerDirs.add("-Isrc/exampleLib");
 //        iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
-//        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlPath), getAndroidTarget());
-        JBuilder.build(buildConfig, getEmscriptenTarget(idlPath));
+        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlReader), getAndroidTarget());
+//        JBuilder.build(buildConfig, getEmscriptenTarget(idlReader));
     }
 
     private static BuildMultiTarget getWindowTarget() {
@@ -100,32 +100,32 @@ public class Main {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getEmscriptenTarget(String idlPath) {
+    private static BuildMultiTarget getEmscriptenTarget(IDLReader idlReader) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
-//        EmscriptenLibTarget emscriptenTarget = new EmscriptenLibTarget(idlPath);
-//        emscriptenTarget.libName = "exampleLibside";
-//        emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
-//        emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-//        emscriptenTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
-//        emscriptenTarget.cppFlags.add("-v");
-//        emscriptenTarget.cppFlags.add("-fPIC");
-//        emscriptenTarget.cppFlags.add("-sSIDE_MODULE=1");
-//        emscriptenTarget.cppFlags.add("-sEXPORT_ALL=1");
-//        emscriptenTarget.linkerFlags.add("-v");
-//        emscriptenTarget.linkerFlags.add("-fPIC");
-//        emscriptenTarget.linkerFlags.add("-sSIDE_MODULE=1");
-//        emscriptenTarget.linkerFlags.add("-sEXPORT_ALL=1");
-//        emscriptenTarget.libSuffix = ".wasm";
+        EmscriptenLibTarget emscriptenTarget = new EmscriptenLibTarget();
+        emscriptenTarget.libName = "exampleLibside";
+        emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
+        emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+        emscriptenTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+        emscriptenTarget.cppFlags.add("-fPIC");
+        emscriptenTarget.cppFlags.add("-sEXPORT_ALL=1");
+        emscriptenTarget.linkerFlags.add("-v");
+        emscriptenTarget.linkerFlags.add("-fPIC");
+        emscriptenTarget.linkerFlags.add("-sSIDE_MODULE=1");
+        emscriptenTarget.linkerFlags.add("-sEXPORT_ALL=1");
+        emscriptenTarget.libSuffix = ".wasm";
+        multiTarget.add(emscriptenTarget);
 
-//        multiTarget.add(emscriptenTarget);
-
-        EmscriptenTarget mainTarget = new EmscriptenTarget(idlPath);
+        EmscriptenTarget mainTarget = new EmscriptenTarget(idlReader);
         mainTarget.headerDirs.add("-Isrc/exampleLib");
         mainTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-        mainTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+        mainTarget.cppFlags.add("-fPIC");
+        mainTarget.linkerFlags.add("-sMAIN_MODULE=2");
+        mainTarget.linkerFlags.add("-fPIC");
+        mainTarget.linkerFlags.add("-ERROR_ON_UNDEFINED_SYMBOLS=0");
+        mainTarget.linkerFlags.add("../../libs/emscripten/exampleLibside.wasm");
         multiTarget.add(mainTarget);
-
 
         return multiTarget;
     }

@@ -1,10 +1,13 @@
 package com.github.xpenatan.jparser.idl;
 
+import com.github.xpenatan.jparser.core.JParser;
+import idl.IDLBase;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
@@ -15,17 +18,25 @@ public class IDLReader {
 
     public final ArrayList<IDLFile> fileArray = new ArrayList<>();
 
-    public final String cppDir;
+    public IDLReader() {
 
-    public IDLReader(String cppDir) {
-        String srcPath = null;
-        if(cppDir != null) {
-            try {
-                srcPath = new File(cppDir).getCanonicalPath() + File.separator;
-            } catch(IOException e) {
-            }
+        if(JParser.CREATE_IDL_HELPER) {
+            String baseIDLPath = "IDLHelper.idl";
+            InputStream resourceAsStream = IDLBase.class.getClassLoader().getResourceAsStream(baseIDLPath);
+            InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
+            IDLFile baseIDLFile = IDLReader.parseFile(streamReader, baseIDLPath);
+            fileArray.add(baseIDLFile);
         }
-        this.cppDir = srcPath;
+    }
+
+    public String mergeIDLFiles() {
+        String idlFinalStr = "";
+        for(IDLFile idlFile : fileArray) {
+            String idlStr = idlFile.getIDLStr();
+            idlFinalStr += "\n// " + idlFile.idlName + "\n\n";
+            idlFinalStr += idlStr;
+        }
+        return idlFinalStr;
     }
 
     public IDLClass getClass(String name) {
@@ -51,13 +62,21 @@ public class IDLReader {
     }
 
     public static IDLReader readIDL(String idlDir) {
-        return readIDL(idlDir, null);
+        IDLReader reader = new IDLReader();
+        try {
+            idlDir = new File(idlDir).getCanonicalPath() + File.separator;
+        } catch(IOException e) {
+            throw new RuntimeException("IDL file not found: " + idlDir);
+        }
+        IDLFile idlFile = parseFile(idlDir);
+        reader.fileArray.add(idlFile);
+        return reader;
     }
 
-    public static IDLReader readIDL(String idlDir, String cppDir) {
-        IDLReader reader = new IDLReader(cppDir);
-        IDLFile idlFile = parseFile(idlDir);
-        if(idlFile != null) {
+    public static IDLReader readIDL(ArrayList<String> idlDirs) {
+        IDLReader reader = new IDLReader();
+        for(String idlDir : idlDirs) {
+            IDLFile idlFile = parseFile(idlDir);
             reader.fileArray.add(idlFile);
         }
         return reader;
@@ -67,9 +86,10 @@ public class IDLReader {
         path = path.replace("\\", File.separator);
         File file = new File(path);    //creates a new file instance
         if(file.exists()) {
+            String name = file.getName();
             try {
                 InputStreamReader fr = new FileReader(file);
-                return parseFile(fr);
+                return parseFile(fr, name);
             } catch(FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -79,8 +99,8 @@ public class IDLReader {
         }
     }
 
-    public static IDLFile parseFile(InputStreamReader inputStreamReader) {
-        IDLFile idlFile = new IDLFile();
+    public static IDLFile parseFile(InputStreamReader inputStreamReader, String idlName) {
+        IDLFile idlFile = new IDLFile(idlName);
             try {
                 BufferedReader br = new BufferedReader(inputStreamReader);  //creates a buffering character input stream
                 ArrayList<String> lines = new ArrayList<>();
@@ -90,8 +110,9 @@ public class IDLReader {
                 }
                 inputStreamReader.close();    //closes the stream and release the resources
 
+                idlFile.lines.addAll(lines);
                 ArrayList<IDLClassOrEnum> classList = new ArrayList<>();
-                parseFile(idlFile, lines, classList);
+                parseFile(idlFile, classList);
                 idlFile.classArray.addAll(classList);
             }
             catch(Throwable t) {
@@ -100,14 +121,14 @@ public class IDLReader {
         return idlFile;
     }
 
-    private static void parseFile(IDLFile idlFile, ArrayList<String> lines, ArrayList<IDLClassOrEnum> classList) {
+    private static void parseFile(IDLFile idlFile, ArrayList<IDLClassOrEnum> classList) {
         ArrayList<String> classLines = new ArrayList<>();
         boolean foundStartClass = false;
         boolean foundStartEnum = false;
         ArrayList<String> settings = new ArrayList<>();
-        int size = lines.size();
+        int size = idlFile.lines.size();
         for(int i = 0; i < size; i++) {
-            String line = lines.get(i).trim();
+            String line = idlFile.lines.get(i).trim();
             if(line.startsWith("//") || line.isEmpty()) {
                 if(foundStartClass || foundStartEnum) {
                     String cmd = line.replace("//", "").trim();
@@ -156,7 +177,7 @@ public class IDLReader {
                 if(line.endsWith("};")) {
                     int nextLineIdx = i + 1;
                     if(nextLineIdx < size) {
-                        String nextLine = lines.get(nextLineIdx);
+                        String nextLine = idlFile.lines.get(nextLineIdx);
                         if(nextLine.contains(" implements ")) {
                             classLines.add(nextLine.trim());
                             i++; // add i so nextLine is not skipped on next loop

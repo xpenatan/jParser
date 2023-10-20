@@ -133,16 +133,12 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     private final CppGenerator cppGenerator;
 
-    public CppCodeParser(CppGenerator cppGenerator) {
-        this(cppGenerator, null);
+    public CppCodeParser(CppGenerator cppGenerator, String cppDir) {
+        this(cppGenerator, null, "", cppDir);
     }
 
-    public CppCodeParser(CppGenerator cppGenerator, IDLReader idlReader) {
-        this(cppGenerator, idlReader, "");
-    }
-
-    public CppCodeParser(CppGenerator cppGenerator, IDLReader idlReader, String basePackage) {
-        super(basePackage, HEADER_CMD, idlReader);
+    public CppCodeParser(CppGenerator cppGenerator, IDLReader idlReader, String basePackage, String cppDir) {
+        super(basePackage, HEADER_CMD, idlReader, cppDir);
         this.cppGenerator = cppGenerator;
     }
 

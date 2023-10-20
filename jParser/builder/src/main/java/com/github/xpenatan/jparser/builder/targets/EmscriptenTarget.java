@@ -3,26 +3,22 @@ package com.github.xpenatan.jparser.builder.targets;
 import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildTarget;
 import com.github.xpenatan.jparser.builder.JProcess;
-import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
+import com.github.xpenatan.jparser.idl.IDLReader;
 import java.io.File;
 import java.util.ArrayList;
 
 public class EmscriptenTarget extends BuildTarget {
 
-    private CustomFileDescriptor idlFile;
+    private IDLReader idlReader;
 
     String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
 
-    public EmscriptenTarget(String idlFile) {
+    public EmscriptenTarget(IDLReader idlReader) {
         this.libDirSuffix = "emscripten/";
         this.tempBuildDir = "target/emscripten";
-        this.idlFile = new CustomFileDescriptor(idlFile);
-
-        if(!this.idlFile.exists()) {
-            throw new RuntimeException("IDL file does not exist: " + idlFile);
-        }
+        this.idlReader = idlReader;
 
         long initialMemory = 64 * 1024 * 1024;
 
@@ -128,17 +124,9 @@ public class EmscriptenTarget extends BuildTarget {
     }
 
     private CustomFileDescriptor mergeIDLFile(CustomFileDescriptor jsglueDir) {
-        String idlStr = idlFile.readString();
-
-        if(!JParser.CREATE_IDL_HELPER) {
-            return idlFile;
-        }
-
-        CustomFileDescriptor idlHelper = new CustomFileDescriptor("IDLHelper.idl", CustomFileDescriptor.FileType.Classpath);
-        String idlHelperStr = idlHelper.readString();
-        String mergedIdlStr = idlStr + "\n\n" + idlHelperStr;
-        CustomFileDescriptor mergedIdlFile = jsglueDir.child(idlFile.name());
-        mergedIdlFile.writeString(mergedIdlStr, false);
+        String idlStr = idlReader.mergeIDLFiles();
+        CustomFileDescriptor mergedIdlFile = jsglueDir.child("IDLMerged.idl");
+        mergedIdlFile.writeString(idlStr, false);
         return mergedIdlFile;
     }
 }

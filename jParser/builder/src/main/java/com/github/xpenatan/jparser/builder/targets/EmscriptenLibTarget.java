@@ -2,28 +2,20 @@ package com.github.xpenatan.jparser.builder.targets;
 
 import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildTarget;
-import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
-import java.util.ArrayList;
 
 // Test Target
 @Deprecated
 public class EmscriptenLibTarget extends BuildTarget {
 
-    private CustomFileDescriptor idlFile;
 
     String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
 
-    public EmscriptenLibTarget(String idlFile) {
+    public EmscriptenLibTarget() {
         this.libDirSuffix = "emscripten/";
         this.tempBuildDir = "target/emscripten";
-        this.idlFile = new CustomFileDescriptor(idlFile);
-
-        if(!this.idlFile.exists()) {
-            throw new RuntimeException("IDL file does not exist: " + idlFile);
-        }
 
         long initialMemory = 64 * 1024 * 1024;
 
@@ -78,14 +70,6 @@ public class EmscriptenLibTarget extends BuildTarget {
             jsglueDir.mkdirs();
         }
 
-//        CustomFileDescriptor mergedIDLFile = mergeIDLFile(jsglueDir);
-
-//        CustomFileDescriptor idlHelperCPP = new CustomFileDescriptor("IDLHelper.h", CustomFileDescriptor.FileType.Classpath);
-//        idlHelperCPP.copyTo(jsglueDir, false);
-
-//        CustomFileDescriptor cppFile = jsglueDir.child(idlHelperCPP.name());
-//        headerDirs.add("-include" + cppFile.path());
-
         String jsGluePath = jsglueDir.path() + File.separator;
 
         CustomFileDescriptor postFile = new CustomFileDescriptor("emscripten/post.js", CustomFileDescriptor.FileType.Classpath);
@@ -102,44 +86,11 @@ public class EmscriptenLibTarget extends BuildTarget {
         postJS.writeString(s, false);
         String postPath = postJS.path();
 
-//        linkerFlags.add("--post-js");
-//        linkerFlags.add(jsGluePath + "glue.js");
         linkerFlags.add("--extern-post-js");
         linkerFlags.add(postPath);
         linkerFlags.add("-s");
         linkerFlags.add("EXPORT_NAME='" + libName + "'");
-
-        String pythonCmd = "python";
-        if(isUnix()) {
-            pythonCmd = "python3";
-        }
-
-        ArrayList<String> generateGlueCommand = new ArrayList<>();
-        generateGlueCommand.add(pythonCmd);
-        generateGlueCommand.add(WEBIDL_BINDER_SCRIPT);
-//        generateGlueCommand.add(mergedIDLFile.toString());
-        generateGlueCommand.add("glue");
-//        if(!JProcess.startProcess(jsglueDir.file(), generateGlueCommand)) {
-//            return false;
-//        }
-
         cppFlags.add("-c");
-
         return super.build(config);
-    }
-
-    private CustomFileDescriptor mergeIDLFile(CustomFileDescriptor jsglueDir) {
-        String idlStr = idlFile.readString();
-
-        if(!JParser.CREATE_IDL_HELPER) {
-            return idlFile;
-        }
-
-        CustomFileDescriptor idlHelper = new CustomFileDescriptor("IDLHelper.idl", CustomFileDescriptor.FileType.Classpath);
-        String idlHelperStr = idlHelper.readString();
-        String mergedIdlStr = idlStr + "\n\n" + idlHelperStr;
-        CustomFileDescriptor mergedIdlFile = jsglueDir.child(idlFile.name());
-        mergedIdlFile.writeString(mergedIdlStr, false);
-        return mergedIdlFile;
     }
 }

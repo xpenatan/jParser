@@ -6,7 +6,26 @@ import java.util.ArrayList;
  * @author xpenatan
  */
 public class IDLFile {
+
+    public final String idlName;
+
+    public ArrayList<String> lines = new ArrayList<>();
+
     public final ArrayList<IDLClassOrEnum> classArray = new ArrayList<>();
+
+    public IDLFile(String idlName) {
+        this.idlName = idlName;
+    }
+
+    public String getIDLStr() {
+        String idlStr = "";
+        for(String line : lines) {
+            if(!line.trim().isEmpty()) {
+                idlStr += line + "\n";
+            }
+        }
+        return idlStr;
+    }
 
     public IDLClass getClass(String name) {
         int size = classArray.size();

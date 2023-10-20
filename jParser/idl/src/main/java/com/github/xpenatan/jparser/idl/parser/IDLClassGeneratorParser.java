@@ -55,8 +55,11 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     protected HashMap<String, String> classCppPath;
 
-    public IDLClassGeneratorParser(String basePackage, String headerCMD, IDLReader idlReader) {
+    protected String cppDir;
+
+    public IDLClassGeneratorParser(String basePackage, String headerCMD, IDLReader idlReader, String cppDir) {
         super(headerCMD);
+        this.cppDir = cppDir;
         this.basePackage = basePackage;
         this.idlReader = idlReader;
     }
@@ -67,13 +70,6 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             return;
         }
         classCppPath = getClassCppPath();
-        if(JParser.CREATE_IDL_HELPER) {
-            String baseIDLPath = "IDLHelper.idl";
-            InputStream resourceAsStream = IDLBase.class.getClassLoader().getResourceAsStream(baseIDLPath);
-            InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
-            IDLFile baseIDLFile = IDLReader.parseFile(streamReader);
-            idlReader.fileArray.add(baseIDLFile);
-        }
         createBaseUnitFromResources(jParser);
         generateIDLJavaClasses(jParser, jParser.genDir);
     }
@@ -142,7 +138,6 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     private HashMap<String, String> getClassCppPath() {
         HashMap<String, String> mapPackage = new HashMap<>();
-        String cppDir = idlReader.cppDir;
         if(cppDir != null) {
             ArrayList<String> filesFromDir = FileHelper.getFilesFromDir(cppDir);
             for(String path : filesFromDir) {
@@ -163,7 +158,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         String className = idlClass.name;
         CompilationUnit compilationUnit = new CompilationUnit();
         compilationUnit.printer(new CustomPrettyPrinter());
-        if(subPackage != null && !subPackage.isEmpty()) {
+        if(subPackage != null && !subPackage.isEmpty() && !subPackage.startsWith(".")) {
             subPackage = "." + subPackage;
         }
         compilationUnit.setPackageDeclaration(basePackage + subPackage);
