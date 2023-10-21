@@ -73,7 +73,7 @@ public class IDLReader {
         return reader;
     }
 
-    public static void readIDL(IDLReader reader, String idlDir) {
+    public static void addIDL(IDLReader reader, String idlDir) {
         try {
             idlDir = new File(idlDir).getCanonicalPath() + File.separator;
         } catch(IOException e) {
