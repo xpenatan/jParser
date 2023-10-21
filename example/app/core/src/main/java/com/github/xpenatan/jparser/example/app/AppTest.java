@@ -15,9 +15,7 @@ import com.github.xpenatan.jparser.example.lib.ReturnClass;
 import com.github.xpenatan.jparser.example.lib.idl.helper.FloatArray;
 
 public class AppTest extends ApplicationAdapter {
-    long time = 0;
     private boolean init = false;
-    private boolean initLib = false;
 
     private SpriteBatch batch;
     private BitmapFont font;
@@ -31,8 +29,7 @@ public class AppTest extends ApplicationAdapter {
         ExampleLibLoader.init(new Runnable() {
             @Override
             public void run() {
-                time = System.currentTimeMillis();
-                init = true;
+                initLib();
             }
         });
 
@@ -41,10 +38,10 @@ public class AppTest extends ApplicationAdapter {
     }
 
     private void initLib() {
-        if(initLib) {
+        if(init) {
             return;
         }
-        initLib = true;
+        init = true;
 
         NormalClass normalClass = new NormalClass();
 
@@ -133,14 +130,7 @@ public class AppTest extends ApplicationAdapter {
     public void render() {
         ScreenUtils.clear(0.4f, 0.4f, 0.4f, 1);
 
-        if(init) {
-            long timeNow = System.currentTimeMillis();
-            if((timeNow - time) > 5000) {
-                initLib();
-            }
-        }
-
-        if(!initLib) {
+        if(!init) {
             return;
         }
 

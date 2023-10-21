@@ -3,9 +3,10 @@ plugins {
 }
 
 val emscriptenFile = "$projectDir/../generator/build/c++/libs/emscripten/exampleLib.wasm.js"
+val emscriptenSideFile = "$projectDir/../generator/build/c++/libs/emscripten/exampleLibside.wasm"
 
 tasks.jar {
-    from(emscriptenFile)
+    from(emscriptenFile, emscriptenSideFile)
 }
 
 

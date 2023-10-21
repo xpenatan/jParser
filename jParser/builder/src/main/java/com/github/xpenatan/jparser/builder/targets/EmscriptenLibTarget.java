@@ -9,9 +9,7 @@ import java.io.File;
 @Deprecated
 public class EmscriptenLibTarget extends BuildTarget {
 
-
     String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
-    String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
 
     public EmscriptenLibTarget() {
         this.libDirSuffix = "emscripten/";
@@ -53,8 +51,6 @@ public class EmscriptenLibTarget extends BuildTarget {
         linkerFlags.add("SINGLE_FILE=1");
 
         libSuffix = ".wasm.js";
-
-//        cppIncludes.add("**/jsglue/*.cpp");
     }
 
     @Override

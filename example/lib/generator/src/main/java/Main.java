@@ -102,9 +102,33 @@ public class Main {
 
     private static BuildMultiTarget getEmscriptenTarget(IDLReader idlReader) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
+        int buildType = 1;
 
-        {
-            // Make lib as a side module
+        if(buildType == 0) {
+            // Compile and create a js file
+            EmscriptenTarget emscriptenTarget = new EmscriptenTarget(idlReader);
+            emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
+            emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+            emscriptenTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+            multiTarget.add(emscriptenTarget);
+        }
+        else if(buildType == 1) {
+            // Make a static library
+            EmscriptenTarget libTarget = new EmscriptenTarget(idlReader);
+            libTarget.isStatic = true;
+            libTarget.compileGlueCode = false;
+            libTarget.headerDirs.add("-Isrc/exampleLib");
+            libTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+            multiTarget.add(libTarget);
+
+            // Compile glue code and link to make js file
+            EmscriptenTarget linkTarget = new EmscriptenTarget(idlReader);
+            linkTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+            linkTarget.linkerFlags.add("../../libs/emscripten/exampleLib.a");
+            multiTarget.add(linkTarget);
+        }
+        else if(buildType == 2) {
+            // Make lib as a side module/dynamic linking
             EmscriptenLibTarget sideTarget = new EmscriptenLibTarget();
             sideTarget.libName = "exampleLibside";
             sideTarget.headerDirs.add("-Isrc/exampleLib");
@@ -117,7 +141,7 @@ public class Main {
             sideTarget.linkerFlags.add("-sSIDE_MODULE=1");
             sideTarget.linkerFlags.add("-sEXPORT_ALL=1");
             sideTarget.libSuffix = ".wasm";
-//            multiTarget.add(sideTarget);
+            multiTarget.add(sideTarget);
 
             // Make lib as a main module
             EmscriptenTarget mainTarget = new EmscriptenTarget(idlReader);
@@ -128,34 +152,8 @@ public class Main {
             mainTarget.linkerFlags.add("-fPIC");
             mainTarget.linkerFlags.add("-ERROR_ON_UNDEFINED_SYMBOLS=0");
             mainTarget.linkerFlags.add("../../libs/emscripten/exampleLibside.wasm");
-//            multiTarget.add(mainTarget);
+            multiTarget.add(mainTarget);
         }
-
-        {
-            // Make a static library
-            EmscriptenTarget libTarget = new EmscriptenTarget(idlReader);
-            libTarget.isStatic = true;
-            libTarget.compileGlueCode = false;
-            libTarget.headerDirs.add("-Isrc/exampleLib");
-            libTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
-//            multiTarget.add(libTarget);
-
-            // Only Link and make js file
-            EmscriptenTarget linkTarget = new EmscriptenTarget(idlReader);
-            linkTarget.compileGlueCode = true;
-            linkTarget.shouldCompile = true;
-            linkTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-            linkTarget.linkerFlags.add("../../libs/emscripten/exampleLib.a");
-//            multiTarget.add(linkTarget);
-        }
-
-        // Compile and create a js file
-        EmscriptenTarget emscriptenTarget = new EmscriptenTarget(idlReader);
-        emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
-        emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-        emscriptenTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
-        multiTarget.add(emscriptenTarget);
-
         return multiTarget;
     }
 
