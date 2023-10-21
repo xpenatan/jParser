@@ -2,9 +2,7 @@ import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildMultiTarget;
 import com.github.xpenatan.jparser.builder.JBuilder;
 import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
-import com.github.xpenatan.jparser.builder.targets.EmscriptenLibTarget;
 import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
-import com.github.xpenatan.jparser.builder.targets.IOSTarget;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.util.FileHelper;
@@ -85,6 +83,7 @@ public class Main {
     private static BuildMultiTarget getWindowTarget() {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
+        // Make a static library
         WindowsTarget windowsTarget = new WindowsTarget();
         windowsTarget.isStatic = true;
         windowsTarget.addJNI = false;
@@ -103,28 +102,53 @@ public class Main {
     private static BuildMultiTarget getEmscriptenTarget(IDLReader idlReader) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
-        EmscriptenLibTarget emscriptenTarget = new EmscriptenLibTarget();
-        emscriptenTarget.libName = "exampleLibside";
-        emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
-        emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-        emscriptenTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
-        emscriptenTarget.cppFlags.add("-fPIC");
-        emscriptenTarget.cppFlags.add("-sEXPORT_ALL=1");
-        emscriptenTarget.linkerFlags.add("-v");
-        emscriptenTarget.linkerFlags.add("-fPIC");
-        emscriptenTarget.linkerFlags.add("-sSIDE_MODULE=1");
-        emscriptenTarget.linkerFlags.add("-sEXPORT_ALL=1");
-        emscriptenTarget.libSuffix = ".wasm";
-        multiTarget.add(emscriptenTarget);
+//        EmscriptenLibTarget emscriptenTarget = new EmscriptenLibTarget();
+//        emscriptenTarget.libName = "exampleLibside";
+//        emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
+//        emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+//        emscriptenTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+//        emscriptenTarget.cppFlags.add("-fPIC");
+//        emscriptenTarget.cppFlags.add("-sEXPORT_ALL=1");
+//        emscriptenTarget.linkerFlags.add("-v");
+//        emscriptenTarget.linkerFlags.add("-fPIC");
+//        emscriptenTarget.linkerFlags.add("-sSIDE_MODULE=1");
+//        emscriptenTarget.linkerFlags.add("-sEXPORT_ALL=1");
+//        emscriptenTarget.libSuffix = ".wasm";
+//        multiTarget.add(emscriptenTarget);
+//
+//        EmscriptenTarget mainTarget = new EmscriptenTarget(idlReader);
+//        mainTarget.headerDirs.add("-Isrc/exampleLib");
+//        mainTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+//        mainTarget.cppFlags.add("-fPIC");
+//        mainTarget.linkerFlags.add("-sMAIN_MODULE=2");
+//        mainTarget.linkerFlags.add("-fPIC");
+//        mainTarget.linkerFlags.add("-ERROR_ON_UNDEFINED_SYMBOLS=0");
+//        mainTarget.linkerFlags.add("../../libs/emscripten/exampleLibside.wasm");
+//        multiTarget.add(mainTarget);
 
+        {
+            // Make a static library
+            EmscriptenTarget libTarget = new EmscriptenTarget(idlReader);
+            libTarget.isStatic = true;
+            libTarget.headerDirs.add("-Isrc/exampleLib");
+            libTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+            libTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+//            multiTarget.add(libTarget);
+
+            // Only Link and make js file
+            EmscriptenTarget mainTarget = new EmscriptenTarget(idlReader);
+            mainTarget.compileGlueCode = false;
+            mainTarget.shouldCompile = false;
+            mainTarget.linkerFlags.add("-sMAIN_MODULE=2");
+            mainTarget.linkerFlags.add("../../libs/emscripten/exampleLib.a");
+//            multiTarget.add(mainTarget);
+        }
+
+        // Compile and create a js file
         EmscriptenTarget mainTarget = new EmscriptenTarget(idlReader);
         mainTarget.headerDirs.add("-Isrc/exampleLib");
         mainTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-        mainTarget.cppFlags.add("-fPIC");
-        mainTarget.linkerFlags.add("-sMAIN_MODULE=2");
-        mainTarget.linkerFlags.add("-fPIC");
-        mainTarget.linkerFlags.add("-ERROR_ON_UNDEFINED_SYMBOLS=0");
-        mainTarget.linkerFlags.add("../../libs/emscripten/exampleLibside.wasm");
+        mainTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
         multiTarget.add(mainTarget);
 
         return multiTarget;

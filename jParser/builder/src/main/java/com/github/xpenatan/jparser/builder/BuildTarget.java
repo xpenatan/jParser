@@ -40,8 +40,8 @@ public abstract class BuildTarget {
     public String libName = "";
     public String libDirSuffix = "";
 
-    public boolean isCompile = true;
-    public boolean isLink = true;
+    public boolean shouldCompile = true;
+    public boolean shouldLink = true;
 
     public boolean addJNI = true;
     public boolean isStatic = false;
@@ -62,15 +62,19 @@ public abstract class BuildTarget {
 
         setup(config);
 
-        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.sourceDir, cppIncludes);
+        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppIncludes));
+        for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
+            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppIncludes);
+            cppFiles.addAll(cppFiles1);
+        }
 
-        if(isCompile && isLink && compile(config, childTarget, cppFiles)) {
+        if(shouldCompile && shouldLink && compile(config, childTarget, cppFiles)) {
             return link(config, childTarget);
         }
-        else if(isCompile && !isLink) {
+        else if(shouldCompile && !shouldLink) {
             return compile(config, childTarget, cppFiles);
         }
-        else if(!isCompile && isLink) {
+        else if(!shouldCompile && shouldLink) {
             return link(config, childTarget);
         }
         else {

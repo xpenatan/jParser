@@ -5,12 +5,14 @@ import com.github.xpenatan.jparser.builder.BuildTarget;
 import com.github.xpenatan.jparser.builder.JProcess;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jparser.idl.IDLReader;
-import java.io.File;
 import java.util.ArrayList;
 
 public class EmscriptenTarget extends BuildTarget {
 
     private IDLReader idlReader;
+
+    public boolean isStatic = false;
+    public boolean compileGlueCode = true;
 
     String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
@@ -19,8 +21,6 @@ public class EmscriptenTarget extends BuildTarget {
         this.libDirSuffix = "emscripten/";
         this.tempBuildDir = "target/emscripten";
         this.idlReader = idlReader;
-
-        long initialMemory = 64 * 1024 * 1024;
 
         cppCompiler.clear();
         linkerCompiler.clear();
@@ -32,36 +32,20 @@ public class EmscriptenTarget extends BuildTarget {
         cppCompiler.add(cppCompilerr);
         linkerCompiler.add(cppCompilerr);
 
-        linkerFlags.add("-O3");
-        linkerFlags.add("-std=c++17");
-        linkerFlags.add("--llvm-lto");
-        linkerFlags.add("1");
-        linkerFlags.add("-s");
-        linkerFlags.add("ALLOW_MEMORY_GROWTH=1");
-        linkerFlags.add("-s");
-        linkerFlags.add("ALLOW_TABLE_GROWTH=1");
-        linkerFlags.add("-s");
-        linkerFlags.add("MODULARIZE=1");
-        linkerFlags.add("-s");
-        linkerFlags.add("NO_FILESYSTEM=1");
-        linkerFlags.add("-s");
-        linkerFlags.add("INITIAL_MEMORY=" + initialMemory);
-        linkerFlags.add("-s");
-        linkerFlags.add("EXPORTED_FUNCTIONS=['_free','_malloc']");
-        linkerFlags.add("-s");
-        linkerFlags.add("EXPORTED_RUNTIME_METHODS=['UTF8ToString']");
-        linkerFlags.add("-s");
-        linkerFlags.add("WASM=1");
-        linkerFlags.add("-s");
-        linkerFlags.add("SINGLE_FILE=1");
-
         libSuffix = ".wasm.js";
 
-        cppIncludes.add("**/jsglue/*.cpp");
+        cppFlags.add("-c");
+        cppFlags.add("-std=c++17");
+        cppFlags.add("-O3");
     }
 
     @Override
     protected boolean build(BuildConfig config) {
+        String libName = this.libName;
+        if(libName.isEmpty()) {
+            libName = config.libName;
+        }
+
         CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
         if(childTarget.exists()) {
             childTarget.delete();
@@ -73,37 +57,86 @@ public class EmscriptenTarget extends BuildTarget {
             jsglueDir.mkdirs();
         }
 
-        CustomFileDescriptor mergedIDLFile = mergeIDLFile(jsglueDir);
-
-        CustomFileDescriptor idlHelperCPP = new CustomFileDescriptor("IDLHelper.h", CustomFileDescriptor.FileType.Classpath);
-        idlHelperCPP.copyTo(jsglueDir, false);
-
-        CustomFileDescriptor cppFile = jsglueDir.child(idlHelperCPP.name());
-        headerDirs.add("-include" + cppFile.path());
-
-        String jsGluePath = jsglueDir.path() + File.separator;
-
-        CustomFileDescriptor postFile = new CustomFileDescriptor("emscripten/post.js", CustomFileDescriptor.FileType.Classpath);
-        String s = postFile.readString();
-
-        String libName = this.libName;
-        if(libName.isEmpty()) {
-            libName = config.libName;
+        if(compileGlueCode) {
+            cppIncludes.add("**/jsglue/*.cpp");
+            copyHelperClass(jsglueDir);
         }
 
+        CustomFileDescriptor mergedIDLFile = mergeIDLFile(jsglueDir);
+        if(!createGlueCode(mergedIDLFile, jsglueDir)) {
+            return false;
+        }
+
+        if(isStatic) {
+            linkerCompiler.clear();
+
+            String cppCompilerr = EMSCRIPTEN_ROOT + "emar";
+            if(isWindows()) {
+                cppCompilerr += ".bat";
+            }
+
+            linkerCompiler.add(cppCompilerr);
+            linkerFlags.add("rcs");
+            libSuffix = ".a";
+        }
+        else {
+            String postPath = createPostJS(jsglueDir, libName);
+            long initialMemory = 64 * 1024 * 1024;
+            linkerFlags.add("--llvm-lto");
+            linkerFlags.add("1");
+            linkerFlags.add("-s");
+            linkerFlags.add("ALLOW_MEMORY_GROWTH=1");
+            linkerFlags.add("-s");
+            linkerFlags.add("ALLOW_TABLE_GROWTH=1");
+            linkerFlags.add("-s");
+            linkerFlags.add("MODULARIZE=1");
+            linkerFlags.add("-s");
+            linkerFlags.add("NO_FILESYSTEM=1");
+            linkerFlags.add("-s");
+            linkerFlags.add("INITIAL_MEMORY=" + initialMemory);
+            linkerFlags.add("-s");
+            linkerFlags.add("EXPORTED_FUNCTIONS=['_free','_malloc']");
+            linkerFlags.add("-s");
+            linkerFlags.add("EXPORTED_RUNTIME_METHODS=['UTF8ToString']");
+            linkerFlags.add("-s");
+            linkerFlags.add("WASM=1");
+            linkerFlags.add("-s");
+            linkerFlags.add("SINGLE_FILE=1");
+
+            linkerFlags.add("--post-js");
+            linkerFlags.add(jsglueDir.path() + "/glue.js");
+            linkerFlags.add("--extern-post-js");
+            linkerFlags.add(postPath);
+            linkerFlags.add("-s");
+            linkerFlags.add("EXPORT_NAME='" + libName + "'");
+        }
+
+        return super.build(config);
+    }
+
+    @Override
+    protected void onLink(String objFilePath, String libPath) {
+        if(isStatic) {
+            linkerCommands.addAll(linkerCompiler);
+            linkerCommands.addAll(linkerFlags);
+            linkerCommands.add(libPath);
+            linkerCommands.add("@" + objFilePath);
+        }
+        else {
+            super.onLink(objFilePath, libPath);
+        }
+    }
+
+    private String createPostJS(CustomFileDescriptor jsglueDir, String libName) {
+        CustomFileDescriptor postFile = new CustomFileDescriptor("emscripten/post.js", CustomFileDescriptor.FileType.Classpath);
+        String s = postFile.readString();
         s = s.replace("[MODULE_NAME]", libName);
-
-        CustomFileDescriptor postJS = new CustomFileDescriptor(jsGluePath + "post.js");
+        CustomFileDescriptor postJS = new CustomFileDescriptor(jsglueDir + "/post.js");
         postJS.writeString(s, false);
-        String postPath = postJS.path();
+        return postJS.path();
+    }
 
-        linkerFlags.add("--post-js");
-        linkerFlags.add(jsGluePath + "glue.js");
-        linkerFlags.add("--extern-post-js");
-        linkerFlags.add(postPath);
-        linkerFlags.add("-s");
-        linkerFlags.add("EXPORT_NAME='" + libName + "'");
-
+    private boolean createGlueCode(CustomFileDescriptor mergedIDLFile, CustomFileDescriptor jsglueDir) {
         String pythonCmd = "python";
         if(isUnix()) {
             pythonCmd = "python3";
@@ -114,13 +147,15 @@ public class EmscriptenTarget extends BuildTarget {
         generateGlueCommand.add(WEBIDL_BINDER_SCRIPT);
         generateGlueCommand.add(mergedIDLFile.toString());
         generateGlueCommand.add("glue");
-        if(!JProcess.startProcess(jsglueDir.file(), generateGlueCommand)) {
-            return false;
-        }
+        return JProcess.startProcess(jsglueDir.file(), generateGlueCommand);
+    }
 
-        cppFlags.add("-c");
-
-        return super.build(config);
+    private void copyHelperClass(CustomFileDescriptor jsglueDir) {
+        // Copy IDLHelper from base module.
+        CustomFileDescriptor idlHelperCPP = new CustomFileDescriptor("IDLHelper.h", CustomFileDescriptor.FileType.Classpath);
+        idlHelperCPP.copyTo(jsglueDir, false);
+        CustomFileDescriptor cppFile = jsglueDir.child(idlHelperCPP.name());
+        headerDirs.add("-include" + cppFile.path());
     }
 
     private CustomFileDescriptor mergeIDLFile(CustomFileDescriptor jsglueDir) {

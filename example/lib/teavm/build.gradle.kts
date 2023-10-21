@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-val emscriptenFile = "$projectDir/../generator/build/c++/libs/emscripten/"
+val emscriptenFile = "$projectDir/../generator/build/c++/libs/emscripten/exampleLib.wasm.js"
 
 tasks.jar {
     from(emscriptenFile)

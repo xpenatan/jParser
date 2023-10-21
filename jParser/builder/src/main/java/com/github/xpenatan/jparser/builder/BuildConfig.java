@@ -1,10 +1,12 @@
 package com.github.xpenatan.jparser.builder;
 
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
+import java.util.ArrayList;
 
 public class BuildConfig {
     public CustomFileDescriptor buildDir;
     public CustomFileDescriptor sourceDir;
+    public ArrayList<CustomFileDescriptor> additionalSourceDirs = new ArrayList<>();
     public CustomFileDescriptor libDir;
     public String libName;
 
