@@ -135,15 +135,16 @@ public class Main {
             // Make a static library
             EmscriptenTarget libTarget = new EmscriptenTarget(idlReader);
             libTarget.isStatic = true;
+            libTarget.compileGlueCode = false;
             libTarget.headerDirs.add("-Isrc/exampleLib");
-            libTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
             libTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 //            multiTarget.add(libTarget);
 
             // Only Link and make js file
             EmscriptenTarget linkTarget = new EmscriptenTarget(idlReader);
-            linkTarget.compileGlueCode = false;
-            linkTarget.shouldCompile = false;
+            linkTarget.compileGlueCode = true;
+            linkTarget.shouldCompile = true;
+            linkTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
             linkTarget.linkerFlags.add("../../libs/emscripten/exampleLib.a");
 //            multiTarget.add(linkTarget);
         }
