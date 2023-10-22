@@ -583,4 +583,11 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             convertCallerLongToInt(all);
         }
     }
+
+    @Override
+    protected boolean parseCodeBlock(Node node, String headerCommands, String content) {
+        // Replace custom code that contains module tag
+        String newContent = content.replace(TEMPLATE_TAG_MODULE, module);
+        return super.parseCodeBlock(node, headerCommands, newContent);
+    }
 }

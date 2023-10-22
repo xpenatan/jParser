@@ -161,7 +161,7 @@ public abstract class DefaultCodeParser implements CodeParser {
         return false;
     }
 
-    public boolean parseCodeBlock(Node node, String headerCommands, String content) {
+    protected boolean parseCodeBlock(Node node, String headerCommands, String content) {
         if(headerCommands.contains(CMD_ADD_RAW)) {
             setAddReplaceCMD(node, content, false, true);
             return true;
