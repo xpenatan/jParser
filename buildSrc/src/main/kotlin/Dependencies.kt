@@ -5,8 +5,8 @@ object LibExt {
     const val jUnitVersion = "4.12"
     const val groupId = "com.github.xpenatan.jParser"
     const val exampleUseRepoLibs = false
-    const val gdxVersion = "1.12.0"
-    const val teaVMVersion = "0.9.0-dev-7"
+    const val gdxVersion = "1.12.1"
+    const val teaVMVersion = "0.10.0-dev-2"
 
     private fun getVersion(): String {
         var isRelease = System.getenv("RELEASE")
