@@ -197,8 +197,8 @@ public class NativeCPPGenerator implements CppGenerator {
             paramsType += valueType;
             if(typeName.equals("String")) {
                 newParamName = newParamName + "_string";
-                prefixCode += "char* " + paramName + " = (char*)env->GetStringUTFChars(" + newParamName + ", 0);\n";
-                suffixCode += "env->ReleaseStringUTFChars(" + newParamName + ", " + paramName  + ");\n";
+                prefixCode += "char* " + paramName + " = " + newParamName + " == NULL ? NULL : (char*)env->GetStringUTFChars(" + newParamName + ", 0);\n";
+                suffixCode += "if(" + paramName + " != NULL) env->ReleaseStringUTFChars(" + newParamName + ", " + paramName  + ");\n";
             }
             params += ", " + type.getJniType() + " " + newParamName;
         }
