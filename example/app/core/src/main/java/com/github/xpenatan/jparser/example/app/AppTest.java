@@ -71,7 +71,7 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("returnValueObject: " + returnValueObject.get_value());
 
         normalClass.printText(10, "printText HELLO");
-        IDLFloatArray floatArray = IDLFloatArray.tmp1_1;
+        IDLFloatArray floatArray = IDLFloatArray.TMP1_1;
         long pointer = floatArray.getPointer();
         System.out.println("pointer: " + pointer);
         normalClass.setArray(floatArray);
