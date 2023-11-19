@@ -14,12 +14,12 @@ public class IDLBool extends IDLBoolArray {
         super(1);
     }
 
-    IDLBool set(boolean value) {
+    public IDLBool set(boolean value) {
         setValue(0, value);
         return this;
     }
 
-    boolean getValue() {
+    public boolean getValue() {
         return getValue(0);
     }
 

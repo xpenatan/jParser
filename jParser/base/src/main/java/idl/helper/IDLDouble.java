@@ -14,12 +14,12 @@ public class IDLDouble extends IDLDoubleArray {
         super(1);
     }
 
-    IDLDouble set(double value) {
+    public IDLDouble set(double value) {
         setValue(0, value);
         return this;
     }
 
-    double getValue() {
+    public double getValue() {
         return getValue(0);
     }
 

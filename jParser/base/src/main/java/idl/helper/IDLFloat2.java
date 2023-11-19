@@ -14,27 +14,27 @@ public class IDLFloat2 extends IDLFloatArray {
         super(2);
     }
 
-    IDLFloat2 set(float value0, float value1) {
+    public IDLFloat2 set(float value0, float value1) {
         setValue(0, value0);
         setValue(1, value1);
         return this;
     }
 
-    IDLFloat2 set0(float value) {
+    public IDLFloat2 set0(float value) {
         setValue(0, value);
         return this;
     }
 
-    IDLFloat2 set1(float value) {
+    public IDLFloat2 set1(float value) {
         setValue(1, value);
         return this;
     }
 
-    float get0() {
+    public float get0() {
         return getValue(0);
     }
 
-    float get1() {
+    public float get1() {
         return getValue(1);
     }
 

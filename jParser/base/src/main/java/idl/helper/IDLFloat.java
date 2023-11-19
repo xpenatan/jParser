@@ -14,12 +14,12 @@ public class IDLFloat extends IDLFloatArray {
         super(1);
     }
 
-    IDLFloat set(float value) {
+    public IDLFloat set(float value) {
         setValue(0, value);
         return this;
     }
 
-    float getValue() {
+    public float getValue() {
         return getValue(0);
     }
 

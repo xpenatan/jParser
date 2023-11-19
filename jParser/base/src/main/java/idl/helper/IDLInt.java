@@ -14,12 +14,12 @@ public class IDLInt extends IDLIntArray {
         super(1);
     }
 
-    IDLInt set(int value) {
+    public IDLInt set(int value) {
         setValue(0, value);
         return this;
     }
 
-    int getValue() {
+    public int getValue() {
         return getValue(0);
     }
 

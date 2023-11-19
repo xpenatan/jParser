@@ -14,27 +14,27 @@ public class IDLInt2 extends IDLIntArray {
         super(2);
     }
 
-    IDLInt2 set(int value0, int value1) {
+    public IDLInt2 set(int value0, int value1) {
         setValue(0, value0);
         setValue(1, value1);
         return this;
     }
 
-    IDLInt2 set0(int value) {
+    public IDLInt2 set0(int value) {
         setValue(0, value);
         return this;
     }
 
-    IDLInt2 set1(int value) {
+    public IDLInt2 set1(int value) {
         setValue(1, value);
         return this;
     }
 
-    int get0() {
+    public int get0() {
         return getValue(0);
     }
 
-    int get1() {
+    public int get1() {
         return getValue(1);
     }
 

@@ -12,6 +12,7 @@ import com.github.xpenatan.jparser.example.lib.ExampleLibLoader;
 import com.github.xpenatan.jparser.example.lib.NormalClass;
 import com.github.xpenatan.jparser.example.lib.OperatorClass;
 import com.github.xpenatan.jparser.example.lib.ReturnClass;
+import com.github.xpenatan.jparser.example.lib.idl.helper.IDLFloat;
 import com.github.xpenatan.jparser.example.lib.idl.helper.IDLFloatArray;
 
 public class AppTest extends ApplicationAdapter {
@@ -71,11 +72,11 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("returnValueObject: " + returnValueObject.get_value());
 
         normalClass.printText(10, "printText HELLO");
-        IDLFloatArray floatArray = IDLFloatArray.TMP1_1;
+        IDLFloat floatArray = IDLFloat.TMP_1;
         long pointer = floatArray.getPointer();
         System.out.println("pointer: " + pointer);
         normalClass.setArray(floatArray);
-        System.out.println("setArray: " + floatArray.getValue(0));
+        System.out.println("setArray: " + floatArray.getValue());
         System.out.println("EnumTwoLib THIRD: " + EnumTwoLib.EnumTwoLib_THIRD);
         System.out.println("EnumTwoLib FOURTH: " + EnumTwoLib.EnumTwoLib_FOURTH);
         System.out.println("NormalClass.subIntValue: " + NormalClass.subIntValue(2, 1));

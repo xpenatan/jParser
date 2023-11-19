@@ -14,37 +14,37 @@ public class IDLFloat3 extends IDLFloatArray {
         super(3);
     }
 
-    IDLFloat3 set(float value0, float value1, float value2) {
+    public IDLFloat3 set(float value0, float value1, float value2) {
         setValue(0, value0);
         setValue(1, value1);
         setValue(2, value2);
         return this;
     }
 
-    IDLFloat3 set0(float value) {
+    public IDLFloat3 set0(float value) {
         setValue(0, value);
         return this;
     }
 
-    IDLFloat3 set1(float value) {
+    public IDLFloat3 set1(float value) {
         setValue(1, value);
         return this;
     }
 
-    IDLFloat3 set2(float value) {
+    public IDLFloat3 set2(float value) {
         setValue(2, value);
         return this;
     }
 
-    float get0() {
+    public float get0() {
         return getValue(0);
     }
 
-    float get1() {
+    public float get1() {
         return getValue(1);
     }
 
-    float get2() {
+    public float get2() {
         return getValue(2);
     }
 

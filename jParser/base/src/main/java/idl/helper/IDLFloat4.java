@@ -14,7 +14,7 @@ public class IDLFloat4 extends IDLFloatArray {
         super(4);
     }
 
-    IDLFloat4 set(float value0, float value1, float value2, float value3) {
+    public IDLFloat4 set(float value0, float value1, float value2, float value3) {
         setValue(0, value0);
         setValue(1, value1);
         setValue(2, value2);
@@ -22,39 +22,39 @@ public class IDLFloat4 extends IDLFloatArray {
         return this;
     }
 
-    IDLFloat4 set0(float value) {
+    public IDLFloat4 set0(float value) {
         setValue(0, value);
         return this;
     }
 
-    IDLFloat4 set1(float value) {
+    public IDLFloat4 set1(float value) {
         setValue(1, value);
         return this;
     }
 
-    IDLFloat4 set2(float value) {
+    public IDLFloat4 set2(float value) {
         setValue(2, value);
         return this;
     }
 
-    IDLFloat4 set3(float value) {
+    public IDLFloat4 set3(float value) {
         setValue(3, value);
         return this;
     }
 
-    float get0() {
+    public float get0() {
         return getValue(0);
     }
 
-    float get1() {
+    public float get1() {
         return getValue(1);
     }
 
-    float get2() {
+    public float get2() {
         return getValue(2);
     }
 
-    float get3() {
+    public float get3() {
         return getValue(3);
     }
 
