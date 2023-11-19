@@ -71,7 +71,7 @@ public class IDLReaderTest {
         Assert.assertEquals("int", idlMethod.parameters.get(1).type);
         Assert.assertEquals("NormalClassTest", idlMethod.parameters.get(2).type);
         Assert.assertEquals("normalClass", idlMethod.parameters.get(2).name);
-        Assert.assertEquals("FloatArray", idlMethod.parameters.get(3).type);
+        Assert.assertEquals("IDLFloatArray", idlMethod.parameters.get(3).type);
         Assert.assertTrue(idlMethod.parameters.get(3).isArray);
         Assert.assertEquals("vertices", idlMethod.parameters.get(3).name);
         Assert.assertTrue(idlMethod.parameters.get(2).isRef);
