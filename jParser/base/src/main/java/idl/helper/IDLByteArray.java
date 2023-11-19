@@ -4,29 +4,6 @@ import idl.IDLBase;
 
 public class IDLByteArray extends IDLBase {
 
-    public static IDLByteArray TMP1_1 = new IDLByteArray(1);
-    public static IDLByteArray TMP1_2 = new IDLByteArray(1);
-
-    public static IDLByteArray TMP2_1 = new IDLByteArray(2);
-    public static IDLByteArray TMP2_2 = new IDLByteArray(2);
-
-    public static IDLByteArray TMP3_1 = new IDLByteArray(3);
-    public static IDLByteArray TMP3_2 = new IDLByteArray(3);
-
-    public static IDLByteArray TMP4_1 = new IDLByteArray(4);
-    public static IDLByteArray TMP4_2 = new IDLByteArray(4);
-
-    public static void disposeTEMP() {
-        TMP1_1.dispose();
-        TMP1_2.dispose();
-        TMP2_1.dispose();
-        TMP2_2.dispose();
-        TMP3_1.dispose();
-        TMP3_2.dispose();
-        TMP4_1.dispose();
-        TMP4_2.dispose();
-    }
-
     public IDLByteArray(int size) {
     }
 
