@@ -4,27 +4,27 @@ import idl.IDLBase;
 
 public class IDLIntArray extends IDLBase {
 
-    public static IDLIntArray tmp1_1 = new IDLIntArray(1);
-    public static IDLIntArray tmp1_2 = new IDLIntArray(1);
+    public static IDLIntArray TMP1_1 = new IDLIntArray(1);
+    public static IDLIntArray TMP1_2 = new IDLIntArray(1);
 
-    public static IDLIntArray tmp2_1 = new IDLIntArray(2);
-    public static IDLIntArray tmp2_2 = new IDLIntArray(2);
+    public static IDLIntArray TMP2_1 = new IDLIntArray(2);
+    public static IDLIntArray TMP2_2 = new IDLIntArray(2);
 
-    public static IDLIntArray tmp3_1 = new IDLIntArray(3);
-    public static IDLIntArray tmp3_2 = new IDLIntArray(3);
+    public static IDLIntArray TMP3_1 = new IDLIntArray(3);
+    public static IDLIntArray TMP3_2 = new IDLIntArray(3);
 
-    public static IDLIntArray tmp4_1 = new IDLIntArray(4);
-    public static IDLIntArray tmp4_2 = new IDLIntArray(4);
+    public static IDLIntArray TMP4_1 = new IDLIntArray(4);
+    public static IDLIntArray TMP4_2 = new IDLIntArray(4);
 
     public static void disposeTEMP() {
-        tmp1_1.dispose();
-        tmp1_2.dispose();
-        tmp2_1.dispose();
-        tmp2_2.dispose();
-        tmp3_1.dispose();
-        tmp3_2.dispose();
-        tmp4_1.dispose();
-        tmp4_2.dispose();
+        TMP1_1.dispose();
+        TMP1_2.dispose();
+        TMP2_1.dispose();
+        TMP2_2.dispose();
+        TMP3_1.dispose();
+        TMP3_2.dispose();
+        TMP4_1.dispose();
+        TMP4_2.dispose();
     }
 
     public IDLIntArray(int size) {
