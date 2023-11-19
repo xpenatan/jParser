@@ -13,19 +13,19 @@ public class IDLHelper {
     }
 
     public static String getCArray(String type) {
-        if(type.equals("BoolArray")) {
+        if(type.equals("IDLBoolArray")) {
             return "bool *";
         }
-        else if(type.equals("IntArray")) {
+        else if(type.equals("IDLIntArray")) {
             return "int *";
         }
-        else if(type.equals("FloatArray")) {
+        else if(type.equals("IDLFloatArray")) {
             return "float *";
         }
-        else if(type.equals("DoubleArray")) {
+        else if(type.equals("IDLDoubleArray")) {
             return "double *";
         }
-        else if(type.equals("ByteArray")) {
+        else if(type.equals("IDLByteArray")) {
             return "char *";
         }
         return null;

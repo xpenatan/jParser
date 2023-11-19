@@ -79,19 +79,19 @@ public class IDLParameter {
 
         // Convert to array object
         if(type.equals("int[]")) {
-            type = "IntArray";
+            type = "IDLIntArray";
         }
         else if(type.equals("float[]")) {
-            type = "FloatArray";
+            type = "IDLFloatArray";
         }
         else if(type.equals("byte[]")) {
-            type = "ByteArray";
+            type = "IDLByteArray";
         }
         else if(type.equals("boolean[]")) {
-            type = "BoolArray";
+            type = "IDLBoolArray";
         }
         else if(type.equals("double[]")) {
-            type = "DoubleArray";
+            type = "IDLDoubleArray";
         }
 
         name = s1[s1.length - 1];

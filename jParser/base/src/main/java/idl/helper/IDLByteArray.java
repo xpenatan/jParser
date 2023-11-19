@@ -2,9 +2,32 @@ package idl.helper;
 
 import idl.IDLBase;
 
-public class ByteArray extends IDLBase {
+public class IDLByteArray extends IDLBase {
 
-    public ByteArray(int size) {
+    public static IDLByteArray tmp1_1 = new IDLByteArray(1);
+    public static IDLByteArray tmp1_2 = new IDLByteArray(1);
+
+    public static IDLByteArray tmp2_1 = new IDLByteArray(2);
+    public static IDLByteArray tmp2_2 = new IDLByteArray(2);
+
+    public static IDLByteArray tmp3_1 = new IDLByteArray(3);
+    public static IDLByteArray tmp3_2 = new IDLByteArray(3);
+
+    public static IDLByteArray tmp4_1 = new IDLByteArray(4);
+    public static IDLByteArray tmp4_2 = new IDLByteArray(4);
+
+    public static void disposeTEMP() {
+        tmp1_1.dispose();
+        tmp1_2.dispose();
+        tmp2_1.dispose();
+        tmp2_2.dispose();
+        tmp3_1.dispose();
+        tmp3_2.dispose();
+        tmp4_1.dispose();
+        tmp4_2.dispose();
+    }
+
+    public IDLByteArray(int size) {
     }
 
     public void copy(byte [] array) {
@@ -22,8 +45,8 @@ public class ByteArray extends IDLBase {
     public native long getPointer();
     public native int getSize();
 
-    public static void arraycopy(byte[] src,  int  srcPos,
-                                 ByteArray dest, int destPos,
+    public static void arraycopy(byte[] src, int  srcPos,
+                                 IDLByteArray dest, int destPos,
                                  int length) {
         int srcP = srcPos;
         int destP = destPos;
@@ -37,7 +60,7 @@ public class ByteArray extends IDLBase {
         }
     }
 
-    public static void arraycopy(ByteArray src,  int  srcPos,
+    public static void arraycopy(IDLByteArray src, int  srcPos,
                                  byte[] dest, int destPos,
                                  int length) {
         int srcP = srcPos;

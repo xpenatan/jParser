@@ -12,7 +12,7 @@ import com.github.xpenatan.jparser.example.lib.ExampleLibLoader;
 import com.github.xpenatan.jparser.example.lib.NormalClass;
 import com.github.xpenatan.jparser.example.lib.OperatorClass;
 import com.github.xpenatan.jparser.example.lib.ReturnClass;
-import com.github.xpenatan.jparser.example.lib.idl.helper.FloatArray;
+import com.github.xpenatan.jparser.example.lib.idl.helper.IDLFloatArray;
 
 public class AppTest extends ApplicationAdapter {
     private boolean init = false;
@@ -51,7 +51,7 @@ public class AppTest extends ApplicationAdapter {
         ret1 = normalClass.addIntValue(a1, b1);
         System.out.println("addIntValue " + a1 + " + " + b1 + " = " + ret1);
 
-        FloatArray array = new FloatArray(1);
+        IDLFloatArray array = new IDLFloatArray(1);
         array.setValue(0, 10);
         float value = array.getValue(0);
         System.out.println("VALUE: " + value);
@@ -71,7 +71,7 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("returnValueObject: " + returnValueObject.get_value());
 
         normalClass.printText(10, "printText HELLO");
-        FloatArray floatArray = new FloatArray(1);
+        IDLFloatArray floatArray = IDLFloatArray.tmp1_1;
         long pointer = floatArray.getPointer();
         System.out.println("pointer: " + pointer);
         normalClass.setArray(floatArray);

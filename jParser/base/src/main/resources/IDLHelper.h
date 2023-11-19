@@ -3,13 +3,13 @@
 #include <stddef.h>     // NULL
 #include <stdint.h>     // intptr_t
 
-class BoolArray {
+class IDLBoolArray {
     private:
         int size;
     public:
         bool * data;
-        BoolArray(int size) { data = NULL; resize(size); }
-        ~BoolArray() { if(data != NULL) { deleteData(); } }
+        IDLBoolArray(int size) { data = NULL; resize(size); }
+        ~IDLBoolArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();
@@ -31,13 +31,13 @@ class BoolArray {
         int getSize() { return size; }
 };
 
-class IntArray {
+class IDLIntArray {
     private:
         int size;
     public:
         int * data;
-        IntArray(int size) { data = NULL; resize(size); }
-        ~IntArray() { if(data != NULL) { deleteData(); } }
+        IDLIntArray(int size) { data = NULL; resize(size); }
+        ~IDLIntArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();
@@ -59,13 +59,13 @@ class IntArray {
         int getSize() { return size; }
 };
 
-class FloatArray {
+class IDLFloatArray {
     private:
         int size;
     public:
         float * data;
-        FloatArray(int size) { data = NULL; resize(size); }
-        ~FloatArray() { if(data != NULL) { deleteData(); } }
+        IDLFloatArray(int size) { data = NULL; resize(size); }
+        ~IDLFloatArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();
@@ -87,13 +87,13 @@ class FloatArray {
         int getSize() { return size; }
 };
 
-class DoubleArray {
+class IDLDoubleArray {
     private:
         int size;
     public:
         double * data;
-        DoubleArray(int size) { data = NULL; resize(size); }
-        ~DoubleArray() { if(data != NULL) { deleteData(); } }
+        IDLDoubleArray(int size) { data = NULL; resize(size); }
+        ~IDLDoubleArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();
@@ -115,13 +115,13 @@ class DoubleArray {
         int getSize() { return size; }
 };
 
-class ByteArray {
+class IDLByteArray {
     private:
         int size;
     public:
         char * data;
-        ByteArray(int size) { data = NULL; resize(size); }
-        ~ByteArray() { if(data != NULL) { deleteData(); } }
+        IDLByteArray(int size) { data = NULL; resize(size); }
+        ~IDLByteArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();
