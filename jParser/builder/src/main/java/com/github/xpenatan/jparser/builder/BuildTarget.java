@@ -29,6 +29,9 @@ public abstract class BuildTarget {
 
     public final ArrayList<String> headerDirs = new ArrayList<>();
     public final ArrayList<String> cppIncludes = new ArrayList<>();
+
+    /** Includes only files with this suffix */
+    public String filterCPPSuffix = ".cpp";
     public ArrayList<String> cppCompiler = new ArrayList<>();
     public ArrayList<String> linkerCompiler = new ArrayList<>();
     public String compilerOutputCommand = "-o";
@@ -62,9 +65,9 @@ public abstract class BuildTarget {
 
         setup(config);
 
-        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppIncludes));
+        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppIncludes, filterCPPSuffix));
         for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
-            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppIncludes);
+            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppIncludes, filterCPPSuffix);
             cppFiles.addAll(cppFiles1);
         }
 
@@ -198,9 +201,9 @@ public abstract class BuildTarget {
         }
     }
 
-    public static ArrayList<CustomFileDescriptor> getCPPFiles(CustomFileDescriptor dir, ArrayList<String> cppIncludes) {
+    public static ArrayList<CustomFileDescriptor> getCPPFiles(CustomFileDescriptor dir, ArrayList<String> cppIncludes, String cppSuffix) {
         ArrayList<CustomFileDescriptor> files = new ArrayList<>();
-        getAllFiles(dir, files, ".cpp");
+        getAllFiles(dir, files, cppSuffix);
         for(int i = 0; i < files.size(); i++) {
             // Remove file that does not match
             CustomFileDescriptor fileDescriptor = files.get(i);

@@ -64,9 +64,9 @@ public class AndroidTarget extends BuildTarget {
         }
         linkerFlagsStr = linkerFlagsStr.trim();
 
-        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppIncludes));
+        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppIncludes, filterCPPSuffix));
         for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
-            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppIncludes);
+            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppIncludes, filterCPPSuffix);
             cppFiles.addAll(cppFiles1);
         }
 
