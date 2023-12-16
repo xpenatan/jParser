@@ -22,7 +22,7 @@ public class AndroidTarget extends BuildTarget {
         cppFlags.add("-fvisibility=hidden");
         linkerFlags.add("-lm");
 
-        cppIncludes.add("**/jniglue/JNIGlue.cpp");
+        cppInclude.add("**/jniglue/JNIGlue.cpp");
         headerDirs.add("jni-headers/");
         headerDirs.add("jni-headers/linux");
     }
@@ -64,9 +64,9 @@ public class AndroidTarget extends BuildTarget {
         }
         linkerFlagsStr = linkerFlagsStr.trim();
 
-        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppIncludes, filterCPPSuffix));
+        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppInclude, cppExclude, filterCPPSuffix));
         for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
-            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppIncludes, filterCPPSuffix);
+            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
             cppFiles.addAll(cppFiles1);
         }
 

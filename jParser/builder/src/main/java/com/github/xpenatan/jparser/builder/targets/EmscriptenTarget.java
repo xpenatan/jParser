@@ -58,7 +58,7 @@ public class EmscriptenTarget extends BuildTarget {
         }
 
         if(compileGlueCode) {
-            cppIncludes.add("**/jsglue/*.cpp");
+            cppInclude.add("**/jsglue/*.cpp");
             copyHelperClass(jsglueDir);
         }
 

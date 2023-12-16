@@ -89,7 +89,7 @@ public class Main {
         windowsTarget.isStatic = true;
         windowsTarget.addJNI = false;
         windowsTarget.headerDirs.add("-Isrc/exampleLib");
-        windowsTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+        windowsTarget.cppInclude.add("**/src/exampleLib/**.cpp");
         multiTarget.add(windowsTarget);
 
         WindowsTarget glueTarget = new WindowsTarget();
@@ -109,7 +109,7 @@ public class Main {
             EmscriptenTarget emscriptenTarget = new EmscriptenTarget(idlReader);
             emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
             emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-            emscriptenTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+            emscriptenTarget.cppInclude.add("**/src/exampleLib/**.cpp");
             multiTarget.add(emscriptenTarget);
         }
         else if(buildType == 1) {
@@ -118,7 +118,7 @@ public class Main {
             libTarget.isStatic = true;
             libTarget.compileGlueCode = false;
             libTarget.headerDirs.add("-Isrc/exampleLib");
-            libTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+            libTarget.cppInclude.add("**/src/exampleLib/**.cpp");
             multiTarget.add(libTarget);
 
             // Compile glue code and link to make js file
@@ -133,7 +133,7 @@ public class Main {
             sideTarget.libName = "exampleLibside";
             sideTarget.headerDirs.add("-Isrc/exampleLib");
             sideTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-            sideTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+            sideTarget.cppInclude.add("**/src/exampleLib/**.cpp");
             sideTarget.cppFlags.add("-fPIC");
             sideTarget.cppFlags.add("-sEXPORT_ALL=1");
             sideTarget.linkerFlags.add("-v");
@@ -162,7 +162,7 @@ public class Main {
 
         AndroidTarget androidTarget = new AndroidTarget();
         androidTarget.headerDirs.add("src/exampleLib");
-        androidTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
+        androidTarget.cppInclude.add("**/src/exampleLib/**.cpp");
 
         multiTarget.add(androidTarget);
 

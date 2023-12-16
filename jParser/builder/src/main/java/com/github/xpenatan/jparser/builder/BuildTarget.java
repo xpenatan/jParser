@@ -28,7 +28,8 @@ public abstract class BuildTarget {
     protected final ArrayList<String> linkerCommands = new ArrayList<>();
 
     public final ArrayList<String> headerDirs = new ArrayList<>();
-    public final ArrayList<String> cppIncludes = new ArrayList<>();
+    public final ArrayList<String> cppInclude = new ArrayList<>();
+    public final ArrayList<String> cppExclude = new ArrayList<>();
 
     /** Includes only files with this suffix */
     public String filterCPPSuffix = ".cpp";
@@ -65,9 +66,9 @@ public abstract class BuildTarget {
 
         setup(config);
 
-        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppIncludes, filterCPPSuffix));
+        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppInclude, cppExclude, filterCPPSuffix));
         for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
-            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppIncludes, filterCPPSuffix);
+            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
             cppFiles.addAll(cppFiles1);
         }
 
@@ -162,11 +163,11 @@ public abstract class BuildTarget {
         String fullLibName = libPrefix + libName + libSuffix;
         String libPath = libsDir + "/" + fullLibName;
 
-        ArrayList<CustomFileDescriptor> files = new ArrayList<>();
-        getAllFiles(childTarget, files, "");
+        ArrayList<CustomFileDescriptor> compiledObjects = new ArrayList<>();
+        getAllFiles(childTarget, compiledObjects, "");
 
         String compiledPaths = "";
-        for(CustomFileDescriptor file : files) {
+        for(CustomFileDescriptor file : compiledObjects) {
             String path = file.path();
             compiledPaths = compiledPaths + "\n" + path;
         }
@@ -188,7 +189,7 @@ public abstract class BuildTarget {
     }
 
     protected void addJNIHeadersAndGlueCode() {
-        cppIncludes.add("**/jniglue/*.cpp");
+        cppInclude.add("**/jniglue/*.cpp");
         headerDirs.add("-Ijni-headers/");
         if(isUnix()) {
             headerDirs.add("-Ijni-headers/linux");
@@ -201,7 +202,7 @@ public abstract class BuildTarget {
         }
     }
 
-    public static ArrayList<CustomFileDescriptor> getCPPFiles(CustomFileDescriptor dir, ArrayList<String> cppIncludes, String cppSuffix) {
+    public static ArrayList<CustomFileDescriptor> getCPPFiles(CustomFileDescriptor dir, ArrayList<String> cppIncludes, ArrayList<String> cppExcludes, String cppSuffix) {
         ArrayList<CustomFileDescriptor> files = new ArrayList<>();
         getAllFiles(dir, files, cppSuffix);
         for(int i = 0; i < files.size(); i++) {
@@ -215,6 +216,14 @@ public abstract class BuildTarget {
                 boolean matches = pathMatcher.matches(of);
                 if(matches) {
                     remove = false;
+                    break;
+                }
+            }
+            for(String cppExclude : cppExcludes) {
+                PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + cppExclude);
+                boolean matches = pathMatcher.matches(of);
+                if(matches) {
+                    remove = true;
                     break;
                 }
             }

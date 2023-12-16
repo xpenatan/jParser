@@ -13,7 +13,7 @@ public class IOSTarget extends BuildTarget {
         linkerFlags.add("-shared");
         linkerFlags.add("-stdlib=libc++");
 
-        cppIncludes.add("**/jniglue/JNIGlue.cpp");
+        cppInclude.add("**/jniglue/JNIGlue.cpp");
         headerDirs.add("jni-headers/");
         headerDirs.add("jni-headers/mac");
 
