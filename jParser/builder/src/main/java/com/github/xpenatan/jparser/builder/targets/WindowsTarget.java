@@ -14,13 +14,13 @@ public class WindowsTarget extends BuildTarget {
         cppFlags.add("-c");
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
-//        cppFlags.add("-mfpmath=sse");
-//        cppFlags.add("-msse2");
-//        cppFlags.add("-fmessage-length=0");
-//        cppFlags.add("-m64");
-////        cppFlags.add("-std=c++17");
-//        cppFlags.add("-Wno-unused-variable");
-//        cppFlags.add("-Wno-unused-but-set-variable");
+        cppFlags.add("-mfpmath=sse");
+        cppFlags.add("-msse2");
+        cppFlags.add("-fmessage-length=0");
+        cppFlags.add("-m64");
+        cppFlags.add("-std=c++17");
+        cppFlags.add("-Wno-unused-variable");
+        cppFlags.add("-Wno-unused-but-set-variable");
     }
 
     @Override
@@ -32,13 +32,13 @@ public class WindowsTarget extends BuildTarget {
             libSuffix = "64.a";
         }
         else {
-//            linkerFlags.add("-fPIC");
+            linkerFlags.add("-fPIC");
             linkerFlags.add("-shared");
-//            linkerFlags.add("-static");
-//            linkerFlags.add("-static-libgcc");
-//            linkerFlags.add("-static-libstdc++");
-//            linkerFlags.add("-Wl,--kill-at");
-//            linkerFlags.add("-m64");
+            linkerFlags.add("-static");
+            linkerFlags.add("-static-libgcc");
+            linkerFlags.add("-static-libstdc++");
+            linkerFlags.add("-Wl,--kill-at");
+            linkerFlags.add("-m64");
             libSuffix = "64.dll";
         }
 
