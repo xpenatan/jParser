@@ -62,9 +62,11 @@ public class EmscriptenTarget extends BuildTarget {
             copyHelperClass(jsglueDir);
         }
 
-        CustomFileDescriptor mergedIDLFile = mergeIDLFile(jsglueDir);
-        if(!createGlueCode(mergedIDLFile, jsglueDir)) {
-            return false;
+        if(idlReader != null) {
+            CustomFileDescriptor mergedIDLFile = mergeIDLFile(jsglueDir);
+            if(!createGlueCode(mergedIDLFile, jsglueDir)) {
+                return false;
+            }
         }
 
         if(isStatic) {
