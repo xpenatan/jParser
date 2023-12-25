@@ -43,6 +43,7 @@ public abstract class BuildTarget {
     public String libPrefix = "";
     public String libName = "";
     public String libDirSuffix = "";
+    public String linkObjSuffix = ".o";
 
     public boolean shouldCompile = true;
     public boolean shouldLink = true;
@@ -104,7 +105,6 @@ public abstract class BuildTarget {
         compilerCommands.add("@" + cppList.path());
         System.out.println("##### COMPILE #####");
         boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
-        cppList.delete();
         if(!flag) {
             return false;
         }
@@ -164,7 +164,7 @@ public abstract class BuildTarget {
         String libPath = libsDir + "/" + fullLibName;
 
         ArrayList<CustomFileDescriptor> compiledObjects = new ArrayList<>();
-        getAllFiles(childTarget, compiledObjects, "");
+        getAllFiles(childTarget, compiledObjects, linkObjSuffix);
 
         String compiledPaths = "";
         for(CustomFileDescriptor file : compiledObjects) {
