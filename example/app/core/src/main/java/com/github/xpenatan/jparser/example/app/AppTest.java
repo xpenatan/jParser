@@ -14,6 +14,7 @@ import com.github.xpenatan.jparser.example.lib.OperatorClass;
 import com.github.xpenatan.jparser.example.lib.ReturnClass;
 import com.github.xpenatan.jparser.example.lib.idl.helper.IDLFloat;
 import com.github.xpenatan.jparser.example.lib.idl.helper.IDLFloatArray;
+import com.lib.ext.CustomLib;
 
 public class AppTest extends ApplicationAdapter {
     private boolean init = false;
@@ -90,6 +91,8 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("operatorClass1 copy: " + operatorClass1.get_value());
 
         testPrimitive();
+
+        CustomLib.print();
     }
 
     private void testPrimitive() {

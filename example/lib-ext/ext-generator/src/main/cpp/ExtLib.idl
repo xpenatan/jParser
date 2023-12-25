@@ -1,0 +1,3 @@
+interface CustomLib {
+    static void print();
+};

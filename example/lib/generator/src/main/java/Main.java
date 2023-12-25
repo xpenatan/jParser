@@ -14,6 +14,7 @@ import com.github.xpenatan.jparser.cpp.NativeCPPGenerator;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.teavm.TeaVMCodeParser;
 import java.io.File;
+import java.io.IOException;
 
 public class Main {
 
@@ -77,24 +78,31 @@ public class Main {
 //        iosTarget.headerDirs.add("-Isrc/exampleLib");
 //        iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
-        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlReader), getAndroidTarget());
+//        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlReader), getAndroidTarget());
 //        JBuilder.build(buildConfig, getEmscriptenTarget(idlReader));
+        JBuilder.build(buildConfig, getWindowTarget());
     }
 
-    private static BuildMultiTarget getWindowTarget() {
+    private static BuildMultiTarget getWindowTarget() throws IOException {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
-        // Make a static library
-        WindowsTarget windowsTarget = new WindowsTarget();
-        windowsTarget.isStatic = true;
-        windowsTarget.addJNI = false;
-        windowsTarget.headerDirs.add("-Isrc/exampleLib");
-        windowsTarget.cppInclude.add("**/src/exampleLib/**.cpp");
-        multiTarget.add(windowsTarget);
+        String libPath = new File("../../lib-ext/").getCanonicalPath().replace("\\", "/");
+        String libCPPPath = libPath + "/ext-generator/build/c++";
+
+//        // Make a static library
+//        WindowsTarget windowsTarget = new WindowsTarget();
+//        windowsTarget.isStatic = true;
+//        windowsTarget.addJNI = false;
+//        windowsTarget.headerDirs.add("-Isrc/exampleLib");
+//        windowsTarget.cppInclude.add("**/src/exampleLib/**.cpp");
+//        multiTarget.add(windowsTarget);
 
         WindowsTarget glueTarget = new WindowsTarget();
         glueTarget.linkerFlags.add("../../libs/windows/exampleLib64.a");
+        glueTarget.linkerFlags.add(libCPPPath + "/libs/windows/extlib64.a");
+        glueTarget.headerDirs.add("-include" + libCPPPath + "/src/extlib/CustomLib.h");
         glueTarget.headerDirs.add("-Isrc/exampleLib");
+        glueTarget.headerDirs.add("-I" + libCPPPath + "src/extlib");
         multiTarget.add(glueTarget);
 
         return multiTarget;
