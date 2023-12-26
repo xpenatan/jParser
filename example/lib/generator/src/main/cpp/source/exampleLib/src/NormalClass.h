@@ -1,13 +1,11 @@
+#pragma once
+
 #include "ParentClass.h"
 #include "subpackage/ParamData.h"
 #include "ReturnClass.h"
 #include "InterfaceClass.h"
-#include "OperatorClass.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-#ifndef NORMALCLASS_H
-#define NORMALCLASS_H
 
 enum EnumLib : int {
     DEFAULT = 10,
@@ -79,5 +77,3 @@ public:
     bool printText(int dummyParam, const char* text);
     void setArray(float* array);
 };
-
-#endif  //NORMALCLASS_H

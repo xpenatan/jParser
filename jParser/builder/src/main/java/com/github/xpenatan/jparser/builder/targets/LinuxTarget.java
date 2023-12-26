@@ -4,8 +4,6 @@ import com.github.xpenatan.jparser.builder.BuildTarget;
 
 public class LinuxTarget extends BuildTarget {
 
-    public boolean addJNI = true;
-
     public LinuxTarget() {
         this.libDirSuffix = "linux/";
         this.tempBuildDir = "target/linux";
@@ -26,9 +24,5 @@ public class LinuxTarget extends BuildTarget {
         linkerFlags.add("-m64");
         libSuffix = "64.so";
         libPrefix = "lin";
-
-        if(addJNI) {
-            addJNIHeadersAndGlueCode();
-        }
     }
 }

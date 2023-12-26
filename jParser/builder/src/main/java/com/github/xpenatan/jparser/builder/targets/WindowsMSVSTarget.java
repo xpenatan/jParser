@@ -37,9 +37,5 @@ public class WindowsMSVSTarget extends BuildTarget {
         }
         linkerCompiler.add("/NOLOGO");
         linkerCompiler.add("/MACHINE:X64");
-
-        if(addJNI) {
-            addJNIHeadersAndGlueCode();
-        }
     }
 }

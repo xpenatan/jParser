@@ -1,7 +1,6 @@
-#include "InterfaceClass.h"
+#pragma once
 
-#ifndef DEFAULTINTERFACE_H
-#define DEFAULTINTERFACE_H
+#include "InterfaceClass.h"
 
 class DefaultInterface : public InterfaceClass
 {
@@ -11,5 +10,3 @@ public:
         data.floatData = 99.9;
     }
 };
-
-#endif  //DEFAULTINTERFACE_H

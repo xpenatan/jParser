@@ -78,31 +78,37 @@ public class Main {
 //        iosTarget.headerDirs.add("-Isrc/exampleLib");
 //        iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
-//        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlReader), getAndroidTarget());
+        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlReader), getAndroidTarget());
 //        JBuilder.build(buildConfig, getEmscriptenTarget(idlReader));
-        JBuilder.build(buildConfig, getWindowTarget());
+//        JBuilder.build(buildConfig, getWindowTarget());
     }
 
     private static BuildMultiTarget getWindowTarget() throws IOException {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String libBuildPath = new File("./build/c++/").getCanonicalPath().replace("\\", "/");
 
-        String libPath = new File("../../lib-ext/").getCanonicalPath().replace("\\", "/");
-        String libCPPPath = libPath + "/ext-generator/build/c++";
-
-//        // Make a static library
-//        WindowsTarget windowsTarget = new WindowsTarget();
-//        windowsTarget.isStatic = true;
-//        windowsTarget.addJNI = false;
-//        windowsTarget.headerDirs.add("-Isrc/exampleLib");
-//        windowsTarget.cppInclude.add("**/src/exampleLib/**.cpp");
-//        multiTarget.add(windowsTarget);
+        // Make a static library
+        WindowsTarget windowsTarget = new WindowsTarget();
+        windowsTarget.isStatic = true;
+        windowsTarget.headerDirs.add("-Isrc/exampleLib");
+        windowsTarget.cppInclude.add("**/src/exampleLib/**.cpp");
+        multiTarget.add(windowsTarget);
 
         WindowsTarget glueTarget = new WindowsTarget();
-        glueTarget.linkerFlags.add("../../libs/windows/exampleLib64.a");
-        glueTarget.linkerFlags.add(libCPPPath + "/libs/windows/extlib64.a");
-        glueTarget.headerDirs.add("-include" + libCPPPath + "/src/extlib/CustomLib.h");
+        glueTarget.addJNIHeaders();
         glueTarget.headerDirs.add("-Isrc/exampleLib");
-        glueTarget.headerDirs.add("-I" + libCPPPath + "src/extlib");
+        glueTarget.headerDirs.add("-I" + libBuildPath + "/src/jniglue");
+        glueTarget.linkerFlags.add("../../libs/windows/exampleLib64.a");
+        glueTarget.cppInclude.add(libBuildPath + "/src/jniglue/JNIGlue.cpp");
+
+//        BuildExtCode.build();
+//        String libExtPath = new File("../../lib-ext/").getCanonicalPath().replace("\\", "/");
+//        String libExtCPPPath = libExtPath + "/ext-generator/build/c++";
+//        glueTarget.headerDirs.add("-I" + libExtCPPPath + "/src/extlib");
+//        glueTarget.headerDirs.add("-I" + libExtCPPPath + "/src/jniglue");
+//        glueTarget.linkerFlags.add(libExtCPPPath + "/libs/windows/extlib64.a");
+//        glueTarget.headerDirs.add("-include" + libExtCPPPath + "/src/jniglue/JNIGlue.h");
+
         multiTarget.add(glueTarget);
 
         return multiTarget;
@@ -169,6 +175,7 @@ public class Main {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
         AndroidTarget androidTarget = new AndroidTarget();
+        androidTarget.addJNIHeaders();
         androidTarget.headerDirs.add("src/exampleLib");
         androidTarget.cppInclude.add("**/src/exampleLib/**.cpp");
 

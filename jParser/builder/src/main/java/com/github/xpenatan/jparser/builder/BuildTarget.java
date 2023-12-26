@@ -48,7 +48,6 @@ public abstract class BuildTarget {
     public boolean shouldCompile = true;
     public boolean shouldLink = true;
 
-    public boolean addJNI = true;
     public boolean isStatic = false;
 
     protected BuildTarget() {
@@ -188,8 +187,7 @@ public abstract class BuildTarget {
         linkerCommands.add(linkerOutputCommand + libPath);
     }
 
-    protected void addJNIHeadersAndGlueCode() {
-        cppInclude.add("**/jniglue/*.cpp");
+    public void addJNIHeaders() {
         headerDirs.add("-Ijni-headers/");
         if(isUnix()) {
             headerDirs.add("-Ijni-headers/linux");

@@ -19,6 +19,7 @@ dependencies {
         implementation(project(":jParser:cpp"))
         implementation(project(":jParser:builder"))
     }
+    implementation(project(":example:lib-ext:ext-generator"))
 }
 
 tasks.register<JavaExec>("build_project") {

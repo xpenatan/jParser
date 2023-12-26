@@ -14,11 +14,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class BuildCustomCode {
+public class BuildExtCode {
 
     public static void build() throws Exception {
         String libName = "extlib";
         String basePackage = "com.lib.ext";
+
+        JParser.CREATE_IDL_HELPER = false;
 
         String libPath = new File("../../lib").getCanonicalPath().replace("\\", "/");
         String idlPath = new File("src/main/cpp/ExtLib.idl").getCanonicalPath();
@@ -36,9 +38,7 @@ public class BuildCustomCode {
         Path copyOut = new File(libDestinationPath).toPath();
         FileHelper.copyDir(new File("src/main/cpp/cpp-source/custom").toPath(), copyOut);
 
-        JParser.CREATE_IDL_HELPER = false;
-
-        CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath, false);
+        CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath);
         CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, cppSourceDir);
         cppParser.generateClass = true;
         JParser.generate(cppParser, baseJavaDir, "../ext-core/src/main/java");
@@ -61,7 +61,6 @@ public class BuildCustomCode {
         WindowsTarget windowsTarget = new WindowsTarget();
         windowsTarget.headerDirs.add("-I" + libCppPath + "/src/imgui");
         windowsTarget.isStatic = true;
-        windowsTarget.addJNI = true;
         windowsTarget.headerDirs.add("-Isrc/extlib/");
         windowsTarget.cppInclude.add("**/extlib/*.cpp");
         multiTarget.add(windowsTarget);

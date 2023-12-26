@@ -1,5 +1,4 @@
-#ifndef OPERATORCLASS_H
-#define OPERATORCLASS_H
+#pragma once
 
 class OperatorClass
 {
@@ -8,5 +7,3 @@ public:
     OperatorClass& operator=(const OperatorClass& other);
     float operator+(OperatorClass toAdd);
 };
-
-#endif  //OPERATORCLASS_H

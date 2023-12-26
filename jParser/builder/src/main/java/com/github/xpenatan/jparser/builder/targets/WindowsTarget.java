@@ -5,8 +5,6 @@ import com.github.xpenatan.jparser.builder.BuildTarget;
 
 public class WindowsTarget extends BuildTarget {
 
-    public boolean addJNI = true;
-
     public WindowsTarget() {
         this.libDirSuffix = "windows/";
         this.tempBuildDir = "target/windows";
@@ -32,19 +30,16 @@ public class WindowsTarget extends BuildTarget {
             libSuffix = "64.a";
         }
         else {
-            linkerFlags.add("-fPIC");
+//            linkerFlags.add("-fPIC");
             linkerFlags.add("-shared");
-            linkerFlags.add("-static");
-            linkerFlags.add("-static-libgcc");
-            linkerFlags.add("-static-libstdc++");
-            linkerFlags.add("-Wl,--kill-at");
+//            linkerFlags.add("-static");
+//            linkerFlags.add("-static-libgcc");
+//            linkerFlags.add("-static-libstdc++");
+//            linkerFlags.add("-Wl,--kill-at");
             linkerFlags.add("-m64");
             libSuffix = "64.dll";
         }
 
-        if(addJNI) {
-            addJNIHeadersAndGlueCode();
-        }
     }
 
     @Override

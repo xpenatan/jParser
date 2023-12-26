@@ -1,7 +1,6 @@
-#include "subpackage/ParamData.h"
+#pragma once
 
-#ifndef INTERFACECLASS_H
-#define INTERFACECLASS_H
+#include "subpackage/ParamData.h"
 
 class InterfaceClass
 {
@@ -10,5 +9,3 @@ public:
 
     virtual void onParamCall(ParamData& data) const = 0;
 };
-
-#endif  //INTERFACECLASS_H

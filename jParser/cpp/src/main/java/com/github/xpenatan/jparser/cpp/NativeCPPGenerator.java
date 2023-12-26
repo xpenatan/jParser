@@ -95,15 +95,15 @@ public class NativeCPPGenerator implements CppGenerator {
 
     private HashSet<String> includes = new HashSet<>();
 
-    private boolean exportJNIMethodsOnly;
+    private boolean exportJNIMethods;
 
     public NativeCPPGenerator(String cppDestinationDir) {
         this(cppDestinationDir, true);
     }
 
-    public NativeCPPGenerator(String cppDestinationDir, boolean exportJNIMethodsOnly) {
+    public NativeCPPGenerator(String cppDestinationDir, boolean exportJNIMethods) {
         try {
-            this.exportJNIMethodsOnly = exportJNIMethodsOnly;
+            this.exportJNIMethods = exportJNIMethods;
             this.cppDestinationDir = new File(cppDestinationDir).getCanonicalPath() + File.separator;
         } catch(IOException e) {
             throw new RuntimeException(e);
@@ -113,6 +113,7 @@ public class NativeCPPGenerator implements CppGenerator {
     private void print(PrintType type, String text) {
         if(init) {
             init = false;
+            headerPrinter.append("#pragma once\n");
             headerPrinter.append("#include <jni.h>\n");
             headerPrinter.append("#include \"" + helperName + "\"\n");
             mainPrinter.append("\n");
@@ -232,7 +233,7 @@ public class NativeCPPGenerator implements CppGenerator {
 
         String JNIExport = "";
 
-        if(exportJNIMethodsOnly) {
+        if(exportJNIMethods) {
             JNIExport = "JNIEXPORT ";
         }
 
@@ -259,9 +260,12 @@ public class NativeCPPGenerator implements CppGenerator {
         String gluePathStr = cppDestinationDir + File.separator + ".." + File.separator + "jniglue" + File.separator;
         CustomFileDescriptor gluePath = new CustomFileDescriptor(gluePathStr);
 
-        InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
-        CustomFileDescriptor helperFile = gluePath.child(helperName);
-        helperFile.write(idlHelperClass, false);
+        if(JParser.CREATE_IDL_HELPER) {
+            // Create cpp file if flag is enable
+            InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
+            CustomFileDescriptor helperFile = gluePath.child(helperName);
+            helperFile.write(idlHelperClass, false);
+        }
 
         String cppGlueHPath = gluePathStr + cppGlueName + ".h";
         String cppGluePath = gluePathStr + cppGlueName + ".cpp";
