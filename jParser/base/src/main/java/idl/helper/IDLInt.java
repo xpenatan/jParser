@@ -14,6 +14,11 @@ public class IDLInt extends IDLIntArray {
         super(1);
     }
 
+    public IDLInt(int value) {
+        this();
+        set(value);
+    }
+
     public IDLInt set(int value) {
         setValue(0, value);
         return this;

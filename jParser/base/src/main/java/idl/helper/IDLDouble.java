@@ -14,6 +14,11 @@ public class IDLDouble extends IDLDoubleArray {
         super(1);
     }
 
+    public IDLDouble(double value) {
+        this();
+        set(value);
+    }
+
     public IDLDouble set(double value) {
         setValue(0, value);
         return this;

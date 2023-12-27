@@ -14,6 +14,11 @@ public class IDLFloat extends IDLFloatArray {
         super(1);
     }
 
+    public IDLFloat(float value) {
+        this();
+        set(value);
+    }
+
     public IDLFloat set(float value) {
         setValue(0, value);
         return this;

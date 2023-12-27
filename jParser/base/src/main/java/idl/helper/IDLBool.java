@@ -14,6 +14,11 @@ public class IDLBool extends IDLBoolArray {
         super(1);
     }
 
+    public IDLBool(boolean value) {
+        this();
+        set(value);
+    }
+
     public IDLBool set(boolean value) {
         setValue(0, value);
         return this;
