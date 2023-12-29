@@ -19,6 +19,8 @@ import java.util.Scanner;
 
 public class NativeCPPGenerator implements CppGenerator {
 
+    public static boolean SKIP_GLUE_CODE;
+
     private static final Map<String, ArgumentType> plainOldDataTypes;
     private static final Map<String, ArgumentType> arrayTypes;
     private static final Map<String, ArgumentType> bufferTypes;
@@ -270,7 +272,9 @@ public class NativeCPPGenerator implements CppGenerator {
         String cppGlueHPath = gluePathStr + cppGlueName + ".h";
         String cppGluePath = gluePathStr + cppGlueName + ".cpp";
         CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);
-        fileDescriptor.writeString(code, false);
+        if(!SKIP_GLUE_CODE) {
+            fileDescriptor.writeString(code, false);
+        }
 
         CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
         String include = "#include \"" + cppGlueName + ".h\"";
