@@ -312,7 +312,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                     NodeList<Parameter> parameters = method.getParameters();
                     for(Parameter parameter : parameters) {
                         Type type = parameter.getType();
-                        addImport(jParser, unit, returnType);
+                        addImport(jParser, unit, type);
                     }
                 }
             }
