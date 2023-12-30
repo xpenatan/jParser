@@ -253,49 +253,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             JParserItem parserItem = parserItems.get(i);
             CompilationUnit unit = parserItem.unit;
 
-            NodeList<ImportDeclaration> imports = unit.getImports();
-
-            ArrayList<ImportDeclaration> importsToRemove = new ArrayList<>();
-
-            for(ImportDeclaration anImport : imports) {
-                Name name = anImport.getName();
-                String identifier = name.getIdentifier();
-                JParserItem parserUnitItem = jParser.getParserUnitItem(identifier);
-                if(parserUnitItem != null) {
-                    importsToRemove.add(anImport);
-                }
-            }
-
-            for(ImportDeclaration anImport : importsToRemove) {
-                Name name = anImport.getName();
-                String identifier = name.getIdentifier();
-                JParserItem parserUnitItem = jParser.getParserUnitItem(identifier);
-                if(parserUnitItem != null) {
-                    CompilationUnit importUnit = parserUnitItem.unit;
-                    anImport.remove();
-
-                    boolean skipUnit = false;
-
-                    if(!JParser.CREATE_IDL_HELPER) {
-                        // Hack to look for idl classes that was generated with the main lib
-                        ArrayList<String> baseIDLClasses = getBaseIDLClasses();
-                        for(String baseIDLClass : baseIDLClasses) {
-                            String[] split = baseIDLClass.split("\\.");
-                            String s = split[split.length - 1];
-                            if(s.equals(identifier)) {
-                                unit.addImport(baseIDLClass);
-                                skipUnit = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if(!skipUnit) {
-                        String importName = importUnit.getPackageDeclaration().get().getNameAsString() + "." + parserUnitItem.className;
-                        unit.addImport(importName);
-                    }
-                }
-            }
+            // Add missing imports
             ClassOrInterfaceDeclaration classDeclaration = parserItem.getClassDeclaration();
             if(classDeclaration != null) {
                 // add import by looking into fields and methods
@@ -313,6 +271,51 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                     for(Parameter parameter : parameters) {
                         Type type = parameter.getType();
                         addImport(jParser, unit, type);
+                    }
+                }
+            }
+
+            {
+                // Update imports if its invalid.
+                NodeList<ImportDeclaration> imports = unit.getImports();
+                ArrayList<ImportDeclaration> importsToRemove = new ArrayList<>();
+                for(ImportDeclaration anImport : imports) {
+                    Name name = anImport.getName();
+                    String identifier = name.getIdentifier();
+                    JParserItem parserUnitItem = jParser.getParserUnitItem(identifier);
+                    if(parserUnitItem != null) {
+                        importsToRemove.add(anImport);
+                    }
+                }
+
+                for(ImportDeclaration anImport : importsToRemove) {
+                    Name name = anImport.getName();
+                    String identifier = name.getIdentifier();
+                    JParserItem parserUnitItem = jParser.getParserUnitItem(identifier);
+                    if(parserUnitItem != null) {
+                        CompilationUnit importUnit = parserUnitItem.unit;
+                        anImport.remove();
+
+                        boolean skipUnit = false;
+
+                        if(!JParser.CREATE_IDL_HELPER) {
+                            // Hack to look for idl classes that was generated with the main lib
+                            ArrayList<String> baseIDLClasses = getBaseIDLClasses();
+                            for(String baseIDLClass : baseIDLClasses) {
+                                String[] split = baseIDLClass.split("\\.");
+                                String s = split[split.length - 1];
+                                if(s.equals(identifier)) {
+                                    unit.addImport(baseIDLClass);
+                                    skipUnit = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(!skipUnit) {
+                            String importName = importUnit.getPackageDeclaration().get().getNameAsString() + "." + parserUnitItem.className;
+                            unit.addImport(importName);
+                        }
                     }
                 }
             }
