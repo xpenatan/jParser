@@ -19,7 +19,8 @@ public class WindowsTarget extends BuildTarget {
         cppFlags.add("-std=c++17");
         cppFlags.add("-Wno-unused-variable");
         cppFlags.add("-Wno-unused-but-set-variable");
-        cppFlags.add("-Wno-int-to-pointer-cast");
+        cppFlags.add("-Wno-format-security");
+        cppFlags.add("-Wno-int-to-void-pointer-cast");
     }
 
     @Override
