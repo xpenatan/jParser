@@ -60,8 +60,9 @@ public class AppTest extends ApplicationAdapter {
         normalClass.setString(string);
 
         IDLString retString = normalClass.getString();
-
         System.out.println("retString: " + retString.c_str());
+        IDLString retStringValue = normalClass.getStringValue();
+        System.out.println("retStringValue: " + retStringValue.c_str());
 
         int version = normalClass.getVersion();
         System.out.println("Version " + version);

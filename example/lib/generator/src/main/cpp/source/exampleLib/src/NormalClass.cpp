@@ -151,3 +151,9 @@ std::string& NormalClass::getString()
     std::string* test = new std::string("HELLO STRING");
     return *test;
 }
+
+std::string NormalClass::getStringValue()
+{
+    std::string test = "HELLO STRING VALUE";
+    return test;
+}

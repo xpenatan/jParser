@@ -82,4 +82,5 @@ public:
 
     void setString(std::string& text);
     std::string& getString();
+    std::string getStringValue();
 };
