@@ -71,6 +71,8 @@ public class Main {
         );
 
         String teaVMgenDir = "../teavm/src/main/java/";
+
+//        EmscriptenTarget.SKIP_GLUE_CODE = true;
         TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, customSourceDir);
         JParser.generate(teavmParser, baseJavaDir, teaVMgenDir);
 

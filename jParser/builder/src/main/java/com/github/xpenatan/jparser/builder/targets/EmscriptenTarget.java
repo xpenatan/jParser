@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 public class EmscriptenTarget extends BuildTarget {
 
+    public static boolean SKIP_GLUE_CODE;
+
     private IDLReader idlReader;
 
     public boolean isStatic = false;
@@ -64,7 +66,7 @@ public class EmscriptenTarget extends BuildTarget {
 
         if(idlReader != null) {
             CustomFileDescriptor mergedIDLFile = mergeIDLFile(jsglueDir);
-            if(!createGlueCode(mergedIDLFile, jsglueDir)) {
+            if(!SKIP_GLUE_CODE && !createGlueCode(mergedIDLFile, jsglueDir)) {
                 return false;
             }
         }

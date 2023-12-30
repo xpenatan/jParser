@@ -112,6 +112,10 @@ enum EnumWithinClass {
   "NormalClass::e_val"
 };
 
+enum EnumClassWithinClass {
+  "EnumClassWithinClass::testEnum"
+};
+
 enum EnumInNamespace {
 // [-NAMESPACE]
     "EnumNamespace::e_namespace_val"

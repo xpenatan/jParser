@@ -139,6 +139,10 @@ public class IDLReader {
         int size = idlFile.lines.size();
         for(int i = 0; i < size; i++) {
             String line = idlFile.lines.get(i).trim();
+            String nextLine = "";
+            if(i+1 < size) {
+                nextLine = idlFile.lines.get(i+1).trim();
+            }
             if(line.startsWith("//") || line.isEmpty()) {
                 if(foundStartClass || foundStartEnum) {
                     String cmd = line.replace("//", "").trim();
@@ -152,7 +156,7 @@ public class IDLReader {
             boolean justAdded = false;
 
             if(!foundStartEnum) {
-                if(line.startsWith("enum ")) {
+                if(line.startsWith("enum ") || IDLClassHeader.isLineHeader(line) && nextLine.startsWith("enum ")) {
                     foundStartEnum = true;
                     classLines.clear();
                 }
@@ -173,7 +177,7 @@ public class IDLReader {
             }
 
             if(!foundStartClass) {
-                if(line.startsWith("interface ") || IDLClassHeader.isLineHeader(line)) {
+                if(line.startsWith("interface ") || IDLClassHeader.isLineHeader(line) && nextLine.startsWith("interface ")) {
                     foundStartClass = true;
                     classLines.clear();
                     justAdded = true;
@@ -187,9 +191,9 @@ public class IDLReader {
                 if(line.endsWith("};")) {
                     int nextLineIdx = i + 1;
                     if(nextLineIdx < size) {
-                        String nextLine = idlFile.lines.get(nextLineIdx);
-                        if(nextLine.contains(" implements ")) {
-                            classLines.add(nextLine.trim());
+                        String nextL = idlFile.lines.get(nextLineIdx);
+                        if(nextL.contains(" implements ")) {
+                            classLines.add(nextL.trim());
                             i++; // add i so nextLine is not skipped on next loop
                         }
                     }

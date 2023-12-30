@@ -13,9 +13,7 @@ enum EnumLib : int {
     SECOND,
 };
 
-typedef int EnumTwoLib;
-
-enum EnumTwoLib_ {
+enum EnumTwoLib {
     EnumTwoLib_THIRD = 15,
     EnumTwoLib_FOURTH
 };
@@ -35,6 +33,10 @@ private:
 public:
     enum EnumWithinClass {
         e_val = 34
+    };
+
+    enum class EnumClassWithinClass {
+        testEnum = 35
     };
 
     int hiddenInt = 1;

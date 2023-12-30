@@ -8,4 +8,5 @@
 #include "DefaultParamsClass.h"
 
 typedef NormalClass::EnumWithinClass EnumWithinClass;
+typedef NormalClass::EnumClassWithinClass EnumClassWithinClass;
 typedef EnumNamespace::EnumInNamespace EnumInNamespace;

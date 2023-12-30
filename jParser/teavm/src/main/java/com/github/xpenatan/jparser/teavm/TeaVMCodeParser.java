@@ -445,12 +445,21 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
         String content  = "";
         if(enumStr.contains("::")) {
+            String[] split = enumStr.split("::");
+            String leftName = split[0];
+            String rightName = split[1];
             boolean isNameSpaceEnum = idlEnum.isNameSpace;
             if(isNameSpaceEnum) {
-                enumStr = enumStr.split("::")[1];
+                enumStr = rightName;
             }
             else {
-                enumStr = enumStr.replace("::", ".");
+                if(leftName.equals(idlEnum.name)) {
+                    // enum class cannot have child class name
+                    enumStr = rightName;
+                }
+                else {
+                    enumStr = enumStr.replace("::", ".");
+                }
             }
         }
         content = ENUM_GET_INT_TEMPLATE.replace(TEMPLATE_TAG_ENUM, enumStr).replace(TEMPLATE_TAG_MODULE, module);
