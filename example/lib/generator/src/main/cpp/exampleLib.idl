@@ -52,6 +52,9 @@ interface NormalClass {
     boolean printText(long dummyParam, [Const]DOMString text);
 
     void setArray(float[] array);
+
+    void setString([Ref] IDLString text);
+    [Ref] IDLString getString();
 };
 NormalClass implements ParentClass;
 

@@ -1,3 +1,13 @@
+
+interface IDLString {
+    void IDLString();
+    void clear();
+    void append([Const] DOMString text);
+    void append([Const] DOMString text, long size);
+    byte at(long index);
+    [Const] DOMString c_str();
+};
+
 interface IDLBoolArray {
     void IDLBoolArray(long size);
     void resize(long size);

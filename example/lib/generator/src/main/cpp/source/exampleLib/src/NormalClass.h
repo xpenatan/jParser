@@ -6,6 +6,7 @@
 #include "InterfaceClass.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 
 enum EnumLib : int {
     DEFAULT = 10,
@@ -78,4 +79,7 @@ public:
     void enumTwoVoidParam(EnumTwoLib value);
     bool printText(int dummyParam, const char* text);
     void setArray(float* array);
+
+    void setString(std::string& text);
+    std::string& getString();
 };

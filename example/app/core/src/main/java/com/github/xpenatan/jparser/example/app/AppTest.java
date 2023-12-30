@@ -15,6 +15,7 @@ import com.github.xpenatan.jparser.example.lib.OperatorClass;
 import com.github.xpenatan.jparser.example.lib.ReturnClass;
 import com.github.xpenatan.jparser.example.lib.idl.helper.IDLFloat;
 import com.github.xpenatan.jparser.example.lib.idl.helper.IDLFloatArray;
+import com.github.xpenatan.jparser.example.lib.idl.helper.IDLString;
 
 public class AppTest extends ApplicationAdapter {
     private boolean init = false;
@@ -46,6 +47,21 @@ public class AppTest extends ApplicationAdapter {
         init = true;
 
         NormalClass normalClass = new NormalClass();
+
+        IDLString string = new IDLString();
+
+        string.append("MY TEXT");
+        string.append(" HELLO");
+
+        String text = string.c_str();
+
+        System.out.println("String: " + text);
+
+        normalClass.setString(string);
+
+        IDLString retString = normalClass.getString();
+
+        System.out.println("retString: " + retString.c_str());
 
         int version = normalClass.getVersion();
         System.out.println("Version " + version);

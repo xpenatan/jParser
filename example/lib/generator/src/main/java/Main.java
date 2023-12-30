@@ -58,6 +58,7 @@ public class Main {
         // Move custom code to destination build directory
         FileHelper.copyDir(customSourceDir, libDestinationPath);
 
+//        NativeCPPGenerator.SKIP_GLUE_CODE = true;
         CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath);
         CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, customSourceDir);
         cppParser.generateClass = true;

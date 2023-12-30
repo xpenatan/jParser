@@ -141,3 +141,13 @@ void NormalClass::setArray(float* array)
 {
     array[0] = 1.2;
 }
+
+void NormalClass::setString(std::string& text)
+{
+}
+
+std::string& NormalClass::getString()
+{
+    std::string* test = new std::string("HELLO STRING");
+    return *test;
+}

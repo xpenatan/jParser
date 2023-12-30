@@ -1,7 +1,10 @@
 #pragma once
 
+#include <string>
 #include <stddef.h>     // NULL
 #include <stdint.h>     // intptr_t
+
+typedef std::string IDLString;
 
 class IDLBoolArray {
     private:
