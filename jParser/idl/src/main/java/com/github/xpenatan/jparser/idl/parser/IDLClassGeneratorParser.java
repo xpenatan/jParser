@@ -92,6 +92,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 if(!JParser.CREATE_IDL_HELPER) {
                     jParserItem.notAllowed = true;
                 }
+                jParserItem.isIDL = true;
                 jParser.unitArray.add(jParserItem);
             } catch(IOException e) {
                 throw new RuntimeException(e);

@@ -27,7 +27,7 @@ public class IDLString extends IDLBase {
         return jstrBuf;
     */
     /*[-teaVM;-NATIVE]
-        var jsObj = exampleLib.wrapPointer(this_addr, exampleLib.IDLString);
+        var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].IDLString);
         var returnedJSObj = jsObj.c_str();
         return returnedJSObj;
     */

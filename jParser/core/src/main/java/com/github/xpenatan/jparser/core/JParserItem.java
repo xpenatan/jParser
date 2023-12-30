@@ -20,6 +20,7 @@ public class JParserItem {
     public String packagePathName;
     public String className = "";
     public boolean notAllowed;
+    public boolean isIDL;
 
     public JParserItem(CompilationUnit unit, String inputPath, String destinationBaseDir) {
         this.unit = unit;

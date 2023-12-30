@@ -45,7 +45,7 @@ public class IDLAttributeParser {
 
         JParserItem parserUnitItem = jParser.getParserUnitItem(type.toString());
         if(parserUnitItem != null) {
-            if(parserUnitItem.notAllowed) {
+            if(parserUnitItem.notAllowed && !parserUnitItem.isIDL) {
                 // skip generating set/get for class that is not allowed to have get and set. Ex Enum
                 return;
             }
