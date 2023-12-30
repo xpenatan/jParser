@@ -17,11 +17,8 @@ public class WindowsTarget extends BuildTarget {
         cppFlags.add("-fmessage-length=0");
         cppFlags.add("-m64");
         cppFlags.add("-std=c++17");
-        cppFlags.add("-Wno-unused-variable");
-        cppFlags.add("-Wno-unused-but-set-variable");
-        cppFlags.add("-Wno-format-security");
-        cppFlags.add("-Wno-int-to-void-pointer-cast");
-        cppFlags.add("-Wno-int-to-pointer-cast");
+        cppFlags.add("-w");
+        cppFlags.add("-Wno-format");
     }
 
     @Override
