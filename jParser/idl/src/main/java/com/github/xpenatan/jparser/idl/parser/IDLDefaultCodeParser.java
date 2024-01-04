@@ -152,4 +152,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
+    public String getIDLMethodName(String name) {
+        return name;
+    }
 }

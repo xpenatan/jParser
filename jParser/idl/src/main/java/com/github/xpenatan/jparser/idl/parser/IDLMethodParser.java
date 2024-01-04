@@ -111,8 +111,9 @@ public class IDLMethodParser {
             }
         }
 
+        String updatedMethodName = idlParser.getIDLMethodName(methodName);
         ArrayList<IDLParameter> parameters = idlMethod.parameters;
-        MethodDeclaration methodDeclaration = classOrInterfaceDeclaration.addMethod(methodName, Modifier.Keyword.PUBLIC);
+        MethodDeclaration methodDeclaration = classOrInterfaceDeclaration.addMethod(updatedMethodName, Modifier.Keyword.PUBLIC);
         methodDeclaration.setStatic(idlMethod.isStaticMethod);
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter idlParameter = parameters.get(i);

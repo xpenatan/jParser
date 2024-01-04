@@ -269,7 +269,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     private void setupMethodGenerated(IDLMethod idlMethod, String param, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         Type returnType = methodDeclaration.getType();
         String returnTypeStr = idlMethod.returnType;
-        String methodName = methodDeclaration.getNameAsString();
+        String methodName = idlMethod.name;
         String classTypeName = classDeclaration.getNameAsString();
         IDLClass idlClass = idlMethod.idlFile.getClass(classTypeName);
         if(idlClass != null) {
