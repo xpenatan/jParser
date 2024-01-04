@@ -5,13 +5,21 @@ import com.github.xpenatan.jparser.builder.BuildTarget;
 
 public class WindowsTarget extends BuildTarget {
 
+    public static boolean DEBUG_BUILD;
+
     public WindowsTarget() {
         this.libDirSuffix = "windows/";
         this.tempBuildDir = "target/windows";
 
         cppFlags.add("-c");
         cppFlags.add("-Wall");
-        cppFlags.add("-O2");
+        if(DEBUG_BUILD) {
+            cppFlags.add("-O0");
+            cppFlags.add("-g");
+        }
+        else {
+            cppFlags.add("-O2");
+        }
         cppFlags.add("-mfpmath=sse");
         cppFlags.add("-msse2");
         cppFlags.add("-fmessage-length=0");
@@ -19,6 +27,7 @@ public class WindowsTarget extends BuildTarget {
         cppFlags.add("-std=c++17");
         cppFlags.add("-w");
         cppFlags.add("-Wno-format");
+
     }
 
     @Override
