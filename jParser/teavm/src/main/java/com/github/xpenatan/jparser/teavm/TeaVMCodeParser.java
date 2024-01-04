@@ -252,7 +252,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
         convertLongToInt(methodDeclaration.getBody().get(), nativeMethod);
         String returnType = idlMethod.returnType;
-        String methodName = methodDeclaration.getNameAsString();
+        String methodName = idlMethod.name;
         String param = getParams(idlMethod, methodDeclaration);
         String annotationParam = "";
 
