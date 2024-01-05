@@ -10,13 +10,13 @@ import java.util.ArrayList;
 public class EmscriptenTarget extends BuildTarget {
 
     public static boolean SKIP_GLUE_CODE;
+    public final static String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
 
     private IDLReader idlReader;
 
     public boolean isStatic = false;
     public boolean compileGlueCode = true;
 
-    String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
 
     public EmscriptenTarget(IDLReader idlReader) {
