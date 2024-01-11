@@ -1,10 +1,6 @@
 package com.github.xpenatan.jparser.cpp;
 
-import com.badlogic.gdx.jnigen.FileDescriptor;
-import com.badlogic.gdx.jnigen.parsing.CMethodParser;
-import com.badlogic.gdx.jnigen.parsing.JavaMethodParser;
-import com.badlogic.gdx.jnigen.parsing.JniHeaderCMethodParser;
-import com.github.javaparser.Position;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -15,226 +11,286 @@ import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Scanner;
 
-/**
- * Modified version of gdx-jnigen NativeCodeGenerator
- */
-@Deprecated
 public class NativeCPPGenerator implements CppGenerator {
 
-    private CustomFileDescriptor jniDir;
-    private String classpath;
-    private CMethodParser cMethodParser = new JniHeaderCMethodParser();
+    public static boolean SKIP_GLUE_CODE;
 
-    private static final String JNI_ARG_PREFIX = "obj_";
-    private static final String JNI_RETURN_VALUE = "JNI_returnValue";
-    private static final String JNI_WRAPPER_PREFIX = "wrapped_";
+    private static final Map<String, ArgumentType> plainOldDataTypes;
+    private static final Map<String, ArgumentType> arrayTypes;
+    private static final Map<String, ArgumentType> bufferTypes;
+    private static final Map<String, ArgumentType> otherTypes;
+    private static final Map<String, String> valueTypes;
 
-    private static final Map<String, JavaMethodParser.ArgumentType> plainOldDataTypes;
-    private static final Map<String, JavaMethodParser.ArgumentType> arrayTypes;
-    private static final Map<String, JavaMethodParser.ArgumentType> bufferTypes;
-    private static final Map<String, JavaMethodParser.ArgumentType> otherTypes;
-
-    private int startCode = 0;
+    private static String helperName = "IDLHelper.h";
 
     static {
-        plainOldDataTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
-        plainOldDataTypes.put("boolean", JavaMethodParser.ArgumentType.Boolean);
-        plainOldDataTypes.put("byte", JavaMethodParser.ArgumentType.Byte);
-        plainOldDataTypes.put("char", JavaMethodParser.ArgumentType.Char);
-        plainOldDataTypes.put("short", JavaMethodParser.ArgumentType.Short);
-        plainOldDataTypes.put("int", JavaMethodParser.ArgumentType.Integer);
-        plainOldDataTypes.put("long", JavaMethodParser.ArgumentType.Long);
-        plainOldDataTypes.put("float", JavaMethodParser.ArgumentType.Float);
-        plainOldDataTypes.put("double", JavaMethodParser.ArgumentType.Double);
+        valueTypes = new HashMap<>();
+        valueTypes.put(ArgumentType.Boolean.getJniType(), "Z");
+        valueTypes.put(ArgumentType.Byte.getJniType(), "B");
+        valueTypes.put(ArgumentType.Char.getJniType(), "C");
+        valueTypes.put(ArgumentType.Short.getJniType(), "S");
+        valueTypes.put(ArgumentType.Integer.getJniType(), "I");
+        valueTypes.put(ArgumentType.Long.getJniType(), "J");
+        valueTypes.put(ArgumentType.Float.getJniType(), "F");
+        valueTypes.put(ArgumentType.Double.getJniType(), "D");
+        valueTypes.put(ArgumentType.FloatArray.getJniType(), "_3F");
+        valueTypes.put(ArgumentType.IntegerArray.getJniType(), "_3I");
+        valueTypes.put(ArgumentType.DoubleArray.getJniType(), "_3D");
+        valueTypes.put(ArgumentType.LongArray.getJniType(), "_3J");
+        valueTypes.put(ArgumentType.ShortArray.getJniType(), "_3S");
+        valueTypes.put(ArgumentType.CharArray.getJniType(), "_3C");
+        valueTypes.put(ArgumentType.ByteArray.getJniType(), "_3B");
+        valueTypes.put(ArgumentType.BooleanArray.getJniType(), "_3Z");
+        valueTypes.put(ArgumentType.Object.getJniType(), "L");
+        valueTypes.put(ArgumentType.String.getJniType(), "Ljava_lang_String_2");
 
-        arrayTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
-        arrayTypes.put("boolean", JavaMethodParser.ArgumentType.BooleanArray);
-        arrayTypes.put("byte", JavaMethodParser.ArgumentType.ByteArray);
-        arrayTypes.put("char", JavaMethodParser.ArgumentType.CharArray);
-        arrayTypes.put("short", JavaMethodParser.ArgumentType.ShortArray);
-        arrayTypes.put("int", JavaMethodParser.ArgumentType.IntegerArray);
-        arrayTypes.put("long", JavaMethodParser.ArgumentType.LongArray);
-        arrayTypes.put("float", JavaMethodParser.ArgumentType.FloatArray);
-        arrayTypes.put("double", JavaMethodParser.ArgumentType.DoubleArray);
+        plainOldDataTypes = new HashMap<String, ArgumentType>();
+        plainOldDataTypes.put("boolean", ArgumentType.Boolean);
+        plainOldDataTypes.put("byte", ArgumentType.Byte);
+        plainOldDataTypes.put("char", ArgumentType.Char);
+        plainOldDataTypes.put("short", ArgumentType.Short);
+        plainOldDataTypes.put("int", ArgumentType.Integer);
+        plainOldDataTypes.put("long", ArgumentType.Long);
+        plainOldDataTypes.put("float", ArgumentType.Float);
+        plainOldDataTypes.put("double", ArgumentType.Double);
 
-        bufferTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
-        bufferTypes.put("Buffer", JavaMethodParser.ArgumentType.Buffer);
-        bufferTypes.put("ByteBuffer", JavaMethodParser.ArgumentType.ByteBuffer);
-        bufferTypes.put("CharBuffer", JavaMethodParser.ArgumentType.CharBuffer);
-        bufferTypes.put("ShortBuffer", JavaMethodParser.ArgumentType.ShortBuffer);
-        bufferTypes.put("IntBuffer", JavaMethodParser.ArgumentType.IntBuffer);
-        bufferTypes.put("LongBuffer", JavaMethodParser.ArgumentType.LongBuffer);
-        bufferTypes.put("FloatBuffer", JavaMethodParser.ArgumentType.FloatBuffer);
-        bufferTypes.put("DoubleBuffer", JavaMethodParser.ArgumentType.DoubleBuffer);
+        arrayTypes = new HashMap<String, ArgumentType>();
+        arrayTypes.put("boolean", ArgumentType.BooleanArray);
+        arrayTypes.put("byte", ArgumentType.ByteArray);
+        arrayTypes.put("char", ArgumentType.CharArray);
+        arrayTypes.put("short", ArgumentType.ShortArray);
+        arrayTypes.put("int", ArgumentType.IntegerArray);
+        arrayTypes.put("long", ArgumentType.LongArray);
+        arrayTypes.put("float", ArgumentType.FloatArray);
+        arrayTypes.put("double", ArgumentType.DoubleArray);
 
-        otherTypes = new HashMap<String, JavaMethodParser.ArgumentType>();
-        otherTypes.put("String", JavaMethodParser.ArgumentType.String);
-        otherTypes.put("Class", JavaMethodParser.ArgumentType.Class);
-        otherTypes.put("Throwable", JavaMethodParser.ArgumentType.Throwable);
+        bufferTypes = new HashMap<String, ArgumentType>();
+        bufferTypes.put("Buffer", ArgumentType.Buffer);
+        bufferTypes.put("ByteBuffer", ArgumentType.ByteBuffer);
+        bufferTypes.put("CharBuffer", ArgumentType.CharBuffer);
+        bufferTypes.put("ShortBuffer", ArgumentType.ShortBuffer);
+        bufferTypes.put("IntBuffer", ArgumentType.IntBuffer);
+        bufferTypes.put("LongBuffer", ArgumentType.LongBuffer);
+        bufferTypes.put("FloatBuffer", ArgumentType.FloatBuffer);
+        bufferTypes.put("DoubleBuffer", ArgumentType.DoubleBuffer);
+
+        otherTypes = new HashMap<String, ArgumentType>();
+        otherTypes.put("String", ArgumentType.String);
+        otherTypes.put("Class", ArgumentType.Class);
+        otherTypes.put("Throwable", ArgumentType.Throwable);
     }
 
-    private ArrayList<CppParserItem> parserItems = new ArrayList<>();
-    ArrayList<JavaMethodParser.JavaSegment> javaSegments = new ArrayList<>();
+    private String cppDestinationDir;
+    private String cppGlueName = "JNIGlue";
 
-    public NativeCPPGenerator(String classpath, String jniDir) {
+    StringBuilder mainPrinter = new StringBuilder();
+    StringBuilder headerPrinter = new StringBuilder();
+    StringBuilder codePrinter = new StringBuilder();
+
+    private boolean init = true;
+
+    private HashSet<String> includes = new HashSet<>();
+
+    private boolean exportJNIMethods;
+
+    public NativeCPPGenerator(String cppDestinationDir) {
+        this(cppDestinationDir, true);
+    }
+
+    public NativeCPPGenerator(String cppDestinationDir, boolean exportJNIMethods) {
         try {
-            jniDir = jniDir.replace("\\", File.separator);
-            this.jniDir = new CustomFileDescriptor(new File(jniDir).getCanonicalPath());
-            this.classpath = classpath;
-            if(!this.jniDir.exists()) {
-                this.jniDir.mkdirs();
-            }
-        }
-        catch(IOException e) {
+            this.exportJNIMethods = exportJNIMethods;
+            this.cppDestinationDir = new File(cppDestinationDir).getCanonicalPath() + File.separator;
+        } catch(IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public void addParseFile(JParser jParser, JParserItem jParserItem) {
-        String sourceBaseDir = jParser.sourceDir;
-        String inputJavaPath = jParserItem.inputPath;
-        String destinationJavaPath = jParserItem.destinationPath;
-
-        if(javaSegments.size() == 0) {
-            return;
+    private void print(PrintType type, String text) {
+        if(init) {
+            init = false;
+            headerPrinter.append("#pragma once\n");
+            headerPrinter.append("#include <jni.h>\n");
+            headerPrinter.append("#include \"" + helperName + "\"\n");
+            mainPrinter.append("\n");
+            mainPrinter.append("extern \"C\" {\n");
+            mainPrinter.append("\n");
         }
-
-        CppParserItem parserItem = new CppParserItem();
-        parserItem.sourceBaseDir = sourceBaseDir;
-        parserItem.inputJavaPath = inputJavaPath;
-        parserItem.destinationJavaPath = destinationJavaPath;
-        parserItem.javaSegments.addAll(javaSegments);
-        parserItem.javaSegments.sort(new Comparator<JavaMethodParser.JavaSegment>() {
-            @Override
-            public int compare(JavaMethodParser.JavaSegment o1, JavaMethodParser.JavaSegment o2) {
-                if(o1.getStartIndex() < o2.getStartIndex()) {
-                    return -1;
-                }
-                else if(o1.getStartIndex() > o2.getStartIndex()) {
-                    return 1;
-                }
-                return 0;
-            }
-        });
-
-        parserItems.add(parserItem);
-        startCode = 0;
-        javaSegments.clear();
-    }
-
-    @Override
-    public void generate(JParser jParser) {
-        FileDescriptor cppBuild = FileDescriptor.tempDirectory("cppBuild");
-        String tempPath = cppBuild.file().getAbsolutePath();
-        String classes = "";
-        for(JParserItem item : jParser.unitArray) {
-            classes += item.destinationPath + " ";
+        if(type == PrintType.HEADER) {
+            headerPrinter.append(text + "\n");
         }
-        File file = new File(jParser.genDir);
-        String command = "javac -cp " + this.classpath + " -d " + tempPath + " " + classes;
-
-        System.out.println("command: " + command);
-        CPPBuildHelper.startProcess(file, command);
-
-        String classpath = this.classpath;
-        classpath += tempPath + ";";
-        this.classpath = classpath;
-
-        for(int i = 0; i < parserItems.size(); i++) {
-            CppParserItem parserItem = parserItems.get(i);
-            if(parserItem.javaSegments.size() != 0) {
-                parseItem(parserItem);
-            }
+        else if(type == PrintType.MAIN) {
+            mainPrinter.append(text + "\n");
         }
-    }
-
-    private void parseItem(CppParserItem parserItem) {
-        String destinationJavaPath = parserItem.destinationJavaPath;
-        String sourceBaseDir = parserItem.sourceBaseDir;
-        String inputJavaPath = parserItem.inputJavaPath;
-        ArrayList<JavaMethodParser.JavaSegment> javaSegments = parserItem.javaSegments;
-        try {
-            generateHFiles(destinationJavaPath);
-            String className = getNativeClassFileName(sourceBaseDir, inputJavaPath);
-
-            List<FileDescriptor> hFiles = new ArrayList<>();
-            for(FileDescriptor f : new FileDescriptor(jniDir.path()).list()) {
-                if(f.name().startsWith(className) && f.name().endsWith(".h")) {
-                    hFiles.add(f);
-                }
-            }
-
-            FileDescriptor cppFile = new FileDescriptor(jniDir + "/" + className + ".cpp");
-            System.out.println("Generating C++: " + cppFile.path());
-            generateCppFile(javaSegments, hFiles, cppFile);
-        }
-        catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void addNativeCode(MethodDeclaration methodDeclaration, String content) {
-        JavaMethodParser.JavaMethod method = createMethod(content, methodDeclaration);
-        if(method != null) {
-            javaSegments.add(method);
+        else if(type == PrintType.CODE) {
+            codePrinter.append(text + "\n");
         }
     }
 
     @Override
     public void addNativeCode(Node node, String content) {
-        int startLine = startCode;
-        int endLine = 0;
-        startCode++;
-        javaSegments.add(new JavaMethodParser.JniSection(content + "\n\n", startLine, endLine));
-        //        node.remove();
-    }
+        Scanner scanner = new Scanner(content);
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+            if(line.startsWith("#include")) {
+                line = line.replace("\\", "/");
+                line = line.replace("/", File.separator);
+                line = line.replaceFirst("\"", "<");
+                line = line.replace("\"", ">");
 
-    private JavaMethodParser.JavaMethod createMethod(String content, MethodDeclaration method) {
-        String className = null;
-        Optional<Node> parentNodeOptional = method.getParentNode();
-        if(parentNodeOptional.isPresent()) {
-            Node parentNode = parentNodeOptional.get();
-            if(parentNode instanceof ClassOrInterfaceDeclaration) {
-                ClassOrInterfaceDeclaration classInterface = (ClassOrInterfaceDeclaration)parentNode;
-                className = classInterface.getNameAsString();
+                if(!includes.contains(line)) {
+                    includes.add(line);
+                    print(PrintType.HEADER, line);
+                }
+            }
+            else {
+                print(PrintType.CODE, line);
             }
         }
-        if(className == null)
-            return null;
-        String name = method.getNameAsString();
-        boolean isStatic = method.isStatic();
-        String returnType = method.getType().toString();
-        ArrayList<JavaMethodParser.Argument> arguments = new ArrayList<JavaMethodParser.Argument>();
-
-        if(method.getParameters() != null) {
-            for(Parameter parameter : method.getParameters()) {
-                arguments.add(new JavaMethodParser.Argument(getArgumentType(parameter), parameter.getNameAsString()));
-            }
-        }
-        Optional<Position> begin = method.getBegin();
-        int lineBegin = 0;
-        int lineEnd = 0;
-        if(begin.isPresent()) {
-            lineBegin = begin.get().line;
-            lineEnd = method.getEnd().get().line;;
-        }
-        return new JavaMethodParser.JavaMethod(className, name, isStatic, returnType, content, arguments, lineBegin, lineEnd);
+        scanner.close();
     }
 
-    private JavaMethodParser.ArgumentType getArgumentType(Parameter parameter) {
+    @Override
+    public void addNativeCode(MethodDeclaration nativeMethod, String content) {
+        String methodName = nativeMethod.getNameAsString();
+        boolean isStatic = nativeMethod.isStatic();
+        ClassOrInterfaceDeclaration classDeclaration = (ClassOrInterfaceDeclaration)nativeMethod.getParentNode().get();
+        CompilationUnit compilationUnit = classDeclaration.findCompilationUnit().get();
+        String packageName = compilationUnit.getPackageDeclaration().get().getNameAsString();
+        String className = classDeclaration.getNameAsString();
+        String packageNameCPP = packageName.replace(".", "_");
+        String returnTypeStr = nativeMethod.getType().toString();
+        String returnType = returnTypeStr.equals("void") ? returnTypeStr : getType(returnTypeStr).getJniType();
+        String params = "(JNIEnv* env, ";
+        if(isStatic) {
+            params += "jclass clazz";
+        }
+        else {
+            params += "jobject object";
+        }
+
+        ArrayList<Argument> arguments = new ArrayList<Argument>();
+        if(nativeMethod.getParameters() != null) {
+            for(Parameter parameter : nativeMethod.getParameters()) {
+                Argument argument = getArgument(parameter);
+                arguments.add(argument);
+            }
+        }
+
+        // https://docs.oracle.com/en/java/javase/17/docs/specs/jni/design.html#native-method-arguments
+
+        String paramsType = "";
+
+        String prefixCode = "";
+        String suffixCode = "";
+
+        for(int i = 0; i < arguments.size(); i++) {
+            Argument argument = arguments.get(i);
+            ArgumentType type = argument.getType();
+            String typeName = type.name();
+            String paramName = argument.getName();
+            String newParamName = paramName;
+            String valueType = argument.getValueType();
+            paramsType += valueType;
+            if(typeName.equals("String")) {
+                newParamName = newParamName + "_string";
+                prefixCode += "char* " + paramName + " = " + newParamName + " == NULL ? NULL : (char*)env->GetStringUTFChars(" + newParamName + ", 0);\n";
+                suffixCode += "if(" + paramName + " != NULL) env->ReleaseStringUTFChars(" + newParamName + ", " + paramName  + ");\n";
+            }
+            params += ", " + type.getJniType() + " " + newParamName;
+        }
+
+        if(!paramsType.isEmpty()) {
+            paramsType = "__" + paramsType;
+        }
+        else {
+            // Not tested in all cases
+            paramsType += "__";
+        }
+
+        params += ")";
+
+        if(methodName.contains("_")) {
+            methodName = methodName.replace("_", "_1");
+        }
+
+        if(className.contains("_")) {
+            className = className.replace("_", "_1");
+        }
+
+        if(content.contains("return")) {
+            content = content.replace("return", returnType + " returnValue =");
+            suffixCode += "return returnValue;";
+        }
+
+        content = prefixCode + "\n" + content + "\n" + suffixCode;
+
+        String fullMethodName =  packageNameCPP + "_" + className + "_" + methodName + paramsType + params;
+
+        String JNIExport = "";
+
+        if(exportJNIMethods) {
+            JNIExport = "JNIEXPORT ";
+        }
+
+        print(PrintType.MAIN, JNIExport + returnType + " JNICALL Java_" + fullMethodName + " {");
+        content = "\t" + content.replace("\n", "\n\t");
+        print(PrintType.MAIN, content);
+        print(PrintType.MAIN, "}");
+        print(PrintType.MAIN, "");
+    }
+
+    @Override
+    public void addParseFile(JParser jParser, JParserItem parserItem) {
+    }
+
+    @Override
+    public void generate(JParser jParser) {
+        headerPrinter.append("\n");
+
+        mainPrinter.insert(0, codePrinter);
+        mainPrinter.insert(0, headerPrinter);
+        print(PrintType.MAIN, "}");
+        String code = mainPrinter.toString();
+
+        String gluePathStr = cppDestinationDir + File.separator + ".." + File.separator + "jniglue" + File.separator;
+        CustomFileDescriptor gluePath = new CustomFileDescriptor(gluePathStr);
+
+        if(JParser.CREATE_IDL_HELPER) {
+            // Create cpp file if flag is enable
+            InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
+            CustomFileDescriptor helperFile = gluePath.child(helperName);
+            helperFile.write(idlHelperClass, false);
+        }
+
+        String cppGlueHPath = gluePathStr + cppGlueName + ".h";
+        String cppGluePath = gluePathStr + cppGlueName + ".cpp";
+        CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);
+        if(!SKIP_GLUE_CODE) {
+            fileDescriptor.writeString(code, false);
+        }
+
+        CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
+        String include = "#include \"" + cppGlueName + ".h\"";
+        cppFile.writeString(include, false);
+    }
+
+    private Argument getArgument(Parameter parameter) {
         String[] typeTokens = parameter.getType().toString().split("\\.");
         String type = typeTokens[typeTokens.length - 1];
+        ArgumentType argumentType = getType(type);
+        String jniType = argumentType.getJniType();
+        String valueType = valueTypes.get(jniType);
+        return new Argument(argumentType, parameter.getNameAsString(), valueType);
+    }
+
+    private ArgumentType getType(String type) {
         int arrayDim = 0;
         for(int i = 0; i < type.length(); i++) {
             if(type.charAt(i) == '[') arrayDim++;
@@ -242,10 +298,10 @@ public class NativeCPPGenerator implements CppGenerator {
         type = type.replace("[", "").replace("]", "");
 
         if(arrayDim >= 1) {
-            if(arrayDim > 1) return JavaMethodParser.ArgumentType.ObjectArray;
-            JavaMethodParser.ArgumentType arrayType = arrayTypes.get(type);
+            if(arrayDim > 1) return ArgumentType.ObjectArray;
+            ArgumentType arrayType = arrayTypes.get(type);
             if(arrayType == null) {
-                return JavaMethodParser.ArgumentType.ObjectArray;
+                return ArgumentType.ObjectArray;
             }
             return arrayType;
         }
@@ -253,345 +309,105 @@ public class NativeCPPGenerator implements CppGenerator {
         if(plainOldDataTypes.containsKey(type)) return plainOldDataTypes.get(type);
         if(bufferTypes.containsKey(type)) return bufferTypes.get(type);
         if(otherTypes.containsKey(type)) return otherTypes.get(type);
-        return JavaMethodParser.ArgumentType.Object;
+        return ArgumentType.Object;
     }
 
-    private String getNativeClassFileName(String sourceDirPath, String filePath) {
-        String className = filePath.replace(sourceDirPath, "").replace('\\', '_').replace('/', '_').replace(".java", "");
-        if(className.startsWith("_")) className = className.substring(1);
-        return className;
-    }
+    public enum ArgumentType {
+        Boolean("jboolean"), Byte("jbyte"), Char("jchar"), Short("jshort"), Integer("jint"), Long("jlong"), Float("jfloat"), Double(
+                "jdouble"), Buffer("jobject"), ByteBuffer("jobject"), CharBuffer("jobject"), ShortBuffer("jobject"), IntBuffer("jobject"), LongBuffer(
+                "jobject"), FloatBuffer("jobject"), DoubleBuffer("jobject"), BooleanArray("jbooleanArray"), ByteArray("jbyteArray"), CharArray(
+                "jcharArray"), ShortArray("jshortArray"), IntegerArray("jintArray"), LongArray("jlongArray"), FloatArray("jfloatArray"), DoubleArray(
+                "jdoubleArray"), String("jstring"), Class("jclass"), Throwable("jthrowable"), Object("jobject"), ObjectArray("jobjectArray");
 
-    private void generateHFiles(String filePath) throws Exception {
-        //Use temporary directory to prevent javac from creating class files somewhere we care about.
-        File tempClassFilesDirectory = Files.createTempDirectory("gdx-jnigen").toFile();
-        String command = "javac -classpath " + classpath + " -d " + tempClassFilesDirectory.getAbsolutePath() + " -h " + jniDir.path() + " " + filePath;
-        System.out.println("JNI Commands: " + command);
-        Process process = Runtime.getRuntime().exec(command);
-        process.waitFor();
-        if(process.exitValue() != 0) {
-            System.out.println();
-            System.out.println("Command: " + command);
-            InputStream errorStream = process.getErrorStream();
-            int c = 0;
-            while((c = errorStream.read()) != -1) {
-                System.out.print((char)c);
-            }
+        private final String jniType;
+
+        ArgumentType (String jniType) {
+            this.jniType = jniType;
         }
 
-        //Recursively delete temporary directory.
-        Files.walk(tempClassFilesDirectory.toPath())
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
-    }
-
-    private void generateCppFile(ArrayList<JavaMethodParser.JavaSegment> javaSegments, List<FileDescriptor> hFiles, FileDescriptor cppFile)
-            throws Exception {
-        StringBuffer buffer = new StringBuffer();
-
-        ArrayList<CMethodParser.CMethod> cMethods = new ArrayList<>();
-        for(FileDescriptor hFile : hFiles) {
-            String headerFileContent = hFile.readString();
-            cMethods.addAll(cMethodParser.parse(headerFileContent).getMethods());
-            emitHeaderInclude(buffer, hFile.name());
+        public boolean isPrimitiveArray () {
+            return toString().endsWith("Array") && this != ObjectArray;
         }
 
-        for(JavaMethodParser.JavaSegment segment : javaSegments) {
-            if(segment instanceof JavaMethodParser.JniSection) {
-                emitJniSection(buffer, (JavaMethodParser.JniSection)segment);
-            }
-
-            if(segment instanceof JavaMethodParser.JavaMethod) {
-                JavaMethodParser.JavaMethod javaMethod = (JavaMethodParser.JavaMethod)segment;
-                if(javaMethod.getNativeCode() == null) {
-                    throw new RuntimeException("Method '" + javaMethod.getName() + "' has no body");
-                }
-                CMethodParser.CMethod cMethod = findCMethod(javaMethod, cMethods);
-                if(cMethod == null)
-                    throw new RuntimeException("Couldn't find C method for Java method '" + javaMethod.getClassName() + "#"
-                                + javaMethod.getName() + "'");
-                emitJavaMethod(buffer, javaMethod, cMethod);
-            }
+        public boolean isBuffer () {
+            return toString().endsWith("Buffer");
         }
-        cppFile.writeString(buffer.toString(), false, "UTF-8");
-    }
 
-    private void emitJniSection(StringBuffer buffer, JavaMethodParser.JniSection section) {
-        emitLineMarker(buffer, section.getStartIndex());
-        buffer.append(section.getNativeCode().replace("\r", ""));
-    }
-
-    private CMethodParser.CMethod findCMethod(JavaMethodParser.JavaMethod javaMethod, ArrayList<CMethodParser.CMethod> cMethods) {
-        for(CMethodParser.CMethod cMethod : cMethods) {
-            String javaMethodName = javaMethod.getName().replace("_", "_1");
-            String javaClassName = javaMethod.getClassName().toString().replace("_", "_1");
-            if(cMethod.getHead().endsWith(javaClassName + "_" + javaMethodName)
-                    || cMethod.getHead().contains(javaClassName + "_" + javaMethodName + "__")) {
-                // FIXME poor man's overloaded method check...
-                // FIXME float test[] won't work, needs to be float[] test.
-                if(cMethod.getArgumentTypes().length - 2 == javaMethod.getArguments().size()) {
-                    boolean match = true;
-                    for(int i = 2; i < cMethod.getArgumentTypes().length; i++) {
-                        String cType = cMethod.getArgumentTypes()[i];
-                        String javaType = javaMethod.getArguments().get(i - 2).getType().getJniType();
-                        if(!cType.equals(javaType)) {
-                            match = false;
-                            break;
-                        }
-                    }
-
-                    if(match) {
-                        return cMethod;
-                    }
-                }
-            }
+        public boolean isObject () {
+            return toString().equals("Object") || this == ObjectArray;
         }
-        return null;
-    }
 
-    private void emitHeaderInclude(StringBuffer buffer, String fileName) {
-        buffer.append("#include <" + fileName + ">\n");
-    }
-
-    private void emitJavaMethod(StringBuffer buffer, JavaMethodParser.JavaMethod javaMethod, CMethodParser.CMethod cMethod) {
-        // get the setup and cleanup code for arrays, buffers and strings
-        StringBuffer jniSetupCode = new StringBuffer();
-        StringBuffer jniCleanupCode = new StringBuffer();
-        StringBuffer additionalArgs = new StringBuffer();
-        StringBuffer wrapperArgs = new StringBuffer();
-        emitJniSetupCode(jniSetupCode, javaMethod, additionalArgs, wrapperArgs);
-        emitJniCleanupCode(jniCleanupCode, javaMethod, cMethod);
-
-        // check if the user wants to do manual setup of JNI args
-        boolean isManual = javaMethod.isManual();
-
-        // if we have disposable arguments (string, buffer, array) and if there is a return
-        // in the native code (conservative, not syntactically checked), emit a wrapper method.
-        if(javaMethod.hasDisposableArgument() && javaMethod.getNativeCode().contains("return")) {
-            // if the method is marked as manual, we just emit the signature and let the
-            // user do whatever she wants.
-            if(isManual) {
-                emitMethodSignature(buffer, javaMethod, cMethod, null, false);
-                emitMethodBody(buffer, javaMethod);
-                buffer.append("}\n\n");
-            }
-            else {
-                // emit the method containing the actual code, called by the wrapper
-                // method with setup pointers to arrays, buffers and strings
-                String wrappedMethodName = emitMethodSignature(buffer, javaMethod, cMethod, additionalArgs.toString());
-                emitMethodBody(buffer, javaMethod);
-                buffer.append("}\n\n");
-
-                // emit the wrapper method, the one with the declaration in the header file
-                emitMethodSignature(buffer, javaMethod, cMethod, null);
-                if(!isManual) {
-                    buffer.append(jniSetupCode);
-                }
-
-                if(cMethod.getReturnType().equals("void")) {
-                    buffer.append("\t" + wrappedMethodName + "(" + wrapperArgs.toString() + ");\n\n");
-                    if(!isManual) {
-                        buffer.append(jniCleanupCode);
-                    }
-                    buffer.append("\treturn;\n");
-                }
-                else {
-                    buffer.append("\t" + cMethod.getReturnType() + " " + JNI_RETURN_VALUE + " = " + wrappedMethodName + "("
-                            + wrapperArgs.toString() + ");\n\n");
-                    if(!isManual) {
-                        buffer.append(jniCleanupCode);
-                    }
-                    buffer.append("\treturn " + JNI_RETURN_VALUE + ";\n");
-                }
-                buffer.append("}\n\n");
-            }
+        public boolean isString () {
+            return toString().equals("String");
         }
-        else {
-            emitMethodSignature(buffer, javaMethod, cMethod, null);
-            if(!isManual) {
-                buffer.append(jniSetupCode);
-            }
-            emitMethodBody(buffer, javaMethod);
-            if(!isManual) {
-                buffer.append(jniCleanupCode);
-            }
-            buffer.append("}\n\n");
+
+        public boolean isPlainOldDataType () {
+            return !isString() && !isPrimitiveArray() && !isBuffer() && !isObject();
+        }
+
+        public String getBufferCType () {
+            if (!this.isBuffer()) throw new RuntimeException("ArgumentType " + this + " is not a Buffer!");
+            if (this == Buffer) return "unsigned char*";
+            if (this == ByteBuffer) return "char*";
+            if (this == CharBuffer) return "unsigned short*";
+            if (this == ShortBuffer) return "short*";
+            if (this == IntBuffer) return "int*";
+            if (this == LongBuffer) return "long long*";
+            if (this == FloatBuffer) return "float*";
+            if (this == DoubleBuffer) return "double*";
+            throw new RuntimeException("Unknown Buffer type " + this);
+        }
+
+        public String getArrayCType () {
+            if (!this.isPrimitiveArray()) throw new RuntimeException("ArgumentType " + this + " is not an Array!");
+            if (this == BooleanArray) return "bool*";
+            if (this == ByteArray) return "char*";
+            if (this == CharArray) return "unsigned short*";
+            if (this == ShortArray) return "short*";
+            if (this == IntegerArray) return "int*";
+            if (this == LongArray) return "long long*";
+            if (this == FloatArray) return "float*";
+            if (this == DoubleArray) return "double*";
+            throw new RuntimeException("Unknown Array type " + this);
+        }
+
+        public String getJniType () {
+            return jniType;
         }
     }
 
-    private void emitJniSetupCode(StringBuffer buffer, JavaMethodParser.JavaMethod javaMethod, StringBuffer additionalArgs,
-                                  StringBuffer wrapperArgs) {
-        // add environment and class/object as the two first arguments for
-        // wrapped method.
-        if(javaMethod.isStatic()) {
-            wrapperArgs.append("env, clazz, ");
-        }
-        else {
-            wrapperArgs.append("env, object, ");
+    public static class Argument {
+        final ArgumentType type;
+        private final String name;
+        private final String valueType;
+
+        public Argument (ArgumentType type, String name, String valueType) {
+            this.type = type;
+            this.name = name;
+            this.valueType = valueType;
         }
 
-        // arguments for wrapper method
-        for(int i = 0; i < javaMethod.getArguments().size(); i++) {
-            JavaMethodParser.Argument arg = javaMethod.getArguments().get(i);
-            if(!arg.getType().isPlainOldDataType() && !arg.getType().isObject()) {
-                wrapperArgs.append(JNI_ARG_PREFIX);
-            }
-            // output the name of the argument
-            wrapperArgs.append(arg.getName());
-            if(i < javaMethod.getArguments().size() - 1) wrapperArgs.append(", ");
+        public ArgumentType getType () {
+            return type;
         }
 
-        // direct buffer pointers
-        for(JavaMethodParser.Argument arg : javaMethod.getArguments()) {
-            if(arg.getType().isBuffer()) {
-                String type = arg.getType().getBufferCType();
-                buffer.append("\t" + type + " " + arg.getName() + " = (" + type + ")(" + JNI_ARG_PREFIX + arg.getName()
-                        + "?env->GetDirectBufferAddress(" + JNI_ARG_PREFIX + arg.getName() + "):0);\n");
-                additionalArgs.append(", ");
-                additionalArgs.append(type);
-                additionalArgs.append(" ");
-                additionalArgs.append(arg.getName());
-                wrapperArgs.append(", ");
-                wrapperArgs.append(arg.getName());
-            }
+        public String getName () {
+            return name;
         }
 
-        // string pointers
-        for(JavaMethodParser.Argument arg : javaMethod.getArguments()) {
-            if(arg.getType().isString()) {
-                String type = "char*";
-                buffer.append("\t" + type + " " + arg.getName() + " = (" + type + ")env->GetStringUTFChars(" + JNI_ARG_PREFIX
-                        + arg.getName() + ", 0);\n");
-                additionalArgs.append(", ");
-                additionalArgs.append(type);
-                additionalArgs.append(" ");
-                additionalArgs.append(arg.getName());
-                wrapperArgs.append(", ");
-                wrapperArgs.append(arg.getName());
-            }
+        public String getValueType() {
+            return valueType;
         }
 
-        // Array pointers, we have to collect those last as GetPrimitiveArrayCritical
-        // will explode into our face if we call another JNI method after that.
-        for(JavaMethodParser.Argument arg : javaMethod.getArguments()) {
-            if(arg.getType().isPrimitiveArray()) {
-                String type = arg.getType().getArrayCType();
-                buffer.append("\t" + type + " " + arg.getName() + " = (" + type + ")env->GetPrimitiveArrayCritical(" + JNI_ARG_PREFIX
-                        + arg.getName() + ", 0);\n");
-                additionalArgs.append(", ");
-                additionalArgs.append(type);
-                additionalArgs.append(" ");
-                additionalArgs.append(arg.getName());
-                wrapperArgs.append(", ");
-                wrapperArgs.append(arg.getName());
-            }
+        @Override
+        public String toString () {
+            return "Argument [type=" + type + ", name=" + name + ", valueType=" + valueType + "]";
         }
-
-        // new line for separation
-        buffer.append("\n");
     }
 
-    private void emitJniCleanupCode(StringBuffer buffer, JavaMethodParser.JavaMethod javaMethod, CMethodParser.CMethod cMethod) {
-        // emit cleanup code for arrays, must come first
-        for(JavaMethodParser.Argument arg : javaMethod.getArguments()) {
-            if(arg.getType().isPrimitiveArray()) {
-                buffer.append("\tenv->ReleasePrimitiveArrayCritical(" + JNI_ARG_PREFIX + arg.getName() + ", " + arg.getName()
-                        + ", 0);\n");
-            }
-        }
-
-        // emit cleanup code for strings
-        for(JavaMethodParser.Argument arg : javaMethod.getArguments()) {
-            if(arg.getType().isString()) {
-                buffer.append("\tenv->ReleaseStringUTFChars(" + JNI_ARG_PREFIX + arg.getName() + ", " + arg.getName() + ");\n");
-            }
-        }
-
-        // new line for separation
-        buffer.append("\n");
-    }
-
-    private String emitMethodSignature(StringBuffer buffer, JavaMethodParser.JavaMethod javaMethod, CMethodParser.CMethod cMethod, String additionalArguments) {
-        return emitMethodSignature(buffer, javaMethod, cMethod, additionalArguments, true);
-    }
-
-    private String emitMethodSignature(StringBuffer buffer, JavaMethodParser.JavaMethod javaMethod, CMethodParser.CMethod cMethod, String additionalArguments,
-                                       boolean appendPrefix) {
-        // emit head, consisting of JNIEXPORT,return type and method name
-        // if this is a wrapped method, prefix the method name
-        String wrappedMethodName = null;
-        if(additionalArguments != null) {
-            String[] tokens = cMethod.getHead().replace("\r\n", "").replace("\n", "").split(" ");
-            wrappedMethodName = JNI_WRAPPER_PREFIX + tokens[3];
-            buffer.append("static inline ");
-            buffer.append(tokens[1]);
-            buffer.append(" ");
-            buffer.append(wrappedMethodName);
-            buffer.append("\n");
-        }
-        else {
-            buffer.append(cMethod.getHead());
-        }
-
-        // construct argument list
-        // Differentiate between static and instance method, then output each argument
-        if(javaMethod.isStatic()) {
-            buffer.append("(JNIEnv* env, jclass clazz");
-        }
-        else {
-            buffer.append("(JNIEnv* env, jobject object");
-        }
-        if(javaMethod.getArguments().size() > 0) buffer.append(", ");
-        for(int i = 0; i < javaMethod.getArguments().size(); i++) {
-            // output the argument type as defined in the header
-            buffer.append(cMethod.getArgumentTypes()[i + 2]);
-            buffer.append(" ");
-            // if this is not a POD or an object, we need to add a prefix
-            // as we will output JNI code to get pointers to strings, arrays
-            // and direct buffers.
-            JavaMethodParser.Argument javaArg = javaMethod.getArguments().get(i);
-            if(!javaArg.getType().isPlainOldDataType() && !javaArg.getType().isObject() && appendPrefix) {
-                buffer.append(JNI_ARG_PREFIX);
-            }
-            // output the name of the argument
-            buffer.append(javaArg.getName());
-
-            // comma, if this is not the last argument
-            if(i < javaMethod.getArguments().size() - 1) buffer.append(", ");
-        }
-
-        // if this is a wrapper method signature, add the additional arguments
-        if(additionalArguments != null) {
-            buffer.append(additionalArguments);
-        }
-
-        // close signature, open method body
-        buffer.append(") {\n");
-
-        // return the wrapped method name if any
-        return wrappedMethodName;
-    }
-
-    private void emitMethodBody(StringBuffer buffer, JavaMethodParser.JavaMethod javaMethod) {
-        // emit a line marker
-        emitLineMarker(buffer, javaMethod.getEndIndex());
-
-        // FIXME add tabs cleanup
-        buffer.append(javaMethod.getNativeCode());
-        buffer.append("\n");
-    }
-
-    private void emitLineMarker(StringBuffer buffer, int line) {
-        buffer.append("\n//@line:");
-        buffer.append(line);
-        buffer.append("\n");
-    }
-
-    private static class CppParserItem {
-        public String sourceBaseDir;
-        public String inputJavaPath;
-        public String destinationJavaPath;
-        public final ArrayList<JavaMethodParser.JavaSegment> javaSegments = new ArrayList<>();
+    enum PrintType {
+        HEADER,
+        CODE,
+        MAIN
     }
 }

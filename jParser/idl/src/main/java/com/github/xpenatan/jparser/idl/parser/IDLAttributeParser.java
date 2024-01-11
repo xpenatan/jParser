@@ -8,9 +8,6 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
@@ -19,7 +16,7 @@ import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
-import com.github.xpenatan.jparser.idl.IDLMethod;
+import com.github.xpenatan.jparser.idl.IDLHelper;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,9 +26,13 @@ public class IDLAttributeParser {
         if(idlAttribute.skip) {
             return;
         }
+        MethodDeclaration containsSetMethod = containsSetMethod(classOrInterfaceDeclaration, idlAttribute);
+        MethodDeclaration containsGetMethod = containsGetMethod(classOrInterfaceDeclaration, idlAttribute);
 
         String attributeName = idlAttribute.name;
         String attributeType = idlAttribute.type;
+
+        attributeType = IDLHelper.convertEnumToInt(idlParser.idlReader, attributeType);
 
         Type type = null;
         try {
@@ -44,7 +45,7 @@ public class IDLAttributeParser {
 
         JParserItem parserUnitItem = jParser.getParserUnitItem(type.toString());
         if(parserUnitItem != null) {
-            if(parserUnitItem.notAllowed) {
+            if(parserUnitItem.notAllowed && !parserUnitItem.isIDL) {
                 // skip generating set/get for class that is not allowed to have get and set. Ex Enum
                 return;
             }
@@ -86,45 +87,115 @@ public class IDLAttributeParser {
                 }
             }
         }
-        if(addGet) {
+        if(addGet && !shouldSkipMethod(containsGetMethod)) {
             if(getMethodDeclaration != null) {
                 getMethodDeclaration.remove();
             }
-            getMethodDeclaration = classOrInterfaceDeclaration.addMethod(attributeName, Modifier.Keyword.PUBLIC);
+            String getMethodName = "get_" + attributeName;
+            getMethodDeclaration = classOrInterfaceDeclaration.addMethod(getMethodName, Modifier.Keyword.PUBLIC);
+            getMethodDeclaration.setStatic(idlAttribute.isStatic);
             getMethodDeclaration.setType(type);
             JParserHelper.addMissingImportType(jParser, unit, type);
             IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, type, getMethodDeclaration);
 
-            if(!idlParser.generateClass) {
-                idlParser.onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, getMethodDeclaration, true);
-            }
-            else {
-                setupAttributeMethod(idlParser, jParser, idlAttribute, classOrInterfaceDeclaration, getMethodDeclaration);
+            if(idlParser.generateClass) {
+                setupAttributeMethod(idlParser, jParser, idlAttribute, false, classOrInterfaceDeclaration, getMethodDeclaration);
             }
         }
-        if(addSet) {
+
+        if(idlAttribute.isReadOnly) {
+            addSet = false;
+        }
+
+        if(addSet && !shouldSkipMethod(containsSetMethod)) {
             if(setMethodDeclaration != null) {
                 setMethodDeclaration.remove();
             }
-            setMethodDeclaration = classOrInterfaceDeclaration.addMethod(attributeName, Modifier.Keyword.PUBLIC);
+            String setMethodName = "set_" + attributeName;
+            setMethodDeclaration = classOrInterfaceDeclaration.addMethod(setMethodName, Modifier.Keyword.PUBLIC);
             setMethodDeclaration.setStatic(idlAttribute.isStatic);
             Parameter parameter = setMethodDeclaration.addAndGetParameter(type, attributeName);
             Type paramType = parameter.getType();
             JParserHelper.addMissingImportType(jParser, unit, paramType);
 
-            if(!idlParser.generateClass) {
-                idlParser.onIDLMethodGenerated(jParser, idlClass, null, unit, classOrInterfaceDeclaration, setMethodDeclaration, true);
-            }
-            else {
-                setupAttributeMethod(idlParser, jParser, idlAttribute, classOrInterfaceDeclaration, setMethodDeclaration);
+            if(idlParser.generateClass) {
+                setupAttributeMethod(idlParser, jParser, idlAttribute, true, classOrInterfaceDeclaration, setMethodDeclaration);
             }
         }
     }
 
-    private static void setupAttributeMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLAttribute idlAttribute, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
-        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, idlAttribute.isValue, classDeclaration, methodDeclaration);
-        if(nativeMethodDeclaration != null) {
-            idlParser.onIDLAttributeGenerated(jParser, idlAttribute, classDeclaration, methodDeclaration, nativeMethodDeclaration);
+    private static void setupAttributeMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
+        boolean isValue = idlAttribute.isValue;
+        boolean addCopyParam = false;
+        if(isValue && !isSet) {
+            //  When it's a get attribute method we pass a temp c++ object to copy to the returned temp c++ object.
         }
+        isValue = false;
+        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, isValue, classDeclaration, methodDeclaration, "");
+        if(nativeMethod != null) {
+            idlParser.onIDLAttributeGenerated(jParser, idlAttribute, isSet, classDeclaration, methodDeclaration, nativeMethod);
+        }
+    }
+
+    public static boolean shouldSkipMethod(MethodDeclaration containsMethod) {
+        if(containsMethod != null) {
+            boolean isNative = containsMethod.isNative();
+            boolean isStatic = containsMethod.isStatic();
+            boolean containsBlockComment = false;
+            Optional<Comment> optionalComment = containsMethod.getComment();
+            if(optionalComment.isPresent()) {
+                Comment comment = optionalComment.get();
+                if(comment instanceof BlockComment) {
+                    BlockComment blockComment = (BlockComment)optionalComment.get();
+                    String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
+                    // Skip if method already exist with header code
+                    if(headerCommands != null) {
+                        if(headerCommands.contains(DefaultCodeParser.CMD_NATIVE)) {
+                            return true;
+                        }
+                        else {
+                            if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
+                                //If skip is found then remove the method
+                                containsMethod.remove();
+                            }
+                            return true;
+                        }
+                    }
+                }
+            }
+            if(isNative) {
+                // It's a dummy method. Remove it and let IDL generate it again.
+                // This is useful to use a base method as an interface and let the generator create the real method.
+                containsMethod.remove();
+            }
+            if(!isNative) {
+                // if a simple method exist, keep it and don't let IDL generate the method.
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static MethodDeclaration containsSetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
+        String[] paramTypes = new String[1];
+        paramTypes[0] = idlAttribute.type;
+        String methodName = "set_" + idlAttribute.name;
+        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
+
+        if(methods.size() > 0) {
+            return methods.get(0);
+        }
+        return null;
+    }
+
+    private static MethodDeclaration containsGetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
+        String[] paramTypes = new String[0];
+        String methodName = "get_" + idlAttribute.name;
+        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
+
+        if(methods.size() > 0) {
+            return methods.get(0);
+        }
+        return null;
     }
 }

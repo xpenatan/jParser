@@ -47,29 +47,17 @@ public class CustomFileDescriptor {
     protected CustomFileDescriptor() {
     }
 
-    /**
-     * Creates a new absolute FileHandle for the file name. Use this for tools on the desktop that don't need any of the backends.
-     * Do not use this constructor in case you write something cross-platform. Use the Files interface instead.
-     *
-     * @param fileName the filename.
-     */
     public CustomFileDescriptor(String fileName) {
         this.file = new File(fileName);
         this.type = FileType.Absolute;
     }
 
-    /**
-     * Creates a new absolute FileHandle for the {@link java.io.File}. Use this for tools on the desktop that don't need any of the
-     * backends. Do not use this constructor in case you write something cross-platform. Use the Files interface instead.
-     *
-     * @param file the file.
-     */
     public CustomFileDescriptor(File file) {
         this.file = file;
         this.type = FileType.Absolute;
     }
 
-    protected CustomFileDescriptor(String fileName, FileType type) {
+    public CustomFileDescriptor(String fileName, FileType type) {
         this.type = type;
         file = new File(fileName);
     }
@@ -105,19 +93,10 @@ public class CustomFileDescriptor {
         return type;
     }
 
-    /**
-     * Returns a java.io.File that represents this file handle. Note the returned file will only be usable for
-     * {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Absolute} and FileType#External file handles.
-     */
     public File file() {
         return file;
     }
 
-    /**
-     * Returns a stream for reading this file as bytes.
-     *
-     * @throw RuntimeException if the file handle represents a directory, doesn't exist, or could not be read.
-     */
     public InputStream read() {
         if(type == FileType.Classpath && !file.exists()) {
             InputStream input = CustomFileDescriptor.class.getResourceAsStream("/" + file.getPath().replace('\\', '/'));
@@ -134,20 +113,10 @@ public class CustomFileDescriptor {
         }
     }
 
-    /**
-     * Returns a reader for reading this file as characters.
-     *
-     * @throw RuntimeException if the file handle represents a directory, doesn't exist, or could not be read.
-     */
     public Reader reader() {
         return new InputStreamReader(read());
     }
 
-    /**
-     * Returns a reader for reading this file as characters.
-     *
-     * @throw RuntimeException if the file handle represents a directory, doesn't exist, or could not be read.
-     */
     public Reader reader(String charset) {
         try {
             return new InputStreamReader(read(), charset);
@@ -157,20 +126,10 @@ public class CustomFileDescriptor {
         }
     }
 
-    /**
-     * Returns a buffered reader for reading this file as characters.
-     *
-     * @throw RuntimeException if the file handle represents a directory, doesn't exist, or could not be read.
-     */
     public BufferedReader reader(int bufferSize) {
         return new BufferedReader(new InputStreamReader(read()), bufferSize);
     }
 
-    /**
-     * Returns a buffered reader for reading this file as characters.
-     *
-     * @throw RuntimeException if the file handle represents a directory, doesn't exist, or could not be read.
-     */
     public BufferedReader reader(int bufferSize, String charset) {
         try {
             return new BufferedReader(new InputStreamReader(read(), charset), bufferSize);
@@ -180,20 +139,10 @@ public class CustomFileDescriptor {
         }
     }
 
-    /**
-     * Reads the entire file into a string using the platform's default charset.
-     *
-     * @throw RuntimeException if the file handle represents a directory, doesn't exist, or could not be read.
-     */
     public String readString() {
         return readString(null);
     }
 
-    /**
-     * Reads the entire file into a string using the specified charset.
-     *
-     * @throw RuntimeException if the file handle represents a directory, doesn't exist, or could not be read.
-     */
     public String readString(String charset) {
         StringBuilder output = new StringBuilder(512);
         InputStreamReader reader = null;
@@ -222,11 +171,6 @@ public class CustomFileDescriptor {
         return output.toString();
     }
 
-    /**
-     * Reads the entire file into a byte array.
-     *
-     * @throw RuntimeException if the file handle represents a directory, doesn't exist, or could not be read.
-     */
     public byte[] readBytes() {
         int length = (int)length();
         if(length == 0) length = 512;
@@ -265,14 +209,6 @@ public class CustomFileDescriptor {
         return buffer;
     }
 
-    /**
-     * Reads the entire file into the byte array. The byte array must be big enough to hold the file's data.
-     *
-     * @param bytes  the array to load the file into
-     * @param offset the offset to start writing bytes
-     * @param size   the number of bytes to read, see {@link #length()}
-     * @return the number of read bytes
-     */
     public int readBytes(byte[] bytes, int offset, int size) {
         InputStream input = read();
         int position = 0;
@@ -296,13 +232,6 @@ public class CustomFileDescriptor {
         return position - offset;
     }
 
-    /**
-     * Returns a stream for writing to this file. Parent directories will be created if necessary.
-     *
-     * @param append If false, this file will be overwritten if it exists, otherwise it will be appended.
-     * @throw RuntimeException if this file handle represents a directory, if it is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or
-     * FileType#Internal file, or if it could not be written.
-     */
     public OutputStream write(boolean append) {
         if(type == FileType.Classpath) throw new RuntimeException("Cannot write to a classpath file: " + file);
         parent().mkdirs();
@@ -316,14 +245,6 @@ public class CustomFileDescriptor {
         }
     }
 
-    /**
-     * Reads the remaining bytes from the specified stream and writes them to this file. The stream is closed. Parent directories
-     * will be created if necessary.
-     *
-     * @param append If false, this file will be overwritten if it exists, otherwise it will be appended.
-     * @throw RuntimeException if this file handle represents a directory, if it is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or
-     * FileType#Internal file, or if it could not be written.
-     */
     public void write(InputStream input, boolean append) {
         OutputStream output = null;
         try {
@@ -352,25 +273,10 @@ public class CustomFileDescriptor {
         }
     }
 
-    /**
-     * Returns a writer for writing to this file using the default charset. Parent directories will be created if necessary.
-     *
-     * @param append If false, this file will be overwritten if it exists, otherwise it will be appended.
-     * @throw RuntimeException if this file handle represents a directory, if it is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or
-     * FileType#Internal file, or if it could not be written.
-     */
     public Writer writer(boolean append) {
         return writer(append, null);
     }
 
-    /**
-     * Returns a writer for writing to this file. Parent directories will be created if necessary.
-     *
-     * @param append  If false, this file will be overwritten if it exists, otherwise it will be appended.
-     * @param charset May be null to use the default charset.
-     * @throw RuntimeException if this file handle represents a directory, if it is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or
-     * FileType#Internal file, or if it could not be written.
-     */
     public Writer writer(boolean append, String charset) {
         if(type == FileType.Classpath) throw new RuntimeException("Cannot write to a classpath file: " + file);
         parent().mkdirs();
@@ -388,25 +294,10 @@ public class CustomFileDescriptor {
         }
     }
 
-    /**
-     * Writes the specified string to the file using the default charset. Parent directories will be created if necessary.
-     *
-     * @param append If false, this file will be overwritten if it exists, otherwise it will be appended.
-     * @throw RuntimeException if this file handle represents a directory, if it is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or
-     * FileType#Internal file, or if it could not be written.
-     */
     public void writeString(String string, boolean append) {
         writeString(string, append, null);
     }
 
-    /**
-     * Writes the specified string to the file as UTF-8. Parent directories will be created if necessary.
-     *
-     * @param append  If false, this file will be overwritten if it exists, otherwise it will be appended.
-     * @param charset May be null to use the default charset.
-     * @throw RuntimeException if this file handle represents a directory, if it is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or
-     * FileType#Internal file, or if it could not be written.
-     */
     public void writeString(String string, boolean append, String charset) {
         Writer writer = null;
         try {
@@ -425,13 +316,6 @@ public class CustomFileDescriptor {
         }
     }
 
-    /**
-     * Writes the specified bytes to the file. Parent directories will be created if necessary.
-     *
-     * @param append If false, this file will be overwritten if it exists, otherwise it will be appended.
-     * @throw RuntimeException if this file handle represents a directory, if it is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or
-     * FileType#Internal file, or if it could not be written.
-     */
     public void writeBytes(byte[] bytes, boolean append) {
         OutputStream output = write(append);
         try {
@@ -449,12 +333,6 @@ public class CustomFileDescriptor {
         }
     }
 
-    /**
-     * Returns the paths to the children of this directory. Returns an empty list if this file handle represents a file and not a
-     * directory. On the desktop, an FileType#Internal handle to a directory on the classpath will return a zero length array.
-     *
-     * @throw RuntimeException if this file is an {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} file.
-     */
     public CustomFileDescriptor[] list() {
         if(type == FileType.Classpath) throw new RuntimeException("Cannot list a classpath directory: " + file);
         String[] relativePaths = file().list();
@@ -465,13 +343,6 @@ public class CustomFileDescriptor {
         return handles;
     }
 
-    /**
-     * Returns the paths to the children of this directory with the specified suffix. Returns an empty list if this file handle
-     * represents a file and not a directory. On the desktop, an FileType#Internal handle to a directory on the classpath will
-     * return a zero length array.
-     *
-     * @throw RuntimeException if this file is an {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} file.
-     */
     public CustomFileDescriptor[] list(String suffix) {
         if(type == FileType.Classpath) throw new RuntimeException("Cannot list a classpath directory: " + file);
         String[] relativePaths = file().list();
@@ -492,22 +363,11 @@ public class CustomFileDescriptor {
         return handles;
     }
 
-    /**
-     * Returns true if this file is a directory. Always returns false for classpath files. On Android, an FileType#Internal handle
-     * to an empty directory will return false. On the desktop, an FileType#Internal handle to a directory on the classpath will
-     * return false.
-     */
     public boolean isDirectory() {
         if(type == FileType.Classpath) return false;
         return file().isDirectory();
     }
 
-    /**
-     * Returns a handle to the child with the specified name.
-     *
-     * @throw RuntimeException if this file handle is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or FileType#Internal and the child doesn't
-     * exist.
-     */
     public CustomFileDescriptor child(String name) {
         if(file.getPath().length() == 0) return new CustomFileDescriptor(new File(name), type);
         return new CustomFileDescriptor(new File(file, name), type);
@@ -524,57 +384,28 @@ public class CustomFileDescriptor {
         return new CustomFileDescriptor(parent, type);
     }
 
-    /**
-     * @throw RuntimeException if this file handle is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or FileType#Internal file.
-     */
     public boolean mkdirs() {
         if(type == FileType.Classpath) throw new RuntimeException("Cannot mkdirs with a classpath file: " + file);
         return file().mkdirs();
     }
 
-    /**
-     * Returns true if the file exists. On Android, a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or FileType#Internal handle to a directory will
-     * always return false.
-     */
     public boolean exists() {
         if(type == FileType.Classpath)
             return CustomFileDescriptor.class.getResource("/" + file.getPath().replace('\\', '/')) != null;
         return file().exists();
     }
 
-    /**
-     * Deletes this file or empty directory and returns success. Will not delete a directory that has children.
-     *
-     * @throw RuntimeException if this file handle is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or FileType#Internal file.
-     */
     public boolean delete() {
         if(type == FileType.Classpath) throw new RuntimeException("Cannot delete a classpath file: " + file);
         return file().delete();
     }
 
-    /**
-     * Deletes this file or directory and all children, recursively.
-     *
-     * @throw RuntimeException if this file handle is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or FileType#Internal file.
-     */
     public boolean deleteDirectory() {
         if(type == FileType.Classpath) throw new RuntimeException("Cannot delete a classpath file: " + file);
         return deleteDirectory(file());
     }
 
-    /**
-     * Copies this file or directory to the specified file or directory. If this handle is a file, then 1) if the destination is a
-     * file, it is overwritten, or 2) if the destination is a directory, this file is copied into it, or 3) if the destination
-     * doesn't exist, {@link #mkdirs()} is called on the destination's parent and this file is copied into it with a new name. If
-     * this handle is a directory, then 1) if the destination is a file, RuntimeException is thrown, or 2) if the destination is a
-     * directory, this directory is copied recursively into it as a subdirectory, overwriting existing files, or 3) if the
-     * destination doesn't exist, {@link #mkdirs()} is called on the destination and this directory is copied recursively into it
-     * as a subdirectory.
-     *
-     * @throw RuntimeException if the destination file handle is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or FileType#Internal file, or copying
-     * failed.
-     */
-    public void copyTo(CustomFileDescriptor dest) {
+    public void copyTo(CustomFileDescriptor dest, boolean createChildFolder) {
         if(!isDirectory()) {
             if(dest.isDirectory()) dest = dest.child(name());
             copyFile(this, dest);
@@ -587,25 +418,18 @@ public class CustomFileDescriptor {
             dest.mkdirs();
             if(!dest.isDirectory()) throw new RuntimeException("Destination directory cannot be created: " + dest);
         }
-        dest = dest.child(name());
+        if(createChildFolder) {
+            dest = dest.child(name());
+        }
         copyDirectory(this, dest);
     }
 
-    /**
-     * Moves this file to the specified file, overwriting the file if it already exists.
-     *
-     * @throw RuntimeException if the source or destination file handle is a {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} or FileType#Internal file.
-     */
     public void moveTo(CustomFileDescriptor dest) {
         if(type == FileType.Classpath) throw new RuntimeException("Cannot move a classpath file: " + file);
-        copyTo(dest);
+        copyTo(dest, true);
         delete();
     }
 
-    /**
-     * Returns the length in bytes of this file, or 0 if this file is a directory, does not exist, or the size cannot otherwise be
-     * determined.
-     */
     public long length() {
         if(type == FileType.Classpath || !file.exists()) {
             InputStream input = read();
@@ -626,11 +450,6 @@ public class CustomFileDescriptor {
         return file().length();
     }
 
-    /**
-     * Returns the last modified time in milliseconds for this file. Zero is returned if the file doesn't exist. Zero is returned
-     * for {@link com.github.xpenatan.tools.jparser.core.util.CustomFileDescriptor.FileType#Classpath} files. On Android, zero is returned for FileType#Internal files. On the desktop, zero is
-     * returned for FileType#Internal files on the classpath.
-     */
     public long lastModified() {
         return file().lastModified();
     }

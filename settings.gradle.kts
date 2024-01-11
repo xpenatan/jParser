@@ -1,11 +1,33 @@
 include(":jParser:core")
+include(":jParser:builder")
 include(":jParser:base")
 include(":jParser:idl")
-include(":jParser:loader")
 include(":jParser:cpp")
 include(":jParser:teavm")
-include(":example:example-build")
-include(":example:example-base")
-include(":example:example-core")
-include(":example:example-desktop")
-include(":example:example-teavm")
+include(":jParser:loader:loader-core")
+include(":jParser:loader:loader-teavm")
+
+include(":example:lib:generator")
+include(":example:lib:base")
+include(":example:lib:core")
+include(":example:lib:core-ext")
+include(":example:lib:desktop")
+include(":example:lib:teavm")
+include(":example:lib:android")
+
+include(":example:lib-ext:ext-generator")
+include(":example:lib-ext:ext-base")
+include(":example:lib-ext:ext-core")
+include(":example:lib-ext:ext-teavm")
+
+include(":example:app:core")
+include(":example:app:desktop")
+include(":example:app:teavm")
+include(":example:app:android")
+
+
+//includeBuild("E:\\Dev\\Projects\\java\\gdx-teavm") {
+//    dependencySubstitution {
+//        substitute(module("com.github.xpenatan.gdx-teavm:backend-teavm")).using(project(":backends:backend-teavm"))
+//    }
+//}

@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "jParser-idl"
+val moduleName = "idl"
 
 dependencies {
     implementation(project(":jParser:base"))

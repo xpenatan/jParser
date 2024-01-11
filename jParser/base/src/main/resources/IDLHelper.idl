@@ -1,44 +1,54 @@
-interface BoolArray {
-    void BoolArray(long size);
+
+interface IDLString {
+    void IDLString();
+    void clear();
+    void append([Const] DOMString text);
+    void append([Const] DOMString text, long size);
+    byte at(long index);
+    [Const] DOMString c_str();
+};
+
+interface IDLBoolArray {
+    void IDLBoolArray(long size);
     void resize(long size);
     boolean getValue(long index);
     void setValue(long index, boolean value);
-    any getPointer();
+    long getPointer();
     long getSize();
 };
 
-interface IntArray {
-    void IntArray(long size);
+interface IDLIntArray {
+    void IDLIntArray(long size);
     void resize(long size);
     long getValue(long index);
     void setValue(long index, long value);
-    any getPointer();
+    long getPointer();
     long getSize();
 };
 
-interface FloatArray {
-    void FloatArray(long size);
+interface IDLFloatArray {
+    void IDLFloatArray(long size);
     void resize(long size);
     float getValue(long index);
     void setValue(long index, float value);
-    any getPointer();
+    long getPointer();
     long getSize();
 };
 
-interface DoubleArray {
-    void DoubleArray(long size);
+interface IDLDoubleArray {
+    void IDLDoubleArray(long size);
     void resize(long size);
     double getValue(long index);
     void setValue(long index, double value);
-    any getPointer();
+    long getPointer();
     long getSize();
 };
 
-interface CharArray {
-    void CharArray(long size);
+interface IDLByteArray {
+    void IDLByteArray(long size);
     void resize(long size);
     byte getValue(long index);
     void setValue(long index, byte value);
-    any getPointer();
+    long getPointer();
     long getSize();
 };

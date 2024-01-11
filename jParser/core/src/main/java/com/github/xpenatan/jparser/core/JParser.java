@@ -41,6 +41,9 @@ public class JParser {
     public final String genDir;
     public ArrayList<JParserItem> unitArray = new ArrayList<>();
 
+
+    public static boolean CREATE_IDL_HELPER = true;
+
     private JParser(String sourceDir, String genDir) {
         this.sourceDir = sourceDir;
         this.genDir = genDir;
@@ -82,12 +85,6 @@ public class JParser {
                 throw new Exception("Couldn't create directory '" + genD + "'");
             }
         }
-        else {
-            fileGenDir.deleteDirectory();
-            if(!fileGenDir.mkdirs()) {
-                throw new Exception("Couldn't create directory '" + genD + "'");
-            }
-        }
         System.out.println("***** GENERATING CODE *****");
         JParser jParser = new JParser(sourceD, genD);
         processDirectory(jParser, fileSourceDir, fileGenDir, excludes, fileSourceDir);
@@ -98,19 +95,31 @@ public class JParser {
     }
 
     private static void parseJavaFiles(JParser jParser, CodeParser wrapper) throws Exception {
+        ArrayList<JParserItem> parserItems = new ArrayList<>();
         for(int i = 0; i < jParser.unitArray.size(); i++) {
             JParserItem parserItem = jParser.unitArray.get(i);
-            String inputPath = parserItem.inputPath;
-            String destinationPath = parserItem.destinationPath;
-
+            String inputPath = parserItem.getFullDestinationPath();
             System.out.println(i + " Parsing: " + inputPath);
-
             wrapper.onParseFileStart(jParser, parserItem);
-            String codeParsed = parseJava(jParser, wrapper, parserItem);
+            CompilationUnit compilationUnit = parseJava(jParser, wrapper, parserItem);
+            if(compilationUnit != null) {
+                wrapper.onParseFileEnd(jParser, parserItem);
+                parserItems.add(parserItem);
+            }
+        }
+
+        wrapper.onParserComplete(jParser, parserItems);
+
+        for(int i = 0; i < parserItems.size(); i++) {
+            JParserItem parserItem = parserItems.get(i);
+            if(parserItem.notAllowed) {
+                continue;
+            }
+            String destinationPath = parserItem.getFullDestinationPath();
+            String codeParsed = parserItem.unit.toString();
             if(codeParsed != null) {
                 generateFile(destinationPath, codeParsed);
             }
-            wrapper.onParseFileEnd(jParser, parserItem);
         }
     }
 
@@ -162,11 +171,8 @@ public class JParser {
                     unit.printer(new CustomPrettyPrinter());
                     String absolutePath = file1.getAbsolutePath();
 
-                    String packageFilePath = absolutePath.replace(fileSourceDir.file().getAbsolutePath(), "");
-                    String fullPath = fileGenDir.file().getAbsolutePath();
-                    fullPath = fullPath + packageFilePath;
-
-                    jParser.unitArray.add(new JParserItem(unit, absolutePath, fullPath));
+                    String genPath = fileGenDir.file().getAbsolutePath();
+                    jParser.unitArray.add(new JParserItem(unit, absolutePath, genPath));
                 }
             }
         }
@@ -183,7 +189,7 @@ public class JParser {
         return className;
     }
 
-    private static String parseJava(JParser jParser, CodeParser wrapper, JParserItem parserItem) throws Exception {
+    private static CompilationUnit parseJava(JParser jParser, CodeParser wrapper, JParserItem parserItem) throws Exception {
         ArrayList<Node> array = new ArrayList<>();
         CompilationUnit unit = parserItem.unit;
         array.addAll(unit.getChildNodes());
@@ -210,7 +216,7 @@ public class JParser {
         }
         wrapper.onParseCodeEnd();
         PositionUtils.sortByBeginPosition(unit.getTypes(), false);
-        return unit.toString();
+        return unit;
     }
 
     private static void parseClassInterface(JParser jParser, CompilationUnit unit, CodeParser wrapper, ClassOrInterfaceDeclaration clazzInterface) {

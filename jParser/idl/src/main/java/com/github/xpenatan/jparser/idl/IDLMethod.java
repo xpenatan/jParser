@@ -7,6 +7,7 @@ import java.util.ArrayList;
  */
 public class IDLMethod {
     public final IDLFile idlFile;
+    public final IDLClass idlClass;
 
     public String line;
     public String paramsLine;
@@ -14,13 +15,16 @@ public class IDLMethod {
     public String name;
     public boolean isReturnArray;
     public boolean skip = false;
+    public boolean isAny = false;
     public boolean isReturnRef;
     public boolean isReturnValue;
     public boolean isStaticMethod = false;
+    public String operator = "";
 
     public final ArrayList<IDLParameter> parameters = new ArrayList<>();
 
-    public IDLMethod(IDLFile idlFile) {
+    public IDLMethod(IDLClass idlClass, IDLFile idlFile) {
+        this.idlClass = idlClass;
         this.idlFile = idlFile;
     }
 
@@ -29,15 +33,21 @@ public class IDLMethod {
         paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
         int index = line.indexOf("(");
         String leftSide = line.substring(0, index).trim();
-        String returnInfo = "";
-        if(leftSide.startsWith("[")) {
-            int i = leftSide.indexOf("]") + 1;
-            returnInfo = line.substring(0, i);
-        }
 
-        int endIndex = getLastIndex(leftSide);
-        if(endIndex != -1) {
-            leftSide = line.substring(endIndex + 1, index).trim();
+        String tagsStr = getTags(leftSide);
+        if(!tagsStr.isEmpty()) {
+            isReturnRef = tagsStr.contains("Ref");
+            isReturnValue = tagsStr.contains("Value");
+            leftSide = leftSide.replace(tagsStr, "");
+
+            tagsStr = tagsStr.substring(1, tagsStr.length()-1);
+            for(String s : tagsStr.split(",")) {
+                if(s.contains("Operator")) {
+                    int first = s.indexOf("\"");
+                    int last = s.lastIndexOf("\"");
+                    operator = s.substring(first, last + 1).replace("\"", "");
+                }
+            }
         }
 
         if(leftSide.contains("[]")) {
@@ -46,18 +56,13 @@ public class IDLMethod {
         }
         leftSide = IDLHelper.removeMultipleSpaces(leftSide.trim());
 
-        isReturnRef = returnInfo.contains("Ref");
-        isReturnValue = returnInfo.contains("Value");
+        if(leftSide.contains("static")) {
+            isStaticMethod = true;
+        }
 
         String[] s = leftSide.split(" ");
-
-        if(s[0].equals("static")) {
-            isStaticMethod = true;
-            returnType = s[1];
-        }
-        else {
-            returnType = s[0];
-        }
+        name = s[s.length-1];
+        returnType = s[s.length-2];
 
         if(returnType.equals("long")) {
             returnType = "int";
@@ -65,13 +70,11 @@ public class IDLMethod {
         if(returnType.equals("DOMString")) {
             returnType = "String";
         }
-        name = s[s.length-1];
 
-        if(paramsLine != null && paramsLine.contains("any ")) {
+        if(returnType.contains("any") || returnType.contains("VoidPtr")) {
+            isAny = true;
             skip = true;
-        }
-        if(returnType.contains("any")) {
-            skip = true;
+            returnType = "int";
         }
     }
 
@@ -93,28 +96,30 @@ public class IDLMethod {
     }
 
     public IDLMethod clone() {
-        IDLMethod clonedMethod = new IDLMethod(idlFile);
-        clonedMethod.line = line;
-        clonedMethod.paramsLine = paramsLine;
-        clonedMethod.returnType = returnType;
-        clonedMethod.name = name;
-        clonedMethod.skip = skip;
-        clonedMethod.isReturnValue = isReturnValue;
-        clonedMethod.isReturnArray = isReturnArray;
-        clonedMethod.isStaticMethod = isStaticMethod;
-        clonedMethod.isReturnRef = isReturnRef;
+        IDLMethod cloned = new IDLMethod(idlClass, idlFile);
+        cloned.line = line;
+        cloned.paramsLine = paramsLine;
+        cloned.returnType = returnType;
+        cloned.name = name;
+        cloned.skip = skip;
+        cloned.isAny = isAny;
+        cloned.isReturnValue = isReturnValue;
+        cloned.isReturnArray = isReturnArray;
+        cloned.isStaticMethod = isStaticMethod;
+        cloned.isReturnRef = isReturnRef;
 
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);
             IDLParameter clonedParam = parameter.clone();
-            clonedMethod.parameters.add(clonedParam);
+            cloned.parameters.add(clonedParam);
         }
-        return clonedMethod;
+        return cloned;
     }
 
-    private int getLastIndex(String leftSide) {
+    private String getTags(String leftSide) {
         int startIndex = leftSide.indexOf("[");
-        if(startIndex != -1) {
+        int endIndex = -1;
+        if(startIndex != -1 && leftSide.startsWith("[")) {
             int count = 0;
             for(int i = startIndex; i < leftSide.length(); i++) {
                 char c = leftSide.charAt(i);
@@ -125,11 +130,16 @@ public class IDLMethod {
                     count--;
                 }
                 if(count == 0) {
-                    return i;
+                    endIndex = i;
+                    break;
                 }
             }
         }
-        return -1;
+
+        if(startIndex != -1 && endIndex != -1) {
+            return leftSide.substring(startIndex, endIndex + 1);
+        }
+        return "";
     }
 
     static String setParameters(IDLFile idlFile, String line, ArrayList<IDLParameter> out) {

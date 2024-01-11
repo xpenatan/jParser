@@ -8,7 +8,7 @@ import com.github.xpenatan.jparser.core.JParserItem;
 public interface CppGenerator {
     void addNativeCode(Node node, String content);
 
-    void addNativeCode(MethodDeclaration methodDeclaration, String content);
+    void addNativeCode(MethodDeclaration nativeMethod, String content);
 
     void addParseFile(JParser jParser, JParserItem parserItem);
 

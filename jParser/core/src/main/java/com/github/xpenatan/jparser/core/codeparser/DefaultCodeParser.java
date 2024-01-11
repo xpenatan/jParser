@@ -91,6 +91,16 @@ public abstract class DefaultCodeParser implements CodeParser {
                 blockComment = comment.asBlockComment();
             }
         }
+        else if(node instanceof RawCodeBlock) {
+            RawCodeBlock rawCodeBlock = (RawCodeBlock)node;
+            String content = rawCodeBlock.getContent();
+            content = content.replace("/*", "");
+            content = content.replace("*/", "");
+            //Block comment already add tags
+            BlockComment comment = new BlockComment(content);
+            cache.add(comment);
+            return;
+        }
         else if(node instanceof BlockComment) {
             BlockComment standAloneBlockComment = (BlockComment)node;
             cache.add(standAloneBlockComment);
@@ -151,7 +161,7 @@ public abstract class DefaultCodeParser implements CodeParser {
         return false;
     }
 
-    public boolean parseCodeBlock(Node node, String headerCommands, String content) {
+    protected boolean parseCodeBlock(Node node, String headerCommands, String content) {
         if(headerCommands.contains(CMD_ADD_RAW)) {
             setAddReplaceCMD(node, content, false, true);
             return true;
@@ -225,5 +235,5 @@ public abstract class DefaultCodeParser implements CodeParser {
         }
     }
 
-    protected abstract void setJavaBodyNativeCMD(String content, MethodDeclaration methodDeclaration);
+    protected abstract void setJavaBodyNativeCMD(String content, MethodDeclaration nativeMethodDeclaration);
 }

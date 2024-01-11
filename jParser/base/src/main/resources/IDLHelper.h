@@ -1,18 +1,18 @@
 #pragma once
 
-#if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
-#include <stddef.h>     // intptr_t
-#else
+#include <string>
+#include <stddef.h>     // NULL
 #include <stdint.h>     // intptr_t
-#endif
 
-class BoolArray {
+typedef std::string IDLString;
+
+class IDLBoolArray {
     private:
-        bool * data;
         int size;
     public:
-        BoolArray(int size) { data = NULL; resize(size); }
-        ~BoolArray() { if(data != NULL) { deleteData(); } }
+        bool * data;
+        IDLBoolArray(int size) { data = NULL; resize(size); }
+        ~IDLBoolArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();
@@ -30,17 +30,17 @@ class BoolArray {
         void deleteData() { delete data; }
         bool getValue(int index) { return data[index]; }
         void setValue(int index, bool value) { data[index] = value; }
-        void* getPointer() { return (void*)data; }
+        intptr_t getPointer() { return (intptr_t)data; }
         int getSize() { return size; }
 };
 
-class IntArray {
+class IDLIntArray {
     private:
-        int * data;
         int size;
     public:
-        IntArray(int size) { data = NULL; resize(size); }
-        ~IntArray() { if(data != NULL) { deleteData(); } }
+        int * data;
+        IDLIntArray(int size) { data = NULL; resize(size); }
+        ~IDLIntArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();
@@ -58,17 +58,17 @@ class IntArray {
         void deleteData() { delete data; }
         int getValue(int index) { return data[index]; }
         void setValue(int index, int value) { data[index] = value; }
-        void* getPointer() { return (void*)data; }
+        intptr_t getPointer() { return (intptr_t)data; }
         int getSize() { return size; }
 };
 
-class FloatArray {
+class IDLFloatArray {
     private:
-        float * data;
         int size;
     public:
-        FloatArray(int size) { data = NULL; resize(size); }
-        ~FloatArray() { if(data != NULL) { deleteData(); } }
+        float * data;
+        IDLFloatArray(int size) { data = NULL; resize(size); }
+        ~IDLFloatArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();
@@ -86,17 +86,17 @@ class FloatArray {
         void deleteData() { delete data; }
         float getValue(int index) { return data[index]; }
         void setValue(int index, float value) { data[index] = value; }
-        void* getPointer() { return (void*)data; }
+        intptr_t getPointer() { return (intptr_t)data; }
         int getSize() { return size; }
 };
 
-class DoubleArray {
+class IDLDoubleArray {
     private:
-        double * data;
         int size;
     public:
-        DoubleArray(int size) { data = NULL; resize(size); }
-        ~DoubleArray() { if(data != NULL) { deleteData(); } }
+        double * data;
+        IDLDoubleArray(int size) { data = NULL; resize(size); }
+        ~IDLDoubleArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();
@@ -114,17 +114,17 @@ class DoubleArray {
         void deleteData() { delete data; }
         double getValue(int index) { return data[index]; }
         void setValue(int index, double value) { data[index] = value; }
-        void* getPointer() { return (void*)data; }
+        intptr_t getPointer() { return (intptr_t)data; }
         int getSize() { return size; }
 };
 
-class CharArray {
+class IDLByteArray {
     private:
-        char * data;
         int size;
     public:
-        CharArray(int size) { data = NULL; resize(size); }
-        ~CharArray() { if(data != NULL) { deleteData(); } }
+        char * data;
+        IDLByteArray(int size) { data = NULL; resize(size); }
+        ~IDLByteArray() { if(data != NULL) { deleteData(); } }
         void resize(int newSize) {
             if(this->data != NULL) {
                 deleteData();
@@ -142,6 +142,6 @@ class CharArray {
         void deleteData() { delete data; }
         char getValue(int index) { return data[index]; }
         void setValue(int index, char value) { data[index] = value; }
-        void* getPointer() { return (void*)data; }
+        intptr_t getPointer() { return (intptr_t)data; }
         int getSize() { return size; }
 };

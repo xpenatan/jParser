@@ -25,16 +25,4 @@ public class CustomPrettyPrinter extends DefaultPrettyPrinter {
     public CustomPrettyPrinter() {
         super(createDefaultVisitor(), createDefaultConfiguration());
     }
-
-    @Override
-    public String print(Node node) {
-        String print = super.print(node);
-
-        if(node instanceof RawCodeBlock) {
-
-            System.out.println("");
-        }
-
-        return print;
-    }
 }

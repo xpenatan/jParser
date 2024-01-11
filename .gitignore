@@ -3,7 +3,6 @@
 .*.swp
 .DS_STORE
 *.cache
-*.js
 
 bin/
 target/
@@ -28,5 +27,11 @@ local.properties
 out/
 *.ini
 **/webapp/**
-**/example-core/src/**
-**/example-desktop/src/**
+**/lib/core/src/**
+**/lib/desktop/src/main/**
+**/lib-ext/ext-core/src/**
+**/lib-ext/ext-desktop/src/main/**
+**/lib/teavm/src/main/java/emu/**
+**/lib/teavm/src/main/resources/*.js
+**/lib/teavm/src/main/resources/*.wasm
+**/app/android/libs/

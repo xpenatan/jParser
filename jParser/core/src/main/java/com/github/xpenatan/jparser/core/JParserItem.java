@@ -4,7 +4,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,20 +15,31 @@ import java.util.Optional;
  */
 public class JParserItem {
     public CompilationUnit unit;
-    public String destinationPath;
     public String inputPath;
+    public final String destinationBaseDir;
+    public String packagePathName;
     public String className = "";
     public boolean notAllowed;
+    public boolean isIDL;
 
-    public JParserItem(CompilationUnit unit, String inputPath, String destinationPath) {
+    public JParserItem(CompilationUnit unit, String inputPath, String destinationBaseDir) {
         this.unit = unit;
         this.inputPath = inputPath;
-        this.destinationPath = destinationPath;
-
+        this.destinationBaseDir = destinationBaseDir;
+        List<EnumDeclaration> allEnum = unit.findAll(EnumDeclaration.class);
         List<ClassOrInterfaceDeclaration> all = unit.findAll(ClassOrInterfaceDeclaration.class);
+
         if(all.size() > 0) {
             className = all.get(0).getNameAsString();
+            String packageName = unit.getPackageDeclaration().get().getNameAsString();
+            this.packagePathName = packageName.replace(".", File.separator);
         }
+        //TODO support enum
+//        else if(allEnum.size() > 0) {
+//            className = allEnum.get(0).getNameAsString();
+//            String packageName = unit.getPackageDeclaration().get().getNameAsString();
+//            this.packagePathName = packageName.replace(".", File.separator);
+//        }
         else {
             notAllowed = true;
             List<CompilationUnit> compiAll = unit.findAll(CompilationUnit.class);
@@ -38,6 +51,11 @@ public class JParserItem {
                 }
             }
         }
+    }
+
+    public String getFullDestinationPath() {
+        String path = destinationBaseDir + File.separator + packagePathName + File.separator + className + ".java";
+        return path;
     }
 
     public PackageDeclaration getPackage() {

@@ -5,10 +5,8 @@ import java.util.ArrayList;
 /**
  * @author xpenatan
  */
-public class IDLClass {
+public class IDLClass extends IDLClassOrEnum {
     public final IDLFile idlFile;
-
-    public String name;
 
     public IDLClassHeader classHeader;
 
@@ -17,6 +15,7 @@ public class IDLClass {
     public final ArrayList<IDLConstructor> constructors = new ArrayList<>();
     public final ArrayList<IDLMethod> methods = new ArrayList<>();
     public final ArrayList<IDLAttribute> attributes = new ArrayList<>();
+    public ArrayList<String> settings = new ArrayList<>();
 
     public IDLClass(IDLFile idlFile) {
         this.idlFile = idlFile;
@@ -34,7 +33,7 @@ public class IDLClass {
         for(int i = 1; i < classLines.size(); i++) {
             String line = classLines.get(i);
             if(line.contains("attribute ")) {
-                IDLAttribute attribute = new IDLAttribute();
+                IDLAttribute attribute = new IDLAttribute(idlFile);
                 attribute.initAttribute(line);
                 attributes.add(attribute);
             }
@@ -43,10 +42,19 @@ public class IDLClass {
                     IDLConstructor constructor = new IDLConstructor(idlFile);
                     constructor.initConstructor(line);
                     constructors.add(constructor);
+
+                    int totalOptionalParams = constructor.getTotalOptionalParams();
+                    if(totalOptionalParams > 0) {
+                        for(int j = 0; j < totalOptionalParams; j++) {
+                            IDLConstructor clone = constructor.clone();
+                            clone.removeLastParam(j + 1);
+                            constructors.add(clone);
+                        }
+                    }
                 }
                 else {
                     if(line.contains("(") && line.contains(")")) {
-                        IDLMethod method = new IDLMethod(idlFile);
+                        IDLMethod method = new IDLMethod(this, idlFile);
                         method.initMethod(line);
                         methods.add(method);
 
@@ -115,5 +123,23 @@ public class IDLClass {
 
     public String getName() {
         return classHeader.prefixName + name;
+    }
+
+    public IDLMethod getMethod(String methodName) {
+        for(IDLMethod method : methods) {
+            if(method.name.equals(methodName)) {
+                return method;
+            }
+        }
+        return null;
+    }
+
+    public IDLMethod getOperatorMethod(String operator) {
+        for(IDLMethod method : methods) {
+            if(method.operator.equals(operator)) {
+                return method;
+            }
+        }
+        return null;
     }
 }

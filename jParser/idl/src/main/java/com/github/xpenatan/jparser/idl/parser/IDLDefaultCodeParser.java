@@ -2,7 +2,11 @@ package com.github.xpenatan.jparser.idl.parser;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.comments.BlockComment;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -10,11 +14,15 @@ import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
+import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLConstructor;
+import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * @author xpenatan
@@ -28,14 +36,14 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
     protected boolean enableAttributeParsing = true;
 
-    static final String CPOINTER_METHOD = "getCPointer()";
+    protected static final String CPOINTER_METHOD = "getCPointer()";
 
-    public IDLDefaultCodeParser(String headerCMD, IDLReader idlReader) {
-        super("", headerCMD, idlReader);
+    public IDLDefaultCodeParser(String headerCMD, IDLReader idlReader, String cppDir) {
+        super("", headerCMD, idlReader, cppDir);
     }
 
-    public IDLDefaultCodeParser(String basePackage, String headerCMD, IDLReader idlReader) {
-        super(basePackage, headerCMD, idlReader);
+    public IDLDefaultCodeParser(String basePackage, String headerCMD, IDLReader idlReader, String cppDir) {
+        super(basePackage, headerCMD, idlReader, cppDir);
     }
 
     @Override
@@ -62,6 +70,21 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
             String nameStr = name.asString();
             IDLClass idlClass = idlReader.getClass(nameStr);
             if(idlClass != null) {
+                Optional<Comment> optionalComment = classOrInterfaceDeclaration.getComment();
+                if(optionalComment.isPresent()) {
+                    Comment comment = optionalComment.get();
+                    if(comment instanceof BlockComment) {
+                        BlockComment blockComment = (BlockComment)optionalComment.get();
+                        String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
+                        // Skip if method already exist with header code
+                        if(headerCommands != null) {
+                            if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
+                                //If skip is found then remove the method
+                                return;
+                            }
+                        }
+                    }
+                }
 
                 if(generateClass) {
                     IDLConstructorParser.generateConstructor(this, jParser, unit, classOrInterfaceDeclaration, idlClass);
@@ -70,13 +93,21 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
                 ArrayList<IDLMethod> methods = idlClass.methods;
                 for(int i = 0; i < methods.size(); i++) {
                     IDLMethod idlMethod = methods.get(i);
-                    IDLMethodParser.generateMethods(this, jParser, unit, classOrInterfaceDeclaration, idlClass, idlMethod);
+                    IDLMethodParser.generateMethod(this, jParser, unit, classOrInterfaceDeclaration, idlClass, idlMethod);
                 }
                 if(enableAttributeParsing) {
                     ArrayList<IDLAttribute> attributes = idlClass.attributes;
                     for(int i = 0; i < attributes.size(); i++) {
                         IDLAttribute idlAttribute = attributes.get(i);
                         IDLAttributeParser.generateAttribute(this, jParser, unit, classOrInterfaceDeclaration, idlClass, idlAttribute);
+                    }
+                }
+            }
+            else {
+                if(generateClass) {
+                    IDLEnum idlEnum = idlReader.getEnum(nameStr);
+                    if(idlEnum != null) {
+                        IDLEnumParser.generateEnum(this, jParser, unit, classOrInterfaceDeclaration, idlEnum);
                     }
                 }
             }
@@ -109,23 +140,19 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
         }
     }
 
-    @Deprecated
-    public void onIDLMethodGenerated(JParser jParser, IDLClass idlClass, IDLMethod idlMethod, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration idlMethodDeclaration, boolean isAttribute) {
+    public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
-
 
     public void onIDLMethodGenerated(JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
-    public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
-    /**
-     * true to accept the idl method
-     */
-    @Deprecated
-    public boolean filterIDLMethod(IDLClass idlClass, IDLMethod idlMethod) {
-        return true;
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
+    public String getIDLMethodName(String name) {
+        return name;
+    }
 }

@@ -15,6 +15,7 @@ public class IDLParameter {
     public boolean isRef;
     public boolean isConst;
     public boolean isValue;
+    public boolean isAny;
     public final ArrayList<String> tags = new ArrayList<>();
 
     public boolean optional;
@@ -33,18 +34,18 @@ public class IDLParameter {
 
         int startIndex = line.indexOf("[");
         int endIndex = line.indexOf("]");
-        if(!isArray && startIndex != -1 && endIndex != -1) {
-            String substring1 = line.substring(startIndex, endIndex + 1);
-            isRef = substring1.contains("Ref");
-            isConst = substring1.contains("Const");
-            isValue = substring1.contains("Value");
-            String substring2 = substring1.replace("[", "").replace("]", "");
+        if(startIndex != -1 && endIndex != -1 && startIndex + 2 < endIndex) {
+            String tagsStr = line.substring(startIndex, endIndex + 1);
+            isRef = tagsStr.contains("Ref");
+            isConst = tagsStr.contains("Const");
+            isValue = tagsStr.contains("Value");
+            String substring2 = tagsStr.replace("[", "").replace("]", "");
             String[] s = substring2.split(" ");
             for(int i = 0; i < s.length; i++) {
                 String tag = s[i];
                 tags.add(tag);
             }
-            tmpLine = tmpLine.replace(substring1, "").trim();
+            tmpLine = tmpLine.replace(tagsStr, "").trim();
         }
 
         if(isArray) {
@@ -58,17 +59,41 @@ public class IDLParameter {
             type = type + "[]";
         }
 
+        if(type.equals("any") || type.equals("VoidPtr")) {
+            type = "int";
+            isAny = true;
+        }
+
         if(type.equals("long")) {
             type = "int";
         }
-
         if(type.equals("long[]")) {
             type = "int[]";
         }
-
         if(type.equals("DOMString")) {
             type = "String";
         }
+        if(type.equals("octet")) {
+            type = "byte";
+        }
+
+        // Convert to array object
+        if(type.equals("int[]")) {
+            type = "IDLIntArray";
+        }
+        else if(type.equals("float[]")) {
+            type = "IDLFloatArray";
+        }
+        else if(type.equals("byte[]")) {
+            type = "IDLByteArray";
+        }
+        else if(type.equals("boolean[]")) {
+            type = "IDLBoolArray";
+        }
+        else if(type.equals("double[]")) {
+            type = "IDLDoubleArray";
+        }
+
         name = s1[s1.length - 1];
     }
 
@@ -78,6 +103,9 @@ public class IDLParameter {
         clonedParam.type = type;
         clonedParam.name = name;
         clonedParam.isRef = isRef;
+        clonedParam.isAny = isAny;
+        clonedParam.isArray = isArray;
+        clonedParam.isValue = isValue;
         clonedParam.isConst = isConst;
         clonedParam.tags.addAll(tags);
         return clonedParam;

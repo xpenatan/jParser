@@ -6,19 +6,48 @@ import java.util.ArrayList;
  * @author xpenatan
  */
 public class IDLFile {
-    public final String subPackage;
-    public final ArrayList<IDLClass> classArray = new ArrayList<>();
 
-    public IDLFile(String subPackage) {
-        this.subPackage = subPackage;
+    public final String idlName;
+
+    public ArrayList<String> lines = new ArrayList<>();
+
+    public final ArrayList<IDLClassOrEnum> classArray = new ArrayList<>();
+
+    public IDLFile(String idlName) {
+        this.idlName = idlName;
+    }
+
+    public String getIDLStr() {
+        String idlStr = "";
+        for(String line : lines) {
+            if(!line.trim().isEmpty()) {
+                idlStr += line + "\n";
+            }
+        }
+        return idlStr;
     }
 
     public IDLClass getClass(String name) {
         int size = classArray.size();
         for(int i = 0; i < size; i++) {
-            IDLClass idlClass = classArray.get(i);
+            IDLClassOrEnum idlClass = classArray.get(i);
             if(idlClass.name.equals(name)) {
-                return idlClass;
+                if(idlClass.isClass()) {
+                    return idlClass.asClass();
+                }
+            }
+        }
+        return null;
+    }
+
+    public IDLEnum getEnum(String name) {
+        int size = classArray.size();
+        for(int i = 0; i < size; i++) {
+            IDLClassOrEnum idlClass = classArray.get(i);
+            if(idlClass.name.equals(name)) {
+                if(idlClass.isEnum()) {
+                    return idlClass.asEnum();
+                }
             }
         }
         return null;
