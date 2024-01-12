@@ -1,9 +1,11 @@
 import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildMultiTarget;
+import com.github.xpenatan.jparser.builder.BuildTarget;
 import com.github.xpenatan.jparser.builder.JBuilder;
 import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jparser.builder.targets.EmscriptenLibTarget;
 import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
+import com.github.xpenatan.jparser.builder.targets.LinuxTarget;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.util.FileHelper;
@@ -15,6 +17,7 @@ import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.teavm.TeaVMCodeParser;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Main {
 
@@ -77,13 +80,19 @@ public class Main {
         TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, customSourceDir);
         JParser.generate(teavmParser, baseJavaDir, teaVMgenDir);
 
+        ArrayList<BuildMultiTarget> targets = new ArrayList<>();
+        if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
+            targets.add(getWindowTarget());
+            targets.add(getEmscriptenTarget(idlReader));
+            JBuilder.build(buildConfig, getLinuxTarget());
+        }
+
 //        IOSTarget iosTarget = new IOSTarget();
 //        iosTarget.headerDirs.add("-Isrc/exampleLib");
 //        iosTarget.cppIncludes.add("**/src/exampleLib/**.cpp");
 
-        JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlReader), getAndroidTarget());
+        //       JBuilder.build(buildConfig, getWindowTarget(), getEmscriptenTarget(idlReader), getAndroidTarget());
 //        JBuilder.build(buildConfig, getEmscriptenTarget(idlReader));
-//        JBuilder.build(buildConfig, getWindowTarget());
     }
 
     private static BuildMultiTarget getWindowTarget() throws IOException {
@@ -116,6 +125,30 @@ public class Main {
 
         return multiTarget;
     }
+
+    private static BuildMultiTarget getLinuxTarget() throws IOException {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String libBuildPath = new File("./build/c++/").getCanonicalPath().replace("\\", "/");
+
+        // Make a static library
+        LinuxTarget windowsTarget = new LinuxTarget();
+        windowsTarget.isStatic = true;
+        windowsTarget.headerDirs.add("-Isrc/exampleLib");
+        windowsTarget.cppInclude.add("**/src/exampleLib/**.cpp");
+        multiTarget.add(windowsTarget);
+
+        LinuxTarget glueTarget = new LinuxTarget();
+        glueTarget.addJNIHeaders();
+        glueTarget.headerDirs.add("-Isrc/exampleLib");
+        glueTarget.headerDirs.add("-I" + libBuildPath + "/src/jniglue");
+        glueTarget.linkerFlags.add("../../libs/linux/libexampleLib64.a");
+        glueTarget.cppInclude.add(libBuildPath + "/src/jniglue/JNIGlue.cpp");
+
+        multiTarget.add(glueTarget);
+
+        return multiTarget;
+    }
+
 
     private static BuildMultiTarget getEmscriptenTarget(IDLReader idlReader) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();

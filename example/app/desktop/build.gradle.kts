@@ -3,7 +3,7 @@ dependencies {
     implementation(project(":example:lib:desktop"))
 
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
-    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl:${LibExt.gdxVersion}")
+    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 }
 
 val mainClassName = "com.github.xpenatan.jparser.example.app.Main"

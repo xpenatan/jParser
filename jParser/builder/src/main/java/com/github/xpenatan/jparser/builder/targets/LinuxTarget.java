@@ -8,6 +8,7 @@ public class LinuxTarget extends BuildTarget {
     public LinuxTarget() {
         this.libDirSuffix = "linux/";
         this.tempBuildDir = "target/linux";
+        this.libPrefix = "lib";
 
         cppFlags.add("-c");
         cppFlags.add("-Wall");
@@ -33,7 +34,6 @@ public class LinuxTarget extends BuildTarget {
             libSuffix = "64.a";
         }
         else {
-            linkerFlags.add("-Wl,-wrap,memcpy");
             linkerFlags.add("-shared");
             linkerFlags.add("-m64");
             libSuffix = "64.so";

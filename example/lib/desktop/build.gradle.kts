@@ -3,8 +3,10 @@ plugins {
 }
 
 val windowsFile = "$projectDir/../generator/build/c++/libs/windows/exampleLib64.dll"
+val linuxFile = "$projectDir/../generator/build/c++/libs/linux/libexampleLib64.so"
 
 tasks.jar {
+    from(linuxFile)
     from(windowsFile)
 }
 
