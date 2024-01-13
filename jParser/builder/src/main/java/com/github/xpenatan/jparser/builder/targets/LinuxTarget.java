@@ -10,6 +10,11 @@ public class LinuxTarget extends BuildTarget {
         this.tempBuildDir = "target/linux";
         this.libPrefix = "lib";
 
+        cppCompiler.clear();
+        linkerCompiler.clear();
+        cppCompiler.add("g++");
+        linkerCompiler.add("g++");
+
         cppFlags.add("-c");
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
