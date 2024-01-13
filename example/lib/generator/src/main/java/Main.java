@@ -84,9 +84,9 @@ public class Main {
 
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
-            targets.add(getWindowTarget());
-            targets.add(getEmscriptenTarget(idlReader));
-            targets.add(getAndroidTarget());
+//            targets.add(getWindowTarget());
+//            targets.add(getEmscriptenTarget(idlReader));
+//            targets.add(getAndroidTarget());
         }
         if(BuildTarget.isUnix()) {
 //            targets.add(getLinuxTarget());
@@ -95,7 +95,7 @@ public class Main {
 //            targets.add(getMacTarget());
 //            targets.add(getIOSTarget());
         }
-        JBuilder.build(buildConfig, getIOSTarget());
+        JBuilder.build(buildConfig, targets);
     }
 
     private static BuildMultiTarget getWindowTarget() throws IOException {
