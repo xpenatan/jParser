@@ -87,6 +87,8 @@ public class Main {
             targets.add(getWindowTarget());
             targets.add(getEmscriptenTarget(idlReader));
             targets.add(getAndroidTarget());
+        }
+        if(BuildTarget.isUnix()) {
             targets.add(getLinuxTarget());
         }
         if(BuildTarget.isMac()) {
