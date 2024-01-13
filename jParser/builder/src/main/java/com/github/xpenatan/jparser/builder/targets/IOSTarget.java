@@ -8,6 +8,12 @@ public class IOSTarget extends BuildTarget {
         this.libDirSuffix = "ios/";
         this.tempBuildDir = "target/ios";
 
+        cppCompiler.clear();
+        linkerCompiler.clear();
+        cppCompiler.add("clang++");
+        linkerCompiler.add("clang++");
+        libSuffix = "dylib";
+
         cppFlags.add("-c");
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
@@ -18,11 +24,6 @@ public class IOSTarget extends BuildTarget {
         cppInclude.add("**/jniglue/JNIGlue.cpp");
         headerDirs.add("jni-headers/");
         headerDirs.add("jni-headers/mac");
-
-        cppCompiler.clear();
-        linkerCompiler.clear();
-        cppCompiler.add("clang++");
-        libSuffix = "dylib";
     }
 
     @Override
