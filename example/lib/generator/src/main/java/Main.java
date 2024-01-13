@@ -89,7 +89,7 @@ public class Main {
             targets.add(getAndroidTarget());
         }
         if(BuildTarget.isUnix()) {
-            targets.add(getLinuxTarget());
+//            targets.add(getLinuxTarget());
         }
         if(BuildTarget.isMac()) {
 //            targets.add(getMacTarget());
