@@ -62,13 +62,14 @@ public class MacTarget extends BuildTarget {
             linkerFlags.add("-shared");
             if(isArm) {
                 cppFlags.add("-arch arm64");
+                libSuffix = "arm64.dylib";
             }
             else {
                 cppFlags.add("-arch x86_64");
+                libSuffix = "64.dylib";
             }
             linkerFlags.add("-mmacosx-version-min=10.7");
             linkerFlags.add("-stdlib=libc++");
-            libSuffix = "64.dylib";
         }
     }
 
