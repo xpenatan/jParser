@@ -119,7 +119,7 @@ public class EmscriptenTarget extends BuildTarget {
     }
 
     @Override
-    protected void onLink(String objFilePath, String libPath) {
+    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
         if(isStatic) {
             linkerCommands.addAll(linkerCompiler);
             linkerCommands.addAll(linkerFlags);
@@ -127,7 +127,7 @@ public class EmscriptenTarget extends BuildTarget {
             linkerCommands.add("@" + objFilePath);
         }
         else {
-            super.onLink(objFilePath, libPath);
+            super.onLink(compiledObjects, objFilePath, libPath);
         }
     }
 

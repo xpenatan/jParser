@@ -174,13 +174,13 @@ public abstract class BuildTarget {
         objList.writeString(compiledPaths.trim(), false);
 
         linkerCommands.clear();
-        onLink(objList.path(), libPath);
+        onLink(compiledObjects, objList.path(), libPath);
 
         System.out.println("##### LINK #####");
         return JProcess.startProcess(childTarget.file(), linkerCommands);
     }
 
-    protected void onLink(String objFilePath, String libPath) {
+    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
         linkerCommands.addAll(linkerCompiler);
         linkerCommands.add("@" + objFilePath);
         linkerCommands.addAll(linkerFlags);
