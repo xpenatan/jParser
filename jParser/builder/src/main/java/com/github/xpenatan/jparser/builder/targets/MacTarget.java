@@ -19,6 +19,9 @@ public class MacTarget extends BuildTarget {
         cppFlags.add("-c");
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
+        cppFlags.add("-arch x86_64");
+        cppFlags.add("-DFIXED_POINT");
+
         cppFlags.add("-mfpmath=sse");
         cppFlags.add("-msse2");
         cppFlags.add("-fmessage-length=0");
@@ -28,7 +31,7 @@ public class MacTarget extends BuildTarget {
         cppFlags.add("-Wno-unused-but-set-variable");
         cppFlags.add("-w");
         cppFlags.add("-Wno-format");
-        cppFlags.add("-arch x86_64");
+
         cppFlags.add("-mmacosx-version-min=10.7");
         cppFlags.add("-stdlib=libc++");
     }
