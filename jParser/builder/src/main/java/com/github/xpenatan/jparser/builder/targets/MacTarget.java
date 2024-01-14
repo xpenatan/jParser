@@ -15,8 +15,15 @@ public class MacTarget extends BuildTarget {
 
     public MacTarget(boolean isArm) {
         this.isArm = isArm;
-        this.libDirSuffix = "mac/";
-        this.tempBuildDir = "target/mac";
+
+        if(isArm) {
+            this.libDirSuffix = "mac/arm/";
+            this.tempBuildDir = "target/mac/arm";
+        }
+        else {
+            this.libDirSuffix = "mac/";
+            this.tempBuildDir = "target/mac";
+        }
         this.libPrefix = "lib";
 
         cppCompiler.clear();
@@ -79,6 +86,7 @@ public class MacTarget extends BuildTarget {
             linkerCommands.addAll(linkerCompiler);
             linkerCommands.addAll(linkerFlags);
             linkerCommands.add(libPath);
+            // TODO this may fail if contains many files. Need an alternative like at sign in windows.
             for(int i = 0; i < compiledObjects.size(); i++) {
                 CustomFileDescriptor customFileDescriptor = compiledObjects.get(i);
                 String path = customFileDescriptor.path();
