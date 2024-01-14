@@ -7,7 +7,14 @@ import java.util.ArrayList;
 
 public class MacTarget extends BuildTarget {
 
+    private boolean isArm = false;
+
     public MacTarget() {
+        this(false);
+    }
+
+    public MacTarget(boolean isArm) {
+        this.isArm = isArm;
         this.libDirSuffix = "mac/";
         this.tempBuildDir = "target/mac";
         this.libPrefix = "lib";
@@ -21,7 +28,12 @@ public class MacTarget extends BuildTarget {
         cppFlags.add("-c");
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
-        cppFlags.add("-arch x86_64");
+        if(isArm) {
+            cppFlags.add("-arch arm64");
+        }
+        else {
+            cppFlags.add("-arch x86_64");
+        }
         cppFlags.add("-DFIXED_POINT");
 
         cppFlags.add("-mfpmath=sse");
@@ -48,7 +60,12 @@ public class MacTarget extends BuildTarget {
         }
         else {
             linkerFlags.add("-shared");
-            linkerFlags.add("-arch x86_64");
+            if(isArm) {
+                cppFlags.add("-arch arm64");
+            }
+            else {
+                cppFlags.add("-arch x86_64");
+            }
             linkerFlags.add("-mmacosx-version-min=10.7");
             linkerFlags.add("-stdlib=libc++");
             libSuffix = "64.dylib";
