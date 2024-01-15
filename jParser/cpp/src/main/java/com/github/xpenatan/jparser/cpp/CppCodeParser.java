@@ -280,6 +280,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         if(idlMethod.idlFile.getEnum(returnTypeStr) != null) {
             returnCastStr = "(int)";
         }
+        if(idlMethod.isAny) {
+            returnCastStr = "(jlong)";
+        }
+
         String operator = getOperation(idlMethod.operator, param);
         String content = null;
         IDLMethodOperation.Op op = IDLMethodOperation.getEnum(idlMethod, methodDeclaration, nativeMethod);
