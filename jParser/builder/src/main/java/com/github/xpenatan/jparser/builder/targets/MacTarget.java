@@ -61,8 +61,9 @@ public class MacTarget extends BuildTarget {
     protected void setup(BuildConfig config) {
         if(isStatic) {
             linkerCompiler.clear();
-            linkerCompiler.add("ar");
-            linkerFlags.add("rcs");
+            linkerCompiler.add("libtool");
+            linkerFlags.add("-static");
+            linkerFlags.add("-o");
             libSuffix = "64.a";
         }
         else {
@@ -86,12 +87,7 @@ public class MacTarget extends BuildTarget {
             linkerCommands.addAll(linkerCompiler);
             linkerCommands.addAll(linkerFlags);
             linkerCommands.add(libPath);
-            // TODO this may fail if contains many files. Need an alternative like at sign in windows.
-            for(int i = 0; i < compiledObjects.size(); i++) {
-                CustomFileDescriptor customFileDescriptor = compiledObjects.get(i);
-                String path = customFileDescriptor.path();
-                linkerCommands.add(path);
-            }
+            linkerCommands.add("@" + objFilePath);
         }
         else {
             super.onLink(compiledObjects, objFilePath, libPath);

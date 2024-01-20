@@ -23,17 +23,18 @@ public class IOSTarget extends BuildTarget {
         String cppCompilerr = "clang++";
         cppCompiler.add(cppCompilerr);
         linkerCompiler.add(cppCompilerr);
-        cppFlags.add("-isysroot " + iphoneSimulatorSdk + " -arch x86_64 -mios-simulator-version-min=" + minIOSVersion);
+
+//        cppFlags.add("-isysroot " + iphoneSimulatorSdk + " -arch x86_64 -mios-simulator-version-min=" + minIOSVersion);
         cppFlags.add("-c");
+        cppFlags.add("-arch x86_64");
+        cppFlags.add("-mios-simulator-version-min=" + minIOSVersion);
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
         cppFlags.add("-stdlib=libc++");
+        cppFlags.add("-std=c++17");
+        
         linkerFlags.add("-shared");
         linkerFlags.add("-stdlib=libc++");
-
-        cppInclude.add("**/jniglue/JNIGlue.cpp");
-        headerDirs.add("jni-headers/");
-        headerDirs.add("jni-headers/mac");
     }
 
     @Override
@@ -54,9 +55,10 @@ public class IOSTarget extends BuildTarget {
 
         if(isStatic) {
             linkerCompiler.clear();
-            linkerCompiler.add("ar");
-            linkerFlags.add("rcs");
-            libSuffix = ".a";
+            linkerCompiler.add("libtool");
+            linkerFlags.add("-static");
+            linkerFlags.add("-o");
+            libSuffix = "64.a";
         }
         else {
             linkerFlags.add("-shared");
