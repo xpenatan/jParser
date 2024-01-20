@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-val moduleName = "base"
+val moduleName = "jParser-base"
 
 tasks {
     withType<Jar> {
