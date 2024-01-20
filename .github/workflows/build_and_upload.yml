@@ -16,7 +16,7 @@ env:
 jobs:
   build_Mac:
     name: Build Linux
-    runs-on: macos-11
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
