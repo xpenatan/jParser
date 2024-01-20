@@ -24,7 +24,7 @@ public class IOSTarget extends BuildTarget {
         cppCompiler.add(cppCompilerr);
         linkerCompiler.add(cppCompilerr);
 
-//        cppFlags.add("-isysroot " + iphoneSimulatorSdk + " -arch x86_64 -mios-simulator-version-min=" + minIOSVersion);
+        cppFlags.add("-isysroot " + iphoneSimulatorSdk);
         cppFlags.add("-c");
         cppFlags.add("-arch x86_64");
         cppFlags.add("-mios-simulator-version-min=" + minIOSVersion);
