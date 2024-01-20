@@ -25,9 +25,11 @@ public class IOSTarget extends BuildTarget {
         linkerCompiler.add(cppCompilerr);
 
         cppFlags.add("-isysroot" + iphoneSimulatorSdk);
-        cppFlags.add("-c");
         cppFlags.add("-arch x86_64");
         cppFlags.add("-mios-simulator-version-min=" + minIOSVersion);
+        cppFlags.add("-d");
+        cppFlags.add("-c");
+
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
         cppFlags.add("-stdlib=libc++");
@@ -58,6 +60,9 @@ public class IOSTarget extends BuildTarget {
             libSuffix = "64.a";
         }
         else {
+            linkerFlags.add("-isysroot" + iphoneSimulatorSdk);
+            linkerFlags.add("-arch x86_64");
+            linkerFlags.add("-mios-simulator-version-min=" + minIOSVersion);
             linkerFlags.add("-shared");
             linkerFlags.add("-stdlib=libc++");
             libSuffix = "";
