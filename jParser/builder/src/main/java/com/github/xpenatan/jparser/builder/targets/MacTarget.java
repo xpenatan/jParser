@@ -1,11 +1,11 @@
 package com.github.xpenatan.jparser.builder.targets;
 
 import com.github.xpenatan.jparser.builder.BuildConfig;
-import com.github.xpenatan.jparser.builder.BuildTarget;
+import com.github.xpenatan.jparser.builder.DefaultBuildTarget;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.util.ArrayList;
 
-public class MacTarget extends BuildTarget {
+public class MacTarget extends DefaultBuildTarget {
 
     private boolean isArm = false;
 

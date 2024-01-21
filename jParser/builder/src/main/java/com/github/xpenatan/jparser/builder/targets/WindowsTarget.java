@@ -1,11 +1,11 @@
 package com.github.xpenatan.jparser.builder.targets;
 
 import com.github.xpenatan.jparser.builder.BuildConfig;
-import com.github.xpenatan.jparser.builder.BuildTarget;
+import com.github.xpenatan.jparser.builder.DefaultBuildTarget;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.util.ArrayList;
 
-public class WindowsTarget extends BuildTarget {
+public class WindowsTarget extends DefaultBuildTarget {
 
     public static boolean DEBUG_BUILD;
 
