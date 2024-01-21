@@ -256,14 +256,14 @@ public class Main {
         iosTarget.cppInclude.add("**/src/exampleLib/**.cpp");
         multiTarget.add(iosTarget);
 
-//        IOSTarget glueTarget = new IOSTarget();
-//        glueTarget.addJNIHeaders();
-//        glueTarget.headerDirs.add("-Isrc/exampleLib");
-//        glueTarget.headerDirs.add("-I" + libBuildPath + "/src/jniglue");
-//        glueTarget.linkerFlags.add("../../libs/ios/libexampleLib.dylib");
-//        glueTarget.cppInclude.add(libBuildPath + "/src/jniglue/JNIGlue.cpp");
+        IOSTarget glueTarget = new IOSTarget();
+        glueTarget.addJNIHeaders();
+        glueTarget.headerDirs.add("-Isrc/exampleLib");
+        glueTarget.headerDirs.add("-I" + libBuildPath + "/src/jniglue");
+        glueTarget.linkerFlags.add("../../libs/ios/exampleLib64.a");
+        glueTarget.cppInclude.add(libBuildPath + "/src/jniglue/JNIGlue.cpp");
 
-//        multiTarget.add(glueTarget);
+        multiTarget.add(glueTarget);
 
         return multiTarget;
     }
