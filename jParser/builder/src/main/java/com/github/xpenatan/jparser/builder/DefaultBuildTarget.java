@@ -101,35 +101,6 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         for(CustomFileDescriptor file : files) {
             file.moveTo(childTarget);
         }
-
-//        for(CustomFileDescriptor file : cppFiles) {
-//            String path = file.path();
-//            String sourceBasePath = config.sourceDir.path();
-//            String pathWithoutBase = file.path().replace(sourceBasePath, "");
-//            String pathName = file.name();
-//            String parent = pathWithoutBase.replace(pathName, "");
-//            CustomFileDescriptor toCopy = childTarget.child(parent);
-//            String p = toCopy.path();
-//            if(!toCopy.exists()) {
-//                toCopy.mkdirs();
-//            }
-//            p += "/";
-//            String compiledPath = p + file.nameWithoutExtension() + ".o";
-//
-//            compilerCommands.clear();
-//            compilerCommands.addAll(cppCompiler);
-//            compilerCommands.addAll(cppFlags);
-//            compilerCommands.addAll(headerDirs);
-//            compilerCommands.add(path);
-//            compilerCommands.add(compilerOutputCommand + compiledPath);
-//
-//            System.out.println("##### COMPILE #####");
-//            boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
-//            if(!flag) {
-//                return false;
-//            }
-//            retFlag = true;
-//        }
         return retFlag;
     }
 
