@@ -111,7 +111,10 @@ public class IDLMethodParser {
             }
         }
 
-        String updatedMethodName = idlParser.getIDLMethodName(methodName);
+        // Remove methods characters if it contains "_1", "_2", etc.
+        String fixedMethodName = methodName.replaceFirst("_\\d$", "");
+
+        String updatedMethodName = idlParser.getIDLMethodName(fixedMethodName);
         ArrayList<IDLParameter> parameters = idlMethod.parameters;
         MethodDeclaration methodDeclaration = classOrInterfaceDeclaration.addMethod(updatedMethodName, Modifier.Keyword.PUBLIC);
         methodDeclaration.setStatic(idlMethod.isStaticMethod);
