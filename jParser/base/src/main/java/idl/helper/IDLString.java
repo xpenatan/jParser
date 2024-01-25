@@ -4,6 +4,8 @@ import idl.IDLBase;
 
 public class IDLString extends IDLBase {
 
+    public static IDLString TMP_EMPTY_1 = new IDLString((byte)0);
+
     public static IDLString TMP_1 = new IDLString();
     public static IDLString TMP_2 = new IDLString();
 
@@ -14,6 +16,8 @@ public class IDLString extends IDLBase {
 
     public IDLString() {
     }
+
+    public IDLString(byte b) {}
 
     public String c_str() {
         String text = c_strNATIVE(getCPointer());
