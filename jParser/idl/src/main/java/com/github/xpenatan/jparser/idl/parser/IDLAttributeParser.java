@@ -22,6 +22,9 @@ import java.util.Optional;
 
 public class IDLAttributeParser {
 
+    public static final String ATTRIBUTE_PREFIX_SET = "";
+    public static final String ATTRIBUTE_PREFIX_GET = "";
+
     public static void generateAttribute(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass, IDLAttribute idlAttribute) {
         if(idlAttribute.skip) {
             return;
@@ -91,7 +94,7 @@ public class IDLAttributeParser {
             if(getMethodDeclaration != null) {
                 getMethodDeclaration.remove();
             }
-            String getMethodName = "get_" + attributeName;
+            String getMethodName = ATTRIBUTE_PREFIX_GET + attributeName;
             getMethodDeclaration = classOrInterfaceDeclaration.addMethod(getMethodName, Modifier.Keyword.PUBLIC);
             getMethodDeclaration.setStatic(idlAttribute.isStatic);
             getMethodDeclaration.setType(type);
@@ -111,7 +114,7 @@ public class IDLAttributeParser {
             if(setMethodDeclaration != null) {
                 setMethodDeclaration.remove();
             }
-            String setMethodName = "set_" + attributeName;
+            String setMethodName = ATTRIBUTE_PREFIX_SET + attributeName;
             setMethodDeclaration = classOrInterfaceDeclaration.addMethod(setMethodName, Modifier.Keyword.PUBLIC);
             setMethodDeclaration.setStatic(idlAttribute.isStatic);
             Parameter parameter = setMethodDeclaration.addAndGetParameter(type, attributeName);
@@ -180,7 +183,7 @@ public class IDLAttributeParser {
     private static MethodDeclaration containsSetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
         String[] paramTypes = new String[1];
         paramTypes[0] = idlAttribute.type;
-        String methodName = "set_" + idlAttribute.name;
+        String methodName = ATTRIBUTE_PREFIX_SET + idlAttribute.name;
         List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
 
         if(methods.size() > 0) {
@@ -191,7 +194,7 @@ public class IDLAttributeParser {
 
     private static MethodDeclaration containsGetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
         String[] paramTypes = new String[0];
-        String methodName = "get_" + idlAttribute.name;
+        String methodName = ATTRIBUTE_PREFIX_GET + idlAttribute.name;
         List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
 
         if(methods.size() > 0) {

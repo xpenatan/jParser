@@ -85,7 +85,7 @@ public class Main {
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
             targets.add(getWindowTarget());
-//            targets.add(getEmscriptenTarget(idlReader));
+            targets.add(getEmscriptenTarget(idlReader));
 //            targets.add(getAndroidTarget());
         }
         if(BuildTarget.isUnix()) {
