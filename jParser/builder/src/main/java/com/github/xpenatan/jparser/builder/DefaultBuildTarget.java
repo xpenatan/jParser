@@ -88,7 +88,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         compilerCommands.addAll(cppFlags);
         compilerCommands.addAll(headerDirs);
         compilerCommands.add("@" + cppList.path());
-        System.out.println("##### COMPILE #####");
+        System.err.println("##### COMPILE #####");
         boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
         if(!flag) {
             return false;
@@ -133,7 +133,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         linkerCommands.clear();
         onLink(compiledObjects, objList.path(), libPath);
 
-        System.out.println("##### LINK #####");
+        System.err.println("##### LINK #####");
         return JProcess.startProcess(childTarget.file(), linkerCommands);
     }
 
