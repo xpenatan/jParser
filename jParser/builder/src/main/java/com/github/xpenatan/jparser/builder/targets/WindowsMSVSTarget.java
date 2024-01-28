@@ -8,6 +8,7 @@ public class WindowsMSVSTarget extends DefaultBuildTarget {
     public WindowsMSVSTarget() {
         this.libDirSuffix = "windows/";
         this.tempBuildDir = "target/windows";
+        linkObjSuffix = ".obj";
 
         cppCompiler.clear();
         linkerCompiler.clear();
