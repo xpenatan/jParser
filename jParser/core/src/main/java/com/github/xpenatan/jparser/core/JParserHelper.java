@@ -89,11 +89,15 @@ public class JParserHelper {
         for(int i = 0; i < imports.size(); i++) {
             ImportDeclaration importDeclaration = imports.get(i);
             String importName = importDeclaration.getName().asString();
-            if(useEqual && classPath.equals(importName)) {
-                return true;
+            if(useEqual) {
+                if(classPath.equals(importName)) {
+                    return true;
+                }
             }
-            else if(importName.contains(classPath)) {
-                return true;
+            else {
+                if(importName.contains(classPath)) {
+                    return true;
+                }
             }
         }
         return false;
