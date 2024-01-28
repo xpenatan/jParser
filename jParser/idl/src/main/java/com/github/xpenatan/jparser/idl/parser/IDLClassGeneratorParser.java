@@ -27,8 +27,6 @@ import com.github.xpenatan.jparser.core.util.ResourceList;
 import idl.IDLBase;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -55,15 +53,22 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     protected HashMap<String, String> classCppPath;
 
-    protected String cppDir;
+    protected String includeDir;
 
-    public IDLClassGeneratorParser(String basePackage, String headerCMD, IDLReader idlReader, String cppDir) {
+    /**
+     *
+     * @param basePackage Base module source. This is used to generate other sources
+     * @param headerCMD This is the first command option that this parser will use. Ex teavm, C++.
+     * @param idlReader Contains the parsed idl files
+     * @param includeDir This is used to add java subpackages from c++ tree. Without this all java source will be at the root package.
+     */
+    public IDLClassGeneratorParser(String basePackage, String headerCMD, IDLReader idlReader, String includeDir) {
         super(headerCMD);
-        this.cppDir = cppDir;
+        this.includeDir = includeDir;
         this.basePackage = basePackage;
         this.idlReader = idlReader;
-        if(this.cppDir != null) {
-            this.cppDir = this.cppDir.replace("\\", "/").replace("//", "/");;
+        if(this.includeDir != null) {
+            this.includeDir = this.includeDir.replace("\\", "/").replace("//", "/");;
         }
     }
 
@@ -142,13 +147,13 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     private HashMap<String, String> getClassCppPath() {
         HashMap<String, String> mapPackage = new HashMap<>();
-        if(cppDir != null) {
-            ArrayList<String> filesFromDir = FileHelper.getFilesFromDir(cppDir);
+        if(includeDir != null) {
+            ArrayList<String> filesFromDir = FileHelper.getFilesFromDir(includeDir);
             for(String path : filesFromDir) {
                 if(!path.endsWith(".h"))
                     continue;
                 path = path.replace("\\", "/").replace("//", "/");
-                String include = path.replace(cppDir, "");
+                String include = path.replace(includeDir, "");
                 if(include.startsWith("/")) {
                     include = include.replaceFirst("/", "");
                 }
