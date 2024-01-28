@@ -63,7 +63,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         this.basePackage = basePackage;
         this.idlReader = idlReader;
         if(this.cppDir != null) {
-            this.cppDir = this.cppDir.replace("\\", "/");
+            this.cppDir = this.cppDir.replace("\\", "/").replace("//", "/");;
         }
     }
 
@@ -147,7 +147,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             for(String path : filesFromDir) {
                 if(!path.endsWith(".h"))
                     continue;
-                path = path.replace("\\", "/");
+                path = path.replace("\\", "/").replace("//", "/");
                 String include = path.replace(cppDir, "");
                 if(include.startsWith("/")) {
                     include = include.replaceFirst("/", "");
