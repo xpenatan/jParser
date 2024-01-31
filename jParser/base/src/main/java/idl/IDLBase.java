@@ -34,19 +34,19 @@ public abstract class IDLBase {
     /**
      * Obtains a reference to this object, call release to free the reference.
      */
-    public void obtain() {
+    public void idl_obtain() {
         refCount++;
     }
 
     /**
      * Release a previously obtained reference, causing the object to be disposed when this was the last reference.
      */
-    public void release() {
+    public void idl_release() {
         if(--refCount <= 0 && USE_REF_COUNTING) dispose();
     }
 
     /**
-     * @return Whether this instance is obtained using the {@link #obtain()} method.
+     * @return Whether this instance is obtained using the {@link #idl_obtain()} method.
      */
     public boolean isObtained() {
         return refCount > 0;
@@ -57,7 +57,7 @@ public abstract class IDLBase {
     }
 
     protected void reset(long cPtr, boolean cMemoryOwn) {
-        if(!destroyed) destroy();
+        if(!destroyed) idl_destroy();
         cMemOwn = cMemoryOwn;
         cPointer = cPtr;
         construct();
@@ -133,7 +133,7 @@ public abstract class IDLBase {
         return getClass().getSimpleName() + "(" + cPointer + "," + cMemOwn + ")";
     }
 
-    protected void destroy() {
+    protected void idl_destroy() {
         try {
             if(destroyed && ENABLE_LOGGING) {
                 error("IDL", "Already destroyed " + toString());

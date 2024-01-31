@@ -34,11 +34,12 @@ public class IDLConstructorParser {
         // All classes contain a temp constructor so temp objects can be reused
         if(idlParser.baseClassUnit != unit) {
             ClassOrInterfaceDeclaration classDeclaration = JParserHelper.getClassDeclaration(unit);
-            Optional<ConstructorDeclaration> constructorDeclarationOptional = classDeclaration.getConstructorByParameterTypes("byte");
+            Optional<ConstructorDeclaration> constructorDeclarationOptional = classDeclaration.getConstructorByParameterTypes("byte", "char");
             if(constructorDeclarationOptional.isEmpty()) {
                 //Only add temp constructor if it does not exist
                 ConstructorDeclaration constructorDeclaration = classDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
-                constructorDeclaration.addParameter("byte", "temp");
+                constructorDeclaration.addParameter("byte", "b");
+                constructorDeclaration.addParameter("char", "c");
             }
         }
 
@@ -63,7 +64,7 @@ public class IDLConstructorParser {
                 }
             }
             if(addSuperByte) {
-                Statement statement = StaticJavaParser.parseStatement("super((byte)1);");
+                Statement statement = StaticJavaParser.parseStatement("super((byte)1, (char)1);");
                 constructorDeclaration.getBody().addStatement(0, statement);
             }
         }
