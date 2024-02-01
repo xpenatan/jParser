@@ -59,7 +59,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             jsglueDir.mkdirs();
         }
 
-        if(compileGlueCode) {
+        if(compileGlueCode && !isStatic) {
             cppInclude.add("**/jsglue/*.cpp");
             copyHelperClass(jsglueDir);
         }
