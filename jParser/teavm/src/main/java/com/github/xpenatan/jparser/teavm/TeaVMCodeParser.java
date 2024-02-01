@@ -117,17 +117,17 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
-            "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
+            "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]_addr);";
 
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE =
-            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]);\n";
+            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]_addr);\n";
 
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
-            "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
+            "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]_addr);";
 
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE =
-            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]);\n";
+            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]_addr);\n";
 
     protected static final String ATTRIBUTE_SET_PRIMITIVE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
