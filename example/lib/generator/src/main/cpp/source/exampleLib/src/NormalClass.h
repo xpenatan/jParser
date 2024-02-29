@@ -83,4 +83,6 @@ public:
     void setString(std::string& text);
     std::string& getString();
     std::string getStringValue();
+    void setVoidParam(void* param);
+    void* getVoidParam();
 };

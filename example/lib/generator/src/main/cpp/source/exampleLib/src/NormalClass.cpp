@@ -157,3 +157,12 @@ std::string NormalClass::getStringValue()
     std::string test = "HELLO STRING VALUE";
     return test;
 }
+
+void NormalClass::setVoidParam(void* param)
+{
+}
+
+void* NormalClass::getVoidParam()
+{
+    return NULL;
+}

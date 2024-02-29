@@ -56,6 +56,9 @@ interface NormalClass {
     void setString([Ref] IDLString text);
     [Ref] IDLString getString();
     [Value] IDLString getStringValue();
+
+    void setVoidParam(any param);
+    any getVoidParam();
 };
 NormalClass implements ParentClass;
 

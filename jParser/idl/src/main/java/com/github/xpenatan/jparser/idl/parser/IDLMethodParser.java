@@ -207,12 +207,12 @@ public class IDLMethodParser {
             if(type.isClassOrInterfaceType()) {
                 if(IDLHelper.getCArray(type.asClassOrInterfaceType().getNameAsString()) != null) {
                     String methodCall = paramName + ".getPointer()";
-                    paramName =  variableName + " != null ? " + methodCall + " : 0";
+                    paramName =  "(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
                 else if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
                     //All methods must contain a base class to get its pointer
                     String methodCall = paramName + ".getCPointer()";
-                    paramName =  variableName + " != null ? " + methodCall + " : 0";
+                    paramName =  "(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
             }
             else if(type.isArrayType()) {
