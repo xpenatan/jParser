@@ -391,7 +391,7 @@ public class IDLMethodParser {
             paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
             paramTypes[i] = paramType;
         }
-        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsByName(idlMethod.name);
+        List<MethodDeclaration> methods = JParserHelper.getMethodsByName(classOrInterfaceDeclaration, idlMethod.name);
 
         if(methods.size() > 0) {
             for(MethodDeclaration method : methods) {

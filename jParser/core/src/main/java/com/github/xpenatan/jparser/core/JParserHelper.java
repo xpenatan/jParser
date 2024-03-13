@@ -10,6 +10,7 @@ import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +56,7 @@ public class JParserHelper {
     public static boolean containsMethod(ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
         String nameAsString = methodDeclaration.getNameAsString();
         NodeList<Parameter> parameters = methodDeclaration.getParameters();
-        List<MethodDeclaration> methodsByName = classDeclaration.getMethodsByName(nameAsString);
+        List<MethodDeclaration> methodsByName = getMethodsByName(classDeclaration, nameAsString);
         for(int i = 0; i < methodsByName.size(); i++) {
             MethodDeclaration otherMethod = methodsByName.get(i);
             NodeList<Parameter> otherParameters = otherMethod.getParameters();
@@ -65,6 +66,21 @@ public class JParserHelper {
             }
         }
         return false;
+    }
+
+    public static List<MethodDeclaration> getMethodsByName(ClassOrInterfaceDeclaration classDeclaration, String methodName) {
+        ArrayList<MethodDeclaration> list = new ArrayList<>();
+        List<MethodDeclaration> methods = classDeclaration.getMethods();
+        int size = methods.size();
+        for(int i = 0; i < size; i++) {
+            MethodDeclaration methodDeclaration = methods.get(i);
+            String method = methodDeclaration.getNameAsString().toLowerCase();
+            String methodToCheck = methodName.toLowerCase();
+            if(method.equals(methodToCheck)) {
+                list.add(methodDeclaration);
+            }
+        }
+        return list;
     }
 
     public static boolean containsParameters(NodeList<Parameter> parameters, NodeList<Parameter> otherParameters) {
