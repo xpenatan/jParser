@@ -10,6 +10,7 @@ object LibExt {
     const val exampleUseRepoLibs = false
     const val gdxVersion = "1.12.1"
     const val teaVMVersion = "0.9.2"
+    const val gdxTeaVMVersion = "-SNAPSHOT"
 
 }
 
