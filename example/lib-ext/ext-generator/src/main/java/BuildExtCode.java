@@ -47,7 +47,7 @@ public class BuildExtCode {
 
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
-            targets.add(getWindowBuildTarget(libPath));
+//            targets.add(getWindowBuildTarget(libPath));
         }
 
         JBuilder.build(buildConfig, targets);
