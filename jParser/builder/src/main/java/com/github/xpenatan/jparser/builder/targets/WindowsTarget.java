@@ -43,9 +43,9 @@ public class WindowsTarget extends DefaultBuildTarget {
         else {
 //            linkerFlags.add("-fPIC");
             linkerFlags.add("-shared");
-//            linkerFlags.add("-static");
-//            linkerFlags.add("-static-libgcc");
-//            linkerFlags.add("-static-libstdc++");
+            linkerFlags.add("-static");
+            linkerFlags.add("-static-libgcc");
+            linkerFlags.add("-static-libstdc++");
 //            linkerFlags.add("-Wl,--kill-at");
             linkerFlags.add("-m64");
             libSuffix = "64.dll";
