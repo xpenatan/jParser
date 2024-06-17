@@ -122,7 +122,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             "return (jlong)&[OPERATOR];\n";
 
     protected static final String METHOD_GET_PRIMITIVE_STATIC_TEMPLATE =
-            "\nreturn [TYPE]::[METHOD];\n";
+            "\nreturn [CAST][TYPE]::[METHOD];\n";
 
     protected static final String METHOD_GET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
@@ -340,7 +340,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case GET_PRIMITIVE_STATIC:
-                content = METHOD_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                content = METHOD_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);
                 break;
             case GET_PRIMITIVE:
                 content = METHOD_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);
