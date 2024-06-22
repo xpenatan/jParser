@@ -38,7 +38,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
         cppFlags.add("-c");
         cppFlags.add("-std=c++17");
-        cppFlags.add("-O3");
+        cppFlags.add("-Os");
     }
 
     @Override
