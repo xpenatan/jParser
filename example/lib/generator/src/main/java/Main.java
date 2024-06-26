@@ -92,7 +92,7 @@ public class Main {
 //            targets.add(getLinuxTarget());
         }
         if(BuildTarget.isMac()) {
-//            targets.add(getMacTarget());
+            targets.add(getMacTarget());
 //            targets.add(getIOSTarget());
         }
         JBuilder.build(buildConfig, targets);
