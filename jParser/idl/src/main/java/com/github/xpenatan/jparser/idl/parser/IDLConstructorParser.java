@@ -107,7 +107,7 @@ public class IDLConstructorParser {
             IDLMethodParser.setupCallerParam(isStatic, false, caller, parameters);
 
             Statement statement1 = StaticJavaParser.parseStatement("long addr = " + caller + ";");
-            Statement statement2 = StaticJavaParser.parseStatement("initObject(addr, true);");
+            Statement statement2 = StaticJavaParser.parseStatement("initNative(addr, true);");
             blockStmt.addStatement(statement1);
             blockStmt.addStatement(statement2);
 
