@@ -8,10 +8,10 @@ public abstract class IDLBase {
     public static boolean USE_REF_COUNTING = false;
     public static boolean ENABLE_LOGGING = true;
 
-    protected long cPointer;
-    protected boolean cMemOwn;
+    private long cPointer;
+    private boolean cMemOwn;
     private boolean disposed;
-    protected boolean destroyed;
+    private boolean destroyed;
     private int refCount;
 
     public IDLBase() {
@@ -28,6 +28,10 @@ public abstract class IDLBase {
     public void setPointer(long cPtr) {
         if(!cMemOwn) {
             cPointer = cPtr;
+        }
+        else {
+            String className = getClass().getSimpleName();
+            throw new RuntimeException("Cannot change " + className + " pointer owned by native code");
         }
     }
 
