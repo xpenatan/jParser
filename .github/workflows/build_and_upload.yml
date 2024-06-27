@@ -31,10 +31,6 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: clang version
-        shell: bash
-        run: clang++ --version
-
       - name: clang targets
         shell: bash
         run: clang++ --print-targets

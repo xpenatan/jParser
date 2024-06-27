@@ -36,12 +36,12 @@ public class MacTarget extends DefaultBuildTarget {
         cppFlags.add("-c");
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
-        if(isArm) {
-            cppFlags.add("-arch arm64");
-        }
-        else {
-            cppFlags.add("-arch x86_64");
-        }
+//        if(isArm) {
+//            cppFlags.add("-arch arm64");
+//        }
+//        else {
+//            cppFlags.add("-arch x86_64");
+//        }
         cppFlags.add("-DFIXED_POINT");
 
         cppFlags.add("-mfpmath=sse");
