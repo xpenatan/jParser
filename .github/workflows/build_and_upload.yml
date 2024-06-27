@@ -33,7 +33,7 @@ jobs:
 
       - name: clang targets
         shell: bash
-        run: clang++ --print-targets
+        run: clang++ --print-targets-triple
 
       - name: clang supported-cpus
         shell: bash
