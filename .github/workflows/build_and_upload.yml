@@ -28,15 +28,11 @@ jobs:
           distribution: "zulu"
           java-version: 11
 
-      - name: Change wrapper permissions
-        run: chmod +x ./gradlew
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
 
-      - name: Build Target
-        shell: bash
-        run: llc --version
-
-#      - name: Build project
-#        run: ./gradlew build_project
+      - name: Build project
+        run: ./gradlew build_project
 #
 #      - name: Upload to repository
 #        if: ${{ inputs.shouldUpload }}
