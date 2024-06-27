@@ -35,6 +35,10 @@ jobs:
         shell: bash
         run: clang++ --version
 
+      - name: clang version
+        shell: bash
+        run: clang++ --print-targets
+
       - name: Build project
         run: ./gradlew build_project
 #
