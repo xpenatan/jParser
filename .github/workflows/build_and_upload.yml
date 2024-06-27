@@ -31,17 +31,25 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build project
-        run: ./gradlew build_project
+      - name: Build Target
+        shell: bash
+        run: clang -cc1 -help
 
-      - name: Upload to repository
-        if: ${{ inputs.shouldUpload }}
-        run: ./gradlew publish
-        env:
-          USER: ${{ secrets.USER }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          SIGNING_KEY: ${{ secrets.PGP_SECRET }}
-          SIGNING_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}
+#      - name: Build project
+#        run: ./gradlew build_project
+#
+#      - name: Upload to repository
+#        if: ${{ inputs.shouldUpload }}
+#        run: ./gradlew publish
+#        env:
+#          USER: ${{ secrets.USER }}
+#          PASSWORD: ${{ secrets.PASSWORD }}
+#          SIGNING_KEY: ${{ secrets.PGP_SECRET }}
+#          SIGNING_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}
+
+
+
+
 #
 #jobs:
 #  build_Linux:
