@@ -32,6 +32,7 @@ public class MacTarget extends DefaultBuildTarget {
         cppCompiler.add(cppCompilerr);
         linkerCompiler.add(cppCompilerr);
 
+        cppFlags.add("-march=x86-6");
         cppFlags.add("-c");
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
