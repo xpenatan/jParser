@@ -33,7 +33,7 @@ jobs:
 
       - name: Build Target
         shell: bash
-        run: clang -cc1 -help
+        run: clang -print-target
 
 #      - name: Build project
 #        run: ./gradlew build_project
