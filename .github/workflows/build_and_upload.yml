@@ -16,7 +16,7 @@ env:
 jobs:
   build_Mac:
     name: Build mac
-    runs-on: macos-14
+    runs-on: macos-13
 
     steps:
       - name: Checkout code
@@ -38,6 +38,10 @@ jobs:
       - name: clang targets
         shell: bash
         run: clang++ --print-targets
+
+      - name: clang supported-cpus
+        shell: bash
+        run: clang++ --print-supported-cpus
 
       - name: Build project
         run: ./gradlew build_project
