@@ -35,7 +35,7 @@ jobs:
         shell: bash
         run: clang++ --version
 
-      - name: clang test
+      - name: clang targets
         shell: bash
         run: clang++ --print-targets
 
