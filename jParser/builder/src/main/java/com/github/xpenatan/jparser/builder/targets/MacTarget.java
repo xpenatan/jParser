@@ -33,16 +33,16 @@ public class MacTarget extends DefaultBuildTarget {
         linkerCompiler.add(cppCompilerr);
 
         cppFlags.add("--target=x86-64");
-        cppFlags.add("-darwin-target-variant x86-64");
+//        cppFlags.add("-darwin-target-variant x86-64");
         cppFlags.add("-c");
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
-//        if(isArm) {
-//            cppFlags.add("-arch arm64");
-//        }
-//        else {
-//            cppFlags.add("-arch x86_64");
-//        }
+        if(isArm) {
+            cppFlags.add("-archarm64");
+        }
+        else {
+            cppFlags.add("-archx86_64");
+        }
         cppFlags.add("-DFIXED_POINT");
 
         cppFlags.add("-mfpmath=sse");
