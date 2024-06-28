@@ -41,7 +41,8 @@ public class MacTarget extends DefaultBuildTarget {
             cppFlags.add("-archarm64");
         }
         else {
-            cppFlags.add("-arch=x86_64");
+            cppFlags.add("-arch");
+            cppFlags.add("x86_64");
         }
         cppFlags.add("-DFIXED_POINT");
 
