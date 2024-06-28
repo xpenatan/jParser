@@ -32,8 +32,6 @@ public class MacTarget extends DefaultBuildTarget {
         cppCompiler.add(cppCompilerr);
         linkerCompiler.add(cppCompilerr);
 
-        cppFlags.add("--target=x86-64");
-//        cppFlags.add("-darwin-target-variant x86-64");
         cppFlags.add("-c");
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
@@ -41,7 +39,7 @@ public class MacTarget extends DefaultBuildTarget {
             cppFlags.add("-archarm64");
         }
         else {
-            cppFlags.add("-arch x86_64");
+            cppFlags.add("-arch x86-64");
         }
         cppFlags.add("-DFIXED_POINT");
 
