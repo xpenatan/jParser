@@ -71,7 +71,7 @@ jobs:
           sudo apt install -y --force-yes mingw-w64 lib32z1
 
       - name: Install emscripten
-        uses: mymindstorm/setup-emsdk@v11
+        uses: mymindstorm/setup-emsdk@v14
 
       - name: Install NDK
         id: setup-ndk
