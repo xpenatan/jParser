@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":example:lib:core"))
+    implementation(project(":example:lib:lib-core"))
 }
 
 tasks.named("clean") {

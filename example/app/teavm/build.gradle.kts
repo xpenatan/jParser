@@ -9,7 +9,7 @@ gretty {
 
 dependencies {
     implementation(project(":example:app:core"))
-    implementation(project(":example:lib:teavm"))
+    implementation(project(":example:lib:lib-teavm"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
     implementation("com.github.xpenatan.gdx-teavm:backend-teavm:${LibExt.gdxTeaVMVersion}")

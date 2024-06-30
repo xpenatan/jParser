@@ -21,7 +21,7 @@ dependencies {
     else {
         implementation(project(":jParser:loader:loader-core"))
     }
-    testImplementation(project(":example:lib:core"))
+    testImplementation(project(":example:lib:lib-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
     testImplementation("org.teavm:teavm-core:${LibExt.teaVMVersion}")
     testImplementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")

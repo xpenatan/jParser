@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":example:lib:core"))
+    implementation(project(":example:lib:lib-core"))
     implementation(project(":jParser:core"))
     implementation(project(":jParser:idl"))
     implementation(project(":jParser:teavm"))

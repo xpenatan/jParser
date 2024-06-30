@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Main {
+public class BuildLib {
 
     public static void main(String[] args) throws Exception {
 //        generateClassOnly();
@@ -44,18 +44,27 @@ public class Main {
     private static void generateAndBuild() throws Exception {
         String libName = "exampleLib";
         String basePackage = "com.github.xpenatan.jparser.example.lib";
-        String idlPath = new File("src/main/cpp/exampleLib.idl").getCanonicalPath();
-        String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
-        String cppSourceDir = new File("./src/main/cpp/source/exampleLib/src/").getCanonicalPath();
-        String customSourceDir = new File("./src/main/cpp/custom/").getCanonicalPath();
+
+        String libPath = new File("./../").getCanonicalPath().replace("\\", "/");
+
+        String libBasePath = libPath + "/lib-base";
+        String libBuildPath = libPath + "/lib-build";
+        String libCorePath = libPath + "/lib-core";
+        String libTeavmPath = libPath + "/lib-teavm";
+
+        String idlPath = libBuildPath + "/src/main/cpp/exampleLib.idl";
+
+        String libBaseJavaDir = libBasePath + "/src/main/java";
+
+        String cppSourceDir = libBuildPath + "/src/main/cpp/source/exampleLib/src/";
+        String customSourceDir = libBuildPath + "/src/main/cpp/custom/";
+
+        String libBuildCPPPath = libBuildPath + "/build/c++/";
+        String libsDir = libBuildCPPPath + "/libs/";
+        String cppDestinationPath = libBuildCPPPath + "/src";
+        String libDestinationPath = cppDestinationPath + "/" + libName;
 
         IDLReader idlReader = IDLReader.readIDL(idlPath);
-
-        String libsDir = new File("./build/c++/libs/").getCanonicalPath();
-        String genDir = "../core/src/main/java";
-        String libBuildPath = new File("./build/c++/").getCanonicalPath();
-        String cppDestinationPath = libBuildPath + "/src";
-        String libDestinationPath = cppDestinationPath + "/exampleLib";
 
         // Move original source code to destination build directory
         FileHelper.copyDir(cppSourceDir, libDestinationPath);
@@ -65,22 +74,20 @@ public class Main {
 
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
         CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath);
-        CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, customSourceDir);
+        CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, cppSourceDir);
         cppParser.generateClass = true;
-        JParser.generate(cppParser, baseJavaDir, genDir);
+        JParser.generate(cppParser, libBaseJavaDir, libCorePath + "/src/main/java");
 
         BuildConfig buildConfig = new BuildConfig(
                 cppDestinationPath,
-                libBuildPath,
+                libBuildCPPPath,
                 libsDir,
                 libName
         );
 
-        String teaVMgenDir = "../teavm/src/main/java/";
-
 //        EmscriptenTarget.SKIP_GLUE_CODE = true;
-        TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, customSourceDir);
-        JParser.generate(teavmParser, baseJavaDir, teaVMgenDir);
+        TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, cppSourceDir);
+        JParser.generate(teavmParser, libBaseJavaDir, libTeavmPath + "src/main/java/");
 
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {

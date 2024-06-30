@@ -19,7 +19,7 @@ dependencies {
     else {
         testImplementation(project(":jParser:loader:loader-core"))
     }
-    testImplementation(project(":example:lib:core"))
+    testImplementation(project(":example:lib:lib-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 
