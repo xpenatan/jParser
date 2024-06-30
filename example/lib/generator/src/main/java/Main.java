@@ -86,10 +86,10 @@ public class Main {
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
             targets.add(getWindowTarget());
             targets.add(getEmscriptenTarget(idlReader));
-//            targets.add(getAndroidTarget());
+            targets.add(getAndroidTarget());
         }
         if(BuildTarget.isUnix()) {
-//            targets.add(getLinuxTarget());
+            targets.add(getLinuxTarget());
         }
         if(BuildTarget.isMac()) {
             targets.add(getMacTarget());
