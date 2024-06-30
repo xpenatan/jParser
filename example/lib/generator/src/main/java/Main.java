@@ -86,10 +86,10 @@ public class Main {
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
             targets.add(getWindowTarget());
             targets.add(getEmscriptenTarget(idlReader));
-//            targets.add(getAndroidTarget());
+            targets.add(getAndroidTarget());
         }
         if(BuildTarget.isUnix()) {
-//            targets.add(getLinuxTarget());
+            targets.add(getLinuxTarget());
         }
         if(BuildTarget.isMac()) {
             targets.add(getMacTarget());
@@ -237,7 +237,7 @@ public class Main {
         glueTarget.addJNIHeaders();
         glueTarget.headerDirs.add("-Isrc/exampleLib");
         glueTarget.headerDirs.add("-I" + libBuildPath + "/src/jniglue");
-        glueTarget.linkerFlags.add("../../libs/mac/libexampleLib64.dylib");
+        glueTarget.linkerFlags.add("../../libs/mac/libexampleLib64.a");
         glueTarget.cppInclude.add(libBuildPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(glueTarget);

@@ -16,7 +16,7 @@ env:
 jobs:
   build_Mac:
     name: Build mac
-    runs-on: macos-14
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -31,68 +31,65 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build project
+      - name: clang targets
         shell: bash
-        run: clang++ --version
+        run: clang++ --print-targets
 
-#      - name: Build project
-#        run: ./gradlew build_project
-#
-#      - name: Upload to repository
-#        if: ${{ inputs.shouldUpload }}
-#        run: ./gradlew publish
-#        env:
-#          USER: ${{ secrets.USER }}
-#          PASSWORD: ${{ secrets.PASSWORD }}
-#          SIGNING_KEY: ${{ secrets.PGP_SECRET }}
-#          SIGNING_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}
+      - name: clang supported-cpus
+        shell: bash
+        run: clang++ --print-supported-cpus
 
+      - name: Build project
+        run: |
+          # See https://github.com/actions/virtual-environments/issues/2557
+          sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
+          sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
+          sudo mv /Applications/Xcode_14.3.1.app /Applications/Xcode.app
+          sudo xcode-select -switch /Applications/Xcode.app
+          /usr/bin/xcodebuild -version
+          ./gradlew build_project
 
+  build_Linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-#
-#jobs:
-#  build_Linux:
-#    name: Build Linux
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
-#
-#      - name: Set up JDK 11
-#        uses: actions/setup-java@v3
-#        with:
-#          distribution: "zulu"
-#          java-version: 11
-#
-#      - name: Check Ant
-#        run: ant -version
-#
-#      - name: Set up MinGW
-#        run: |
-#          sudo apt install -y --force-yes mingw-w64 lib32z1
-#
-#      - name: Install emscripten
-#        uses: mymindstorm/setup-emsdk@v11
-#
-#      - name: Install NDK
-#        id: setup-ndk
-#        uses: nttld/setup-ndk@v1
-#        with:
-#          ndk-version: r25c
-#          add-to-path: false
-#
-#      - name: Change wrapper permissions
-#        run: chmod +x ./gradlew
-#
-#      - name: Build project
-#        run: ./gradlew build_project
-#        env:
-#          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-#
-#      - name: Build classes
-#        run: ./gradlew build
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: 11
+
+      - name: Check Ant
+        run: ant -version
+
+      - name: Set up MinGW
+        run: |
+          sudo apt install -y --force-yes mingw-w64 lib32z1
+
+      - name: Install emscripten
+        uses: mymindstorm/setup-emsdk@v11
+
+      - name: Install NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c
+          add-to-path: false
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Build project
+        run: ./gradlew build_project
+        env:
+          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Build classes
+        run: ./gradlew build
 #
 #      - name: Upload to repository
 #        if: ${{ inputs.shouldUpload }}
