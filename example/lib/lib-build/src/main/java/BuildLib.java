@@ -87,7 +87,7 @@ public class BuildLib {
 
 //        EmscriptenTarget.SKIP_GLUE_CODE = true;
         TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, cppSourceDir);
-        JParser.generate(teavmParser, libBaseJavaDir, libTeavmPath + "src/main/java/");
+        JParser.generate(teavmParser, libBaseJavaDir, libTeavmPath + "/src/main/java/");
 
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
         if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
