@@ -90,12 +90,12 @@ jobs:
 
       - name: Build classes
         run: ./gradlew build
-#
-#      - name: Upload to repository
-#        if: ${{ inputs.shouldUpload }}
-#        run: ./gradlew publish
-#        env:
-#          USER: ${{ secrets.USER }}
-#          PASSWORD: ${{ secrets.PASSWORD }}
-#          SIGNING_KEY: ${{ secrets.PGP_SECRET }}
-#          SIGNING_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}
+
+      - name: Upload to repository
+        if: ${{ inputs.shouldUpload }}
+        run: ./gradlew publish
+        env:
+          USER: ${{ secrets.USER }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          SIGNING_KEY: ${{ secrets.PGP_SECRET }}
+          SIGNING_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}
