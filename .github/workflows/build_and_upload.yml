@@ -38,7 +38,13 @@ jobs:
 
       - name: Build project
         run: |
-          ./gradlew build_project_mac64
+          ./gradlew build_project_mac64 build_project_macArm
+
+      - name: Upload natives
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-natives
+          path: ./example/lib/lib-build/build/c++/libs/
 
   build_linux64:
     name: Build Linux64
@@ -69,6 +75,12 @@ jobs:
       - name: Build project
         run: ./gradlew build_project_linux64
 
+      - name: Upload natives
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-natives
+          path: ./example/lib/lib-build/build/c++/libs/
+
   build_windows64:
     name: Build Windows64
     runs-on: ubuntu-latest
@@ -92,21 +104,17 @@ jobs:
         run: |
           sudo apt install -y --force-yes mingw-w64 lib32z1
 
-      - name: Install emscripten
-        uses: mymindstorm/setup-emsdk@v14
-
-      - name: Install NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r25c
-          add-to-path: false
-
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
       - name: Build project
         run: ./gradlew build_project_windows64
+
+      - name: Upload natives
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-natives
+          path: ./example/lib/lib-build/build/c++/libs/
 
   build_teavm:
     name: Build TeaVM
@@ -139,6 +147,12 @@ jobs:
 
       - name: Build project
         run: ./gradlew build_project_teavm
+
+      - name: Upload natives
+        uses: actions/upload-artifact@v4
+        with:
+          name: teavm-natives
+          path: ./example/lib/lib-build/build/c++/libs/
 
   build_android:
     name: Build Android
@@ -177,11 +191,78 @@ jobs:
         run: ./gradlew build_project_android
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+      - name: Upload natives
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-natives
+          path: ./example/lib/lib-build/build/c++/libs/
   
-  
-  
-  
-  
+  upload_natives:
+    name: Upload Natives
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: 11
+
+      - name: Set up MinGW
+        run: |
+          sudo apt install -y --force-yes mingw-w64 lib32z1
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Download windows natives
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-natives
+          path: ./example/lib/lib-build/build/c++/libs/
+
+      - name: Download linux natives
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-natives
+          path: ./example/lib/lib-build/build/c++/libs/
+
+      - name: Download mac natives
+        uses: actions/download-artifact@v4
+        with:
+          name: mac-natives
+          path: ./example/lib/lib-build/build/c++/libs/
+
+      - name: Download android natives
+        uses: actions/download-artifact@v4
+        with:
+          name: android-natives
+          path: ./example/lib/lib-build/build/c++/libs/
+
+      - name: Download teavm natives
+        uses: actions/download-artifact@v4
+        with:
+          name: teavm-natives
+          path: ./example/lib/lib-build/build/c++/libs/
+
+      - name: Upload to repository
+        if: ${{ inputs.shouldUpload }}
+        run: ./gradlew publish
+        env:
+          USER: ${{ secrets.USER }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          SIGNING_KEY: ${{ secrets.PGP_SECRET }}
+          SIGNING_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}
+
+
   
   
   
