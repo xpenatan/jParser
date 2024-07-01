@@ -5,7 +5,7 @@ plugins {
 val windowsFile = "$projectDir/../generator/build/c++/libs/windows/exampleLib64.dll"
 val linuxFile = "$projectDir/../generator/build/c++/libs/linux/libexampleLib64.so"
 val macFile = "$projectDir/../generator/build/c++/libs/mac/libexampleLib64.dylib"
-val macArmFile = "$projectDir/../generator/build/c++/libs/mac/arm/libexampleLib64.dylib"
+val macArmFile = "$projectDir/../generator/build/c++/libs/mac/arm/libexampleLibarm64.dylib"
 
 tasks.jar {
     from(windowsFile)
