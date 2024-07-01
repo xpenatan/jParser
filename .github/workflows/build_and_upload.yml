@@ -19,6 +19,11 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -31,14 +36,6 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-#      - name: clang targets
-#        shell: bash
-#        run: clang++ --print-targets
-#
-#      - name: clang supported-cpus
-#        shell: bash
-#        run: clang++ --print-supported-cpus
-
       - name: Build project
         run: |
           ./gradlew build_project_mac64
@@ -48,6 +45,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -72,6 +74,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -106,6 +113,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -133,6 +145,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -158,6 +175,8 @@ jobs:
 
       - name: Build project
         run: ./gradlew build_project_android
+        env:
+          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
   
   
   
