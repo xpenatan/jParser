@@ -36,10 +36,12 @@ public class MacTarget extends DefaultBuildTarget {
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
         if(isArm) {
-            cppFlags.add("-arch arm64");
+            cppFlags.add("-arch");
+            cppFlags.add("arm64");
         }
         else {
-            cppFlags.add("-arch x86_64");
+            cppFlags.add("-arch");
+            cppFlags.add("x86_64");
         }
         cppFlags.add("-DFIXED_POINT");
 
@@ -68,11 +70,13 @@ public class MacTarget extends DefaultBuildTarget {
         else {
             linkerFlags.add("-shared");
             if(isArm) {
-                cppFlags.add("-arch arm64");
+                cppFlags.add("-arch");
+                cppFlags.add("arm64");
                 libSuffix = "arm64.dylib";
             }
             else {
-                cppFlags.add("-arch x86_64");
+                cppFlags.add("-arch");
+                cppFlags.add("x86_64");
                 libSuffix = "64.dylib";
             }
             linkerFlags.add("-mmacosx-version-min=10.7");

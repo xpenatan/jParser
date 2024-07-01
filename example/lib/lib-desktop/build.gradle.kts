@@ -2,10 +2,11 @@ plugins {
     id("java")
 }
 
-val windowsFile = "$projectDir/../generator/build/c++/libs/windows/exampleLib64.dll"
-val linuxFile = "$projectDir/../generator/build/c++/libs/linux/libexampleLib64.so"
-val macFile = "$projectDir/../generator/build/c++/libs/mac/libexampleLib64.dylib"
-val macArmFile = "$projectDir/../generator/build/c++/libs/mac/arm/libexampleLibarm64.dylib"
+val libDir = "${projectDir}/../lib-build/build/c++/libs"
+val windowsFile = "$libDir/windows/exampleLib64.dll"
+val linuxFile = "$libDir/linux/libexampleLib64.so"
+val macFile = "$libDir/mac/libexampleLib64.dylib"
+val macArmFile = "$libDir/mac/arm/libexampleLibarm64.dylib"
 
 tasks.jar {
     from(windowsFile)
