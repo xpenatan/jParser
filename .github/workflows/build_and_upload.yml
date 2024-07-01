@@ -135,7 +135,7 @@ jobs:
         run: ./gradlew build_project_teavm
 
   build_android:
-    name: Build Linux64
+    name: Build Android
     runs-on: ubuntu-latest
 
     steps:
