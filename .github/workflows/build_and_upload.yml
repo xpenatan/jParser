@@ -14,7 +14,7 @@ env:
   RELEASE: ${{ inputs.isRelease }}
 
 jobs:
-  build_mac64:
+  build_mac:
     name: Build Mac64
     runs-on: macos-latest
 
@@ -46,7 +46,7 @@ jobs:
           name: mac-natives
           path: ./example/lib/lib-build/build/c++/libs/
 
-  build_linux64:
+  build_linux:
     name: Build Linux64
     runs-on: ubuntu-latest
 
@@ -81,7 +81,7 @@ jobs:
           name: linux-natives
           path: ./example/lib/lib-build/build/c++/libs/
 
-  build_windows64:
+  build_windows:
     name: Build Windows64
     runs-on: ubuntu-latest
 
@@ -199,6 +199,7 @@ jobs:
   
   upload_natives:
     name: Upload Natives
+    needs: [build_windows, build_linux, build_mac, build_android, build_teavm]
     runs-on: ubuntu-latest
 
     steps:
