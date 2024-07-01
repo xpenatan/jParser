@@ -1,3 +1,5 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 dependencies {
     implementation(project(":example:app:core"))
     implementation(project(":example:lib:lib-desktop"))
@@ -13,4 +15,8 @@ tasks.register<JavaExec>("run-app-desktop") {
     description = "Run desktop app"
     mainClass.set(mainClassName)
     classpath = sourceSets["main"].runtimeClasspath
+
+    if(DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX) {
+        jvmArgs("-XstartOnFirstThread")
+    }
 }
