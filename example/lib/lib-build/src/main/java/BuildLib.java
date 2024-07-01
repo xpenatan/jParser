@@ -62,7 +62,7 @@ public class BuildLib {
         linkTarget.addJNIHeaders();
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/exampleLib64.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + op.libName + "64.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);
@@ -85,7 +85,7 @@ public class BuildLib {
         linkTarget.addJNIHeaders();
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + ".a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);
@@ -109,7 +109,7 @@ public class BuildLib {
         linkTarget.addJNIHeaders();
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + ".a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);
