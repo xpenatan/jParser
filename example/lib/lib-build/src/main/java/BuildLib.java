@@ -1,278 +1,219 @@
-import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildMultiTarget;
-import com.github.xpenatan.jparser.builder.BuildTarget;
-import com.github.xpenatan.jparser.builder.JBuilder;
 import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
-import com.github.xpenatan.jparser.builder.targets.EmscriptenLibTarget;
 import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jparser.builder.targets.IOSTarget;
 import com.github.xpenatan.jparser.builder.targets.LinuxTarget;
 import com.github.xpenatan.jparser.builder.targets.MacTarget;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
-import com.github.xpenatan.jparser.core.JParser;
-import com.github.xpenatan.jparser.core.util.FileHelper;
-import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
-import com.github.xpenatan.jparser.cpp.CppCodeParser;
-import com.github.xpenatan.jparser.cpp.CppGenerator;
-import com.github.xpenatan.jparser.cpp.NativeCPPGenerator;
+import com.github.xpenatan.jparser.builder.tool.BuildToolListener;
+import com.github.xpenatan.jparser.builder.tool.BuildToolOptions;
+import com.github.xpenatan.jparser.builder.tool.BuilderTool;
 import com.github.xpenatan.jparser.idl.IDLReader;
-import com.github.xpenatan.jparser.teavm.TeaVMCodeParser;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class BuildLib {
 
     public static void main(String[] args) throws Exception {
-//        generateClassOnly();
-        generateAndBuild();
-    }
-
-    private static void generateClassOnly() throws Exception {
-        String basePackage = "com.github.xpenatan.jparser.example.lib";
-        String idlPath = new File("src/main/cpp/exampleLib.idl").getCanonicalPath();
-        String baseJavaDir = new File(".").getAbsolutePath() + "./base/src/main/java";
-        String genDir = "../core/src/main/java";
-        String cppSourceDir = new File("./src/main/cpp/exampleLib/src/").getCanonicalPath();
-
-        IDLReader idlReader = IDLReader.readIDL(idlPath);
-        IDLDefaultCodeParser idlParser = new IDLDefaultCodeParser(basePackage, "IDL-Test", idlReader, cppSourceDir);
-        idlParser.generateClass = true;
-        JParser.generate(idlParser, baseJavaDir, genDir);
-    }
-
-    private static void generateAndBuild() throws Exception {
         String libName = "exampleLib";
         String basePackage = "com.github.xpenatan.jparser.example.lib";
-
-        String libPath = new File("./../").getCanonicalPath().replace("\\", "/");
-
-        String libBasePath = libPath + "/lib-base";
-        String libBuildPath = libPath + "/lib-build";
-        String libCorePath = libPath + "/lib-core";
-        String libTeavmPath = libPath + "/lib-teavm";
-
-        String idlPath = libBuildPath + "/src/main/cpp/exampleLib.idl";
-
-        String libBaseJavaDir = libBasePath + "/src/main/java";
-
-        String cppSourceDir = libBuildPath + "/src/main/cpp/source/exampleLib/src/";
-        String customSourceDir = libBuildPath + "/src/main/cpp/custom/";
-
-        String libBuildCPPPath = libBuildPath + "/build/c++/";
-        String libsDir = libBuildCPPPath + "/libs/";
-        String cppDestinationPath = libBuildCPPPath + "/src";
-        String libDestinationPath = cppDestinationPath + "/" + libName;
-
-        IDLReader idlReader = IDLReader.readIDL(idlPath);
-
-        // Move original source code to destination build directory
-        FileHelper.copyDir(cppSourceDir, libDestinationPath);
-
-        // Move custom code to destination build directory
-        FileHelper.copyDir(customSourceDir, libDestinationPath);
-
-//        NativeCPPGenerator.SKIP_GLUE_CODE = true;
-        CppGenerator cppGenerator = new NativeCPPGenerator(libDestinationPath);
-        CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, basePackage, cppSourceDir);
-        cppParser.generateClass = true;
-        JParser.generate(cppParser, libBaseJavaDir, libCorePath + "/src/main/java");
-
-        BuildConfig buildConfig = new BuildConfig(
-                cppDestinationPath,
-                libBuildCPPPath,
-                libsDir,
-                libName
-        );
-
-//        EmscriptenTarget.SKIP_GLUE_CODE = true;
-        TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, libName, basePackage, cppSourceDir);
-        JParser.generate(teavmParser, libBaseJavaDir, libTeavmPath + "/src/main/java/");
-
-        ArrayList<BuildMultiTarget> targets = new ArrayList<>();
-        if(BuildTarget.isWindows() || BuildTarget.isUnix()) {
-            targets.add(getWindowTarget());
-            targets.add(getEmscriptenTarget(idlReader));
-            targets.add(getAndroidTarget());
-        }
-        if(BuildTarget.isUnix()) {
-            targets.add(getLinuxTarget());
-        }
-        if(BuildTarget.isMac()) {
-            targets.add(getMacTarget());
-//            targets.add(getIOSTarget());
-        }
-        JBuilder.build(buildConfig, targets);
+        String sourceDir =  "/src/main/cpp/source/exampleLib/src";
+        BuildToolOptions op = new BuildToolOptions(libName, basePackage, sourceDir, args);
+        BuilderTool.build(op, new BuildToolListener() {
+            @Override
+            public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
+                if(op.teavm) {
+                    targets.add(getTeavmTarget(op, idlReader));
+                }
+                if(op.windows64) {
+                    targets.add(getWindowTarget(op));
+                }
+                if(op.linux64) {
+                    targets.add(getLinuxTarget(op));
+                }
+                if(op.mac64) {
+                    targets.add(getMacTarget(op, false));
+                }
+                if(op.macArm) {
+                    targets.add(getMacTarget(op, true));
+                }
+                if(op.android) {
+                    targets.add(getAndroidTarget(op));
+                }
+                if(op.iOS) {
+                    targets.add(getIOSTarget(op));
+                }
+            }
+        });
     }
 
-    private static BuildMultiTarget getWindowTarget() throws IOException {
+    private static BuildMultiTarget getWindowTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
-        String libBuildPath = new File("./build/c++/").getCanonicalPath().replace("\\", "/");
+
+        String libBuildCPPPath = op.libBuildCPPPath;
 
         // Make a static library
-        WindowsTarget windowsTarget = new WindowsTarget();
-        windowsTarget.isStatic = true;
-        windowsTarget.headerDirs.add("-Isrc/exampleLib");
-        windowsTarget.cppInclude.add("**/src/exampleLib/**.cpp");
-        multiTarget.add(windowsTarget);
+        WindowsTarget compileStaticTarget = new WindowsTarget();
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
+        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/exampleLib/**.cpp");
+        multiTarget.add(compileStaticTarget);
 
-        WindowsTarget glueTarget = new WindowsTarget();
-        glueTarget.addJNIHeaders();
-        glueTarget.headerDirs.add("-Isrc/exampleLib");
-        glueTarget.headerDirs.add("-I" + libBuildPath + "/src/jniglue");
-        glueTarget.linkerFlags.add("../../libs/windows/exampleLib64.a");
-        glueTarget.cppInclude.add(libBuildPath + "/src/jniglue/JNIGlue.cpp");
+        WindowsTarget linkTarget = new WindowsTarget();
+        linkTarget.addJNIHeaders();
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/exampleLib64.a");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
-//        BuildExtCode.build();
-//        String libExtPath = new File("../../lib-ext/").getCanonicalPath().replace("\\", "/");
-//        String libExtCPPPath = libExtPath + "/ext-generator/build/c++";
-//        glueTarget.headerDirs.add("-I" + libExtCPPPath + "/src/extlib");
-//        glueTarget.headerDirs.add("-I" + libExtCPPPath + "/src/jniglue");
-//        glueTarget.linkerFlags.add(libExtCPPPath + "/libs/windows/extlib64.a");
-//        glueTarget.headerDirs.add("-include" + libExtCPPPath + "/src/jniglue/JNIGlue.h");
+        multiTarget.add(linkTarget);
+        return multiTarget;
+    }
 
-        multiTarget.add(glueTarget);
+    private static BuildMultiTarget getLinuxTarget(BuildToolOptions op) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+
+        String libBuildCPPPath = op.libBuildCPPPath;
+
+        // Make a static library
+        LinuxTarget compileStaticTarget = new LinuxTarget();
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.headerDirs.add("-Isrc/exampleLib");
+        compileStaticTarget.cppInclude.add("**/src/exampleLib/**.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        LinuxTarget linkTarget = new LinuxTarget();
+        linkTarget.addJNIHeaders();
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + ".a");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+
+        multiTarget.add(linkTarget);
 
         return multiTarget;
     }
 
-    private static BuildMultiTarget getEmscriptenTarget(IDLReader idlReader) {
+    private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
+
+        String libBuildCPPPath = op.libBuildCPPPath;
+
+        // Make a static library
+        MacTarget compileStaticTarget = new MacTarget(isArm);
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
+        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/exampleLib/**.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        MacTarget linkTarget = new MacTarget(isArm);
+        linkTarget.addJNIHeaders();
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + ".a");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getTeavmTarget(BuildToolOptions op, IDLReader idlReader) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+
+        String libBuildCPPPath = op.libBuildCPPPath;
+
         int buildType = 1;
 
         if(buildType == 0) {
-            // Compile and create a js file
-            EmscriptenTarget emscriptenTarget = new EmscriptenTarget(idlReader);
-            emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
-            emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-            emscriptenTarget.cppInclude.add("**/src/exampleLib/**.cpp");
-            multiTarget.add(emscriptenTarget);
+//            // Compile and create a js file
+//            EmscriptenTarget emscriptenTarget = new EmscriptenTarget(idlReader);
+//            emscriptenTarget.headerDirs.add("-Isrc/exampleLib");
+//            emscriptenTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+//            emscriptenTarget.cppInclude.add("**/src/exampleLib/**.cpp");
+//            multiTarget.add(emscriptenTarget);
         }
         else if(buildType == 1) {
             // Make a static library
-            EmscriptenTarget libTarget = new EmscriptenTarget(idlReader);
-            libTarget.isStatic = true;
-            libTarget.compileGlueCode = false;
-            libTarget.headerDirs.add("-Isrc/exampleLib");
-            libTarget.cppInclude.add("**/src/exampleLib/**.cpp");
-            multiTarget.add(libTarget);
+            EmscriptenTarget compileStaticTarget = new EmscriptenTarget(idlReader);
+            compileStaticTarget.isStatic = true;
+            compileStaticTarget.compileGlueCode = false;
+            compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
+            compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/exampleLib/**.cpp");
+            multiTarget.add(compileStaticTarget);
 
             // Compile glue code and link to make js file
             EmscriptenTarget linkTarget = new EmscriptenTarget(idlReader);
-            linkTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-            linkTarget.linkerFlags.add("../../libs/emscripten/exampleLib.a");
+            linkTarget.headerDirs.add("-include" + libBuildCPPPath + "/src/exampleLib/CustomCode.h");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + ".a");
             multiTarget.add(linkTarget);
         }
         else if(buildType == 2) {
-            // Make lib as a side module/dynamic linking
-            EmscriptenLibTarget sideTarget = new EmscriptenLibTarget();
-            sideTarget.libName = "exampleLibside";
-            sideTarget.headerDirs.add("-Isrc/exampleLib");
-            sideTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-            sideTarget.cppInclude.add("**/src/exampleLib/**.cpp");
-            sideTarget.cppFlags.add("-fPIC");
-            sideTarget.cppFlags.add("-sEXPORT_ALL=1");
-            sideTarget.linkerFlags.add("-v");
-            sideTarget.linkerFlags.add("-fPIC");
-            sideTarget.linkerFlags.add("-sSIDE_MODULE=1");
-            sideTarget.linkerFlags.add("-sEXPORT_ALL=1");
-            sideTarget.libSuffix = ".wasm";
-            multiTarget.add(sideTarget);
-
-            // Make lib as a main module
-            EmscriptenTarget mainTarget = new EmscriptenTarget(idlReader);
-            mainTarget.headerDirs.add("-Isrc/exampleLib");
-            mainTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
-            mainTarget.cppFlags.add("-fPIC");
-            mainTarget.linkerFlags.add("-sMAIN_MODULE=2");
-            mainTarget.linkerFlags.add("-fPIC");
-            mainTarget.linkerFlags.add("-ERROR_ON_UNDEFINED_SYMBOLS=0");
-            mainTarget.linkerFlags.add("../../libs/emscripten/exampleLibside.wasm");
-            multiTarget.add(mainTarget);
+//            // Make lib as a side module/dynamic linking
+//            EmscriptenLibTarget sideTarget = new EmscriptenLibTarget();
+//            sideTarget.libName = "exampleLibside";
+//            sideTarget.headerDirs.add("-Isrc/exampleLib");
+//            sideTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+//            sideTarget.cppInclude.add("**/src/exampleLib/**.cpp");
+//            sideTarget.cppFlags.add("-fPIC");
+//            sideTarget.cppFlags.add("-sEXPORT_ALL=1");
+//            sideTarget.linkerFlags.add("-v");
+//            sideTarget.linkerFlags.add("-fPIC");
+//            sideTarget.linkerFlags.add("-sSIDE_MODULE=1");
+//            sideTarget.linkerFlags.add("-sEXPORT_ALL=1");
+//            sideTarget.libSuffix = ".wasm";
+//            multiTarget.add(sideTarget);
+//
+//            // Make lib as a main module
+//            EmscriptenTarget mainTarget = new EmscriptenTarget(idlReader);
+//            mainTarget.headerDirs.add("-Isrc/exampleLib");
+//            mainTarget.headerDirs.add("-includesrc/exampleLib/CustomCode.h");
+//            mainTarget.cppFlags.add("-fPIC");
+//            mainTarget.linkerFlags.add("-sMAIN_MODULE=2");
+//            mainTarget.linkerFlags.add("-fPIC");
+//            mainTarget.linkerFlags.add("-ERROR_ON_UNDEFINED_SYMBOLS=0");
+//            mainTarget.linkerFlags.add("../../libs/emscripten/exampleLibside.wasm");
+//            multiTarget.add(mainTarget);
         }
         return multiTarget;
     }
 
-    private static BuildMultiTarget getAndroidTarget() {
+    private static BuildMultiTarget getAndroidTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
+
+        String libBuildCPPPath = op.libBuildCPPPath;
 
         AndroidTarget androidTarget = new AndroidTarget();
         androidTarget.addJNIHeaders();
-        androidTarget.headerDirs.add("src/exampleLib");
-        androidTarget.cppInclude.add("**/src/exampleLib/**.cpp");
+        androidTarget.headerDirs.add(libBuildCPPPath + "/src/exampleLib");
+        androidTarget.cppInclude.add(libBuildCPPPath + "/src/exampleLib/**.cpp");
 
         multiTarget.add(androidTarget);
 
         return multiTarget;
     }
 
-    private static BuildMultiTarget getLinuxTarget() throws IOException {
+    private static BuildMultiTarget getIOSTarget(BuildToolOptions op)  {
+        String libBuildCPPPath = op.libBuildCPPPath;
+        // TODO WIP/not working
+
         BuildMultiTarget multiTarget = new BuildMultiTarget();
-        String libBuildPath = new File("./build/c++/").getCanonicalPath().replace("\\", "/");
 
         // Make a static library
-        LinuxTarget linuxTarget = new LinuxTarget();
-        linuxTarget.isStatic = true;
-        linuxTarget.headerDirs.add("-Isrc/exampleLib");
-        linuxTarget.cppInclude.add("**/src/exampleLib/**.cpp");
-        multiTarget.add(linuxTarget);
+        IOSTarget compileStaticTarget = new IOSTarget();
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
+        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/exampleLib/**.cpp");
+        multiTarget.add(compileStaticTarget);
 
-        LinuxTarget glueTarget = new LinuxTarget();
-        glueTarget.addJNIHeaders();
-        glueTarget.headerDirs.add("-Isrc/exampleLib");
-        glueTarget.headerDirs.add("-I" + libBuildPath + "/src/jniglue");
-        glueTarget.linkerFlags.add("../../libs/linux/libexampleLib64.a");
-        glueTarget.cppInclude.add(libBuildPath + "/src/jniglue/JNIGlue.cpp");
+        IOSTarget linkTarget = new IOSTarget();
+        linkTarget.addJNIHeaders();
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/exampleLib");
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + ".a");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
-        multiTarget.add(glueTarget);
+        multiTarget.add(linkTarget);
 
         return multiTarget;
     }
-
-    private static BuildMultiTarget getMacTarget() throws IOException {
-        BuildMultiTarget multiTarget = new BuildMultiTarget();
-        String libBuildPath = new File("./build/c++/").getCanonicalPath().replace("\\", "/");
-
-        // Make a static library
-        MacTarget macTarget = new MacTarget();
-        macTarget.isStatic = true;
-        macTarget.headerDirs.add("-Isrc/exampleLib");
-        macTarget.cppInclude.add("**/src/exampleLib/**.cpp");
-        multiTarget.add(macTarget);
-
-        MacTarget glueTarget = new MacTarget();
-        glueTarget.addJNIHeaders();
-        glueTarget.headerDirs.add("-Isrc/exampleLib");
-        glueTarget.headerDirs.add("-I" + libBuildPath + "/src/jniglue");
-        glueTarget.linkerFlags.add("../../libs/mac/libexampleLib64.a");
-        glueTarget.cppInclude.add(libBuildPath + "/src/jniglue/JNIGlue.cpp");
-
-        multiTarget.add(glueTarget);
-
-        return multiTarget;
-    }
-
-    private static BuildMultiTarget getIOSTarget() throws IOException {
-        BuildMultiTarget multiTarget = new BuildMultiTarget();
-        String libBuildPath = new File("./build/c++/").getCanonicalPath().replace("\\", "/");
-
-        // Make a static library
-        IOSTarget iosTarget = new IOSTarget();
-        iosTarget.isStatic = true;
-        iosTarget.headerDirs.add("-Isrc/exampleLib");
-        iosTarget.cppInclude.add("**/src/exampleLib/**.cpp");
-        multiTarget.add(iosTarget);
-
-        IOSTarget glueTarget = new IOSTarget();
-        glueTarget.addJNIHeaders();
-        glueTarget.headerDirs.add("-Isrc/exampleLib");
-        glueTarget.headerDirs.add("-I" + libBuildPath + "/src/jniglue");
-        glueTarget.linkerFlags.add("../../libs/ios/exampleLib64.a");
-        glueTarget.cppInclude.add(libBuildPath + "/src/jniglue/JNIGlue.cpp");
-
-        multiTarget.add(glueTarget);
-
-        return multiTarget;
-    }
-
 }

@@ -12,12 +12,16 @@ public class EmscriptenTarget extends DefaultBuildTarget {
     public static boolean SKIP_GLUE_CODE;
     public final static String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
 
-    private IDLReader idlReader;
+    public IDLReader idlReader;
 
     public boolean isStatic = false;
     public boolean compileGlueCode = true;
 
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
+
+    public EmscriptenTarget() {
+        this(null);
+    }
 
     public EmscriptenTarget(IDLReader idlReader) {
         this.libDirSuffix = "emscripten/";

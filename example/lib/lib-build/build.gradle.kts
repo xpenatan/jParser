@@ -13,6 +13,8 @@ dependencies {
         implementation("com.github.xpenatan.jParser:idl:${LibExt.libVersion}")
         implementation("com.github.xpenatan.jParser:teavm:${LibExt.libVersion}")
         implementation("com.github.xpenatan.jParser:cpp:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:builder:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:builder-tool:${LibExt.libVersion}")
     }
     else {
         implementation(project(":jParser:core"))
@@ -20,6 +22,7 @@ dependencies {
         implementation(project(":jParser:teavm"))
         implementation(project(":jParser:cpp"))
         implementation(project(":jParser:builder"))
+        implementation(project(":jParser:builder-tool"))
     }
 }
 
@@ -27,31 +30,47 @@ tasks.register<JavaExec>("build_project") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("teavm", "windows", "linux", "mac", "android")
+    args = mutableListOf("teavm", "windows64", "linux64", "mac64", "android")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_windows") {
+tasks.register<JavaExec>("build_project_teavm") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("windows")
+    args = mutableListOf("teavm")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_linux") {
+tasks.register<JavaExec>("build_project_windows64") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("linux")
+    args = mutableListOf("windows64")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_mac") {
+tasks.register<JavaExec>("build_project_linux64") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("mac")
+    args = mutableListOf("linux64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("build_project_mac64") {
+    group = "lib"
+    description = "Generate native project"
+    mainClass.set(mainClassName)
+    args = mutableListOf("mac64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("build_project_macArm") {
+    group = "lib"
+    description = "Generate native project"
+    mainClass.set(mainClassName)
+    args = mutableListOf("macArm")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -63,10 +82,10 @@ tasks.register<JavaExec>("build_project_android") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_teavm") {
+tasks.register<JavaExec>("build_project_ios") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("teavm")
+    args = mutableListOf("ios")
     classpath = sourceSets["main"].runtimeClasspath
 }

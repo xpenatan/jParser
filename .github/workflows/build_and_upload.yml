@@ -14,8 +14,8 @@ env:
   RELEASE: ${{ inputs.isRelease }}
 
 jobs:
-  build_Mac:
-    name: Build mac
+  build_mac64:
+    name: Build Mac64
     runs-on: macos-latest
 
     steps:
@@ -31,13 +31,13 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: clang targets
-        shell: bash
-        run: clang++ --print-targets
-
-      - name: clang supported-cpus
-        shell: bash
-        run: clang++ --print-supported-cpus
+#      - name: clang targets
+#        shell: bash
+#        run: clang++ --print-targets
+#
+#      - name: clang supported-cpus
+#        shell: bash
+#        run: clang++ --print-supported-cpus
 
       - name: Build project
         run: |
@@ -47,24 +47,45 @@ jobs:
           sudo mv /Applications/Xcode_14.3.1.app /Applications/Xcode.app
           sudo xcode-select -switch /Applications/Xcode.app
           /usr/bin/xcodebuild -version
-          ./gradlew build_project
+          ./gradlew build_project_mac64
 
-  build_Linux:
-    name: Build Linux
+  build_linux64:
+    name: Build Linux64
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: 11
 
-      - name: Check Ant
-        run: ant -version
+      - name: Set up MinGW
+        run: |
+          sudo apt install -y --force-yes mingw-w64 lib32z1
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Build project
+        run: ./gradlew build_project_linux64
+
+  build_windows64:
+    name: Build Windows64
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: 11
 
       - name: Set up MinGW
         run: |
@@ -84,18 +105,160 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project
-        run: ./gradlew build_project
-        env:
-          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: ./gradlew build_project_windows64
 
-      - name: Build classes
-        run: ./gradlew build
+  build_teavm:
+    name: Build TeaVM
+    runs-on: ubuntu-latest
 
-      - name: Upload to repository
-        if: ${{ inputs.shouldUpload }}
-        run: ./gradlew publish
-        env:
-          USER: ${{ secrets.USER }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          SIGNING_KEY: ${{ secrets.PGP_SECRET }}
-          SIGNING_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: 11
+
+      - name: Set up MinGW
+        run: |
+          sudo apt install -y --force-yes mingw-w64 lib32z1
+
+      - name: Install emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Build project
+        run: ./gradlew build_project_teavm
+
+  build_android:
+    name: Build Linux64
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: 11
+
+      - name: Set up MinGW
+        run: |
+          sudo apt install -y --force-yes mingw-w64 lib32z1
+
+      - name: Install NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c
+          add-to-path: false
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Build project
+        run: ./gradlew build_project_android
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+#  build_mac64:
+#    name: Build mac
+#    runs-on: macos-latest
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Set up JDK 11
+#        uses: actions/setup-java@v4
+#        with:
+#          distribution: "zulu"
+#          java-version: 11
+#
+#      - name: Change wrapper permissions
+#        run: chmod +x ./gradlew
+#
+#      - name: clang targets
+#        shell: bash
+#        run: clang++ --print-targets
+#
+#      - name: clang supported-cpus
+#        shell: bash
+#        run: clang++ --print-supported-cpus
+#
+#      - name: Build project
+#        run: |
+#          # See https://github.com/actions/virtual-environments/issues/2557
+#          sudo mv /Library/Developer/CommandLineTools/SDKs/* /tmp
+#          sudo mv /Applications/Xcode.app /Applications/Xcode.app.bak
+#          sudo mv /Applications/Xcode_14.3.1.app /Applications/Xcode.app
+#          sudo xcode-select -switch /Applications/Xcode.app
+#          /usr/bin/xcodebuild -version
+#          ./gradlew build_project_mac64
+
+#  build_Linux:
+#    name: Build Linux
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#
+#      - name: Set up JDK 11
+#        uses: actions/setup-java@v3
+#        with:
+#          distribution: "zulu"
+#          java-version: 11
+#
+#      - name: Check Ant
+#        run: ant -version
+#
+#      - name: Set up MinGW
+#        run: |
+#          sudo apt install -y --force-yes mingw-w64 lib32z1
+#
+#      - name: Install emscripten
+#        uses: mymindstorm/setup-emsdk@v14
+#
+#      - name: Install NDK
+#        id: setup-ndk
+#        uses: nttld/setup-ndk@v1
+#        with:
+#          ndk-version: r25c
+#          add-to-path: false
+#
+#      - name: Change wrapper permissions
+#        run: chmod +x ./gradlew
+#
+#      - name: Build project
+#        run: ./gradlew build_project
+#        env:
+#          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+#
+#      - name: Build classes
+#        run: ./gradlew build
+#
+#      - name: Upload to repository
+#        if: ${{ inputs.shouldUpload }}
+#        run: ./gradlew publish
+#        env:
+#          USER: ${{ secrets.USER }}
+#          PASSWORD: ${{ secrets.PASSWORD }}
+#          SIGNING_KEY: ${{ secrets.PGP_SECRET }}
+#          SIGNING_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}

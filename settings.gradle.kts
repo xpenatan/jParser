@@ -1,5 +1,6 @@
 include(":jParser:core")
 include(":jParser:builder")
+include(":jParser:builder-tool")
 include(":jParser:base")
 include(":jParser:idl")
 include(":jParser:cpp")
