@@ -6,7 +6,6 @@ val mainClassName = "BuildLib"
 
 dependencies {
     implementation(project(":example:lib:lib-base"))
-    implementation(project(":example:lib-ext:ext-build"))
 
     if(LibExt.exampleUseRepoLibs) {
         implementation("com.github.xpenatan.jParser:core:${LibExt.libVersion}")
@@ -31,6 +30,14 @@ tasks.register<JavaExec>("build_project") {
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf()
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("build_project_all") {
+    group = "lib"
+    description = "Generate native project"
+    mainClass.set(mainClassName)
+    args = mutableListOf("teavm", "windows64", "linux64", "mac64", "macArm", "android", "ios")
     classpath = sourceSets["main"].runtimeClasspath
 }
 

@@ -17,8 +17,8 @@ public class BuildLib {
         String libName = "exampleLib";
         String modulePrefix = "lib";
         String basePackage = "com.github.xpenatan.jparser.example.lib";
-        String sourceDir =  "/src/main/cpp/source/exampleLib/src";
-        BuildToolOptions op = new BuildToolOptions(modulePrefix, libName, basePackage, sourceDir, args);
+        String sourceDir = "/src/main/cpp/source/exampleLib/src";
+        BuildToolOptions op = new BuildToolOptions(libName, basePackage, modulePrefix, sourceDir, args);
         BuilderTool.build(op, new BuildToolListener() {
             @Override
             public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
@@ -50,7 +50,7 @@ public class BuildLib {
     private static BuildMultiTarget getWindowTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
-        String libBuildCPPPath = op.libBuildCPPPath;
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         WindowsTarget compileStaticTarget = new WindowsTarget();
@@ -73,7 +73,7 @@ public class BuildLib {
     private static BuildMultiTarget getLinuxTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
-        String libBuildCPPPath = op.libBuildCPPPath;
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         LinuxTarget compileStaticTarget = new LinuxTarget();
@@ -97,7 +97,7 @@ public class BuildLib {
     private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
-        String libBuildCPPPath = op.libBuildCPPPath;
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
@@ -127,7 +127,7 @@ public class BuildLib {
     private static BuildMultiTarget getTeavmTarget(BuildToolOptions op, IDLReader idlReader) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
-        String libBuildCPPPath = op.libBuildCPPPath;
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         int buildType = 1;
 
@@ -187,7 +187,7 @@ public class BuildLib {
     private static BuildMultiTarget getAndroidTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
 
-        String libBuildCPPPath = op.libBuildCPPPath;
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         AndroidTarget androidTarget = new AndroidTarget();
         androidTarget.addJNIHeaders();
@@ -200,7 +200,7 @@ public class BuildLib {
     }
 
     private static BuildMultiTarget getIOSTarget(BuildToolOptions op)  {
-        String libBuildCPPPath = op.libBuildCPPPath;
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
         // TODO WIP/not working
 
         BuildMultiTarget multiTarget = new BuildMultiTarget();
