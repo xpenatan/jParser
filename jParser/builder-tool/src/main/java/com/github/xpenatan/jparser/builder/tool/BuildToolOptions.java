@@ -5,10 +5,12 @@ import java.io.File;
 import java.io.IOException;
 
 public class BuildToolOptions {
-
+    public String libPath;
     public String libName;
     public String libBasePackage;
     public String buildSourceDir;
+    public boolean generateTeaVM = true;
+    public boolean generateCPP = true;
 
     /** Name of the idl file located in [Module Build Path] + src/main/cpp/myidl.idl. The default is libName but can be changed. */
     public String idlName;
@@ -91,11 +93,12 @@ public class BuildToolOptions {
     }
 
     void setup() {
-        String libPath = null;
-        try {
-            libPath = new File("./../").getCanonicalPath().replace("\\", "/");
-        } catch(IOException e) {
-            throw new RuntimeException(e);
+        if(libPath == null) {
+            try {
+                libPath = new File("./../").getCanonicalPath().replace("\\", "/");
+            } catch(IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         moduleBasePath = libPath + "/" + modulePrefix + "-base";
         moduleBuildPath = libPath + "/" + modulePrefix + "-build";

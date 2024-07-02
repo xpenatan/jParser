@@ -27,22 +27,27 @@ public class BuilderTool {
 
         IDLReader idlReader = IDLReader.readIDL(op.getIDLPath());
 
-        // Move original source code to destination build directory
-        FileHelper.copyDir(op.getCPPSourceDir(), op.getLibDestinationPath());
+        if(op.generateCPP || op.generateTeaVM) {
+            // Move original source code to destination build directory
+            FileHelper.copyDir(op.getCPPSourceDir(), op.getLibDestinationPath());
 
-        // Move custom code to destination build directory
-        FileHelper.copyDir(op.getCustomSourceDir(), op.getLibDestinationPath());
+            // Move custom code to destination build directory
+            FileHelper.copyDir(op.getCustomSourceDir(), op.getLibDestinationPath());
+        }
 
-//        NativeCPPGenerator.SKIP_GLUE_CODE = true;
-        CppGenerator cppGenerator = new NativeCPPGenerator(op.getLibDestinationPath());
-        CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.libBasePackage, op.getCPPSourceDir());
-        cppParser.generateClass = true;
-        JParser.generate(cppParser, op.getModuleBaseJavaDir(), op.getModuleCorePath() + "/src/main/java");
+        if(op.generateCPP) {
+//            NativeCPPGenerator.SKIP_GLUE_CODE = true;
+            CppGenerator cppGenerator = new NativeCPPGenerator(op.getLibDestinationPath());
+            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.libBasePackage, op.getCPPSourceDir());
+            cppParser.generateClass = true;
+            JParser.generate(cppParser, op.getModuleBaseJavaDir(), op.getModuleCorePath() + "/src/main/java");
+        }
 
-//        EmscriptenTarget.SKIP_GLUE_CODE = true;
-
-        TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.libName, op.libBasePackage, op.getCPPSourceDir());
-        JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getModuleTeaVMPath() + "/src/main/java/");
+        if(op.generateTeaVM) {
+//            EmscriptenTarget.SKIP_GLUE_CODE = true;
+            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.libName, op.libBasePackage, op.getCPPSourceDir());
+            JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getModuleTeaVMPath() + "/src/main/java/");
+        }
 
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
 
