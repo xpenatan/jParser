@@ -254,6 +254,9 @@ jobs:
           name: teavm-natives
           path: ./example/lib/lib-build/build/c++/libs/
 
+      - name: Generate Java classes
+        run: ./gradlew build_project
+
       - name: Upload to repository
         if: ${{ inputs.shouldUpload }}
         run: ./gradlew publish

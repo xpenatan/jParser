@@ -30,7 +30,7 @@ tasks.register<JavaExec>("build_project") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("teavm", "windows64", "linux64", "mac64", "android")
+    args = mutableListOf()
     classpath = sourceSets["main"].runtimeClasspath
 }
 
