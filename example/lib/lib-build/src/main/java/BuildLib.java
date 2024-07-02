@@ -15,9 +15,10 @@ public class BuildLib {
 
     public static void main(String[] args) throws Exception {
         String libName = "exampleLib";
+        String modulePrefix = "lib";
         String basePackage = "com.github.xpenatan.jparser.example.lib";
         String sourceDir =  "/src/main/cpp/source/exampleLib/src";
-        BuildToolOptions op = new BuildToolOptions(libName, basePackage, sourceDir, args);
+        BuildToolOptions op = new BuildToolOptions(modulePrefix, libName, basePackage, sourceDir, args);
         BuilderTool.build(op, new BuildToolListener() {
             @Override
             public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {

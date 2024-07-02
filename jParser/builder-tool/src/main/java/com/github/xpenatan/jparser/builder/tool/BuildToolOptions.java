@@ -36,7 +36,7 @@ public class BuildToolOptions {
      * @param buildSourceDir path inside lib-build module
      * @param platform windows64, linux64, mac64, mac64arm, android, ios, teavm
      */
-    public BuildToolOptions(String libName, String libBasePackage, String buildSourceDir, String ... platform) {
+    public BuildToolOptions(String modulePrefix, String libName, String libBasePackage, String buildSourceDir, String ... platform) {
         this.libName = libName;
         this.libBasePackage = libBasePackage;
 
@@ -46,10 +46,10 @@ public class BuildToolOptions {
         } catch(IOException e) {
             throw new RuntimeException(e);
         }
-        libBasePath = libPath + "/lib-base";
-        libBuildPath = libPath + "/lib-build";
-        libCorePath = libPath + "/lib-core";
-        libTeavmPath = libPath + "/lib-teavm";
+        libBasePath = libPath + "/" + modulePrefix + "-base";
+        libBuildPath = libPath + "/" + modulePrefix + "-build";
+        libCorePath = libPath + "/" + modulePrefix + "-core";
+        libTeavmPath = libPath + "/" + modulePrefix + "-teavm";
 
         idlPath = libBuildPath + "/src/main/cpp/" + libName + ".idl";
 
