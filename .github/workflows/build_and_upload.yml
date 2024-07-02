@@ -14,9 +14,9 @@ env:
   RELEASE: ${{ inputs.isRelease }}
 
 jobs:
-  build_mac:
-    name: Build Mac
-    runs-on: macos-latest
+  build_windows:
+    name: Build Windows
+    runs-on: ubuntu-latest
 
     steps:
       - name: Cancel Previous Runs
@@ -33,17 +33,20 @@ jobs:
           distribution: "zulu"
           java-version: 11
 
+      - name: Set up MinGW
+        run: |
+          sudo apt install -y --force-yes mingw-w64 lib32z1
+
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
       - name: Build project
-        run: |
-          ./gradlew build_project_mac64 build_project_macArm
+        run: ./gradlew build_project_windows64
 
       - name: Upload natives
         uses: actions/upload-artifact@v4
         with:
-          name: mac-natives
+          name: windows-natives
           path: ./example/lib/lib-build/build/c++/libs/
 
   build_linux:
@@ -81,9 +84,9 @@ jobs:
           name: linux-natives
           path: ./example/lib/lib-build/build/c++/libs/
 
-  build_windows:
-    name: Build Windows
-    runs-on: ubuntu-latest
+  build_mac:
+    name: Build Mac
+    runs-on: macos-latest
 
     steps:
       - name: Cancel Previous Runs
@@ -100,20 +103,17 @@ jobs:
           distribution: "zulu"
           java-version: 11
 
-      - name: Set up MinGW
-        run: |
-          sudo apt install -y --force-yes mingw-w64 lib32z1
-
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
       - name: Build project
-        run: ./gradlew build_project_windows64
+        run: |
+          ./gradlew build_project_mac64 build_project_macArm
 
       - name: Upload natives
         uses: actions/upload-artifact@v4
         with:
-          name: windows-natives
+          name: mac-natives
           path: ./example/lib/lib-build/build/c++/libs/
 
   build_teavm:
