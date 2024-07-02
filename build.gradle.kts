@@ -50,6 +50,7 @@ configure(allprojects - project(":example:app:android") - project(":example:lib:
 var libProjects = mutableSetOf(
     project(":jParser:core"),
     project(":jParser:builder"),
+    project(":jParser:builder-tool"),
     project(":jParser:base"),
     project(":jParser:idl"),
     project(":jParser:loader:loader-core"),
