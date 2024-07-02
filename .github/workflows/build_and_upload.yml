@@ -15,7 +15,7 @@ env:
 
 jobs:
   build_mac:
-    name: Build Mac64
+    name: Build Mac
     runs-on: macos-latest
 
     steps:
@@ -47,7 +47,7 @@ jobs:
           path: ./example/lib/lib-build/build/c++/libs/
 
   build_linux:
-    name: Build Linux64
+    name: Build Linux
     runs-on: ubuntu-latest
 
     steps:
@@ -82,7 +82,7 @@ jobs:
           path: ./example/lib/lib-build/build/c++/libs/
 
   build_windows:
-    name: Build Windows64
+    name: Build Windows
     runs-on: ubuntu-latest
 
     steps:
