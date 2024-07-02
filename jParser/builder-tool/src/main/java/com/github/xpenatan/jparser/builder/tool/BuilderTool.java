@@ -45,7 +45,7 @@ public class BuilderTool {
 
         if(op.generateTeaVM) {
 //            EmscriptenTarget.SKIP_GLUE_CODE = true;
-            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.libName, op.libBasePackage, op.getCPPSourceDir());
+            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.moduleName, op.libBasePackage, op.getCPPSourceDir());
             JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getModuleTeaVMPath() + "/src/main/java/");
         }
 

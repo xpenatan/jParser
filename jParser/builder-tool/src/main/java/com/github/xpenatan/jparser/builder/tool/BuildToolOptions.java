@@ -7,6 +7,7 @@ import java.io.IOException;
 public class BuildToolOptions {
     public String libPath;
     public String libName;
+    public String moduleName;
     public String libBasePackage;
     public String buildSourceDir;
     public boolean generateTeaVM = true;
@@ -51,6 +52,7 @@ public class BuildToolOptions {
         this.modulePrefix = modulePrefix;
         this.buildSourceDir = buildSourceDir;
         this.idlName = libName;
+        this.moduleName = libName;
 
         boolean windows64tmp = false;
         boolean linux64tmp = false;
