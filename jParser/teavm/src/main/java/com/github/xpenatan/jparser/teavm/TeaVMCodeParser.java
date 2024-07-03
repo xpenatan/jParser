@@ -20,7 +20,6 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
@@ -44,7 +43,7 @@ import java.util.Optional;
 
 public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
-    private static final String HEADER_CMD = "teaVM";
+    private static final String HEADER_CMD = "TEAVM";
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";

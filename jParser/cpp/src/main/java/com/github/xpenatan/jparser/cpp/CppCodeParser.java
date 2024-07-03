@@ -27,7 +27,7 @@ import java.util.ArrayList;
 
 public class CppCodeParser extends IDLDefaultCodeParser {
 
-    private static final String HEADER_CMD = "C++";
+    private static final String HEADER_CMD = "JNI";
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
@@ -458,7 +458,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         //TODO fix this. Disable auto include because path may be wrong.
 //        if(include != null) {
 //            String comment = "" +
-//                    "/*[-C++;-NATIVE]\n" +
+//                    "/*[-JNI;-NATIVE]\n" +
 //                    "       #include <" + include + ">\n" +
 //                    "    */";
 //            Position begin = new Position(0, 0);

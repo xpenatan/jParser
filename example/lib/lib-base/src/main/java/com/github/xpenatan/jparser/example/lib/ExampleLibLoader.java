@@ -5,18 +5,18 @@ import idl.helper.IDLByteArray;
 
 public class ExampleLibLoader {
 
-    /*[-C++;-NATIVE]
+    /*[-JNI;-NATIVE]
         #include "CustomCode.h"
     */
 
-    /*[-teaVM;-ADD]
+    /*[-TEAVM;-ADD]
         @org.teavm.jso.JSFunctor
         public interface OnInitFunction extends org.teavm.jso.JSObject {
             void onInit();
         }
     */
 
-    /*[-teaVM;-REPLACE]
+    /*[-TEAVM;-REPLACE]
      public static void init(Runnable run) {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
         OnInitFunction onInitFunction = new OnInitFunction() {
@@ -39,10 +39,10 @@ public class ExampleLibLoader {
         run.run();
     }
 
-    /*[-teaVM;-REPLACE]
+    /*[-TEAVM;-REPLACE]
         @org.teavm.jso.JSBody(params = { "onInitFunction" }, script = "window.exampleLibOnInit = onInitFunction;")
         private static native void setOnLoadInit(OnInitFunction onInitFunction);
     */
-    /*[-C++;-REMOVE] */
+    /*[-JNI;-REMOVE] */
     public static native void setOnLoadInit();
 }

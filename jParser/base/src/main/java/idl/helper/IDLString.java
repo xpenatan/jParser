@@ -24,13 +24,13 @@ public class IDLString extends IDLBase {
         return text;
     }
 
-    /*[-C++;-NATIVE]
+    /*[-JNI;-NATIVE]
         IDLString* nativeObject = (IDLString*)this_addr;
         const char* str = nativeObject->c_str();
         jstring jstrBuf = env->NewStringUTF(str);
         return jstrBuf;
     */
-    /*[-teaVM;-NATIVE]
+    /*[-TEAVM;-NATIVE]
         var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].IDLString);
         var returnedJSObj = jsObj.c_str();
         return returnedJSObj;

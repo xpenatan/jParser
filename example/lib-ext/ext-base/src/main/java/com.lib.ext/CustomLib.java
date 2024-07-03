@@ -1,7 +1,7 @@
 package com.lib.ext;
 
 public class CustomLib {
-        /*[-C++;-NATIVE]
+        /*[-JNI;-NATIVE]
         #include "CustomLib.h"
     */
 }
