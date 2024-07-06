@@ -257,18 +257,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         String returnTypeName = classDeclaration.getNameAsString();
         String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_TYPE, returnTypeName);
 
-        NodeList<Parameter> nativeParameters = nativeMethodDeclaration.getParameters();
-        String param = "";
-        int size = nativeParameters.size();
-        for(int i = 0; i < size; i++) {
-            Parameter parameter = nativeParameters.get(i);
-            String paramName = parameter.getNameAsString();
-            param += paramName;
-            if(i < size - 1) {
-                param += "\", \"";
-            }
-        }
-
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + "\n" + content + "\n";
         nativeMethodDeclaration.setBlockComment(blockComment);
