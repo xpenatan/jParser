@@ -29,7 +29,7 @@ public class JParserLibraryLoader {
     }
 
     public void load(String libraryName01, String libraryName02, Runnable runnable) {
-        String libPath = "assets/" + libraryName01 + ".js";;
+        String libPath = "scripts/" + libraryName01 + ".js";;
         if(loadedLibraries.contains(libPath)) {
             return;
         }
