@@ -43,6 +43,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
             "\nreturn (jlong)new [CONSTRUCTOR];\n";
 
+    protected static final String METHOD_DELETE_OBJ_POINTER_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "delete nativeObject;\n";
+
     protected static final String ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE =
             "\n[TYPE]::[ATTRIBUTE] = [ATTRIBUTE];\n";
 
@@ -157,6 +161,17 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
         String constructor = classTypeName + "(" + params + ")";
         String content = GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_CONSTRUCTOR, constructor);
+
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String blockComment = header + content;
+        nativeMethodDeclaration.setBlockComment(blockComment);
+    }
+
+    @Override
+    public void onIDLDeConstructorGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        String classTypeName = idlClass.classHeader.prefixName + classDeclaration.getNameAsString();
+
+        String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_TYPE, classTypeName);
 
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + content;

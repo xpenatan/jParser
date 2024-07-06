@@ -2,11 +2,16 @@ package idl;
 
 public class IDLNativeData {
 
+    private IDLBase idlBase;
     private long cPointer;
     private boolean cMemOwn;
     private boolean disposed;
     private boolean destroyed;
     private int refCount;
+
+    public IDLNativeData(IDLBase idlBase) {
+        this.idlBase = idlBase;
+    }
 
     public void initNative(long cPtr, boolean cMemoryOwn) {
         cMemOwn = cMemoryOwn;
@@ -97,13 +102,6 @@ public class IDLNativeData {
         return cMemOwn;
     }
 
-    /**
-     * Deletes the IDL object this class encapsulates. Do not call directly, instead use the {@link #dispose()} method.
-     */
-    public void deleteNative() {
-
-    }
-
     public void dispose() {
         if(refCount > 0 && IDLBase.USE_REF_COUNTING && IDLBase.ENABLE_LOGGING) {
             error("IDL", "Disposing " + toString() + " while it still has " + refCount + " references.");
@@ -111,7 +109,7 @@ public class IDLNativeData {
         if(cMemOwn) {
             // Don't try to delete if this object did not create the pointer
             disposed = true;
-            deleteNative();
+            idlBase.deleteNative();
             cPointer = 0;
         }
     }

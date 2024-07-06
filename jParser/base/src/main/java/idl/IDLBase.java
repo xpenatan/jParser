@@ -7,7 +7,7 @@ public abstract class IDLBase {
 
     public static boolean USE_REF_COUNTING = false;
     public static boolean ENABLE_LOGGING = true;
-    protected final IDLNativeData nativeData = new IDLNativeData();
+    protected final IDLNativeData nativeData = new IDLNativeData(this);
 
     public IDLBase() {
     }
@@ -34,5 +34,11 @@ public abstract class IDLBase {
 
     public void dispose() {
         nativeData.dispose();
+    }
+
+    /**
+     * Deletes the IDL object this class encapsulates. Do not call directly, instead use the {@link #dispose()} method.
+     */
+    protected void deleteNative() {
     }
 }

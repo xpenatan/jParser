@@ -27,6 +27,7 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
+import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
@@ -57,6 +58,10 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
             "var jsObj = new [MODULE].[CONSTRUCTOR];\n" +
             "return [MODULE].getPointer(jsObj);";
+
+    protected static final String METHOD_DELETE_OBJ_POINTER_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "[MODULE].destroy(jsObj);";
 
     protected static final String METHOD_COPY_VALUE_STATIC_TEMPLATE =
             "var returnedJSObj = [MODULE].[TYPE].prototype.[METHOD];\n" +
@@ -245,6 +250,28 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 normalAnnotationExpr.addPair("script", "\"" + content + "\"");
             }
         }
+    }
+
+    @Override
+    public void onIDLDeConstructorGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        String returnTypeName = classDeclaration.getNameAsString();
+        String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+
+        NodeList<Parameter> nativeParameters = nativeMethodDeclaration.getParameters();
+        String param = "";
+        int size = nativeParameters.size();
+        for(int i = 0; i < size; i++) {
+            Parameter parameter = nativeParameters.get(i);
+            String paramName = parameter.getNameAsString();
+            param += paramName;
+            if(i < size - 1) {
+                param += "\", \"";
+            }
+        }
+
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String blockComment = header + "\n" + content + "\n";
+        nativeMethodDeclaration.setBlockComment(blockComment);
     }
 
     @Override

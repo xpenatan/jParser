@@ -57,6 +57,7 @@ import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.PatternExpr;
+import com.github.javaparser.ast.expr.RecordPatternExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
@@ -65,6 +66,7 @@ import com.github.javaparser.ast.expr.SwitchExpr;
 import com.github.javaparser.ast.expr.TextBlockLiteralExpr;
 import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.expr.TypeExpr;
+import com.github.javaparser.ast.expr.TypePatternExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.modules.ModuleDeclaration;
@@ -215,27 +217,27 @@ public class CustomDefaultPrettyPrinterVisitor implements VoidVisitor<Void> {
         }
     }
 
-    protected void printArguments(final NodeList<Expression> args, final Void arg) {
+    protected <T extends Expression> void printArguments(final NodeList<T> args, final Void arg) {
         printer.print("(");
-        if(!isNullOrEmpty(args)) {
-            boolean columnAlignParameters = (args.size() > 1) && getOption(ConfigOption.COLUMN_ALIGN_PARAMETERS).isPresent();
-            if(columnAlignParameters) {
+        if (!isNullOrEmpty(args)) {
+            boolean columnAlignParameters = (args.size() > 1)
+                    && getOption(ConfigOption.COLUMN_ALIGN_PARAMETERS).isPresent();
+            if (columnAlignParameters) {
                 printer.indentWithAlignTo(printer.getCursor().column);
             }
-            for(final Iterator<Expression> i = args.iterator(); i.hasNext(); ) {
-                final Expression e = i.next();
+            for (final Iterator<T> i = args.iterator(); i.hasNext(); ) {
+                final T e = i.next();
                 e.accept(this, arg);
-                if(i.hasNext()) {
+                if (i.hasNext()) {
                     printer.print(",");
-                    if(columnAlignParameters) {
+                    if (columnAlignParameters) {
                         printer.println();
-                    }
-                    else {
+                    } else {
                         printer.print(" ");
                     }
                 }
             }
-            if(columnAlignParameters) {
+            if (columnAlignParameters) {
                 printer.unindent();
             }
         }
@@ -836,11 +838,27 @@ public class CustomDefaultPrettyPrinterVisitor implements VoidVisitor<Void> {
         }
     }
 
+//    @Override
+//    public void visit(final PatternExpr n, final Void arg) {
+//        n.getType().accept(this, arg);
+//        printer.print(" ");
+//        n.getName().accept(this, arg);
+//    }
+
     @Override
-    public void visit(final PatternExpr n, final Void arg) {
+    public void visit(final TypePatternExpr n, final Void arg) {
+        printModifiers(n.getModifiers());
         n.getType().accept(this, arg);
         printer.print(" ");
         n.getName().accept(this, arg);
+    }
+
+    @Override
+    public void visit(final RecordPatternExpr n, final Void arg) {
+        printOrphanCommentsBeforeThisChildNode(n);
+        printComment(n.getComment(), arg);
+        n.getType().accept(this, arg);
+        printArguments(n.getPatternList(), arg);
     }
 
     @Override

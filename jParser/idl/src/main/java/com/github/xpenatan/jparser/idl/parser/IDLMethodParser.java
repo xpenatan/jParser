@@ -76,37 +76,10 @@ public class IDLMethodParser {
 
         MethodDeclaration containsMethod = containsMethod(idlParser, classOrInterfaceDeclaration, idlMethod);
         if(containsMethod != null) {
-            boolean isNative = containsMethod.isNative();
-            boolean isStatic = containsMethod.isStatic();
-            Optional<Comment> optionalComment = containsMethod.getComment();
-            if(optionalComment.isPresent()) {
-                Comment comment = optionalComment.get();
-                if(comment instanceof BlockComment) {
-                    BlockComment blockComment = (BlockComment)optionalComment.get();
-                    String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
-                    // Skip if method already exist with header code
-                    if(headerCommands != null) {
-                        if(headerCommands.contains(DefaultCodeParser.CMD_NATIVE)) {
-                            return;
-                        }
-                        else {
-                            if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
-                                //If skip is found then remove the method
-                                containsMethod.remove();
-                            }
-                            return;
-                        }
-                    }
-                }
-            }
-            if(isNative) {
-                // It's a dummy method. Remove it and let IDL generate it again.
-                // This is useful to use a base method as an interface and let the generator create the real method.
+            if(canGenerateMethod(containsMethod)) {
                 returnType = containsMethod.getType();
-                containsMethod.remove();
             }
-            if(!isNative) {
-                // if a simple method exist, keep it and don't let IDL generate the method.
+            else {
                 return;
             }
         }
@@ -137,6 +110,41 @@ public class IDLMethodParser {
 
         if(idlParser.generateClass) {
             setupMethod(idlParser, jParser, idlMethod, classOrInterfaceDeclaration, methodDeclaration);
+        }
+    }
+
+    public static boolean canGenerateMethod(MethodDeclaration containsMethod) {
+        boolean isNative = containsMethod.isNative();
+        Optional<Comment> optionalComment = containsMethod.getComment();
+        if(optionalComment.isPresent()) {
+            Comment comment = optionalComment.get();
+            if(comment instanceof BlockComment) {
+                BlockComment blockComment = (BlockComment)optionalComment.get();
+                String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
+                // Skip if method already exist with header code
+                if(headerCommands != null) {
+                    if(headerCommands.contains(DefaultCodeParser.CMD_NATIVE)) {
+                        return false;
+                    }
+                    else {
+                        if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
+                            //If skip is found then remove the method
+                            containsMethod.remove();
+                        }
+                        return false;
+                    }
+                }
+            }
+        }
+        if(isNative) {
+            // It's a dummy method. Remove it and let IDL generate it again.
+            // This is useful to use a base method as an interface and let the generator create the real method.
+            containsMethod.remove();
+            return true;
+        }
+        else  {
+            // if a simple method exist, keep it and don't let IDL generate the method.
+            return false;
         }
     }
 

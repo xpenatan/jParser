@@ -88,6 +88,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
                 if(generateClass) {
                     IDLConstructorParser.generateConstructor(this, jParser, unit, classOrInterfaceDeclaration, idlClass);
+                    IDLDeConstructorParser.generateDeConstructor(this, jParser, unit, classOrInterfaceDeclaration, idlClass);
                 }
 
                 ArrayList<IDLMethod> methods = idlClass.methods;
@@ -141,6 +142,9 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     }
 
     public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    }
+
+    public void onIDLDeConstructorGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
     public void onIDLMethodGenerated(JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {

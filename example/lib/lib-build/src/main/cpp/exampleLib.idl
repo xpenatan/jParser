@@ -68,6 +68,7 @@ interface DefaultParamsClass {
     void defaultMethodParams(long a, long b, optional float c, optional float d);
 };
 
+[NoDelete]
 interface ReturnClass {
     void ReturnClass();
 
