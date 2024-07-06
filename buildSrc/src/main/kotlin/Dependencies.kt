@@ -3,7 +3,7 @@ import java.util.*
 
 object LibExt {
     val libVersion: String = getVersion()
-    const val jniGenVersion = "2.3.1"
+    const val jniGenVersion = "2.5.1"
     const val javaparserVersion = "3.26.1"
     const val jUnitVersion = "4.13.2"
     const val groupId = "com.github.xpenatan.jParser"
