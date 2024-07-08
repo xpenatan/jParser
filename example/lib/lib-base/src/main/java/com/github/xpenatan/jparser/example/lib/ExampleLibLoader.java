@@ -26,7 +26,7 @@ public class ExampleLibLoader {
             }
         };
         setOnLoadInit(onInitFunction);
-        libraryLoader.load("exampleLib.wasm");
+        libraryLoader.load("exampleLib.wasm.js");
     }
     */
 
