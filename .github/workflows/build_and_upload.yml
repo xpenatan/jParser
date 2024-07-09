@@ -267,7 +267,7 @@ jobs:
 
       - name: Upload to repository
         uses: nick-fields/retry@v3
-        if: ${{ success() && inputs.shouldUpload == 'true' }}
+        if: (success()) && ${{ inputs.shouldUpload == 'true' }}
         with:
           max_attempts: 3
           timeout_minutes: 10
