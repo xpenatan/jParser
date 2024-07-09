@@ -1,4 +1,4 @@
-## jParser
+# jParser
 
 ![Build](https://github.com/xpenatan/jParser/actions/workflows/release.yml/badge.svg)
 ![Build](https://github.com/xpenatan/jParser/actions/workflows/snapshot.yml/badge.svg)
