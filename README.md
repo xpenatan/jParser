@@ -25,6 +25,7 @@ It's not 100%, but it will reduce the amount of work binding big libraries. You 
 Libraries usisng jParser: <br>
 - [gdx-imgui](https://github.com/xpenatan/gdx-imgui)
 - [gdx-lua](https://github.com/xpenatan/gdx-lua)
+- [gdx-jolt](https://github.com/xpenatan/gdx-jolt)
 - [gdx-bullet](https://github.com/xpenatan/gdx-bullet)
 - [gdx-physx](https://github.com/xpenatan/gdx-physx)
 - [gdx-box2d](https://github.com/xpenatan/gdx-box2d)
