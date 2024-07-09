@@ -11,8 +11,25 @@ on:
         type: boolean
 jobs:
   build-and-upload:
-    uses: ./.github/workflows/build_and_upload.yml
-    with:
-      isRelease: ${{ inputs.isRelease }}
-      shouldUpload: ${{ inputs.shouldUpload }}
-    secrets: inherit
+#    uses: ./.github/workflows/build_and_upload.yml
+#    with:
+#      isRelease: ${{ inputs.isRelease }}
+#      shouldUpload: ${{ inputs.shouldUpload }}
+#    secrets: inherit
+#
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Test Release
+        uses: actions/github-script@v7
+        if: ${{ inputs.shouldUpload == 'true' }}
+        with:
+          script: |
+            console.log("LOG shouldUpload");
+
+      - name: Test Release
+        uses: actions/github-script@v7
+        if: ${{ inputs.isRelease == 'true' }}
+        with:
+          script: |
+            console.log("LOG RELEASE");
