@@ -27,7 +27,7 @@ import java.util.ArrayList;
 
 public class CppCodeParser extends IDLDefaultCodeParser {
 
-    private static final String HEADER_CMD = "C++";
+    private static final String HEADER_CMD = "JNI";
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
@@ -42,6 +42,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
             "\nreturn (jlong)new [CONSTRUCTOR];\n";
+
+    protected static final String METHOD_DELETE_OBJ_POINTER_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "delete nativeObject;\n";
 
     protected static final String ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE =
             "\n[TYPE]::[ATTRIBUTE] = [ATTRIBUTE];\n";
@@ -122,7 +126,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             "return (jlong)&[OPERATOR];\n";
 
     protected static final String METHOD_GET_PRIMITIVE_STATIC_TEMPLATE =
-            "\nreturn [TYPE]::[METHOD];\n";
+            "\nreturn [CAST][TYPE]::[METHOD];\n";
 
     protected static final String METHOD_GET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
@@ -157,6 +161,17 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
         String constructor = classTypeName + "(" + params + ")";
         String content = GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_CONSTRUCTOR, constructor);
+
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String blockComment = header + content;
+        nativeMethodDeclaration.setBlockComment(blockComment);
+    }
+
+    @Override
+    public void onIDLDeConstructorGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        String classTypeName = idlClass.classHeader.prefixName + classDeclaration.getNameAsString();
+
+        String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_TYPE, classTypeName);
 
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + content;
@@ -280,6 +295,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         if(idlMethod.idlFile.getEnum(returnTypeStr) != null) {
             returnCastStr = "(int)";
         }
+        if(idlMethod.isAny) {
+            returnCastStr = "(jlong)";
+        }
+
         String operator = getOperation(idlMethod.operator, param);
         String content = null;
         IDLMethodOperation.Op op = IDLMethodOperation.getEnum(idlMethod, methodDeclaration, nativeMethod);
@@ -336,7 +355,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case GET_PRIMITIVE_STATIC:
-                content = METHOD_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                content = METHOD_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);
                 break;
             case GET_PRIMITIVE:
                 content = METHOD_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);
@@ -454,7 +473,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         //TODO fix this. Disable auto include because path may be wrong.
 //        if(include != null) {
 //            String comment = "" +
-//                    "/*[-C++;-NATIVE]\n" +
+//                    "/*[-JNI;-NATIVE]\n" +
 //                    "       #include <" + include + ">\n" +
 //                    "    */";
 //            Position begin = new Position(0, 0);

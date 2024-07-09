@@ -1,13 +1,14 @@
 package com.github.xpenatan.jparser.builder.targets;
 
 import com.github.xpenatan.jparser.builder.BuildConfig;
-import com.github.xpenatan.jparser.builder.BuildTarget;
+import com.github.xpenatan.jparser.builder.DefaultBuildTarget;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
+import static com.github.xpenatan.jparser.builder.BuildTarget.isWindows;
 
 // Test Target
 @Deprecated
-public class EmscriptenLibTarget extends BuildTarget {
+public class EmscriptenLibTarget extends DefaultBuildTarget {
 
     String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
 

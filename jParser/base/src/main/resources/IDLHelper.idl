@@ -4,6 +4,7 @@ interface IDLString {
     void clear();
     void append([Const] DOMString text);
     void append([Const] DOMString text, long size);
+    long size();
     byte at(long index);
     [Const] DOMString c_str();
 };

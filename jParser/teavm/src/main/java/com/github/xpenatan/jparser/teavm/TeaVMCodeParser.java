@@ -11,13 +11,15 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.CastExpr;
+import com.github.javaparser.ast.expr.ConditionalExpr;
+import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
@@ -25,6 +27,7 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
+import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
@@ -41,7 +44,7 @@ import java.util.Optional;
 
 public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
-    private static final String HEADER_CMD = "teaVM";
+    private static final String HEADER_CMD = "TEAVM";
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
@@ -55,6 +58,10 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     protected static final String GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE =
             "var jsObj = new [MODULE].[CONSTRUCTOR];\n" +
             "return [MODULE].getPointer(jsObj);";
+
+    protected static final String METHOD_DELETE_OBJ_POINTER_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "[MODULE].destroy(jsObj);";
 
     protected static final String METHOD_COPY_VALUE_STATIC_TEMPLATE =
             "var returnedJSObj = [MODULE].[TYPE].prototype.[METHOD];\n" +
@@ -117,17 +124,17 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
-            "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
+            "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]_addr);";
 
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE =
-            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]);\n";
+            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]_addr);\n";
 
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
-            "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
+            "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]_addr);";
 
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE =
-            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]);\n";
+            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]_addr);\n";
 
     protected static final String ATTRIBUTE_SET_PRIMITIVE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
@@ -153,7 +160,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     protected void setJavaBodyNativeCMD(String content, MethodDeclaration nativeMethodDeclaration) {
-        convertNativeMethodLongToInt(nativeMethodDeclaration);
+//        convertNativeMethodLongToInt(nativeMethodDeclaration);
         String param = "";
         NodeList<Parameter> parameters = nativeMethodDeclaration.getParameters();
         int size = parameters.size();
@@ -201,7 +208,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
-        convertLongToInt(constructorDeclaration.getBody(), nativeMethodDeclaration);
+//        convertLongToInt(constructorDeclaration.getBody(), nativeMethodDeclaration);
 
         String param = "";
 
@@ -246,12 +253,21 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
+    public void onIDLDeConstructorGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        String returnTypeName = classDeclaration.getNameAsString();
+        String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_TYPE, returnTypeName);
+
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String blockComment = header + "\n" + content + "\n";
+        nativeMethodDeclaration.setBlockComment(blockComment);
+    }
+
+    @Override
     public void onIDLMethodGenerated(JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         // IDL parser generate our empty methods with default return values.
         // We now modify it to match teavm native calls
 
-        convertLongToInt(methodDeclaration.getBody().get(), nativeMethod);
-        String returnType = idlMethod.returnType;
+//        convertLongToInt(methodDeclaration.getBody().get(), nativeMethod);
         String methodName = idlMethod.name;
         String param = getParams(idlMethod, methodDeclaration);
         String annotationParam = "";
@@ -357,7 +373,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
-        convertLongToInt(methodDeclaration.getBody().get(), nativeMethod);
+//        convertLongToInt(methodDeclaration.getBody().get(), nativeMethod);
 
         String returnTypeName = classDeclaration.getNameAsString();
         String attributeName = idlAttribute.name;
@@ -474,41 +490,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         }
     }
 
-    private static void convertLongToInt(BlockStmt blockStmt, MethodDeclaration nativeMethod) {
-        //Convert native method params that contains long to int when calling native methods.
-
-        convertNativeMethodLongToInt(nativeMethod);
-        List<MethodCallExpr> all = blockStmt.findAll(MethodCallExpr.class);
-        convertCallerLongToInt(all);
-    }
-
-    public static void convertCallerLongToInt(List<MethodCallExpr> all) {
-        for(MethodCallExpr methodCallExpr : all) {
-            NodeList<Expression> arguments = methodCallExpr.getArguments();
-            String methodNameStr = methodCallExpr.getNameAsString();
-            if(methodNameStr.equals("getCPointer") || methodNameStr.contains("getPointer")) {
-                Optional<Node> parentNode = methodCallExpr.getParentNode();
-                if(parentNode.isPresent()) {
-                    Node node = parentNode.get();
-                    Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
-                    CastExpr intCast = new CastExpr(intType, methodCallExpr);
-                    node.replace(methodCallExpr, intCast);
-                }
-            }
-        }
-    }
-
-    private static void convertNativeMethodLongToInt(MethodDeclaration nativeMethod) {
-        if(JParserHelper.isLong(nativeMethod.getType())) {
-            nativeMethod.setType(int.class);
-        }
-        for(Parameter parameter : nativeMethod.getParameters()) {
-            if(JParserHelper.isLong(parameter.getType())) {
-                parameter.setType(int.class);
-            }
-        }
-    }
-
     @Override
     public void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
         super.onParserComplete(jParser, parserItems);
@@ -588,8 +569,15 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             }
 
             //cast cpointer to int
+
+            List<ClassOrInterfaceDeclaration> classDeclarations = unit.findAll(ClassOrInterfaceDeclaration.class);
+
+            for(int i1 = 0; i1 < classDeclarations.size(); i1++) {
+                ClassOrInterfaceDeclaration classDeclaration = classDeclarations.get(i1);
+                convertNativeMethodLongType(classDeclaration);
+            }
+
             List<MethodCallExpr> all = unit.findAll(MethodCallExpr.class);
-            convertCallerLongToInt(all);
         }
     }
 
@@ -598,5 +586,130 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         // Replace custom code that contains module tag
         String newContent = content.replace(TEMPLATE_TAG_MODULE, module);
         return super.parseCodeBlock(node, headerCommands, newContent);
+    }
+
+    private void convertNativeMethodLongType(ClassOrInterfaceDeclaration classDeclaration) {
+        String className = classDeclaration.getNameAsString();
+
+        List<ConstructorDeclaration> constructorDeclarations = classDeclaration.findAll(ConstructorDeclaration.class);
+        for(int i = 0; i < constructorDeclarations.size(); i++) {
+            ConstructorDeclaration constructorDeclaration = constructorDeclarations.get(i);
+            List<MethodCallExpr> methodCallerExprList = constructorDeclaration.findAll(MethodCallExpr.class);
+            updateLongToInt(classDeclaration, methodCallerExprList);
+        }
+
+        List<MethodDeclaration> methodDeclarations = classDeclaration.findAll(MethodDeclaration.class);
+        for(int i = 0; i < methodDeclarations.size(); i++) {
+            MethodDeclaration methodDeclaration = methodDeclarations.get(i);
+            if(!methodDeclaration.isNative()) {
+                String methodName = methodDeclaration.getNameAsString();
+                List<MethodCallExpr> methodCallerExprList = methodDeclaration.findAll(MethodCallExpr.class);
+                updateLongToInt(classDeclaration, methodCallerExprList);
+            }
+        }
+    }
+
+    private void updateLongToInt(ClassOrInterfaceDeclaration classDeclaration, List<MethodCallExpr> methodCallerExprList) {
+        for(int i1 = 0; i1 < methodCallerExprList.size(); i1++) {
+            MethodCallExpr methodCallExpr = methodCallerExprList.get(i1);
+            NodeList<Expression> arguments = methodCallExpr.getArguments();
+            MethodDeclaration nativeMethod = getNativeMethod(classDeclaration, methodCallExpr);
+            if(nativeMethod != null) {
+                NodeList<Parameter> parameters = nativeMethod.getParameters();
+                int paramSize = parameters.size();
+                if(paramSize > 0) {
+                    if(arguments.size() != paramSize) {
+                        throw new RuntimeException("Arguments are not the same");
+                    }
+                    for(int argI = 0; argI < arguments.size(); argI++) {
+                        Expression arg = arguments.get(argI);
+                        Parameter param = parameters.get(argI);
+                        Type type = param.getType();
+                        if(JParserHelper.isLong(type)) {
+                            Optional<Node> parentNode = arg.getParentNode();
+                            if(parentNode.isPresent()) {
+                                Node node = parentNode.get();
+                                Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
+                                CastExpr intCast;
+                                if(arg instanceof ConditionalExpr) {
+                                    intCast = new CastExpr(intType, new EnclosedExpr(arg));
+                                }
+                                else {
+                                    intCast = new CastExpr(intType, arg);
+                                }
+                                node.replace(arg, intCast);
+                            }
+                        }
+                    }
+                }
+
+                Node node = methodCallExpr.getParentNode().get();
+                if(node instanceof VariableDeclarator) {
+                    VariableDeclarator parentNode = (VariableDeclarator)node;
+                    if(JParserHelper.isLong(parentNode.getType())) {
+                        parentNode.setType(int.class);
+                    }
+                }
+                convertNativeMethodLongToInt(nativeMethod);
+            }
+        }
+    }
+
+    public MethodDeclaration getNativeMethod(ClassOrInterfaceDeclaration classDeclaration, MethodCallExpr methodCallExpr) {
+        String nativeMethodName = methodCallExpr.getNameAsString();
+        NodeList<Expression> arguments = methodCallExpr.getArguments();
+        List<MethodDeclaration> methodsByName = getNativeMethodsByName(classDeclaration, nativeMethodName, arguments.size(), null);
+        int size = methodsByName.size();
+        if(size == 0) {
+            return null;
+        }
+        if(methodsByName.size() == 1) {
+            MethodDeclaration methodDeclaration = methodsByName.get(0);
+
+            if(methodDeclaration.isNative()) {
+                return methodDeclaration;
+            }
+            else {
+                return null;
+            }
+        }
+        else {
+            throw new RuntimeException("NEED TO IMPLEMENT");
+        }
+    }
+
+    private List<MethodDeclaration> getNativeMethodsByName(ClassOrInterfaceDeclaration classDeclaration, String name, int paramSize, String... paramTypes) {
+        List<MethodDeclaration> list = new ArrayList<>();
+        List<MethodDeclaration> methodsByName = classDeclaration.getMethodsByName(name);
+        for(int i = 0; i < methodsByName.size(); i++) {
+            MethodDeclaration methodDeclaration = methodsByName.get(i);
+            if(!methodDeclaration.isNative()) {
+                continue;
+            }
+
+            boolean add = false;
+            NodeList<Parameter> parameters = methodDeclaration.getParameters();
+            add = parameters.size() == paramSize;
+
+            if(add && paramTypes != null && paramTypes.length > 0 && paramTypes.length == paramSize) {
+                add = methodDeclaration.hasParametersOfType(paramTypes);
+            }
+
+            if(add) {
+                list.add(methodDeclaration);
+            }
+        }
+        return list;
+    }
+
+    private static void convertNativeMethodLongToInt(MethodDeclaration nativeMethod) {
+        if(JParserHelper.isLong(nativeMethod.getType())) {
+            nativeMethod.setType(int.class);
+        }
+        for(Parameter parameter : nativeMethod.getParameters()) {
+            if(JParserHelper.isLong(parameter.getType())) {
+                parameter.setType(int.class);
+            }
+        }
     }
 }

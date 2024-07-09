@@ -60,7 +60,7 @@ public class JProcess {
                 }
 
                 private void printFileLineNumber (String line) {
-                    System.out.println(line);
+                    System.err.println(line);
                 }
             });
             t.setDaemon(true);

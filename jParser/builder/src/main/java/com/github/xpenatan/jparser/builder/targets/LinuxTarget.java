@@ -1,13 +1,21 @@
 package com.github.xpenatan.jparser.builder.targets;
 
 import com.github.xpenatan.jparser.builder.BuildConfig;
-import com.github.xpenatan.jparser.builder.BuildTarget;
+import com.github.xpenatan.jparser.builder.DefaultBuildTarget;
+import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
+import java.util.ArrayList;
 
-public class LinuxTarget extends BuildTarget {
+public class LinuxTarget extends DefaultBuildTarget {
 
     public LinuxTarget() {
         this.libDirSuffix = "linux/";
         this.tempBuildDir = "target/linux";
+        this.libPrefix = "lib";
+
+        cppCompiler.clear();
+        linkerCompiler.clear();
+        cppCompiler.add("g++");
+        linkerCompiler.add("g++");
 
         cppFlags.add("-c");
         cppFlags.add("-Wall");
@@ -33,7 +41,9 @@ public class LinuxTarget extends BuildTarget {
             libSuffix = "64.a";
         }
         else {
-            linkerFlags.add("-Wl,-wrap,memcpy");
+            // Note:
+            // Linux have an issue with libstdc++, libgcc and libc where if the system uses an updated version when compiling, older linux version will fail to run.
+            // static linking may fix libstdc++ and libgcc but not libc because it's not possible to static link it.
             linkerFlags.add("-shared");
             linkerFlags.add("-m64");
             libSuffix = "64.so";
@@ -41,7 +51,7 @@ public class LinuxTarget extends BuildTarget {
     }
 
     @Override
-    protected void onLink(String objFilePath, String libPath) {
+    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
         if(isStatic) {
             linkerCommands.addAll(linkerCompiler);
             linkerCommands.addAll(linkerFlags);
@@ -49,7 +59,7 @@ public class LinuxTarget extends BuildTarget {
             linkerCommands.add("@" + objFilePath);
         }
         else {
-            super.onLink(objFilePath, libPath);
+            super.onLink(compiledObjects, objFilePath, libPath);
         }
     }
 }

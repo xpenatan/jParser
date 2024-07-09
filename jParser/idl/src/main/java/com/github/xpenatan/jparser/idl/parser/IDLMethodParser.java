@@ -40,8 +40,8 @@ public class IDLMethodParser {
             "{\n" +
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) return null;\n" +
-            "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1);\n" +
-            "    [TYPE]_TEMP_GEN_[NUM].setPointer(pointer);\n" +
+            "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
+            "    [TYPE]_TEMP_GEN_[NUM].setCPointer(pointer);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
 
@@ -76,42 +76,18 @@ public class IDLMethodParser {
 
         MethodDeclaration containsMethod = containsMethod(idlParser, classOrInterfaceDeclaration, idlMethod);
         if(containsMethod != null) {
-            boolean isNative = containsMethod.isNative();
-            boolean isStatic = containsMethod.isStatic();
-            Optional<Comment> optionalComment = containsMethod.getComment();
-            if(optionalComment.isPresent()) {
-                Comment comment = optionalComment.get();
-                if(comment instanceof BlockComment) {
-                    BlockComment blockComment = (BlockComment)optionalComment.get();
-                    String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
-                    // Skip if method already exist with header code
-                    if(headerCommands != null) {
-                        if(headerCommands.contains(DefaultCodeParser.CMD_NATIVE)) {
-                            return;
-                        }
-                        else {
-                            if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
-                                //If skip is found then remove the method
-                                containsMethod.remove();
-                            }
-                            return;
-                        }
-                    }
-                }
-            }
-            if(isNative) {
-                // It's a dummy method. Remove it and let IDL generate it again.
-                // This is useful to use a base method as an interface and let the generator create the real method.
+            if(canGenerateMethod(containsMethod)) {
                 returnType = containsMethod.getType();
-                containsMethod.remove();
             }
-            if(!isNative) {
-                // if a simple method exist, keep it and don't let IDL generate the method.
+            else {
                 return;
             }
         }
 
-        String updatedMethodName = idlParser.getIDLMethodName(methodName);
+        // Remove methods characters if it contains "_1", "_2", etc.
+        String fixedMethodName = methodName.replaceFirst("_\\d$", "");
+
+        String updatedMethodName = idlParser.getIDLMethodName(fixedMethodName);
         ArrayList<IDLParameter> parameters = idlMethod.parameters;
         MethodDeclaration methodDeclaration = classOrInterfaceDeclaration.addMethod(updatedMethodName, Modifier.Keyword.PUBLIC);
         methodDeclaration.setStatic(idlMethod.isStaticMethod);
@@ -137,15 +113,50 @@ public class IDLMethodParser {
         }
     }
 
+    public static boolean canGenerateMethod(MethodDeclaration containsMethod) {
+        boolean isNative = containsMethod.isNative();
+        Optional<Comment> optionalComment = containsMethod.getComment();
+        if(optionalComment.isPresent()) {
+            Comment comment = optionalComment.get();
+            if(comment instanceof BlockComment) {
+                BlockComment blockComment = (BlockComment)optionalComment.get();
+                String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
+                // Skip if method already exist with header code
+                if(headerCommands != null) {
+                    if(headerCommands.contains(DefaultCodeParser.CMD_NATIVE)) {
+                        return false;
+                    }
+                    else {
+                        if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
+                            //If skip is found then remove the method
+                            containsMethod.remove();
+                        }
+                        return false;
+                    }
+                }
+            }
+        }
+        if(isNative) {
+            // It's a dummy method. Remove it and let IDL generate it again.
+            // This is useful to use a base method as an interface and let the generator create the real method.
+            containsMethod.remove();
+            return true;
+        }
+        else  {
+            // if a simple method exist, keep it and don't let IDL generate the method.
+            return false;
+        }
+    }
+
     private static void setupMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
-        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlMethod.isStaticMethod, idlMethod.isReturnValue, classDeclaration, methodDeclaration, idlMethod.operator);
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlMethod.isStaticMethod, idlMethod.isReturnValue, classDeclaration, methodDeclaration, idlMethod.name, idlMethod.operator);
         if(nativeMethodDeclaration != null) {
             idlParser.onIDLMethodGenerated(jParser, idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
         }
     }
 
-    public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String operator) {
-        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, methodDeclaration);
+    public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator) {
+        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, methodDeclaration, methodName);
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             //Add native method if it does not exist
             classDeclaration.getMembers().add(nativeMethodDeclaration);
@@ -204,12 +215,12 @@ public class IDLMethodParser {
             if(type.isClassOrInterfaceType()) {
                 if(IDLHelper.getCArray(type.asClassOrInterfaceType().getNameAsString()) != null) {
                     String methodCall = paramName + ".getPointer()";
-                    paramName =  variableName + " != null ? " + methodCall + " : 0";
+                    paramName =  "(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
                 else if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
                     //All methods must contain a base class to get its pointer
                     String methodCall = paramName + ".getCPointer()";
-                    paramName =  variableName + " != null ? " + methodCall + " : 0";
+                    paramName =  "(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
             }
             else if(type.isArrayType()) {
@@ -292,6 +303,7 @@ public class IDLMethodParser {
                     ObjectCreationExpr expression = new ObjectCreationExpr();
                     expression.setType(fieldType);
                     expression.addArgument(StaticJavaParser.parseExpression("(byte)1"));
+                    expression.addArgument(StaticJavaParser.parseExpression("(char)1"));
                     fieldDeclaration = classDeclaration.addFieldWithInitializer(fieldType, fieldName, expression, Modifier.Keyword.STATIC, keyword, Modifier.Keyword.FINAL);
                 }
                 else {
@@ -319,8 +331,7 @@ public class IDLMethodParser {
         }
     }
 
-    public static MethodDeclaration generateNativeMethod(boolean isReturnValue, MethodDeclaration methodDeclaration) {
-        String methodName = methodDeclaration.getNameAsString();
+    private static MethodDeclaration generateNativeMethod(boolean isReturnValue, MethodDeclaration methodDeclaration, String methodName) {
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
         Type methodReturnType = methodDeclaration.getType();
         boolean isStatic = methodDeclaration.isStatic();
@@ -388,7 +399,7 @@ public class IDLMethodParser {
             paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
             paramTypes[i] = paramType;
         }
-        List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsByName(idlMethod.name);
+        List<MethodDeclaration> methods = JParserHelper.getMethodsByName(classOrInterfaceDeclaration, idlMethod.name);
 
         if(methods.size() > 0) {
             for(MethodDeclaration method : methods) {

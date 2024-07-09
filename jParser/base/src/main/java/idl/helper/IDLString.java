@@ -4,6 +4,8 @@ import idl.IDLBase;
 
 public class IDLString extends IDLBase {
 
+    public static IDLString TMP_EMPTY_1 = new IDLString((byte)0, '0');
+
     public static IDLString TMP_1 = new IDLString();
     public static IDLString TMP_2 = new IDLString();
 
@@ -15,18 +17,20 @@ public class IDLString extends IDLBase {
     public IDLString() {
     }
 
+    public IDLString(byte b, char c) {}
+
     public String c_str() {
         String text = c_strNATIVE(getCPointer());
         return text;
     }
 
-    /*[-C++;-NATIVE]
+    /*[-JNI;-NATIVE]
         IDLString* nativeObject = (IDLString*)this_addr;
         const char* str = nativeObject->c_str();
         jstring jstrBuf = env->NewStringUTF(str);
         return jstrBuf;
     */
-    /*[-teaVM;-NATIVE]
+    /*[-TEAVM;-NATIVE]
         var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].IDLString);
         var returnedJSObj = jsObj.c_str();
         return returnedJSObj;

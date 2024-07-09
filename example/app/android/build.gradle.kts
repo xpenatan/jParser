@@ -51,7 +51,7 @@ dependencies {
     natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-x86")
 
     implementation(project(":example:app:core"))
-    implementation(project(":example:lib:android"))
+    implementation(project(":example:lib:lib-android"))
 }
 
 

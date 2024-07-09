@@ -1,23 +1,27 @@
 package com.github.xpenatan.jparser.builder.targets;
 
 import com.github.xpenatan.jparser.builder.BuildConfig;
-import com.github.xpenatan.jparser.builder.BuildTarget;
+import com.github.xpenatan.jparser.builder.DefaultBuildTarget;
 import com.github.xpenatan.jparser.builder.JProcess;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.ArrayList;
 
-public class EmscriptenTarget extends BuildTarget {
+public class EmscriptenTarget extends DefaultBuildTarget {
 
     public static boolean SKIP_GLUE_CODE;
     public final static String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
 
-    private IDLReader idlReader;
+    public IDLReader idlReader;
 
     public boolean isStatic = false;
     public boolean compileGlueCode = true;
 
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
+
+    public EmscriptenTarget() {
+        this(null);
+    }
 
     public EmscriptenTarget(IDLReader idlReader) {
         this.libDirSuffix = "emscripten/";
@@ -38,7 +42,8 @@ public class EmscriptenTarget extends BuildTarget {
 
         cppFlags.add("-c");
         cppFlags.add("-std=c++17");
-        cppFlags.add("-O3");
+        cppFlags.add("-Os");
+        cppFlags.add("-g0");
     }
 
     @Override
@@ -59,7 +64,7 @@ public class EmscriptenTarget extends BuildTarget {
             jsglueDir.mkdirs();
         }
 
-        if(compileGlueCode) {
+        if(compileGlueCode && !isStatic) {
             cppInclude.add("**/jsglue/*.cpp");
             copyHelperClass(jsglueDir);
         }
@@ -119,7 +124,7 @@ public class EmscriptenTarget extends BuildTarget {
     }
 
     @Override
-    protected void onLink(String objFilePath, String libPath) {
+    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
         if(isStatic) {
             linkerCommands.addAll(linkerCompiler);
             linkerCommands.addAll(linkerFlags);
@@ -127,7 +132,7 @@ public class EmscriptenTarget extends BuildTarget {
             linkerCommands.add("@" + objFilePath);
         }
         else {
-            super.onLink(objFilePath, libPath);
+            super.onLink(compiledObjects, objFilePath, libPath);
         }
     }
 

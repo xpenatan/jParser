@@ -1,11 +1,9 @@
 package emu.com.github.xpenatan.jparser.loader;
 
+import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoader;
+import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoaderListener;
+import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
 import java.util.HashSet;
-import org.teavm.jso.browser.Window;
-import org.teavm.jso.dom.events.Event;
-import org.teavm.jso.dom.events.EventListener;
-import org.teavm.jso.dom.html.HTMLDocument;
-import org.teavm.jso.dom.html.HTMLScriptElement;
 
 public class JParserLibraryLoader {
 
@@ -14,45 +12,38 @@ public class JParserLibraryLoader {
     public JParserLibraryLoader() {
     }
 
-    @Deprecated
     public void load(String libraryName) {
-        load(libraryName, null, null);
+        loadInternal(libraryName, null);
     }
 
-    @Deprecated
-    public void load(String libraryName01, String libraryName02) {
-        load(libraryName01, libraryName02, null);
+    public void load(String libraryName, JParserLibraryLoaderListener listener) {
+        loadInternal(libraryName, listener);
     }
 
-    public void load(String libraryName, Runnable runnable) {
-        load(libraryName, null, runnable);
-    }
+    public void loadInternal(String libraryName, JParserLibraryLoaderListener listener) {
+        if(!libraryName.endsWith(".js")) {
+            libraryName = libraryName + ".js";
+        }
 
-    public void load(String libraryName01, String libraryName02, Runnable runnable) {
-        String libPath = "assets/" + libraryName01 + ".js";;
-        if(loadedLibraries.contains(libPath)) {
+        if(loadedLibraries.contains(libraryName)) {
             return;
         }
-
-        if(libraryName02 != null) {
-
-        }
-        if(libraryName01 != null) {
-            System.out.println("Loading JS script: " + libPath);
-            Window current = Window.current();
-            HTMLDocument document = current.getDocument();
-            HTMLScriptElement scriptElement = (HTMLScriptElement)document.createElement("script");
-            scriptElement.setSrc(libPath);
-            scriptElement.addEventListener("load", new EventListener<Event>() {
+        loadedLibraries.add(libraryName);
+        AssetLoader.AssetLoad instance = AssetLoader.getInstance();
+        if(listener != null) {
+            instance.loadScript(true, libraryName, new AssetLoaderListener<>(){
                 @Override
-                public void handleEvent(Event evt) {
-                    loadedLibraries.add(libPath);
-                    if(runnable != null) {
-                        runnable.run();
-                    }
+                public void onSuccess(String url, String result) {
+                    listener.onLoad(true);
+                }
+                @Override
+                public void onFailure(String url) {
+                    listener.onLoad(false);
                 }
             });
-            document.getBody().appendChild(scriptElement);
+        }
+        else {
+            instance.loadScript(false, libraryName, null);
         }
     }
 }

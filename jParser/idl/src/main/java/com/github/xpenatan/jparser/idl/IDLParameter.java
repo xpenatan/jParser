@@ -59,14 +59,16 @@ public class IDLParameter {
             type = type + "[]";
         }
 
-        if(type.equals("any") || type.equals("VoidPtr")) {
+        if(type.equals("long")) {
+            // long in webidl means int
             type = "int";
+        }
+
+        if(type.equals("any") || type.equals("VoidPtr")) {
+            type = "long";
             isAny = true;
         }
 
-        if(type.equals("long")) {
-            type = "int";
-        }
         if(type.equals("long[]")) {
             type = "int[]";
         }

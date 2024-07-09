@@ -57,6 +57,7 @@ import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.PatternExpr;
+import com.github.javaparser.ast.expr.RecordPatternExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
@@ -65,6 +66,7 @@ import com.github.javaparser.ast.expr.SwitchExpr;
 import com.github.javaparser.ast.expr.TextBlockLiteralExpr;
 import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.expr.TypeExpr;
+import com.github.javaparser.ast.expr.TypePatternExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.modules.ModuleDeclaration;
@@ -215,27 +217,27 @@ public class CustomDefaultPrettyPrinterVisitor implements VoidVisitor<Void> {
         }
     }
 
-    protected void printArguments(final NodeList<Expression> args, final Void arg) {
+    protected <T extends Expression> void printArguments(final NodeList<T> args, final Void arg) {
         printer.print("(");
-        if(!isNullOrEmpty(args)) {
-            boolean columnAlignParameters = (args.size() > 1) && getOption(ConfigOption.COLUMN_ALIGN_PARAMETERS).isPresent();
-            if(columnAlignParameters) {
+        if (!isNullOrEmpty(args)) {
+            boolean columnAlignParameters = (args.size() > 1)
+                    && getOption(ConfigOption.COLUMN_ALIGN_PARAMETERS).isPresent();
+            if (columnAlignParameters) {
                 printer.indentWithAlignTo(printer.getCursor().column);
             }
-            for(final Iterator<Expression> i = args.iterator(); i.hasNext(); ) {
-                final Expression e = i.next();
+            for (final Iterator<T> i = args.iterator(); i.hasNext(); ) {
+                final T e = i.next();
                 e.accept(this, arg);
-                if(i.hasNext()) {
+                if (i.hasNext()) {
                     printer.print(",");
-                    if(columnAlignParameters) {
+                    if (columnAlignParameters) {
                         printer.println();
-                    }
-                    else {
+                    } else {
                         printer.print(" ");
                     }
                 }
             }
-            if(columnAlignParameters) {
+            if (columnAlignParameters) {
                 printer.unindent();
             }
         }
@@ -836,11 +838,27 @@ public class CustomDefaultPrettyPrinterVisitor implements VoidVisitor<Void> {
         }
     }
 
+//    @Override
+//    public void visit(final PatternExpr n, final Void arg) {
+//        n.getType().accept(this, arg);
+//        printer.print(" ");
+//        n.getName().accept(this, arg);
+//    }
+
     @Override
-    public void visit(final PatternExpr n, final Void arg) {
+    public void visit(final TypePatternExpr n, final Void arg) {
+        printModifiers(n.getModifiers());
         n.getType().accept(this, arg);
         printer.print(" ");
         n.getName().accept(this, arg);
+    }
+
+    @Override
+    public void visit(final RecordPatternExpr n, final Void arg) {
+        printOrphanCommentsBeforeThisChildNode(n);
+        printComment(n.getComment(), arg);
+        n.getType().accept(this, arg);
+        printArguments(n.getPatternList(), arg);
     }
 
     @Override
@@ -1785,18 +1803,52 @@ public class CustomDefaultPrettyPrinterVisitor implements VoidVisitor<Void> {
 
     @Override
     public void visit(final BlockComment n, final Void arg) {
-        if(!getOption(ConfigOption.PRINT_COMMENTS).isPresent()) {
+        // xpenatan Modified to pretty print block comment
+
+        if (!getOption(ConfigOption.PRINT_COMMENTS).isPresent()) {
             return;
         }
-        final String commentContent = normalizeEolInTextBlock(n.getContent(), getOption(ConfigOption.END_OF_LINE_CHARACTER).get().asString());
-        String[] lines = commentContent.split("\\R", -1); // as BlockComment should not be formatted, -1 to preserve any trailing empty line if present
-        printer.print("/*");
-        for(int i = 0; i < (lines.length - 1); i++) {
-            printer.print(lines[i]);
-            printer.print(getOption(ConfigOption.END_OF_LINE_CHARACTER).get().asValue()); // Avoids introducing indentation in blockcomments. ie: do not use println() as it would trigger indentation at the next print call.
+
+        printOrphanCommentsBeforeThisChildNode(n);
+        if (getOption(ConfigOption.PRINT_COMMENTS).isPresent()
+                && getOption(ConfigOption.PRINT_JAVADOC).isPresent()) {
+            printer.println(n.getHeader());
+            final String commentContent = normalizeEolInTextBlock(
+                    n.getContent(),
+                    getOption(ConfigOption.END_OF_LINE_CHARACTER).get().asString());
+            String[] lines = commentContent.split("\\R");
+            List<String> strippedLines = new ArrayList<>();
+            for (String line : lines) {
+                final String trimmedLine = line.trim();
+                if (trimmedLine.startsWith("*")) {
+                    line = trimmedLine.substring(1);
+                }
+                line = trimTrailingSpaces(line);
+                strippedLines.add(line);
+            }
+            boolean skippingLeadingEmptyLines = true;
+            boolean prependEmptyLine = false;
+            boolean prependSpace = strippedLines.stream().anyMatch(line -> !line.isEmpty() && !line.startsWith(" "));
+            for (String line : strippedLines) {
+                if (line.isEmpty()) {
+                    if (!skippingLeadingEmptyLines) {
+                        prependEmptyLine = true;
+                    }
+                } else {
+                    skippingLeadingEmptyLines = false;
+                    if (prependEmptyLine) {
+                        printer.println(" ");
+                        prependEmptyLine = false;
+                    }
+                    printer.print(" ");
+                    if (prependSpace) {
+                        printer.print(" ");
+                    }
+                    printer.println(line);
+                }
+            }
+            printer.println("" + n.getFooter());
         }
-        printer.print(lines[lines.length - 1]); // last line is not followed by a newline, and simply terminated with `*/`
-        printer.println("*/");
     }
 
     public void visit(final RawCodeBlock n) {

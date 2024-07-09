@@ -4,7 +4,7 @@ plugins {
 
 
 dependencies {
-    implementation(project(":example:lib:core"))
+    implementation(project(":example:lib:lib-core"))
     implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
     implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 }

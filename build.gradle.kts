@@ -31,10 +31,6 @@ allprojects()  {
         mavenCentral()
         maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
         maven { url = uri("https://oss.sonatype.org/content/repositories/releases/") }
-        maven {
-            url = uri("http://teavm.org/maven/repository/")
-            isAllowInsecureProtocol = true
-        }
     }
 
     configurations.configureEach {
@@ -43,7 +39,7 @@ allprojects()  {
     }
 }
 
-configure(allprojects - project(":example:app:android") - project(":example:lib:android")) {
+configure(allprojects - project(":example:app:android") - project(":example:lib:lib-android")) {
     apply {
         plugin("java")
     }
@@ -54,6 +50,7 @@ configure(allprojects - project(":example:app:android") - project(":example:lib:
 var libProjects = mutableSetOf(
     project(":jParser:core"),
     project(":jParser:builder"),
+    project(":jParser:builder-tool"),
     project(":jParser:base"),
     project(":jParser:idl"),
     project(":jParser:loader:loader-core"),
