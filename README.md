@@ -1,11 +1,10 @@
+## jParser
+
 ![Build](https://github.com/xpenatan/jParser/actions/workflows/release.yml/badge.svg)
 ![Build](https://github.com/xpenatan/jParser/actions/workflows/snapshot.yml/badge.svg)
-
 [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/releases/com.github.xpenatan.jParser/jParser-core?nexusVersion=2&server=https%3A%2F%2Foss.sonatype.org&label=release)](https://repo.maven.apache.org/maven2/com/github/xpenatan/jParser/)
 [![Static Badge](https://img.shields.io/badge/snapshot---SNAPSHOT-red)](https://oss.sonatype.org/content/repositories/snapshots/com/github/xpenatan/jParser/)
 
-
-## jParser
 jParser is a small Java library that helps bind C/C++ code to desktop, mobile, and the web, allowing it to be written inline with Java source code.
 
 It was inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen) that you add a native code into a code block. This code block will be translated to the specific code target. You can add multiple code block targets in the same java source. For each code target, it will generate a new java source code.
