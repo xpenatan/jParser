@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Test Release
+      - name: Test Upload
         uses: actions/github-script@v7
         if: ${{ inputs.shouldUpload == 'true' }}
         with:
