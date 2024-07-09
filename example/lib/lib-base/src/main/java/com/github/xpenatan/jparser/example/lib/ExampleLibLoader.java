@@ -1,7 +1,6 @@
 package com.github.xpenatan.jparser.example.lib;
 
 import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
-import idl.helper.IDLByteArray;
 
 public class ExampleLibLoader {
 
@@ -17,26 +16,21 @@ public class ExampleLibLoader {
     */
 
     /*[-TEAVM;-REPLACE]
-     public static void init(Runnable run) {
+     public static void init(Runnable onSuccess) {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
-        OnInitFunction onInitFunction = new OnInitFunction() {
-            @Override
-            public void onInit() {
-                run.run();
-            }
-        };
+        OnInitFunction onInitFunction = () -> onSuccess.run();
         setOnLoadInit(onInitFunction);
-        libraryLoader.load("exampleLib.wasm.js");
+        libraryLoader.load("exampleLib.wasm", isSuccess -> {});
     }
     */
 
-    public static void init(Runnable run) {
+    public static void init(Runnable onSuccess) {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
-        libraryLoader.load("exampleLib");
-
-        IDLByteArray test = new IDLByteArray(1);
-        test.setValue(0, (byte)1);
-        run.run();
+        libraryLoader.load("exampleLib", isSuccess -> {
+            if(isSuccess) {
+                onSuccess.run();
+            }
+        });
     }
 
     /*[-TEAVM;-REPLACE]

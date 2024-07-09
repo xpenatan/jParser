@@ -18,14 +18,24 @@ public class JParserLibraryLoader {
         loadInternal(libraryName, null);
     }
 
-    public void load(String libraryName, Runnable runnable) {
-        loadInternal(libraryName, runnable);
+    public void load(String libraryName, JParserLibraryLoaderListener listener) {
+        loadInternal(libraryName, listener);
     }
 
-    public void loadInternal(String libraryName, Runnable runnable) {
-        loader.load(libraryName);
-        if(runnable != null) {
-            runnable.run();
+    public void loadInternal(String libraryName, JParserLibraryLoaderListener listener) {
+        if(listener != null) {
+            new Thread(() -> {
+                try {
+                    loader.load(libraryName);
+                    listener.onLoad(true);
+                }
+                catch(Exception e) {
+                    listener.onLoad(false);
+                }
+            }).start();
+        }
+        else {
+            loader.load(libraryName);
         }
     }
 }

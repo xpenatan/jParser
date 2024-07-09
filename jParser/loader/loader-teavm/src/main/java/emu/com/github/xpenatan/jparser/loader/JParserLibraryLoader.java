@@ -2,6 +2,7 @@ package emu.com.github.xpenatan.jparser.loader;
 
 import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoader;
 import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoaderListener;
+import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
 import java.util.HashSet;
 
 public class JParserLibraryLoader {
@@ -15,23 +16,34 @@ public class JParserLibraryLoader {
         loadInternal(libraryName, null);
     }
 
-    public void load(String libraryName, Runnable runnable) {
-        loadInternal(libraryName, runnable);
+    public void load(String libraryName, JParserLibraryLoaderListener listener) {
+        loadInternal(libraryName, listener);
     }
 
-    public void loadInternal(String libraryName, Runnable runnable) {
+    public void loadInternal(String libraryName, JParserLibraryLoaderListener listener) {
+        if(!libraryName.endsWith(".js")) {
+            libraryName = libraryName + ".js";
+        }
+
         if(loadedLibraries.contains(libraryName)) {
             return;
         }
         loadedLibraries.add(libraryName);
         AssetLoader.AssetLoad instance = AssetLoader.getInstance();
-        instance.loadScript(true, libraryName, new AssetLoaderListener<>(){
-            @Override
-            public void onSuccess(String url, String result) {
-                if(runnable != null) {
-                    runnable.run();
+        if(listener != null) {
+            instance.loadScript(true, libraryName, new AssetLoaderListener<>(){
+                @Override
+                public void onSuccess(String url, String result) {
+                    listener.onLoad(true);
                 }
-            }
-        });
+                @Override
+                public void onFailure(String url) {
+                    listener.onLoad(false);
+                }
+            });
+        }
+        else {
+            instance.loadScript(false, libraryName, null);
+        }
     }
 }
