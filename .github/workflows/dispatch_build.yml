@@ -22,7 +22,7 @@ jobs:
 
       - name: Test Upload
         uses: actions/github-script@v7
-        if: ${{ inputs.shouldUpload == 'true' }}
+        if: ${{ inputs.shouldUpload }}
         with:
           script: |
             console.log("LOG shouldUpload");
