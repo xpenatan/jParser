@@ -16,7 +16,7 @@ public class MacTarget extends DefaultBuildTarget {
     }
 
     public MacTarget(boolean isArm) {
-        this(isArm, "10.7");
+        this(isArm, "10.12");
     }
 
     public MacTarget(boolean isArm, String macMinTarget) {
