@@ -9,12 +9,19 @@ public class MacTarget extends DefaultBuildTarget {
 
     private boolean isArm = false;
 
+    private final String macMinTarget;
+
     public MacTarget() {
         this(false);
     }
 
     public MacTarget(boolean isArm) {
+        this(isArm, "10.7");
+    }
+
+    public MacTarget(boolean isArm, String macMinTarget) {
         this.isArm = isArm;
+        this.macMinTarget = macMinTarget;
 
         if(isArm) {
             this.libDirSuffix = "mac/arm/";
@@ -54,7 +61,7 @@ public class MacTarget extends DefaultBuildTarget {
         cppFlags.add("-w");
         cppFlags.add("-Wno-format");
 
-        cppFlags.add("-mmacosx-version-min=10.7");
+        cppFlags.add("-mmacosx-version-min=" + macMinTarget);
         cppFlags.add("-stdlib=libc++");
     }
 
@@ -79,7 +86,7 @@ public class MacTarget extends DefaultBuildTarget {
                 cppFlags.add("x86_64");
                 libSuffix = "64.dylib";
             }
-            linkerFlags.add("-mmacosx-version-min=10.7");
+            linkerFlags.add("-mmacosx-version-min=" + macMinTarget);
             linkerFlags.add("-stdlib=libc++");
         }
     }
