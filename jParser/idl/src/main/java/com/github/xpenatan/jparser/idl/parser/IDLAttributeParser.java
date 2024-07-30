@@ -42,8 +42,8 @@ public class IDLAttributeParser {
             type = StaticJavaParser.parseType(attributeType);
         }
         catch(Exception e) {
-            e.printStackTrace();
-            return;
+            System.err.println("Type error: " + attributeType);
+            throw e;
         }
 
         JParserItem parserUnitItem = jParser.getParserUnitItem(type.toString());

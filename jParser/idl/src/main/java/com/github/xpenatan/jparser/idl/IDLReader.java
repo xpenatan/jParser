@@ -139,11 +139,10 @@ public class IDLReader {
         int size = idlFile.lines.size();
         for(int i = 0; i < size; i++) {
             String line = idlFile.lines.get(i).trim();
-            String nextLine = "";
-            if(i+1 < size) {
-                nextLine = idlFile.lines.get(i+1).trim();
-            }
-            if(line.startsWith("//") || line.isEmpty()) {
+            line = removeComment(line);
+            String nextLine = getNextLine(idlFile.lines, i);
+
+            if(line.isEmpty()) {
                 if(foundStartClass || foundStartEnum) {
                     String cmd = line.replace("//", "").trim();
                     if(cmd.startsWith("[-") && cmd.endsWith("]")) {
@@ -189,13 +188,10 @@ public class IDLReader {
                     classLines.add(line);
                 }
                 if(line.endsWith("};")) {
-                    int nextLineIdx = i + 1;
-                    if(nextLineIdx < size) {
-                        String nextL = idlFile.lines.get(nextLineIdx);
-                        if(nextL.contains(" implements ")) {
-                            classLines.add(nextL.trim());
-                            i++; // add i so nextLine is not skipped on next loop
-                        }
+                    String nextL = getNextLine(idlFile.lines, i);;
+                    if(nextL.contains(" implements ")) {
+                        classLines.add(nextL.trim());
+                        i++; // add i so nextLine is not skipped on next loop
                     }
                     foundStartClass = false;
                     IDLClass parserLineClass = new IDLClass(idlFile);
@@ -207,5 +203,28 @@ public class IDLReader {
                 }
             }
         }
+    }
+
+    private static String removeComment(String line) {
+        int commentIndex = line.indexOf("//");
+        if(commentIndex != -1) {
+            line = line.substring(0, commentIndex);
+            line = line.trim();
+        }
+        return line;
+    }
+
+    private static String getNextLine(ArrayList<String> lines, int index) {
+        String nextLine = "";
+        int size = lines.size();
+        if(index + 1 < size) {
+            nextLine = lines.get(index+1).trim();
+            nextLine = removeComment(nextLine);
+            if(nextLine.isEmpty() && index + 2 < size) {
+                nextLine = lines.get(index+2).trim();
+                nextLine = removeComment(nextLine);
+            }
+        }
+        return nextLine;
     }
 }

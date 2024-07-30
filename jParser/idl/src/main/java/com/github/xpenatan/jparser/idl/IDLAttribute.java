@@ -55,6 +55,10 @@ public class IDLAttribute {
             type = type.replace("long", "int");
         }
 
+        if(type.contains("int int")) {
+            type = type.replace("int int", "long");
+        }
+
         if(type.contains("unsigned")) {
             type = type.replace("unsigned", "").trim();
         }
