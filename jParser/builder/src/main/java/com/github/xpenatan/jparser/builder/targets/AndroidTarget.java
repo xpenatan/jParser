@@ -12,6 +12,8 @@ public class AndroidTarget extends DefaultBuildTarget {
     public String androidABIS = "all";
     public String androidPlatform = "android-19";
 
+    public ArrayList<String> customArgs = new ArrayList<>();
+
     public AndroidTarget() {
         this.libDirSuffix = "android/";
         this.tempBuildDir = "target/android";
@@ -108,6 +110,7 @@ public class AndroidTarget extends DefaultBuildTarget {
         CustomFileDescriptor childTarget = config.libDir.child("android");
         ArrayList<String> commands = new ArrayList<>();
         commands.add(androidCommand);
+        commands.addAll(customArgs);
         commands.add("NDK_PROJECT_PATH=.");
         commands.add("NDK_APPLICATION_MK=Application.mk");
         commands.add(" NDK_LIBS_OUT=" + childTarget.path());
