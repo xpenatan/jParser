@@ -107,6 +107,11 @@ public class AndroidTarget extends DefaultBuildTarget {
             androidCommand += ".cmd";
         }
 
+        if(multiCoreCompile) {
+            int i = Runtime.getRuntime().availableProcessors();
+            customArgs.add("-j" + i );
+        }
+
         CustomFileDescriptor childTarget = config.libDir.child("android");
         ArrayList<String> commands = new ArrayList<>();
         commands.add(androidCommand);

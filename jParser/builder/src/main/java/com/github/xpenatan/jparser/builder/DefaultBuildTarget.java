@@ -5,8 +5,13 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public abstract class DefaultBuildTarget extends BuildTarget {
+
+    public boolean multiCoreCompile = true;
 
     public String tempBuildDir;
 
@@ -83,15 +88,52 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         CustomFileDescriptor cppList = childTarget.child("cpp.txt");
         cppList.writeString(compiledPaths.trim(), false);
 
-        compilerCommands.clear();
-        compilerCommands.addAll(cppCompiler);
-        compilerCommands.addAll(cppFlags);
-        compilerCommands.addAll(headerDirs);
-        compilerCommands.add("@" + cppList.path());
-        System.err.println("##### COMPILE #####");
-        boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
-        if(!flag) {
-            return false;
+        if(multiCoreCompile) {
+            System.err.println("##### COMPILE #####");
+
+            int threads = Runtime.getRuntime().availableProcessors();
+            ExecutorService executorService = Executors.newFixedThreadPool(threads);
+            ArrayList<Future<?>> futures = new ArrayList<>();
+
+            for(CustomFileDescriptor file : cppFiles) {
+                String path = file.path();
+
+                Future<?> submit = executorService.submit(() -> {
+                    ArrayList<String> threadCommands = new ArrayList<>();
+                    threadCommands.addAll(cppCompiler);
+                    threadCommands.addAll(cppFlags);
+                    threadCommands.addAll(headerDirs);
+                    threadCommands.add(path);
+                    boolean flag = JProcess.startProcess(config.buildDir.file(), threadCommands);
+                    if(!flag) {
+                        throw new RuntimeException("Compile Error");
+                    }
+                });
+                futures.add(submit);
+            }
+
+            for (Future<?> future : futures) {
+                try {
+                    future.get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    executorService.shutdown();
+                    return false;
+                }
+            }
+            executorService.shutdown();
+        }
+        else {
+            compilerCommands.clear();
+            compilerCommands.addAll(cppCompiler);
+            compilerCommands.addAll(cppFlags);
+            compilerCommands.addAll(headerDirs);
+            compilerCommands.add("@" + cppList.path());
+            System.err.println("##### COMPILE #####");
+            boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
+            if(!flag) {
+                return false;
+            }
         }
         retFlag = true;
 
