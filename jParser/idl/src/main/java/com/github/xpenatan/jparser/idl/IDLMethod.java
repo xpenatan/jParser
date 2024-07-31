@@ -18,6 +18,7 @@ public class IDLMethod {
     public boolean isAny = false;
     public boolean isReturnRef;
     public boolean isReturnValue;
+    public boolean isReturnConst;
     public boolean isStaticMethod = false;
     public String operator = "";
 
@@ -34,10 +35,11 @@ public class IDLMethod {
         int index = line.indexOf("(");
         String leftSide = line.substring(0, index).trim();
 
-        String tagsStr = getTags(leftSide);
+        String tagsStr = IDLHelper.getTags(leftSide);
         if(!tagsStr.isEmpty()) {
             isReturnRef = tagsStr.contains("Ref");
             isReturnValue = tagsStr.contains("Value");
+            isReturnConst = tagsStr.contains("Const");
             leftSide = leftSide.replace(tagsStr, "");
 
             tagsStr = tagsStr.substring(1, tagsStr.length()-1);
@@ -113,32 +115,6 @@ public class IDLMethod {
             cloned.parameters.add(clonedParam);
         }
         return cloned;
-    }
-
-    private String getTags(String leftSide) {
-        int startIndex = leftSide.indexOf("[");
-        int endIndex = -1;
-        if(startIndex != -1 && leftSide.startsWith("[")) {
-            int count = 0;
-            for(int i = startIndex; i < leftSide.length(); i++) {
-                char c = leftSide.charAt(i);
-                if(c == '[') {
-                    count++;
-                }
-                else if(c == ']') {
-                    count--;
-                }
-                if(count == 0) {
-                    endIndex = i;
-                    break;
-                }
-            }
-        }
-
-        if(startIndex != -1 && endIndex != -1) {
-            return leftSide.substring(startIndex, endIndex + 1);
-        }
-        return "";
     }
 
     static String setParameters(IDLFile idlFile, String line, ArrayList<IDLParameter> out) {

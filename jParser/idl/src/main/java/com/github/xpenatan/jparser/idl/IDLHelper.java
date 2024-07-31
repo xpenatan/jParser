@@ -43,4 +43,31 @@ public class IDLHelper {
         }
         return type;
     }
+
+    public static String getTags(String line) {
+        line = line.trim();
+        int startIndex = line.indexOf("[");
+        int endIndex = -1;
+        if(startIndex != -1 && line.startsWith("[")) {
+            int count = 0;
+            for(int i = startIndex; i < line.length(); i++) {
+                char c = line.charAt(i);
+                if(c == '[') {
+                    count++;
+                }
+                else if(c == ']') {
+                    count--;
+                }
+                if(count == 0) {
+                    endIndex = i;
+                    break;
+                }
+            }
+        }
+
+        if(startIndex != -1 && endIndex != -1) {
+            return line.substring(startIndex, endIndex + 1);
+        }
+        return "";
+    }
 }

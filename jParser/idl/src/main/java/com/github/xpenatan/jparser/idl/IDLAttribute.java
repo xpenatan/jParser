@@ -34,16 +34,19 @@ public class IDLAttribute {
         if(leftSide.contains("static")) {
             isStatic = true;
         }
-        if(leftSide.contains("[Value]")) {
-            isValue = true;
-        }
-        if(leftSide.contains("[Const]")) {
-            isConst = true;
+
+        String tagsStr = IDLHelper.getTags(leftSide);
+        if(!tagsStr.isEmpty()) {
+            if(tagsStr.contains("Value")) {
+                isValue = true;
+            }
+            if(leftSide.contains("Const")) {
+                isConst = true;
+            }
         }
         if(leftSide.contains("readonly")) {
             isReadOnly = true;
         }
-
 
         if(type.contains("[]")) {
             isArray = true;

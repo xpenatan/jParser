@@ -11,6 +11,16 @@ public class IDLReaderTest {
     }
 
     @Test
+    public void test_getTag() {
+        String tag1 = "[Const, Value] readonly attribute Vec3 mDirection;";
+        String tag2= "[Value] attribute SoftBodySharedSettingsSkinWeight[] mWeights;";
+        String test1 = IDLHelper.getTags(tag1);
+        String test2 = IDLHelper.getTags(tag2);
+        Assert.assertEquals("[Const, Value]", test1);
+        Assert.assertEquals("[Value]", test2);
+    }
+
+    @Test
     public void test_NoDeleteClassTest_not_null() {
         IDLReader idlReader = IDLReader.readIDL("src\\test\\resources\\idl\\Test.idl");
         IDLClass idlClass = idlReader.getClass("NoDeleteClassTest");

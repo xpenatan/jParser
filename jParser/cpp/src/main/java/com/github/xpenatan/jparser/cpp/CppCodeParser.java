@@ -35,6 +35,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     protected static final String TEMPLATE_TAG_ATTRIBUTE = "[ATTRIBUTE]";
     protected static final String TEMPLATE_TAG_ENUM = "[ENUM]";
     protected static final String TEMPLATE_TAG_ATTRIBUTE_TYPE = "[ATTRIBUTE_TYPE]";
+    protected static final String TEMPLATE_TAG_RETURN_TYPE = "[RETURN_TYPE]";
+    protected static final String TEMPLATE_TAG_CONST = "[CONST]";
     protected static final String TEMPLATE_TAG_COPY_TYPE = "[COPY_TYPE]";
     protected static final String TEMPLATE_TAG_COPY_PARAM = "[COPY_PARAM]";
     protected static final String TEMPLATE_TAG_CONSTRUCTOR = "[CONSTRUCTOR]";
@@ -80,14 +82,15 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     protected static final String ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
-            "return (jlong)nativeObject->[ATTRIBUTE];\n";
+            "[CONST][ATTRIBUTE_TYPE]* attr = nativeObject->[ATTRIBUTE];\n" +
+            "return (jlong)attr;\n";
 
     protected static final String ATTRIBUTE_GET_PRIMITIVE_STATIC_TEMPLATE =
             "\nreturn [TYPE]::[ATTRIBUTE];\n";
 
     protected static final String ATTRIBUTE_GET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
-            "return nativeObject->[ATTRIBUTE];\n";
+            "return [CAST]nativeObject->[ATTRIBUTE];\n";
 
     protected static final String METHOD_GET_OBJ_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
@@ -112,7 +115,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     protected static final String METHOD_GET_OBJ_POINTER_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
-            "return (jlong)nativeObject->[METHOD];\n";
+            "[CONST][RETURN_TYPE]* obj = nativeObject->[METHOD];\n" +
+            "return (jlong)obj;\n";
 
     protected static final String METHOD_GET_REF_OBJ_POINTER_STATIC_TEMPLATE =
             "\nreturn (jlong)&[TYPE]::[METHOD];\n";
@@ -193,7 +197,12 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             classTypeName = idlClass.classHeader.prefixName + classTypeName;
         }
 
+        String getPrimitiveCast = "";
         String attributeType = idlAttribute.type;
+        String constTag = "";
+        if(idlAttribute.isConst) {
+            constTag = "const ";
+        }
 
         IDLClass retTypeClass = idlAttribute.idlFile.getClass(attributeType);
         if(retTypeClass != null) {
@@ -210,6 +219,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             else {
                 attributeReturnCast = "(" + idlEnum.typePrefix + "::" + attributeType + ")";
             }
+            getPrimitiveCast = "(jint)";
         }
 
         String content = null;
@@ -246,7 +256,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                         .replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case GET_OBJECT_POINTER:
-                content = ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                content = ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType).replace(TEMPLATE_TAG_CONST, constTag);
                 break;
             case GET_OBJECT_POINTER_STATIC:
                 content = ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
@@ -258,7 +268,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 content = ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case GET_PRIMITIVE:
-                content = ATTRIBUTE_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                content = ATTRIBUTE_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, getPrimitiveCast);
                 break;
             case GET_PRIMITIVE_STATIC:
                 content = ATTRIBUTE_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
@@ -297,6 +307,11 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         }
         if(idlMethod.isAny) {
             returnCastStr = "(jlong)";
+        }
+
+        String constTag = "";
+        if(idlMethod.isReturnConst) {
+            constTag = "const ";
         }
 
         String operator = getOperation(idlMethod.operator, param);
@@ -352,7 +367,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 content = METHOD_GET_OBJ_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case GET_OBJ_POINTER:
-                content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_RETURN_TYPE, returnTypeStr).replace(TEMPLATE_TAG_CONST, constTag);
                 break;
             case GET_PRIMITIVE_STATIC:
                 content = METHOD_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);
