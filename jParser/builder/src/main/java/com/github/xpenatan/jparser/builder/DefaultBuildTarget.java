@@ -11,6 +11,8 @@ import java.util.concurrent.Future;
 
 public abstract class DefaultBuildTarget extends BuildTarget {
 
+    private static String helperName = "IDLHelper.h";
+
     public boolean multiCoreCompile = true;
 
     public String tempBuildDir;
@@ -38,8 +40,10 @@ public abstract class DefaultBuildTarget extends BuildTarget {
 
     public boolean shouldCompile = true;
     public boolean shouldLink = true;
-
     public boolean isStatic = false;
+
+    protected CustomFileDescriptor idlDir;
+    protected CustomFileDescriptor idlHelperHFile;
 
     protected DefaultBuildTarget() {
         cppCompiler.add("x86_64-w64-mingw32-g++");
@@ -53,6 +57,17 @@ public abstract class DefaultBuildTarget extends BuildTarget {
             childTarget.deleteDirectory();
         }
         childTarget.mkdirs();
+
+        idlDir = config.sourceDir.child("idl");
+        if(!idlDir.exists()) {
+            idlDir.mkdirs();
+        }
+
+        CustomFileDescriptor idlHelperCPP = new CustomFileDescriptor(helperName, CustomFileDescriptor.FileType.Classpath);
+        idlHelperCPP.copyTo(idlDir, false);
+        idlHelperHFile = idlDir.child(idlHelperCPP.name());
+        headerDirs.add("-I" + idlDir.path());
+
         setup(config);
         return build(config, childTarget);
     }

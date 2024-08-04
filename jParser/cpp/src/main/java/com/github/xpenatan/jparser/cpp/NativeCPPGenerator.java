@@ -262,13 +262,6 @@ public class NativeCPPGenerator implements CppGenerator {
         String gluePathStr = cppDestinationDir + File.separator + ".." + File.separator + "jniglue" + File.separator;
         CustomFileDescriptor gluePath = new CustomFileDescriptor(gluePathStr);
 
-        if(JParser.CREATE_IDL_HELPER) {
-            // Create cpp file if flag is enable
-            InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
-            CustomFileDescriptor helperFile = gluePath.child(helperName);
-            helperFile.write(idlHelperClass, false);
-        }
-
         String cppGlueHPath = gluePathStr + cppGlueName + ".h";
         String cppGluePath = gluePathStr + cppGlueName + ".cpp";
         CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);

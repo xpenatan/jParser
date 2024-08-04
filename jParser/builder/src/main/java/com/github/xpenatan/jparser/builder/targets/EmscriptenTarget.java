@@ -59,7 +59,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
         if(compileGlueCode && !isStatic) {
             cppInclude.add("**/jsglue/*.cpp");
-            copyHelperClass(jsglueDir);
+            headerDirs.add("-include" + idlHelperHFile.path());
         }
 
         if(idlReader != null) {
@@ -150,14 +150,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         generateGlueCommand.add(mergedIDLFile.toString());
         generateGlueCommand.add("glue");
         return JProcess.startProcess(jsglueDir.file(), generateGlueCommand);
-    }
-
-    private void copyHelperClass(CustomFileDescriptor jsglueDir) {
-        // Copy IDLHelper from base module.
-        CustomFileDescriptor idlHelperCPP = new CustomFileDescriptor("IDLHelper.h", CustomFileDescriptor.FileType.Classpath);
-        idlHelperCPP.copyTo(jsglueDir, false);
-        CustomFileDescriptor cppFile = jsglueDir.child(idlHelperCPP.name());
-        headerDirs.add("-include" + cppFile.path());
     }
 
     private CustomFileDescriptor mergeIDLFile(CustomFileDescriptor jsglueDir) {

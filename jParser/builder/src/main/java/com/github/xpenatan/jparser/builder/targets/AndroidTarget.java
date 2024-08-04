@@ -26,7 +26,6 @@ public class AndroidTarget extends DefaultBuildTarget {
         linkerFlags.add("-lm");
 
         cppInclude.add("**/jniglue/JNIGlue.cpp");
-        headerDirs.add("jni-headers/");
         headerDirs.add("jni-headers/linux");
     }
 
@@ -49,6 +48,7 @@ public class AndroidTarget extends DefaultBuildTarget {
 
         String headerDirsStr = "";
         for(String headerDir : headerDirs) {
+            headerDir = headerDir.replace("-I", "");
             headerDirsStr += headerDir + " ";
         }
         headerDirsStr = headerDirsStr.trim();
