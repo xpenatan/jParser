@@ -16,5 +16,5 @@ public abstract class BuildTarget {
         return (OS.contains("nix") || OS.contains("nux") || OS.contains("aix") || OS.contains("Linux"));
     }
 
-    protected abstract boolean build(BuildConfig config);
+    protected abstract boolean buildInternal(BuildConfig config);
 }

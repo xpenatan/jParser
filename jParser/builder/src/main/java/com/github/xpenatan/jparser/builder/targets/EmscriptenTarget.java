@@ -46,17 +46,11 @@ public class EmscriptenTarget extends DefaultBuildTarget {
     }
 
     @Override
-    protected boolean build(BuildConfig config) {
+    protected boolean build(BuildConfig config, CustomFileDescriptor childTarget) {
         String libName = this.libName;
         if(libName.isEmpty()) {
             libName = config.libName;
         }
-
-        CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
-        if(childTarget.exists()) {
-            childTarget.delete();
-        }
-        childTarget.mkdirs();
 
         CustomFileDescriptor jsglueDir = config.sourceDir.child("jsglue");
         if(!jsglueDir.exists()) {
@@ -119,7 +113,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("EXPORT_NAME='" + libName + "'");
         }
 
-        return super.build(config);
+        return super.build(config, childTarget);
     }
 
     @Override

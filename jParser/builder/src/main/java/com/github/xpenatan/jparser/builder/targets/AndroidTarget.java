@@ -31,7 +31,7 @@ public class AndroidTarget extends DefaultBuildTarget {
     }
 
     @Override
-    protected boolean build(BuildConfig config) {
+    protected boolean build(BuildConfig config, CustomFileDescriptor childTarget) {
         CustomFileDescriptor androidDir = config.buildDir;
         if(!androidDir.exists()) {
             androidDir.mkdirs();
@@ -112,7 +112,6 @@ public class AndroidTarget extends DefaultBuildTarget {
             customArgs.add("-j" + i );
         }
 
-        CustomFileDescriptor childTarget = config.libDir.child("android");
         ArrayList<String> commands = new ArrayList<>();
         commands.add(androidCommand);
         commands.addAll(customArgs);

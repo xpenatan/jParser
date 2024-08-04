@@ -17,7 +17,7 @@ public class JBuilder {
                 for(BuildTarget buildTarget : target.multiTarget) {
                     String targetName = buildTarget.getClass().getSimpleName();
                     System.err.println("##### Building: " + targetName + " #####");
-                    if(!buildTarget.build(config)) {
+                    if(!buildTarget.buildInternal(config)) {
                         throw new RuntimeException();
                     }
                 }

@@ -46,17 +46,20 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         linkerCompiler.add("x86_64-w64-mingw32-g++");
     }
 
-    protected void setup(BuildConfig config) {}
-
-    protected boolean build(BuildConfig config) {
+    @Override
+    protected boolean buildInternal(BuildConfig config) {
         CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
         if(childTarget.exists()) {
             childTarget.deleteDirectory();
         }
         childTarget.mkdirs();
-
         setup(config);
+        return build(config, childTarget);
+    }
 
+    protected void setup(BuildConfig config) {}
+
+    protected boolean build(BuildConfig config, CustomFileDescriptor childTarget) {
         ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppInclude, cppExclude, filterCPPSuffix));
         for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
             ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
