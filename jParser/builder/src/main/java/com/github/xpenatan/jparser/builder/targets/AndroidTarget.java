@@ -112,12 +112,13 @@ public class AndroidTarget extends DefaultBuildTarget {
             customArgs.add("-j" + i );
         }
 
+        CustomFileDescriptor libTarget = config.libDir.child("android");
         ArrayList<String> commands = new ArrayList<>();
         commands.add(androidCommand);
         commands.addAll(customArgs);
         commands.add("NDK_PROJECT_PATH=.");
         commands.add("NDK_APPLICATION_MK=Application.mk");
-        commands.add(" NDK_LIBS_OUT=" + childTarget.path());
+        commands.add(" NDK_LIBS_OUT=" + libTarget.path());
         if(!JProcess.startProcess(androidDir.file(), commands)) {
             return false;
         }
