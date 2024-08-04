@@ -9,7 +9,7 @@ jParser is a small Java library that helps bind C/C++ code to desktop, mobile, a
 
 It was inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen) that you add a native code into a code block. This code block will be translated to the specific code target. You can add multiple code block targets in the same java source. For each code target, it will generate a new java source code.
 
-For the web, it needs emscripten and a webidl file to generate a js/wasm file and [teavm](https://github.com/konsoletyper/teavm). The generated classes in teavm module use JSBody to communicate with javascript.
+For the web, it needs emscripten to generate a js/wasm file and [teavm](https://github.com/konsoletyper/teavm). The generated classes in teavm module use JSBody to communicate with javascript.
 
 jParser only supports ```JNI``` and ```TEAVM``` code targets.
 
