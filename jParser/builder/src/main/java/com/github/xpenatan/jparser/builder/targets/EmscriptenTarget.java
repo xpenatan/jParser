@@ -46,7 +46,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
     }
 
     @Override
-    protected boolean build(BuildConfig config, CustomFileDescriptor childTarget) {
+    protected boolean build(BuildConfig config, CustomFileDescriptor buildTargetTemp) {
         String libName = this.libName;
         if(libName.isEmpty()) {
             libName = config.libName;
@@ -113,7 +113,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("EXPORT_NAME='" + libName + "'");
         }
 
-        return super.build(config, childTarget);
+        return super.build(config, buildTargetTemp);
     }
 
     @Override

@@ -54,7 +54,7 @@ public class EmscriptenLibTarget extends DefaultBuildTarget {
     }
 
     @Override
-    protected boolean build(BuildConfig config, CustomFileDescriptor childTarget) {
+    protected boolean build(BuildConfig config, CustomFileDescriptor buildTargetTemp) {
         CustomFileDescriptor jsglueDir = config.sourceDir.child("jsglue");
         if(!jsglueDir.exists()) {
             jsglueDir.mkdirs();
@@ -81,6 +81,6 @@ public class EmscriptenLibTarget extends DefaultBuildTarget {
         linkerFlags.add("-s");
         linkerFlags.add("EXPORT_NAME='" + libName + "'");
         cppFlags.add("-c");
-        return super.build(config, childTarget);
+        return super.build(config, buildTargetTemp);
     }
 }

@@ -30,7 +30,7 @@ public class AndroidTarget extends DefaultBuildTarget {
     }
 
     @Override
-    protected boolean build(BuildConfig config, CustomFileDescriptor childTarget) {
+    protected boolean build(BuildConfig config, CustomFileDescriptor buildTargetTemp) {
         CustomFileDescriptor androidDir = config.buildDir;
         if(!androidDir.exists()) {
             androidDir.mkdirs();

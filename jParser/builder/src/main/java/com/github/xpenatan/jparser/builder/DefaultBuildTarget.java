@@ -74,28 +74,28 @@ public abstract class DefaultBuildTarget extends BuildTarget {
 
     protected void setup(BuildConfig config) {}
 
-    protected boolean build(BuildConfig config, CustomFileDescriptor childTarget) {
+    protected boolean build(BuildConfig config, CustomFileDescriptor buildTargetTemp) {
         ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppInclude, cppExclude, filterCPPSuffix));
         for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
             ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
             cppFiles.addAll(cppFiles1);
         }
 
-        if(shouldCompile && shouldLink && compile(config, childTarget, cppFiles)) {
-            return link(config, childTarget);
+        if(shouldCompile && shouldLink && compile(config, buildTargetTemp, cppFiles)) {
+            return link(config, buildTargetTemp);
         }
         else if(shouldCompile && !shouldLink) {
-            return compile(config, childTarget, cppFiles);
+            return compile(config, buildTargetTemp, cppFiles);
         }
         else if(!shouldCompile && shouldLink) {
-            return link(config, childTarget);
+            return link(config, buildTargetTemp);
         }
         else {
             return false;
         }
     }
 
-    private boolean compile(BuildConfig config, CustomFileDescriptor childTarget, ArrayList<CustomFileDescriptor> cppFiles) {
+    private boolean compile(BuildConfig config, CustomFileDescriptor buildTargetTemp, ArrayList<CustomFileDescriptor> cppFiles) {
         boolean retFlag = false;
 
         String compiledPaths = "";
@@ -103,7 +103,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
             String path = file.path();
             compiledPaths = compiledPaths + "\n" + path;
         }
-        CustomFileDescriptor cppList = childTarget.child("cpp.txt");
+        CustomFileDescriptor cppList = buildTargetTemp.child("cpp.txt");
         cppList.writeString(compiledPaths.trim(), false);
 
         if(multiCoreCompile) {
@@ -159,7 +159,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         ArrayList<CustomFileDescriptor> files = new ArrayList<>();
         getObjectFiles(config.buildDir, files);
         for(CustomFileDescriptor file : files) {
-            file.moveTo(childTarget);
+            file.moveTo(buildTargetTemp);
         }
         return retFlag;
     }
