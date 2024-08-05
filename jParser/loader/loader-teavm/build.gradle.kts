@@ -5,7 +5,6 @@ plugins {
 val moduleName = "loader-teavm"
 
 dependencies {
-    api("com.badlogicgames.gdx:gdx-jnigen-loader:${LibExt.jniGenVersion}")
     implementation(project(":jParser:loader:loader-core"))
     implementation("com.github.xpenatan.gdx-teavm:asset-loader:${LibExt.gdxTeaVMVersion}")
 }
