@@ -11,7 +11,7 @@ public class MacTarget extends DefaultBuildTarget {
 
     private final String macMinTarget;
 
-    public static String MIN_MAC_VERSION = "13.0";
+    public static String MIN_MAC_VERSION = "10.13";
 
     public MacTarget() {
         this(false);
