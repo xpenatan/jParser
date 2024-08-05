@@ -11,12 +11,14 @@ public class MacTarget extends DefaultBuildTarget {
 
     private final String macMinTarget;
 
+    public static String MIN_MAC_VERSION = "10.13";
+
     public MacTarget() {
         this(false);
     }
 
     public MacTarget(boolean isArm) {
-        this(isArm, "10.12");
+        this(isArm, MIN_MAC_VERSION);
     }
 
     public MacTarget(boolean isArm, String macMinTarget) {
