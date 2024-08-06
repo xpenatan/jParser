@@ -308,6 +308,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         boolean skipUnit = false;
 
                         if(!JParser.CREATE_IDL_HELPER) {
+                            //TODO implement better class renaming
                             // Hack to look for idl classes that was generated with the main lib
                             ArrayList<String> baseIDLClasses = getBaseIDLClasses();
                             for(String baseIDLClass : baseIDLClasses) {
