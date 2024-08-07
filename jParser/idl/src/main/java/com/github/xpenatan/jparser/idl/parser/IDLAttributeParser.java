@@ -94,7 +94,7 @@ public class IDLAttributeParser {
             if(getMethodDeclaration != null) {
                 getMethodDeclaration.remove();
             }
-            String getMethodName = attributeName;
+            String getMethodName = ATTRIBUTE_PREFIX_GET + attributeName;
             getMethodDeclaration = classOrInterfaceDeclaration.addMethod(getMethodName, Modifier.Keyword.PUBLIC);
             getMethodDeclaration.setStatic(idlAttribute.isStatic);
             getMethodDeclaration.setType(type);
@@ -102,7 +102,7 @@ public class IDLAttributeParser {
             IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, type, getMethodDeclaration);
 
             if(idlParser.generateClass) {
-                setupAttributeMethod(idlParser, jParser, idlAttribute, false, classOrInterfaceDeclaration, getMethodDeclaration, ATTRIBUTE_PREFIX_GET + getMethodName);
+                setupAttributeMethod(idlParser, jParser, idlAttribute, false, classOrInterfaceDeclaration, getMethodDeclaration, getMethodName);
             }
         }
 
@@ -114,7 +114,7 @@ public class IDLAttributeParser {
             if(setMethodDeclaration != null) {
                 setMethodDeclaration.remove();
             }
-            String setMethodName = attributeName;
+            String setMethodName = ATTRIBUTE_PREFIX_SET + attributeName;
             setMethodDeclaration = classOrInterfaceDeclaration.addMethod(setMethodName, Modifier.Keyword.PUBLIC);
             setMethodDeclaration.setStatic(idlAttribute.isStatic);
             Parameter parameter = setMethodDeclaration.addAndGetParameter(type, attributeName);
@@ -122,7 +122,7 @@ public class IDLAttributeParser {
             JParserHelper.addMissingImportType(jParser, unit, paramType);
 
             if(idlParser.generateClass) {
-                setupAttributeMethod(idlParser, jParser, idlAttribute, true, classOrInterfaceDeclaration, setMethodDeclaration, ATTRIBUTE_PREFIX_SET + setMethodName);
+                setupAttributeMethod(idlParser, jParser, idlAttribute, true, classOrInterfaceDeclaration, setMethodDeclaration, setMethodName);
             }
         }
     }
