@@ -22,6 +22,9 @@ jParser has two part.
 To improve even more the long hours of porting each method manually, jParser also has Emscripten WebIDL support. You create a webidl file, and it will generate binding code for JNI and teaVM. 
 It's not 100%, but it will reduce the amount of work binding big libraries. You can check the example:lib module or gdx-imgui for a complete example.
 
+It will create the exact same method as the webidl file. If C++ is Pascal case like in ImGui, then Java methods will also be Pascal case. <br>
+C/C++ attributes are converted to methods, it starts with 'set_' or 'get_'.
+
 Libraries usisng jParser: <br>
 - [gdx-imgui](https://github.com/xpenatan/gdx-imgui)
 - [gdx-lua](https://github.com/xpenatan/gdx-lua)
