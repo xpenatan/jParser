@@ -117,29 +117,40 @@ public abstract class DefaultBuildTarget extends BuildTarget {
                 String path = file.path();
 
                 Future<?> submit = executorService.submit(() -> {
-                    ArrayList<String> threadCommands = new ArrayList<>();
-                    threadCommands.addAll(cppCompiler);
-                    threadCommands.addAll(cppFlags);
-                    threadCommands.addAll(headerDirs);
-                    threadCommands.add(path);
-                    boolean flag = JProcess.startProcess(config.buildDir.file(), threadCommands);
-                    if(!flag) {
-                        throw new RuntimeException("Compile Error");
+                    if(multiCoreCompile) {
+                        ArrayList<String> threadCommands = new ArrayList<>();
+                        threadCommands.addAll(cppCompiler);
+                        threadCommands.addAll(cppFlags);
+                        threadCommands.addAll(headerDirs);
+                        threadCommands.add(path);
+                        boolean flag = JProcess.startProcess(config.buildDir.file(), threadCommands);
+                        if(!flag) {
+                            multiCoreCompile = false;
+                            throw new RuntimeException("Compile Error");
+                        }
                     }
                 });
                 futures.add(submit);
             }
 
             for (Future<?> future : futures) {
-                try {
-                    future.get();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    executorService.shutdown();
-                    return false;
+                if(multiCoreCompile) {
+                    try {
+                        future.get();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        multiCoreCompile = false;
+                        break;
+                    }
+                }
+                else {
+                    break;
                 }
             }
             executorService.shutdown();
+            if(!multiCoreCompile) {
+                return false;
+            }
         }
         else {
             compilerCommands.clear();
