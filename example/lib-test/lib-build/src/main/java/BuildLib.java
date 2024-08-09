@@ -17,7 +17,7 @@ public class BuildLib {
         String libName = "test";
         String modulePrefix = "lib";
         String basePackage = "lib.test";
-        String sourceDir = "/src/main/cpp/source/test/src";
+        String sourceDir = "/src/main/cpp/source/testLib/src";
         BuildToolOptions op = new BuildToolOptions(libName, basePackage, modulePrefix, sourceDir, args);
         BuilderTool.build(op, new BuildToolListener() {
             @Override
