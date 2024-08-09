@@ -36,3 +36,5 @@ out/
 **/lib/lib-teavm/src/main/java/emu/**
 **/lib/lib-core/src/main/java/**
 **/app/android/libs/
+**/lib-test/lib-teavm/src/main/java/emu/**
+**/lib-test/lib-core/src/main/java/**

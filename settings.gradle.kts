@@ -15,6 +15,13 @@ include(":example:lib:lib-desktop")
 include(":example:lib:lib-teavm")
 include(":example:lib:lib-android")
 
+include(":example:lib-test:lib-build")
+include(":example:lib-test:lib-base")
+include(":example:lib-test:lib-core")
+include(":example:lib-test:lib-desktop")
+include(":example:lib-test:lib-teavm")
+include(":example:lib-test:lib-android")
+
 //include(":example:lib-ext:ext-base")
 //include(":example:lib-ext:ext-build")
 //include(":example:lib-ext:ext-core")
