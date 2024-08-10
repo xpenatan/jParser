@@ -38,3 +38,4 @@ out/
 **/app/android/libs/
 **/lib-test/lib-teavm/src/main/java/emu/**
 **/lib-test/lib-core/src/main/java/**
+**/app-lib/android/libs/
