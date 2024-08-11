@@ -1,4 +1,4 @@
-package lib.emscripten;
+package lib.test;
 
 import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
 

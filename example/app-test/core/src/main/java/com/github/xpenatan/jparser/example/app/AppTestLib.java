@@ -2,7 +2,6 @@ package com.github.xpenatan.jparser.example.app;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.utils.ScreenUtils;
-import lib.emscripten.TestLibLoader;
 import lib.test.ArrayArgumentTest;
 import lib.test.ArrayClass;
 import lib.test.Child1;
@@ -17,6 +16,7 @@ import lib.test.RefUser;
 import lib.test.StoreArray;
 import lib.test.StringUser;
 import lib.test.StructInArray;
+import lib.test.TestLibLoader;
 import lib.test.TypeTestClass;
 import lib.test.VoidPointerUser;
 import lib.test.idl.helper.IDLByteArray;

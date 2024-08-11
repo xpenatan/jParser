@@ -134,7 +134,7 @@ public class IDLAttributeParser {
             //  When it's a get attribute method we pass a temp c++ object to copy to the returned temp c++ object.
         }
         isValue = false;
-        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, isValue, classDeclaration, methodDeclaration, methodName, "");
+        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, isValue, classDeclaration, methodDeclaration, methodName, "", null);
         if(nativeMethod != null) {
             idlParser.onIDLAttributeGenerated(jParser, idlAttribute, isSet, classDeclaration, methodDeclaration, nativeMethod);
         }
