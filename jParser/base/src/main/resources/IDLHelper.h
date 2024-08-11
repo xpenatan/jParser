@@ -5,6 +5,7 @@
 #include <stdint.h>     // intptr_t
 
 typedef std::string IDLString;
+typedef std::string_view IDLStringView;
 
 class IDLBoolArray {
     private:
