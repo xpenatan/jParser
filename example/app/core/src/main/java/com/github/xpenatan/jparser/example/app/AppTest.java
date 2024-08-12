@@ -32,7 +32,7 @@ public class AppTest extends ApplicationAdapter {
         ExampleLibLoader.init(new Runnable() {
             @Override
             public void run() {
-                initLib();
+                init = true;
             }
         });
 
@@ -40,12 +40,23 @@ public class AppTest extends ApplicationAdapter {
         font = new BitmapFont();
     }
 
-    private void initLib() {
+
+    @Override
+    public void render() {
+        ScreenUtils.clear(0.4f, 0.4f, 0.4f, 1);
+
         if(init) {
+            init = false;
+            initLib();
             return;
         }
-        init = true;
 
+        batch.begin();
+        font.draw(batch, "addIntValue " + a1 + " + " + b1 + " = " + ret1, 100, 100);
+        batch.end();
+    }
+
+    private void initLib() {
         NormalClass normalClass = new NormalClass();
 
         IDLString string = new IDLString();
@@ -109,6 +120,7 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("operatorClass1 copy: " + operatorClass1.get_value());
 
         testPrimitive();
+        testArray(normalClass);
 
 //        CustomLib.print();
     }
@@ -148,16 +160,39 @@ public class AppTest extends ApplicationAdapter {
         System.out.println("nullPointerReturnClass: " + nullPointerReturnClass);
     }
 
-    @Override
-    public void render() {
-        ScreenUtils.clear(0.4f, 0.4f, 0.4f, 1);
+    private void testArray(NormalClass normalClass) {
+        System.out.println("set intArray");
+        normalClass.set_intArray(0, 1);
+        normalClass.set_intArray(1, 2);
+        normalClass.set_intArray(2, 3);
+        System.out.println("get intArray");
+        int intArray0 = normalClass.get_intArray(0);
+        int intArray1 = normalClass.get_intArray(1);
+        int intArray2 = normalClass.get_intArray(2);
+        System.out.println("intArray0: " + intArray0);
+        System.out.println("intArray1: " + intArray1);
+        System.out.println("intArray2: " + intArray2);
 
-        if(!init) {
-            return;
-        }
+        //Object value is updated from 10 to 11 even after getting the pointer
+        ReturnClass pointerClass1 = new ReturnClass();
+        pointerClass1.set_value(10);
+        normalClass.set_pointerArray(0, pointerClass1);
+        ReturnClass pointerObject = normalClass.get_pointerArray(0);
+        float valuePointer = pointerObject.get_value();
+        System.out.println("pointerClass1: " + valuePointer);
+        pointerClass1.set_value(11);
+        float valuePointerUpdated = pointerObject.get_value();
+        System.out.println("pointerClass1 updated: " + valuePointerUpdated);
 
-        batch.begin();
-        font.draw(batch, "addIntValue " + a1 + " + " + b1 + " = " + ret1, 100, 100);
-        batch.end();
+        //Object value is not updated from 10 to 11 because a object copy is made
+        ReturnClass valueClass1 = new ReturnClass();
+        valueClass1.set_value(10);
+        normalClass.set_valueArray(0, valueClass1);
+        ReturnClass valueObject = normalClass.get_valueArray(0);
+        valueClass1.set_value(11);
+        float valueObj = valueObject.get_value();
+        System.out.println("valueClass1: " + valueObj);
+        float valueObjUpdated = valueObject.get_value();
+        System.out.println("valueClass1 updated: " + valueObjUpdated);
     }
 }

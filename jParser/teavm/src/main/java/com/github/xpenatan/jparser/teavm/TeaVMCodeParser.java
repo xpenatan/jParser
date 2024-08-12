@@ -108,11 +108,23 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "return jsObj.get_[ATTRIBUTE]();";
 
+    protected static final String ATTRIBUTE_ARRAY_GET_PRIMITIVE_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "return jsObj.get_[ATTRIBUTE](index);";
+
     protected static final String ATTRIBUTE_GET_PRIMITIVE_STATIC_TEMPLATE =
             "return [MODULE].[TYPE].prototype.get_[ATTRIBUTE]()";
 
+    protected static final String ATTRIBUTE_ARRAY_GET_PRIMITIVE_STATIC_TEMPLATE =
+            "return [MODULE].[TYPE].prototype.get_[ATTRIBUTE](index)";
+
     protected static final String ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE =
             "var returnedJSObj = [MODULE].[TYPE].prototype.get_[ATTRIBUTE]();\n" +
+            "if(!returnedJSObj.hasOwnProperty('ptr')) return 0; \n" +
+            "return [MODULE].getPointer(returnedJSObj);";
+
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_STATIC_TEMPLATE =
+            "var returnedJSObj = [MODULE].[TYPE].prototype.get_[ATTRIBUTE](index);\n" +
             "if(!returnedJSObj.hasOwnProperty('ptr')) return 0; \n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
@@ -122,30 +134,61 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             "if(!returnedJSObj.hasOwnProperty('ptr')) return 0; \n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "var returnedJSObj = jsObj.get_[ATTRIBUTE](index);\n" +
+            "if(!returnedJSObj.hasOwnProperty('ptr')) return 0; \n" +
+            "return [MODULE].getPointer(returnedJSObj);";
+
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]_addr);";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "jsObj.set_[ATTRIBUTE](index, [ATTRIBUTE]_addr);";
+
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE =
             "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]_addr);\n";
+
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_STATIC_TEMPLATE =
+            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE](index, [ATTRIBUTE]_addr);\n";
 
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]_addr);";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "jsObj.set_[ATTRIBUTE](index, [ATTRIBUTE]_addr);";
+
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE =
             "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]_addr);\n";
+
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_STATIC_TEMPLATE =
+            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE](index, [ATTRIBUTE]_addr);\n";
 
     protected static final String ATTRIBUTE_SET_PRIMITIVE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_PRIMITIVE_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "jsObj.set_[ATTRIBUTE](index, [ATTRIBUTE]);";
+
     protected static final String ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE =
             "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]);\n";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_PRIMITIVE_STATIC_TEMPLATE =
+            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE](index, [ATTRIBUTE]);\n";
+
     protected static final String ATTRIBUTE_GET_OBJECT_VALUE_STATIC_TEMPLATE = ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE;
 
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_STATIC_TEMPLATE = ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_STATIC_TEMPLATE;
+
     protected static final String ATTRIBUTE_GET_OBJECT_VALUE_TEMPLATE = ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE;
+
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_TEMPLATE = ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_TEMPLATE;
 
     protected static final String ENUM_GET_INT_TEMPLATE =
             "\nreturn [MODULE].[ENUM];\n";
@@ -398,11 +441,22 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             case SET_OBJECT_VALUE:
                 content = ATTRIBUTE_SET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case SET_ARRAY_OBJECT_VALUE:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case SET_OBJECT_VALUE_STATIC:
                 content = ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case SET_ARRAY_OBJECT_VALUE_STATIC:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case GET_OBJECT_VALUE:
                 content = ATTRIBUTE_GET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_TYPE, returnTypeName)
+                        .replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_ARRAY_OBJECT_VALUE:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
                         .replace(TEMPLATE_TAG_TYPE, returnTypeName)
                         .replace(TEMPLATE_TAG_MODULE, module);
                 break;
@@ -411,29 +465,58 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                         .replace(TEMPLATE_TAG_TYPE, returnTypeName)
                         .replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case GET_ARRAY_OBJECT_VALUE_STATIC:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_TYPE, returnTypeName)
+                        .replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case SET_OBJECT_POINTER:
                 content = ATTRIBUTE_SET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case SET_ARRAY_OBJECT_POINTER:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
             case SET_OBJECT_POINTER_STATIC:
                 content = ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case SET_ARRAY_OBJECT_POINTER_STATIC:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case GET_OBJECT_POINTER:
                 content = ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_ARRAY_OBJECT_POINTER:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
             case GET_OBJECT_POINTER_STATIC:
                 content = ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case GET_ARRAY_OBJECT_POINTER_STATIC:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case SET_PRIMITIVE:
                 content = ATTRIBUTE_SET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case SET_ARRAY_PRIMITIVE:
+                content = ATTRIBUTE_ARRAY_SET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
             case SET_PRIMITIVE_STATIC:
                 content = ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case SET_ARRAY_PRIMITIVE_STATIC:
+                content = ATTRIBUTE_ARRAY_SET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case GET_PRIMITIVE:
                 content = ATTRIBUTE_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case GET_ARRAY_PRIMITIVE:
+                content = ATTRIBUTE_ARRAY_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case GET_PRIMITIVE_STATIC:
                 content = ATTRIBUTE_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_ARRAY_PRIMITIVE_STATIC:
+                content = ATTRIBUTE_ARRAY_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
         }
 

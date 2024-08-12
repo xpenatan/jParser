@@ -51,7 +51,6 @@ public class IDLAttribute {
         if(type.contains("[]")) {
             isArray = true;
             type = type.replace("[]", "").trim();
-            type = type+"[]";
         }
 
         if(type.endsWith("long") || type.endsWith("long[]")) {

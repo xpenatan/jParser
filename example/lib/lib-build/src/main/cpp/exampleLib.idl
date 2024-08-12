@@ -4,6 +4,9 @@ interface ParentClass {
 };
 
 interface NormalClass {
+    [BoundsChecked] attribute long[] intArray;
+    [Value] attribute ReturnClass[] valueArray;
+    attribute ReturnClass[] pointerArray;
     attribute long hiddenInt;
     [Value] attribute ReturnClass valueReturnClass;
     attribute ReturnClass pointerReturnClass;

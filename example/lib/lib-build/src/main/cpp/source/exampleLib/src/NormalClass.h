@@ -32,6 +32,10 @@ private:
     ParamData data;
 
 public:
+    int intArray[3];
+    ReturnClass valueArray[3];
+    ReturnClass* pointerArray[3];
+
     enum EnumWithinClass {
         e_val = 34
     };

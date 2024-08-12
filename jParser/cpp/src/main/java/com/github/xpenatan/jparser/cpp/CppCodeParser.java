@@ -52,45 +52,88 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     protected static final String ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE =
             "\n[TYPE]::[ATTRIBUTE] = [ATTRIBUTE];\n";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_PRIMITIVE_STATIC_TEMPLATE =
+            "\n[TYPE]::[ATTRIBUTE][index] = [ATTRIBUTE];\n";
+
     protected static final String ATTRIBUTE_SET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = [CAST][ATTRIBUTE];\n";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_PRIMITIVE_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "nativeObject->[ATTRIBUTE][index] = [CAST][ATTRIBUTE];\n";
+
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE =
             "\n[TYPE]::[ATTRIBUTE] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
+
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_STATIC_TEMPLATE =
+            "\n[TYPE]::[ATTRIBUTE][index] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
 
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "nativeObject->[ATTRIBUTE][index] = ([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr;\n";
+
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE =
             "\n[TYPE]::[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
+
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_STATIC_TEMPLATE =
+            "\n[TYPE]::[ATTRIBUTE][index] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
 
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "nativeObject->[ATTRIBUTE] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "nativeObject->[ATTRIBUTE][index] = *(([ATTRIBUTE_TYPE]*)[ATTRIBUTE]_addr);\n";
+
     protected static final String ATTRIBUTE_GET_OBJECT_VALUE_STATIC_TEMPLATE =
             "\nreturn (jlong)&[TYPE]::[ATTRIBUTE];\n";
+
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_STATIC_TEMPLATE =
+            "\nreturn (jlong)&[TYPE]::[ATTRIBUTE][index];\n";
 
     protected static final String ATTRIBUTE_GET_OBJECT_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return (jlong)&nativeObject->[ATTRIBUTE];\n";
 
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "return (jlong)&nativeObject->[ATTRIBUTE][index];\n";
+
     protected static final String ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE =
             "\nreturn (jlong)[TYPE]::[ATTRIBUTE];\n";
+
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_STATIC_TEMPLATE =
+            "\nreturn (jlong)([TYPE]::[ATTRIBUTE][index]);\n";
 
     protected static final String ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "[CONST][ATTRIBUTE_TYPE]* attr = nativeObject->[ATTRIBUTE];\n" +
             "return (jlong)attr;\n";
 
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "[CONST][ATTRIBUTE_TYPE]* attr = (nativeObject->[ATTRIBUTE][index]);\n" +
+            "return (jlong)attr;\n";
+
     protected static final String ATTRIBUTE_GET_PRIMITIVE_STATIC_TEMPLATE =
             "\nreturn [TYPE]::[ATTRIBUTE];\n";
+
+    protected static final String ATTRIBUTE_ARRAY_GET_PRIMITIVE_STATIC_TEMPLATE =
+            "\nreturn [TYPE]::[ATTRIBUTE][index];\n";
 
     protected static final String ATTRIBUTE_GET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return [CAST]nativeObject->[ATTRIBUTE];\n";
+
+    protected static final String ATTRIBUTE_ARRAY_GET_PRIMITIVE_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "return [CAST]nativeObject->[ATTRIBUTE][index];\n";
 
     protected static final String METHOD_GET_OBJ_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
@@ -230,8 +273,18 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                         .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
                         .replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
+            case SET_ARRAY_OBJECT_VALUE:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
             case SET_OBJECT_VALUE_STATIC:
                 content = ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case SET_ARRAY_OBJECT_VALUE_STATIC:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
                         .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
                         .replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
@@ -240,8 +293,18 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                         .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
                         .replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
+            case GET_ARRAY_OBJECT_VALUE:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
             case GET_OBJECT_VALUE_STATIC:
                 content = ATTRIBUTE_GET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case GET_ARRAY_OBJECT_VALUE_STATIC:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
                         .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
                         .replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
@@ -250,16 +313,32 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                         .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
                         .replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
+            case SET_ARRAY_OBJECT_POINTER:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
             case SET_OBJECT_POINTER_STATIC:
                 content = ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
+                        .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case SET_ARRAY_OBJECT_POINTER_STATIC:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
                         .replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType)
                         .replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case GET_OBJECT_POINTER:
                 content = ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType).replace(TEMPLATE_TAG_CONST, constTag);
                 break;
+            case GET_ARRAY_OBJECT_POINTER:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_ATTRIBUTE_TYPE, attributeType).replace(TEMPLATE_TAG_CONST, constTag);
+                break;
             case GET_OBJECT_POINTER_STATIC:
                 content = ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case GET_ARRAY_OBJECT_POINTER_STATIC:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case SET_PRIMITIVE:
                 content = ATTRIBUTE_SET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, attributeReturnCast);
@@ -267,11 +346,23 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             case SET_PRIMITIVE_STATIC:
                 content = ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
+            case SET_ARRAY_PRIMITIVE_STATIC:
+                content = ATTRIBUTE_ARRAY_SET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case SET_ARRAY_PRIMITIVE:
+                content = ATTRIBUTE_ARRAY_SET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, attributeReturnCast);
+                break;
             case GET_PRIMITIVE:
                 content = ATTRIBUTE_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, getPrimitiveCast);
                 break;
+            case GET_ARRAY_PRIMITIVE:
+                content = ATTRIBUTE_ARRAY_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, getPrimitiveCast);
+                break;
             case GET_PRIMITIVE_STATIC:
                 content = ATTRIBUTE_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
+                break;
+            case GET_ARRAY_PRIMITIVE_STATIC:
+                content = ATTRIBUTE_ARRAY_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
         }
 

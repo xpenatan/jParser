@@ -97,6 +97,11 @@ public class IDLAttributeParser {
             String getMethodName = ATTRIBUTE_PREFIX_GET + attributeName;
             getMethodDeclaration = classOrInterfaceDeclaration.addMethod(getMethodName, Modifier.Keyword.PUBLIC);
             getMethodDeclaration.setStatic(idlAttribute.isStatic);
+
+            if(idlAttribute.isArray) {
+                getMethodDeclaration.addAndGetParameter("int", "index");
+            }
+
             getMethodDeclaration.setType(type);
             JParserHelper.addMissingImportType(jParser, unit, type);
             IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, type, getMethodDeclaration);
@@ -117,6 +122,9 @@ public class IDLAttributeParser {
             String setMethodName = ATTRIBUTE_PREFIX_SET + attributeName;
             setMethodDeclaration = classOrInterfaceDeclaration.addMethod(setMethodName, Modifier.Keyword.PUBLIC);
             setMethodDeclaration.setStatic(idlAttribute.isStatic);
+            if(idlAttribute.isArray) {
+                setMethodDeclaration.addAndGetParameter("int", "index");
+            }
             Parameter parameter = setMethodDeclaration.addAndGetParameter(type, attributeName);
             Type paramType = parameter.getType();
             JParserHelper.addMissingImportType(jParser, unit, paramType);
