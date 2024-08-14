@@ -23,6 +23,10 @@ import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.resolution.UnsolvedSymbolException;
+import com.github.javaparser.resolution.types.ResolvedArrayType;
+import com.github.javaparser.resolution.types.ResolvedReferenceType;
+import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
@@ -679,6 +683,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         for(int i = 0; i < constructorDeclarations.size(); i++) {
             ConstructorDeclaration constructorDeclaration = constructorDeclarations.get(i);
             List<MethodCallExpr> methodCallerExprList = constructorDeclaration.findAll(MethodCallExpr.class);
+            NodeList<Parameter> constructorParameters = constructorDeclaration.getParameters();
             updateLongToInt(classDeclaration, methodCallerExprList);
         }
 
@@ -739,10 +744,45 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         }
     }
 
-    public MethodDeclaration getNativeMethod(ClassOrInterfaceDeclaration classDeclaration, MethodCallExpr methodCallExpr) {
+    private MethodDeclaration getNativeMethod(ClassOrInterfaceDeclaration classDeclaration, MethodCallExpr methodCallExpr) {
         String nativeMethodName = methodCallExpr.getNameAsString();
         NodeList<Expression> arguments = methodCallExpr.getArguments();
-        List<MethodDeclaration> methodsByName = getNativeMethodsByName(classDeclaration, nativeMethodName, arguments.size(), null);
+        ArrayList<String> paramTypes = new ArrayList<>();
+        if(arguments.size() > 0) {
+            for(int i = 0; i < arguments.size(); i++) {
+                Expression expression = arguments.get(i);
+                ResolvedType resolvedType = null;
+                try {
+                    resolvedType = expression.calculateResolvedType();
+                }
+                catch(Throwable t) {
+
+                    if(t instanceof UnsolvedSymbolException) {
+                        UnsolvedSymbolException unE = (UnsolvedSymbolException)t;
+                        String name = unE.getName();
+                        paramTypes.add(name);
+                    }
+                    continue;
+                }
+                String type = null;
+                if(resolvedType.isPrimitive()) {
+                    type = resolvedType.asPrimitive().describe();
+                }
+                else if(resolvedType.isReferenceType()) {
+                    ResolvedReferenceType referenceType1 = resolvedType.asReferenceType();
+                    String[] split = referenceType1.describe().split("\\.");
+                    type = split[split.length-1];
+                }
+                else if(resolvedType.isArray()) {
+                    ResolvedArrayType arrayType = resolvedType.asArrayType();
+                    type = arrayType.describe();
+                }
+                paramTypes.add(type);
+            }
+        }
+        String[] paramT = new String[paramTypes.size()];
+        paramTypes.toArray(paramT);
+        List<MethodDeclaration> methodsByName = getNativeMethodsByName(classDeclaration, nativeMethodName, arguments.size(), paramT);
         int size = methodsByName.size();
         if(size == 0) {
             return null;

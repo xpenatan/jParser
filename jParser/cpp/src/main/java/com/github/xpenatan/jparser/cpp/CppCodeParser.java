@@ -541,6 +541,21 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         else if(isAny) {
             paramName = "( void* )" + paramName;
         }
+        else {
+            // basic param cast jni java primitive to c++ primitive.
+            if(classType.equals("int")) {
+                paramName = "(int)" + paramName;
+            }
+            else if(classType.equals("float")) {
+                paramName = "(float)" + paramName;
+            }
+            else if(classType.equals("double")) {
+                paramName = "(double)" + paramName;
+            }
+            else if(classType.equals("boolean")) {
+                paramName = "(bool)" + paramName;
+            }
+        }
 
         IDLEnum anEnum = idlFile.getEnum(classType);
         if(anEnum != null) {

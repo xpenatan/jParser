@@ -1,7 +1,9 @@
 package com.github.xpenatan.jparser.idl;
 
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import java.io.ByteArrayInputStream;
 
 public class IDLHelper {
     public static String removeMultipleSpaces(String in) {

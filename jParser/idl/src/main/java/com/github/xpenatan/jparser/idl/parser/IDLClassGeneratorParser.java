@@ -184,8 +184,8 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             IDLMethodParser.generateFieldName("T_02", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
             IDLMethodParser.generateFieldName("T_03", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
         }
-
-        return compilationUnit;
+        // Hack to inject internal dependencies
+        return StaticJavaParser.parse(compilationUnit.toString());
     }
 
     @Override

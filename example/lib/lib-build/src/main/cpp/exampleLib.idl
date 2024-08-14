@@ -1,3 +1,41 @@
+interface TestObjectClass {
+    void TestObjectClass();
+    attribute long intValue;
+    attribute float floatValue;
+};
+
+interface TestAttributeArrayClass {
+    void TestAttributeArrayClass();
+    [BoundsChecked] attribute long[] intArray;
+    attribute float[] floatArray;
+    attribute byte[] byteArray;
+    attribute boolean[] boolArray;
+    [Value] attribute TestObjectClass[] valueObjectArray;
+    attribute TestObjectClass[] pointerObjectArray;
+};
+
+interface TestAttributeClass {
+    void TestAttributeClass();
+    readonly attribute long readOnlyIntValue;
+    attribute long intValue;
+    attribute float floatValue;
+    attribute double doubleValue;
+    attribute boolean boolValue;
+    attribute any voidPointer;
+    [Value] attribute TestObjectClass valueObject;
+    attribute TestObjectClass pointerObject;
+    attribute TestObjectClass nullPointerObject;
+};
+
+interface TestConstructorClass {
+    void TestConstructorClass(long intParam);
+    void TestConstructorClass(float floatParam, boolean boolParam);
+    void TestConstructorClass(long intParam, long intParam2, float floatParam, float floatParam2, optional boolean boolParam);
+    void TestConstructorClass(long intParam, long[] intArray, float[] floatArray);
+};
+
+
+
 interface ParentClass {
     float addFloatValue(float a, float b);
     boolean invertBoolean(boolean value);

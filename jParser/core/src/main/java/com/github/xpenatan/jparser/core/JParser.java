@@ -1,11 +1,16 @@
 package com.github.xpenatan.jparser.core;
 
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
+import com.github.javaparser.resolution.TypeSolver;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.github.javaparser.utils.PositionUtils;
 import com.github.xpenatan.jparser.core.codeparser.CodeParser;
 import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
@@ -87,6 +92,13 @@ public class JParser {
         }
         System.out.println("***** GENERATING CODE *****");
         JParser jParser = new JParser(sourceD, genD);
+
+        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+        combinedTypeSolver.add(new ReflectionTypeSolver());
+        // Configure JavaParser to use type resolution
+        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
+        StaticJavaParser.getParserConfiguration().setSymbolResolver(symbolSolver);
+
         processDirectory(jParser, fileSourceDir, fileGenDir, excludes, fileSourceDir);
         wrapper.onParseStart(jParser);
         parseJavaFiles(jParser, wrapper);

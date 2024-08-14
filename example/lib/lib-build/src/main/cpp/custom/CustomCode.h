@@ -6,6 +6,7 @@
 #include "DefaultInterface.h"
 #include "subpackage/ParamData.h"
 #include "DefaultParamsClass.h"
+#include "TestLib.h"
 
 typedef NormalClass::EnumWithinClass EnumWithinClass;
 typedef NormalClass::EnumClassWithinClass EnumClassWithinClass;
