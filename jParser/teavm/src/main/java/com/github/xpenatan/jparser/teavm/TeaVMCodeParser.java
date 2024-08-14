@@ -751,17 +751,19 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         if(arguments.size() > 0) {
             for(int i = 0; i < arguments.size(); i++) {
                 Expression expression = arguments.get(i);
+                if(expression.isMethodCallExpr() || expression.isEnclosedExpr()) {
+                    paramTypes.add("long");
+                    continue;
+                }
+                else if(expression.isLambdaExpr()) {
+                    continue;
+                }
                 ResolvedType resolvedType = null;
                 try {
                     resolvedType = expression.calculateResolvedType();
                 }
                 catch(Throwable t) {
-
-                    if(t instanceof UnsolvedSymbolException) {
-                        UnsolvedSymbolException unE = (UnsolvedSymbolException)t;
-                        String name = unE.getName();
-                        paramTypes.add(name);
-                    }
+                    t.printStackTrace();
                     continue;
                 }
                 String type = null;
