@@ -1,8 +1,10 @@
-package com.github.xpenatan.jparser.example.lib;
+package com.github.xpenatan.jparser.example.testlib;
 
 import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
 
-public class ExampleLibLoader {
+public class TestLibLoader {
+
+    public static final String LIB_NAME = "TestLib";
 
     /*[-JNI;-NATIVE]
         #include "CustomCode.h"
@@ -20,13 +22,13 @@ public class ExampleLibLoader {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
         OnInitFunction onInitFunction = () -> onSuccess.run();
         setOnLoadInit(onInitFunction);
-        libraryLoader.load("exampleLib.wasm", isSuccess -> {});
+        libraryLoader.load(LIB_NAME + ".wasm", isSuccess -> {});
     }
     */
 
     public static void init(Runnable onSuccess) {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
-        libraryLoader.load("exampleLib", isSuccess -> {
+        libraryLoader.load(LIB_NAME, isSuccess -> {
             if(isSuccess) {
                 onSuccess.run();
             }
@@ -34,7 +36,7 @@ public class ExampleLibLoader {
     }
 
     /*[-TEAVM;-REPLACE]
-        @org.teavm.jso.JSBody(params = { "onInitFunction" }, script = "window.exampleLibOnInit = onInitFunction;")
+        @org.teavm.jso.JSBody(params = { "onInitFunction" }, script = "window.TestLibOnInit = onInitFunction;")
         private static native void setOnLoadInit(OnInitFunction onInitFunction);
     */
     /*[-JNI;-REMOVE] */

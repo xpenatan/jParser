@@ -1,9 +1,6 @@
 package com.github.xpenatan.jparser.example;
 
-import com.github.xpenatan.jparser.example.lib.NormalClass;
-import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import com.github.xpenatan.jparser.example.testlib.NormalClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

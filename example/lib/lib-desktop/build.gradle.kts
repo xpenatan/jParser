@@ -3,10 +3,10 @@ plugins {
 }
 
 val libDir = "${projectDir}/../lib-build/build/c++/libs"
-val windowsFile = "$libDir/windows/exampleLib64.dll"
-val linuxFile = "$libDir/linux/libexampleLib64.so"
-val macFile = "$libDir/mac/libexampleLib64.dylib"
-val macArmFile = "$libDir/mac/arm/libexampleLibarm64.dylib"
+val windowsFile = "$libDir/windows/TestLib64.dll"
+val linuxFile = "$libDir/linux/libTestLib64.so"
+val macFile = "$libDir/mac/libTestLib64.dylib"
+val macArmFile = "$libDir/mac/arm/libTestLibarm64.dylib"
 
 tasks.jar {
     from(windowsFile)
