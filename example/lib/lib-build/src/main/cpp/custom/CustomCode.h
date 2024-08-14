@@ -11,3 +11,8 @@
 typedef NormalClass::EnumWithinClass EnumWithinClass;
 typedef NormalClass::EnumClassWithinClass EnumClassWithinClass;
 typedef EnumNamespace::EnumInNamespace EnumInNamespace;
+
+
+typedef TestEnumClass::TestEnumWithinClass TestEnumWithinClass;
+typedef TestEnumClass::TestEnumClassWithinClass TestEnumClassWithinClass;
+typedef TestEnumNamespace::TestEnumInNamespace TestEnumInNamespace;

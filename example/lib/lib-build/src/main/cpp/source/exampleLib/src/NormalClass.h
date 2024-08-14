@@ -9,7 +9,7 @@
 #include <string>
 
 enum EnumLib : int {
-    DEFAULT = 10,
+    DEFAULT = 7,
     FIRST,
     SECOND,
 };

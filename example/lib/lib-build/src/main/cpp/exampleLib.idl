@@ -25,16 +25,59 @@ interface TestAttributeClass {
     [Value] attribute TestObjectClass valueObject;
     attribute TestObjectClass pointerObject;
     attribute TestObjectClass nullPointerObject;
+    [Value] attribute IDLString strParam;
 };
 
 interface TestConstructorClass {
+    [Value] attribute IDLString strParam;
+
     void TestConstructorClass(long intParam);
-    void TestConstructorClass(float floatParam, boolean boolParam);
+    void TestConstructorClass(float floatParam, [Const] DOMString strParam);
     void TestConstructorClass(long intParam, long intParam2, float floatParam, float floatParam2, optional boolean boolParam);
     void TestConstructorClass(long intParam, long[] intArray, float[] floatArray);
 };
 
+interface TestMethodClass {
+    void TestMethodClass();
+    void setMethod01(long intParam);
+    void setMethod02(float floatParam, boolean boolParam);
+    void setMethod03(long intParam, long intParam2, float floatParam, float floatParam2, optional boolean boolParam);
+    void setMethod04(long intParam, long[] intArray, float[] floatArray);
+    void setMethod05([Const] DOMString strParam);
+    void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
 
+    long getIntParam();
+    long getIntParam2();
+    float getFloatParam();
+    float getFloatParam2();
+    float getBoolParam();
+    [Const, Value] IDLStringView getStrParam();
+    [Const] TestObjectClass getPointerObject01();
+    TestObjectClass getPointerObject02();
+    [Const, Ref] TestObjectClass getRefObject01();
+    [Ref] TestObjectClass getRefObject02();
+    [Value] TestObjectClass getValueObject();
+};
+
+enum TestEnumWithinClass {
+    "TestEnumClass::e_val"
+};
+
+enum TestEnumClassWithinClass {
+    "TestEnumClassWithinClass::testEnum"
+};
+
+enum TestEnumInNamespace {
+    "TestEnumInNamespace::e_namespace_val"
+};
+
+enum TestEnumLib {
+    "TEST_DEFAULT",
+    "TEST_FIRST",
+    "TEST_SECOND"
+};
+
+// ##########################################
 
 interface ParentClass {
     float addFloatValue(float a, float b);
