@@ -4,14 +4,13 @@ interface TestObjectClass {
     attribute float floatValue01;
 };
 
-interface TestAttributeArrayClass {
-    void TestAttributeArrayClass();
-    [BoundsChecked] attribute long[] intArray;
-    attribute float[] floatArray;
-    attribute byte[] byteArray;
-    attribute boolean[] boolArray;
-    [Value] attribute TestObjectClass[] valueObjectArray;
-    attribute TestObjectClass[] pointerObjectArray;
+interface TestConstructorClass {
+    [Value] attribute IDLString strValue01;
+
+    void TestConstructorClass(long intValue01);
+    void TestConstructorClass(float floatValue, [Const] DOMString strValue01);
+    void TestConstructorClass(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
+    void TestConstructorClass(long intValue01, long[] intArray, float[] floatArray);
 };
 
 interface TestAttributeClass {
@@ -37,13 +36,14 @@ interface TestStaticAttributeClass {
     static attribute boolean staticBoolValue01;
 };
 
-interface TestConstructorClass {
-    [Value] attribute IDLString strValue01;
-
-    void TestConstructorClass(long intValue01);
-    void TestConstructorClass(float floatValue, [Const] DOMString strValue01);
-    void TestConstructorClass(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
-    void TestConstructorClass(long intValue01, long[] intArray, float[] floatArray);
+interface TestAttributeArrayClass {
+    void TestAttributeArrayClass();
+    [BoundsChecked] attribute long[] intArray;
+    attribute float[] floatArray;
+    attribute byte[] byteArray;
+    attribute boolean[] boolArray;
+    [Value] attribute TestObjectClass[] valueObjectArray;
+    attribute TestObjectClass[] pointerObjectArray;
 };
 
 interface TestMethodClass {
