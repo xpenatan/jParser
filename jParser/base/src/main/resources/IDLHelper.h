@@ -46,6 +46,7 @@ class IDLArray {
         void setValue(int index, T value) { data[index] = value; }
         int getSize() { return size; }
         intptr_t getPointer() { return (intptr_t)data; }
+        T* getData() { return data; }
 };
 
 typedef std::string IDLString;
