@@ -42,8 +42,6 @@ allprojects()  {
 configure(allprojects
         - project(":example:app:android")
         - project(":example:lib:lib-android")
-        - project(":example:lib-test:lib-android")
-        - project(":example:app-test:android")
 ) {
     apply {
         plugin("java")
