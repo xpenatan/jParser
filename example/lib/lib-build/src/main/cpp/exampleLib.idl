@@ -28,6 +28,15 @@ interface TestAttributeClass {
     [Value] attribute IDLString strParam;
 };
 
+[NoDelete]
+interface TestStaticAttributeClass {
+    static attribute long staticIntValue;
+    static readonly attribute long staticConstIntValue;
+    static attribute float staticFloatValue;
+    static attribute double staticDoubleValue;
+    static attribute boolean staticBoolValue;
+};
+
 interface TestConstructorClass {
     [Value] attribute IDLString strParam;
 
@@ -57,6 +66,28 @@ interface TestMethodClass {
     [Const, Ref] TestObjectClass getRefObject01();
     [Ref] TestObjectClass getRefObject02();
     [Value] TestObjectClass getValueObject();
+};
+
+[NoDelete]
+interface TestStaticMethodClass {
+    static void setMethod01(long intParam);
+    static void setMethod02(float floatParam, boolean boolParam);
+    static void setMethod03(long intParam, long intParam2, float floatParam, float floatParam2, optional boolean boolParam);
+    static void setMethod04(long intParam, long[] intArray, float[] floatArray);
+    static void setMethod05([Const] DOMString strParam);
+    static void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
+
+    static long getIntParam();
+    static long getIntParam2();
+    static float getFloatParam();
+    static float getFloatParam2();
+    static float getBoolParam();
+    [Const, Value] static IDLStringView getStrParam();
+    [Const] static TestObjectClass getPointerObject01();
+    static TestObjectClass getPointerObject02();
+    [Const, Ref] static TestObjectClass getRefObject01();
+    [Ref] static TestObjectClass getRefObject02();
+    [Value] static TestObjectClass getValueObject();
 };
 
 enum TestEnumWithinClass {

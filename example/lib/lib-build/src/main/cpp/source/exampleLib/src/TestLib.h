@@ -51,6 +51,17 @@ class TestAttributeClass {
         };
 };
 
+class TestStaticAttributeClass {
+    private:
+
+    public:
+        inline static int staticIntValue;
+        inline static const int staticConstIntValue = 20;
+        inline static float staticFloatValue;
+        inline static double staticDoubleValue;
+        inline static bool staticBoolValue;
+};
+
 class TestConstructorClass {
     private:
 
@@ -145,6 +156,63 @@ class TestMethodClass {
         const TestObjectClass& getRefObject01() { return refObject01; };
         TestObjectClass& getRefObject02() { return refObject02; };
         TestObjectClass getValueObject() { return refObject02; };
+};
+
+class TestStaticMethodClass {
+    private:
+        inline static int intParam;
+        inline static int intParam2;
+        inline static float floatParam;
+        inline static float floatParam2;
+        inline static bool boolParam;
+        inline static string strParam;
+        inline static const TestObjectClass* pointerObject01 = NULL;
+        inline static TestObjectClass* pointerObject02 = NULL;
+        inline static TestObjectClass refObject01;
+        inline static TestObjectClass refObject02;
+    public:
+        static void setMethod01(int intParam) {
+            TestStaticMethodClass::intParam = intParam;
+        };
+        static void setMethod02(float floatParam, bool boolParam) {
+            TestStaticMethodClass::floatParam = floatParam;
+            TestStaticMethodClass::boolParam = boolParam;
+        };
+        static void setMethod03(int intParam, int intParam2, float floatParam, float floatParam2, bool boolParam = true) {
+            TestStaticMethodClass::intParam = intParam;
+            TestStaticMethodClass::intParam2 = intParam2;
+            TestStaticMethodClass::floatParam = floatParam;
+            TestStaticMethodClass::floatParam2 = floatParam2;
+            TestStaticMethodClass::boolParam = boolParam;
+        };
+        static void setMethod04(int intParam, int* intArraySize2, float* floatArraySize2) {
+            TestStaticMethodClass::intParam = intParam;
+            intArraySize2[0] = 1;
+            intArraySize2[1] = 2;
+            floatArraySize2[0] = 3.1;
+            floatArraySize2[1] = 4.2;
+        };
+        static void setMethod05(const char* strParam) {
+            TestStaticMethodClass::strParam = strParam;
+        };
+        static void setMethod06(const TestObjectClass* pointerObject01, TestObjectClass* pointerObject02, const TestObjectClass& refObject01, TestObjectClass& refObject02) {
+            TestStaticMethodClass::pointerObject01 = pointerObject01;
+            TestStaticMethodClass::pointerObject02 = pointerObject02;
+            TestStaticMethodClass::refObject01 = refObject01;
+            TestStaticMethodClass::refObject02 = refObject02;
+        };
+
+        static int getIntParam() { return TestStaticMethodClass::intParam; };
+        static int getIntParam2() { return TestStaticMethodClass::intParam2; };
+        static float getFloatParam() { return TestStaticMethodClass::floatParam; };
+        static float getFloatParam2() { return TestStaticMethodClass::floatParam2; };
+        static bool getBoolParam() { return TestStaticMethodClass::boolParam; };
+        static const char* getStrParam() { return TestStaticMethodClass::strParam.c_str(); };
+        static const TestObjectClass* getPointerObject01() { return TestStaticMethodClass::pointerObject01; };
+        static TestObjectClass* getPointerObject02() { return TestStaticMethodClass::pointerObject02; };
+        static const TestObjectClass& getRefObject01() { return TestStaticMethodClass::refObject01; };
+        static TestObjectClass& getRefObject02() { return TestStaticMethodClass::refObject02; };
+        static TestObjectClass getValueObject() { return TestStaticMethodClass::refObject02; };
 };
 
 class TestEnumClass {
