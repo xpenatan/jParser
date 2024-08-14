@@ -190,7 +190,7 @@ public class IDLAttributeParser {
     private static MethodDeclaration containsSetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
         String[] paramTypes = new String[1];
         paramTypes[0] = idlAttribute.type;
-        String methodName = idlAttribute.name;
+        String methodName = ATTRIBUTE_PREFIX_SET + idlAttribute.name;
         List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
 
         if(methods.size() > 0) {
@@ -201,7 +201,7 @@ public class IDLAttributeParser {
 
     private static MethodDeclaration containsGetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
         String[] paramTypes = new String[0];
-        String methodName = idlAttribute.name;
+        String methodName = ATTRIBUTE_PREFIX_GET + idlAttribute.name;
         List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
 
         if(methods.size() > 0) {
