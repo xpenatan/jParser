@@ -1,7 +1,7 @@
 interface TestObjectClass {
     void TestObjectClass();
-    attribute long intValue;
-    attribute float floatValue;
+    attribute long intValue01;
+    attribute float floatValue01;
 };
 
 interface TestAttributeArrayClass {
@@ -16,51 +16,51 @@ interface TestAttributeArrayClass {
 
 interface TestAttributeClass {
     void TestAttributeClass();
-    readonly attribute long readOnlyIntValue;
-    attribute long intValue;
-    attribute float floatValue;
-    attribute double doubleValue;
-    attribute boolean boolValue;
-    attribute any voidPointer;
+    readonly attribute long readOnlyIntValue01;
+    attribute long intValue01;
+    attribute float floatValue01;
+    attribute double doubleValue01;
+    attribute boolean boolValue01;
+    [Value] attribute IDLString strValue01;
+    attribute any voidPointer01;
     [Value] attribute TestObjectClass valueObject;
     attribute TestObjectClass pointerObject;
     attribute TestObjectClass nullPointerObject;
-    [Value] attribute IDLString strParam;
 };
 
 [NoDelete]
 interface TestStaticAttributeClass {
-    static attribute long staticIntValue;
-    static readonly attribute long staticConstIntValue;
-    static attribute float staticFloatValue;
-    static attribute double staticDoubleValue;
-    static attribute boolean staticBoolValue;
+    static attribute long staticIntValue01;
+    static readonly attribute long staticConstIntValue01;
+    static attribute float staticFloatValue01;
+    static attribute double staticDoubleValue01;
+    static attribute boolean staticBoolValue01;
 };
 
 interface TestConstructorClass {
-    [Value] attribute IDLString strParam;
+    [Value] attribute IDLString strValue01;
 
-    void TestConstructorClass(long intParam);
-    void TestConstructorClass(float floatParam, [Const] DOMString strParam);
-    void TestConstructorClass(long intParam, long intParam2, float floatParam, float floatParam2, optional boolean boolParam);
-    void TestConstructorClass(long intParam, long[] intArray, float[] floatArray);
+    void TestConstructorClass(long intValue01);
+    void TestConstructorClass(float floatValue, [Const] DOMString strValue01);
+    void TestConstructorClass(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
+    void TestConstructorClass(long intValue01, long[] intArray, float[] floatArray);
 };
 
 interface TestMethodClass {
     void TestMethodClass();
-    void setMethod01(long intParam);
-    void setMethod02(float floatParam, boolean boolParam);
-    void setMethod03(long intParam, long intParam2, float floatParam, float floatParam2, optional boolean boolParam);
-    void setMethod04(long intParam, long[] intArray, float[] floatArray);
-    void setMethod05([Const] DOMString strParam);
+    void setMethod01(long intValue01);
+    void setMethod02(float floatValue01, boolean boolValue01);
+    void setMethod03(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
+    void setMethod04(long intValue01, long[] intArray, float[] floatArray);
+    void setMethod05([Const] DOMString strValue01);
     void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
 
-    long getIntParam();
-    long getIntParam2();
-    float getFloatParam();
-    float getFloatParam2();
-    float getBoolParam();
-    [Const, Value] IDLStringView getStrParam();
+    long getIntValue01();
+    long getIntValue02();
+    float getFloatValue01();
+    float getFloatValue02();
+    float getBoolValue01();
+    [Const, Value] IDLStringView getStrValue01();
     [Const] TestObjectClass getPointerObject01();
     TestObjectClass getPointerObject02();
     [Const, Ref] TestObjectClass getRefObject01();
@@ -70,19 +70,19 @@ interface TestMethodClass {
 
 [NoDelete]
 interface TestStaticMethodClass {
-    static void setMethod01(long intParam);
-    static void setMethod02(float floatParam, boolean boolParam);
-    static void setMethod03(long intParam, long intParam2, float floatParam, float floatParam2, optional boolean boolParam);
-    static void setMethod04(long intParam, long[] intArray, float[] floatArray);
-    static void setMethod05([Const] DOMString strParam);
+    static void setMethod01(long intValue01);
+    static void setMethod02(float floatValue01, boolean boolValue01);
+    static void setMethod03(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
+    static void setMethod04(long intValue01, long[] intArray, float[] floatArray);
+    static void setMethod05([Const] DOMString strValue01);
     static void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
 
-    static long getIntParam();
-    static long getIntParam2();
-    static float getFloatParam();
-    static float getFloatParam2();
-    static float getBoolParam();
-    [Const, Value] static IDLStringView getStrParam();
+    static long getIntValue01();
+    static long getIntValue02();
+    static float getFloatValue01();
+    static float getFloatValue02();
+    static float getBoolValue01();
+    [Const, Value] static IDLStringView getStrValue01();
     [Const] static TestObjectClass getPointerObject01();
     static TestObjectClass getPointerObject02();
     [Const, Ref] static TestObjectClass getRefObject01();
@@ -92,10 +92,10 @@ interface TestStaticMethodClass {
 
 interface CallbackClass {
     [Const] void onVoidCallback([Ref] TestObjectClass refData, TestObjectClass pointerData);
-    [Const] long onIntCallback(long intParam01, long intParam02);
-    [Const] float onFloatCallback(float floatParam01, float floatParam02);
-    [Const] boolean onBoolCallback(boolean boolParam);
-    [Const] void onStringCallback([Const] DOMString strParam);
+    [Const] long onIntCallback(long intValue01, long intValue02);
+    [Const] float onFloatCallback(float floatValue01, float floatValue02);
+    [Const] boolean onBoolCallback(boolean boolValue01);
+    [Const] void onStringCallback([Const] DOMString strValue01);
 };
 
 [JSImplementation="CallbackClass"]
@@ -112,14 +112,14 @@ DefaultCallbackClass implements CallbackClass;
 interface TestCallbackClass {
     void TestCallbackClass();
 
-    attribute long intParam01;
-    attribute long intParam02;
-    attribute float floatParam01;
-    attribute float floatParam02;
-    attribute boolean boolParam;
+    attribute long intValue01;
+    attribute long intValue02;
+    attribute float floatValue01;
+    attribute float floatValue02;
+    attribute boolean boolValue01;
+    [Value] attribute IDLString strValue01;
     [Value] attribute TestObjectClass valueObject;
     attribute TestObjectClass pointerObject;
-    [Value] attribute IDLString strParam;
 
     void callVoidCallback(CallbackClass callback);
     void callIntCallback(CallbackClass callback);
