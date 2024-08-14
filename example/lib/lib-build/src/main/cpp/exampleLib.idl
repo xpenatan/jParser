@@ -90,6 +90,44 @@ interface TestStaticMethodClass {
     [Value] static TestObjectClass getValueObject();
 };
 
+interface CallbackClass {
+    [Const] void onVoidCallback([Ref] TestObjectClass refData, TestObjectClass pointerData);
+    [Const] long onIntCallback(long intParam01, long intParam02);
+    [Const] float onFloatCallback(float floatParam01, float floatParam02);
+    [Const] boolean onBoolCallback(boolean boolParam);
+    [Const] void onStringCallback([Const] DOMString strParam);
+};
+
+[JSImplementation="CallbackClass"]
+interface CallbackClassImpl {
+    void CallbackClassImpl();
+};
+CallbackClassImpl implements CallbackClass;
+
+interface DefaultCallbackClass {
+    void DefaultCallbackClass();
+};
+DefaultCallbackClass implements CallbackClass;
+
+interface TestCallbackClass {
+    void TestCallbackClass();
+
+    attribute long intParam01;
+    attribute long intParam02;
+    attribute float floatParam01;
+    attribute float floatParam02;
+    attribute boolean boolParam;
+    [Value] attribute TestObjectClass valueObject;
+    attribute TestObjectClass pointerObject;
+    [Value] attribute IDLString strParam;
+
+    void callVoidCallback(CallbackClass callback);
+    void callIntCallback(CallbackClass callback);
+    void callFloatCallback(CallbackClass callback);
+    void callBoolCallback(CallbackClass callback);
+    void callStringCallback(CallbackClass callback);
+};
+
 enum TestEnumWithinClass {
     "TestEnumClass::e_val"
 };

@@ -215,6 +215,73 @@ class TestStaticMethodClass {
         static TestObjectClass getValueObject() { return TestStaticMethodClass::refObject02; };
 };
 
+class CallbackClass
+{
+public:
+    virtual ~CallbackClass() {}
+
+    virtual void onVoidCallback(TestObjectClass& refData, TestObjectClass* pointerData) const = 0;
+    virtual int onIntCallback(int intParam01, int intParam02) const = 0;
+    virtual float onFloatCallback(float floatParam01, float Param02) const = 0;
+    virtual bool onBoolCallback(bool boolParam) const = 0;
+    virtual void onStringCallback(const char* strParam) const = 0;
+};
+
+class DefaultCallbackClass : public CallbackClass
+{
+public:
+    DefaultCallbackClass() {
+    };
+
+    virtual void onVoidCallback(TestObjectClass& refData, TestObjectClass* pointerData) const {
+        refData.intValue = 7;
+        refData.floatValue = 7.77;
+        pointerData->intValue = 10;
+        pointerData->floatValue = 10.77;
+    }
+    virtual int onIntCallback(int intParam01, int intParam02) const {
+        return intParam01 - intParam02;
+    }
+    virtual float onFloatCallback(float floatParam01, float floatParam02) const {
+        return floatParam01 + floatParam02;
+    }
+    virtual bool onBoolCallback(bool boolParam) const {
+        return !boolParam;
+    }
+    virtual void onStringCallback(const char* strParam) const {
+        cout << "strParam: " << strParam << endl;
+    }
+};
+
+class TestCallbackClass {
+    private:
+    public:
+        int intParam01;
+        int intParam02;
+        float floatParam01;
+        float floatParam02;
+        bool boolParam;
+        string strParam;
+        TestObjectClass valueObject;
+        TestObjectClass* pointerObject;
+
+        void callVoidCallback(CallbackClass* callback) {
+            callback->onVoidCallback(valueObject, pointerObject);
+        };
+        int callIntCallback(CallbackClass* callback) {
+            return callback->onIntCallback(intParam01, intParam02);
+        };
+        int callFloatCallback(CallbackClass* callback) {
+            return callback->onFloatCallback(floatParam01, floatParam02);
+        };
+        bool callBoolCallback(CallbackClass* callback) {
+            return callback->onBoolCallback(boolParam);
+        };
+        void callStringCallback(CallbackClass* callback) {
+            callback->onStringCallback(strParam.c_str());
+        };
+};
+
 class TestEnumClass {
     private:
         ParamData data;
