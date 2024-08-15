@@ -1,3 +1,13 @@
+// NOTE:
+// * Emscripten webidl does not support [Value] object passed by parameter. Better to pass it as [Ref]
+// * [BUG] Emscripten may give runtime errors if string is not at the same order in a overloading method or constructor parameter.
+//   See: TestStringConstructorClass.
+//   Error: VM41:980 Invalid UTF-8 leading byte 0x000000fe encountered when deserializing a UTF-8 string in wasm memory to a JS string!
+// * Emscripten WebIDL does not support overloading method/constructor with different types at the same parameter size.
+//   Ex: void myMethod(float param1, boolean param2) and void myMethod(boolean param1, float param2) will not compile.
+//   It needs to be at the same order if both have the same parameter size.
+//   TestConstructorClass works because it have different parameter size. From the [BUG] above, don't use string or it will fail at runtime.
+
 interface TestObjectClass {
     void TestObjectClass();
     attribute long intValue01;
@@ -20,9 +30,6 @@ interface TestConstructorClass {
 interface TestStringConstructorClass {
     readonly attribute long intValue01;
     [Value] readonly attribute IDLString strValue01;
-
-    // If string is not at the same order emscripten may give errors at runtime
-    // VM41:980 Invalid UTF-8 leading byte 0x000000fe encountered when deserializing a UTF-8 string in wasm memory to a JS string!
 
     void TestStringConstructorClass([Const] DOMString strValue01);
     void TestStringConstructorClass([Const] DOMString strValue01, long intValue01);
