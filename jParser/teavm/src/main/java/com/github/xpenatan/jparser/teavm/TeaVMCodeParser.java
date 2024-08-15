@@ -787,7 +787,12 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         List<MethodDeclaration> methodsByName = getNativeMethodsByName(classDeclaration, nativeMethodName, arguments.size(), paramT);
         int size = methodsByName.size();
         if(size == 0) {
-            return null;
+            // The current state is not possible to get all paramT correctly.
+            // If method list is 0 and without passing type is 1 then use this method.
+            methodsByName = getNativeMethodsByName(classDeclaration, nativeMethodName, arguments.size(), null);
+            if(methodsByName.size() != 1) {
+                return null;
+            }
         }
         if(methodsByName.size() == 1) {
             MethodDeclaration methodDeclaration = methodsByName.get(0);
