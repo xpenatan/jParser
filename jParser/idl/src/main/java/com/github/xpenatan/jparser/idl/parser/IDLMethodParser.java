@@ -36,6 +36,8 @@ import java.util.Optional;
 
 public class IDLMethodParser {
 
+    static final String NATIVE_METHOD = "native_";
+
     static final String GET_OBJECT_TEMPLATE =
             "{\n" +
             "    long pointer = [METHOD];\n" +
@@ -346,8 +348,8 @@ public class IDLMethodParser {
 
         // Clone some generated idl method settings
         MethodDeclaration nativeMethod = new MethodDeclaration();
-        nativeMethod.setName(methodName + "NATIVE");
-        nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
+        nativeMethod.setName(NATIVE_METHOD + methodName);
+        nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
         nativeMethod.removeBody();
 
         if(!isStatic) {
