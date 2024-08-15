@@ -71,14 +71,13 @@ class TestConstructorClass {
         float floatValue01;
         float floatValue02;
         bool boolValue01;
-        string strValue01;
 
         TestConstructorClass(int intValue01) {
             this->intValue01 = intValue01;
         };
-        TestConstructorClass(float floatValue01, const char* strValue01) {
+        TestConstructorClass(float floatValue01, int intValue01) {
             this->floatValue01 = floatValue01;
-            this->strValue01 = strValue01;
+            this->intValue01 = intValue01;
         };
         TestConstructorClass(int intValue01, int intValue02, float floatValue01, float floatValue02, bool boolValue01 = true) {
             this->intValue01 = intValue01;
@@ -93,6 +92,28 @@ class TestConstructorClass {
             intArraySize2[1] = 2;
             floatArraySize2[0] = 3.1;
             floatArraySize2[1] = 4.2;
+        };
+};
+
+class TestStringConstructorClass {
+    private:
+
+    public:
+        int intValue01;
+        int floatValue01;
+        string strValue01;
+
+        TestStringConstructorClass(const char* strValue01) {
+            this->strValue01 = strValue01;
+        };
+        TestStringConstructorClass(const char* strValue01, int intValue01) {
+            this->strValue01 = strValue01;
+            this->intValue01 = intValue01;
+        };
+        TestStringConstructorClass(const char* strValue01, float floatValue01, int intValue01) {
+            this->strValue01 = strValue01;
+            this->floatValue01 = floatValue01;
+            this->intValue01 = intValue01;
         };
 };
 
@@ -112,6 +133,10 @@ class TestMethodClass {
         TestMethodClass() {
             pointerObject01 = NULL;
             pointerObject02 = NULL;
+        };
+        TestMethodClass(const char* strValue01) {
+            cout << "strValue01 before: " << strValue01 << endl;
+            this->strValue01 = strValue01;
         };
         void setMethod01(int intValue01) {
             this->intValue01 = intValue01;
@@ -135,6 +160,7 @@ class TestMethodClass {
             floatArraySize2[1] = 4.2;
         };
         void setMethod05(const char* strValue01) {
+            cout << "strValue01 before: " << strValue01 << endl;
             this->strValue01 = strValue01;
         };
         void setMethod06(const TestObjectClass* pointerObject01, TestObjectClass* pointerObject02, const TestObjectClass& refObject01, TestObjectClass& refObject02) {

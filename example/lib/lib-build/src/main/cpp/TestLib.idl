@@ -5,12 +5,28 @@ interface TestObjectClass {
 };
 
 interface TestConstructorClass {
-    [Value] attribute IDLString strValue01;
+    readonly attribute long intValue01;
+    readonly attribute long intValue02;
+    readonly attribute float floatValue01;
+    readonly attribute float floatValue02;
+    readonly attribute boolean boolValue01;
 
     void TestConstructorClass(long intValue01);
-    void TestConstructorClass(float floatValue, [Const] DOMString strValue01);
+    void TestConstructorClass(float floatValue, long intValue01);
     void TestConstructorClass(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
     void TestConstructorClass(long intValue01, long[] intArray, float[] floatArray);
+};
+
+interface TestStringConstructorClass {
+    readonly attribute long intValue01;
+    [Value] readonly attribute IDLString strValue01;
+
+    // If string is not at the same order emscripten may give errors at runtime
+    // VM41:980 Invalid UTF-8 leading byte 0x000000fe encountered when deserializing a UTF-8 string in wasm memory to a JS string!
+
+    void TestStringConstructorClass([Const] DOMString strValue01);
+    void TestStringConstructorClass([Const] DOMString strValue01, long intValue01);
+    void TestStringConstructorClass([Const] DOMString strValue01, float floatValue01, long intValue01);
 };
 
 interface TestAttributeClass {
@@ -48,6 +64,7 @@ interface TestAttributeArrayClass {
 
 interface TestMethodClass {
     void TestMethodClass();
+    void TestMethodClass([Const] DOMString strValue01);
     void setMethod01(long intValue01);
     void setMethod02(float floatValue01, boolean boolValue01);
     void setMethod03(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
