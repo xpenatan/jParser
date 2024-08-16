@@ -27,6 +27,7 @@ local.properties
 out/
 *.ini
 .temp/
+*.log
 
 **/webapp/**
 **/lib/core/src/**
