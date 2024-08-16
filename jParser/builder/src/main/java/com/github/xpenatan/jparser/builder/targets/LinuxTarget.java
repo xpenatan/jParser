@@ -38,7 +38,7 @@ public class LinuxTarget extends DefaultBuildTarget {
             linkerCompiler.clear();
             linkerCompiler.add("ar");
             linkerFlags.add("rcs");
-            libSuffix = "64.a";
+            libSuffix = "64_.a";
         }
         else {
             // Note:

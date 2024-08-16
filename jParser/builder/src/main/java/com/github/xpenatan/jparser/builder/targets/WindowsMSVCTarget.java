@@ -3,10 +3,10 @@ package com.github.xpenatan.jparser.builder.targets;
 import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.DefaultBuildTarget;
 
-public class WindowsMSVSTarget extends DefaultBuildTarget {
+public class WindowsMSVCTarget extends DefaultBuildTarget {
 
-    public WindowsMSVSTarget() {
-        this.libDirSuffix = "windows/";
+    public WindowsMSVCTarget() {
+        this.libDirSuffix = "windows/vc/";
         this.tempBuildDir = "target/windows";
         linkObjSuffix = ".obj";
 
@@ -31,6 +31,7 @@ public class WindowsMSVSTarget extends DefaultBuildTarget {
         linkerCompiler.add("&");
         if(isStatic) {
             linkerCompiler.add("lib");
+            libSuffix = "64_.lib";
         }
         else {
             linkerCompiler.add("link");

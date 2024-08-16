@@ -4,6 +4,7 @@ import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jparser.builder.targets.IOSTarget;
 import com.github.xpenatan.jparser.builder.targets.LinuxTarget;
 import com.github.xpenatan.jparser.builder.targets.MacTarget;
+import com.github.xpenatan.jparser.builder.targets.WindowsMSVCTarget;
 import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jparser.builder.tool.BuildToolOptions;
@@ -27,6 +28,7 @@ public class BuildLib {
                 }
                 if(op.windows64) {
                     targets.add(getWindowTarget(op));
+                    targets.add(getWindowVCTarget(op));
                 }
                 if(op.linux64) {
                     targets.add(getLinuxTarget(op));
@@ -63,7 +65,30 @@ public class BuildLib {
         linkTarget.addJNIHeaders();
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + op.libName + "64.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + op.libName + "64_.a");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+
+        multiTarget.add(linkTarget);
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getWindowVCTarget(BuildToolOptions op) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        // Make a static library
+        WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
+        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/TestLib/**.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
+        linkTarget.addJNIHeaders();
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);
@@ -86,7 +111,7 @@ public class BuildLib {
         linkTarget.addJNIHeaders();
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);
@@ -112,10 +137,10 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
 
         if(isArm) {
-            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/lib" + op.libName + "64.a");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/lib" + op.libName + "64_.a");
         }
         else {
-            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64.a");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64_.a");
         }
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
@@ -151,7 +176,7 @@ public class BuildLib {
             // Compile glue code and link to make js file
             EmscriptenTarget linkTarget = new EmscriptenTarget(idlReader);
             linkTarget.headerDirs.add("-include" + libBuildCPPPath + "/src/TestLib/CustomCode.h");
-            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + ".a");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
             multiTarget.add(linkTarget);
         }
         else if(buildType == 2) {
@@ -216,7 +241,7 @@ public class BuildLib {
         linkTarget.addJNIHeaders();
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + ".a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);

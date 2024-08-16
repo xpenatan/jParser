@@ -74,7 +74,7 @@ public class MacTarget extends DefaultBuildTarget {
             linkerCompiler.add("libtool");
             linkerFlags.add("-static");
             linkerFlags.add("-o");
-            libSuffix = "64.a";
+            libSuffix = "64_.a";
         }
         else {
             linkerFlags.add("-shared");

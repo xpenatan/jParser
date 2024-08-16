@@ -79,7 +79,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
             linkerCompiler.add(cppCompilerr);
             linkerFlags.add("rcs");
-            libSuffix = ".a";
+            libSuffix = "_.a";
         }
         else {
             String postPath = createPostJS(jsglueDir, libName);
