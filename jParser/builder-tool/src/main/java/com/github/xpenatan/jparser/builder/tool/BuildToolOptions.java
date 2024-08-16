@@ -63,7 +63,7 @@ public class BuildToolOptions {
         boolean teavmtmp = false;
         for(int i = 0; i < platform.length; i++) {
             String arg = platform[i];
-            if(arg.equals("windows64") && (BuildTarget.isWindows() || BuildTarget.isUnix())) {
+            if(arg.equals("windows64") && (BuildTarget.isWindows())) {
                 windows64tmp = true;
             }
             else if(arg.equals("linux64") && BuildTarget.isUnix()) {
