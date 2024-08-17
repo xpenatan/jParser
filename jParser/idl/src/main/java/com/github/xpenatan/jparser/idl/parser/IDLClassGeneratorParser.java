@@ -342,7 +342,10 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         }
 
         // Add additional method to call natives
+        makeNativesPublic(parserItems);
+    }
 
+    private void makeNativesPublic(ArrayList<JParserItem> parserItems) {
         for(int i = 0; i < parserItems.size(); i++) {
             JParserItem parserItem = parserItems.get(i);
             String className = parserItem.className;
