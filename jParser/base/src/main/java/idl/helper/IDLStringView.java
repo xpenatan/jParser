@@ -20,7 +20,7 @@ public class IDLStringView extends IDLBase {
     public IDLStringView(byte b, char c) {}
 
     public String data() {
-        String text = dataNATIVE(getCPointer());
+        String text = internal_native_data(getCPointer());
         return text;
     }
 
@@ -35,5 +35,5 @@ public class IDLStringView extends IDLBase {
         var returnedJSObj = jsObj.data();
         return returnedJSObj;
     */
-    private static native String dataNATIVE(long this_addr);
+    private static native String internal_native_data(long this_addr);
 }

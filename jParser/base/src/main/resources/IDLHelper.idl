@@ -25,7 +25,7 @@ interface IDLBoolArray {
     boolean getValue(long index);
     void setValue(long index, boolean value);
     long getSize();
-    long getPointer();
+    any getPointer();
     void copy([Ref] IDLBoolArray src, long srcOffset, long destOffset, long length);
 };
 
@@ -36,7 +36,7 @@ interface IDLIntArray {
     long getValue(long index);
     void setValue(long index, long value);
     long getSize();
-    long getPointer();
+    any getPointer();
     void copy([Ref] IDLIntArray src, long srcOffset, long destOffset, long length);
 };
 
@@ -47,7 +47,7 @@ interface IDLFloatArray {
     float getValue(long index);
     void setValue(long index, float value);
     long getSize();
-    long getPointer();
+    any getPointer();
     void copy([Ref] IDLFloatArray src, long srcOffset, long destOffset, long length);
 };
 
@@ -58,7 +58,7 @@ interface IDLDoubleArray {
     double getValue(long index);
     void setValue(long index, double value);
     long getSize();
-    long getPointer();
+    any getPointer();
     void copy([Ref] IDLDoubleArray src, long srcOffset, long destOffset, long length);
 };
 
@@ -69,6 +69,6 @@ interface IDLByteArray {
     byte getValue(long index);
     void setValue(long index, byte value);
     long getSize();
-    long getPointer();
+    any getPointer();
     void copy([Ref] IDLByteArray src, long srcOffset, long destOffset, long length);
 };

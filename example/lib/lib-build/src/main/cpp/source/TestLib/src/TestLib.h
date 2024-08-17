@@ -127,6 +127,7 @@ class TestMethodClass {
         string strValue01;
         const TestObjectClass* pointerObject01;
         TestObjectClass* pointerObject02;
+        TestObjectClass** pointerObjectArray;
         TestObjectClass refObject01;
         TestObjectClass refObject02;
     public:
@@ -160,7 +161,6 @@ class TestMethodClass {
             floatArraySize2[1] = 4.2;
         };
         void setMethod05(const char* strValue01) {
-            cout << "strValue01 before: " << strValue01 << endl;
             this->strValue01 = strValue01;
         };
         void setMethod06(const TestObjectClass* pointerObject01, TestObjectClass* pointerObject02, const TestObjectClass& refObject01, TestObjectClass& refObject02) {
@@ -168,6 +168,18 @@ class TestMethodClass {
             this->pointerObject02 = pointerObject02;
             this->refObject01 = refObject01;
             this->refObject02 = refObject02;
+        };
+        void setMethod07(TestObjectClass* pointerObjectArray) {
+            this->pointerObjectArray = ((TestObjectClass** )pointerObjectArray);
+//            this->pointerObjectArray = &pointerObjectArray[0];
+//            this->pointerObjectArray = &(*array[0]);
+
+            TestObjectClass* obj1 = this->pointerObjectArray[0];
+            TestObjectClass* obj2 = this->pointerObjectArray[1];
+            obj1->intValue01 = 20;
+            obj1->floatValue01 = 10.4;
+            obj2->intValue01 = 40;
+            obj2->floatValue01 = 30.8;
         };
 
         int getIntValue01() { return intValue01; };
@@ -309,7 +321,6 @@ class TestCallbackClass {
 
 class TestEnumClass {
     private:
-        ParamData data;
 
     public:
         enum TestEnumWithinClass {

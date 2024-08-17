@@ -45,7 +45,7 @@ class IDLArray {
         T getValue(int index) { return data[index]; }
         void setValue(int index, T value) { data[index] = value; }
         int getSize() { return size; }
-        intptr_t getPointer() { return (intptr_t)data; }
+        void* getPointer() { return (void*)data; }
         T* getData() { return data; }
 };
 

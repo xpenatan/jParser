@@ -36,7 +36,7 @@ import java.util.Optional;
 
 public class IDLMethodParser {
 
-    static final String NATIVE_METHOD = "native_";
+    public static final String NATIVE_METHOD = "internal_native_";
 
     static final String GET_OBJECT_TEMPLATE =
             "{\n" +
@@ -158,15 +158,15 @@ public class IDLMethodParser {
     }
 
     public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator, ArrayList<IDLParameter> idlParameters) {
-        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, methodDeclaration, methodName);
+        NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
+        Type methodReturnType = methodDeclaration.getType();
+        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, methodName, methodParameters, methodReturnType, methodDeclaration.isStatic());
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             //Add native method if it does not exist
             classDeclaration.getMembers().add(nativeMethodDeclaration);
             // Now that we have the native method we setup the caller method.
 
             MethodCallExpr caller = createCaller(nativeMethodDeclaration);
-
-            Type methodReturnType = methodDeclaration.getType();
 
             if(methodReturnType.isVoidType()) {
                 // void types just call the method.
@@ -200,7 +200,7 @@ public class IDLMethodParser {
 
     public static void setupCallerParam(boolean isStatic, boolean isReturnValue, MethodCallExpr caller, NodeList<Parameter> methodParameters, ArrayList<IDLParameter> idlParameters) {
         if(!isStatic) {
-            caller.addArgument(IDLDefaultCodeParser.CPOINTER_METHOD);
+            caller.addArgument("(long)" + IDLDefaultCodeParser.CPOINTER_METHOD);
         }
         for(int i = 0; i < methodParameters.size(); i++) {
             Parameter parameter = methodParameters.get(i);
@@ -220,12 +220,12 @@ public class IDLMethodParser {
                 }
                 if(isArray && IDLHelper.getCArray(type.asClassOrInterfaceType().getNameAsString()) != null) {
                     String methodCall = paramName + ".getPointer()";
-                    paramName =  "(" + variableName + " != null ? " + methodCall + " : 0)";
+                    paramName =  "(long)(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
                 else if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
                     //All methods must contain a base class to get its pointer
                     String methodCall = paramName + ".getCPointer()";
-                    paramName =  "(" + variableName + " != null ? " + methodCall + " : 0)";
+                    paramName =  "(long)(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
             }
             else if(type.isArrayType()) {
@@ -336,20 +336,13 @@ public class IDLMethodParser {
         }
     }
 
-    private static MethodDeclaration generateNativeMethod(boolean isReturnValue, MethodDeclaration methodDeclaration, String methodName) {
-        NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
-        Type methodReturnType = methodDeclaration.getType();
-        boolean isStatic = methodDeclaration.isStatic();
-        return generateNativeMethod(isReturnValue, methodName, methodParameters, methodReturnType, isStatic);
-    }
-
     public static MethodDeclaration generateNativeMethod(boolean isReturnValue, String methodName, NodeList<Parameter> methodParameters, Type methodReturnType, boolean isStatic) {
         boolean isClassOrInterfaceType = methodReturnType.isClassOrInterfaceType();
 
         // Clone some generated idl method settings
         MethodDeclaration nativeMethod = new MethodDeclaration();
         nativeMethod.setName(NATIVE_METHOD + methodName);
-        nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
+        nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
         nativeMethod.removeBody();
 
         if(!isStatic) {

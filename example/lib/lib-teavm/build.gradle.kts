@@ -21,17 +21,17 @@ dependencies {
     else {
         implementation(project(":jParser:loader:loader-core"))
     }
-    testImplementation(project(":example:lib:lib-core"))
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
-    testImplementation("org.teavm:teavm-core:${LibExt.teaVMVersion}")
-    testImplementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
-    testImplementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
-    testImplementation("org.teavm:teavm-junit:${LibExt.teaVMVersion}")
+//    testImplementation(project(":example:lib:lib-core"))
+//    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+//    testImplementation("org.teavm:teavm-core:${LibExt.teaVMVersion}")
+//    testImplementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
+//    testImplementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
+//    testImplementation("org.teavm:teavm-junit:${LibExt.teaVMVersion}")
 }
 
 tasks.named("clean") {
     doFirst {
-        val srcPath = "$projectDir/src/main/java/gen"
+        val srcPath = "$projectDir/src/main/java"
         project.delete(files(srcPath))
     }
 }

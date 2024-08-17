@@ -20,7 +20,7 @@ public class IDLString extends IDLBase {
     public IDLString(byte b, char c) {}
 
     public String c_str() {
-        String text = c_strNATIVE(getCPointer());
+        String text = internal_native_c_str(getCPointer());
         return text;
     }
 
@@ -35,10 +35,10 @@ public class IDLString extends IDLBase {
         var returnedJSObj = jsObj.c_str();
         return returnedJSObj;
     */
-    private static native String c_strNATIVE(long this_addr);
+    private static native String internal_native_c_str(long this_addr);
 
     public String data() {
-        String text = dataNATIVE(getCPointer());
+        String text = internal_native_data(getCPointer());
         return text;
     }
 
@@ -53,5 +53,5 @@ public class IDLString extends IDLBase {
         var returnedJSObj = jsObj.data();
         return returnedJSObj;
     */
-    private static native String dataNATIVE(long this_addr);
+    private static native String internal_native_data(long this_addr);
 }

@@ -32,8 +32,6 @@ out/
 **/webapp/**
 **/lib/core/src/**
 **/lib/desktop/src/main/**
-**/lib-ext/ext-core/src/**
-**/lib-ext/ext-desktop/src/main/**
-**/lib/lib-teavm/src/main/java/emu/**
+**/lib/lib-teavm/src/main/java/**
 **/lib/lib-core/src/main/java/**
 **/app/android/libs/

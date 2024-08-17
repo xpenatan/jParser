@@ -9,6 +9,7 @@ import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jparser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jparser.builder.tool.BuilderTool;
+import com.github.xpenatan.jparser.cpp.NativeCPPGenerator;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.ArrayList;
 
@@ -19,6 +20,10 @@ public class BuildLib {
         String modulePrefix = "lib";
         String basePackage = "com.github.xpenatan.jparser.example.testlib";
         String sourceDir = "/src/main/cpp/source/TestLib/src";
+
+        WindowsMSVCTarget.DEBUG_BUILD = true;
+//        NativeCPPGenerator.SKIP_GLUE_CODE = true;
+
         BuildToolOptions op = new BuildToolOptions(libName, basePackage, modulePrefix, sourceDir, args);
         BuilderTool.build(op, new BuildToolListener() {
             @Override

@@ -23,8 +23,8 @@ import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedArrayType;
+import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.xpenatan.jparser.core.JParser;
@@ -37,9 +37,9 @@ import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
+import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
-import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
 import java.io.File;
 import java.util.ArrayList;
@@ -664,8 +664,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 ClassOrInterfaceDeclaration classDeclaration = classDeclarations.get(i1);
                 convertNativeMethodLongType(classDeclaration);
             }
-
-            List<MethodCallExpr> all = unit.findAll(MethodCallExpr.class);
         }
     }
 
@@ -712,9 +710,21 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                     }
                     for(int argI = 0; argI < arguments.size(); argI++) {
                         Expression arg = arguments.get(argI);
+                        boolean isLong = false; // used in public native methods
+                        try {
+                            ResolvedType resolvedType = arg.calculateResolvedType();
+                            if(resolvedType.isPrimitive()) {
+                                ResolvedPrimitiveType primitive = resolvedType.asPrimitive();
+                                isLong = primitive.describe().equals("long");
+                            }
+                            System.out.println();
+                        }
+                        catch(Throwable t) {
+                            System.out.println();
+                        }
                         Parameter param = parameters.get(argI);
                         Type type = param.getType();
-                        if(JParserHelper.isLong(type)) {
+                        if(JParserHelper.isLong(type) || isLong) {
                             Optional<Node> parentNode = arg.getParentNode();
                             if(parentNode.isPresent()) {
                                 Node node = parentNode.get();

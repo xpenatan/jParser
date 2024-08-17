@@ -7,11 +7,24 @@
 //   Ex: void myMethod(float param1, boolean param2) and void myMethod(boolean param1, float param2) will not compile.
 //   It needs to be at the same order if both have the same parameter size.
 //   TestConstructorClass works because it have different parameter size. From the [BUG] above, don't use string or it will fail at runtime.
+// * Arrays parameters for example "void method(int[] array)" is converted to IDLIntArray class object behind the scene because interacting with array is better using native code.
+//   For custom types is better to use typedef. See TestObjectClassArray in CustomCode.h
+
 
 interface TestObjectClass {
     void TestObjectClass();
     attribute long intValue01;
     attribute float floatValue01;
+};
+
+interface TestObjectClassArray {
+    void TestObjectClassArray(long size);
+    void resize(long size);
+    void clear();
+    TestObjectClass getValue(long index);
+    void setValue(long index, TestObjectClass value);
+    long getSize();
+    any getPointer();
 };
 
 interface TestConstructorClass {
@@ -78,6 +91,7 @@ interface TestMethodClass {
     void setMethod04(long intValue01, long[] intArray, float[] floatArray);
     void setMethod05([Const] DOMString strValue01);
     void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
+    void setMethod07(TestObjectClass pointerObjectArray);
 
     long getIntValue01();
     long getIntValue02();
