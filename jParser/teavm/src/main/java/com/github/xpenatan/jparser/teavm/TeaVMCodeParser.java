@@ -717,10 +717,8 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                                 ResolvedPrimitiveType primitive = resolvedType.asPrimitive();
                                 isLong = primitive.describe().equals("long");
                             }
-                            System.out.println();
                         }
                         catch(Throwable t) {
-                            System.out.println();
                         }
                         Parameter param = parameters.get(argI);
                         Type type = param.getType();
