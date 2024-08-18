@@ -35,7 +35,7 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
       - name: Build project
         run: ./gradlew build_project_windows64
