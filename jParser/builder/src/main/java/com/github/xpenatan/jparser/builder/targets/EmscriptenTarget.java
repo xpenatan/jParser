@@ -14,6 +14,9 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
     public IDLReader idlReader;
 
+    public static boolean DEBUG_BUILD = false;
+    public static boolean IS_WASM = true;
+
     public boolean isStatic = false;
     public boolean compileGlueCode = true;
 
@@ -38,11 +41,23 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         cppCompiler.add(cppCompilerr);
         linkerCompiler.add(cppCompilerr);
 
-        libSuffix = ".wasm.js";
+        if(IS_WASM) {
+            libSuffix = ".wasm.js";
+        }
+        else {
+            libSuffix = ".js";
+        }
 
         cppFlags.add("-c");
         cppFlags.add("-std=c++17");
-        cppFlags.add("-O3");
+
+        if(DEBUG_BUILD) {
+            cppFlags.add("-O0");
+            cppFlags.add("-g2");
+        }
+        else {
+            cppFlags.add("-O3");
+        }
     }
 
     @Override
@@ -100,8 +115,20 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("EXPORTED_FUNCTIONS=['_free','_malloc']");
             linkerFlags.add("-s");
             linkerFlags.add("EXPORTED_RUNTIME_METHODS=['UTF8ToString']");
-            linkerFlags.add("-s");
-            linkerFlags.add("WASM=1");
+            if(DEBUG_BUILD) {
+                linkerFlags.add("-s");
+                linkerFlags.add("ASSERTIONS=1");
+                linkerFlags.add("-s");
+                linkerFlags.add("SAFE_HEAP=1");
+            }
+            if(IS_WASM) {
+                linkerFlags.add("-s");
+                linkerFlags.add("WASM=1");
+            }
+            else {
+                linkerFlags.add("-s");
+                linkerFlags.add("WASM=0");
+            }
             linkerFlags.add("-s");
             linkerFlags.add("SINGLE_FILE=1");
 
