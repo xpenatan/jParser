@@ -38,7 +38,7 @@ jobs:
       - uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
-          export-path-to-vcvarsall: ""
+          export-path-to-vcvarsall: $env:PATH
 
       - name: Build project
         run: ./gradlew build_project_windows64
