@@ -33,9 +33,11 @@ jobs:
           distribution: "zulu"
           java-version: 11
 
-      - uses: msys2/setup-msys2@v2
+      - name: Set up MinGW
+        uses: msys2/setup-msys2@v2
 
-      - uses: TheMrMilchmann/setup-msvc-dev@v3
+      - name: Set up Developer Command Prompt
+        uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
 
