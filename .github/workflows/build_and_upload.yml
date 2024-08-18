@@ -35,10 +35,7 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
 
-      - name: Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
-        with:
-          arch: x64
+      - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Build project
         run: ./gradlew build_project_windows64
