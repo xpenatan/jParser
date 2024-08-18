@@ -38,25 +38,21 @@ jobs:
       - uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
-          export-path-to-vcvarsall: $env:PATH;
 
-#      - name: Append the directory of 'vcvarsall.bat' to PATH environment variable
-#        uses: myci-actions/export-env-var-powershell@1
-#        with:
-#          name: PATH
-#          value: $env:PATH;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build
+      - name: Append the directory of 'vcvarsall.bat' to PATH environment variable
+        uses: myci-actions/export-env-var-powershell@1
+        with:
+          name: PATH
+          value: $env:PATH;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build
 
-      - name: Test msvc
-        run: vcvarsall
+      - name: Build project
+        run: ./gradlew build_project_windows64
 
-#      - name: Build project
-#        run: ./gradlew build_project_windows64
-#
-#      - name: Upload natives
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: windows-natives
-#          path: ./example/lib/lib-build/build/c++/libs/
+      - name: Upload natives
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-natives
+          path: ./example/lib/lib-build/build/c++/libs/
 
   build_linux:
     name: Build Linux
