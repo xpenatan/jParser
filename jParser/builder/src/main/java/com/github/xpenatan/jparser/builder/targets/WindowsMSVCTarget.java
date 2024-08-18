@@ -2,6 +2,8 @@ package com.github.xpenatan.jparser.builder.targets;
 
 import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.DefaultBuildTarget;
+import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
+import java.util.ArrayList;
 
 public class WindowsMSVCTarget extends DefaultBuildTarget {
 
@@ -57,5 +59,18 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
         }
         linkerCompiler.add("/NOLOGO");
         linkerCompiler.add("/MACHINE:X64");
+    }
+
+    @Override
+    protected boolean compile(BuildConfig config, CustomFileDescriptor buildTargetTemp, ArrayList<CustomFileDescriptor> cppFiles) {
+        boolean multiCoreCompile = this.multiCoreCompile;
+        this.multiCoreCompile = false;
+        if(multiCoreCompile) {
+            // Use native MSVC multi core support
+            cppCompiler.add("/MP");
+        }
+        boolean compile = super.compile(config, buildTargetTemp, cppFiles);
+        this.multiCoreCompile = multiCoreCompile;
+        return compile;
     }
 }

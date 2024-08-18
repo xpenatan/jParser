@@ -95,7 +95,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         }
     }
 
-    private boolean compile(BuildConfig config, CustomFileDescriptor buildTargetTemp, ArrayList<CustomFileDescriptor> cppFiles) {
+    protected boolean compile(BuildConfig config, CustomFileDescriptor buildTargetTemp, ArrayList<CustomFileDescriptor> cppFiles) {
         boolean retFlag = false;
 
         String compiledPaths = "";
