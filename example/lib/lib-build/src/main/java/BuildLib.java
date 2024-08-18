@@ -32,8 +32,8 @@ public class BuildLib {
                     targets.add(getTeavmTarget(op, idlReader));
                 }
                 if(op.windows64) {
-                    targets.add(getWindowTarget(op));
                     targets.add(getWindowVCTarget(op));
+                    targets.add(getWindowTarget(op));
                 }
                 if(op.linux64) {
                     targets.add(getLinuxTarget(op));
