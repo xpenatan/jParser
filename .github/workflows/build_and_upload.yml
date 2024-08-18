@@ -40,14 +40,17 @@ jobs:
           arch: x64
           export-path-to-vcvarsall: $env:PATH
 
-      - name: Build project
-        run: ./gradlew build_project_windows64
+      - name: Test msvc
+        run: vcvarsall
 
-      - name: Upload natives
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+#      - name: Build project
+#        run: ./gradlew build_project_windows64
+#
+#      - name: Upload natives
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: windows-natives
+#          path: ./example/lib/lib-build/build/c++/libs/
 
   build_linux:
     name: Build Linux
