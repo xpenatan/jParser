@@ -39,6 +39,8 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
 
     @Override
     protected void setup(BuildConfig config) {
+        linkerCompiler.add("cmd");
+        linkerCompiler.add("/c");
         linkerCompiler.add("vcvarsall");
         linkerCompiler.add("x64");
         linkerCompiler.add("&");
