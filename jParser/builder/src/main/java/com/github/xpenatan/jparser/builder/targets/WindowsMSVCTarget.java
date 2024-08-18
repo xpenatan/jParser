@@ -19,7 +19,8 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
 
         cppCompiler.add("cmd");
         cppCompiler.add("/c");
-        cppCompiler.add("vcvars64.bat");
+        cppCompiler.add("vcvarsall.bat");
+        cppCompiler.add("x64");
         cppCompiler.add("&");
         cppCompiler.add("cl");
         compilerOutputCommand = "-Fo:";
@@ -38,7 +39,8 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
 
     @Override
     protected void setup(BuildConfig config) {
-        linkerCompiler.add("vcvars64.bat");
+        linkerCompiler.add("vcvarsall.bat");
+        linkerCompiler.add("x64");
         linkerCompiler.add("&");
         if(isStatic) {
             linkerCompiler.add("lib");
