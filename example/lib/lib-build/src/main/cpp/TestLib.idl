@@ -9,6 +9,7 @@
 //   TestConstructorClass works because it have different parameter size. From the [BUG] above, don't use string or it will fail at runtime.
 // * Arrays parameters for example "void method(int[] array)" is converted to IDLIntArray class object behind the scene because interacting with array is better using native code.
 //   For custom types is better to use typedef. See TestObjectClassArray in CustomCode.h
+// * Array get_ shape the same object for every index. Don't keep object reference.
 
 
 interface TestObjectClass {
