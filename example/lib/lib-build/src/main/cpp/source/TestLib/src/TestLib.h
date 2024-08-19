@@ -263,6 +263,11 @@ public:
     virtual float onFloatCallback(float floatValue01, float Value02) const = 0;
     virtual bool onBoolCallback(bool boolValue01) const = 0;
     virtual void onStringCallback(const char* strValue01) const = 0;
+
+    int addInt(int a, int b)
+    {
+        return a + b;
+    }
 };
 
 class DefaultCallbackClass : public CallbackClass
