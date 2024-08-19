@@ -100,6 +100,7 @@ interface TestMethodClass {
     float getFloatValue02();
     float getBoolValue01();
     [Const, Value] IDLStringView getStrValue01();
+    [Const, Ref] IDLString getRefStrValue01();
     [Const] TestObjectClass getPointerObject01();
     TestObjectClass getPointerObject02();
     [Const, Ref] TestObjectClass getRefObject01();

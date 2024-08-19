@@ -4,6 +4,7 @@ import com.github.xpenatan.jparser.example.testlib.TestConstructorClass;
 import com.github.xpenatan.jparser.example.testlib.TestMethodClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClassArray;
+import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
 
 public class TestLib {
 
@@ -206,6 +207,37 @@ public class TestLib {
             obj2.dispose();
             array.dispose();
             test.dispose();
+        }
+        {
+            TestMethodClass test = new TestMethodClass();
+            try {
+                String strValue01 = "Hello";
+                test.setMethod05(strValue01);
+                String stringValue = test.getStrValue01().data();
+                if(!(strValue01.equals(stringValue))) {
+                    throw new RuntimeException("strValue01.equals(stringValue)");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+            }
+
+        }
+        {
+            TestMethodClass test = new TestMethodClass();
+            try {
+                String strValue01 = "RefHello";
+                test.setMethod05(strValue01);
+                IDLString refStrValue01 = test.getRefStrValue01();
+                String stringValue = refStrValue01.data();
+                if(!(strValue01.equals(stringValue))) {
+                    throw new RuntimeException("strValue01.equals(stringValue)");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+            }
+
         }
         return true;
     }

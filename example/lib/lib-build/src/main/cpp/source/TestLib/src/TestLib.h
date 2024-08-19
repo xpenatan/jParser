@@ -188,6 +188,7 @@ class TestMethodClass {
         float getFloatValue02() { return floatValue02; };
         bool getBoolValue01() { return boolValue01; };
         const char* getStrValue01() { return strValue01.c_str(); };
+        const string& getRefStrValue01() { return strValue01; };
         const TestObjectClass* getPointerObject01() { return pointerObject01; };
         TestObjectClass* getPointerObject02() { return pointerObject02; };
         const TestObjectClass& getRefObject01() { return refObject01; };
