@@ -134,9 +134,25 @@ interface CallbackClass {
     long addInt(long a, long b);
 };
 
+interface CallbackClassManual {
+    long addInt(long a, long b);
+};
+
 [JSImplementation="CallbackClass"]
 interface CallbackClassImpl {
     void CallbackClassImpl();
+
+    [Const] void onVoidCallback([Ref] TestObjectClass refData, TestObjectClass pointerData);
+    [Const] long onIntCallback(long intValue01, long intValue02);
+    [Const] float onFloatCallback(float floatValue01, float floatValue02);
+    [Const] boolean onBoolCallback(boolean boolValue01);
+    [Const] void onStringCallback([Const] DOMString strValue01);
+};
+CallbackClassImpl implements CallbackClass;
+
+[JSImplementation="CallbackClassManual"]
+interface CallbackClassManualImpl {
+    void CallbackClassManualImpl();
 
     [Const] void onVoidCallback([Ref] TestObjectClass refData, TestObjectClass pointerData);
     [Const] long onIntCallback(long intValue01, long intValue02);
@@ -171,11 +187,11 @@ interface TestCallbackClass {
     [Value] attribute TestObjectClass valueObject;
     attribute TestObjectClass pointerObject;
 
-    void callVoidCallback(CallbackClass callback);
-    long callIntCallback(CallbackClass callback);
-    float callFloatCallback(CallbackClass callback);
-    boolean callBoolCallback(CallbackClass callback);
-    void callStringCallback(CallbackClass callback);
+    void callVoidCallback(CallbackClassManual callback);
+    long callIntCallback(CallbackClassManual callback);
+    float callFloatCallback(CallbackClassManual callback);
+    boolean callBoolCallback(CallbackClassManual callback);
+    void callStringCallback(CallbackClassManual callback);
 };
 
 enum TestEnumWithinClass {

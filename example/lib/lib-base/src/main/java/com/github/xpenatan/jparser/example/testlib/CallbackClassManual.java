@@ -1,7 +1,7 @@
 package com.github.xpenatan.jparser.example.testlib;
 import idl.IDLBase;
 
-public class CallbackClassManual extends CallbackClass {
+public class CallbackClassManual extends IDLBase {
 
     /*[-JNI;-NATIVE]
         static jclass CallbackClassManual_CLASS = 0;
@@ -11,12 +11,12 @@ public class CallbackClassManual extends CallbackClass {
         static jmethodID onBoolCallback_ID = 0;
         static jmethodID onStringCallback_ID = 0;
 
-        class CallbackClassManual : public CallbackClass {
+        class CallbackClassManual_NATIVE : public CallbackClassManual {
             private:
                 JNIEnv* env;
                 jobject obj;
             public:
-                CallbackClassManual( JNIEnv* env, jobject obj ) {
+                CallbackClassManual_NATIVE( JNIEnv* env, jobject obj ) {
                     this->env = env;
                     this->obj = obj;
                 }
@@ -72,7 +72,6 @@ public class CallbackClassManual extends CallbackClass {
 
     /*[-TEAVM;-REPLACE]
         public CallbackClassManual() {
-            super((byte)0, (char)0);
             onVoidCallback onVoidCallback = new onVoidCallback() {
                 @Override
                 public void onVoidCallback(int refData, int pointerData) {
@@ -108,7 +107,6 @@ public class CallbackClassManual extends CallbackClass {
         }
     */
     public CallbackClassManual() {
-        super((byte)0, (char)0);
         long addr = createNATIVE();
         initNative(addr, true);
     }
@@ -122,10 +120,10 @@ public class CallbackClassManual extends CallbackClass {
             onBoolCallback_ID = env->GetMethodID(CallbackClassManual_CLASS, "internal_onBoolCallback", "(Z)Z");
             onStringCallback_ID = env->GetMethodID(CallbackClassManual_CLASS, "internal_onStringCallback", "(Ljava/lang/String;)V");
         }
-        return (jlong)new CallbackClassManual(env, env->NewGlobalRef(object));
+        return (jlong)new CallbackClassManual_NATIVE(env, env->NewGlobalRef(object));
     */
     /*[-TEAVM;-REPLACE]
-        @org.teavm.jso.JSBody(params = { "onVoidCallback", "onIntCallback", "onFloatCallback", "onBoolCallback", "onStringCallback" }, script = "var CallbackClassImpl = new [MODULE].CallbackClassImpl(); CallbackClassImpl.onVoidCallback = onVoidCallback; CallbackClassImpl.onIntCallback = onIntCallback; CallbackClassImpl.onFloatCallback = onFloatCallback; CallbackClassImpl.onBoolCallback = onBoolCallback; CallbackClassImpl.onStringCallback = onStringCallback; return [MODULE].getPointer(CallbackClassImpl);")
+        @org.teavm.jso.JSBody(params = { "onVoidCallback", "onIntCallback", "onFloatCallback", "onBoolCallback", "onStringCallback" }, script = "var CallbackClassManualImpl = new [MODULE].CallbackClassManualImpl(); CallbackClassManualImpl.onVoidCallback = onVoidCallback; CallbackClassManualImpl.onIntCallback = onIntCallback; CallbackClassManualImpl.onFloatCallback = onFloatCallback; CallbackClassManualImpl.onBoolCallback = onBoolCallback; CallbackClassManualImpl.onStringCallback = onStringCallback; return [MODULE].getPointer(CallbackClassManualImpl);")
         private static native int createNative(onVoidCallback onVoidCallback, onIntCallback onIntCallback, onFloatCallback onFloatCallback, onBoolCallback onBoolCallback, onStringCallback onStringCallback);
     */
     private native long createNATIVE();
@@ -147,13 +145,4 @@ public class CallbackClassManual extends CallbackClass {
 
     public void internal_onStringCallback(String strValue01) {
     }
-
-//    private int onCall(long luaState) {
-//        LuaState.TMP.setPointer(luaState);
-//        return onCall(LuaState.TMP);
-//    }
-//
-//    public int onCall(LuaState luaState) {
-//        return 0;
-//    }
 }

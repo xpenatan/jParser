@@ -270,6 +270,23 @@ public:
     }
 };
 
+class CallbackClassManual
+{
+public:
+    virtual ~CallbackClassManual() {}
+
+    virtual void onVoidCallback(TestObjectClass& refData, TestObjectClass* pointerData) const = 0;
+    virtual int onIntCallback(int intValue01, int intValue02) const = 0;
+    virtual float onFloatCallback(float floatValue01, float Value02) const = 0;
+    virtual bool onBoolCallback(bool boolValue01) const = 0;
+    virtual void onStringCallback(const char* strValue01) const = 0;
+
+    int addInt(int a, int b)
+    {
+        return a + b;
+    }
+};
+
 class DefaultCallbackClass : public CallbackClass
 {
 public:
@@ -320,6 +337,23 @@ class TestCallbackClass {
             return callback->onBoolCallback(boolValue01);
         };
         void callStringCallback(CallbackClass* callback) {
+            const char* text = strValue01.c_str();
+            callback->onStringCallback(text);
+        };
+
+        void callVoidCallback(CallbackClassManual* callback) {
+            callback->onVoidCallback(valueObject, pointerObject);
+        };
+        int callIntCallback(CallbackClassManual* callback) {
+            return callback->onIntCallback(intValue01, intValue02);
+        };
+        float callFloatCallback(CallbackClassManual* callback) {
+            return callback->onFloatCallback(floatValue01, floatValue02);
+        };
+        bool callBoolCallback(CallbackClassManual* callback) {
+            return callback->onBoolCallback(boolValue01);
+        };
+        void callStringCallback(CallbackClassManual* callback) {
             const char* text = strValue01.c_str();
             callback->onStringCallback(text);
         };
