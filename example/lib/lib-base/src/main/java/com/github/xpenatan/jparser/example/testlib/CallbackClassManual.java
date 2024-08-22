@@ -1,6 +1,7 @@
 package com.github.xpenatan.jparser.example.testlib;
 import idl.IDLBase;
 
+/*[-IDL_SKIP]*/
 public class CallbackClassManual extends IDLBase {
 
     /*[-JNI;-NATIVE]
