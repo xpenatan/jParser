@@ -172,9 +172,9 @@ interface TestCallbackClass {
     attribute TestObjectClass pointerObject;
 
     void callVoidCallback(CallbackClass callback);
-    void callIntCallback(CallbackClass callback);
-    void callFloatCallback(CallbackClass callback);
-    void callBoolCallback(CallbackClass callback);
+    long callIntCallback(CallbackClass callback);
+    float callFloatCallback(CallbackClass callback);
+    boolean callBoolCallback(CallbackClass callback);
     void callStringCallback(CallbackClass callback);
 };
 

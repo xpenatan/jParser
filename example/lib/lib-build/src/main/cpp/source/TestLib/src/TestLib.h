@@ -292,7 +292,6 @@ public:
         return !boolValue01;
     }
     virtual void onStringCallback(const char* strValue01) const {
-        cout << "strValue01: " << strValue01 << endl;
     }
 };
 
@@ -314,14 +313,15 @@ class TestCallbackClass {
         int callIntCallback(CallbackClass* callback) {
             return callback->onIntCallback(intValue01, intValue02);
         };
-        int callFloatCallback(CallbackClass* callback) {
+        float callFloatCallback(CallbackClass* callback) {
             return callback->onFloatCallback(floatValue01, floatValue02);
         };
         bool callBoolCallback(CallbackClass* callback) {
             return callback->onBoolCallback(boolValue01);
         };
         void callStringCallback(CallbackClass* callback) {
-            callback->onStringCallback(strValue01.c_str());
+            const char* text = strValue01.c_str();
+            callback->onStringCallback(text);
         };
 };
 

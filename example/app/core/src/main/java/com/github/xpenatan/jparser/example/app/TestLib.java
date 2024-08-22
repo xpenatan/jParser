@@ -1,5 +1,7 @@
 package com.github.xpenatan.jparser.example.app;
 
+import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
+import com.github.xpenatan.jparser.example.testlib.TestCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestConstructorClass;
 import com.github.xpenatan.jparser.example.testlib.TestMethodClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
@@ -17,6 +19,7 @@ public class TestLib {
         boolean methodTest = testMethodClass();
         boolean staticMethodTest = testStaticMethodClass();
         boolean callbackTest = testCallbackClass();
+        boolean callbackTestManual = testCallbackClassManual();
 
         System.out.println("constructorTest: " + constructorTest);
         System.out.println("stringConstructorTest: " + stringConstructorTest);
@@ -27,7 +30,7 @@ public class TestLib {
         System.out.println("staticMethodTest: " + staticMethodTest);
         System.out.println("callbackTest: " + callbackTest);
         return constructorTest && stringConstructorTest && attributeTest && staticAttributeTest
-                && attributeArrayTest && methodTest && staticMethodTest && callbackTest;
+                && attributeArrayTest && methodTest && staticMethodTest && callbackTest && callbackTestManual;
     }
 
     private static boolean testConstructorClass() {
@@ -220,8 +223,9 @@ public class TestLib {
             } catch(Throwable e) {
                 e.printStackTrace();
                 test.dispose();
+                return false;
             }
-
+            test.dispose();
         }
         {
             TestMethodClass test = new TestMethodClass();
@@ -236,8 +240,9 @@ public class TestLib {
             } catch(Throwable e) {
                 e.printStackTrace();
                 test.dispose();
+                return false;
             }
-
+            test.dispose();
         }
         return true;
     }
@@ -249,8 +254,121 @@ public class TestLib {
     }
 
     private static boolean testCallbackClass() {
+        return true;
+    }
 
+    private static boolean testCallbackClassManual() {
 
+        {
+            TestCallbackClass test = new TestCallbackClass();
+            try {
+                boolean[] internal_onVoidCallback = { false };
+                CallbackClassManual callback = new CallbackClassManual() {
+                    @Override
+                    public void internal_onVoidCallback(long refData, long pointerData) {
+                        internal_onVoidCallback[0] = true;
+                    }
+                };
+                test.callVoidCallback(callback);
+                if(!(internal_onVoidCallback[0] == true)) {
+                    throw new RuntimeException("internal_onVoidCallback[0] == true");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
+        {
+            TestCallbackClass test = new TestCallbackClass();
+            try {
+                boolean[] internal_onIntCallback = { false };
+                CallbackClassManual callback = new CallbackClassManual() {
+                    @Override
+                    public int internal_onIntCallback(int intValue01, int intValue02) {
+                        internal_onIntCallback[0] = true;
+                        return 0;
+                    }
+                };
+                test.callIntCallback(callback);
+                if(!(internal_onIntCallback[0] == true)) {
+                    throw new RuntimeException("internal_onIntCallback[0] == true");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
+        {
+            TestCallbackClass test = new TestCallbackClass();
+            try {
+                boolean[] internal_onFloatCallback = { false };
+                CallbackClassManual callback = new CallbackClassManual() {
+                    @Override
+                    public float internal_onFloatCallback(float floatValue01, float floatValue02) {
+                        internal_onFloatCallback[0] = true;
+                        return 0;
+                    }
+                };
+                test.callFloatCallback(callback);
+                if(!(internal_onFloatCallback[0] == true)) {
+                    throw new RuntimeException("internal_onFloatCallback[0] == true");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
+        {
+            TestCallbackClass test = new TestCallbackClass();
+            try {
+                boolean[] internal_onBoolCallback = { false };
+                CallbackClassManual callback = new CallbackClassManual() {
+                    @Override
+                    public boolean internal_onBoolCallback(boolean boolValue01) {
+                        internal_onBoolCallback[0] = true;
+                        return false;
+                    }
+                };
+                test.callBoolCallback(callback);
+                if(!(internal_onBoolCallback[0] == true)) {
+                    throw new RuntimeException("internal_onBoolCallback[0] == true");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
+        {
+            TestCallbackClass test = new TestCallbackClass();
+            try {
+                String text = "HELLO_WORLD";
+                test.get_strValue01().append(text);
+                final String[] internal_onStringCallback = new String[1];
+                CallbackClassManual callback = new CallbackClassManual() {
+                    @Override
+                    public void internal_onStringCallback(String strValue01) {
+                        internal_onStringCallback[0] = strValue01;
+                    }
+                };
+                test.callStringCallback(callback);
+                if(!(text.equals(internal_onStringCallback[0]) == true)) {
+                    throw new RuntimeException("text.equals(internal_onStringCallback[0]) == true");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
         return true;
     }
 }
