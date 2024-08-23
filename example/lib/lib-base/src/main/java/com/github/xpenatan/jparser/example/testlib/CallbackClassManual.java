@@ -5,37 +5,46 @@ import idl.IDLBase;
 public class CallbackClassManual extends IDLBase {
 
     /*[-JNI;-NATIVE]
-        static jclass CallbackClassManual_CLASS = 0;
-        static jmethodID onVoidCallback_ID = 0;
-        static jmethodID onIntCallback_ID = 0;
-        static jmethodID onFloatCallback_ID = 0;
-        static jmethodID onBoolCallback_ID = 0;
-        static jmethodID onStringCallback_ID = 0;
-
-        class CallbackClassManual_NATIVE : public CallbackClassManual {
+        class CallbackClassManualImpl : public CallbackClassManual {
             private:
                 JNIEnv* env;
                 jobject obj;
             public:
-                CallbackClassManual_NATIVE( JNIEnv* env, jobject obj ) {
+                inline static jclass jClassID = 0;
+                inline static jmethodID onVoidCallback_ID = 0;
+                inline static jmethodID onIntCallback_ID = 0;
+                inline static jmethodID onFloatCallback_ID = 0;
+                inline static jmethodID onBoolCallback_ID = 0;
+                inline static jmethodID onStringCallback_ID = 0;
+
+                CallbackClassManualImpl( JNIEnv* env, jobject obj ) {
                     this->env = env;
                     this->obj = obj;
+
+                    if(CallbackClassManualImpl::jClassID == 0) {
+                        CallbackClassManualImpl::jClassID = (jclass)env->NewGlobalRef(env->GetObjectClass(obj));
+                        CallbackClassManualImpl::onVoidCallback_ID = env->GetMethodID(jClassID, "internal_onVoidCallback", "(JJ)V");
+                        CallbackClassManualImpl::onIntCallback_ID = env->GetMethodID(jClassID, "internal_onIntCallback", "(II)I");
+                        CallbackClassManualImpl::onFloatCallback_ID = env->GetMethodID(jClassID, "internal_onFloatCallback", "(FF)F");
+                        CallbackClassManualImpl::onBoolCallback_ID = env->GetMethodID(jClassID, "internal_onBoolCallback", "(Z)Z");
+                        CallbackClassManualImpl::onStringCallback_ID = env->GetMethodID(jClassID, "internal_onStringCallback", "(Ljava/lang/String;)V");
+                    }
                 }
                 virtual void onVoidCallback(TestObjectClass& refData, TestObjectClass* pointerData) const {
-                    env->CallVoidMethod(obj, onVoidCallback_ID, (jlong)&refData, (jlong)pointerData);
+                    env->CallVoidMethod(obj, CallbackClassManualImpl::onVoidCallback_ID, (jlong)&refData, (jlong)pointerData);
                 }
                 virtual int onIntCallback(int intValue01, int intValue02) const {
-                    return env->CallIntMethod(obj, onIntCallback_ID, intValue01, intValue02);
+                    return env->CallIntMethod(obj, CallbackClassManualImpl::onIntCallback_ID, intValue01, intValue02);
                 }
                 virtual float onFloatCallback(float floatValue01, float floatValue02) const {
-                    return env->CallFloatMethod(obj, onFloatCallback_ID, floatValue01, floatValue02);
+                    return env->CallFloatMethod(obj, CallbackClassManualImpl::onFloatCallback_ID, floatValue01, floatValue02);
                 }
                 virtual bool onBoolCallback(bool boolValue01) const {
-                    return env->CallBooleanMethod(obj, onBoolCallback_ID, boolValue01);
+                    return env->CallBooleanMethod(obj, CallbackClassManualImpl::onBoolCallback_ID, boolValue01);
                 }
                 virtual void onStringCallback(const char* strValue01) const {
                     jstring jstrBuf = env->NewStringUTF(strValue01);
-                    env->CallVoidMethod(obj, onStringCallback_ID, jstrBuf);
+                    env->CallVoidMethod(obj, CallbackClassManualImpl::onStringCallback_ID, jstrBuf);
                 }
         };
     */
@@ -71,8 +80,23 @@ public class CallbackClassManual extends IDLBase {
         }
     */
 
+    public CallbackClassManual() {
+        long addr = internal_native_create();
+        initNative(addr, true);
+        setCallbacks();
+    }
+
+    /*[-JNI;-NATIVE]
+        return (jlong)new CallbackClassManualImpl(env, env->NewGlobalRef(object));
+    */
     /*[-TEAVM;-REPLACE]
-        public CallbackClassManual() {
+        @org.teavm.jso.JSBody(params = { }, script = "var CallbackClassManualImpl = new [MODULE].CallbackClassManualImpl(); return [MODULE].getPointer(CallbackClassManualImpl);")
+        private static native int internal_native_create();
+    */
+    private native long internal_native_create();
+
+    /*[-TEAVM;-REPLACE_BLOCK]
+        {
             onVoidCallback onVoidCallback = new onVoidCallback() {
                 @Override
                 public void onVoidCallback(int refData, int pointerData) {
@@ -103,31 +127,16 @@ public class CallbackClassManual extends IDLBase {
                     internal_onStringCallback(IDLBase.getJSString(strValue01));
                 }
             };
-            int pointer = createNative(onVoidCallback, onIntCallback, onFloatCallback, onBoolCallback, onStringCallback);
-            initNative(pointer, true);
+            internal_setCallbacks((int)getCPointer(), onVoidCallback, onIntCallback, onFloatCallback, onBoolCallback, onStringCallback);
         }
     */
-    public CallbackClassManual() {
-        long addr = createNATIVE();
-        initNative(addr, true);
+    private void setCallbacks() {
     }
 
-    /*[-JNI;-NATIVE]
-        if(CallbackClassManual_CLASS == 0) {
-            CallbackClassManual_CLASS = (jclass)env->NewGlobalRef(env->GetObjectClass(object));
-            onVoidCallback_ID = env->GetMethodID(CallbackClassManual_CLASS, "internal_onVoidCallback", "(JJ)V");
-            onIntCallback_ID = env->GetMethodID(CallbackClassManual_CLASS, "internal_onIntCallback", "(II)I");
-            onFloatCallback_ID = env->GetMethodID(CallbackClassManual_CLASS, "internal_onFloatCallback", "(FF)F");
-            onBoolCallback_ID = env->GetMethodID(CallbackClassManual_CLASS, "internal_onBoolCallback", "(Z)Z");
-            onStringCallback_ID = env->GetMethodID(CallbackClassManual_CLASS, "internal_onStringCallback", "(Ljava/lang/String;)V");
-        }
-        return (jlong)new CallbackClassManual_NATIVE(env, env->NewGlobalRef(object));
+    /*[-TEAVM;-ADD]
+        @org.teavm.jso.JSBody(params = { "this_addr", "onVoidCallback", "onIntCallback", "onFloatCallback", "onBoolCallback", "onStringCallback" }, script = "var CallbackClassManualImpl = [MODULE].wrapPointer(this_addr, [MODULE].CallbackClassManualImpl); CallbackClassManualImpl.onVoidCallback = onVoidCallback; CallbackClassManualImpl.onIntCallback = onIntCallback; CallbackClassManualImpl.onFloatCallback = onFloatCallback; CallbackClassManualImpl.onBoolCallback = onBoolCallback; CallbackClassManualImpl.onStringCallback = onStringCallback;")
+        private static native void internal_setCallbacks(int this_addr, onVoidCallback onVoidCallback, onIntCallback onIntCallback, onFloatCallback onFloatCallback, onBoolCallback onBoolCallback, onStringCallback onStringCallback);
     */
-    /*[-TEAVM;-REPLACE]
-        @org.teavm.jso.JSBody(params = { "onVoidCallback", "onIntCallback", "onFloatCallback", "onBoolCallback", "onStringCallback" }, script = "var CallbackClassManualImpl = new [MODULE].CallbackClassManualImpl(); CallbackClassManualImpl.onVoidCallback = onVoidCallback; CallbackClassManualImpl.onIntCallback = onIntCallback; CallbackClassManualImpl.onFloatCallback = onFloatCallback; CallbackClassManualImpl.onBoolCallback = onBoolCallback; CallbackClassManualImpl.onStringCallback = onStringCallback; return [MODULE].getPointer(CallbackClassManualImpl);")
-        private static native int createNative(onVoidCallback onVoidCallback, onIntCallback onIntCallback, onFloatCallback onFloatCallback, onBoolCallback onBoolCallback, onStringCallback onStringCallback);
-    */
-    private native long createNATIVE();
 
     public void internal_onVoidCallback(long refData, long pointerData) {
     }

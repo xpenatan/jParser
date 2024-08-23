@@ -216,7 +216,14 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLDeConstructorGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration nativeMethodDeclaration) {
-        String classTypeName = idlClass.classHeader.prefixName + classDeclaration.getNameAsString();
+        String classTypeName;
+
+        if(idlClass.callback == null) {
+            classTypeName = idlClass.classHeader.prefixName + classDeclaration.getNameAsString();
+        }
+        else {
+            classTypeName = idlClass.callback.name;
+        }
 
         String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_TYPE, classTypeName);
 

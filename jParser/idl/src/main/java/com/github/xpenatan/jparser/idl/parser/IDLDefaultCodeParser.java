@@ -80,6 +80,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
                         if(headerCommands != null) {
                             if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
                                 //If skip is found then remove the method
+                                idlClass.idlSkip = true;
                                 return;
                             }
                         }
@@ -102,6 +103,13 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
                         IDLAttribute idlAttribute = attributes.get(i);
                         IDLAttributeParser.generateAttribute(this, jParser, unit, classOrInterfaceDeclaration, idlClass, idlAttribute);
                     }
+                }
+
+                if(generateClass) {
+                    if(idlClass.callback != null) {
+                        IDLCallbackParser.generateCallback(this, jParser, unit, classOrInterfaceDeclaration, idlClass);
+                    }
+
                 }
             }
             else {
@@ -154,6 +162,9 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     }
 
     public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    }
+
+    public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration) {
     }
 
     public String getIDLMethodName(String name) {

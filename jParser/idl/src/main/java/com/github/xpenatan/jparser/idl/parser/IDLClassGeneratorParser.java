@@ -349,6 +349,11 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         for(int i = 0; i < parserItems.size(); i++) {
             JParserItem parserItem = parserItems.get(i);
             String className = parserItem.className;
+            IDLClass idlClass = idlReader.getClass(className);
+            if(idlClass != null && idlClass.idlSkip) {
+                continue;
+            }
+
             CompilationUnit unit = parserItem.unit;
             List<ClassOrInterfaceDeclaration> classDeclarations = unit.findAll(ClassOrInterfaceDeclaration.class);
 

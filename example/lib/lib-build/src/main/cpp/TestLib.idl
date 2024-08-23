@@ -138,17 +138,17 @@ interface CallbackClassManual {
     long addInt(long a, long b);
 };
 
-[JSImplementation="CallbackClass"]
-interface CallbackClassImpl {
-    void CallbackClassImpl();
-
-    [Const] void onVoidCallback([Ref] TestObjectClass refData, TestObjectClass pointerData);
-    [Const] long onIntCallback(long intValue01, long intValue02);
-    [Const] float onFloatCallback(float floatValue01, float floatValue02);
-    [Const] boolean onBoolCallback(boolean boolValue01);
-    [Const] void onStringCallback([Const] DOMString strValue01);
-};
-CallbackClassImpl implements CallbackClass;
+//[JSImplementation="CallbackClass"]
+//interface CallbackClassImpl {
+//    void CallbackClassImpl();
+//
+//    [Const] void onVoidCallback([Ref] TestObjectClass refData, TestObjectClass pointerData);
+//    [Const] long onIntCallback(long intValue01, long intValue02);
+//    [Const] float onFloatCallback(float floatValue01, float floatValue02);
+//    [Const] boolean onBoolCallback(boolean boolValue01);
+//    [Const] void onStringCallback([Const] DOMString strValue01);
+//};
+//CallbackClassImpl implements CallbackClass;
 
 [JSImplementation="CallbackClassManual"]
 interface CallbackClassManualImpl {
@@ -160,20 +160,20 @@ interface CallbackClassManualImpl {
     [Const] boolean onBoolCallback(boolean boolValue01);
     [Const] void onStringCallback([Const] DOMString strValue01);
 };
-CallbackClassImpl implements CallbackClass;
+CallbackClassManualImpl implements CallbackClassManual;
 
 interface DefaultCallbackClass {
     void DefaultCallbackClass();
 };
 DefaultCallbackClass implements CallbackClass;
 
-[JSImplementation="DefaultCallbackClass"]
-interface DefaultCallbackClassImpl {
-    void DefaultCallbackClassImpl();
-
-    [Const] long onIntCallback(long intValue01, long intValue02);
-};
-DefaultCallbackClassImpl implements DefaultCallbackClass;
+//[JSImplementation="DefaultCallbackClass"]
+//interface DefaultCallbackClassImpl {
+//    void DefaultCallbackClassImpl();
+//
+//    [Const] long onIntCallback(long intValue01, long intValue02);
+//};
+//DefaultCallbackClassImpl implements DefaultCallbackClass;
 
 interface TestCallbackClass {
     void TestCallbackClass();

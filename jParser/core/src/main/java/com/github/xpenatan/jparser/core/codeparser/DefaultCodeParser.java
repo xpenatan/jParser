@@ -10,6 +10,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.RawCodeBlock;
@@ -27,6 +28,7 @@ public abstract class DefaultCodeParser implements CodeParser {
     public static final String CMD_ADD_RAW = "-ADD_RAW";
     public static final String CMD_REMOVE = "-REMOVE";
     public static final String CMD_REPLACE = "-REPLACE";
+    public static final String CMD_REPLACE_BLOCK = "-REPLACE_BLOCK";
     public static final String CMD_NATIVE = "-NATIVE";
 
     private ArrayList<BlockComment> cache = new ArrayList<>();
@@ -163,19 +165,28 @@ public abstract class DefaultCodeParser implements CodeParser {
 
     protected boolean parseCodeBlock(Node node, String headerCommands, String content) {
         if(headerCommands.contains(CMD_ADD_RAW)) {
-            setAddReplaceCMD(node, content, false, true);
+            setAddReplaceCMD(node, content, false, true, false);
             return true;
         }
         else if(headerCommands.contains(CMD_ADD)) {
-            setAddReplaceCMD(node, content, false, false);
+            setAddReplaceCMD(node, content, false, false, false);
             return true;
         }
         else if(headerCommands.contains(CMD_REMOVE)) {
             node.remove();
             return true;
         }
+        else if(headerCommands.contains(CMD_REPLACE_BLOCK)) {
+            if(node instanceof MethodDeclaration) {
+                MethodDeclaration methodDeclaration = (MethodDeclaration)node;
+                BlockStmt blockStmt = StaticJavaParser.parseBlock(content);
+                methodDeclaration.setBody(blockStmt);
+                return true;
+            }
+            return false;
+        }
         else if(headerCommands.contains(CMD_REPLACE)) {
-            setAddReplaceCMD(node, content, true, false);
+            setAddReplaceCMD(node, content, true, false, false);
             return true;
         }
         else if(headerCommands.contains(CMD_NATIVE)) {
@@ -190,7 +201,7 @@ public abstract class DefaultCodeParser implements CodeParser {
         return false;
     }
 
-    private void setAddReplaceCMD(Node node, String content, boolean replace, boolean rawAdd) {
+    private void setAddReplaceCMD(Node node, String content, boolean replace, boolean rawAdd, boolean replaceBlock) {
         Node parentNode = null;
         Optional<Node> parentNodeOptional = node.getParentNode();
         if(parentNodeOptional.isPresent()) {
@@ -211,7 +222,6 @@ public abstract class DefaultCodeParser implements CodeParser {
                     else {
                         BodyDeclaration<?> newCode = StaticJavaParser.parseBodyDeclaration(content);
                         typeDeclaration.getMembers().add(newCode);
-
                     }
                 }
                 catch(Throwable t) {

@@ -301,7 +301,14 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLDeConstructorGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration nativeMethodDeclaration) {
-        String returnTypeName = classDeclaration.getNameAsString();
+        String returnTypeName ;
+        if(idlClass.callback == null) {
+            returnTypeName = classDeclaration.getNameAsString();
+        }
+        else {
+            returnTypeName = idlClass.callback.name;
+        }
+
         String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_TYPE, returnTypeName);
 
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";

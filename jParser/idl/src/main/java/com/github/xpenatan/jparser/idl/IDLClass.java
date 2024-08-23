@@ -18,6 +18,7 @@ public class IDLClass extends IDLClassOrEnum {
     public ArrayList<String> settings = new ArrayList<>();
 
     public IDLClass callback;
+    public boolean idlSkip = false;
 
     public IDLClass(IDLFile idlFile) {
         this.idlFile = idlFile;
