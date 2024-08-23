@@ -124,6 +124,7 @@ public class IDLReader {
                 ArrayList<IDLClassOrEnum> classList = new ArrayList<>();
                 parseFile(idlFile, classList);
                 idlFile.classArray.addAll(classList);
+                configCallbacks(idlFile, classList);
             }
             catch(Throwable t) {
                 t.printStackTrace();
@@ -200,6 +201,30 @@ public class IDLReader {
                     classLines.clear();
                     classList.add(parserLineClass);
                     settings.clear();
+                }
+            }
+        }
+    }
+
+    private static void configCallbacks(IDLFile idlFile, ArrayList<IDLClassOrEnum> classList) {
+        for(int i = 0; i < classList.size(); i++) {
+            IDLClassOrEnum idlClassOrEnum = classList.get(i);
+            if(idlClassOrEnum.isClass()) {
+                IDLClass idlCallbackImpl = idlClassOrEnum.asClass();
+                String jsImplementation = idlCallbackImpl.classHeader.jsImplementation;
+                if(jsImplementation != null) {
+                    jsImplementation = jsImplementation.trim();
+                    if(!jsImplementation.isEmpty()) {
+                        IDLClass callbackClass = idlFile.getClass(jsImplementation);
+                        if(callbackClass != null) {
+                            if(callbackClass.callback == null) {
+                                callbackClass.callback = idlCallbackImpl;
+                            }
+                            else {
+                                throw new RuntimeException("Class " + callbackClass.name + " cannot have multiple JSImplementation");
+                            }
+                        }
+                    }
                 }
             }
         }
