@@ -42,7 +42,7 @@ public class IDLClass extends IDLClassOrEnum {
             }
             else {
                 if(line.startsWith("void " + name)) {
-                    IDLConstructor constructor = new IDLConstructor(idlFile);
+                    IDLConstructor constructor = new IDLConstructor(idlFile, this);
                     constructor.initConstructor(line);
                     constructors.add(constructor);
 

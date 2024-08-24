@@ -195,12 +195,9 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
-        String classTypeName = classDeclaration.getNameAsString();
+        IDLClass idlClass = idlConstructor.idlClass;
 
-        IDLClass idlClass = idlConstructor.idlFile.getClass(classTypeName);
-        if(idlClass != null) {
-            classTypeName = idlClass.classHeader.prefixName + classTypeName;
-        }
+        String classTypeName = idlClass.getName();
 
         NodeList<Parameter> parameters = constructorDeclaration.getParameters();
         ArrayList<IDLParameter> idParameters = idlConstructor.parameters;

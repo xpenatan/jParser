@@ -255,11 +255,11 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
-//        convertLongToInt(constructorDeclaration.getBody(), nativeMethodDeclaration);
-
         String param = "";
 
-        String className = classDeclaration.getNameAsString();
+        IDLClass idlClass = idlConstructor.idlClass;
+
+        String className = idlClass.getName();
         MethodCallExpr caller = new MethodCallExpr();
         caller.setName(className);
 

@@ -17,9 +17,12 @@ public class CallbackClassManual extends IDLBase {
                 inline static jmethodID onBoolCallback_ID = 0;
                 inline static jmethodID onStringCallback_ID = 0;
 
-                CallbackClassManualImpl( JNIEnv* env, jobject obj ) {
+                CallbackClassManualImpl() {
+                }
+
+                void setupCallback(JNIEnv* env, jobject obj) {
                     this->env = env;
-                    this->obj = obj;
+                    this->obj = env->NewGlobalRef(obj);
 
                     if(CallbackClassManualImpl::jClassID == 0) {
                         CallbackClassManualImpl::jClassID = (jclass)env->NewGlobalRef(env->GetObjectClass(obj));
@@ -83,17 +86,17 @@ public class CallbackClassManual extends IDLBase {
     public CallbackClassManual() {
         long addr = internal_native_create();
         initNative(addr, true);
-        setCallbacks();
+        setupCallbacks();
     }
 
     /*[-JNI;-NATIVE]
-        return (jlong)new CallbackClassManualImpl(env, env->NewGlobalRef(object));
+        return (jlong)new CallbackClassManualImpl();
     */
-    /*[-TEAVM;-REPLACE]
-        @org.teavm.jso.JSBody(params = { }, script = "var CallbackClassManualImpl = new [MODULE].CallbackClassManualImpl(); return [MODULE].getPointer(CallbackClassManualImpl);")
-        private static native int internal_native_create();
+    /*[-TEAVM;-NATIVE]
+        var CallbackClassManualImpl = new [MODULE].CallbackClassManualImpl();
+        return [MODULE].getPointer(CallbackClassManualImpl);
     */
-    private native long internal_native_create();
+    private static native long internal_native_create();
 
     /*[-TEAVM;-REPLACE_BLOCK]
         {
@@ -127,16 +130,22 @@ public class CallbackClassManual extends IDLBase {
                     internal_onStringCallback(IDLBase.getJSString(strValue01));
                 }
             };
-            internal_setCallbacks((int)getCPointer(), onVoidCallback, onIntCallback, onFloatCallback, onBoolCallback, onStringCallback);
+            internal_native_setupCallbacks((int)getCPointer(), onVoidCallback, onIntCallback, onFloatCallback, onBoolCallback, onStringCallback);
         }
     */
-    private void setCallbacks() {
+    private void setupCallbacks() {
+        internal_native_setupCallbacks(getCPointer());
     }
 
-    /*[-TEAVM;-ADD]
-        @org.teavm.jso.JSBody(params = { "this_addr", "onVoidCallback", "onIntCallback", "onFloatCallback", "onBoolCallback", "onStringCallback" }, script = "var CallbackClassManualImpl = [MODULE].wrapPointer(this_addr, [MODULE].CallbackClassManualImpl); CallbackClassManualImpl.onVoidCallback = onVoidCallback; CallbackClassManualImpl.onIntCallback = onIntCallback; CallbackClassManualImpl.onFloatCallback = onFloatCallback; CallbackClassManualImpl.onBoolCallback = onBoolCallback; CallbackClassManualImpl.onStringCallback = onStringCallback;")
-        private static native void internal_setCallbacks(int this_addr, onVoidCallback onVoidCallback, onIntCallback onIntCallback, onFloatCallback onFloatCallback, onBoolCallback onBoolCallback, onStringCallback onStringCallback);
+    /*[-JNI;-NATIVE]
+        CallbackClassManualImpl* nativeObject = (CallbackClassManualImpl*)this_addr;
+        nativeObject->setupCallback(env, object);
     */
+    /*[-TEAVM;-REPLACE]
+        @org.teavm.jso.JSBody(params = { "this_addr", "onVoidCallback", "onIntCallback", "onFloatCallback", "onBoolCallback", "onStringCallback" }, script = "var CallbackClassManualImpl = [MODULE].wrapPointer(this_addr, [MODULE].CallbackClassManualImpl); CallbackClassManualImpl.onVoidCallback = onVoidCallback; CallbackClassManualImpl.onIntCallback = onIntCallback; CallbackClassManualImpl.onFloatCallback = onFloatCallback; CallbackClassManualImpl.onBoolCallback = onBoolCallback; CallbackClassManualImpl.onStringCallback = onStringCallback;")
+        private static native void internal_native_setupCallbacks(int this_addr, onVoidCallback onVoidCallback, onIntCallback onIntCallback, onFloatCallback onFloatCallback, onBoolCallback onBoolCallback, onStringCallback onStringCallback);
+    */
+    private native void internal_native_setupCallbacks(long this_addr);
 
     public void internal_onVoidCallback(long refData, long pointerData) {
     }

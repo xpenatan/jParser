@@ -28,7 +28,12 @@ public class IDLConstructorParser {
         ArrayList<IDLConstructor> constructors = idlClass.constructors;
         for(int i = 0; i < constructors.size(); i++) {
             IDLConstructor idlConstructor = constructors.get(i);
-            generateConstructor(idlParser, jParser, unit, classOrInterfaceDeclaration, idlConstructor);
+            ConstructorDeclaration constructorDeclaration = IDLConstructorParser.getOrCreateConstructorDeclaration(idlParser, jParser, unit, classOrInterfaceDeclaration, idlConstructor);
+
+            if(constructorDeclaration.getBody().isEmpty()) {
+                MethodDeclaration nativeMethod = IDLConstructorParser.setupConstructor(idlConstructor, classOrInterfaceDeclaration, constructorDeclaration);
+                idlParser.onIDLConstructorGenerated(jParser, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration, nativeMethod);
+            }
         }
 
         // All classes contain a temp constructor so temp objects can be reused
@@ -70,7 +75,7 @@ public class IDLConstructorParser {
         }
     }
 
-    private static void generateConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLConstructor idlConstructor) {
+    public static ConstructorDeclaration getOrCreateConstructorDeclaration(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLConstructor idlConstructor) {
         ConstructorDeclaration constructorDeclaration = containsConstructor(classOrInterfaceDeclaration, idlConstructor);
         if(constructorDeclaration == null) {
             constructorDeclaration = classOrInterfaceDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
@@ -83,13 +88,10 @@ public class IDLConstructorParser {
                 constructorDeclaration.addAndGetParameter(paramType, parameter.name);
             }
         }
-
-        if(constructorDeclaration.getBody().isEmpty()) {
-            setupConstructor(idlParser, jParser, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration);
-        }
+        return constructorDeclaration;
     }
 
-    private static void setupConstructor(IDLDefaultCodeParser idlParser, JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
+    public static MethodDeclaration setupConstructor(IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
         NodeList<Parameter> parameters = constructorDeclaration.getParameters();
         Type type = StaticJavaParser.parseType(classDeclaration.getNameAsString());
 
@@ -111,11 +113,12 @@ public class IDLConstructorParser {
             blockStmt.addStatement(statement1);
             blockStmt.addStatement(statement2);
 
-            idlParser.onIDLConstructorGenerated(jParser, idlConstructor, classDeclaration, constructorDeclaration, nativeMethod);
+            return nativeMethod;
         }
+        return null;
     }
 
-    private static ConstructorDeclaration containsConstructor(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLConstructor idlConstructor) {
+    public static ConstructorDeclaration containsConstructor(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLConstructor idlConstructor) {
         ArrayList<IDLParameter> parameters = idlConstructor.parameters;
         String[] paramTypes = new String[parameters.size()];
         for(int i = 0; i < parameters.size(); i++) {
