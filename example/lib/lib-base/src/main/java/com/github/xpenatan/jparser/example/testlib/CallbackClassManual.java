@@ -17,9 +17,6 @@ public class CallbackClassManual extends IDLBase {
                 inline static jmethodID onBoolCallback_ID = 0;
                 inline static jmethodID onStringCallback_ID = 0;
 
-                CallbackClassManualImpl() {
-                }
-
                 void setupCallback(JNIEnv* env, jobject obj) {
                     this->env = env;
                     this->obj = env->NewGlobalRef(obj);
