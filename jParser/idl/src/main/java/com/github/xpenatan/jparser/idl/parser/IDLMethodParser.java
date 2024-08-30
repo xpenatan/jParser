@@ -111,13 +111,7 @@ public class IDLMethodParser {
             String paramType = idlParameter.getType();
             String paramName = idlParameter.name;
             paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
-            Parameter parameter = null;
-            try {
-                parameter = methodDeclaration.addAndGetParameter(paramType, paramName);
-            }
-            catch(Throwable t) {
-                t.printStackTrace();
-            }
+            Parameter parameter = methodDeclaration.addAndGetParameter(paramType, paramName);
             Type type = parameter.getType();
             JParserHelper.addMissingImportType(jParser, unit, type);
         }
