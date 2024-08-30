@@ -124,6 +124,7 @@ class TestMethodClass {
         float floatValue01;
         float floatValue02;
         bool boolValue01;
+        long long longLongValue01;
         string strValue01;
         const TestObjectClass* pointerObject01;
         TestObjectClass* pointerObject02;
@@ -181,6 +182,9 @@ class TestMethodClass {
             obj2->intValue01 = 40;
             obj2->floatValue01 = 30.8;
         };
+        void setMethod08(long long longLongValue01) {
+            this->longLongValue01 = longLongValue01;
+        };
 
         int getIntValue01() { return intValue01; };
         int getIntValue02() { return intValue02; };
@@ -194,6 +198,7 @@ class TestMethodClass {
         const TestObjectClass& getRefObject01() { return refObject01; };
         TestObjectClass& getRefObject02() { return refObject02; };
         TestObjectClass getValueObject() { return refObject02; };
+        long long getLongLongValue01() { return longLongValue01; };
 };
 
 class TestStaticMethodClass {

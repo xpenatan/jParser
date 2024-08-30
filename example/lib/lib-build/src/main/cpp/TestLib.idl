@@ -93,6 +93,7 @@ interface TestMethodClass {
     void setMethod05([Const] DOMString strValue01);
     void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
     void setMethod07(TestObjectClass pointerObjectArray);
+    void setMethod08(long long longLongValue01);
 
     long getIntValue01();
     long getIntValue02();
@@ -106,6 +107,7 @@ interface TestMethodClass {
     [Const, Ref] TestObjectClass getRefObject01();
     [Ref] TestObjectClass getRefObject02();
     [Value] TestObjectClass getValueObject();
+    long long getLongLongValue01();
 };
 
 [NoDelete]

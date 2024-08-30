@@ -56,15 +56,24 @@ public class IDLParameter {
 
         String[] s1 = tmpLine.split(" ");
         name = s1[s1.length - 1];
-        tmpLine = tmpLine.replace(name, "").trim();
 
-        type = tmpLine;
+        type = "";
+        int sss = s1.length - 1;
+        for(int i = 0; i < sss; i++) {
+            type += s1[i];
+            if(i < sss-1) {
+                type += " ";
+            }
+        }
 
         if(isArray) {
             type = type + "[]";
         }
 
-        if(type.contains("long")) {
+        if(type.contains("long long")) {
+            type = type.replace("long long", "long");
+        }
+        else if(type.contains("long")) {
             // long in webidl means int
             type = type.replace("long", "int");
         }

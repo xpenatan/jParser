@@ -63,12 +63,22 @@ public class IDLMethod {
             isStaticMethod = true;
         }
 
-        String[] s = leftSide.split(" ");
-        name = s[s.length-1];
-        leftSide = leftSide.replace(name, "").trim();
-        returnType = leftSide;
+        String[] s1 = leftSide.split(" ");
+        name = s1[s1.length-1];
 
-        if(returnType.contains("long")) {
+        returnType = "";
+        int sss = s1.length - 1;
+        for(int i = 0; i < sss; i++) {
+            returnType += s1[i];
+            if(i < sss-1) {
+                returnType += " ";
+            }
+        }
+
+        if(returnType.contains("long long")) {
+            returnType = returnType.replace("long long", "long");
+        }
+        else if(returnType.contains("long")) {
             returnType = returnType.replace("long", "int");
         }
         if(returnType.equals("DOMString")) {
