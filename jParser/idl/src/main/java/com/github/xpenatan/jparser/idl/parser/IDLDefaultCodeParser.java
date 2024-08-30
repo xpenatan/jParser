@@ -12,6 +12,7 @@ import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.utils.Pair;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
@@ -128,7 +129,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
             BlockStmt blockStmt = idlMethodDeclaration.getBody().get();
             ReturnStmt returnStmt = new ReturnStmt();
             if(returnType.isPrimitiveType()) {
-                if(JParserHelper.isLong(returnType) || JParserHelper.isInt(returnType) || JParserHelper.isFloat(returnType) || JParserHelper.isDouble(returnType)) {
+                if(JParserHelper.isLong(returnType) || JParserHelper.isInt(returnType) || JParserHelper.isFloat(returnType) || JParserHelper.isDouble(returnType) || JParserHelper.isShort(returnType)) {
                     NameExpr returnNameExpr = new NameExpr();
                     returnNameExpr.setName("0");
                     returnStmt.setExpression(returnNameExpr);
@@ -164,7 +165,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
-    public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration) {
+    public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
     }
 
     public String getIDLMethodName(String name) {

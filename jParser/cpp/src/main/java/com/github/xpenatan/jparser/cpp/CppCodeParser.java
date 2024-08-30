@@ -1,6 +1,7 @@
 package com.github.xpenatan.jparser.cpp;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -8,8 +9,14 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.comments.BlockComment;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.utils.Pair;
 import com.github.xpenatan.jparser.core.JParser;
+import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
@@ -23,6 +30,7 @@ import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
+import com.github.xpenatan.jparser.idl.parser.IDLMethodParser;
 import java.util.ArrayList;
 
 public class CppCodeParser extends IDLDefaultCodeParser {
@@ -386,9 +394,226 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         nativeMethodDeclaration.setBlockComment(blockComment);
     }
 
+    @Override
+    public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        NodeList<Parameter> methodParameters = callbackDeclaration.getParameters();
+        IDLClass idlCallbackClass = idlClass.callback;
+        Type methodReturnType = callbackDeclaration.getType();
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.generateNativeMethod(callbackDeclaration.getNameAsString(), methodParameters, methodReturnType, false);
+        if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
+            nativeMethodDeclaration.removeModifier(Modifier.Keyword.STATIC);
+
+            // Call setupMethod
+            classDeclaration.getMembers().add(nativeMethodDeclaration);
+            MethodCallExpr caller = IDLMethodParser.createCaller(nativeMethodDeclaration);
+            caller.addArgument(IDLDefaultCodeParser.CPOINTER_METHOD);
+            BlockStmt blockStmt = callbackDeclaration.getBody().get();
+            blockStmt.addStatement(caller);
+            String method = callbackDeclaration.getNameAsString() + "(env, object)";
+            String content = METHOD_CALL_VOID_TEMPLATE.replace(TEMPLATE_TAG_METHOD, method).replace(TEMPLATE_TAG_TYPE, idlCallbackClass.name);
+            String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+            String blockComment = header + content;
+            nativeMethodDeclaration.setBlockComment(blockComment);
+
+
+            generateCPPClass(idlClass, classDeclaration, callbackDeclaration, methods);
+        }
+    }
+
+
+    private void generateCPPClass(IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        IDLClass callback = idlClass.callback;
+        String cppClass = "";
+
+        String callbackCode = generateSetupCallbackMethod(idlClass, callbackDeclaration, methods);
+        String methodsCode = generateMethodCallers(idlClass, methods);
+        cppClass += "" +
+                "class " + callback.name + " : public " + idlClass.name + " {\n" +
+                "private:\n" +
+                "\tJNIEnv* env;\n" +
+                "\tjobject obj;\n" +
+                "public:\n";
+        cppClass += callbackCode;
+        cppClass += methodsCode;
+        cppClass += "};\n";
+
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]\n";
+        String code = header + cppClass;
+
+        classDeclaration.getConstructors().get(0).setBlockComment(code);
+
+        System.out.println();
+    }
+
+    private String generateSetupCallbackMethod(IDLClass idlClass, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        String contentTemplate = "" +
+                "\tinline static jclass jClassID = 0;\n" +
+                "[VARIABLES]\n" +
+                "void [METHOD](JNIEnv* env, jobject obj) {\n" +
+                "\tthis->env = env;\n" +
+                "\tthis->obj = env->NewGlobalRef(obj);\n" +
+                "\tif([CLASS_NAME]::jClassID == 0) {\n" +
+                "\t\t[CLASS_NAME]::jClassID = (jclass)env->NewGlobalRef(env->GetObjectClass(obj));\n" +
+                "[METHOD_IDS]" +
+                "\t}\n" +
+                "}\n";
+        String variableTemplate = "\tinline static jmethodID [METHOD]_ID = 0;\n";
+        String methodIdTemplate = "\t\t[CLASS_NAME]::[METHOD]_ID = env->GetMethodID(jClassID, \"[INTERNAL_METHOD]\", \"[PARAM_CODE]\");\n";
+
+        IDLClass callbackClass = idlClass.callback;
+        String className = callbackClass.name;
+
+        String staticVariables = "";
+        String methodIds = "";
+        String methodName = callbackDeclaration.getNameAsString();
+
+        for(int i = 0; i < methods.size(); i++) {
+            Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
+            IDLMethod idlMethod = pair.a;
+            Pair<MethodDeclaration, MethodDeclaration> methodPair = pair.b;
+            MethodDeclaration internalMethod = methodPair.a;
+            MethodDeclaration publicMethod = methodPair.b;
+            String internalMethodName = internalMethod.getNameAsString();
+            String paramCode = "";
+
+            Type returnType = internalMethod.getType();
+            String returnTypeStr = returnType.asString();
+
+            NodeList<Parameter> parameters = internalMethod.getParameters();
+            for(int i1 = 0; i1 < parameters.size(); i1++) {
+                Parameter parameter = parameters.get(i1);
+                Type type = parameter.getType();
+                String typeStr = type.asString();
+                if(type.isPrimitiveType()) {
+                    String jniType = JNITypeSignature.getJNIType(typeStr);
+                    paramCode += jniType;
+                }
+                else if(type.isClassOrInterfaceType()) {
+                    if(typeStr.equals("String")) {
+                        paramCode += JNITypeSignature.String.getJNIType();
+                    }
+                }
+            }
+
+            paramCode = "(" + paramCode + ")" + JNITypeSignature.getJNIType(returnTypeStr);
+
+            String variable = variableTemplate.replace("[METHOD]", idlMethod.name);
+            String methodId = methodIdTemplate.replace("[METHOD]", idlMethod.name)
+                    .replace("[CLASS_NAME]", className)
+                    .replace("[INTERNAL_METHOD]", internalMethodName)
+                    .replace("[PARAM_CODE]", paramCode);
+            staticVariables += variable;
+            methodIds += methodId;
+        }
+
+        String content = contentTemplate.replace("[VARIABLES]", staticVariables)
+                .replace("[METHOD]", methodName)
+                .replace("[CLASS_NAME]", className)
+                .replace("[METHOD_IDS]", methodIds);
+
+        return content;
+    }
+
+    private String generateMethodCallers(IDLClass idlClass, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        IDLClass callback = idlClass.callback;
+        String cppMethods = "";
+        String cppClassName = callback.name;
+
+        String methodTemplate = "" +
+                "virtual [RETURN_TYPE] [METHOD]([PARAMS])[CONST] {\n" +
+                "   [RETURN]env->[CALL_METHOD](obj, [CPP_CLASS]::[METHOD]_ID[CALL_PARAMS]);\n" +
+                "}\n";
+
+        for(int i = 0; i < methods.size(); i++) {
+            Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
+            IDLMethod idlMethod = pair.a;
+            Pair<MethodDeclaration, MethodDeclaration> methodPair = pair.b;
+            MethodDeclaration internalMethod = methodPair.a;
+            MethodDeclaration publicMethod = methodPair.b;
+
+            Type type = internalMethod.getType();
+            boolean isVoidType = type.isVoidType();
+            String typeStr = getCPPType(idlMethod.returnType);
+
+            String methodName = idlMethod.name;
+            String methodParams = "";
+            String callParams = "";
+            String constStr = idlMethod.isReturnConst ? " const" : "";
+
+            NodeList<Parameter> publicMethodParameters = publicMethod.getParameters();
+            for(int i1 = 0; i1 < idlMethod.parameters.size(); i1++) {
+                IDLParameter idlParameter = idlMethod.parameters.get(i1);
+                Parameter parameter = publicMethodParameters.get(i1);
+                boolean isPrimitive = parameter.getType().isPrimitiveType();
+                String paramName = idlParameter.name;
+                String callParamName = idlParameter.name;
+                String paramType = idlParameter.type;
+                boolean isString = paramType.equals("String");
+                String tag = " ";
+                String callParamCast = "";
+
+                if(!isString) {
+                    if(idlParameter.isRef) {
+                        tag = "& ";
+                        callParamCast = "(jlong)&";
+                    }
+                    else if(!isPrimitive && !idlParameter.isValue) {
+                        tag = "* ";
+                        callParamCast = "(jlong)";
+                    }
+                }
+                else {
+                    callParamName = "env->NewStringUTF(" + paramName + ")";
+                }
+                paramType = getCPPType(paramType);
+                if(idlParameter.isConst) {
+                    paramType = "const " + paramType;
+                }
+                callParams += ", ";
+                callParams += callParamCast + callParamName;
+
+                methodParams += paramType + tag + paramName;
+                if(i1 < idlMethod.parameters.size() - 1) {
+                    methodParams += ", ";
+                }
+            }
+
+            String returnStr = "";
+            if(!isVoidType) {
+                returnStr = "return ";
+            }
+
+            if(typeStr.contains("unsigned")) {
+                returnStr += "(" + typeStr + ")";
+            }
+            String callMethod = getCPPCallMethod(type);
+            String methodStr = methodTemplate.replace("[CALL_METHOD]", callMethod).replace("[CPP_CLASS]", cppClassName).replace("[METHOD]", methodName).replace("[CALL_PARAMS]", callParams).replace("[RETURN]", returnStr);
+            methodStr = methodStr.replace("[RETURN_TYPE]", typeStr).replace("[METHOD]", methodName).replace("[PARAMS]", methodParams).replace("[CONST]", constStr);
+
+            cppMethods += methodStr;
+        }
+        return cppMethods;
+    }
+
+    private String getCPPCallMethod(Type type) {
+        String typeString = type.asString();
+        typeString = typeString.substring(0, 1).toUpperCase() + typeString.substring(1);
+        return "Call" + typeString + "Method";
+    }
+
+    private String getCPPType(String typeString) {
+        if(typeString.equals("boolean")) {
+            return "bool";
+        }
+        if(typeString.equals("String")) {
+            return "char*";
+        }
+        return typeString;
+    }
+
     private void setupMethodGenerated(IDLMethod idlMethod, String param, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         Type returnType = methodDeclaration.getType();
-        String returnTypeStr = idlMethod.returnType;
+        String returnTypeStr = idlMethod.getReturnType();
         String methodName = idlMethod.name;
         String classTypeName = classDeclaration.getNameAsString();
         IDLClass idlClass = idlMethod.idlFile.getClass(classTypeName);

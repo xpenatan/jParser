@@ -34,13 +34,14 @@ public class IDLMethod {
         paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
         int index = line.indexOf("(");
         String leftSide = line.substring(0, index).trim();
+        leftSide = IDLHelper.removeMultipleSpaces(leftSide.trim());
 
         String tagsStr = IDLHelper.getTags(leftSide);
         if(!tagsStr.isEmpty()) {
             isReturnRef = tagsStr.contains("Ref");
             isReturnValue = tagsStr.contains("Value");
             isReturnConst = tagsStr.contains("Const");
-            leftSide = leftSide.replace(tagsStr, "");
+            leftSide = leftSide.replace(tagsStr, "").trim();
 
             tagsStr = tagsStr.substring(1, tagsStr.length()-1);
             for(String s : tagsStr.split(",")) {
@@ -53,21 +54,22 @@ public class IDLMethod {
         }
 
         if(leftSide.contains("[]")) {
-            leftSide = leftSide.replace("[]", "");
+            leftSide = leftSide.replace("[]", "").trim();
             isReturnArray = true;
         }
-        leftSide = IDLHelper.removeMultipleSpaces(leftSide.trim());
 
         if(leftSide.contains("static")) {
+            leftSide = leftSide.replace("static", "").trim();
             isStaticMethod = true;
         }
 
         String[] s = leftSide.split(" ");
         name = s[s.length-1];
-        returnType = s[s.length-2];
+        leftSide = leftSide.replace(name, "").trim();
+        returnType = leftSide;
 
-        if(returnType.equals("long")) {
-            returnType = "int";
+        if(returnType.contains("long")) {
+            returnType = returnType.replace("long", "int");
         }
         if(returnType.equals("DOMString")) {
             returnType = "String";
@@ -77,6 +79,10 @@ public class IDLMethod {
             isAny = true;
             returnType = "long";
         }
+    }
+
+    public String getReturnType() {
+        return returnType.replace("unsigned", "").trim();
     }
 
     public int getTotalOptionalParams() {

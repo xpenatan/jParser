@@ -138,17 +138,19 @@ interface CallbackClassManual {
     long addInt(long a, long b);
 };
 
-//[JSImplementation="CallbackClass"]
-//interface CallbackClassImpl {
-//    void CallbackClassImpl();
-//
-//    [Const] void onVoidCallback([Ref] TestObjectClass refData, TestObjectClass pointerData);
-//    [Const] long onIntCallback(long intValue01, long intValue02);
-//    [Const] float onFloatCallback(float floatValue01, float floatValue02);
-//    [Const] boolean onBoolCallback(boolean boolValue01);
-//    [Const] void onStringCallback([Const] DOMString strValue01);
-//};
-//CallbackClassImpl implements CallbackClass;
+[JSImplementation="CallbackClass"]
+interface CallbackClassImpl {
+    void CallbackClassImpl();
+
+    [Const] void onVoidCallback([Ref] TestObjectClass refData, TestObjectClass pointerData);
+    [Const] long onIntCallback(long intValue01, long intValue02);
+    [Const] float onFloatCallback(float floatValue01, float floatValue02);
+    [Const] boolean onBoolCallback(boolean boolValue01);
+    [Const] void onStringCallback([Const] DOMString strValue01);
+    unsigned long onUnsignedIntCallback(unsigned long unsignedInt);
+    [Const] unsigned short onUnsignedShortCallback(unsigned short unsignedShort);
+};
+CallbackClassImpl implements CallbackClass;
 
 [JSImplementation="CallbackClassManual"]
 interface CallbackClassManualImpl {
@@ -162,10 +164,10 @@ interface CallbackClassManualImpl {
 };
 CallbackClassManualImpl implements CallbackClassManual;
 
-interface DefaultCallbackClass {
-    void DefaultCallbackClass();
-};
-DefaultCallbackClass implements CallbackClass;
+//interface DefaultCallbackClass {
+//    void DefaultCallbackClass();
+//};
+//DefaultCallbackClass implements CallbackClass;
 
 //[JSImplementation="DefaultCallbackClass"]
 //interface DefaultCallbackClassImpl {
@@ -187,11 +189,19 @@ interface TestCallbackClass {
     [Value] attribute TestObjectClass valueObject;
     attribute TestObjectClass pointerObject;
 
-    void callVoidCallback(CallbackClassManual callback);
-    long callIntCallback(CallbackClassManual callback);
-    float callFloatCallback(CallbackClassManual callback);
-    boolean callBoolCallback(CallbackClassManual callback);
-    void callStringCallback(CallbackClassManual callback);
+    void callVoidCallback(CallbackClass callback);
+    long callIntCallback(CallbackClass callback);
+    float callFloatCallback(CallbackClass callback);
+    boolean callBoolCallback(CallbackClass callback);
+    void callStringCallback(CallbackClass callback);
+    unsigned long callUnsignedIntCallback(CallbackClass callback);
+    unsigned short callUnsignedShortCallback(CallbackClass callback);
+
+    void callManualVoidCallback(CallbackClassManual callback);
+    long callManualIntCallback(CallbackClassManual callback);
+    float callManualFloatCallback(CallbackClassManual callback);
+    boolean callManualBoolCallback(CallbackClassManual callback);
+    void callManualStringCallback(CallbackClassManual callback);
 };
 
 enum TestEnumWithinClass {

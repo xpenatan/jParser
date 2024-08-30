@@ -41,6 +41,10 @@ public class JParserHelper {
         return JParserHelper.isType(type, "int");
     }
 
+    public static boolean isShort(Type type) {
+        return JParserHelper.isType(type, "short");
+    }
+
     public static boolean isFloat(Type type) {
         return JParserHelper.isType(type, "float");
     }

@@ -31,11 +31,13 @@ public class IDLParameter {
 
         optional = line.contains("optional");
         isArray = line.contains("[]");
+        tmpLine = tmpLine.replace("optional", "").trim();
+        tmpLine = tmpLine.replace("[]", "").trim();
 
-        int startIndex = line.indexOf("[");
-        int endIndex = line.indexOf("]");
+        int startIndex = tmpLine.indexOf("[");
+        int endIndex = tmpLine.indexOf("]");
         if(startIndex != -1 && endIndex != -1 && startIndex + 2 < endIndex) {
-            String tagsStr = line.substring(startIndex, endIndex + 1);
+            String tagsStr = tmpLine.substring(startIndex, endIndex + 1);
             isRef = tagsStr.contains("Ref");
             isConst = tagsStr.contains("Const");
             isValue = tagsStr.contains("Value");
@@ -53,15 +55,18 @@ public class IDLParameter {
         }
 
         String[] s1 = tmpLine.split(" ");
-        type = s1[s1.length - 2];
+        name = s1[s1.length - 1];
+        tmpLine = tmpLine.replace(name, "").trim();
+
+        type = tmpLine;
 
         if(isArray) {
             type = type + "[]";
         }
 
-        if(type.equals("long")) {
+        if(type.contains("long")) {
             // long in webidl means int
-            type = "int";
+            type = type.replace("long", "int");
         }
 
         if(type.equals("any") || type.equals("VoidPtr")) {
@@ -69,9 +74,6 @@ public class IDLParameter {
             isAny = true;
         }
 
-        if(type.equals("long[]")) {
-            type = "int[]";
-        }
         if(type.equals("DOMString")) {
             type = "String";
         }
@@ -95,9 +97,12 @@ public class IDLParameter {
         else if(type.equals("double[]")) {
             type = "IDLDoubleArray";
         }
-
-        name = s1[s1.length - 1];
     }
+
+    public String getType() {
+        return type.replace("unsigned", "").trim();
+    }
+
 
     public IDLParameter clone() {
         IDLParameter clonedParam = new IDLParameter(idlFile);

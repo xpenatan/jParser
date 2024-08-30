@@ -40,7 +40,7 @@ public class IDLDeConstructorParser {
             if(deleteMethod != null) {
                 NodeList<Parameter> parameters = deleteMethod.getParameters();
                 Type type = deleteMethod.getType();
-                MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(false, DELETE_NATIVE, parameters, type, false);
+                MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(DELETE_NATIVE, parameters, type, false);
 
                 if(!JParserHelper.containsMethod(classOrInterfaceDeclaration, nativeMethod)) {
                     classOrInterfaceDeclaration.getMembers().add(nativeMethod);

@@ -778,7 +778,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                     resolvedType = expression.calculateResolvedType();
                 }
                 catch(Throwable t) {
-                    t.printStackTrace();
+//                    t.printStackTrace();
                     continue;
                 }
                 String type = null;

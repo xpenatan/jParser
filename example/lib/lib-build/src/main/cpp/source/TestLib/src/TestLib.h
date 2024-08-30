@@ -263,6 +263,8 @@ public:
     virtual float onFloatCallback(float floatValue01, float Value02) const = 0;
     virtual bool onBoolCallback(bool boolValue01) const = 0;
     virtual void onStringCallback(const char* strValue01) const = 0;
+    virtual unsigned int onUnsignedIntCallback(unsigned int unsignedInt) = 0;
+    virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const = 0;
 
     int addInt(int a, int b)
     {
@@ -310,6 +312,12 @@ public:
     }
     virtual void onStringCallback(const char* strValue01) const {
     }
+    virtual unsigned int onUnsignedIntCallback(unsigned int unsignedInt) {
+        return 10;
+    }
+    virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const {
+        return 20;
+    }
 };
 
 class TestCallbackClass {
@@ -340,20 +348,28 @@ class TestCallbackClass {
             const char* text = strValue01.c_str();
             callback->onStringCallback(text);
         };
+        unsigned int callUnsignedIntCallback(CallbackClass* callback) {
+            unsigned int value = 13;
+            return callback->onUnsignedIntCallback(value);
+        };
+        unsigned short callUnsignedShortCallback(CallbackClass* callback) {
+            unsigned short value = 12;
+            return callback->onUnsignedShortCallback(value);
+        };
 
-        void callVoidCallback(CallbackClassManual* callback) {
+        void callManualVoidCallback(CallbackClassManual* callback) {
             callback->onVoidCallback(valueObject, pointerObject);
         };
-        int callIntCallback(CallbackClassManual* callback) {
+        int callManualIntCallback(CallbackClassManual* callback) {
             return callback->onIntCallback(intValue01, intValue02);
         };
-        float callFloatCallback(CallbackClassManual* callback) {
+        float callManualFloatCallback(CallbackClassManual* callback) {
             return callback->onFloatCallback(floatValue01, floatValue02);
         };
-        bool callBoolCallback(CallbackClassManual* callback) {
+        bool callManualBoolCallback(CallbackClassManual* callback) {
             return callback->onBoolCallback(boolValue01);
         };
-        void callStringCallback(CallbackClassManual* callback) {
+        void callManualStringCallback(CallbackClassManual* callback) {
             const char* text = strValue01.c_str();
             callback->onStringCallback(text);
         };

@@ -39,7 +39,7 @@ public class AppTest extends ApplicationAdapter {
         if(init) {
             init = false;
             testPass = TestLib.test();
-            color = testPass ? Color.GREEN : Color.RED;
+            color = testPass ? Color.LIME : Color.RED;
             return;
         }
 

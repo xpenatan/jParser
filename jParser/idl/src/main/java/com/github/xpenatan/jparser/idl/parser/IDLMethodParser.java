@@ -47,6 +47,10 @@ public class IDLMethodParser {
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
 
+    static final String CALLBACK_PARAM_TEMPLATE =
+            "if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
+            "[TYPE]_TEMP_GEN_[NUM].setCPointer([PARAM]);\n";
+
     static final String GET_TEMP_OBJECT_TEMPLATE =
             "{\n" +
             "    [METHOD];\n" +
@@ -64,25 +68,34 @@ public class IDLMethodParser {
 
     static final String TEMPLATE_TAG_METHOD = "[METHOD]";
 
+    static final String TEMPLATE_TAG_PARAM = "[PARAM]";
+
     static final String TEMPLATE_TAG_TYPE = "[TYPE]";
 
     static final String TEMPLATE_TAG_NUM = "[NUM]";
 
     public static void generateMethod(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass, IDLMethod idlMethod) {
+        MethodDeclaration methodDeclaration = generateAndAddMethodOnly(idlParser, jParser, unit, classOrInterfaceDeclaration, idlMethod);
+        if(methodDeclaration != null && idlParser.generateClass) {
+            setupMethod(idlParser, jParser, idlMethod, classOrInterfaceDeclaration, methodDeclaration);
+        }
+    }
+
+    public static MethodDeclaration generateAndAddMethodOnly(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, IDLMethod idlMethod) {
         if(idlMethod.skip) {
-            return;
+            return null;
         }
 
         String methodName = idlMethod.name;
         Type returnType = null;
 
-        MethodDeclaration containsMethod = containsMethod(idlParser, classOrInterfaceDeclaration, idlMethod);
+        MethodDeclaration containsMethod = containsMethod(idlParser, classDeclaration, idlMethod);
         if(containsMethod != null) {
             if(canGenerateMethod(containsMethod)) {
                 returnType = containsMethod.getType();
             }
             else {
-                return;
+                return null;
             }
         }
 
@@ -91,11 +104,11 @@ public class IDLMethodParser {
 
         String updatedMethodName = idlParser.getIDLMethodName(fixedMethodName);
         ArrayList<IDLParameter> parameters = idlMethod.parameters;
-        MethodDeclaration methodDeclaration = classOrInterfaceDeclaration.addMethod(updatedMethodName, Modifier.Keyword.PUBLIC);
+        MethodDeclaration methodDeclaration = classDeclaration.addMethod(updatedMethodName, Modifier.Keyword.PUBLIC);
         methodDeclaration.setStatic(idlMethod.isStaticMethod);
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter idlParameter = parameters.get(i);
-            String paramType = idlParameter.type;
+            String paramType = idlParameter.getType();
             String paramName = idlParameter.name;
             paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
             Parameter parameter = methodDeclaration.addAndGetParameter(paramType, paramName);
@@ -104,15 +117,12 @@ public class IDLMethodParser {
         }
 
         if(returnType == null) {
-            String returnTypeStr = IDLHelper.convertEnumToInt(idlParser.idlReader, idlMethod.returnType);
+            String returnTypeStr = IDLHelper.convertEnumToInt(idlParser.idlReader, idlMethod.getReturnType());
             returnType = StaticJavaParser.parseType(returnTypeStr);
         }
         methodDeclaration.setType(returnType);
         IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, returnType, methodDeclaration);
-
-        if(idlParser.generateClass) {
-            setupMethod(idlParser, jParser, idlMethod, classOrInterfaceDeclaration, methodDeclaration);
-        }
+        return methodDeclaration;
     }
 
     public static boolean canGenerateMethod(MethodDeclaration containsMethod) {
@@ -160,7 +170,7 @@ public class IDLMethodParser {
     public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator, ArrayList<IDLParameter> idlParameters) {
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
         Type methodReturnType = methodDeclaration.getType();
-        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(isReturnValue, methodName, methodParameters, methodReturnType, methodDeclaration.isStatic());
+        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(methodName, methodParameters, methodReturnType, methodDeclaration.isStatic());
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             //Add native method if it does not exist
             classDeclaration.getMembers().add(nativeMethodDeclaration);
@@ -283,7 +293,7 @@ public class IDLMethodParser {
         return body;
     }
 
-    private static String generateFieldName(ClassOrInterfaceDeclaration classDeclaration, String fieldType, boolean isStatic) {
+    public static String generateFieldName(ClassOrInterfaceDeclaration classDeclaration, String fieldType, boolean isStatic) {
         // Will return a temp object.
         // Java variable will be created by checking its class, name and number.
         // if the temp object already exist it will increment variable number and create it.
@@ -336,7 +346,7 @@ public class IDLMethodParser {
         }
     }
 
-    public static MethodDeclaration generateNativeMethod(boolean isReturnValue, String methodName, NodeList<Parameter> methodParameters, Type methodReturnType, boolean isStatic) {
+    public static MethodDeclaration generateNativeMethod(String methodName, NodeList<Parameter> methodParameters, Type methodReturnType, boolean isStatic) {
         boolean isClassOrInterfaceType = methodReturnType.isClassOrInterfaceType();
 
         // Clone some generated idl method settings
