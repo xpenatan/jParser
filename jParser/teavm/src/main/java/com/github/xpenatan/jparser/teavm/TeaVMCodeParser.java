@@ -259,7 +259,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
         IDLClass idlClass = idlConstructor.idlClass;
 
-        String className = idlClass.getName();
+        String className = idlClass.name; // teavm class cannot have prefix.
         MethodCallExpr caller = new MethodCallExpr();
         caller.setName(className);
 
