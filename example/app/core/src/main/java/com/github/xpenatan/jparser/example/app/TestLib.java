@@ -5,6 +5,7 @@ import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.TestCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestConstructorClass;
 import com.github.xpenatan.jparser.example.testlib.TestMethodClass;
+import com.github.xpenatan.jparser.example.testlib.TestNamespaceClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClassArray;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
@@ -21,6 +22,7 @@ public class TestLib {
         boolean staticMethodTest = testStaticMethodClass();
         boolean callbackTest = testCallbackClass();
         boolean callbackTestManual = testCallbackClassManual();
+        boolean namespaceTest = testNamespaceClass();
 
         System.out.println("constructorTest: " + constructorTest);
         System.out.println("stringConstructorTest: " + stringConstructorTest);
@@ -30,8 +32,9 @@ public class TestLib {
         System.out.println("methodTest: " + methodTest);
         System.out.println("staticMethodTest: " + staticMethodTest);
         System.out.println("callbackTest: " + callbackTest);
+        System.out.println("namespaceTest: " + namespaceTest);
         return constructorTest && stringConstructorTest && attributeTest && staticAttributeTest
-                && attributeArrayTest && methodTest && staticMethodTest && callbackTest && callbackTestManual;
+                && attributeArrayTest && methodTest && staticMethodTest && callbackTest && callbackTestManual && namespaceTest;
     }
 
     private static boolean testConstructorClass() {
@@ -429,7 +432,6 @@ public class TestLib {
     }
 
     private static boolean testCallbackClassManual() {
-
         {
             TestCallbackClass test = new TestCallbackClass();
             try {
@@ -532,6 +534,40 @@ public class TestLib {
                 test.callManualStringCallback(callback);
                 if(!(text.equals(internal_onStringCallback[0]) == true)) {
                     throw new RuntimeException("text.equals(internal_onStringCallback[0]) == true");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
+        return true;
+    }
+
+    private static boolean testNamespaceClass() {
+        {
+            TestNamespaceClass test = new TestNamespaceClass();
+            try {
+                int value = 20;
+                test.setMethod01Value(value);
+                if(!(value == test.getMethod01Value())) {
+                    throw new RuntimeException("value == test.getMethod01Value()");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
+        {
+            TestNamespaceClass test = new TestNamespaceClass();
+            try {
+                int value = 40;
+                test.set_intValue01(value);
+                if(!(value == test.get_intValue01())) {
+                    throw new RuntimeException("value == test.get_intValue01()");
                 }
             } catch(Throwable e) {
                 e.printStackTrace();

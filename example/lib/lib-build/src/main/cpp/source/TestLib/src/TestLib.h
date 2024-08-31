@@ -380,6 +380,22 @@ class TestCallbackClass {
         };
 };
 
+
+namespace TestNamespace {
+    class TestNamespaceClass {
+        private:
+        public:
+            int intValue01;
+
+            void setMethod01Value(int intValue01) {
+                this->intValue01 = intValue01;
+            }
+            int getMethod01Value() {
+                return intValue01;
+            }
+    };
+};
+
 class TestEnumClass {
     private:
 

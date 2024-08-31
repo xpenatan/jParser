@@ -206,6 +206,14 @@ interface TestCallbackClass {
     void callManualStringCallback(CallbackClassManual callback);
 };
 
+[Prefix="TestNamespace::"]
+interface TestNamespaceClass {
+    attribute long intValue01;
+    void TestNamespaceClass();
+    void setMethod01Value(long intValue01);
+    long getMethod01Value();
+};
+
 enum TestEnumWithinClass {
     "TestEnumClass::e_val"
 };
