@@ -27,12 +27,12 @@ public class IDLClass extends IDLClassOrEnum {
     public void initClass(ArrayList<String> lines) {
         classLines.addAll(lines);
         setupHeader();
-        setInterfaceName();
+        setupInterfaceName();
         setupExtendClass();
-        setAttributesAndMethods();
+        setupAttributesAndMethods();
     }
 
-    private void setAttributesAndMethods() {
+    private void setupAttributesAndMethods() {
         for(int i = 1; i < classLines.size(); i++) {
             String line = classLines.get(i);
             if(line.contains("attribute ")) {
@@ -75,7 +75,7 @@ public class IDLClass extends IDLClassOrEnum {
         }
     }
 
-    private void setInterfaceName() {
+    private void setupInterfaceName() {
         String line = searchLine("interface ", true, false);
         if(line != null) {
             name = line.split(" ")[1];
@@ -98,6 +98,15 @@ public class IDLClass extends IDLClassOrEnum {
         if(line != null && !line.startsWith("//")) {
             String[] split = line.split("implements");
             extendClass = split[1].trim().replace(";", "");
+        }
+        if(extendClass.isEmpty()) {
+            // If implements is not found check for :
+            String interfaceLine = searchLine("interface ", true, false);
+            if(interfaceLine != null && interfaceLine.contains(":")) {
+                String[] colonSplit = interfaceLine.split(":");
+                String[] spaceSplit = colonSplit[1].trim().split(" ");
+                extendClass = spaceSplit[0].trim();
+            }
         }
     }
 
