@@ -71,7 +71,7 @@ public class IDLParameter {
         }
 
         if(type.contains("long long")) {
-            type = type.replace("long long", "long");
+            // Keep c++ long long
         }
         else if(type.contains("long")) {
             // long in webidl means int
@@ -110,6 +110,9 @@ public class IDLParameter {
 
     public String getType() {
         if(isAny) {
+            return "long";
+        }
+        if(type.contains("long long")) {
             return "long";
         }
         return type.replace("unsigned", "").trim();

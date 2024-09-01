@@ -25,8 +25,6 @@ public class IDLCallbackParser {
     private final static String callbackMethodName = "setupCallback";
 
     public static void generateCallback(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, IDLClass idlClass) {
-
-
         ArrayList<IDLConstructor> constructors = idlClass.callback.constructors;
         if(constructors.size() == 1) {
             IDLConstructor idlConstructor = constructors.get(0);
