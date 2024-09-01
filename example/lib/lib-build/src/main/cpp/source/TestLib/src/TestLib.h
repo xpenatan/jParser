@@ -278,23 +278,6 @@ public:
     }
 };
 
-class CallbackClassManual
-{
-public:
-    virtual ~CallbackClassManual() {}
-
-    virtual void onVoidCallback(TestObjectClass& refData, TestObjectClass* pointerData) const = 0;
-    virtual int onIntCallback(int intValue01, int intValue02) const = 0;
-    virtual float onFloatCallback(float floatValue01, float Value02) const = 0;
-    virtual bool onBoolCallback(bool boolValue01) const = 0;
-    virtual void onStringCallback(const char* strValue01) const = 0;
-
-    int addInt(int a, int b)
-    {
-        return a + b;
-    }
-};
-
 class DefaultCallbackClass : public CallbackClass
 {
 public:
@@ -323,6 +306,25 @@ public:
     }
     virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const {
         return 20;
+    }
+    virtual void onAnyCallback(void * anyPtr) const {
+    }
+};
+
+class CallbackClassManual
+{
+public:
+    virtual ~CallbackClassManual() {}
+
+    virtual void onVoidCallback(TestObjectClass& refData, TestObjectClass* pointerData) const = 0;
+    virtual int onIntCallback(int intValue01, int intValue02) const = 0;
+    virtual float onFloatCallback(float floatValue01, float Value02) const = 0;
+    virtual bool onBoolCallback(bool boolValue01) const = 0;
+    virtual void onStringCallback(const char* strValue01) const = 0;
+
+    int addInt(int a, int b)
+    {
+        return a + b;
     }
 };
 

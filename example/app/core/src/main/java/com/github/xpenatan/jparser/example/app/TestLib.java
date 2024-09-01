@@ -2,6 +2,7 @@ package com.github.xpenatan.jparser.example.app;
 
 import com.github.xpenatan.jparser.example.testlib.CallbackClass;
 import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
+import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestConstructorClass;
 import com.github.xpenatan.jparser.example.testlib.TestMethodClass;
@@ -309,6 +310,23 @@ public class TestLib {
                 test.callIntCallback(callback);
                 if(!(internal_onIntCallback[0] == true)) {
                     throw new RuntimeException("internal_onIntCallback[0] == true");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
+        {
+            TestCallbackClass test = new TestCallbackClass();
+            try {
+                test.set_intValue01(10);
+                test.set_intValue02(3);
+                CallbackClass callback = new DefaultCallbackClass();
+                int value = test.callIntCallback(callback);
+                if(!(value == 7)) {
+                    throw new RuntimeException("value == 7");
                 }
             } catch(Throwable e) {
                 e.printStackTrace();

@@ -167,10 +167,10 @@ interface CallbackClassManualImpl {
 };
 CallbackClassManualImpl implements CallbackClassManual;
 
-//interface DefaultCallbackClass {
-//    void DefaultCallbackClass();
-//};
-//DefaultCallbackClass implements CallbackClass;
+interface DefaultCallbackClass {
+    void DefaultCallbackClass();
+};
+DefaultCallbackClass implements CallbackClass;
 
 //[JSImplementation="DefaultCallbackClass"]
 //interface DefaultCallbackClassImpl {
