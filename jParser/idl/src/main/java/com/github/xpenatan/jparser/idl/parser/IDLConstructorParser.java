@@ -82,7 +82,7 @@ public class IDLConstructorParser {
             ArrayList<IDLParameter> parameters = idlConstructor.parameters;
             for(int i = 0; i < parameters.size(); i++) {
                 IDLParameter parameter = parameters.get(i);
-                String paramType = parameter.type;
+                String paramType = parameter.getType();
                 paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
                 JParserHelper.addMissingImportType(jParser, unit, paramType);
                 constructorDeclaration.addAndGetParameter(paramType, parameter.name);
