@@ -26,13 +26,16 @@ public class IDLConstructorParser {
 
     public static void generateConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass) {
         ArrayList<IDLConstructor> constructors = idlClass.constructors;
-        for(int i = 0; i < constructors.size(); i++) {
-            IDLConstructor idlConstructor = constructors.get(i);
-            ConstructorDeclaration constructorDeclaration = IDLConstructorParser.getOrCreateConstructorDeclaration(idlParser, jParser, unit, classOrInterfaceDeclaration, idlConstructor);
+        if(idlClass.callback == null) {
+            // Generate constructors only if it's not callback
+            for(int i = 0; i < constructors.size(); i++) {
+                IDLConstructor idlConstructor = constructors.get(i);
+                ConstructorDeclaration constructorDeclaration = IDLConstructorParser.getOrCreateConstructorDeclaration(idlParser, jParser, unit, classOrInterfaceDeclaration, idlConstructor);
 
-            if(constructorDeclaration.getBody().isEmpty()) {
-                MethodDeclaration nativeMethod = IDLConstructorParser.setupConstructor(idlConstructor, classOrInterfaceDeclaration, constructorDeclaration);
-                idlParser.onIDLConstructorGenerated(jParser, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration, nativeMethod);
+                if(constructorDeclaration.getBody().isEmpty()) {
+                    MethodDeclaration nativeMethod = IDLConstructorParser.setupConstructor(idlConstructor, classOrInterfaceDeclaration, constructorDeclaration);
+                    idlParser.onIDLConstructorGenerated(jParser, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration, nativeMethod);
+                }
             }
         }
 
