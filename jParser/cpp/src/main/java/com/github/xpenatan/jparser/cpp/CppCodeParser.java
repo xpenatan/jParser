@@ -465,7 +465,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
         String staticVariables = "";
         String methodIds = "";
-        String methodName = callbackDeclaration.getNameAsString();
+        String callbackMethodName = callbackDeclaration.getNameAsString();
 
         for(int i = 0; i < methods.size(); i++) {
             Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
@@ -494,11 +494,14 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                     }
                 }
             }
+            String methodCode = generateMethodID(internalMethod);
 
             paramCode = "(" + paramCode + ")" + JNITypeSignature.getJNIType(returnTypeStr);
 
-            String variable = variableTemplate.replace("[METHOD]", idlMethod.name);
-            String methodId = methodIdTemplate.replace("[METHOD]", idlMethod.name)
+            String methodName = idlMethod.name + methodCode;
+
+            String variable = variableTemplate.replace("[METHOD]", methodName);
+            String methodId = methodIdTemplate.replace("[METHOD]", methodName)
                     .replace("[CLASS_NAME]", className)
                     .replace("[INTERNAL_METHOD]", internalMethodName)
                     .replace("[PARAM_CODE]", paramCode);
@@ -507,11 +510,32 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         }
 
         String content = contentTemplate.replace("[VARIABLES]", staticVariables)
-                .replace("[METHOD]", methodName)
+                .replace("[METHOD]", callbackMethodName)
                 .replace("[CLASS_NAME]", className)
                 .replace("[METHOD_IDS]", methodIds);
 
         return content;
+    }
+
+    private String generateMethodID(MethodDeclaration internalMethod) {
+        // Method is used when there is multiple overloaded methods
+        String methodCode = "";
+        NodeList<Parameter> parameters = internalMethod.getParameters();
+        for(int i1 = 0; i1 < parameters.size(); i1++) {
+            Parameter parameter = parameters.get(i1);
+            Type type = parameter.getType();
+            String typeStr = type.asString();
+            if(type.isPrimitiveType()) {
+                String jniType = JNITypeSignature.getJNIType(typeStr);
+                methodCode += jniType;
+            }
+            else if(type.isClassOrInterfaceType()) {
+                if(typeStr.equals("String")) {
+                    methodCode += "S";
+                }
+            }
+        }
+        return methodCode;
     }
 
     private String generateMethodCallers(IDLClass idlClass, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
@@ -520,8 +544,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String cppClassName = callback.name;
 
         String methodTemplate = "" +
-                "virtual [RETURN_TYPE] [METHOD]([PARAMS])[CONST] {\n" +
-                "   [RETURN]env->[CALL_METHOD](obj, [CPP_CLASS]::[METHOD]_ID[CALL_PARAMS]);\n" +
+                "virtual [RETURN_TYPE] [METHOD_NAME]([PARAMS])[CONST] {\n" +
+                "   [RETURN]env->[CALL_METHOD](obj, [CPP_CLASS]::[METHOD_ID]_ID[CALL_PARAMS]);\n" +
                 "}\n";
 
         for(int i = 0; i < methods.size(); i++) {
@@ -534,6 +558,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             Type type = internalMethod.getType();
             boolean isVoidType = type.isVoidType();
             String typeStr = getCPPType(idlMethod.returnType);
+
+            String methodCode = generateMethodID(internalMethod);
 
             String methodName = idlMethod.name;
             String methodParams = "";
@@ -587,8 +613,9 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 returnStr += "(" + typeStr + ")";
             }
             String callMethod = getCPPCallMethod(type);
-            String methodStr = methodTemplate.replace("[CALL_METHOD]", callMethod).replace("[CPP_CLASS]", cppClassName).replace("[METHOD]", methodName).replace("[CALL_PARAMS]", callParams).replace("[RETURN]", returnStr);
-            methodStr = methodStr.replace("[RETURN_TYPE]", typeStr).replace("[METHOD]", methodName).replace("[PARAMS]", methodParams).replace("[CONST]", constStr);
+            String methodStr = methodTemplate.replace("[CALL_METHOD]", callMethod).replace("[CPP_CLASS]", cppClassName)
+                    .replace("[METHOD_NAME]", methodName).replace("[CALL_PARAMS]", callParams).replace("[RETURN]", returnStr).replace("[METHOD_ID]", methodName + methodCode);
+            methodStr = methodStr.replace("[RETURN_TYPE]", typeStr).replace("[METHOD_NAME]", methodName).replace("[PARAMS]", methodParams).replace("[CONST]", constStr);
 
             cppMethods += methodStr;
         }

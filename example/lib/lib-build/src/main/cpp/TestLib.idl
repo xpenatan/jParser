@@ -152,6 +152,7 @@ interface CallbackClassImpl {
     unsigned long onUnsignedIntCallback(unsigned long unsignedInt);
     [Const] unsigned short onUnsignedShortCallback(unsigned short unsignedShort);
     [Const] void onAnyCallback(any anyPtr);
+    [Const] void onAnyCallback(any anyPtr, long value);
     [Const] void onLongLongValue(unsigned long long longLongValue);
 };
 CallbackClassImpl implements CallbackClass;

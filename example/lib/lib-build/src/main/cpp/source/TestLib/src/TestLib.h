@@ -271,6 +271,7 @@ public:
     virtual unsigned int onUnsignedIntCallback(unsigned int unsignedInt) = 0;
     virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const = 0;
     virtual void onAnyCallback(void * anyPtr) const = 0;
+    virtual void onAnyCallback(void * anyPtr, int value) const = 0;
     virtual void onLongLongValue(unsigned long long longLongValue) const = 0;
 
     int addInt(int a, int b)
@@ -309,6 +310,8 @@ public:
         return 20;
     }
     virtual void onAnyCallback(void * anyPtr) const {
+    }
+    virtual void onAnyCallback(void * anyPtr, int value) const {
     }
     virtual void onLongLongValue(unsigned long long longLongValue) const {
     }
