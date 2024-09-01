@@ -151,6 +151,7 @@ interface CallbackClassImpl {
     [Const] void onStringCallback([Const] DOMString strValue01);
     unsigned long onUnsignedIntCallback(unsigned long unsignedInt);
     [Const] unsigned short onUnsignedShortCallback(unsigned short unsignedShort);
+    [Const] void onAnyCallback(any anyPtr);
 };
 CallbackClassImpl implements CallbackClass;
 

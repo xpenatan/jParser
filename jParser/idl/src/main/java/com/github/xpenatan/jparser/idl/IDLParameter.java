@@ -79,7 +79,7 @@ public class IDLParameter {
         }
 
         if(type.equals("any") || type.equals("VoidPtr")) {
-            type = "long";
+            type = "void*";
             isAny = true;
         }
 
@@ -109,6 +109,9 @@ public class IDLParameter {
     }
 
     public String getType() {
+        if(isAny) {
+            return "long";
+        }
         return type.replace("unsigned", "").trim();
     }
 

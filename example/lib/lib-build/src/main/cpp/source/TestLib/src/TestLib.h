@@ -270,6 +270,7 @@ public:
     virtual void onStringCallback(const char* strValue01) const = 0;
     virtual unsigned int onUnsignedIntCallback(unsigned int unsignedInt) = 0;
     virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const = 0;
+    virtual void onAnyCallback(void * anyPtr) const = 0;
 
     int addInt(int a, int b)
     {
