@@ -270,8 +270,8 @@ public:
     virtual void onStringCallback(const char* strValue01) const = 0;
     virtual unsigned int onUnsignedIntCallback(unsigned int unsignedInt) = 0;
     virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const = 0;
-    virtual void onAnyCallback(void * anyPtr) const = 0;
-    virtual void onAnyCallback(void * anyPtr, int value) const = 0;
+    virtual void onAnyCallback_1(void * anyPtr) const = 0;
+    virtual void onAnyCallback_2(void * anyPtr, int value) const = 0;
     virtual void onLongLongValue(unsigned long long longLongValue) const = 0;
 
     int addInt(int a, int b)
@@ -309,9 +309,9 @@ public:
     virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const {
         return 20;
     }
-    virtual void onAnyCallback(void * anyPtr) const {
+    virtual void onAnyCallback_1(void * anyPtr) const {
     }
-    virtual void onAnyCallback(void * anyPtr, int value) const {
+    virtual void onAnyCallback_2(void * anyPtr, int value) const {
     }
     virtual void onLongLongValue(unsigned long long longLongValue) const {
     }

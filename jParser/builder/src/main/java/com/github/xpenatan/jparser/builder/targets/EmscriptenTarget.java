@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 public class EmscriptenTarget extends DefaultBuildTarget {
 
-    public static boolean SKIP_GLUE_CODE;
-    public final static String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
+    public static boolean SKIP_GLUE_CODE = false;
+    public final static String EMSCRIPTEN_ROOT = (System.getenv("EMSDK") + "/upstream/emscripten/").replace("\\", "/").replace("//", "/");
 
     public IDLReader idlReader;
 

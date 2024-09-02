@@ -10,7 +10,8 @@
 // * Arrays parameters for example "void method(int[] array)" is converted to IDLIntArray class object behind the scene because interacting with array is better using native code.
 //   For custom types is better to use typedef. See TestObjectClassArray in CustomCode.h
 // * Array get_ shape the same object for every index. Don't keep object reference.
-
+// * Emscripten WebIDL callbacks don't work with overloaded methods so its better to use _[N] at the end of the method
+// * Emscripten class methods don't work with overloaded methods with different parameter order so its better to use _[N] at the end of the method
 
 interface TestObjectClass {
     void TestObjectClass();
@@ -151,8 +152,8 @@ interface CallbackClassImpl {
     [Const] void onStringCallback([Const] DOMString strValue01);
     unsigned long onUnsignedIntCallback(unsigned long unsignedInt);
     [Const] unsigned short onUnsignedShortCallback(unsigned short unsignedShort);
-    [Const] void onAnyCallback(any anyPtr);
-    [Const] void onAnyCallback(any anyPtr, long value);
+    [Const] void onAnyCallback_1(any anyPtr);
+    [Const] void onAnyCallback_2(any anyPtr, long value);
     [Const] void onLongLongValue(unsigned long long longLongValue);
 };
 CallbackClassImpl implements CallbackClass;
