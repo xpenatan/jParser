@@ -108,7 +108,11 @@ public class IDLParameter {
         }
     }
 
-    public String getType() {
+    public String getCPPReturnType() {
+        return type;
+    }
+
+    public String getJavaType() {
         if(isAny) {
             return "long";
         }

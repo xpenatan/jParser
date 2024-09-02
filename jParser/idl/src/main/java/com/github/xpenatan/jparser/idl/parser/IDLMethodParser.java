@@ -108,7 +108,7 @@ public class IDLMethodParser {
         methodDeclaration.setStatic(idlMethod.isStaticMethod);
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter idlParameter = parameters.get(i);
-            String paramType = idlParameter.getType();
+            String paramType = idlParameter.getJavaType();
             String paramName = idlParameter.name;
             paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
             Parameter parameter = methodDeclaration.addAndGetParameter(paramType, paramName);
@@ -117,7 +117,7 @@ public class IDLMethodParser {
         }
 
         if(returnType == null) {
-            String returnTypeStr = IDLHelper.convertEnumToInt(idlParser.idlReader, idlMethod.getReturnType());
+            String returnTypeStr = IDLHelper.convertEnumToInt(idlParser.idlReader, idlMethod.getJavaReturnType());
             returnType = StaticJavaParser.parseType(returnTypeStr);
         }
         methodDeclaration.setType(returnType);
@@ -403,7 +403,7 @@ public class IDLMethodParser {
 
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);
-            String paramType = parameter.type;
+            String paramType = parameter.getJavaType();
             paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
             paramTypes[i] = paramType;
         }

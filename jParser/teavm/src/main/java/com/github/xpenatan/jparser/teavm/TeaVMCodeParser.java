@@ -409,7 +409,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             IDLParameter idlParameter = idParameters.get(i);
             Type type = parameter.getType();
             boolean isObject = type.isClassOrInterfaceType();
-            String paramName = getParam(idlParameter.idlFile, isObject, idlParameter.name, idlParameter.type, idlParameter.isRef, idlParameter.isValue);
+            String paramName = getParam(idlParameter.idlFile, isObject, idlParameter.name, idlParameter.getJavaType(), idlParameter.isRef, idlParameter.isValue);
             if(i > 0) {
                 param += ", ";
             }

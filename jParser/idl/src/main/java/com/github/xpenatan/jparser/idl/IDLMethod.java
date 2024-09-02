@@ -91,7 +91,11 @@ public class IDLMethod {
         }
     }
 
-    public String getReturnType() {
+    public String getCPPReturnType() {
+        return returnType;
+    }
+
+    public String getJavaReturnType() {
         return returnType.replace("unsigned", "").trim();
     }
 

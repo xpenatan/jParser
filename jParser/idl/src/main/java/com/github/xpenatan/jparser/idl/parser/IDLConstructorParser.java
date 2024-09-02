@@ -85,7 +85,7 @@ public class IDLConstructorParser {
             ArrayList<IDLParameter> parameters = idlConstructor.parameters;
             for(int i = 0; i < parameters.size(); i++) {
                 IDLParameter parameter = parameters.get(i);
-                String paramType = parameter.getType();
+                String paramType = parameter.getJavaType();
                 paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
                 JParserHelper.addMissingImportType(jParser, unit, paramType);
                 constructorDeclaration.addAndGetParameter(paramType, parameter.name);
@@ -126,7 +126,7 @@ public class IDLConstructorParser {
         String[] paramTypes = new String[parameters.size()];
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);
-            String paramType = parameter.type;
+            String paramType = parameter.getJavaType();
             paramTypes[i] = paramType;
         }
         Optional<ConstructorDeclaration> constructorDeclarationOptional = classOrInterfaceDeclaration.getConstructorByParameterTypes(paramTypes);

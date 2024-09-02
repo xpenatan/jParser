@@ -9,10 +9,8 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.utils.Pair;
 import com.github.xpenatan.jparser.core.JParser;
@@ -557,7 +555,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
             Type type = internalMethod.getType();
             boolean isVoidType = type.isVoidType();
-            String typeStr = getCPPType(idlMethod.returnType);
+            String typeStr = getCPPType(idlMethod.getCPPReturnType());
 
             String methodCode = generateMethodID(internalMethod);
 
@@ -573,7 +571,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 boolean isPrimitive = parameter.getType().isPrimitiveType();
                 String paramName = idlParameter.name;
                 String callParamName = idlParameter.name;
-                String paramType = idlParameter.type;
+                String paramType = idlParameter.getCPPReturnType();
                 boolean isString = paramType.equals("String");
                 String tag = " ";
                 String callParamCast = "";
@@ -640,7 +638,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     private void setupMethodGenerated(IDLMethod idlMethod, String param, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         Type returnType = methodDeclaration.getType();
-        String returnTypeStr = idlMethod.getReturnType();
+        String returnTypeStr = idlMethod.getJavaReturnType();
         String methodName = idlMethod.name;
         String classTypeName = classDeclaration.getNameAsString();
         IDLClass idlClass = idlMethod.idlFile.getClass(classTypeName);
@@ -764,7 +762,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             Parameter parameter = parameters.get(i);
             IDLParameter idlParameter = idParameters.get(i);
             Type type = parameter.getType();
-            String paramName = getParam(idlParameter.idlFile, type, idlParameter.name, idlParameter.type, idlParameter.isAny, idlParameter.isRef, idlParameter.isValue, idlParameter.isArray);
+            String paramName = getParam(idlParameter.idlFile, type, idlParameter.name, idlParameter.getCPPReturnType(), idlParameter.isAny, idlParameter.isRef, idlParameter.isValue, idlParameter.isArray);
             if(i > 0) {
                 param += ", ";
             }
