@@ -38,6 +38,9 @@ public class IDLCallbackParser {
                 MethodCallExpr caller = IDLMethodParser.createCaller(callbackSetupDeclaration);
                 constructorDeclaration.getBody().addStatement(caller);
                 idlParser.onIDLCallbackGenerated(jParser, idlClass, classDeclaration, callbackSetupDeclaration, methods);
+
+                // Add super methods when its needed
+                IDLConstructorParser.addSuperTempConstructor(classDeclaration, constructorDeclaration);
             }
         }
         else {

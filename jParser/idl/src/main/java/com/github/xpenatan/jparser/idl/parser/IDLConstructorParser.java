@@ -56,7 +56,7 @@ public class IDLConstructorParser {
         }
     }
 
-    private static void addSuperTempConstructor(ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
+    public static void addSuperTempConstructor(ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
         Optional<ClassOrInterfaceType> parent = classDeclaration.getExtendedTypes().getFirst();
         String parentName = "";
         if(parent.isPresent()) {
