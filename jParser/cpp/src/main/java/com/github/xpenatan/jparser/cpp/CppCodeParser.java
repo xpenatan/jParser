@@ -439,8 +439,6 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String code = header + cppClass;
 
         classDeclaration.getConstructors().get(0).setBlockComment(code);
-
-        System.out.println();
     }
 
     private String generateSetupCallbackMethod(IDLClass idlClass, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
