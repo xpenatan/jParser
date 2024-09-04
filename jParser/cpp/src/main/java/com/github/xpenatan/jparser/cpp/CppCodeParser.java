@@ -251,7 +251,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         }
 
         String getPrimitiveCast = "";
-        String attributeType = idlAttribute.type;
+        String attributeType = idlAttribute.getCPPType();
         String constTag = "";
         if(idlAttribute.isConst) {
             constTag = "const ";
@@ -569,8 +569,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 boolean isPrimitive = parameter.getType().isPrimitiveType();
                 String paramName = idlParameter.name;
                 String callParamName = idlParameter.name;
-                String paramType = idlParameter.getCPPReturnType();
-                boolean isString = paramType.equals("String");
+                String paramType = idlParameter.getCPPType();
+                boolean isString = idlParameter.idlType.equals("DOMString");
                 String tag = " ";
                 String callParamCast = "";
 
@@ -760,7 +760,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             Parameter parameter = parameters.get(i);
             IDLParameter idlParameter = idParameters.get(i);
             Type type = parameter.getType();
-            String paramName = getParam(idlParameter.idlFile, type, idlParameter.name, idlParameter.getCPPReturnType(), idlParameter.isAny, idlParameter.isRef, idlParameter.isValue, idlParameter.isArray);
+            String paramName = getParam(idlParameter.idlFile, type, idlParameter.name, idlParameter.getCPPType(), idlParameter.isAny, idlParameter.isRef, idlParameter.isValue, idlParameter.isArray);
             if(i > 0) {
                 param += ", ";
             }
@@ -771,7 +771,12 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     private static String getParam(IDLFile idlFile, Type type, String paramName, String classType, boolean isAny, boolean isRef, boolean isValue, boolean isArray) {
         boolean isObject = type.isClassOrInterfaceType();
-        if(isObject && !classType.equals("String")) {
+        if(isObject && !classType.equals("char*")) {
+            String idlArrayOrNull = IDLHelper.getIDLArrayOrNull(classType);
+            if(idlArrayOrNull != null) {
+                classType = idlArrayOrNull;
+            }
+
             paramName += "_addr";
             IDLClass paramClass = idlFile.getClass(classType);
             String cArray = IDLHelper.getCArray(classType);

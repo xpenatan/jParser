@@ -431,7 +431,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
         String returnTypeName = classDeclaration.getNameAsString();
         String attributeName = idlAttribute.name;
-        String returnType = idlAttribute.type;
 
         String param = "";
         NodeList<Parameter> parameters = nativeMethod.getParameters();

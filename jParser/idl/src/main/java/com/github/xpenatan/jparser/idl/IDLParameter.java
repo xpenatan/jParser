@@ -9,7 +9,7 @@ public class IDLParameter {
     public final IDLFile idlFile;
 
     public String line;
-    public String type;
+    public String idlType;
     public String name;
     public boolean isArray;
     public boolean isRef;
@@ -57,76 +57,36 @@ public class IDLParameter {
         String[] s1 = tmpLine.split(" ");
         name = s1[s1.length - 1];
 
-        type = "";
+        idlType = "";
         int sss = s1.length - 1;
         for(int i = 0; i < sss; i++) {
-            type += s1[i];
+            idlType += s1[i];
             if(i < sss-1) {
-                type += " ";
+                idlType += " ";
             }
         }
 
         if(isArray) {
-            type = type + "[]";
+            idlType = idlType + "[]";
         }
 
-        if(type.contains("long long")) {
-            // Keep c++ long long
-        }
-        else if(type.contains("long")) {
-            // long in webidl means int
-            type = type.replace("long", "int");
-        }
-
-        if(type.equals("any") || type.equals("VoidPtr")) {
-            type = "void*";
+        if(idlType.equals("any") || idlType.equals("VoidPtr")) {
             isAny = true;
-        }
-
-        if(type.equals("DOMString")) {
-            type = "String";
-        }
-        if(type.equals("octet")) {
-            type = "byte";
-        }
-
-        // Convert to array object
-        if(type.equals("int[]")) {
-            type = "IDLIntArray";
-        }
-        else if(type.equals("float[]")) {
-            type = "IDLFloatArray";
-        }
-        else if(type.equals("byte[]")) {
-            type = "IDLByteArray";
-        }
-        else if(type.equals("boolean[]")) {
-            type = "IDLBoolArray";
-        }
-        else if(type.equals("double[]")) {
-            type = "IDLDoubleArray";
         }
     }
 
-    public String getCPPReturnType() {
-        return type;
+    public String getCPPType() {
+        return IDLHelper.getCPPReturnType(idlType);
     }
 
     public String getJavaType() {
-        if(isAny) {
-            return "long";
-        }
-        if(type.contains("long long")) {
-            return "long";
-        }
-        return type.replace("unsigned", "").trim();
+        return IDLHelper.getJavaType(idlType);
     }
-
 
     public IDLParameter clone() {
         IDLParameter clonedParam = new IDLParameter(idlFile);
         clonedParam.line = line;
-        clonedParam.type = type;
+        clonedParam.idlType = idlType;
         clonedParam.name = name;
         clonedParam.isRef = isRef;
         clonedParam.isAny = isAny;

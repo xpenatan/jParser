@@ -6,7 +6,7 @@ package com.github.xpenatan.jparser.idl;
 public class IDLAttribute {
     public IDLFile idlFile;
     public String line;
-    public String type;
+    public String idlType;
     public String name;
     public boolean skip = false;
     public boolean isAny = false;
@@ -28,7 +28,7 @@ public class IDLAttribute {
         String rightSide = split[1].trim();
         String[] rightSlideSplit = rightSide.split(" ");
         String name = rightSlideSplit[rightSlideSplit.length-1];
-        type = rightSide.replace(name, "").trim();
+        idlType = rightSide.replace(name, "").trim();
         this.name = name.replace(";", "").trim();
 
         if(leftSide.contains("static")) {
@@ -48,24 +48,13 @@ public class IDLAttribute {
             isReadOnly = true;
         }
 
-        if(type.contains("[]")) {
+        if(idlType.contains("[]")) {
             isArray = true;
-            type = type.replace("[]", "").trim();
+            idlType = idlType.replace("[]", "").trim();
+            idlType = idlType + "[]";
         }
 
-        if(type.endsWith("long") || type.endsWith("long[]")) {
-            type = type.replace("long", "int");
-        }
-
-        if(type.contains("int int")) {
-            type = type.replace("int int", "long");
-        }
-
-        if(type.contains("unsigned")) {
-            type = type.replace("unsigned", "").trim();
-        }
-
-        if(type.equals("any")) {
+        if(idlType.equals("any")) {
             isAny = true;
         }
 
@@ -73,5 +62,15 @@ public class IDLAttribute {
             //TODO improve
             skip = true;
         }
+    }
+
+    public String getCPPType() {
+        //Attributes don't set/get arrays so we remove it
+        return IDLHelper.getCPPReturnType(idlType).replace("[]", "");
+    }
+
+    public String getJavaType() {
+        //Attributes don't set/get arrays so we remove it
+        return IDLHelper.getJavaType(false, idlType).replace("[]", "");
     }
 }

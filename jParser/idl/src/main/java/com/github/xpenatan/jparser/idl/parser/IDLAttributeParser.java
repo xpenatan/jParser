@@ -33,7 +33,7 @@ public class IDLAttributeParser {
         MethodDeclaration containsGetMethod = containsGetMethod(classOrInterfaceDeclaration, idlAttribute);
 
         String attributeName = idlAttribute.name;
-        String attributeType = idlAttribute.type;
+        String attributeType = idlAttribute.getJavaType();
 
         attributeType = IDLHelper.convertEnumToInt(idlParser.idlReader, attributeType);
 
@@ -189,7 +189,7 @@ public class IDLAttributeParser {
 
     private static MethodDeclaration containsSetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
         String[] paramTypes = new String[1];
-        paramTypes[0] = idlAttribute.type;
+        paramTypes[0] = idlAttribute.getJavaType();
         String methodName = ATTRIBUTE_PREFIX_SET + idlAttribute.name;
         List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
 

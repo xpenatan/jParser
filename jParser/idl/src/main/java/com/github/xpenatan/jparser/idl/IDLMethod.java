@@ -75,28 +75,21 @@ public class IDLMethod {
             }
         }
 
-        if(returnType.contains("long long")) {
-            returnType = returnType.replace("long long", "long");
-        }
-        else if(returnType.contains("long")) {
-            returnType = returnType.replace("long", "int");
-        }
-        if(returnType.equals("DOMString")) {
-            returnType = "String";
+        if(isReturnArray) {
+            returnType = returnType + "[]";
         }
 
         if(returnType.contains("any") || returnType.contains("VoidPtr")) {
             isAny = true;
-            returnType = "long";
         }
     }
 
     public String getCPPReturnType() {
-        return returnType;
+        return IDLHelper.getCPPReturnType(returnType);
     }
 
     public String getJavaReturnType() {
-        return returnType.replace("unsigned", "").trim();
+        return IDLHelper.getJavaType(returnType);
     }
 
     public int getTotalOptionalParams() {
