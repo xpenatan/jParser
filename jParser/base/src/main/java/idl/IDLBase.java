@@ -36,6 +36,11 @@ public abstract class IDLBase {
         nativeData.dispose();
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " " + nativeData;
+    }
+
     /**
      * Deletes the IDL object this class encapsulates. Do not call directly, instead use the {@link #dispose()} method.
      */
