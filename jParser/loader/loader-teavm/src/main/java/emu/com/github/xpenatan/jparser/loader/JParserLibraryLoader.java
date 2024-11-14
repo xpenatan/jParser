@@ -43,5 +43,8 @@ public class JParserLibraryLoader {
                 }
             });
         }
+        else {
+            instance.loadScript(libraryName);
+        }
     }
 }
