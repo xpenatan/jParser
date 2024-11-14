@@ -1,5 +1,6 @@
 package emu.com.github.xpenatan.jparser.loader;
 
+import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetInstance;
 import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoader;
 import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoaderListener;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
@@ -29,9 +30,9 @@ public class JParserLibraryLoader {
             return;
         }
         loadedLibraries.add(libraryName);
-        AssetLoader.AssetLoad instance = AssetLoader.getInstance();
+        AssetLoader instance = AssetInstance.getLoaderInstance();
         if(listener != null) {
-            instance.loadScript(true, libraryName, new AssetLoaderListener<>(){
+            instance.loadScript(libraryName, new AssetLoaderListener<>(){
                 @Override
                 public void onSuccess(String url, String result) {
                     listener.onLoad(true);
@@ -41,9 +42,6 @@ public class JParserLibraryLoader {
                     listener.onLoad(false);
                 }
             });
-        }
-        else {
-            instance.loadScript(false, libraryName, null);
         }
     }
 }
