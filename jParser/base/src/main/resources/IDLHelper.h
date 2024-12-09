@@ -5,7 +5,7 @@
 #include <stddef.h>     // NULL
 #include <stdint.h>     // intptr_t
 #include <algorithm>
-#include <stdexcept>
+#include <assert.h>
 
 template<typename T>
 class IDLArray {
@@ -32,21 +32,15 @@ class IDLArray {
             std::fill(data, data + size, T());
         }
         void copy(IDLArray<T>& src, int srcPos, int destPos, int length) {
-            if (srcPos < 0 || destPos < 0 || length < 0 || srcPos + length > src.size || destPos + length > size) {
-                throw std::out_of_range("Invalid copy range");
-            }
+            assert(srcPos < 0 || destPos < 0 || length < 0 || srcPos + length > src.size || destPos + length > size);
             std::copy(src.data + srcPos, src.data + srcPos + length, data + destPos);
         }
         T getValue(int index) {
-            if (index < 0 || index >= size) {
-                throw std::out_of_range("Index out of range");
-            }
+            assert(index < 0 || index >= size);
             return data[index];
          }
         void setValue(int index, T value) {
-            if (index < 0 || index >= size) {
-                throw std::out_of_range("Index out of range");
-            }
+            assert(index < 0 || index >= size);
             data[index] = value;
         }
         int getSize() { return size; }
