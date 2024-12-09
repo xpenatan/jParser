@@ -32,15 +32,15 @@ class IDLArray {
             std::fill(data, data + size, T());
         }
         void copy(IDLArray<T>& src, int srcPos, int destPos, int length) {
-            assert(srcPos < 0 || destPos < 0 || length < 0 || srcPos + length > src.size || destPos + length > size);
+            assert(!(srcPos < 0 || destPos < 0 || length < 0 || srcPos + length > src.size || destPos + length > size));
             std::copy(src.data + srcPos, src.data + srcPos + length, data + destPos);
         }
         T getValue(int index) {
-            assert(index < 0 || index >= size);
+            assert(!(index < 0 || index >= size));
             return data[index];
          }
         void setValue(int index, T value) {
-            assert(index < 0 || index >= size);
+            assert(!(index < 0 || index >= size));
             data[index] = value;
         }
         int getSize() { return size; }
