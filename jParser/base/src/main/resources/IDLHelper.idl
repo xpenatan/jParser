@@ -40,6 +40,17 @@ interface IDLIntArray {
     void copy([Ref] IDLIntArray src, long srcOffset, long destOffset, long length);
 };
 
+interface IDLLongArray {
+    void IDLLongArray(long size);
+    void resize(long size);
+    void clear();
+    long long getValue(long index);
+    void setValue(long index, long long value);
+    long getSize();
+    any getPointer();
+    void copy([Ref] IDLLongArray src, long srcOffset, long destOffset, long length);
+};
+
 interface IDLFloatArray {
     void IDLFloatArray(long size);
     void resize(long size);

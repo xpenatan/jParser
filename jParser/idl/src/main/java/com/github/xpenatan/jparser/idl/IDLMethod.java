@@ -32,6 +32,9 @@ public class IDLMethod {
     public void initMethod(String line) {
         this.line = line;
         paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
+        for(IDLParameter parameter : parameters) {
+            parameter.idlMethod = this;
+        }
         int index = line.indexOf("(");
         String leftSide = line.substring(0, index).trim();
         leftSide = IDLHelper.removeMultipleSpaces(leftSide.trim());

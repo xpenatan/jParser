@@ -24,6 +24,9 @@ public class IDLHelper {
         else if(type.equals("IDLIntArray")) {
             return "int *";
         }
+        else if(type.equals("IDLLongArray")) {
+            return "long long *";
+        }
         else if(type.equals("IDLFloatArray")) {
             return "float *";
         }
@@ -164,6 +167,9 @@ public class IDLHelper {
         // Convert array to IDL object arrays
         if(type.equals("int[]")) {
             type = "IDLIntArray";
+        }
+        else if(type.equals("long[]") || type.equals("long long[]")) {
+            type = "IDLLongArray";
         }
         else if(type.equals("float[]")) {
             type = "IDLFloatArray";

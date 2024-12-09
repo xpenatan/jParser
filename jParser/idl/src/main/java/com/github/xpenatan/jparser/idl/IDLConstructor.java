@@ -22,6 +22,9 @@ public class IDLConstructor {
     public void initConstructor(String line) {
         this.line = line;
         paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
+        for(IDLParameter parameter : parameters) {
+            parameter.idlConstructor = this;
+        }
     }
 
     public int getTotalOptionalParams() {

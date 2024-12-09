@@ -4,6 +4,8 @@
 #include <vector>
 #include <stddef.h>     // NULL
 #include <stdint.h>     // intptr_t
+#include <algorithm>
+#include <stdexcept>
 
 template<typename T>
 class IDLArray {
@@ -11,39 +13,42 @@ class IDLArray {
         int size;
         T* data;
 
-        void deleteData() { delete[] data; data = NULL; }
+        void deleteData() { delete[] data; data = nullptr; }
     public:
-        IDLArray(int size) { data = NULL; resize(size); }
-        ~IDLArray() { if(data != NULL) { deleteData(); } }
+        IDLArray(int size) : size(0), data(nullptr) { resize(size); }
+        ~IDLArray() { deleteData(); }
         void resize(int newSize) {
-            if(this->data != NULL) {
-                deleteData();
+            if(newSize > 0 && size != newSize) {
+                T* newData = new T[newSize];
+                if (data != nullptr) {
+                    deleteData(); // Delete the old array
+                }
+                data = newData; // Update the data pointer
+                size = newSize; // Update the size
+                clear();
             }
-            T * newData = new T[newSize];
-            this->data = newData;
-            size = newSize;
-            clear();
         }
         void clear() {
-            for(int i = 0; i < size; i++) {
-                data[i] = 0;
-            }
+            std::fill(data, data + size, T());
         }
         void copy(IDLArray<T>& src, int srcPos, int destPos, int length) {
-            T* dest = data;
-            int srcP = srcPos;
-            int destP = destPos;
-            int count = 0;
-            while(count < length) {
-                T srcByte = src.getValue(srcP);
-                srcP++;
-                dest[destP] = srcByte;
-                destP++;
-                count++;
+            if (srcPos < 0 || destPos < 0 || length < 0 || srcPos + length > src.size || destPos + length > size) {
+                throw std::out_of_range("Invalid copy range");
             }
+            std::copy(src.data + srcPos, src.data + srcPos + length, data + destPos);
         }
-        T getValue(int index) { return data[index]; }
-        void setValue(int index, T value) { data[index] = value; }
+        T getValue(int index) {
+            if (index < 0 || index >= size) {
+                throw std::out_of_range("Index out of range");
+            }
+            return data[index];
+         }
+        void setValue(int index, T value) {
+            if (index < 0 || index >= size) {
+                throw std::out_of_range("Index out of range");
+            }
+            data[index] = value;
+        }
         int getSize() { return size; }
         void* getPointer() { return (void*)data; }
         T* getData() { return data; }
@@ -53,6 +58,7 @@ typedef std::string IDLString;
 typedef std::string_view IDLStringView;
 typedef IDLArray<bool> IDLBoolArray;
 typedef IDLArray<int> IDLIntArray;
+typedef IDLArray<long long> IDLLongArray;
 typedef IDLArray<float> IDLFloatArray;
 typedef IDLArray<double> IDLDoubleArray;
 typedef IDLArray<char> IDLByteArray;

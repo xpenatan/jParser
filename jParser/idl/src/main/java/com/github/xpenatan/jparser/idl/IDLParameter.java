@@ -7,6 +7,8 @@ import java.util.ArrayList;
  */
 public class IDLParameter {
     public final IDLFile idlFile;
+    public IDLMethod idlMethod;
+    public IDLConstructor idlConstructor;
 
     public String line;
     public String idlType;
