@@ -35,3 +35,4 @@ out/
 **/lib/lib-teavm/src/main/java/**
 **/lib/lib-core/src/main/java/**
 **/app/android/libs/
+.codiumai
