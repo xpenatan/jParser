@@ -191,7 +191,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         if(idlClass.isClass()) {
             IDLClass aClass = idlClass.asClass();
             if(aClass.isCallback) {
-                classDeclaration.setAbstract(true);
+                // Do nothing
             }
             else {
                 // For every class we generate empty object that can be used when needed.
