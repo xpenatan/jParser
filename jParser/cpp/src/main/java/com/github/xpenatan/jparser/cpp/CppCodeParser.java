@@ -221,11 +221,11 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     public void onIDLDeConstructorGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration nativeMethodDeclaration) {
         String classTypeName;
 
-        if(idlClass.callback == null) {
+        if(idlClass.callbackImpl == null) {
             classTypeName = idlClass.classHeader.prefixName + classDeclaration.getNameAsString();
         }
         else {
-            classTypeName = idlClass.callback.name;
+            classTypeName = idlClass.callbackImpl.name;
         }
 
         String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_TYPE, classTypeName);
@@ -395,7 +395,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     @Override
     public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
         NodeList<Parameter> methodParameters = callbackDeclaration.getParameters();
-        IDLClass idlCallbackClass = idlClass.callback;
+        IDLClass idlCallbackClass = idlClass.callbackImpl;
         Type methodReturnType = callbackDeclaration.getType();
         MethodDeclaration nativeMethodDeclaration = IDLMethodParser.generateNativeMethod(callbackDeclaration.getNameAsString(), methodParameters, methodReturnType, false);
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
@@ -420,7 +420,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
 
     private void generateCPPClass(IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
-        IDLClass callback = idlClass.callback;
+        IDLClass callback = idlClass.callbackImpl;
         String cppClass = "";
 
         String callbackCode = generateSetupCallbackMethod(idlClass, callbackDeclaration, methods);
@@ -456,7 +456,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String variableTemplate = "\tinline static jmethodID [METHOD]_ID = 0;\n";
         String methodIdTemplate = "\t\t[CLASS_NAME]::[METHOD]_ID = env->GetMethodID(jClassID, \"[INTERNAL_METHOD]\", \"[PARAM_CODE]\");\n";
 
-        IDLClass callbackClass = idlClass.callback;
+        IDLClass callbackClass = idlClass.callbackImpl;
         String className = callbackClass.name;
 
         String staticVariables = "";
@@ -535,7 +535,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     private String generateMethodCallers(IDLClass idlClass, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
-        IDLClass callback = idlClass.callback;
+        IDLClass callback = idlClass.callbackImpl;
         String cppMethods = "";
         String cppClassName = callback.name;
 

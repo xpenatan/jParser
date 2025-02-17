@@ -22,4 +22,9 @@ public class IDLClassOrEnum {
     public IDLEnum asEnum() {
         return (IDLEnum)this;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

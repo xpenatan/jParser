@@ -217,8 +217,9 @@ public class IDLReader {
                     if(!jsImplementation.isEmpty()) {
                         IDLClass callbackClass = idlFile.getClass(jsImplementation);
                         if(callbackClass != null) {
-                            if(callbackClass.callback == null) {
-                                callbackClass.callback = idlCallbackImpl;
+                            if(callbackClass.callbackImpl == null) {
+                                callbackClass.callbackImpl = idlCallbackImpl;
+                                callbackClass.isCallback = true;
                             }
                             else {
                                 throw new RuntimeException("Class " + callbackClass.name + " cannot have multiple JSImplementation");

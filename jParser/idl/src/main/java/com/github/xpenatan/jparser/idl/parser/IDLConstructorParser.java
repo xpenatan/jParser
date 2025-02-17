@@ -26,7 +26,7 @@ public class IDLConstructorParser {
 
     public static void generateConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass) {
         ArrayList<IDLConstructor> constructors = idlClass.constructors;
-        if(idlClass.callback == null) {
+        if(idlClass.callbackImpl == null) {
             // Generate constructors only if it's not callback
             for(int i = 0; i < constructors.size(); i++) {
                 IDLConstructor idlConstructor = constructors.get(i);

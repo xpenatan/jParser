@@ -25,7 +25,7 @@ public class IDLCallbackParser {
     private final static String callbackMethodName = "setupCallback";
 
     public static void generateCallback(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, IDLClass idlClass) {
-        ArrayList<IDLConstructor> constructors = idlClass.callback.constructors;
+        ArrayList<IDLConstructor> constructors = idlClass.callbackImpl.constructors;
         if(constructors.size() == 1) {
             IDLConstructor idlConstructor = constructors.get(0);
             ConstructorDeclaration constructorDeclaration = IDLConstructorParser.getOrCreateConstructorDeclaration(idlParser, jParser, unit, classDeclaration, idlConstructor);
@@ -51,11 +51,13 @@ public class IDLCallbackParser {
 
     private static ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> createCallbackMethods(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, IDLClass idlClass) {
         ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods = new ArrayList<>();
-        IDLClass callbackClass = idlClass.callback;
+        IDLClass callbackClass = idlClass.callbackImpl;
 
         for(IDLMethod method : callbackClass.methods) {
             MethodDeclaration methodDeclaration = IDLMethodParser.generateAndAddMethodOnly(idlParser, jParser, unit, classDeclaration, method);
             MethodDeclaration internalMethod = methodDeclaration.clone();
+            methodDeclaration.removeModifier(Modifier.Keyword.PUBLIC);
+            methodDeclaration.addModifier(Modifier.Keyword.PROTECTED);
 
             internalMethod.removeModifier(Modifier.Keyword.PUBLIC);
             internalMethod.addModifier(Modifier.Keyword.PRIVATE);

@@ -302,11 +302,11 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     @Override
     public void onIDLDeConstructorGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration nativeMethodDeclaration) {
         String returnTypeName ;
-        if(idlClass.callback == null) {
+        if(idlClass.callbackImpl == null) {
             returnTypeName = classDeclaration.getNameAsString();
         }
         else {
-            returnTypeName = idlClass.callback.name;
+            returnTypeName = idlClass.callbackImpl.name;
         }
 
         String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_TYPE, returnTypeName);

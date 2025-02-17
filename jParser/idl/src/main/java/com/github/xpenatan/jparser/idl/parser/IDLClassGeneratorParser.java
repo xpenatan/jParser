@@ -189,10 +189,16 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         classDeclaration.setPublic(true);
 
         if(idlClass.isClass()) {
-            // For every class we generate empty object that can be used when needed.
-            IDLMethodParser.generateFieldName("T_01", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
-            IDLMethodParser.generateFieldName("T_02", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
-            IDLMethodParser.generateFieldName("T_03", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
+            IDLClass aClass = idlClass.asClass();
+            if(aClass.isCallback) {
+                classDeclaration.setAbstract(true);
+            }
+            else {
+                // For every class we generate empty object that can be used when needed.
+                IDLMethodParser.generateFieldName("T_01", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
+                IDLMethodParser.generateFieldName("T_02", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
+                IDLMethodParser.generateFieldName("T_03", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
+            }
         }
         // Hack to inject internal dependencies
         return StaticJavaParser.parse(compilationUnit.toString());

@@ -107,7 +107,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
                 }
 
                 if(generateClass) {
-                    if(idlClass.callback != null) {
+                    if(idlClass.callbackImpl != null) {
                         IDLCallbackParser.generateCallback(this, jParser, unit, classOrInterfaceDeclaration, idlClass);
                     }
 
