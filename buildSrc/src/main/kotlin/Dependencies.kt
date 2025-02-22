@@ -8,8 +8,8 @@ object LibExt {
     const val jUnitVersion = "4.13.2"
     const val groupId = "com.github.xpenatan.jParser"
     const val exampleUseRepoLibs = false
-    const val gdxVersion = "1.12.1"
-    const val teaVMVersion = "0.10.0"
+    const val gdxVersion = "1.13.1"
+    const val teaVMVersion = "0.11.0"
     const val gdxTeaVMVersion = "-SNAPSHOT"
 
 }

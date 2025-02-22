@@ -4,7 +4,6 @@ import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.BuildMultiTarget;
 import com.github.xpenatan.jparser.builder.JBuilder;
 import com.github.xpenatan.jparser.core.JParser;
-import com.github.xpenatan.jparser.core.util.FileHelper;
 import com.github.xpenatan.jparser.cpp.CppCodeParser;
 import com.github.xpenatan.jparser.cpp.CppGenerator;
 import com.github.xpenatan.jparser.cpp.NativeCPPGenerator;
@@ -27,25 +26,17 @@ public class BuilderTool {
 
         IDLReader idlReader = IDLReader.readIDL(op.getIDLPath());
 
-        if(op.generateCPP || op.generateTeaVM) {
-            // Move original source code to destination build directory
-            FileHelper.copyDir(op.getCPPSourceDir(), op.getLibDestinationPath());
-
-            // Move custom code to destination build directory
-            FileHelper.copyDir(op.getCustomSourceDir(), op.getLibDestinationPath());
-        }
-
         if(op.generateCPP) {
 //            NativeCPPGenerator.SKIP_GLUE_CODE = true;
-            CppGenerator cppGenerator = new NativeCPPGenerator(op.getLibDestinationPath());
-            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.libBasePackage, op.getCPPSourceDir());
+            CppGenerator cppGenerator = new NativeCPPGenerator(op.getCPPDestinationPath());
+            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.libBasePackage, op.getSourceDir());
             cppParser.generateClass = true;
             JParser.generate(cppParser, op.getModuleBaseJavaDir(), op.getModuleCorePath() + "/src/main/java");
         }
 
         if(op.generateTeaVM) {
 //            EmscriptenTarget.SKIP_GLUE_CODE = true;
-            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.moduleName, op.libBasePackage, op.getCPPSourceDir());
+            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.moduleName, op.libBasePackage, op.getSourceDir());
             JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getModuleTeaVMPath() + "/src/main/java/");
         }
 
@@ -53,12 +44,7 @@ public class BuilderTool {
 
         listener.onAddTarget(op, idlReader, targets);
 
-        BuildConfig buildConfig = new BuildConfig(
-                op.getCPPDestinationPath(),
-                op.getModuleBuildCPPPath(),
-                op.getLibsDir(),
-                op.libName
-        );
+        BuildConfig buildConfig = new BuildConfig(op);
         JBuilder.build(buildConfig, targets);
     }
 }

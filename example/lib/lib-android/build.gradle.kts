@@ -7,7 +7,7 @@ group = "jparser.lib.android"
 
 android {
     namespace = "com.github.xpenatan.jparser.example.testlib"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 21
@@ -15,7 +15,7 @@ android {
 
     sourceSets {
         named("main") {
-            jniLibs.srcDirs("$projectDir/../generator/build/c++/libs/android")
+            jniLibs.srcDirs("$projectDir/../lib-build/build/c++/libs/android")
         }
     }
     compileOptions {

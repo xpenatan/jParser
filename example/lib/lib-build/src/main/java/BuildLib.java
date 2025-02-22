@@ -9,7 +9,6 @@ import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jparser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jparser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jparser.builder.tool.BuilderTool;
-import com.github.xpenatan.jparser.cpp.NativeCPPGenerator;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.ArrayList;
 
@@ -56,65 +55,67 @@ public class BuildLib {
 
     private static BuildMultiTarget getWindowTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
-
+        String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         WindowsTarget compileStaticTarget = new WindowsTarget();
         compileStaticTarget.isStatic = true;
-        compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
-        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/TestLib/**.cpp");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         WindowsTarget linkTarget = new WindowsTarget();
         linkTarget.addJNIHeaders();
-        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
-        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + op.libName + "64_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
-
         multiTarget.add(linkTarget);
+
         return multiTarget;
     }
 
     private static BuildMultiTarget getWindowVCTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
-
+        String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
         compileStaticTarget.isStatic = true;
-        compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
-        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/TestLib/**.cpp");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
         linkTarget.addJNIHeaders();
-        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
-
         multiTarget.add(linkTarget);
+
         return multiTarget;
     }
 
     private static BuildMultiTarget getLinuxTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
-
+        String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         LinuxTarget compileStaticTarget = new LinuxTarget();
         compileStaticTarget.isStatic = true;
-        compileStaticTarget.headerDirs.add("-Isrc/TestLib");
-        compileStaticTarget.cppInclude.add("**/src/TestLib/**.cpp");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         LinuxTarget linkTarget = new LinuxTarget();
         linkTarget.addJNIHeaders();
-        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
@@ -126,19 +127,20 @@ public class BuildLib {
 
     private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
-
+        String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
         compileStaticTarget.isStatic = true;
-        compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
-        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/TestLib/**.cpp");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         MacTarget linkTarget = new MacTarget(isArm);
         linkTarget.addJNIHeaders();
-        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
 
         if(isArm) {
@@ -156,7 +158,7 @@ public class BuildLib {
 
     private static BuildMultiTarget getTeavmTarget(BuildToolOptions op, IDLReader idlReader) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
-
+        String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         int buildType = 1;
@@ -174,13 +176,14 @@ public class BuildLib {
             EmscriptenTarget compileStaticTarget = new EmscriptenTarget(idlReader);
             compileStaticTarget.isStatic = true;
             compileStaticTarget.compileGlueCode = false;
-            compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
-            compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/TestLib/**.cpp");
+            compileStaticTarget.headerDirs.add("-I" + sourceDir);
+            compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
             multiTarget.add(compileStaticTarget);
 
             // Compile glue code and link to make js file
             EmscriptenTarget linkTarget = new EmscriptenTarget(idlReader);
-            linkTarget.headerDirs.add("-include" + libBuildCPPPath + "/src/TestLib/CustomCode.h");
+            linkTarget.headerDirs.add("-I" + sourceDir);
+            linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "CustomCode.h");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
             multiTarget.add(linkTarget);
         }
@@ -216,13 +219,14 @@ public class BuildLib {
 
     private static BuildMultiTarget getAndroidTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
-
-        String libBuildCPPPath = op.getModuleBuildCPPPath();
+        String sourceDir = op.getSourceDir();
 
         AndroidTarget androidTarget = new AndroidTarget();
         androidTarget.addJNIHeaders();
-        androidTarget.headerDirs.add(libBuildCPPPath + "/src/TestLib");
-        androidTarget.cppInclude.add(libBuildCPPPath + "/src/TestLib/**.cpp");
+
+        androidTarget.headerDirs.add("-I" + sourceDir);
+        androidTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        androidTarget.cppInclude.add(sourceDir + "**.cpp");
 
         multiTarget.add(androidTarget);
 
@@ -230,25 +234,26 @@ public class BuildLib {
     }
 
     private static BuildMultiTarget getIOSTarget(BuildToolOptions op)  {
-        String libBuildCPPPath = op.getModuleBuildCPPPath();
-        // TODO WIP/not working
-
         BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        // TODO WIP/not working
 
         // Make a static library
         IOSTarget compileStaticTarget = new IOSTarget();
         compileStaticTarget.isStatic = true;
-        compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
-        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/TestLib/**.cpp");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         IOSTarget linkTarget = new IOSTarget();
         linkTarget.addJNIHeaders();
-        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/TestLib");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
-
         multiTarget.add(linkTarget);
 
         return multiTarget;

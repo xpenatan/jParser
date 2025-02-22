@@ -1,6 +1,7 @@
 package com.github.xpenatan.jparser.builder.tool;
 
 import com.github.xpenatan.jparser.builder.BuildTarget;
+import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.io.IOException;
 
@@ -9,7 +10,6 @@ public class BuildToolOptions {
     public String libName;
     public String moduleName;
     public String libBasePackage;
-    public String buildSourceDir;
     public boolean generateTeaVM = true;
     public boolean generateCPP = true;
 
@@ -24,11 +24,10 @@ public class BuildToolOptions {
     private String moduleTeavmPath;
     private String idlPath;
     private String moduleBaseJavaDir;
-    private String cppSourceDir;
+    private String sourcePath;
     private String customSourceDir;
     private String libsDir;
     private String cppDestinationPath;
-    private String libDestinationPath;
 
     public final boolean windows64;
     public final boolean linux64;
@@ -43,14 +42,28 @@ public class BuildToolOptions {
      * @param libName module name
      * @param libBasePackage module package that all classes will be in
      * @param modulePrefix module prefix name. ex: imgui. So it will be imgui-core, imgui-teavm, etc.
-     * @param buildSourceDir path inside lib-build module
+     * @param cppSourcePath full path where the source is located
      * @param platform windows64, linux64, mac64, mac64arm, android, ios, teavm
      */
-    public BuildToolOptions(String libName, String libBasePackage, String modulePrefix, String buildSourceDir, String ... platform) {
+    public BuildToolOptions(String libName, String libBasePackage, String modulePrefix, String cppSourcePath, String ... platform) {
         this.libName = libName;
         this.libBasePackage = libBasePackage;
         this.modulePrefix = modulePrefix;
-        this.buildSourceDir = buildSourceDir;
+
+        boolean exists = new CustomFileDescriptor(cppSourcePath).exists();
+        if(exists) {
+            this.sourcePath = cppSourcePath.replace("\\", "/");
+        }
+        else {
+            try {
+                this.sourcePath = new File(".", cppSourcePath).getCanonicalPath().replace("\\", "/");
+            } catch(IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if(!this.sourcePath.endsWith("/")) {
+            this.sourcePath += "/";
+        }
         this.idlName = libName;
         this.moduleName = libName;
 
@@ -109,13 +122,11 @@ public class BuildToolOptions {
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         idlPath = moduleBuildPath + "/src/main/cpp/" + idlName + ".idl";
-        cppSourceDir = moduleBuildPath + buildSourceDir;
-        customSourceDir = moduleBuildPath + "/src/main/cpp/custom";
+        customSourceDir = moduleBuildPath + "/src/main/cpp/custom/";
 
         moduleBuildCPPPath = moduleBuildPath + "/build/c++";
         libsDir = moduleBuildCPPPath + "/libs";
         cppDestinationPath = moduleBuildCPPPath + "/src";
-        libDestinationPath = cppDestinationPath + "/" + libName;
     }
 
     public String getModulePrefix() {
@@ -150,8 +161,8 @@ public class BuildToolOptions {
         return moduleBaseJavaDir;
     }
 
-    public String getCPPSourceDir() {
-        return cppSourceDir;
+    public String getSourceDir() {
+        return sourcePath;
     }
 
     /**
@@ -167,9 +178,5 @@ public class BuildToolOptions {
 
     public String getCPPDestinationPath() {
         return cppDestinationPath;
-    }
-
-    public String getLibDestinationPath() {
-        return libDestinationPath;
     }
 }

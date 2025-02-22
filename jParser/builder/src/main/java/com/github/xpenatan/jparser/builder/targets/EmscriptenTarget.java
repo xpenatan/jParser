@@ -67,7 +67,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             libName = config.libName;
         }
 
-        CustomFileDescriptor jsglueDir = config.sourceDir.child("jsglue");
+        CustomFileDescriptor jsglueDir = config.buildSourceDir.child("jsglue");
         if(!jsglueDir.exists()) {
             jsglueDir.mkdirs();
         }

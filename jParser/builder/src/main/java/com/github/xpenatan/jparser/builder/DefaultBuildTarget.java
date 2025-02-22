@@ -58,7 +58,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         }
         childTarget.mkdirs();
 
-        idlDir = config.sourceDir.child("idl");
+        idlDir = config.buildSourceDir.child("idl");
         if(!idlDir.exists()) {
             idlDir.mkdirs();
         }
@@ -75,7 +75,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     protected void setup(BuildConfig config) {}
 
     protected boolean build(BuildConfig config, CustomFileDescriptor buildTargetTemp) {
-        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppInclude, cppExclude, filterCPPSuffix));
+        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.buildSourceDir, cppInclude, cppExclude, filterCPPSuffix);
         for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
             ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
             cppFiles.addAll(cppFiles1);
@@ -107,7 +107,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         cppList.writeString(compiledPaths.trim(), false);
 
         if(multiCoreCompile) {
-            System.err.println("##### COMPILE #####");
+            System.out.println("##### COMPILE #####");
 
             int threads = Runtime.getRuntime().availableProcessors();
             ExecutorService executorService = Executors.newFixedThreadPool(threads);
@@ -158,7 +158,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
             compilerCommands.addAll(cppFlags);
             compilerCommands.addAll(headerDirs);
             compilerCommands.add("@" + cppList.path());
-            System.err.println("##### COMPILE #####");
+            System.out.println("##### COMPILE #####");
             boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
             if(!flag) {
                 return false;
@@ -204,7 +204,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         linkerCommands.clear();
         onLink(compiledObjects, objList.path(), libPath);
 
-        System.err.println("##### LINK #####");
+        System.out.println("##### LINK #####");
         return JProcess.startProcess(childTarget.file(), linkerCommands);
     }
 

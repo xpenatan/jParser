@@ -11,10 +11,10 @@ buildscript {
         google()
     }
 
-    val kotlinVersion = "1.8.10"
+    val kotlinVersion = "2.1.10"
 
     dependencies {
-        classpath("com.android.tools.build:gradle:7.3.1")
+        classpath("com.android.tools.build:gradle:8.2.0")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }

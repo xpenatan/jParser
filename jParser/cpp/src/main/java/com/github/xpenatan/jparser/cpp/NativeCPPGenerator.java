@@ -85,7 +85,7 @@ public class NativeCPPGenerator implements CppGenerator {
         otherTypes.put("Throwable", ArgumentType.Throwable);
     }
 
-    private String cppDestinationDir;
+    private String glueCppDestinationDir;
     private String cppGlueName = "JNIGlue";
 
     StringBuilder mainPrinter = new StringBuilder();
@@ -105,7 +105,7 @@ public class NativeCPPGenerator implements CppGenerator {
     public NativeCPPGenerator(String cppDestinationDir, boolean exportJNIMethods) {
         try {
             this.exportJNIMethods = exportJNIMethods;
-            this.cppDestinationDir = new File(cppDestinationDir).getCanonicalPath() + File.separator;
+            this.glueCppDestinationDir = new File(cppDestinationDir, "jniglue").getCanonicalPath() + File.separator;
         } catch(IOException e) {
             throw new RuntimeException(e);
         }
@@ -258,9 +258,7 @@ public class NativeCPPGenerator implements CppGenerator {
         print(PrintType.MAIN, "}");
         String code = mainPrinter.toString();
 
-        String gluePathStr = cppDestinationDir + File.separator + ".." + File.separator + "jniglue" + File.separator;
-        CustomFileDescriptor gluePath = new CustomFileDescriptor(gluePathStr);
-
+        String gluePathStr = glueCppDestinationDir;
         String cppGlueHPath = gluePathStr + cppGlueName + ".h";
         String cppGluePath = gluePathStr + cppGlueName + ".cpp";
         CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);
