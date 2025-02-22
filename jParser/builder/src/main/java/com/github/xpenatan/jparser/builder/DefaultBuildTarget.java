@@ -247,6 +247,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
                 }
             }
             for(String cppExclude : cppExcludes) {
+                cppExclude = cppExclude.replace("//", "/");
                 PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + cppExclude);
                 boolean matches = pathMatcher.matches(of);
                 if(matches) {
