@@ -1,4 +1,5 @@
 import com.github.xpenatan.jparser.builder.BuildMultiTarget;
+import com.github.xpenatan.jparser.builder.targets.AndroidTargetOld;
 import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jparser.builder.targets.IOSTarget;
@@ -217,11 +218,11 @@ public class BuildLib {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getAndroidTarget(BuildToolOptions op) {
+    private static BuildMultiTarget getAndroidOldTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
 
-        AndroidTarget androidTarget = new AndroidTarget();
+        AndroidTargetOld androidTarget = new AndroidTargetOld();
         androidTarget.addJNIHeaders();
 
         androidTarget.headerDirs.add("-I" + sourceDir);
@@ -229,6 +230,42 @@ public class BuildLib {
         androidTarget.cppInclude.add(sourceDir + "**.cpp");
 
         multiTarget.add(androidTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getAndroidTarget(BuildToolOptions op) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        AndroidTarget.ApiLevel apiLevel = AndroidTarget.ApiLevel.Android_10_29;
+        ArrayList<AndroidTarget.Target> targets = new ArrayList<>();
+
+        targets.add(AndroidTarget.Target.x86);
+        targets.add(AndroidTarget.Target.x86_64);
+        targets.add(AndroidTarget.Target.armeabi_v7a);
+        targets.add(AndroidTarget.Target.arm64_v8a);
+
+        for(int i = 0; i < targets.size(); i++) {
+            AndroidTarget.Target target = targets.get(i);
+
+            // Make a static library
+            AndroidTarget compileStaticTarget = new AndroidTarget(target, apiLevel);
+            compileStaticTarget.isStatic = true;
+            compileStaticTarget.headerDirs.add("-I" + sourceDir);
+            compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+            multiTarget.add(compileStaticTarget);
+
+            AndroidTarget linkTarget = new AndroidTarget(target, apiLevel);
+            linkTarget.addJNIHeaders();
+            linkTarget.headerDirs.add("-I" + sourceDir);
+            linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+            linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() +"/lib" + op.libName + ".a");
+            linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+            multiTarget.add(linkTarget);
+        }
 
         return multiTarget;
     }

@@ -2,126 +2,144 @@ package com.github.xpenatan.jparser.builder.targets;
 
 import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.DefaultBuildTarget;
-import com.github.xpenatan.jparser.builder.JProcess;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
-import com.github.xpenatan.jparser.core.util.CustomFileDescriptor.FileType;
 import java.util.ArrayList;
 
 public class AndroidTarget extends DefaultBuildTarget {
 
-    public String androidABIS = "all";
-    public String androidPlatform = "android-19";
+    public static boolean DEBUG_BUILD;
 
-    public ArrayList<String> customArgs = new ArrayList<>();
+    private String ndkHome = System.getenv("ANDROID_NDK_HOME");
+    private String target;
+    private String apiLevel;
+    private String sysroot;
+    private String archiver;
 
-    public AndroidTarget() {
-        this.libDirSuffix = "android/";
-        this.tempBuildDir = "target/android";
+    public AndroidTarget(Target target, ApiLevel apiLevel) {
+        cppCompiler.clear();
+        linkerCompiler.clear();
 
+        if(ndkHome == null) {
+            return;
+        }
+        this.libPrefix = "lib";
+
+        String osFolder = "windows-x86_64";
+        if(isUnix()) {
+            osFolder = "linux-x86_64";
+        }
+        else if(isMac()) {
+            // TODO Verify if this is correct
+            osFolder = "mac-x86_64";
+        }
+        String toolchain = ndkHome + "/toolchains/llvm/prebuilt/" + osFolder;
+        String compiler = toolchain + "/bin/clang++"; // C++ compiler
+        archiver = toolchain + "/bin/llvm-ar"; // Archiver for static libraries
+        sysroot = toolchain + "/sysroot"; // System root for Android libraries
+
+        // Target settings
+        this.target = target.value;
+        this.apiLevel = apiLevel.value; // Android API level (e.g., Android 10)
+
+        String targetPath = target.folder;
+
+        this.libDirSuffix = "android/" + targetPath;
+        this.tempBuildDir = "target/" + targetPath;
+        linkObjSuffix = ".o";
+
+        cppCompiler.add(compiler);
+        linkerCompiler.add(compiler);
+        cppCompiler.add("--target=" + this.target + this.apiLevel);
+        cppCompiler.add("--sysroot=" + sysroot);
+        cppCompiler.add("-fPIC");
         cppFlags.add("-O2");
         cppFlags.add("-Wall");
         cppFlags.add("-D__ANDROID__");
         cppFlags.add("-fvisibility=hidden");
         cppFlags.add("-std=c++17");
-        linkerFlags.add("-lm");
 
-        cppInclude.add("**/jniglue/JNIGlue.cpp");
-        headerDirs.add("jni-headers/linux");
+        cppFlags.add("-c");
+        libSuffix = "64.o";
     }
 
     @Override
-    protected boolean build(BuildConfig config, CustomFileDescriptor buildTargetTemp) {
-        CustomFileDescriptor androidDir = config.buildDir;
-        if(!androidDir.exists()) {
-            androidDir.mkdirs();
+    protected void setup(BuildConfig config) {
+        if(ndkHome == null) {
+            return;
         }
 
-        CustomFileDescriptor applicationTemplate = new CustomFileDescriptor("android/Application.mk", FileType.Classpath);
-        String applicationStr = applicationTemplate.readString();
-        applicationStr = applicationStr.replace("%androidABIs%", androidABIS);
-        applicationStr = applicationStr.replace("%androidPlat%", androidPlatform);
-        CustomFileDescriptor applicationFile = androidDir.child(applicationTemplate.name());
-        applicationFile.writeString(applicationStr, false);
-
-        CustomFileDescriptor androidTemplate = new CustomFileDescriptor("android/Android.mk", FileType.Classpath);
-        String androidStr = androidTemplate.readString();
-
-        String headerDirsStr = "";
-        for(String headerDir : headerDirs) {
-            headerDir = headerDir.replace("-I", "");
-            headerDirsStr += headerDir + " ";
-        }
-        headerDirsStr = headerDirsStr.trim();
-
-        String cppFlagsStr = "";
-
-        for(String cppFlag : cppFlags) {
-            cppFlagsStr += cppFlag + " ";
-        }
-        cppFlagsStr = cppFlagsStr.trim();
-
-        String linkerFlagsStr = "";
-
-        for(String linkerFlag : linkerFlags) {
-            linkerFlagsStr += linkerFlag + " ";
-        }
-        linkerFlagsStr = linkerFlagsStr.trim();
-
-        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.buildSourceDir, cppInclude, cppExclude, filterCPPSuffix));
-        for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
-            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
-            cppFiles.addAll(cppFiles1);
-        }
-
-        String srcFilesStr = "";
-        for(CustomFileDescriptor file : cppFiles) {
-            String path = file.path();
-            String sourceBasePath = config.buildDir.path();
-            String pathWithoutBase = path.replace(sourceBasePath, "");
-            pathWithoutBase = pathWithoutBase.replaceFirst("/", "");
-            srcFilesStr += "FILE_LIST += $(wildcard $(LOCAL_PATH)/" + pathWithoutBase + ")\n";
-        }
-
-        srcFilesStr = srcFilesStr.trim();
-
-        androidStr = androidStr.replace("%libName%", config.libName);
-        androidStr = androidStr.replace("%headerDirs%", headerDirsStr);
-        androidStr = androidStr.replace("%cppFlags%", cppFlagsStr);
-        androidStr = androidStr.replace("%linkerFlags%", linkerFlagsStr);
-        androidStr = androidStr.replace("%srcFiles%", srcFilesStr);
-
-        CustomFileDescriptor androidFile = androidDir.child(androidTemplate.name());
-        androidFile.writeString(androidStr, false);
-
-        String ndkHome = System.getenv("NDK_HOME");
-
-        if(ndkHome != null) {
-            ndkHome += "/";
+        if(isStatic) {
+            linkerCompiler.clear();
+            linkerCompiler.add(archiver);
+            String staticLib = "libmystaticlib.a";
+            linkerFlags.add("rcs");
+            libSuffix = ".a";
         }
         else {
-            ndkHome = "";
+            linkerFlags.add("-lm");
+            linkerFlags.add("--target=" + target + apiLevel);
+            linkerFlags.add("--sysroot=" + sysroot);
+            linkerFlags.add("-shared");
+            linkerFlags.add("-static-libstdc++"); // Statically link C++ runtime
+            libSuffix = ".so";
+        }
+    }
+
+    @Override
+    protected void onLink(ArrayList<CustomFileDescriptor> compiledObject, String objFilePath, String libPath) {
+        if(isStatic) {
+            linkerCommands.addAll(linkerCompiler);
+            linkerCommands.addAll(linkerFlags);
+            linkerCommands.add(libPath);
+            linkerCommands.add("@" + objFilePath);
+        }
+        else {
+            super.onLink(compiledObject, objFilePath, libPath);
+        }
+    }
+
+    public void addJNIHeaders() {
+        headerDirs.add("-Ijni-headers/");
+        headerDirs.add("-Ijni-headers/linux");
+        headerDirs.add("-Ijni-headers/win32");
+        headerDirs.add("-Ijni-headers/mac");
+    }
+
+    public enum Target {
+        arm64_v8a("aarch64-linux-android", "arm64-v8a"),
+        armeabi_v7a("armv7a-linux-androideabi", "armeabi-v7a"),
+        x86_64("x86_64-linux-android", "x86_64"),
+        x86("i686-linux-android", "x86");
+
+        private String value;
+        private String folder;
+
+        Target(String value, String folder) {
+            this.value = value;
+            this.folder = folder;
         }
 
-        String androidCommand = ndkHome + "ndk-build";
-        if(isWindows()) {
-            androidCommand += ".cmd";
+        public String getFolder() {
+            return folder;
         }
 
-        if(multiCoreCompile) {
-            int i = Runtime.getRuntime().availableProcessors();
-            customArgs.add("-j" + i );
-        }
+    }
 
-        CustomFileDescriptor libTarget = config.libDir.child("android");
-        ArrayList<String> commands = new ArrayList<>();
-        commands.add(androidCommand);
-        commands.addAll(customArgs);
-        commands.add("NDK_PROJECT_PATH=.");
-        commands.add("NDK_APPLICATION_MK=Application.mk");
-        commands.add(" NDK_LIBS_OUT=" + libTarget.path());
-        if(!JProcess.startProcess(androidDir.file(), commands)) {
-            return false;
+    public enum ApiLevel {
+        Android_16_36("36"),
+        Android_15_35("35"),
+        Android_14_34("34"),
+        Android_13_33("33"),
+        Android_12_32("32"),
+        Android_12_31("31"),
+        Android_11_30("30"),
+        Android_10_29("29"),
+        Android_09_28("28");
+
+        private String value;
+
+        ApiLevel(String value) {
+            this.value = value;
         }
-        return true;
     }
 }
