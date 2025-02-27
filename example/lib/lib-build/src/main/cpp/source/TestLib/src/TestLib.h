@@ -201,6 +201,70 @@ class TestMethodClass {
         long long getLongLongValue01() { return longLongValue01; };
 };
 
+class TestOperatorClass {
+private:
+    float value;
+
+public:
+    // Constructor
+    TestOperatorClass() { value = 0; }
+    TestOperatorClass(float value) { this->value = value; }
+
+    // Arithmetic Operators
+    TestOperatorClass operator+(const TestOperatorClass& other) const { return TestOperatorClass(value + other.value); }
+    TestOperatorClass operator-(const TestOperatorClass& other) const { return TestOperatorClass(value - other.value); }
+    TestOperatorClass operator*(const TestOperatorClass& other) const { return TestOperatorClass(value * other.value); }
+    TestOperatorClass operator/(const TestOperatorClass& other) const {
+        if (other.value != 0) return TestOperatorClass(value / other.value);
+        cout << "Error: Division by zero!" << endl;
+        return *this;
+    }
+    TestOperatorClass operator-() const { return TestOperatorClass(-value); } // Unary minus
+
+    // Compound Assignment Operators
+    TestOperatorClass& operator+=(const TestOperatorClass& other) { value += other.value; return *this; }
+    TestOperatorClass& operator-=(const TestOperatorClass& other) { value -= other.value; return *this; }
+    TestOperatorClass& operator*=(const TestOperatorClass& other) { value *= other.value; return *this; }
+    TestOperatorClass& operator/=(const TestOperatorClass& other) {
+        if (other.value != 0) value /= other.value;
+        else cout << "Error: Division by zero!" << endl;
+        return *this;
+    }
+
+    // Comparison Operators
+    bool operator==(const TestOperatorClass& other) const { return value == other.value; }
+    bool operator!=(const TestOperatorClass& other) const { return value != other.value; }
+    bool operator<(const TestOperatorClass& other) const { return value < other.value; }
+    bool operator>(const TestOperatorClass& other) const { return value > other.value; }
+    bool operator<=(const TestOperatorClass& other) const { return value <= other.value; }
+    bool operator>=(const TestOperatorClass& other) const { return value >= other.value; }
+
+    // Increment and Decrement Operators
+    TestOperatorClass& operator++() { value += 1.0; return *this; } // Prefix increment
+    TestOperatorClass operator++(int) { TestOperatorClass temp = *this; value += 1.0; return temp; } // Postfix increment
+    TestOperatorClass& operator--() { value -= 1.0; return *this; } // Prefix decrement
+    TestOperatorClass operator--(int) { TestOperatorClass temp = *this; value -= 1.0; return temp; } // Postfix decrement
+
+    // Bitwise Operators (optional, but included for completeness with float caveats)
+    TestOperatorClass operator&(const TestOperatorClass& other) const { return TestOperatorClass(static_cast<float>(static_cast<int>(value) & static_cast<int>(other.value))); }
+    TestOperatorClass operator|(const TestOperatorClass& other) const { return TestOperatorClass(static_cast<float>(static_cast<int>(value) | static_cast<int>(other.value))); }
+    TestOperatorClass operator^(const TestOperatorClass& other) const { return TestOperatorClass(static_cast<float>(static_cast<int>(value) ^ static_cast<int>(other.value))); }
+    TestOperatorClass operator~() const { return TestOperatorClass(static_cast<float>(~static_cast<int>(value))); }
+    TestOperatorClass operator<<(const TestOperatorClass& other) const { return TestOperatorClass(static_cast<float>(static_cast<int>(value) << static_cast<int>(other.value))); }
+    TestOperatorClass operator>>(const TestOperatorClass& other) const { return TestOperatorClass(static_cast<float>(static_cast<int>(value) >> static_cast<int>(other.value))); }
+
+    // Compound Bitwise Assignment Operators
+    TestOperatorClass& operator&=(const TestOperatorClass& other) { value = static_cast<float>(static_cast<int>(value) & static_cast<int>(other.value)); return *this; }
+    TestOperatorClass& operator|=(const TestOperatorClass& other) { value = static_cast<float>(static_cast<int>(value) | static_cast<int>(other.value)); return *this; }
+    TestOperatorClass& operator^=(const TestOperatorClass& other) { value = static_cast<float>(static_cast<int>(value) ^ static_cast<int>(other.value)); return *this; }
+    TestOperatorClass& operator<<=(const TestOperatorClass& other) { value = static_cast<float>(static_cast<int>(value) << static_cast<int>(other.value)); return *this; }
+    TestOperatorClass& operator>>=(const TestOperatorClass& other) { value = static_cast<float>(static_cast<int>(value) >> static_cast<int>(other.value)); return *this; }
+
+    // Accessor
+    float getValue() const { return value; }
+    void setValue(float val) { this->value = val; }
+};
+
 class TestStaticMethodClass {
     private:
         inline static int intValue01;

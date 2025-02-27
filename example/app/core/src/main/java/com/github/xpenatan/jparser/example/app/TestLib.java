@@ -1,5 +1,7 @@
 package com.github.xpenatan.jparser.example.app;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.github.xpenatan.jparser.example.testlib.CallbackClass;
 import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
@@ -9,6 +11,7 @@ import com.github.xpenatan.jparser.example.testlib.TestMethodClass;
 import com.github.xpenatan.jparser.example.testlib.TestNamespaceClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClassArray;
+import com.github.xpenatan.jparser.example.testlib.TestOperatorClass;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
 
 public class TestLib {
@@ -24,6 +27,7 @@ public class TestLib {
         boolean callbackTest = testCallbackClass();
         boolean callbackTestManual = testCallbackClassManual();
         boolean namespaceTest = testNamespaceClass();
+        boolean operatorTest = testOperatorClass();
 
         System.out.println("constructorTest: " + constructorTest);
         System.out.println("stringConstructorTest: " + stringConstructorTest);
@@ -34,8 +38,11 @@ public class TestLib {
         System.out.println("staticMethodTest: " + staticMethodTest);
         System.out.println("callbackTest: " + callbackTest);
         System.out.println("namespaceTest: " + namespaceTest);
+        System.out.println("operatorTest: " + operatorTest);
+
         return constructorTest && stringConstructorTest && attributeTest && staticAttributeTest
-                && attributeArrayTest && methodTest && staticMethodTest && callbackTest && callbackTestManual && namespaceTest;
+                && attributeArrayTest && methodTest && staticMethodTest && callbackTest
+                && callbackTestManual && namespaceTest && operatorTest;
     }
 
     private static boolean testConstructorClass() {
@@ -276,6 +283,11 @@ public class TestLib {
 
     private static boolean testCallbackClass() {
         {
+            if(Gdx.app.getType() == Application.ApplicationType.WebGL) {
+                // TODO Not supported yet
+                return true;
+            }
+
             TestCallbackClass test = new TestCallbackClass();
             try {
                 boolean[] internal_onVoidCallback = { false };
@@ -595,5 +607,84 @@ public class TestLib {
             test.dispose();
         }
         return true;
+    }
+
+    private static boolean testOperatorClass() {
+        try {
+            TestOperatorClass operatorClass = new TestOperatorClass();
+            TestOperatorClass otherOPClass = new TestOperatorClass();
+            otherOPClass.setValue(3);
+
+            // Arithmetic Operators
+            {
+                operatorClass.setValue(10);
+                TestOperatorClass obj = operatorClass.addValue(otherOPClass);
+                float value = obj.getValue();
+                if(!(value == 13 && (obj != operatorClass && obj != otherOPClass))) {
+                    throw new RuntimeException("testOperatorClass '+' !(value == 13)");
+                }
+            }
+            {
+                operatorClass.setValue(10);
+                TestOperatorClass obj = operatorClass.subValue(otherOPClass);
+                float value = obj.getValue();
+                if(!(value == 7 && (obj != operatorClass && obj != otherOPClass))) {
+                    throw new RuntimeException("testOperatorClass '-' !(value == 7)");
+                }
+            }
+            {
+                operatorClass.setValue(10);
+                TestOperatorClass obj = operatorClass.mulValue(otherOPClass);
+                float value = obj.getValue();
+                if(!(value == 30 && (obj != operatorClass && obj != otherOPClass))) {
+                    throw new RuntimeException("testOperatorClass '*' !(value == 30)");
+                }
+            }
+            {
+                operatorClass.setValue(30);
+                TestOperatorClass obj = operatorClass.divValue(otherOPClass);
+                float value = obj.getValue();
+                if(!(value == 10 && (obj != operatorClass && obj != otherOPClass))) {
+                    throw new RuntimeException("testOperatorClass '/' !(value == 10)");
+                }
+            }
+            // Compound Assignment Operators
+            {
+                operatorClass.setValue(10);
+                TestOperatorClass obj = operatorClass.addRef(otherOPClass);
+                float value = obj.getValue();
+                if(!(value == 13 && (obj == operatorClass))) {
+                    throw new RuntimeException("testOperatorClass '+' !(value == 13)");
+                }
+            }
+            {
+                operatorClass.setValue(10);
+                TestOperatorClass obj = operatorClass.subRef(otherOPClass);
+                float value = obj.getValue();
+                if(!(value == 7 && (obj == operatorClass))) {
+                    throw new RuntimeException("testOperatorClass '-' !(value == 7)");
+                }
+            }
+            {
+                operatorClass.setValue(10);
+                TestOperatorClass obj = operatorClass.mulRef(otherOPClass);
+                float value = obj.getValue();
+                if(!(value == 30 && (obj == operatorClass))) {
+                    throw new RuntimeException("testOperatorClass '*' !(value == 30)");
+                }
+            }
+            {
+                operatorClass.setValue(30);
+                TestOperatorClass obj = operatorClass.divRef(otherOPClass);
+                float value = obj.getValue();
+                if(!(value == 10 && (obj == operatorClass))) {
+                    throw new RuntimeException("testOperatorClass '/' !(value == 10)");
+                }
+            }
+            return true;
+        } catch(Throwable e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

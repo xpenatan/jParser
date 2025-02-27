@@ -217,6 +217,21 @@ interface TestNamespaceClass {
     long getMethod01Value();
 };
 
+interface TestOperatorClass {
+    void TestOperatorClass();
+    void TestOperatorClass(float value);
+    [Operator="+", Value] TestOperatorClass addValue([Const, Ref] TestOperatorClass other);
+    [Operator="-", Value] TestOperatorClass subValue([Const, Ref] TestOperatorClass other);
+    [Operator="*", Value] TestOperatorClass mulValue([Const, Ref] TestOperatorClass other);
+    [Operator="/", Value] TestOperatorClass divValue([Const, Ref] TestOperatorClass other);
+    [Operator="+=", Ref] TestOperatorClass addRef([Const, Ref] TestOperatorClass other);
+    [Operator="-=", Ref] TestOperatorClass subRef([Const, Ref] TestOperatorClass other);
+    [Operator="*=", Ref] TestOperatorClass mulRef([Const, Ref] TestOperatorClass other);
+    [Operator="/=", Ref] TestOperatorClass divRef([Const, Ref] TestOperatorClass other);
+    float getValue();
+    void setValue(float val);
+};
+
 enum TestEnumWithinClass {
     "TestEnumClass::e_val"
 };

@@ -124,6 +124,10 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             if(IS_WASM) {
                 linkerFlags.add("-s");
                 linkerFlags.add("WASM=1");
+                linkerFlags.add("-s");
+
+                // Disable big int because of conversion bug
+                linkerFlags.add("WASM_BIGINT=0");
             }
             else {
                 linkerFlags.add("-s");

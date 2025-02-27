@@ -147,6 +147,13 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             "[COPY_PARAM] = nativeObject->[METHOD];\n" +
             "return (jlong)&[COPY_PARAM];";
 
+    protected static final String METHOD_GET_OBJ_VALUE_ARITHMETIC_OPERATOR_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+                    "static [COPY_TYPE] [COPY_PARAM];\n" +
+                    "[COPY_PARAM] = [OPERATOR];\n" +
+                    "return (jlong)&[COPY_PARAM];";
+
+
     protected static final String METHOD_GET_OBJ_VALUE_STATIC_TEMPLATE =
             "\nstatic [COPY_TYPE] [COPY_PARAM];\n" +
             "[COPY_PARAM] = [TYPE]::[METHOD];\n" +
@@ -657,7 +664,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             constTag = "const ";
         }
 
-        String operator = getOperation(idlMethod.operator, param);
+        String operator = getOperator(idlMethod.operator, param);
         String content = null;
         IDLMethodOperation.Op op = IDLMethodOperation.getEnum(idlMethod, methodDeclaration, nativeMethod);
         switch(op) {
@@ -699,11 +706,20 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                         returnTypeName = retTypeClass.classHeader.prefixName + returnTypeName;
                     }
                     String copyParam = "copy_addr";
-                    content = METHOD_GET_OBJ_VALUE_TEMPLATE
-                            .replace(TEMPLATE_TAG_METHOD, methodCaller)
-                            .replace(TEMPLATE_TAG_TYPE, classTypeName)
-                            .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)
-                            .replace(TEMPLATE_TAG_COPY_PARAM, copyParam);
+                    if(operator.isEmpty()) {
+                        content = METHOD_GET_OBJ_VALUE_TEMPLATE
+                                .replace(TEMPLATE_TAG_METHOD, methodCaller)
+                                .replace(TEMPLATE_TAG_TYPE, classTypeName)
+                                .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)
+                                .replace(TEMPLATE_TAG_COPY_PARAM, copyParam);
+                    }
+                    else {
+                        content = METHOD_GET_OBJ_VALUE_ARITHMETIC_OPERATOR_TEMPLATE
+                                .replace(TEMPLATE_TAG_OPERATOR, operator)
+                                .replace(TEMPLATE_TAG_TYPE, classTypeName)
+                                .replace(TEMPLATE_TAG_COPY_TYPE, returnTypeName)
+                                .replace(TEMPLATE_TAG_COPY_PARAM, copyParam);
+                    }
                 }
                 break;
             case GET_OBJ_POINTER_STATIC:
@@ -725,25 +741,15 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         nativeMethod.setBlockComment(blockComment);
     }
 
-    private static String getOperation(String operatorCode, String param) {
+    private static String getOperator(String operatorCode, String param) {
         String oper = "";
         if(!operatorCode.isEmpty()) {
             if(operatorCode.equals("[]")) {
                 oper = "nativeObject[" + param + "]";
             }
-            else if(operatorCode.equals("=")){
-                oper = "(*nativeObject = " + param + ")";
+            else {
+                oper = "(*nativeObject " + operatorCode + " " + param + ")";
             }
-            //TODO add more operator c++ code
-//            else if(operatorCode.equals("+=")){
-//                oper = " += " + param;
-//            }
-//            else if(operatorCode.equals("-=")){
-//                oper = " -= " + param;
-//            }
-//            else if(operatorCode.equals("*=")){
-//                oper = " *= " + param;
-//            }
         }
         return oper;
     }

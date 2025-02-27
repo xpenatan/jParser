@@ -256,7 +256,7 @@ public class IDLMethodParser {
 
         boolean isRetSameAsClass = false;
 
-        if(!operator.isEmpty() && className.equals(returnTypeName)) {
+        if(!operator.isEmpty() && className.equals(returnTypeName) && !isReturnValue) { // is pointer or ref
             // if its operator and return type is same as class name don't create temp object
             isRetSameAsClass = true;
         }
