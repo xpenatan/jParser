@@ -8,7 +8,7 @@
 //   It needs to be at the same order if both have the same parameter size.
 //   TestConstructorClass works because it have different parameter size. From the [BUG] above, don't use string or it will fail at runtime.
 // * Arrays parameters for example "void method(int[] array)" is converted to IDLIntArray class object behind the scene because interacting with array is better using native code.
-//   For custom types is better to use typedef. See TestObjectClassArray in CustomCode.h
+//   For custom types is better to use 'using' alias. See TestObjectClassArray in CustomCode.h
 // * Array get_ shape the same object for every index. Don't keep object reference.
 // * Emscripten WebIDL callbacks don't work with overloaded methods so its better to use _[N] at the end of the method
 // * Emscripten class methods don't work with overloaded methods with different parameter order so its better to use _[N] at the end of the method

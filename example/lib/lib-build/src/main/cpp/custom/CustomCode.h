@@ -1,8 +1,8 @@
 #include "IDLHelper.h"
 #include "TestLib.h"
 
-typedef TestEnumClass::TestEnumWithinClass TestEnumWithinClass;
-typedef TestEnumClass::TestEnumClassWithinClass TestEnumClassWithinClass;
-typedef TestEnumNamespace::TestEnumInNamespace TestEnumInNamespace;
+using TestEnumWithinClass = TestEnumClass::TestEnumWithinClass;
+using TestEnumClassWithinClass = TestEnumClass::TestEnumClassWithinClass;
+using TestEnumInNamespace = TestEnumNamespace::TestEnumInNamespace;
 
-typedef IDLArray<TestObjectClass*> TestObjectClassArray;
+using TestObjectClassArray = IDLArray<TestObjectClass*>;
