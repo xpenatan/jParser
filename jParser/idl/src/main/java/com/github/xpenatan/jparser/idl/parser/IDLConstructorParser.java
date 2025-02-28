@@ -97,9 +97,23 @@ public class IDLConstructorParser {
     public static MethodDeclaration setupConstructor(IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
         NodeList<Parameter> parameters = constructorDeclaration.getParameters();
         Type type = StaticJavaParser.parseType(classDeclaration.getNameAsString());
-
         boolean isStatic = true;
-        MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod("create", parameters, type, isStatic);
+
+        String additionalName = "";
+
+        // Constructor needs to have type in the name because there are some cases that multiple
+        // parameters with different type will skip creating this native method if they are equal.
+        // Since the parameters object is converter to long. It's impossible to override multiple methods
+        // with the same pointers type.
+        // TODO maybe add parameter type in all native method names.
+        for(int i = 0; i < parameters.size(); i++) {
+            Parameter parameter = parameters.get(i);
+            String typeName = parameter.getType().toString();
+            additionalName += "_" + typeName;
+        }
+
+        String methodName = "create" + additionalName;
+        MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(methodName, parameters, type, isStatic);
 
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethod)) {
             //Add native method if it does not exist
