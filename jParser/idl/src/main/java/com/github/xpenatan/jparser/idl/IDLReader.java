@@ -61,36 +61,57 @@ public class IDLReader {
         return null;
     }
 
-    public static IDLReader readIDL(String idlDir) {
-        IDLReader reader = new IDLReader();
-        try {
-            idlDir = new File(idlDir).getCanonicalPath() + File.separator;
-        } catch(IOException e) {
-            throw new RuntimeException("IDL file not found: " + idlDir);
+    public IDLClassOrEnum getClassOrEnum(String name) {
+        for(int i = 0; i < fileArray.size(); i++) {
+            IDLFile idlFile = fileArray.get(i);
+            IDLClass idlClass = idlFile.getClass(name);
+            if(idlClass != null) {
+                return idlClass;
+            }
+            IDLEnum idlEnum = idlFile.getEnum(name);
+            if(idlEnum != null) {
+                return idlEnum;
+            }
         }
-        IDLFile idlFile = parseFile(idlDir);
-        reader.fileArray.add(idlFile);
+        return null;
+    }
+
+    public ArrayList<IDLClassOrEnum> getAllClasses() {
+        ArrayList<IDLClassOrEnum> classes = new ArrayList<>();
+        for(int i = 0; i < fileArray.size(); i++) {
+            IDLFile idlFile = fileArray.get(i);
+            classes.addAll(idlFile.classArray);
+        }
+        return classes;
+    }
+
+    public static IDLReader readIDL(String ...idlDirs) {
+        IDLReader reader = new IDLReader();
+
+        for(int i = 0; i < idlDirs.length; i++) {
+            String idlDir = idlDirs[i];
+            try {
+                idlDir = new File(idlDir).getCanonicalPath() + File.separator;
+                IDLFile idlFile = parseFile(idlDir);
+                reader.fileArray.add(idlFile);
+            } catch(IOException e) {
+                throw new RuntimeException("IDL file not found: " + idlDir);
+            }
+        }
+
+        setupClasses(reader);
         return reader;
     }
 
-    public static void addIDL(IDLReader reader, String idlDir) {
-        try {
-            idlDir = new File(idlDir).getCanonicalPath() + File.separator;
-        } catch(IOException e) {
-            throw new RuntimeException("IDL file not found: " + idlDir);
-        }
-        IDLFile idlFile = parseFile(idlDir);
-        reader.fileArray.add(idlFile);
-    }
-
-    public static IDLReader readIDL(ArrayList<String> idlDirs) {
-        IDLReader reader = new IDLReader();
-        for(String idlDir : idlDirs) {
-            IDLFile idlFile = parseFile(idlDir);
-            reader.fileArray.add(idlFile);
-        }
-        return reader;
-    }
+//    public static void addIDL(IDLReader reader, String idlDir) {
+//        try {
+//            idlDir = new File(idlDir).getCanonicalPath() + File.separator;
+//        } catch(IOException e) {
+//            throw new RuntimeException("IDL file not found: " + idlDir);
+//        }
+//        IDLFile idlFile = parseFile(idlDir);
+//        reader.fileArray.add(idlFile);
+//    }
 
     public static IDLFile parseFile(String path) {
         path = path.replace("\\", File.separator);
@@ -124,7 +145,6 @@ public class IDLReader {
                 ArrayList<IDLClassOrEnum> classList = new ArrayList<>();
                 parseFile(idlFile, classList);
                 idlFile.classArray.addAll(classList);
-                configCallbacks(idlFile, classList);
             }
             catch(Throwable t) {
                 t.printStackTrace();
@@ -206,7 +226,38 @@ public class IDLReader {
         }
     }
 
-    private static void configCallbacks(IDLFile idlFile, ArrayList<IDLClassOrEnum> classList) {
+    private static void setupClasses(IDLReader idlReader) {
+        ArrayList<IDLClassOrEnum> classList = idlReader.getAllClasses();
+        configClassType(idlReader, classList);
+        configCallbacks(idlReader, classList);
+    }
+
+    private static void configClassType(IDLReader idlReader, ArrayList<IDLClassOrEnum> classList) {
+        // Setup all attributes and parameters type
+        for(int i = 0; i < classList.size(); i++) {
+            IDLClassOrEnum idlClassOrEnum = classList.get(i);
+            if(idlClassOrEnum.isClass()) {
+                IDLClass idlClass = idlClassOrEnum.asClass();
+                for(IDLAttribute attribute : idlClass.attributes) {
+                    String idlType = attribute.idlType;
+                    IDLClassOrEnum childClassOrEnum = idlReader.getClassOrEnum(idlType);
+                    attribute.idlClassOrEnum = childClassOrEnum;
+                }
+                for(IDLMethod method : idlClass.methods) {
+                    for(IDLParameter parameter : method.parameters) {
+                        String idlType = parameter.idlType;
+                        IDLClassOrEnum childClassOrEnum = idlReader.getClassOrEnum(idlType);
+                        parameter.idlClassOrEnum = childClassOrEnum;
+                    }
+                    String returnType = method.returnType;
+                    IDLClassOrEnum childClassOrEnum = idlReader.getClassOrEnum(returnType);
+                    method.returnClassType = childClassOrEnum;
+                }
+            }
+        }
+    }
+
+    private static void configCallbacks(IDLReader idlReader, ArrayList<IDLClassOrEnum> classList) {
         for(int i = 0; i < classList.size(); i++) {
             IDLClassOrEnum idlClassOrEnum = classList.get(i);
             if(idlClassOrEnum.isClass()) {
@@ -215,7 +266,7 @@ public class IDLReader {
                 if(jsImplementation != null) {
                     jsImplementation = jsImplementation.trim();
                     if(!jsImplementation.isEmpty()) {
-                        IDLClass callbackClass = idlFile.getClass(jsImplementation);
+                        IDLClass callbackClass = idlReader.getClass(jsImplementation);
                         if(callbackClass != null) {
                             if(callbackClass.callbackImpl == null) {
                                 callbackClass.callbackImpl = idlCallbackImpl;

@@ -15,6 +15,7 @@ public class IDLAttribute {
     public boolean isConst = false;
     public boolean isValue = false;
     public boolean isArray = false;
+    public IDLClassOrEnum idlClassOrEnum;
 
     public IDLAttribute(IDLFile idlFile) {
         this.idlFile = idlFile;
@@ -66,7 +67,12 @@ public class IDLAttribute {
 
     public String getCPPType() {
         //Attributes don't set/get arrays so we remove it
-        return IDLHelper.getCPPReturnType(idlType).replace("[]", "");
+        String fullType = idlType;
+        if(idlClassOrEnum != null && idlClassOrEnum.isClass()) {
+            IDLClass aClass = idlClassOrEnum.asClass();
+            fullType = aClass.getName();
+        }
+        return IDLHelper.getCPPReturnType(fullType).replace("[]", "");
     }
 
     public String getJavaType() {

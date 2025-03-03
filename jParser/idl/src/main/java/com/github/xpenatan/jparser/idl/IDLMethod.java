@@ -12,6 +12,7 @@ public class IDLMethod {
     public String line;
     public String paramsLine;
     public String returnType;
+    public IDLClassOrEnum returnClassType;
     public String name;
     public boolean isReturnArray;
     public boolean skip = false;

@@ -9,6 +9,7 @@ public class IDLParameter {
     public final IDLFile idlFile;
     public IDLMethod idlMethod;
     public IDLConstructor idlConstructor;
+    public IDLClassOrEnum idlClassOrEnum;
 
     public String line;
     public String idlType;
@@ -78,7 +79,12 @@ public class IDLParameter {
     }
 
     public String getCPPType() {
-        return IDLHelper.getCPPReturnType(idlType);
+        String fullType = idlType;
+        if(idlClassOrEnum != null && idlClassOrEnum.isClass()) {
+            IDLClass aClass = idlClassOrEnum.asClass();
+            fullType = aClass.getName();
+        }
+        return IDLHelper.getCPPReturnType(fullType);
     }
 
     public String getJavaType() {
