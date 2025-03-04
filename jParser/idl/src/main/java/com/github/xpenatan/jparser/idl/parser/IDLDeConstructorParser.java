@@ -20,6 +20,9 @@ public class IDLDeConstructorParser {
 
     public static void generateDeConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass) {
         if(!idlClass.classHeader.isNoDelete) {
+            MethodDeclaration disposeMethod = classOrInterfaceDeclaration.addMethod("dispose", Modifier.Keyword.PUBLIC);
+            disposeMethod.getBody().get().addStatement(new MethodCallExpr("super.dispose"));
+
             List<MethodDeclaration> methodsBySignature = classOrInterfaceDeclaration.getMethodsBySignature(DELETE_NATIVE);
             int size = methodsBySignature.size();
 
