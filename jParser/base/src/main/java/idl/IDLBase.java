@@ -32,7 +32,7 @@ public abstract class IDLBase {
         return nativeData.isDisposed();
     }
 
-    public void dispose() {
+    protected void dispose() {
         nativeData.dispose();
     }
 
