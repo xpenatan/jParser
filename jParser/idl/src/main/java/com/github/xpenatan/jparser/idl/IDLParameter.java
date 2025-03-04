@@ -82,7 +82,7 @@ public class IDLParameter {
         String fullType = idlType;
         if(idlClassOrEnum != null && idlClassOrEnum.isClass()) {
             IDLClass aClass = idlClassOrEnum.asClass();
-            fullType = aClass.getName();
+            fullType = aClass.getCPPName();
         }
         return IDLHelper.getCPPReturnType(fullType);
     }

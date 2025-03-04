@@ -134,7 +134,7 @@ public class IDLClass extends IDLClassOrEnum {
         return null;
     }
 
-    public String getName() {
+    public String getCPPName() {
         return classHeader.prefixName + name;
     }
 

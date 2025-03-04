@@ -210,7 +210,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
         IDLClass idlClass = idlConstructor.idlClass;
 
-        String classTypeName = idlClass.getName();
+        String classTypeName = idlClass.getCPPName();
 
         NodeList<Parameter> parameters = constructorDeclaration.getParameters();
         ArrayList<IDLParameter> idParameters = idlConstructor.parameters;
@@ -229,7 +229,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String classTypeName;
 
         if(idlClass.callbackImpl == null) {
-            classTypeName = idlClass.classHeader.prefixName + classDeclaration.getNameAsString();
+            classTypeName = idlClass.getCPPName();
         }
         else {
             classTypeName = idlClass.callbackImpl.name;
@@ -254,7 +254,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String classTypeName = classDeclaration.getNameAsString();
         IDLClass idlClass = idlAttribute.idlFile.getClass(classTypeName);
         if(idlClass != null) {
-            classTypeName = idlClass.classHeader.prefixName + classTypeName;
+            classTypeName = idlClass.getCPPName();
         }
 
         String getPrimitiveCast = "";
@@ -266,7 +266,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
         IDLClass retTypeClass = idlAttribute.idlFile.getClass(attributeType);
         if(retTypeClass != null) {
-            attributeType = retTypeClass.classHeader.prefixName + attributeType;
+            attributeType = retTypeClass.getCPPName();
         }
 
         String attributeReturnCast = "";
@@ -433,7 +433,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String callbackCode = generateSetupCallbackMethod(idlClass, callbackDeclaration, methods);
         String methodsCode = generateMethodCallers(idlClass, methods);
         cppClass += "" +
-                "class " + callback.name + " : public " + idlClass.name + " {\n" +
+                "class " + callback.getCPPName() + " : public " + idlClass.getCPPName() + " {\n" +
                 "private:\n" +
                 "\tJNIEnv* env;\n" +
                 "\tjobject obj;\n" +
@@ -644,11 +644,12 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     private void setupMethodGenerated(IDLMethod idlMethod, String param, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         Type returnType = methodDeclaration.getType();
         String returnTypeStr = idlMethod.getJavaReturnType();
+        String cppReturnType = idlMethod.getCPPReturnType();
         String methodName = idlMethod.name;
         String classTypeName = classDeclaration.getNameAsString();
         IDLClass idlClass = idlMethod.idlFile.getClass(classTypeName);
         if(idlClass != null) {
-            classTypeName = idlClass.classHeader.prefixName + classTypeName;
+            classTypeName = idlClass.getCPPName();
         }
         String returnCastStr = "";
         String methodCaller = methodName + "(" + param + ")";
@@ -689,7 +690,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                     String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
                     IDLClass retTypeClass = idlMethod.idlFile.getClass(returnTypeName);
                     if(retTypeClass != null) {
-                        returnTypeName = retTypeClass.classHeader.prefixName + returnTypeName;
+                        returnTypeName = retTypeClass.getCPPName();
                     }
                     String copyParam = "copy_addr";
                     content = METHOD_GET_OBJ_VALUE_STATIC_TEMPLATE
@@ -703,7 +704,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                     String returnTypeName = returnType.asClassOrInterfaceType().asClassOrInterfaceType().getNameAsString();
                     IDLClass retTypeClass = idlMethod.idlFile.getClass(returnTypeName);
                     if(retTypeClass != null) {
-                        returnTypeName = retTypeClass.classHeader.prefixName + returnTypeName;
+                        returnTypeName = retTypeClass.getCPPName();
                     }
                     String copyParam = "copy_addr";
                     if(operator.isEmpty()) {
@@ -726,7 +727,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 content = METHOD_GET_OBJ_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case GET_OBJ_POINTER:
-                content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_RETURN_TYPE, returnTypeStr).replace(TEMPLATE_TAG_CONST, constTag);
+                content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_RETURN_TYPE, cppReturnType).replace(TEMPLATE_TAG_CONST, constTag);
                 break;
             case GET_PRIMITIVE_STATIC:
                 content = METHOD_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);
@@ -791,7 +792,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             }
             else {
                 if(paramClass != null) {
-                    classType = paramClass.getName();
+                    classType = paramClass.getCPPName();
                 }
                 if(isRef || isValue) {
                     paramName = "*((" + classType + "* )" + paramName + ")";

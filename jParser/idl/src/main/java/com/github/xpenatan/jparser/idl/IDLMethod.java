@@ -89,7 +89,12 @@ public class IDLMethod {
     }
 
     public String getCPPReturnType() {
-        return IDLHelper.getCPPReturnType(returnType);
+        String fullType = returnType;
+        if(returnClassType != null && returnClassType.isClass()) {
+            IDLClass aClass = returnClassType.asClass();
+            fullType = aClass.getCPPName();
+        }
+        return IDLHelper.getCPPReturnType(fullType);
     }
 
     public String getJavaReturnType() {
