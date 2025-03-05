@@ -501,7 +501,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
             paramCode = "(" + paramCode + ")" + JNITypeSignature.getJNIType(returnTypeStr);
 
-            String methodName = idlMethod.name + methodCode;
+            String methodName = idlMethod.getCPPName() + methodCode;
 
             String variable = variableTemplate.replace("[METHOD]", methodName);
             String methodId = methodIdTemplate.replace("[METHOD]", methodName)
@@ -564,7 +564,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
             String methodCode = generateMethodID(internalMethod);
 
-            String methodName = idlMethod.name;
+            String methodName = idlMethod.getCPPName();
             String methodParams = "";
             String callParams = "";
             String constStr = idlMethod.isReturnConst ? " const" : "";
@@ -645,7 +645,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         Type returnType = methodDeclaration.getType();
         String returnTypeStr = idlMethod.getJavaReturnType();
         String cppReturnType = idlMethod.getCPPReturnType();
-        String methodName = idlMethod.name;
+        String methodName = idlMethod.getCPPName();
         String classTypeName = classDeclaration.getNameAsString();
         IDLClass idlClass = idlMethod.idlFile.getClass(classTypeName);
         if(idlClass != null) {

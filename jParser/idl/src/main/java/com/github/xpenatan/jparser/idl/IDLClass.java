@@ -140,7 +140,7 @@ public class IDLClass extends IDLClassOrEnum {
 
     public IDLMethod getMethod(String methodName) {
         for(IDLMethod method : methods) {
-            if(method.name.equals(methodName)) {
+            if(method.nameEquals(methodName)) {
                 return method;
             }
         }

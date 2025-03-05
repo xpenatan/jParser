@@ -22,6 +22,7 @@ public class IDLMethod {
     public boolean isReturnConst;
     public boolean isStaticMethod = false;
     public String operator = "";
+    public String bindsToName = null;
 
     public final ArrayList<IDLParameter> parameters = new ArrayList<>();
 
@@ -42,17 +43,27 @@ public class IDLMethod {
 
         String tagsStr = IDLHelper.getTags(leftSide);
         if(!tagsStr.isEmpty()) {
-            isReturnRef = tagsStr.contains("Ref");
-            isReturnValue = tagsStr.contains("Value");
-            isReturnConst = tagsStr.contains("Const");
             leftSide = leftSide.replace(tagsStr, "").trim();
-
             tagsStr = tagsStr.substring(1, tagsStr.length()-1);
             for(String s : tagsStr.split(",")) {
+                s = s.trim();
                 if(s.contains("Operator")) {
                     int first = s.indexOf("\"");
                     int last = s.lastIndexOf("\"");
                     operator = s.substring(first, last + 1).replace("\"", "");
+                }
+                else if(s.equals("Ref")) {
+                    isReturnRef = true;
+                }
+                else if(s.equals("Value")) {
+                    isReturnValue = true;
+                }
+                else if(s.equals("Const")) {
+                    isReturnConst = true;
+                }
+                else if(s.startsWith("BindTo")) {
+                    s = s.replace("\"", "");
+                    bindsToName = s.split("=")[1];
                 }
             }
         }
@@ -118,6 +129,25 @@ public class IDLMethod {
         }
     }
 
+    public boolean nameEquals(String value) {
+        if(bindsToName != null) {
+            if(value.equals(bindsToName)) {
+                return true;
+            }
+        }
+        else {
+            return value.equals(name);
+        }
+        return false;
+    }
+
+    public String getCPPName() {
+        if(bindsToName != null) {
+            return bindsToName;
+        }
+        return name;
+    }
+
     public IDLMethod clone() {
         IDLMethod cloned = new IDLMethod(idlClass, idlFile);
         cloned.line = line;
@@ -126,6 +156,7 @@ public class IDLMethod {
         cloned.name = name;
         cloned.skip = skip;
         cloned.isAny = isAny;
+        cloned.bindsToName = bindsToName;
         cloned.isReturnValue = isReturnValue;
         cloned.isReturnArray = isReturnArray;
         cloned.isStaticMethod = isStaticMethod;
