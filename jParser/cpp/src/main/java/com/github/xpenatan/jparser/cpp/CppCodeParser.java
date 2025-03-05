@@ -153,7 +153,6 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                     "[COPY_PARAM] = [OPERATOR];\n" +
                     "return (jlong)&[COPY_PARAM];";
 
-
     protected static final String METHOD_GET_OBJ_VALUE_STATIC_TEMPLATE =
             "\nstatic [COPY_TYPE] [COPY_PARAM];\n" +
             "[COPY_PARAM] = [TYPE]::[METHOD];\n" +
@@ -191,6 +190,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     protected static final String METHOD_GET_PRIMITIVE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
             "return [CAST]nativeObject->[METHOD];\n";
+
+    protected static final String METHOD_GET_PRIMITIVE_OPERATOR_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "return ([OPERATOR]);";
 
     protected static final String ENUM_GET_INT_TEMPLATE =
             "\nreturn (jlong)[ENUM];\n";
@@ -732,8 +735,16 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             case GET_PRIMITIVE_STATIC:
                 content = METHOD_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);
                 break;
-            case GET_PRIMITIVE:
-                content = METHOD_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);
+            case GET_PRIMITIVE: {
+                    if(operator.isEmpty()) {
+                        content = METHOD_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);
+                    }
+                    else {
+                        content = METHOD_GET_PRIMITIVE_OPERATOR_TEMPLATE
+                                .replace(TEMPLATE_TAG_OPERATOR, operator)
+                                .replace(TEMPLATE_TAG_TYPE, classTypeName);
+                    }
+                }
                 break;
         }
 
@@ -746,7 +757,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String oper = "";
         if(!operatorCode.isEmpty()) {
             if(operatorCode.equals("[]")) {
-                oper = "nativeObject[" + param + "]";
+                oper = "(*nativeObject)[" + param + "]";
             }
             else {
                 oper = "(*nativeObject " + operatorCode + " " + param + ")";
