@@ -20,6 +20,7 @@ public class IDLMethod {
     public boolean isReturnRef;
     public boolean isReturnValue;
     public boolean isReturnConst;
+    public boolean isReturnNewObject;
     public boolean isStaticMethod = false;
     public String operator = "";
     public String bindsToName = null;
@@ -64,6 +65,9 @@ public class IDLMethod {
                 else if(s.startsWith("BindTo")) {
                     s = s.replace("\"", "");
                     bindsToName = s.split("=")[1];
+                }
+                else if(s.startsWith("NewObject")) {
+                    isReturnNewObject = true;
                 }
             }
         }
