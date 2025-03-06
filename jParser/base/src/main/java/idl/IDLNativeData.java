@@ -53,14 +53,14 @@ public class IDLNativeData {
     }
 
     /**
-     * Take ownership of the native instance, causing the native object to be deleted when this object gets out of scope.
+     * Take ownership of the native instance, causing the native object to be warned when this object gets out of scope.
      */
     public void takeOwnership() {
         cMemOwn = true;
     }
 
     /**
-     * Release ownership of the native instance, causing the native object NOT to be deleted when this object gets out of
+     * Release ownership of the native instance, causing the native object NOT to be warned when this object gets out of
      * scope.
      */
     public void releaseOwnership() {
