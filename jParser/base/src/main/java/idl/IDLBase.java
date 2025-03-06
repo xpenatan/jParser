@@ -46,18 +46,6 @@ public abstract class IDLBase {
     protected void deleteNative() {
     }
 
-    public void takeOwnership() {
-        nativeData.takeOwnership();
-    }
-
-    public void releaseOwnership() {
-        nativeData.releaseOwnership();
-    }
-
-    public boolean hasOwnership() {
-        return nativeData.hasOwnership();
-    }
-
     /*[-TEAVM;-REPLACE]
        @org.teavm.jso.JSBody(params = { "addr" }, script = "return [MODULE].UTF8ToString(addr);")
        public static native String getJSString(int addr);
