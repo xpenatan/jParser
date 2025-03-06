@@ -340,6 +340,7 @@ public class TestLib {
                 if(!(value == 7)) {
                     throw new RuntimeException("value == 7");
                 }
+                callback.dispose();
             } catch(Throwable e) {
                 e.printStackTrace();
                 test.dispose();
@@ -681,6 +682,9 @@ public class TestLib {
                     throw new RuntimeException("testOperatorClass '/' !(value == 10)");
                 }
             }
+            operatorClass.dispose();
+            otherOPClass.dispose();
+
             return true;
         } catch(Throwable e) {
             e.printStackTrace();

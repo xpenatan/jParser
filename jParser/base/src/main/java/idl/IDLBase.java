@@ -5,7 +5,6 @@ package idl;
  */
 public abstract class IDLBase {
 
-    public static boolean USE_REF_COUNTING = false;
     public static boolean ENABLE_LOGGING = true;
     protected final IDLNativeData nativeData = new IDLNativeData(this);
 
