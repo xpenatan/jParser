@@ -11,7 +11,7 @@ public class IDLClass extends IDLClassOrEnum {
     public IDLClassHeader classHeader;
 
     public String extendClass = "";
-    public final ArrayList<String> classLines = new ArrayList<>();
+    public final ArrayList<IDLLine> classLines = new ArrayList<>();
     public final ArrayList<IDLConstructor> constructors = new ArrayList<>();
     public final ArrayList<IDLMethod> methods = new ArrayList<>();
     public final ArrayList<IDLAttribute> attributes = new ArrayList<>();
@@ -26,19 +26,54 @@ public class IDLClass extends IDLClassOrEnum {
     }
 
     public void initClass(ArrayList<String> lines) {
-        classLines.addAll(lines);
+        setupLines(lines);
         setupHeader();
         setupInterfaceName();
         setupExtendClass();
         setupAttributesAndMethods();
     }
 
+    private void setupLines(ArrayList<String> lines) {
+        for(int i = 0; i < lines.size(); i++) {
+            String originalLine = lines.get(i);
+            int commentIndex = originalLine.indexOf("//");
+            if(commentIndex != -1) {
+                String command = null;
+                String code = originalLine.substring(0, commentIndex);
+                String comment = originalLine.replace(code, "").replace("//", "").trim();
+                code = code.trim();
+                comment = comment.trim();
+                if(comment.isEmpty()) {
+                    comment = null;
+                }
+                else {
+                    int startIdx = comment.indexOf("[-");
+                    int endIdx = comment.indexOf("]");
+                    if(startIdx != -1 && endIdx != -1 && endIdx > startIdx+2) {
+                        String tempCommand = comment.substring(startIdx, endIdx+1);
+                        comment = comment.replace(tempCommand, "").trim();
+                        command = tempCommand.trim();
+                        if(comment.isEmpty()) {
+                            comment = null;
+                        }
+                    }
+                }
+                IDLLine idlLine = new IDLLine(code, comment, command);
+                classLines.add(idlLine);
+            }
+            else {
+                classLines.add(new IDLLine(originalLine, null, null));
+            }
+        }
+    }
+
     private void setupAttributesAndMethods() {
         for(int i = 1; i < classLines.size(); i++) {
-            String line = classLines.get(i);
+            IDLLine idlLine = classLines.get(i);
+            String line = idlLine.line;
             if(line.contains("attribute ")) {
                 IDLAttribute attribute = new IDLAttribute(idlFile);
-                attribute.initAttribute(line);
+                attribute.initAttribute(idlLine);
                 attributes.add(attribute);
             }
             else {
@@ -59,7 +94,7 @@ public class IDLClass extends IDLClassOrEnum {
                 else {
                     if(line.contains("(") && line.contains(")")) {
                         IDLMethod method = new IDLMethod(this, idlFile);
-                        method.initMethod(line);
+                        method.initMethod(idlLine);
                         methods.add(method);
 
                         int totalOptionalParams = method.getTotalOptionalParams();
@@ -84,14 +119,15 @@ public class IDLClass extends IDLClassOrEnum {
     }
 
     private void setupHeader() {
-        String line = "";
+        String code = "";
         if(classLines.size() > 0) {
-            String headerLine = classLines.get(0);
+            IDLLine idlLine = classLines.get(0);
+            String headerLine = idlLine.line;
             if(IDLClassHeader.isLineHeader(headerLine)) {
-                line = headerLine;
+                code = headerLine;
             }
         }
-        classHeader = new IDLClassHeader(line, this);
+        classHeader = new IDLClassHeader(code, this);
     }
 
     private void setupExtendClass() {
@@ -113,7 +149,8 @@ public class IDLClass extends IDLClassOrEnum {
 
     private String searchLine(String text, boolean startsWith, boolean endsWith) {
         for(int i = 0; i < classLines.size(); i++) {
-            String line = classLines.get(i);
+            IDLLine idlLine = classLines.get(i);
+            String line = idlLine.line;
 
             if(startsWith) {
                 if(line.startsWith(text)) {

@@ -52,7 +52,7 @@ public class IDLMethodParser {
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) return null;\n" +
             "    [TYPE] [TYPE]_NEW = new [TYPE]((byte)1, (char)1);\n" +
-            "    [TYPE]_NEW.initNative(pointer, true);\n" +
+            "    [TYPE]_NEW.initNative(pointer, [MEM_OWNED]);\n" +
             "    return [TYPE]_NEW;\n" +
             "}";
 
@@ -82,6 +82,8 @@ public class IDLMethodParser {
     static final String TEMPLATE_TAG_TYPE = "[TYPE]";
 
     static final String TEMPLATE_TAG_NUM = "[NUM]";
+
+    static final String TEMPLATE_TAG_MEM_OWNED = "[MEM_OWNED]";
 
     public static void generateMethod(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass, IDLMethod idlMethod) {
         MethodDeclaration methodDeclaration = generateAndAddMethodOnly(idlParser, jParser, unit, classOrInterfaceDeclaration, idlMethod);
@@ -170,13 +172,13 @@ public class IDLMethodParser {
     }
 
     private static void setupMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
-        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlMethod.isStaticMethod, idlMethod.isReturnValue, idlMethod.isReturnNewObject, classDeclaration, methodDeclaration, idlMethod.name, idlMethod.operator, idlMethod.parameters);
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlMethod.isStaticMethod, idlMethod.isReturnValue, idlMethod.isReturnNewObject, idlMethod.isReturnMemoryOwned, classDeclaration, methodDeclaration, idlMethod.name, idlMethod.operator, idlMethod.parameters);
         if(nativeMethodDeclaration != null) {
             idlParser.onIDLMethodGenerated(jParser, idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
         }
     }
 
-    public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, boolean isReturnNewObject, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator, ArrayList<IDLParameter> idlParameters) {
+    public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, boolean isReturnNewObject, boolean isReturnMemOwned, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator, ArrayList<IDLParameter> idlParameters) {
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
         Type methodReturnType = methodDeclaration.getType();
         MethodDeclaration nativeMethodDeclaration = generateNativeMethod(methodName, methodParameters, methodReturnType, methodDeclaration.isStatic());
@@ -196,7 +198,7 @@ public class IDLMethodParser {
             else if(methodReturnType.isClassOrInterfaceType()) {
                 // Class object needs to generate some additional code.
                 // Needs to obtain the pointer and return a temp object.
-                BlockStmt blockStmt = IDLMethodParser.generateTempObjects(isReturnValue, isReturnNewObject, classDeclaration, methodDeclaration, nativeMethodDeclaration, caller, operator, idlParameters);
+                BlockStmt blockStmt = IDLMethodParser.generateTempObjects(isReturnValue, isReturnNewObject, isReturnMemOwned, classDeclaration, methodDeclaration, nativeMethodDeclaration, caller, operator, idlParameters);
                 methodDeclaration.setBody(blockStmt);
             }
             else {
@@ -255,7 +257,7 @@ public class IDLMethodParser {
         }
     }
 
-    private static BlockStmt generateTempObjects(boolean isReturnValue, boolean isReturnNewObject, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration, MethodCallExpr caller, String operator, ArrayList<IDLParameter> idlParameters) {
+    private static BlockStmt generateTempObjects(boolean isReturnValue, boolean isReturnNewObject, boolean isReturnMemOwned, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration, MethodCallExpr caller, String operator, ArrayList<IDLParameter> idlParameters) {
         Type methodReturnType = methodDeclaration.getType();
         String className = classDeclaration.getNameAsString();
         String returnTypeName = methodReturnType.toString();
@@ -283,6 +285,7 @@ public class IDLMethodParser {
             if(isReturnNewObject) {
                 newBody = GET_NEW_OBJECT_TEMPLATE
                         .replace(TEMPLATE_TAG_METHOD, methodCaller)
+                        .replace(TEMPLATE_TAG_MEM_OWNED, String.valueOf(isReturnMemOwned))
                         .replace(TEMPLATE_TAG_TYPE, returnTypeName);
             }
             else {

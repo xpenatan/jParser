@@ -9,7 +9,7 @@ public class IDLMethod {
     public final IDLFile idlFile;
     public final IDLClass idlClass;
 
-    public String line;
+    public IDLLine idlLine;
     public String paramsLine;
     public String returnType;
     public IDLClassOrEnum returnClassType;
@@ -21,6 +21,7 @@ public class IDLMethod {
     public boolean isReturnValue;
     public boolean isReturnConst;
     public boolean isReturnNewObject;
+    public boolean isReturnMemoryOwned;
     public boolean isStaticMethod = false;
     public String operator = "";
     public String bindsToName = null;
@@ -32,8 +33,9 @@ public class IDLMethod {
         this.idlFile = idlFile;
     }
 
-    public void initMethod(String line) {
-        this.line = line;
+    public void initMethod(IDLLine idlLine) {
+        this.idlLine = idlLine;
+        String line = idlLine.line;
         paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
         for(IDLParameter parameter : parameters) {
             parameter.idlMethod = this;
@@ -41,6 +43,9 @@ public class IDLMethod {
         int index = line.indexOf("(");
         String leftSide = line.substring(0, index).trim();
         leftSide = IDLHelper.removeMultipleSpaces(leftSide.trim());
+
+        isReturnNewObject = idlLine.containsCommand(IDLLine.CMD_NEW_OBJECT);
+        isReturnMemoryOwned = !idlLine.containsCommand(IDLLine.CMD_NOT_MEM_OWN);
 
         String tagsStr = IDLHelper.getTags(leftSide);
         if(!tagsStr.isEmpty()) {
@@ -65,9 +70,6 @@ public class IDLMethod {
                 else if(s.startsWith("BindTo")) {
                     s = s.replace("\"", "");
                     bindsToName = s.split("=")[1];
-                }
-                else if(s.startsWith("NewObject")) {
-                    isReturnNewObject = true;
                 }
             }
         }
@@ -154,7 +156,7 @@ public class IDLMethod {
 
     public IDLMethod clone() {
         IDLMethod cloned = new IDLMethod(idlClass, idlFile);
-        cloned.line = line;
+        cloned.idlLine = idlLine.copy();
         cloned.paramsLine = paramsLine;
         cloned.returnType = returnType;
         cloned.name = name;

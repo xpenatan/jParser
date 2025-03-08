@@ -5,7 +5,7 @@ package com.github.xpenatan.jparser.idl;
  */
 public class IDLAttribute {
     public IDLFile idlFile;
-    public String line;
+    public IDLLine idlLine;
     public String idlType;
     public String name;
     public boolean skip = false;
@@ -21,8 +21,9 @@ public class IDLAttribute {
         this.idlFile = idlFile;
     }
 
-    public void initAttribute(String line) {
-        this.line = line;
+    public void initAttribute(IDLLine idlLine) {
+        this.idlLine = idlLine;
+        String line = idlLine.line;
 
         String[] split = line.split("attribute");
         String leftSide = split[0].trim();

@@ -159,8 +159,8 @@ public class IDLReader {
         ArrayList<String> settings = new ArrayList<>();
         int size = idlFile.lines.size();
         for(int i = 0; i < size; i++) {
-            String line = idlFile.lines.get(i).trim();
-            line = removeComment(line);
+            String originalLine = idlFile.lines.get(i).trim();
+            String line = removeComment(originalLine);
             String nextLine = getNextLine(idlFile.lines, i);
 
             if(line.isEmpty()) {
@@ -206,7 +206,7 @@ public class IDLReader {
             }
             if(foundStartClass) {
                 if(!justAdded) {
-                    classLines.add(line);
+                    classLines.add(originalLine);
                 }
                 if(line.endsWith("};")) {
                     String nextL = getNextLine(idlFile.lines, i);;
