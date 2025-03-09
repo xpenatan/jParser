@@ -11,15 +11,11 @@ public class IDLNativeData {
         this.idlBase = idlBase;
     }
 
-    public void initNative(long cPtr, boolean cMemoryOwn) {
-        cMemOwn = cMemoryOwn;
-        cPointer = cPtr;
-    }
-
     public void reset(long cPtr, boolean cMemoryOwn) {
         dispose();
         cMemOwn = cMemoryOwn;
         cPointer = cPtr;
+        disposed = false;
     }
 
     @Override

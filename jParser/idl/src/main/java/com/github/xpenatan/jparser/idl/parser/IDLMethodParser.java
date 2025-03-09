@@ -43,7 +43,7 @@ public class IDLMethodParser {
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) return null;\n" +
             "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
-            "    [TYPE]_TEMP_GEN_[NUM].getNativeData().initNative(pointer, false);\n" +
+            "    [TYPE]_TEMP_GEN_[NUM].getNativeData().reset(pointer, false);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
 
@@ -52,13 +52,13 @@ public class IDLMethodParser {
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) return null;\n" +
             "    [TYPE] [TYPE]_NEW = new [TYPE]((byte)1, (char)1);\n" +
-            "    [TYPE]_NEW.getNativeData().initNative(pointer, [MEM_OWNED]);\n" +
+            "    [TYPE]_NEW.getNativeData().reset(pointer, [MEM_OWNED]);\n" +
             "    return [TYPE]_NEW;\n" +
             "}";
 
     static final String CALLBACK_PARAM_TEMPLATE =
             "if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
-            "[TYPE]_TEMP_GEN_[NUM].getNativeData().initNative([PARAM], false);\n";
+            "[TYPE]_TEMP_GEN_[NUM].getNativeData().reset([PARAM], false);\n";
 
     static final String OPERATOR_OBJECT_TEMPLATE =
             "{\n" +

@@ -82,7 +82,7 @@ public class CallbackClassManual extends IDLBase {
 
     public CallbackClassManual() {
         long addr = internal_native_create();
-        nativeData.initNative(addr, true);
+        nativeData.reset(addr, true);
         setupCallbacks();
     }
 
