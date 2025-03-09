@@ -41,4 +41,9 @@ public abstract class IDLBase {
     public static String getJSString(long addr) {
         return null;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return nativeData.equals(obj);
+    }
 }
