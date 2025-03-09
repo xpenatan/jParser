@@ -24,7 +24,15 @@ public class IDLNativeData {
 
     @Override
     public boolean equals(Object obj) {
-        return (obj instanceof IDLBase) && (((IDLNativeData)obj).cPointer == this.cPointer);
+        if(obj instanceof IDLBase) {
+            IDLBase idlBase = (IDLBase)obj;
+            return idlBase.nativeData.cPointer == this.cPointer;
+        }
+        else if(obj instanceof IDLNativeData) {
+            IDLNativeData nativeData = (IDLNativeData)obj;
+            return nativeData.cPointer == this.cPointer;
+        }
+        return false;
     }
 
     @Override
