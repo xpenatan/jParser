@@ -48,6 +48,8 @@ public class IDLConstructorParser {
                 ConstructorDeclaration constructorDeclaration = classDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
                 constructorDeclaration.addParameter("byte", "b");
                 constructorDeclaration.addParameter("char", "c");
+                constructorDeclaration.addAnnotation(Deprecated.class);
+                constructorDeclaration.setJavadocComment("Dummy constructor, used internally to creates objects without C++ pointer");
             }
         }
 
@@ -122,8 +124,9 @@ public class IDLConstructorParser {
             MethodCallExpr caller = IDLMethodParser.createCaller(nativeMethod);
 
             BlockStmt blockStmt = constructorDeclaration.getBody();
-
-            IDLMethodParser.setupCallerParam(isStatic, false, caller, parameters, idlConstructor.parameters);
+            IDLMethodParser.NativeMethodData paramData = new IDLMethodParser.NativeMethodData();
+            paramData.isStatic = isStatic;
+            IDLMethodParser.setupCallerParam(paramData, caller, parameters, idlConstructor.parameters);
 
             Statement statement1 = StaticJavaParser.parseStatement("long addr = " + caller + ";");
             Statement statement2 = StaticJavaParser.parseStatement("initNative(addr, true);");

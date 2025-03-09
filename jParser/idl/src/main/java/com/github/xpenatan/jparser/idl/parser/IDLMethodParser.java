@@ -172,13 +172,18 @@ public class IDLMethodParser {
     }
 
     private static void setupMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLMethod idlMethod, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
-        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlMethod.isStaticMethod, idlMethod.isReturnValue, idlMethod.isReturnNewObject, idlMethod.isReturnMemoryOwned, classDeclaration, methodDeclaration, idlMethod.name, idlMethod.operator, idlMethod.parameters);
+        NativeMethodData methodData = new NativeMethodData();
+        methodData.isStatic = idlMethod.isStaticMethod;
+        methodData.isReturnValue = idlMethod.isReturnValue;
+        methodData.isReturnNewObject = idlMethod.isReturnNewObject;
+        methodData.isReturnMemOwned = idlMethod.isReturnMemoryOwned;
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(methodData, classDeclaration, methodDeclaration, idlMethod.name, idlMethod.operator, idlMethod.parameters);
         if(nativeMethodDeclaration != null) {
             idlParser.onIDLMethodGenerated(jParser, idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
         }
     }
 
-    public static MethodDeclaration prepareNativeMethod(boolean isStatic, boolean isReturnValue, boolean isReturnNewObject, boolean isReturnMemOwned, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator, ArrayList<IDLParameter> idlParameters) {
+    public static MethodDeclaration prepareNativeMethod(NativeMethodData paramData, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator, ArrayList<IDLParameter> idlParameters) {
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
         Type methodReturnType = methodDeclaration.getType();
         MethodDeclaration nativeMethodDeclaration = generateNativeMethod(methodName, methodParameters, methodReturnType, methodDeclaration.isStatic());
@@ -191,20 +196,20 @@ public class IDLMethodParser {
 
             if(methodReturnType.isVoidType()) {
                 // void types just call the method.
-                IDLMethodParser.setupCallerParam(isStatic, false, caller, methodDeclaration.getParameters(), idlParameters);
+                IDLMethodParser.setupCallerParam(paramData, caller, methodDeclaration.getParameters(), idlParameters);
                 BlockStmt blockStmt = methodDeclaration.getBody().get();
                 blockStmt.addStatement(caller);
             }
             else if(methodReturnType.isClassOrInterfaceType()) {
                 // Class object needs to generate some additional code.
                 // Needs to obtain the pointer and return a temp object.
-                BlockStmt blockStmt = IDLMethodParser.generateTempObjects(isReturnValue, isReturnNewObject, isReturnMemOwned, classDeclaration, methodDeclaration, nativeMethodDeclaration, caller, operator, idlParameters);
+                BlockStmt blockStmt = IDLMethodParser.generateTempObjects(paramData, classDeclaration, methodDeclaration, caller, operator, idlParameters);
                 methodDeclaration.setBody(blockStmt);
             }
             else {
                 // Should be a primitive return type.
                 ReturnStmt returnStmt = IDLMethodParser.getReturnStmt(methodDeclaration);
-                IDLMethodParser.setupCallerParam(isStatic, false, caller, methodDeclaration.getParameters(), idlParameters);
+                IDLMethodParser.setupCallerParam(paramData, caller, methodDeclaration.getParameters(), idlParameters);
                 returnStmt.setExpression(caller);
             }
             return nativeMethodDeclaration;
@@ -219,8 +224,8 @@ public class IDLMethodParser {
         return caller;
     }
 
-    public static void setupCallerParam(boolean isStatic, boolean isReturnValue, MethodCallExpr caller, NodeList<Parameter> methodParameters, ArrayList<IDLParameter> idlParameters) {
-        if(!isStatic) {
+    public static void setupCallerParam(NativeMethodData paramData, MethodCallExpr caller, NodeList<Parameter> methodParameters, ArrayList<IDLParameter> idlParameters) {
+        if(!paramData.isStatic) {
             caller.addArgument("(long)" + IDLDefaultCodeParser.CPOINTER_METHOD);
         }
         for(int i = 0; i < methodParameters.size(); i++) {
@@ -257,7 +262,7 @@ public class IDLMethodParser {
         }
     }
 
-    private static BlockStmt generateTempObjects(boolean isReturnValue, boolean isReturnNewObject, boolean isReturnMemOwned, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration, MethodCallExpr caller, String operator, ArrayList<IDLParameter> idlParameters) {
+    private static BlockStmt generateTempObjects(NativeMethodData paramData, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodCallExpr caller, String operator, ArrayList<IDLParameter> idlParameters) {
         Type methodReturnType = methodDeclaration.getType();
         String className = classDeclaration.getNameAsString();
         String returnTypeName = methodReturnType.toString();
@@ -267,13 +272,12 @@ public class IDLMethodParser {
 
         boolean isRetSameAsClass = false;
 
-        if(!operator.isEmpty() && className.equals(returnTypeName) && !isReturnValue) { // is pointer or ref
+        if(!operator.isEmpty() && className.equals(returnTypeName) && !paramData.isReturnValue) { // is pointer or ref
             // if its operator and return type is same as class name don't create temp object
             isRetSameAsClass = true;
         }
 
-
-        IDLMethodParser.setupCallerParam(isStatic, isReturnValue, caller, methodDeclaration.getParameters(), idlParameters);
+        IDLMethodParser.setupCallerParam(paramData, caller, methodDeclaration.getParameters(), idlParameters);
 
         String methodCaller = caller.toString();
 
@@ -282,10 +286,10 @@ public class IDLMethodParser {
                     .replace(TEMPLATE_TAG_METHOD, methodCaller);
         }
         else {
-            if(isReturnNewObject) {
+            if(paramData.isReturnNewObject) {
                 newBody = GET_NEW_OBJECT_TEMPLATE
                         .replace(TEMPLATE_TAG_METHOD, methodCaller)
-                        .replace(TEMPLATE_TAG_MEM_OWNED, String.valueOf(isReturnMemOwned))
+                        .replace(TEMPLATE_TAG_MEM_OWNED, String.valueOf(paramData.isReturnMemOwned))
                         .replace(TEMPLATE_TAG_TYPE, returnTypeName);
             }
             else {
@@ -455,4 +459,11 @@ public class IDLMethodParser {
         return null;
     }
 
+    public static class NativeMethodData {
+
+        public boolean isStatic;
+        public boolean isReturnValue;
+        public boolean isReturnNewObject;
+        public boolean isReturnMemOwned;
+    }
 }

@@ -136,13 +136,9 @@ public class IDLAttributeParser {
     }
 
     private static void setupAttributeMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName) {
-        boolean isValue = idlAttribute.isValue;
-        boolean addCopyParam = false;
-        if(isValue && !isSet) {
-            //  When it's a get attribute method we pass a temp c++ object to copy to the returned temp c++ object.
-        }
-        isValue = false;
-        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, isValue, false, false, classDeclaration, methodDeclaration, methodName, "", null);
+        IDLMethodParser.NativeMethodData methodData = new IDLMethodParser.NativeMethodData();
+        methodData.isStatic = idlAttribute.isStatic;
+        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(methodData, classDeclaration, methodDeclaration, methodName, "", null);
         if(nativeMethod != null) {
             idlParser.onIDLAttributeGenerated(jParser, idlAttribute, isSet, classDeclaration, methodDeclaration, nativeMethod);
         }
@@ -151,8 +147,6 @@ public class IDLAttributeParser {
     public static boolean shouldSkipMethod(MethodDeclaration containsMethod) {
         if(containsMethod != null) {
             boolean isNative = containsMethod.isNative();
-            boolean isStatic = containsMethod.isStatic();
-            boolean containsBlockComment = false;
             Optional<Comment> optionalComment = containsMethod.getComment();
             if(optionalComment.isPresent()) {
                 Comment comment = optionalComment.get();
