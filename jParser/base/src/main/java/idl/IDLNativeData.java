@@ -35,11 +35,6 @@ public class IDLNativeData {
         return false;
     }
 
-    @Override
-    public int hashCode() {
-        return (int)cPointer;
-    }
-
     /**
      * @return The memory location (pointer) of this instance.
      */
