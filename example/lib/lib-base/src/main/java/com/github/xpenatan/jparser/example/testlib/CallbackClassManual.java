@@ -82,7 +82,7 @@ public class CallbackClassManual extends IDLBase {
 
     public CallbackClassManual() {
         long addr = internal_native_create();
-        initNative(addr, true);
+        nativeData.initNative(addr, true);
         setupCallbacks();
     }
 
@@ -127,11 +127,11 @@ public class CallbackClassManual extends IDLBase {
                     internal_onStringCallback(IDLBase.getJSString(strValue01));
                 }
             };
-            internal_native_setupCallbacks((int)getCPointer(), onVoidCallback, onIntCallback, onFloatCallback, onBoolCallback, onStringCallback);
+            internal_native_setupCallbacks((int)getNativeData().getCPointer(), onVoidCallback, onIntCallback, onFloatCallback, onBoolCallback, onStringCallback);
         }
     */
     private void setupCallbacks() {
-        internal_native_setupCallbacks(getCPointer());
+        internal_native_setupCallbacks(getNativeData().getCPointer());
     }
 
     /*[-JNI;-NATIVE]

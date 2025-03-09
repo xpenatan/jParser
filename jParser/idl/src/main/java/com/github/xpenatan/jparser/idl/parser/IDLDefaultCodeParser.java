@@ -37,7 +37,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
     protected boolean enableAttributeParsing = true;
 
-    protected static final String CPOINTER_METHOD = "getCPointer()";
+    protected static final String CPOINTER_METHOD = "getNativeData().getCPointer()";
 
     public IDLDefaultCodeParser(String headerCMD, IDLReader idlReader, String cppDir) {
         super("", headerCMD, idlReader, cppDir);

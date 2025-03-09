@@ -20,7 +20,7 @@ public class IDLStringView extends IDLBase {
     public IDLStringView(byte b, char c) {}
 
     public String data() {
-        String text = internal_native_data(getCPointer());
+        String text = internal_native_data(getNativeData().getCPointer());
         return text;
     }
 

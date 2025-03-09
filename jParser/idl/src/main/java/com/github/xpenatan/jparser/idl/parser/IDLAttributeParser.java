@@ -138,6 +138,10 @@ public class IDLAttributeParser {
     private static void setupAttributeMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName) {
         IDLMethodParser.NativeMethodData methodData = new IDLMethodParser.NativeMethodData();
         methodData.isStatic = idlAttribute.isStatic;
+        if(idlAttribute.idlClassOrEnum != null && idlAttribute.idlClassOrEnum.isClass()) {
+            IDLClass aClass = idlAttribute.idlClassOrEnum.asClass();
+            methodData.isNoDelete = aClass.classHeader.isNoDelete;
+        }
         MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(methodData, classDeclaration, methodDeclaration, methodName, "", null);
         if(nativeMethod != null) {
             idlParser.onIDLAttributeGenerated(jParser, idlAttribute, isSet, classDeclaration, methodDeclaration, nativeMethod);

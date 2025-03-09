@@ -43,7 +43,7 @@ public class IDLMethodParser {
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) return null;\n" +
             "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
-            "    [TYPE]_TEMP_GEN_[NUM].setCPointer(pointer);\n" +
+            "    [TYPE]_TEMP_GEN_[NUM].getNativeData().initNative(pointer, false);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
 
@@ -52,19 +52,13 @@ public class IDLMethodParser {
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) return null;\n" +
             "    [TYPE] [TYPE]_NEW = new [TYPE]((byte)1, (char)1);\n" +
-            "    [TYPE]_NEW.initNative(pointer, [MEM_OWNED]);\n" +
+            "    [TYPE]_NEW.getNativeData().initNative(pointer, [MEM_OWNED]);\n" +
             "    return [TYPE]_NEW;\n" +
             "}";
 
     static final String CALLBACK_PARAM_TEMPLATE =
             "if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
-            "[TYPE]_TEMP_GEN_[NUM].setCPointer([PARAM]);\n";
-
-    static final String GET_TEMP_OBJECT_TEMPLATE =
-            "{\n" +
-            "    [METHOD];\n" +
-            "    return [TYPE]_TEMP_GEN_[NUM];\n" +
-            "}";
+            "[TYPE]_TEMP_GEN_[NUM].getNativeData().initNative([PARAM], false);\n";
 
     static final String OPERATOR_OBJECT_TEMPLATE =
             "{\n" +
@@ -176,7 +170,11 @@ public class IDLMethodParser {
         methodData.isStatic = idlMethod.isStaticMethod;
         methodData.isReturnValue = idlMethod.isReturnValue;
         methodData.isReturnNewObject = idlMethod.isReturnNewObject;
-        methodData.isReturnMemOwned = idlMethod.isReturnMemoryOwned;
+        methodData.isReturnMemoryOwned = idlMethod.isReturnMemoryOwned;
+        if(idlMethod.returnClassType != null && idlMethod.returnClassType.isClass()) {
+            IDLClass aClass = idlMethod.returnClassType.asClass();
+            methodData.isNoDelete = aClass.classHeader.isNoDelete;
+        }
         MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(methodData, classDeclaration, methodDeclaration, idlMethod.name, idlMethod.operator, idlMethod.parameters);
         if(nativeMethodDeclaration != null) {
             idlParser.onIDLMethodGenerated(jParser, idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
@@ -245,12 +243,12 @@ public class IDLMethodParser {
                     isArray = idlParameter.isArray;
                 }
                 if(isArray && IDLHelper.getCArray(type.asClassOrInterfaceType().getNameAsString()) != null) {
-                    String methodCall = paramName + ".getPointer()";
+                    String methodCall = paramName + "." + IDLDefaultCodeParser.CPOINTER_METHOD;
                     paramName =  "(long)(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
                 else if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
                     //All methods must contain a base class to get its pointer
-                    String methodCall = paramName + ".getCPointer()";
+                    String methodCall = paramName + "." + IDLDefaultCodeParser.CPOINTER_METHOD;
                     paramName =  "(long)(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
             }
@@ -269,8 +267,12 @@ public class IDLMethodParser {
         String newBody = null;
 
         boolean isStatic = methodDeclaration.isStatic();
-
         boolean isRetSameAsClass = false;
+        boolean isReturnMemOwned = paramData.isReturnMemoryOwned;
+        if(paramData.isNoDelete) {
+            // When NoDelete it means that the library is responsible to delete it.
+            isReturnMemOwned = false;
+        }
 
         if(!operator.isEmpty() && className.equals(returnTypeName) && !paramData.isReturnValue) { // is pointer or ref
             // if its operator and return type is same as class name don't create temp object
@@ -289,7 +291,7 @@ public class IDLMethodParser {
             if(paramData.isReturnNewObject) {
                 newBody = GET_NEW_OBJECT_TEMPLATE
                         .replace(TEMPLATE_TAG_METHOD, methodCaller)
-                        .replace(TEMPLATE_TAG_MEM_OWNED, String.valueOf(paramData.isReturnMemOwned))
+                        .replace(TEMPLATE_TAG_MEM_OWNED, String.valueOf(isReturnMemOwned))
                         .replace(TEMPLATE_TAG_TYPE, returnTypeName);
             }
             else {
@@ -460,10 +462,10 @@ public class IDLMethodParser {
     }
 
     public static class NativeMethodData {
-
         public boolean isStatic;
         public boolean isReturnValue;
         public boolean isReturnNewObject;
-        public boolean isReturnMemOwned;
+        public boolean isReturnMemoryOwned;
+        public boolean isNoDelete;
     }
 }

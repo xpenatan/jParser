@@ -189,7 +189,7 @@ public class TestLib {
             array.setValue(0, obj1);
             array.setValue(1, obj2);
             try {
-                TestMethodClass.native_setMethod07(test.getCPointer(), array.getPointer());
+                TestMethodClass.native_setMethod07(test.getNativeData().getCPointer(), array.getPointer());
                 {
                     float intValue01 = obj1.get_intValue01();
                     if(!(intValue01 == 20)) {

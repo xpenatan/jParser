@@ -20,7 +20,7 @@ public class IDLString extends IDLBase {
     public IDLString(byte b, char c) {}
 
     public String c_str() {
-        String text = internal_native_c_str(getCPointer());
+        String text = internal_native_c_str(getNativeData().getCPointer());
         return text;
     }
 
@@ -38,7 +38,7 @@ public class IDLString extends IDLBase {
     private static native String internal_native_c_str(long this_addr);
 
     public String data() {
-        String text = internal_native_data(getCPointer());
+        String text = internal_native_data(getNativeData().getCPointer());
         return text;
     }
 

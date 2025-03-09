@@ -11,23 +11,11 @@ public abstract class IDLBase {
     public IDLBase() {
     }
 
-    public final void initNative(long cPtr, boolean cMemoryOwn) {
-        nativeData.initNative(cPtr, cMemoryOwn);
-    }
-
-    public final void setCPointer(long cPtr) {
-        nativeData.setCPointer(cPtr);
-    }
-
-    public final long getCPointer() {
-        return nativeData.getCPointer();
-    }
-
     public final IDLNativeData getNativeData() {
         return nativeData;
     }
 
-    public boolean isDisposed() {
+    protected boolean isDisposed() {
         return nativeData.isDisposed();
     }
 

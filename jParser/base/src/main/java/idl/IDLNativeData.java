@@ -16,19 +16,6 @@ public class IDLNativeData {
         cPointer = cPtr;
     }
 
-    /**
-     * Set pointer if it's not owned by this object. Useful for setting temp objets
-     */
-    public void setCPointer(long cPtr) {
-        if(!cMemOwn) {
-            cPointer = cPtr;
-        }
-        else {
-            String className = getClass().getSimpleName();
-            throw new RuntimeException("Cannot change " + className + " pointer owned by native code");
-        }
-    }
-
     public void reset(long cPtr, boolean cMemoryOwn) {
         dispose();
         cMemOwn = cMemoryOwn;

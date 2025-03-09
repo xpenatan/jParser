@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
@@ -22,6 +23,9 @@ public class IDLDeConstructorParser {
         if(!idlClass.classHeader.isNoDelete) {
             MethodDeclaration disposeMethod = classOrInterfaceDeclaration.addMethod("dispose", Modifier.Keyword.PUBLIC);
             disposeMethod.getBody().get().addStatement(new MethodCallExpr("super.dispose"));
+            MethodDeclaration isDisposeMethod = classOrInterfaceDeclaration.addMethod("isDisposed", Modifier.Keyword.PUBLIC);
+            isDisposeMethod.setType(PrimitiveType.booleanType());
+            isDisposeMethod.getBody().get().addStatement(new MethodCallExpr("return super.isDisposed"));
 
             List<MethodDeclaration> methodsBySignature = classOrInterfaceDeclaration.getMethodsBySignature(DELETE_NATIVE);
             int size = methodsBySignature.size();
