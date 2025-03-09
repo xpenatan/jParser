@@ -18,6 +18,10 @@ public class IDLNativeData {
         disposed = false;
     }
 
+    public void reset(IDLBase idlBase, boolean cMemoryOwn) {
+        reset(idlBase.nativeData.getCPointer(), cMemoryOwn);
+    }
+
     @Override
     public boolean equals(Object obj) {
         return (obj instanceof IDLBase) && (((IDLNativeData)obj).cPointer == this.cPointer);
