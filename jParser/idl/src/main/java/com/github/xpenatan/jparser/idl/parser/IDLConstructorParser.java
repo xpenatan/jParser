@@ -128,8 +128,10 @@ public class IDLConstructorParser {
             paramData.isStatic = isStatic;
             IDLMethodParser.setupCallerParam(paramData, caller, parameters, idlConstructor.parameters);
 
+            String isMemoryOwned = String.valueOf(!idlConstructor.idlClass.classHeader.isNoDelete);
+
             Statement statement1 = StaticJavaParser.parseStatement("long addr = " + caller + ";");
-            Statement statement2 = StaticJavaParser.parseStatement("getNativeData().reset(addr, true);");
+            Statement statement2 = StaticJavaParser.parseStatement("getNativeData().reset(addr, " + isMemoryOwned + ");");
             blockStmt.addStatement(statement1);
             blockStmt.addStatement(statement2);
 
