@@ -283,11 +283,6 @@ public class TestLib {
 
     private static boolean testCallbackClass() {
         {
-            if(Gdx.app.getType() == Application.ApplicationType.WebGL) {
-                // TODO Not supported yet
-                return true;
-            }
-
             TestCallbackClass test = new TestCallbackClass();
             try {
                 boolean[] internal_onVoidCallback = { false };

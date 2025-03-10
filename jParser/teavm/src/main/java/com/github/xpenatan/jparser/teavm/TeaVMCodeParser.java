@@ -3,6 +3,7 @@ package com.github.xpenatan.jparser.teavm;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
@@ -12,6 +13,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.CastExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.EnclosedExpr;
@@ -19,7 +21,12 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
@@ -27,6 +34,7 @@ import com.github.javaparser.resolution.types.ResolvedArrayType;
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
+import com.github.javaparser.utils.Pair;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
@@ -41,6 +49,7 @@ import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
+import com.github.xpenatan.jparser.idl.parser.IDLMethodParser;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -581,6 +590,144 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             NormalAnnotationExpr normalAnnotationExpr = nativeMethodDeclaration.addAndGetAnnotation("org.teavm.jso.JSBody");
             normalAnnotationExpr.addPair("script", "\"" + content + "\"");
         }
+    }
+
+    @Override
+    public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        NodeList<Parameter> methodParameters = callbackDeclaration.getParameters();
+        IDLClass idlCallbackClass = idlClass.callbackImpl;
+        String callbackClassName = idlCallbackClass.name;
+        Type methodReturnType = callbackDeclaration.getType();
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.generateNativeMethod(callbackDeclaration.getNameAsString(), methodParameters, methodReturnType, false);
+        if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
+            NormalAnnotationExpr customAnnotation = new NormalAnnotationExpr();
+            customAnnotation.setName("org.teavm.jso.JSBody");
+            ArrayInitializerExpr paramsArray = new ArrayInitializerExpr();
+            NodeList<Expression> values = paramsArray.getValues();
+            String script = "var " + callbackClassName + " = "+ module + ".wrapPointer(this_addr, " + module + "." + callbackClassName + ");";
+            MethodCallExpr caller = IDLMethodParser.createCaller(nativeMethodDeclaration);
+
+            caller.addArgument("getNativeData().getCPointer()");
+
+            values.add(new StringLiteralExpr("this_addr"));
+            for(int i = 0; i < methods.size(); i++) {
+                Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
+                IDLMethod idlMethod = pair.a;
+                String methodName = idlMethod.name;
+                values.add(new StringLiteralExpr(methodName));
+                nativeMethodDeclaration.addParameter(methodName, methodName);
+                script += " " + callbackClassName + "." + methodName + " = " + methodName + ";";
+                caller.addArgument(methodName);
+            }
+
+            customAnnotation.addPair("params", paramsArray);
+            customAnnotation.addPair("script", new StringLiteralExpr(script));
+            nativeMethodDeclaration.addAnnotation(customAnnotation);
+            classDeclaration.getMembers().add(nativeMethodDeclaration);
+
+
+            BlockStmt callbackMethodBody = callbackDeclaration.getBody().get();
+
+            for(int i = 0; i < methods.size(); i++) {
+                Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
+                IDLMethod idlMethod = pair.a;
+                Pair<MethodDeclaration, MethodDeclaration> methodPair = pair.b;
+                MethodDeclaration internalMethod = methodPair.a;
+                MethodDeclaration publicMethod = methodPair.b;
+                String internalMethodName = internalMethod.getNameAsString();
+                String paramCode = "";
+                String methodName = idlMethod.name;
+
+                Type returnType = internalMethod.getType();
+                String returnTypeStr = returnType.asString();
+
+                NodeList<Parameter> parameters = internalMethod.getParameters();
+                createInterfaceClass(classDeclaration, methodName, returnTypeStr, parameters);
+                createInterfaceInstance(methodName, internalMethodName, returnTypeStr, parameters, callbackMethodBody);
+            }
+            callbackMethodBody.addStatement(caller);
+        }
+    }
+
+    private void createInterfaceClass(ClassOrInterfaceDeclaration classDeclaration, String methodName, String returnTypeStr, NodeList<Parameter> parameters) {
+        ClassOrInterfaceDeclaration interfaceDecl = new ClassOrInterfaceDeclaration();
+        interfaceDecl.setInterface(true); // Mark it as an interface
+        interfaceDecl.setName(methodName);
+        interfaceDecl.setPublic(true); // Optional, interfaces are public by default
+        interfaceDecl.addExtendedType("org.teavm.jso.JSObject");
+
+        NormalAnnotationExpr customAnnotation = new NormalAnnotationExpr();
+        customAnnotation.setName("org.teavm.jso.JSFunctor");
+        interfaceDecl.addAnnotation(customAnnotation);
+
+        MethodDeclaration method = interfaceDecl.addMethod(methodName);
+        method.removeBody();
+        method.setType(returnTypeStr);
+        for(int i1 = 0; i1 < parameters.size(); i1++) {
+            Parameter parameter = parameters.get(i1);
+            Type type = parameter.getType();
+            String typeStr = type.asString();
+            String paramName = parameter.getNameAsString();
+            if(typeStr.equals("String") || JParserHelper.isLong(type)) {
+                typeStr = "int";
+            }
+            method.addParameter(typeStr, paramName);
+        }
+        classDeclaration.addMember(interfaceDecl);
+    }
+
+    private void createInterfaceInstance(String methodName, String internalMethodName, String returnTypeStr, NodeList<Parameter> parameters, BlockStmt callbackMethodBody) {
+        ObjectCreationExpr anonymousClass = new ObjectCreationExpr();
+        anonymousClass.setType(new ClassOrInterfaceType().setName(methodName));
+
+        ClassOrInterfaceDeclaration anonymousBody = new ClassOrInterfaceDeclaration();
+        anonymousBody.setInterface(false); // This is a class, not an interface
+
+        // Implement onEvent method
+        MethodDeclaration implMethod1 = anonymousBody.addMethod(methodName, Modifier.Keyword.PUBLIC);
+        implMethod1.setType(returnTypeStr);
+        String params = "";
+        int paramSize = parameters.size();
+        for(int i1 = 0; i1 < paramSize; i1++) {
+            Parameter parameter = parameters.get(i1);
+            Type type = parameter.getType();
+            String typeStr = type.asString();
+            String paramNameOriginal = parameter.getNameAsString();
+            String paramName = paramNameOriginal;
+
+            if(typeStr.equals("String"))  {
+                // Edge case where String need to be converted
+                paramName = "IDLBase.getJSString(" + paramName + ")";
+                typeStr = "int";
+            }
+            if(JParserHelper.isLong(type)) {
+                typeStr = "int";
+            }
+            params += paramName;
+            if(i1 < paramSize-1) {
+                params += ", ";
+            }
+            implMethod1.addParameter(typeStr, paramNameOriginal);
+        }
+        BlockStmt body1 = new BlockStmt();
+        String methodCall = internalMethodName + "(" + params + ");";
+        String returnCode = "";
+        if(!returnTypeStr.equals("void")) {
+            returnCode = "return ";
+        }
+        body1.addStatement(returnCode + methodCall);
+        implMethod1.setBody(body1);
+
+        anonymousClass.setAnonymousClassBody(anonymousBody.getMembers());
+
+        VariableDeclarationExpr varDecl = new VariableDeclarationExpr(
+                new VariableDeclarator(
+                        new ClassOrInterfaceType().setName(methodName),
+                        methodName,
+                        anonymousClass
+                )
+        );
+        callbackMethodBody.addStatement(new ExpressionStmt(varDecl));
     }
 
     @Override
