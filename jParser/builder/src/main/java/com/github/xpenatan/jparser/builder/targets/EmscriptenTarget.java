@@ -22,6 +22,9 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
 
+    public long initialMemory = 64 * 1024 * 1024;
+    public long stackSize = 1048576;
+
     public EmscriptenTarget() {
         this(null);
     }
@@ -98,7 +101,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         }
         else {
             String postPath = createPostJS(jsglueDir, libName);
-            long initialMemory = 64 * 1024 * 1024;
             linkerFlags.add("--llvm-lto");
             linkerFlags.add("1");
             linkerFlags.add("-s");
@@ -111,6 +113,8 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("NO_FILESYSTEM=1");
             linkerFlags.add("-s");
             linkerFlags.add("INITIAL_MEMORY=" + initialMemory);
+            linkerFlags.add("-s");
+            linkerFlags.add("STACK_SIZE=" + stackSize);
             linkerFlags.add("-s");
             linkerFlags.add("EXPORTED_FUNCTIONS=['_free','_malloc']");
             linkerFlags.add("-s");
