@@ -4,39 +4,27 @@ import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 public class JParserLibraryLoader {
 
-    private final SharedLibraryLoader loader;
+    private static final SharedLibraryLoader loader = new SharedLibraryLoader();
 
-    public JParserLibraryLoader() {
-        loader = new SharedLibraryLoader();
-    }
+    private JParserLibraryLoader() {}
 
-    public JParserLibraryLoader(String nativesJar) {
-        loader = new SharedLibraryLoader(nativesJar);
-    }
-
-    public void load(String libraryName) {
-        loadInternal(libraryName, null);
-    }
-
-    public void load(String libraryName, JParserLibraryLoaderListener listener) {
+    public static void load(String libraryName, JParserLibraryLoaderListener listener) {
         loadInternal(libraryName, listener);
     }
 
-    public void loadInternal(String libraryName, JParserLibraryLoaderListener listener) {
-        if(listener != null) {
-            new Thread(() -> {
-                try {
-                    loader.load(libraryName);
-                    listener.onLoad(true, null);
-                }
-                catch(Exception e) {
-                    e.printStackTrace();
-                    listener.onLoad(false, e);
-                }
-            }).start();
+    private static void loadInternal(String libraryName, JParserLibraryLoaderListener listener) {
+        if(listener == null) {
+            throw new RuntimeException("Should implement listener");
         }
-        else {
-            loader.load(libraryName);
-        }
+        new Thread(() -> {
+            try {
+                loader.load(libraryName);
+                listener.onLoad(true, null);
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+                listener.onLoad(false, e);
+            }
+        }).start();
     }
 }
