@@ -176,13 +176,11 @@ public class JParser {
                         continue;
                     }
                     String javaContent = file.readString();
-                    File file1 = file.file();
                     CompilationUnit unit = StaticJavaParser.parse(new ByteArrayInputStream(javaContent.getBytes()));
                     unit.printer(new CustomPrettyPrinter());
-                    String absolutePath = file1.getAbsolutePath();
 
                     String genPath = fileGenDir.file().getAbsolutePath();
-                    jParser.unitArray.add(new JParserItem(unit, absolutePath, genPath));
+                    jParser.unitArray.add(new JParserItem(unit, genPath));
                 }
             }
         }
@@ -194,7 +192,8 @@ public class JParser {
     }
 
     private static String getFullyQualifiedClassName(CustomFileDescriptor fileSourceDir, CustomFileDescriptor file) {
-        String className = file.path().replace(fileSourceDir.path(), "").replace('\\', '.').replace('/', '.').replace(".java", "");
+        String replacePath = file.path().replace(fileSourceDir.path(), "").replace("\\", "/");
+        String className = replacePath.replace("/", ".").replace('/', '.').replace(".java", "");
         if(className.startsWith(".")) className = className.substring(1);
         return className;
     }

@@ -106,7 +106,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 }
                 String newPackage = basePackage + originalPackage;
                 compilationUnit.setPackageDeclaration(newPackage);
-                JParserItem jParserItem = new JParserItem(compilationUnit, jParser.genDir, jParser.genDir);
+                JParserItem jParserItem = new JParserItem(compilationUnit, jParser.genDir);
                 if(!JParser.CREATE_IDL_HELPER) {
                     jParserItem.notAllowed = true;
                 }
@@ -124,6 +124,9 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
     }
 
     private void generateIDLJavaClasses(JParser jParser, String genPath) {
+        System.out.println("Class Mapping: ");
+        System.out.println(classCppPath);
+
         for(IDLFile idlFile : idlReader.fileArray) {
             for(IDLClassOrEnum idlClassOrEnum : idlFile.classArray) {
                 String className = idlClassOrEnum.name;
@@ -143,12 +146,12 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         Path p = Paths.get(includeClass);
                         Path parent = p.getParent();
                         if(parent != null) {
-                            String string = parent.toString();
-                            subPackage = string.replace(File.separator, ".").toLowerCase();
+                            String string = parent.toString().replace("\\", "/");
+                            subPackage = string.replace("/", ".").toLowerCase();
                         }
                     }
                     CompilationUnit compilationUnit = setupClass(idlClassOrEnum, subPackage);
-                    parserItem = new JParserItem(compilationUnit, genPath, genPath);
+                    parserItem = new JParserItem(compilationUnit, genPath);
                     jParser.unitArray.add(parserItem);
                 }
             }
