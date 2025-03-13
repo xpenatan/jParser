@@ -46,7 +46,6 @@ public class LinuxTarget extends DefaultBuildTarget {
             // Linux have an issue with libstdc++, libgcc and libc where if the system uses an updated version when compiling, older linux version will fail to run.
             // static linking may fix libstdc++ and libgcc but not libc because it's not possible to static link it.
             linkerFlags.add("-shared");
-            linkerFlags.add("-static-libgcc");
             linkerFlags.add("-m64");
             libSuffix = "64.so";
         }
