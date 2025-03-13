@@ -68,7 +68,8 @@ public class FileHelper {
     }
 
     public static ArrayList<String> getFilesFromDir(String src) {
-        Path srcPath = new File(src).toPath();
+        src = src.replace("\\", "/");
+        Path srcPath = Path.of(src);
         try {
             return copyDir(srcPath);
         } catch(IOException e) {
@@ -86,10 +87,8 @@ public class FileHelper {
             Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-                    File file = path.toFile();
-                    String fullPath = file.getCanonicalPath();
-                    String name = fullPath.replace(srcFullPath, "");
-                    outPath.add(file.getCanonicalPath());
+                    String fullPath = path.toFile().getCanonicalPath().replace("\\", "/");
+                    outPath.add(fullPath);
                     return FileVisitResult.CONTINUE;
                 }
 
