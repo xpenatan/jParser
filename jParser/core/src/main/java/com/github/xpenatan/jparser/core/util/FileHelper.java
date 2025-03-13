@@ -78,8 +78,11 @@ public class FileHelper {
 
     public static ArrayList<String> copyDir(Path src) throws IOException {
         ArrayList<String> outPath = new ArrayList<>();
-        String srcFullPath = src.toFile().getCanonicalPath();
-        if(Files.exists(src)) {
+        String srcFullPath = src.toFile().getCanonicalPath().replace("\\", "/");
+        boolean exists = Files.exists(src);
+        System.out.println("CopyDir: ");
+        System.out.println(exists + " " + srcFullPath);
+        if(exists) {
             Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {

@@ -160,8 +160,10 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     private HashMap<String, String> getClassCppPath() {
         HashMap<String, String> mapPackage = new HashMap<>();
+        System.out.println("includeDir: " + includeDir);
         if(includeDir != null) {
             ArrayList<String> filesFromDir = FileHelper.getFilesFromDir(includeDir);
+            System.out.println("filesFromDir: " + filesFromDir.size());
             for(String path : filesFromDir) {
                 if(!path.endsWith(".h"))
                     continue;
