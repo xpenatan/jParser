@@ -163,7 +163,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         System.out.println("includeDir: " + includeDir);
         if(includeDir != null) {
             ArrayList<String> filesFromDir = FileHelper.getFilesFromDir(includeDir);
-            System.out.println("filesFromDir: " + filesFromDir.size());
+            System.out.println("FilesFromDir: " + filesFromDir.size());
             for(String path : filesFromDir) {
                 if(!path.endsWith(".h"))
                     continue;
