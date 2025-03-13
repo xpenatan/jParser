@@ -98,7 +98,7 @@ public class IDLNativeData {
     @Override
     protected void finalize() throws Throwable {
         if(cMemOwn && !disposed && IDLBase.ENABLE_LOGGING) {
-            error("IDL", " Memory Leak - " + idlBase.getClass().getSimpleName() + " was not disposed correctly.");
+            error("IDL", "Memory Leak - " + idlBase.getClass().getSimpleName() + " was not disposed correctly.");
         }
         super.finalize();
     }
