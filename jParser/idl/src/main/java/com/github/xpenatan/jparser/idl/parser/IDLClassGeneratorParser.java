@@ -33,8 +33,8 @@ import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.core.util.ResourceList;
+import com.github.xpenatan.jparser.idl.IDLPackageRenaming;
 import idl.IDLBase;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,6 +65,8 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     protected String includeDir;
 
+    public IDLPackageRenaming packageRenaming;
+
     /**
      * @param basePackage Base module source. This is used to generate other sources
      * @param headerCMD   This is the first command option that this parser will use. Ex teavm, C++.
@@ -78,7 +80,6 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         this.idlReader = idlReader;
         if(this.includeDir != null) {
             this.includeDir = this.includeDir.replace("\\", "/").replace("//", "/");
-            ;
         }
     }
 
@@ -148,6 +149,9 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         if(parent != null) {
                             String string = parent.toString().replace("\\", "/");
                             subPackage = string.replace("/", ".").toLowerCase();
+                            if(packageRenaming != null) {
+                                subPackage = packageRenaming.obtainNewPackage(subPackage);
+                            }
                         }
                     }
                     CompilationUnit compilationUnit = setupClass(idlClassOrEnum, subPackage);
