@@ -27,11 +27,11 @@ public class JParserLibraryLoader {
             new Thread(() -> {
                 try {
                     loader.load(libraryName);
-                    listener.onLoad(true);
+                    listener.onLoad(true, null);
                 }
                 catch(Exception e) {
                     e.printStackTrace();
-                    listener.onLoad(false);
+                    listener.onLoad(false, e);
                 }
             }).start();
         }

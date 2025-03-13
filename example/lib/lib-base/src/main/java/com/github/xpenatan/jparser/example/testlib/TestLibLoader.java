@@ -1,6 +1,7 @@
 package com.github.xpenatan.jparser.example.testlib;
 
 import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
+import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
 
 public class TestLibLoader {
 
@@ -18,21 +19,20 @@ public class TestLibLoader {
     */
 
     /*[-TEAVM;-REPLACE]
-     public static void init(Runnable onSuccess) {
+     public static void init(JParserLibraryLoaderListener listener) {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
-        OnInitFunction onInitFunction = () -> onSuccess.run();
-        setOnLoadInit(onInitFunction);
-        libraryLoader.load(LIB_NAME + ".wasm", isSuccess -> {});
+        setOnLoadInit(() -> listener.onLoad(true, null));
+        libraryLoader.load(LIB_NAME + ".wasm", (isSuccess, e) -> {
+            if(!isSuccess) {
+                listener.onLoad(false, e);
+            }
+        });
     }
     */
 
-    public static void init(Runnable onSuccess) {
+    public static void init(JParserLibraryLoaderListener listener) {
         JParserLibraryLoader libraryLoader = new JParserLibraryLoader();
-        libraryLoader.load(LIB_NAME, isSuccess -> {
-            if(isSuccess) {
-                onSuccess.run();
-            }
-        });
+        libraryLoader.load(LIB_NAME, listener);
     }
 
     /*[-TEAVM;-REPLACE]

@@ -20,12 +20,7 @@ public class AppTest extends ApplicationAdapter {
 
     @Override
     public void create() {
-        TestLibLoader.init(new Runnable() {
-            @Override
-            public void run() {
-                init = true;
-            }
-        });
+        TestLibLoader.init((isSuccess, e) -> init = isSuccess);
 
         batch = new SpriteBatch();
         font = new BitmapFont();

@@ -5,6 +5,7 @@ import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoader;
 import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoaderListener;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
 import java.util.HashSet;
+import javax.script.ScriptException;
 
 public class JParserLibraryLoader {
 
@@ -35,11 +36,11 @@ public class JParserLibraryLoader {
             instance.loadScript(libraryName, new AssetLoaderListener<>(){
                 @Override
                 public void onSuccess(String url, String result) {
-                    listener.onLoad(true);
+                    listener.onLoad(true, null);
                 }
                 @Override
                 public void onFailure(String url) {
-                    listener.onLoad(false);
+                    listener.onLoad(false, new ScriptException("Failed to load script: " + url));
                 }
             });
         }
