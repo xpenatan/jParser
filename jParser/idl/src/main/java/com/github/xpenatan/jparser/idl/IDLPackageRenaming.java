@@ -1,5 +1,5 @@
 package com.github.xpenatan.jparser.idl;
 
 public interface IDLPackageRenaming {
-    String obtainNewPackage(String classPackage);
+    String obtainNewPackage(String className, String classPackage);
 }

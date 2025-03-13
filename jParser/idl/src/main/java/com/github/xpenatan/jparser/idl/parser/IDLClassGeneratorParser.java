@@ -149,10 +149,10 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         if(parent != null) {
                             String string = parent.toString().replace("\\", "/");
                             subPackage = string.replace("/", ".").toLowerCase();
-                            if(packageRenaming != null) {
-                                subPackage = packageRenaming.obtainNewPackage(subPackage);
-                            }
                         }
+                    }
+                    if(packageRenaming != null) {
+                        subPackage = packageRenaming.obtainNewPackage(className, subPackage);
                     }
                     CompilationUnit compilationUnit = setupClass(idlClassOrEnum, subPackage);
                     parserItem = new JParserItem(compilationUnit, genPath);
