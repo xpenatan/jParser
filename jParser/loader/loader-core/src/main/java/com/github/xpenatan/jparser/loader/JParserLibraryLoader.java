@@ -30,6 +30,7 @@ public class JParserLibraryLoader {
                     listener.onLoad(true);
                 }
                 catch(Exception e) {
+                    e.printStackTrace();
                     listener.onLoad(false);
                 }
             }).start();
