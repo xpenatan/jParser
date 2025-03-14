@@ -243,7 +243,7 @@ public class IDLMethodParser {
                     isArray = idlParameter.isArray;
                 }
                 if(isArray && IDLHelper.getCArray(type.asClassOrInterfaceType().getNameAsString()) != null) {
-                    String methodCall = paramName + "." + IDLDefaultCodeParser.CPOINTER_METHOD;
+                    String methodCall = paramName + "." + IDLDefaultCodeParser.CPOINTER_ARRAY_METHOD;
                     paramName =  "(long)(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
                 else if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
