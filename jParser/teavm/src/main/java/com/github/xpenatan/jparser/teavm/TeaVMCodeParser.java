@@ -625,7 +625,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             nativeMethodDeclaration.addAnnotation(customAnnotation);
             classDeclaration.getMembers().add(nativeMethodDeclaration);
 
-
             BlockStmt callbackMethodBody = callbackDeclaration.getBody().get();
 
             for(int i = 0; i < methods.size(); i++) {
