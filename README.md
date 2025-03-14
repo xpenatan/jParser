@@ -29,12 +29,15 @@ The generated methods will match those defined in the WebIDL file. If the C++ co
 IDL classes, such as `IDLInt` or `IDLIntArray`, provide a method for passing primitive pointers to C++ code, compatible with Emscripten, desktop, and mobile platforms. Use these classes when you need to pass a pointer array or a primitive that the C++ code will modify.
 
 Libraries using jParser: <br>
-- [gdx-imgui](https://github.com/xpenatan/gdx-imgui)
-- [gdx-lua](https://github.com/xpenatan/gdx-lua)
-- [gdx-jolt](https://github.com/xpenatan/gdx-jolt)
-- [gdx-bullet](https://github.com/xpenatan/gdx-bullet)
-- [gdx-physx](https://github.com/xpenatan/gdx-physx)
-- [gdx-box2d](https://github.com/xpenatan/gdx-box2d)
+- [gdx-imgui](https://github.com/xpenatan/gdx-imgui)¹
+- [gdx-jolt](https://github.com/xpenatan/gdx-jolt)¹
+- [gdx-lua](https://github.com/xpenatan/gdx-lua)¹
+- [gdx-box2d](https://github.com/xpenatan/gdx-box2d)²
+- [gdx-bullet](https://github.com/xpenatan/gdx-bullet)²
+- [gdx-physx](https://github.com/xpenatan/gdx-physx)²
+
+¹: The focus is on maintaining this project. <br>
+²: This project is currently inactive and may only be used to test the generator.
 
 ## Requirements:
 #### [Mingw64](https://github.com/niXman/mingw-builds-binaries/releases) or [Visual Studio C++](https://visualstudio.microsoft.com/vs/community/)
