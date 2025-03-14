@@ -31,6 +31,10 @@ public class BuilderTool {
 
         IDLReader idlReader = IDLReader.readIDL(op.getIDLPath());
 
+        ArrayList<BuildMultiTarget> targets = new ArrayList<>();
+        listener.onAddTarget(op, idlReader, targets);
+        IDLReader.setupClasses(idlReader);
+
         if(op.generateCPP) {
 //            NativeCPPGenerator.SKIP_GLUE_CODE = true;
             CppGenerator cppGenerator = new NativeCPPGenerator(op.getCPPDestinationPath());
@@ -46,10 +50,6 @@ public class BuilderTool {
             teavmParser.packageRenaming = packageRenaming;
             JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getModuleTeaVMPath() + "/src/main/java/");
         }
-
-        ArrayList<BuildMultiTarget> targets = new ArrayList<>();
-
-        listener.onAddTarget(op, idlReader, targets);
 
         BuildConfig buildConfig = new BuildConfig(op);
         JBuilder.build(buildConfig, targets);

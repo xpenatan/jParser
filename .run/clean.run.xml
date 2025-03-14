@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="jParser:example:lib:lib-build [build_project_all]" type="GradleRunConfiguration" factoryName="Gradle" folderName="lib">
+  <configuration default="false" name="clean" type="GradleRunConfiguration" factoryName="Gradle" folderName="lib-build">
     <ExternalSystemSettings>
       <option name="executionName" />
-      <option name="externalProjectPath" value="$PROJECT_DIR$/example/lib/lib-build" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
       <option name="scriptParameters" value="" />
       <option name="taskDescriptions">
@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="build_project_all" />
+          <option value="clean" />
         </list>
       </option>
       <option name="vmOptions" />

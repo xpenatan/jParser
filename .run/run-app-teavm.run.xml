@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="jParser:example:app:desktop [run-app-desktop]" type="GradleRunConfiguration" factoryName="Gradle" folderName="lib">
+  <configuration default="false" name="run-app-teavm" type="GradleRunConfiguration" factoryName="Gradle" folderName="lib-run">
     <ExternalSystemSettings>
       <option name="executionName" />
-      <option name="externalProjectPath" value="$PROJECT_DIR$/example/app/desktop" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$/example/app/teavm" />
       <option name="externalSystemIdString" value="GRADLE" />
       <option name="scriptParameters" value="" />
       <option name="taskDescriptions">
@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="run-app-desktop" />
+          <option value="run-app-teavm" />
         </list>
       </option>
       <option name="vmOptions" />
