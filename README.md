@@ -28,7 +28,7 @@ The generated methods will match those defined in the WebIDL file. If the C++ co
 ## WebIDL Classes
 IDL classes, such as `IDLInt` or `IDLIntArray`, provide a method for passing primitive pointers to C++ code, compatible with Emscripten, desktop, and mobile platforms. Use these classes when you need to pass a pointer array or a primitive that the C++ code will modify.
 
-Libraries usisng jParser: <br>
+Libraries using jParser: <br>
 - [gdx-imgui](https://github.com/xpenatan/gdx-imgui)
 - [gdx-lua](https://github.com/xpenatan/gdx-lua)
 - [gdx-jolt](https://github.com/xpenatan/gdx-jolt)
