@@ -182,7 +182,7 @@ public class IDLReader {
             }
 
             if(foundStartEnum) {
-                classLines.add(line);
+                classLines.add(originalLine);
 
                 if(line.endsWith("};")) {
                     foundStartEnum = false;
@@ -200,7 +200,7 @@ public class IDLReader {
                     foundStartClass = true;
                     classLines.clear();
                     justAdded = true;
-                    classLines.add(line);
+                    classLines.add(originalLine);
                 }
             }
             if(foundStartClass) {

@@ -151,6 +151,9 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                             subPackage = string.replace("/", ".").toLowerCase();
                         }
                     }
+                    if(idlClassOrEnum.subPackage != null) {
+                        subPackage = idlClassOrEnum.subPackage;
+                    }
                     if(packageRenaming != null) {
                         subPackage = packageRenaming.obtainNewPackage(className, subPackage);
                     }

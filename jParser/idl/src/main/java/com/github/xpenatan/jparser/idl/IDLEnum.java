@@ -8,7 +8,6 @@ import java.util.ArrayList;
 public class IDLEnum extends IDLClassOrEnum {
     public final IDLFile idlFile;
 
-    public final ArrayList<String> classLines = new ArrayList<>();
     public final ArrayList<String> enums = new ArrayList<>();
     public ArrayList<String> settings = new ArrayList<>();
 
@@ -21,29 +20,31 @@ public class IDLEnum extends IDLClassOrEnum {
     }
 
     public void initEnum(ArrayList<String> lines) {
-        classLines.addAll(lines);
+        setupLines(lines);
         setupInterfaceName();
+        setupInterfacePackage();
         setupEnumValues();
         setupSettings();
     }
 
     private void setupInterfaceName() {
-        String nameLine = null;
-        for(int i = 0; i < classLines.size(); i++) {
-            String line = classLines.get(i);
-            if(line.contains("enum ")) {
-                nameLine = line;
-                break;
-            }
+        IDLLine idlLine = searchLine("enum ", true);
+        if(idlLine != null) {
+            name = idlLine.line.split(" ")[1].trim();
         }
-        if(nameLine != null) {
-            name = nameLine.split(" ")[1];
+    }
+
+    private void setupInterfacePackage() {
+        IDLLine idlLine = searchLine("enum ", true);
+        if(idlLine != null && idlLine.containsCommand(IDLLine.CMD_SUB_PACKAGE)) {
+            subPackage = idlLine.getCommandValue(IDLLine.CMD_SUB_PACKAGE);
         }
     }
 
     private void setupEnumValues() {
         for(int i = 1; i < classLines.size()-1; i++) {
-            String enumLine = classLines.get(i);
+            IDLLine idlLine = classLines.get(i);
+            String enumLine = idlLine.line;
             String[] split = enumLine.split(",");
             for(String s : split) {
                 enumLine = s.replace("\"", "").trim();

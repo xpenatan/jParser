@@ -1,22 +1,22 @@
 package com.github.xpenatan.jparser.example.app;
 
-import com.badlogic.gdx.Application;
-import com.badlogic.gdx.Gdx;
 import com.github.xpenatan.jparser.example.testlib.CallbackClass;
 import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestConstructorClass;
 import com.github.xpenatan.jparser.example.testlib.TestMethodClass;
-import com.github.xpenatan.jparser.example.testlib.TestNamespaceClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClassArray;
-import com.github.xpenatan.jparser.example.testlib.TestOperatorClass;
+import com.github.xpenatan.jparser.example.testlib.core.enums.TestEnumWithinClass;
+import com.github.xpenatan.jparser.example.testlib.core.op.TestOperatorClass;
+import com.github.xpenatan.jparser.example.testlib.core.sub.TestNamespaceClass;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
 
 public class TestLib {
 
     public static boolean test() {
+        int eVal = TestEnumWithinClass.e_val;
         boolean constructorTest = testConstructorClass();
         boolean stringConstructorTest = testStringConstructorClass();
         boolean attributeTest = testAttributeClass();

@@ -11,7 +11,6 @@ public class IDLClass extends IDLClassOrEnum {
     public IDLClassHeader classHeader;
 
     public String extendClass = "";
-    public final ArrayList<IDLLine> classLines = new ArrayList<>();
     public final ArrayList<IDLConstructor> constructors = new ArrayList<>();
     public final ArrayList<IDLMethod> methods = new ArrayList<>();
     public final ArrayList<IDLAttribute> attributes = new ArrayList<>();
@@ -29,42 +28,9 @@ public class IDLClass extends IDLClassOrEnum {
         setupLines(lines);
         setupHeader();
         setupInterfaceName();
+        setupInterfacePackage();
         setupExtendClass();
         setupAttributesAndMethods();
-    }
-
-    private void setupLines(ArrayList<String> lines) {
-        for(int i = 0; i < lines.size(); i++) {
-            String originalLine = lines.get(i);
-            int commentIndex = originalLine.indexOf("//");
-            if(commentIndex != -1) {
-                String command = null;
-                String code = originalLine.substring(0, commentIndex);
-                String comment = originalLine.replace(code, "").replace("//", "").trim();
-                code = code.trim();
-                comment = comment.trim();
-                if(comment.isEmpty()) {
-                    comment = null;
-                }
-                else {
-                    int startIdx = comment.indexOf("[-");
-                    int endIdx = comment.indexOf("]");
-                    if(startIdx != -1 && endIdx != -1 && endIdx > startIdx+2) {
-                        String tempCommand = comment.substring(startIdx, endIdx+1);
-                        comment = comment.replace(tempCommand, "").trim();
-                        command = tempCommand.trim();
-                        if(comment.isEmpty()) {
-                            comment = null;
-                        }
-                    }
-                }
-                IDLLine idlLine = new IDLLine(code, comment, command);
-                classLines.add(idlLine);
-            }
-            else {
-                classLines.add(new IDLLine(originalLine, null, null));
-            }
-        }
     }
 
     private void setupAttributesAndMethods() {
@@ -112,9 +78,16 @@ public class IDLClass extends IDLClassOrEnum {
     }
 
     private void setupInterfaceName() {
-        String line = searchLine("interface ", true, false);
-        if(line != null) {
-            name = line.split(" ")[1];
+        IDLLine idlLine = searchLine("interface ", true);
+        if(idlLine != null) {
+            name = idlLine.line.split(" ")[1].trim();
+        }
+    }
+
+    private void setupInterfacePackage() {
+        IDLLine idlLine = searchLine("interface ", true);
+        if(idlLine != null && idlLine.containsCommand(IDLLine.CMD_SUB_PACKAGE)) {
+            subPackage = idlLine.getCommandValue(IDLLine.CMD_SUB_PACKAGE);
         }
     }
 
@@ -131,44 +104,20 @@ public class IDLClass extends IDLClassOrEnum {
     }
 
     private void setupExtendClass() {
-        String line = searchLine(" implements ", false, false);
-        if(line != null && !line.startsWith("//")) {
-            String[] split = line.split("implements");
+        IDLLine idlLine = searchLine(" implements ", false);
+        if(idlLine != null && !idlLine.line.startsWith("//")) {
+            String[] split = idlLine.line.split("implements");
             extendClass = split[1].trim().replace(";", "");
         }
         if(extendClass.isEmpty()) {
             // If implements is not found check for :
-            String interfaceLine = searchLine("interface ", true, false);
-            if(interfaceLine != null && interfaceLine.contains(":")) {
-                String[] colonSplit = interfaceLine.split(":");
+            IDLLine interfaceLine = searchLine("interface ", true);
+            if(interfaceLine != null && interfaceLine.line.contains(":")) {
+                String[] colonSplit = interfaceLine.line.split(":");
                 String[] spaceSplit = colonSplit[1].trim().split(" ");
                 extendClass = spaceSplit[0].trim();
             }
         }
-    }
-
-    private String searchLine(String text, boolean startsWith, boolean endsWith) {
-        for(int i = 0; i < classLines.size(); i++) {
-            IDLLine idlLine = classLines.get(i);
-            String line = idlLine.line;
-
-            if(startsWith) {
-                if(line.startsWith(text)) {
-                    return line;
-                }
-            }
-            else if(endsWith) {
-                if(line.endsWith(text)) {
-                    return line;
-                }
-            }
-            else {
-                if(line.contains(text)) {
-                    return line;
-                }
-            }
-        }
-        return null;
     }
 
     public String getCPPName() {

@@ -210,14 +210,14 @@ interface TestCallbackClass {
 };
 
 [Prefix="TestNamespace::"]
-interface TestNamespaceClass {
+interface TestNamespaceClass { //[-SUB_PACKAGE=core.sub]
     attribute long intValue01;
     void TestNamespaceClass();
     void setMethod01Value(long intValue01);
     long getMethod01Value();
 };
 
-interface TestOperatorClass {
+interface TestOperatorClass { //[-SUB_PACKAGE=core.op]
     void TestOperatorClass();
     void TestOperatorClass(float value);
     [Operator="+", Value] TestOperatorClass addValue([Const, Ref] TestOperatorClass other);
@@ -232,7 +232,7 @@ interface TestOperatorClass {
     void setValue(float val);
 };
 
-enum TestEnumWithinClass {
+enum TestEnumWithinClass { //[-SUB_PACKAGE=core.enums]
     "TestEnumClass::e_val"
 };
 

@@ -6,6 +6,7 @@ public class IDLLine {
     public static final String CMD_NEW_OBJECT = "NEW_OBJECT";
     public static final String CMD_MEM_OWN = "MEM_OWN";
     public static final String CMD_NOT_MEM_OWN = "NOT_MEM_OWN";
+    public static final String CMD_SUB_PACKAGE = "SUB_PACKAGE";
 
     public final String line;
     public final String comment;
@@ -40,11 +41,21 @@ public class IDLLine {
     public boolean containsCommand(String command) {
         for(int i = 0; i < commands.size(); i++) {
             String cmd = commands.get(i);
-            if(cmd.equals(command)) {
+            if(cmd.startsWith(command)) {
                 return true;
             }
         }
-
         return false;
+    }
+
+    public String getCommandValue(String command) {
+        for(int i = 0; i < commands.size(); i++) {
+            String cmd = commands.get(i);
+            if(cmd.startsWith(command)) {
+                String value = cmd.split("=")[1].trim();
+                return value;
+            }
+        }
+        return null;
     }
 }
