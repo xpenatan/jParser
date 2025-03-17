@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
@@ -20,6 +21,12 @@ public class IDLDeConstructorParser {
 
     public static void generateDeConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass) {
         if(!idlClass.classHeader.isNoDelete) {
+            MethodDeclaration disposeMethod = classOrInterfaceDeclaration.addMethod("dispose", Modifier.Keyword.PUBLIC);
+            disposeMethod.getBody().get().addStatement(new MethodCallExpr("super.dispose"));
+            MethodDeclaration isDisposeMethod = classOrInterfaceDeclaration.addMethod("isDisposed", Modifier.Keyword.PUBLIC);
+            isDisposeMethod.setType(PrimitiveType.booleanType());
+            isDisposeMethod.getBody().get().addStatement(new MethodCallExpr("return super.isDisposed"));
+
             List<MethodDeclaration> methodsBySignature = classOrInterfaceDeclaration.getMethodsBySignature(DELETE_NATIVE);
             int size = methodsBySignature.size();
 
@@ -40,12 +47,12 @@ public class IDLDeConstructorParser {
             if(deleteMethod != null) {
                 NodeList<Parameter> parameters = deleteMethod.getParameters();
                 Type type = deleteMethod.getType();
-                MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(false, DELETE_NATIVE, parameters, type, false);
+                MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(DELETE_NATIVE, parameters, type, false);
 
                 if(!JParserHelper.containsMethod(classOrInterfaceDeclaration, nativeMethod)) {
                     classOrInterfaceDeclaration.getMembers().add(nativeMethod);
                     MethodCallExpr caller = IDLMethodParser.createCaller(nativeMethod);
-                    caller.addArgument(IDLDefaultCodeParser.CPOINTER_METHOD);
+                    caller.addArgument("(long)" + IDLDefaultCodeParser.CPOINTER_METHOD);
                     BlockStmt blockStmt = deleteMethod.getBody().get();
                     blockStmt.addStatement(caller);
                     idlParser.onIDLDeConstructorGenerated(jParser, idlClass, classOrInterfaceDeclaration, nativeMethod);

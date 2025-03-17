@@ -11,6 +11,16 @@ public class IDLReaderTest {
     }
 
     @Test
+    public void test_getTag() {
+        String tag1 = "[Const, Value] readonly attribute Vec3 mDirection;";
+        String tag2= "[Value] attribute SoftBodySharedSettingsSkinWeight[] mWeights;";
+        String test1 = IDLHelper.getTags(tag1);
+        String test2 = IDLHelper.getTags(tag2);
+        Assert.assertEquals("[Const, Value]", test1);
+        Assert.assertEquals("[Value]", test2);
+    }
+
+    @Test
     public void test_NoDeleteClassTest_not_null() {
         IDLReader idlReader = IDLReader.readIDL("src\\test\\resources\\idl\\Test.idl");
         IDLClass idlClass = idlReader.getClass("NoDeleteClassTest");
@@ -39,24 +49,24 @@ public class IDLReaderTest {
         Assert.assertEquals("ReadOnlyInt", idlAttribute.name);
         Assert.assertTrue(idlClass.attributes.get(0).isStatic);
         Assert.assertTrue(idlClass.attributes.get(0).isReadOnly);
-        Assert.assertEquals("int", idlClass.attributes.get(0).type);
+        Assert.assertEquals("unsigned long", idlClass.attributes.get(0).idlType);
         Assert.assertTrue(idlClass.attributes.get(1).isConst);
         Assert.assertEquals("constNormalClass", idlClass.attributes.get(1).name);
-        Assert.assertEquals("NormalClassTest", idlClass.attributes.get(1).type);
+        Assert.assertEquals("NormalClassTest", idlClass.attributes.get(1).idlType);
         Assert.assertEquals("valueNormalClass", idlClass.attributes.get(2).name);
         Assert.assertTrue(idlClass.attributes.get(2).isValue);
-        Assert.assertEquals("NormalClassTest", idlClass.attributes.get(2).type);
+        Assert.assertEquals("NormalClassTest", idlClass.attributes.get(2).idlType);
         Assert.assertEquals("floatAttribute", idlClass.attributes.get(3).name);
-        Assert.assertEquals("float", idlClass.attributes.get(3).type);
-        Assert.assertEquals("NormalClassTest", idlClass.attributes.get(2).type);
+        Assert.assertEquals("float", idlClass.attributes.get(3).idlType);
+        Assert.assertEquals("NormalClassTest", idlClass.attributes.get(2).idlType);
         Assert.assertEquals("boolAttribute", idlClass.attributes.get(4).name);
-        Assert.assertEquals("boolean", idlClass.attributes.get(4).type);
+        Assert.assertEquals("boolean", idlClass.attributes.get(4).idlType);
         Assert.assertEquals("arrayBoolean", idlClass.attributes.get(6).name);
-        Assert.assertEquals("boolean[]", idlClass.attributes.get(6).type);
+        Assert.assertEquals("boolean[]", idlClass.attributes.get(6).idlType);
         Assert.assertEquals("arrayInt", idlClass.attributes.get(7).name);
-        Assert.assertEquals("int[]", idlClass.attributes.get(7).type);
+        Assert.assertEquals("unsigned long[]", idlClass.attributes.get(7).idlType);
         Assert.assertEquals("anyObject", idlClass.attributes.get(8).name);
-        Assert.assertEquals("any", idlClass.attributes.get(8).type);
+        Assert.assertEquals("any", idlClass.attributes.get(8).idlType);
         Assert.assertTrue(idlClass.attributes.get(8).isAny);
     }
 
@@ -67,17 +77,17 @@ public class IDLReaderTest {
         IDLMethod idlMethod = idlClass.methods.get(1);
         Assert.assertEquals("getExtendClass", idlMethod.name);
         Assert.assertEquals("ExtendClassTest", idlMethod.returnType);
-        Assert.assertEquals("float", idlMethod.parameters.get(0).type);
-        Assert.assertEquals("int", idlMethod.parameters.get(1).type);
-        Assert.assertEquals("NormalClassTest", idlMethod.parameters.get(2).type);
+        Assert.assertEquals("float", idlMethod.parameters.get(0).idlType);
+        Assert.assertEquals("long", idlMethod.parameters.get(1).idlType);
+        Assert.assertEquals("NormalClassTest", idlMethod.parameters.get(2).idlType);
         Assert.assertEquals("normalClass", idlMethod.parameters.get(2).name);
-        Assert.assertEquals("IDLFloatArray", idlMethod.parameters.get(3).type);
+        Assert.assertEquals("float[]", idlMethod.parameters.get(3).idlType);
         Assert.assertTrue(idlMethod.parameters.get(3).isArray);
         Assert.assertEquals("vertices", idlMethod.parameters.get(3).name);
         Assert.assertTrue(idlMethod.parameters.get(2).isRef);
         Assert.assertTrue(idlMethod.parameters.get(2).isConst);
         IDLMethod flagsMethod = idlClass.getMethod("GetFlags");
-        Assert.assertEquals("int", flagsMethod.returnType);
+        Assert.assertEquals("unsigned long", flagsMethod.returnType);
         IDLMethod copyNormalClassMethod = idlClass.getMethod("copyNormalClass");
         Assert.assertTrue(copyNormalClassMethod.isReturnRef);
         Assert.assertEquals("=", copyNormalClassMethod.operator);

@@ -7,9 +7,12 @@ import java.util.ArrayList;
  */
 public class IDLParameter {
     public final IDLFile idlFile;
+    public IDLMethod idlMethod;
+    public IDLConstructor idlConstructor;
+    public IDLClassOrEnum idlClassOrEnum;
 
     public String line;
-    public String type;
+    public String idlType;
     public String name;
     public boolean isArray;
     public boolean isRef;
@@ -31,11 +34,13 @@ public class IDLParameter {
 
         optional = line.contains("optional");
         isArray = line.contains("[]");
+        tmpLine = tmpLine.replace("optional", "").trim();
+        tmpLine = tmpLine.replace("[]", "").trim();
 
-        int startIndex = line.indexOf("[");
-        int endIndex = line.indexOf("]");
+        int startIndex = tmpLine.indexOf("[");
+        int endIndex = tmpLine.indexOf("]");
         if(startIndex != -1 && endIndex != -1 && startIndex + 2 < endIndex) {
-            String tagsStr = line.substring(startIndex, endIndex + 1);
+            String tagsStr = tmpLine.substring(startIndex, endIndex + 1);
             isRef = tagsStr.contains("Ref");
             isConst = tagsStr.contains("Const");
             isValue = tagsStr.contains("Value");
@@ -53,56 +58,43 @@ public class IDLParameter {
         }
 
         String[] s1 = tmpLine.split(" ");
-        type = s1[s1.length - 2];
+        name = s1[s1.length - 1];
+
+        idlType = "";
+        int sss = s1.length - 1;
+        for(int i = 0; i < sss; i++) {
+            idlType += s1[i];
+            if(i < sss-1) {
+                idlType += " ";
+            }
+        }
 
         if(isArray) {
-            type = type + "[]";
+            idlType = idlType + "[]";
         }
 
-        if(type.equals("long")) {
-            // long in webidl means int
-            type = "int";
-        }
-
-        if(type.equals("any") || type.equals("VoidPtr")) {
-            type = "long";
+        if(idlType.equals("any") || idlType.equals("VoidPtr")) {
             isAny = true;
         }
+    }
 
-        if(type.equals("long[]")) {
-            type = "int[]";
+    public String getCPPType() {
+        String fullType = idlType;
+        if(idlClassOrEnum != null && idlClassOrEnum.isClass()) {
+            IDLClass aClass = idlClassOrEnum.asClass();
+            fullType = aClass.getCPPName();
         }
-        if(type.equals("DOMString")) {
-            type = "String";
-        }
-        if(type.equals("octet")) {
-            type = "byte";
-        }
+        return IDLHelper.getCPPReturnType(fullType);
+    }
 
-        // Convert to array object
-        if(type.equals("int[]")) {
-            type = "IDLIntArray";
-        }
-        else if(type.equals("float[]")) {
-            type = "IDLFloatArray";
-        }
-        else if(type.equals("byte[]")) {
-            type = "IDLByteArray";
-        }
-        else if(type.equals("boolean[]")) {
-            type = "IDLBoolArray";
-        }
-        else if(type.equals("double[]")) {
-            type = "IDLDoubleArray";
-        }
-
-        name = s1[s1.length - 1];
+    public String getJavaType() {
+        return IDLHelper.getJavaType(idlType);
     }
 
     public IDLParameter clone() {
         IDLParameter clonedParam = new IDLParameter(idlFile);
         clonedParam.line = line;
-        clonedParam.type = type;
+        clonedParam.idlType = idlType;
         clonedParam.name = name;
         clonedParam.isRef = isRef;
         clonedParam.isAny = isAny;

@@ -5,8 +5,15 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public abstract class DefaultBuildTarget extends BuildTarget {
+
+    private static String helperName = "IDLHelper.h";
+
+    public boolean multiCoreCompile = true;
 
     public String tempBuildDir;
 
@@ -33,46 +40,62 @@ public abstract class DefaultBuildTarget extends BuildTarget {
 
     public boolean shouldCompile = true;
     public boolean shouldLink = true;
-
     public boolean isStatic = false;
+
+    protected CustomFileDescriptor idlDir;
+    protected CustomFileDescriptor idlHelperHFile;
 
     protected DefaultBuildTarget() {
         cppCompiler.add("x86_64-w64-mingw32-g++");
         linkerCompiler.add("x86_64-w64-mingw32-g++");
     }
 
-    protected void setup(BuildConfig config) {}
-
-    protected boolean build(BuildConfig config) {
+    @Override
+    protected boolean buildInternal(BuildConfig config) {
         CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
         if(childTarget.exists()) {
             childTarget.deleteDirectory();
         }
         childTarget.mkdirs();
 
-        setup(config);
+        idlDir = config.buildSourceDir.child("idl");
+        if(!idlDir.exists()) {
+            idlDir.mkdirs();
+        }
 
-        ArrayList<CustomFileDescriptor> cppFiles = new ArrayList<>(getCPPFiles(config.sourceDir, cppInclude, cppExclude, filterCPPSuffix));
+        CustomFileDescriptor idlHelperCPP = new CustomFileDescriptor(helperName, CustomFileDescriptor.FileType.Classpath);
+        idlHelperCPP.copyTo(idlDir, false);
+        idlHelperHFile = idlDir.child(idlHelperCPP.name());
+        headerDirs.add("-I" + idlDir.path());
+
+        setup(config);
+        return build(config, childTarget);
+    }
+
+    protected void setup(BuildConfig config) {}
+
+    protected boolean build(BuildConfig config, CustomFileDescriptor buildTargetTemp) {
+        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.buildSourceDir, cppInclude, cppExclude, filterCPPSuffix);
         for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
             ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
             cppFiles.addAll(cppFiles1);
         }
 
-        if(shouldCompile && shouldLink && compile(config, childTarget, cppFiles)) {
-            return link(config, childTarget);
+        if(shouldCompile && shouldLink && compile(config, buildTargetTemp, cppFiles)) {
+            return link(config, buildTargetTemp);
         }
         else if(shouldCompile && !shouldLink) {
-            return compile(config, childTarget, cppFiles);
+            return compile(config, buildTargetTemp, cppFiles);
         }
         else if(!shouldCompile && shouldLink) {
-            return link(config, childTarget);
+            return link(config, buildTargetTemp);
         }
         else {
             return false;
         }
     }
 
-    private boolean compile(BuildConfig config, CustomFileDescriptor childTarget, ArrayList<CustomFileDescriptor> cppFiles) {
+    protected boolean compile(BuildConfig config, CustomFileDescriptor buildTargetTemp, ArrayList<CustomFileDescriptor> cppFiles) {
         boolean retFlag = false;
 
         String compiledPaths = "";
@@ -80,18 +103,66 @@ public abstract class DefaultBuildTarget extends BuildTarget {
             String path = file.path();
             compiledPaths = compiledPaths + "\n" + path;
         }
-        CustomFileDescriptor cppList = childTarget.child("cpp.txt");
+        CustomFileDescriptor cppList = buildTargetTemp.child("cpp.txt");
         cppList.writeString(compiledPaths.trim(), false);
 
-        compilerCommands.clear();
-        compilerCommands.addAll(cppCompiler);
-        compilerCommands.addAll(cppFlags);
-        compilerCommands.addAll(headerDirs);
-        compilerCommands.add("@" + cppList.path());
-        System.err.println("##### COMPILE #####");
-        boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
-        if(!flag) {
-            return false;
+        if(multiCoreCompile) {
+            System.out.println("##### COMPILE #####");
+
+            int threads = Runtime.getRuntime().availableProcessors();
+            ExecutorService executorService = Executors.newFixedThreadPool(threads);
+            ArrayList<Future<?>> futures = new ArrayList<>();
+
+            for(CustomFileDescriptor file : cppFiles) {
+                String path = file.path();
+
+                Future<?> submit = executorService.submit(() -> {
+                    if(multiCoreCompile) {
+                        ArrayList<String> threadCommands = new ArrayList<>();
+                        threadCommands.addAll(cppCompiler);
+                        threadCommands.addAll(cppFlags);
+                        threadCommands.addAll(headerDirs);
+                        threadCommands.add(path);
+                        boolean flag = JProcess.startProcess(config.buildDir.file(), threadCommands);
+                        if(!flag) {
+                            multiCoreCompile = false;
+                            throw new RuntimeException("Compile Error");
+                        }
+                    }
+                });
+                futures.add(submit);
+            }
+
+            for (Future<?> future : futures) {
+                if(multiCoreCompile) {
+                    try {
+                        future.get();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        multiCoreCompile = false;
+                        break;
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+            executorService.shutdown();
+            if(!multiCoreCompile) {
+                return false;
+            }
+        }
+        else {
+            compilerCommands.clear();
+            compilerCommands.addAll(cppCompiler);
+            compilerCommands.addAll(cppFlags);
+            compilerCommands.addAll(headerDirs);
+            compilerCommands.add("@" + cppList.path());
+            System.out.println("##### COMPILE #####");
+            boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
+            if(!flag) {
+                return false;
+            }
         }
         retFlag = true;
 
@@ -99,7 +170,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         ArrayList<CustomFileDescriptor> files = new ArrayList<>();
         getObjectFiles(config.buildDir, files);
         for(CustomFileDescriptor file : files) {
-            file.moveTo(childTarget);
+            file.moveTo(buildTargetTemp);
         }
         return retFlag;
     }
@@ -133,7 +204,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         linkerCommands.clear();
         onLink(compiledObjects, objList.path(), libPath);
 
-        System.err.println("##### LINK #####");
+        System.out.println("##### LINK #####");
         return JProcess.startProcess(childTarget.file(), linkerCommands);
     }
 
@@ -167,6 +238,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
             Path of = Path.of(path);
             boolean remove = true;
             for(String cppInclude : cppIncludes) {
+                cppInclude = cppInclude.replace("//", "/");
                 PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + cppInclude);
                 boolean matches = pathMatcher.matches(of);
                 if(matches) {
@@ -175,6 +247,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
                 }
             }
             for(String cppExclude : cppExcludes) {
+                cppExclude = cppExclude.replace("//", "/");
                 PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + cppExclude);
                 boolean matches = pathMatcher.matches(of);
                 if(matches) {

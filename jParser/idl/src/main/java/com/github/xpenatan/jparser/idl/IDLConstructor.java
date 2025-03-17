@@ -8,18 +8,23 @@ import java.util.ArrayList;
 public class IDLConstructor {
     public final IDLFile idlFile;
 
+    public IDLClass idlClass;
     public String line;
     public String paramsLine;
 
     public final ArrayList<IDLParameter> parameters = new ArrayList<>();
 
-    public IDLConstructor(IDLFile idlFile) {
+    public IDLConstructor(IDLFile idlFile, IDLClass idlClass) {
         this.idlFile = idlFile;
+        this.idlClass = idlClass;
     }
 
     public void initConstructor(String line) {
         this.line = line;
         paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
+        for(IDLParameter parameter : parameters) {
+            parameter.idlConstructor = this;
+        }
     }
 
     public int getTotalOptionalParams() {
@@ -40,7 +45,7 @@ public class IDLConstructor {
     }
 
     public IDLConstructor clone() {
-        IDLConstructor cloned = new IDLConstructor(idlFile);
+        IDLConstructor cloned = new IDLConstructor(idlFile, idlClass);
         cloned.line = line;
         cloned.paramsLine = paramsLine;
         for(int i = 0; i < parameters.size(); i++) {

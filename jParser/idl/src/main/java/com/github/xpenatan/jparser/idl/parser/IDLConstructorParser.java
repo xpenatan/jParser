@@ -26,9 +26,17 @@ public class IDLConstructorParser {
 
     public static void generateConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass) {
         ArrayList<IDLConstructor> constructors = idlClass.constructors;
-        for(int i = 0; i < constructors.size(); i++) {
-            IDLConstructor idlConstructor = constructors.get(i);
-            generateConstructor(idlParser, jParser, unit, classOrInterfaceDeclaration, idlConstructor);
+        if(idlClass.callbackImpl == null) {
+            // Generate constructors only if it's not callback
+            for(int i = 0; i < constructors.size(); i++) {
+                IDLConstructor idlConstructor = constructors.get(i);
+                ConstructorDeclaration constructorDeclaration = IDLConstructorParser.getOrCreateConstructorDeclaration(idlParser, jParser, unit, classOrInterfaceDeclaration, idlConstructor);
+
+                if(constructorDeclaration.getBody().isEmpty()) {
+                    MethodDeclaration nativeMethod = IDLConstructorParser.setupConstructor(idlConstructor, classOrInterfaceDeclaration, constructorDeclaration);
+                    idlParser.onIDLConstructorGenerated(jParser, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration, nativeMethod);
+                }
+            }
         }
 
         // All classes contain a temp constructor so temp objects can be reused
@@ -40,6 +48,8 @@ public class IDLConstructorParser {
                 ConstructorDeclaration constructorDeclaration = classDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
                 constructorDeclaration.addParameter("byte", "b");
                 constructorDeclaration.addParameter("char", "c");
+                constructorDeclaration.addAnnotation(Deprecated.class);
+                constructorDeclaration.setJavadocComment("Dummy constructor, used internally to creates objects without C++ pointer");
             }
         }
 
@@ -48,7 +58,7 @@ public class IDLConstructorParser {
         }
     }
 
-    private static void addSuperTempConstructor(ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
+    public static void addSuperTempConstructor(ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
         Optional<ClassOrInterfaceType> parent = classDeclaration.getExtendedTypes().getFirst();
         String parentName = "";
         if(parent.isPresent()) {
@@ -70,31 +80,42 @@ public class IDLConstructorParser {
         }
     }
 
-    private static void generateConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLConstructor idlConstructor) {
+    public static ConstructorDeclaration getOrCreateConstructorDeclaration(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLConstructor idlConstructor) {
         ConstructorDeclaration constructorDeclaration = containsConstructor(classOrInterfaceDeclaration, idlConstructor);
         if(constructorDeclaration == null) {
             constructorDeclaration = classOrInterfaceDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
             ArrayList<IDLParameter> parameters = idlConstructor.parameters;
             for(int i = 0; i < parameters.size(); i++) {
                 IDLParameter parameter = parameters.get(i);
-                String paramType = parameter.type;
+                String paramType = parameter.getJavaType();
                 paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
                 JParserHelper.addMissingImportType(jParser, unit, paramType);
                 constructorDeclaration.addAndGetParameter(paramType, parameter.name);
             }
         }
-
-        if(constructorDeclaration.getBody().isEmpty()) {
-            setupConstructor(idlParser, jParser, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration);
-        }
+        return constructorDeclaration;
     }
 
-    private static void setupConstructor(IDLDefaultCodeParser idlParser, JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
+    public static MethodDeclaration setupConstructor(IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
         NodeList<Parameter> parameters = constructorDeclaration.getParameters();
         Type type = StaticJavaParser.parseType(classDeclaration.getNameAsString());
-
         boolean isStatic = true;
-        MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(false, "create", parameters, type, isStatic);
+
+        String additionalName = "";
+
+        // Constructor needs to have type in the name because there are some cases that multiple
+        // parameters with different type will skip creating this native method if they are equal.
+        // Since the parameters object is converter to long. It's impossible to override multiple methods
+        // with the same pointers type.
+        // TODO maybe add parameter type in all native method names.
+        for(int i = 0; i < parameters.size(); i++) {
+            Parameter parameter = parameters.get(i);
+            String typeName = parameter.getType().toString();
+            additionalName += "_" + typeName;
+        }
+
+        String methodName = "create" + additionalName;
+        MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(methodName, parameters, type, isStatic);
 
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethod)) {
             //Add native method if it does not exist
@@ -103,24 +124,28 @@ public class IDLConstructorParser {
             MethodCallExpr caller = IDLMethodParser.createCaller(nativeMethod);
 
             BlockStmt blockStmt = constructorDeclaration.getBody();
+            IDLMethodParser.NativeMethodData paramData = new IDLMethodParser.NativeMethodData();
+            paramData.isStatic = isStatic;
+            IDLMethodParser.setupCallerParam(paramData, caller, parameters, idlConstructor.parameters);
 
-            IDLMethodParser.setupCallerParam(isStatic, false, caller, parameters);
+            String isMemoryOwned = String.valueOf(!idlConstructor.idlClass.classHeader.isNoDelete);
 
             Statement statement1 = StaticJavaParser.parseStatement("long addr = " + caller + ";");
-            Statement statement2 = StaticJavaParser.parseStatement("initNative(addr, true);");
+            Statement statement2 = StaticJavaParser.parseStatement("getNativeData().reset(addr, " + isMemoryOwned + ");");
             blockStmt.addStatement(statement1);
             blockStmt.addStatement(statement2);
 
-            idlParser.onIDLConstructorGenerated(jParser, idlConstructor, classDeclaration, constructorDeclaration, nativeMethod);
+            return nativeMethod;
         }
+        return null;
     }
 
-    private static ConstructorDeclaration containsConstructor(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLConstructor idlConstructor) {
+    public static ConstructorDeclaration containsConstructor(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLConstructor idlConstructor) {
         ArrayList<IDLParameter> parameters = idlConstructor.parameters;
         String[] paramTypes = new String[parameters.size()];
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);
-            String paramType = parameter.type;
+            String paramType = parameter.getJavaType();
             paramTypes[i] = paramType;
         }
         Optional<ConstructorDeclaration> constructorDeclarationOptional = classOrInterfaceDeclaration.getConstructorByParameterTypes(paramTypes);

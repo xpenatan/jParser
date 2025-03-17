@@ -6,6 +6,9 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.github.javaparser.utils.PositionUtils;
 import com.github.xpenatan.jparser.core.codeparser.CodeParser;
 import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
@@ -87,6 +90,13 @@ public class JParser {
         }
         System.out.println("***** GENERATING CODE *****");
         JParser jParser = new JParser(sourceD, genD);
+
+        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+        combinedTypeSolver.add(new ReflectionTypeSolver());
+        // Configure JavaParser to use type resolution
+        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
+        StaticJavaParser.getParserConfiguration().setSymbolResolver(symbolSolver);
+
         processDirectory(jParser, fileSourceDir, fileGenDir, excludes, fileSourceDir);
         wrapper.onParseStart(jParser);
         parseJavaFiles(jParser, wrapper);
@@ -166,13 +176,11 @@ public class JParser {
                         continue;
                     }
                     String javaContent = file.readString();
-                    File file1 = file.file();
                     CompilationUnit unit = StaticJavaParser.parse(new ByteArrayInputStream(javaContent.getBytes()));
                     unit.printer(new CustomPrettyPrinter());
-                    String absolutePath = file1.getAbsolutePath();
 
                     String genPath = fileGenDir.file().getAbsolutePath();
-                    jParser.unitArray.add(new JParserItem(unit, absolutePath, genPath));
+                    jParser.unitArray.add(new JParserItem(unit, genPath));
                 }
             }
         }
@@ -184,7 +192,8 @@ public class JParser {
     }
 
     private static String getFullyQualifiedClassName(CustomFileDescriptor fileSourceDir, CustomFileDescriptor file) {
-        String className = file.path().replace(fileSourceDir.path(), "").replace('\\', '.').replace('/', '.').replace(".java", "");
+        String replacePath = file.path().replace(fileSourceDir.path(), "").replace("\\", "/");
+        String className = replacePath.replace("/", ".").replace('/', '.').replace(".java", "");
         if(className.startsWith(".")) className = className.substring(1);
         return className;
     }

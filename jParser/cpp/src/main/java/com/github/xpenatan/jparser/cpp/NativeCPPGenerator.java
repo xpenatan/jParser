@@ -10,7 +10,6 @@ import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,7 +85,7 @@ public class NativeCPPGenerator implements CppGenerator {
         otherTypes.put("Throwable", ArgumentType.Throwable);
     }
 
-    private String cppDestinationDir;
+    private String glueCppDestinationDir;
     private String cppGlueName = "JNIGlue";
 
     StringBuilder mainPrinter = new StringBuilder();
@@ -106,7 +105,7 @@ public class NativeCPPGenerator implements CppGenerator {
     public NativeCPPGenerator(String cppDestinationDir, boolean exportJNIMethods) {
         try {
             this.exportJNIMethods = exportJNIMethods;
-            this.cppDestinationDir = new File(cppDestinationDir).getCanonicalPath() + File.separator;
+            this.glueCppDestinationDir = new File(cppDestinationDir, "jniglue").getCanonicalPath() + File.separator;
         } catch(IOException e) {
             throw new RuntimeException(e);
         }
@@ -259,16 +258,7 @@ public class NativeCPPGenerator implements CppGenerator {
         print(PrintType.MAIN, "}");
         String code = mainPrinter.toString();
 
-        String gluePathStr = cppDestinationDir + File.separator + ".." + File.separator + "jniglue" + File.separator;
-        CustomFileDescriptor gluePath = new CustomFileDescriptor(gluePathStr);
-
-        if(JParser.CREATE_IDL_HELPER) {
-            // Create cpp file if flag is enable
-            InputStream idlHelperClass = getClass().getClassLoader().getResourceAsStream(helperName);
-            CustomFileDescriptor helperFile = gluePath.child(helperName);
-            helperFile.write(idlHelperClass, false);
-        }
-
+        String gluePathStr = glueCppDestinationDir;
         String cppGlueHPath = gluePathStr + cppGlueName + ".h";
         String cppGluePath = gluePathStr + cppGlueName + ".cpp";
         CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(cppGlueHPath);

@@ -4,14 +4,23 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration;
+import com.github.javaparser.utils.Pair;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
@@ -24,8 +33,8 @@ import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.core.util.ResourceList;
+import com.github.xpenatan.jparser.idl.IDLPackageRenaming;
 import idl.IDLBase;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -55,12 +65,13 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     protected String includeDir;
 
+    public IDLPackageRenaming packageRenaming;
+
     /**
-     *
      * @param basePackage Base module source. This is used to generate other sources
-     * @param headerCMD This is the first command option that this parser will use. Ex teavm, C++.
-     * @param idlReader Contains the parsed idl files
-     * @param includeDir This is used to add java subpackages from c++ tree. Without this all java source will be at the root package.
+     * @param headerCMD   This is the first command option that this parser will use. Ex teavm, C++.
+     * @param idlReader   Contains the parsed idl files
+     * @param includeDir  This is used to add java subpackages from c++ tree. Without this all java source will be at the root package.
      */
     public IDLClassGeneratorParser(String basePackage, String headerCMD, IDLReader idlReader, String includeDir) {
         super(headerCMD);
@@ -68,7 +79,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         this.basePackage = basePackage;
         this.idlReader = idlReader;
         if(this.includeDir != null) {
-            this.includeDir = this.includeDir.replace("\\", "/").replace("//", "/");;
+            this.includeDir = this.includeDir.replace("\\", "/").replace("//", "/");
         }
     }
 
@@ -96,7 +107,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 }
                 String newPackage = basePackage + originalPackage;
                 compilationUnit.setPackageDeclaration(newPackage);
-                JParserItem jParserItem = new JParserItem(compilationUnit, jParser.genDir, jParser.genDir);
+                JParserItem jParserItem = new JParserItem(compilationUnit, jParser.genDir);
                 if(!JParser.CREATE_IDL_HELPER) {
                     jParserItem.notAllowed = true;
                 }
@@ -114,6 +125,9 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
     }
 
     private void generateIDLJavaClasses(JParser jParser, String genPath) {
+        System.out.println("Class Mapping: ");
+        System.out.println(classCppPath);
+
         for(IDLFile idlFile : idlReader.fileArray) {
             for(IDLClassOrEnum idlClassOrEnum : idlFile.classArray) {
                 String className = idlClassOrEnum.name;
@@ -133,12 +147,18 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         Path p = Paths.get(includeClass);
                         Path parent = p.getParent();
                         if(parent != null) {
-                            String string = parent.toString();
-                            subPackage = string.replace(File.separator, ".").toLowerCase();
+                            String string = parent.toString().replace("\\", "/");
+                            subPackage = string.replace("/", ".").toLowerCase();
                         }
                     }
+                    if(idlClassOrEnum.subPackage != null) {
+                        subPackage = idlClassOrEnum.subPackage;
+                    }
+                    if(packageRenaming != null) {
+                        subPackage = packageRenaming.obtainNewPackage(className, subPackage);
+                    }
                     CompilationUnit compilationUnit = setupClass(idlClassOrEnum, subPackage);
-                    parserItem = new JParserItem(compilationUnit, genPath, genPath);
+                    parserItem = new JParserItem(compilationUnit, genPath);
                     jParser.unitArray.add(parserItem);
                 }
             }
@@ -147,8 +167,10 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     private HashMap<String, String> getClassCppPath() {
         HashMap<String, String> mapPackage = new HashMap<>();
+        System.out.println("includeDir: " + includeDir);
         if(includeDir != null) {
             ArrayList<String> filesFromDir = FileHelper.getFilesFromDir(includeDir);
+            System.out.println("FilesFromDir: " + filesFromDir.size());
             for(String path : filesFromDir) {
                 if(!path.endsWith(".h"))
                     continue;
@@ -179,13 +201,19 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         classDeclaration.setPublic(true);
 
         if(idlClass.isClass()) {
-            // For every class we generate empty object that can be used when needed.
-            IDLMethodParser.generateFieldName("T_01", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
-            IDLMethodParser.generateFieldName("T_02", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
-            IDLMethodParser.generateFieldName("T_03", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
+            IDLClass aClass = idlClass.asClass();
+            if(aClass.isCallback) {
+                // Do nothing
+            }
+            else {
+                // For every class we generate empty object that can be used when needed.
+                IDLMethodParser.generateFieldName("T_01", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
+                IDLMethodParser.generateFieldName("T_02", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
+                IDLMethodParser.generateFieldName("T_03", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
+            }
         }
-
-        return compilationUnit;
+        // Hack to inject internal dependencies
+        return StaticJavaParser.parse(compilationUnit.toString());
     }
 
     @Override
@@ -308,6 +336,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         boolean skipUnit = false;
 
                         if(!JParser.CREATE_IDL_HELPER) {
+                            //TODO implement better class renaming
                             // Hack to look for idl classes that was generated with the main lib
                             ArrayList<String> baseIDLClasses = getBaseIDLClasses();
                             for(String baseIDLClass : baseIDLClasses) {
@@ -329,7 +358,157 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 }
             }
         }
+
+        // Add additional method to call natives
+        makeNativesPublic(parserItems);
     }
+
+    private void makeNativesPublic(ArrayList<JParserItem> parserItems) {
+        for(int i = 0; i < parserItems.size(); i++) {
+            JParserItem parserItem = parserItems.get(i);
+            String className = parserItem.className;
+            IDLClass idlClass = idlReader.getClass(className);
+            if(idlClass != null && idlClass.idlSkip) {
+                continue;
+            }
+
+            CompilationUnit unit = parserItem.unit;
+            List<ClassOrInterfaceDeclaration> classDeclarations = unit.findAll(ClassOrInterfaceDeclaration.class);
+
+            for(int i1 = 0; i1 < classDeclarations.size(); i1++) {
+                ClassOrInterfaceDeclaration classDeclaration = classDeclarations.get(i1);
+
+                ArrayList<Pair<MethodDeclaration, MethodDeclaration>> pairList = new ArrayList<>();
+
+                List<MethodCallExpr> methodCalls = classDeclaration.findAll(MethodCallExpr.class);
+
+                for(int i2 = 0; i2 < methodCalls.size(); i2++) {
+                    MethodCallExpr methodCallExpr = methodCalls.get(i2);
+
+                    try {
+                        ResolvedMethodDeclaration resolve = methodCallExpr.resolve();
+                        if(resolve instanceof JavaParserMethodDeclaration) {
+                            JavaParserMethodDeclaration jpmd = (JavaParserMethodDeclaration)resolve;
+                            MethodDeclaration nativeMethod = jpmd.getWrappedNode();
+                            if(nativeMethod.isNative()) {
+                                Node node = methodCallExpr.getParentNode().get();
+                                while(node != null) {
+                                    if(node instanceof MethodDeclaration) {
+                                        MethodDeclaration callMethod = (MethodDeclaration)node;
+                                        pairList.add(new Pair<>(callMethod, nativeMethod));
+                                        break;
+                                    }
+                                    else if(node instanceof ConstructorDeclaration) {
+                                        pairList.add(new Pair<>(null, nativeMethod));
+                                        break;
+                                    }
+                                    Optional<Node> parentNode = node.getParentNode();
+                                    node = parentNode.orElse(null);
+                                }
+                            }
+                        }
+                    } catch(Throwable t) {
+                    }
+                }
+
+                for(int i2 = 0; i2 < pairList.size(); i2++) {
+                    Pair<MethodDeclaration, MethodDeclaration> pair = pairList.get(i2);
+                    MethodDeclaration methodDeclaration = pair.a;
+                    MethodDeclaration nativeMethod = pair.b;
+                    duplicateNativeMethodToLong(classDeclaration, methodDeclaration, nativeMethod);
+                }
+            }
+        }
+    }
+
+    private void duplicateNativeMethodToLong(ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
+        // Because all native code convert int to long. If it's called from outside the library teavm will give errors.
+        // This is to duplicate all native code method to keep the long address parameters.
+
+        MethodDeclaration clone = nativeMethod.clone();
+        clone.getAnnotations().clear();
+        clone.removeModifier(Modifier.Keyword.NATIVE);
+        clone.removeModifier(Modifier.Keyword.PRIVATE);
+        clone.removeModifier(Modifier.Keyword.STATIC);
+        clone.addModifier(Modifier.Keyword.PUBLIC);
+        clone.addModifier(Modifier.Keyword.STATIC);
+        clone.removeComment();
+        NodeList<Parameter> parameters = clone.getParameters();
+        int paramSize = parameters.size();
+        for(int i1 = 0; i1 < paramSize; i1++) {
+            Parameter parameter = parameters.get(i1);
+            String paramName = parameter.getNameAsString();
+            if(paramName.endsWith("_addr")) {
+                parameter.setType(PrimitiveType.longType());
+            }
+        }
+        if(!clone.getNameAsString().contains(IDLMethodParser.NATIVE_METHOD)) {
+            return;
+        }
+        String newName = clone.getNameAsString().replace(IDLMethodParser.NATIVE_METHOD, "native_");
+        clone.setName(newName);
+
+        String returnStr = "\t";
+
+        if(methodDeclaration == null) {
+            // Is constructor
+            Type type = nativeMethod.getType();
+            if(JParserHelper.isLong(type)) {
+                returnStr += "return ";
+                clone.setType(PrimitiveType.longType());
+            }
+        }
+        else {
+            Type type = methodDeclaration.getType();
+            if(type.isClassOrInterfaceType() && !nativeMethod.isClassOrInterfaceDeclaration()) {
+                returnStr += "return ";
+                clone.setType(PrimitiveType.longType());
+            }
+            else if(!type.isVoidType()) {
+                returnStr += "return ";
+            }
+        }
+        String methodStr = getMethodStr(nativeMethod, paramSize, parameters);
+        String body = "{\n";
+        body += returnStr;
+        body += methodStr;
+        body += "\n}";
+
+        BodyDeclaration<?> bodyDeclaration = StaticJavaParser.parseBodyDeclaration(body);
+        InitializerDeclaration initializerDeclaration = (InitializerDeclaration)bodyDeclaration;
+        clone.setBody(initializerDeclaration.getBody());
+
+        NodeList<Parameter> parameters1 = clone.getParameters();
+        String[] param = new String[parameters1.size()];
+        for(int i = 0; i < parameters1.size(); i++) {
+            Parameter parameter = parameters1.get(i);
+            String nameAsString = parameter.getType().asString();
+            param[i] = nameAsString;
+        }
+        List<MethodDeclaration> methodsBySignature = classDeclaration.getMethodsBySignature(clone.getNameAsString(), param);
+        if(methodsBySignature.isEmpty()) {
+            classDeclaration.addMember(clone);
+        }
+    }
+
+    private static String getMethodStr(MethodDeclaration nativeMethod, int paramSize, NodeList<Parameter> parameters) {
+        String methodStr = nativeMethod.getNameAsString();
+        String params = "";
+        for(int i1 = 0; i1 < paramSize; i1++) {
+            String comma = "";
+            if(i1 < paramSize - 1) {
+                comma = ", ";
+            }
+            Parameter parameter = parameters.get(i1);
+            String paramName = parameter.getNameAsString();
+            params += paramName;
+            params += comma;
+        }
+
+        methodStr += "(" + params + ");";
+        return methodStr;
+    }
+
 
     private static void addImport(JParser jParser, CompilationUnit unit, Type elementType) {
         if(elementType.isClassOrInterfaceType()) {

@@ -37,7 +37,6 @@ public class JProcess {
                 String command = commands[i];
                 System.out.println("Param: " + command);
             }
-            System.out.println();
 
             final Process process = new ProcessBuilder(commands)
                     .redirectErrorStream(true)

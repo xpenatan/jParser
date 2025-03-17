@@ -30,6 +30,7 @@ public class LinuxTarget extends DefaultBuildTarget {
         cppFlags.add("-Wno-unused-but-set-variable");
         cppFlags.add("-w");
         cppFlags.add("-Wno-format");
+//        -static-libgcc
     }
 
     @Override
@@ -38,7 +39,7 @@ public class LinuxTarget extends DefaultBuildTarget {
             linkerCompiler.clear();
             linkerCompiler.add("ar");
             linkerFlags.add("rcs");
-            libSuffix = "64.a";
+            libSuffix = "64_.a";
         }
         else {
             // Note:

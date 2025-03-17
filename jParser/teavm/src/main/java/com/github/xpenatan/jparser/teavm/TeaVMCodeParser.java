@@ -3,6 +3,7 @@ package com.github.xpenatan.jparser.teavm;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
@@ -12,6 +13,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.CastExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.EnclosedExpr;
@@ -19,10 +21,20 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.resolution.types.ResolvedArrayType;
+import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
+import com.github.javaparser.resolution.types.ResolvedReferenceType;
+import com.github.javaparser.resolution.types.ResolvedType;
+import com.github.javaparser.utils.Pair;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
@@ -33,10 +45,11 @@ import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
+import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
-import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
+import com.github.xpenatan.jparser.idl.parser.IDLMethodParser;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,11 +121,23 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "return jsObj.get_[ATTRIBUTE]();";
 
+    protected static final String ATTRIBUTE_ARRAY_GET_PRIMITIVE_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "return jsObj.get_[ATTRIBUTE](index);";
+
     protected static final String ATTRIBUTE_GET_PRIMITIVE_STATIC_TEMPLATE =
             "return [MODULE].[TYPE].prototype.get_[ATTRIBUTE]()";
 
+    protected static final String ATTRIBUTE_ARRAY_GET_PRIMITIVE_STATIC_TEMPLATE =
+            "return [MODULE].[TYPE].prototype.get_[ATTRIBUTE](index)";
+
     protected static final String ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE =
             "var returnedJSObj = [MODULE].[TYPE].prototype.get_[ATTRIBUTE]();\n" +
+            "if(!returnedJSObj.hasOwnProperty('ptr')) return 0; \n" +
+            "return [MODULE].getPointer(returnedJSObj);";
+
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_STATIC_TEMPLATE =
+            "var returnedJSObj = [MODULE].[TYPE].prototype.get_[ATTRIBUTE](index);\n" +
             "if(!returnedJSObj.hasOwnProperty('ptr')) return 0; \n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
@@ -122,30 +147,61 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             "if(!returnedJSObj.hasOwnProperty('ptr')) return 0; \n" +
             "return [MODULE].getPointer(returnedJSObj);";
 
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "var returnedJSObj = jsObj.get_[ATTRIBUTE](index);\n" +
+            "if(!returnedJSObj.hasOwnProperty('ptr')) return 0; \n" +
+            "return [MODULE].getPointer(returnedJSObj);";
+
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]_addr);";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "jsObj.set_[ATTRIBUTE](index, [ATTRIBUTE]_addr);";
+
     protected static final String ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE =
             "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]_addr);\n";
+
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_STATIC_TEMPLATE =
+            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE](index, [ATTRIBUTE]_addr);\n";
 
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]_addr);";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "jsObj.set_[ATTRIBUTE](index, [ATTRIBUTE]_addr);";
+
     protected static final String ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE =
             "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]_addr);\n";
+
+    protected static final String ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_STATIC_TEMPLATE =
+            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE](index, [ATTRIBUTE]_addr);\n";
 
     protected static final String ATTRIBUTE_SET_PRIMITIVE_TEMPLATE =
             "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
             "jsObj.set_[ATTRIBUTE]([ATTRIBUTE]);";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_PRIMITIVE_TEMPLATE =
+            "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].[TYPE]);\n" +
+            "jsObj.set_[ATTRIBUTE](index, [ATTRIBUTE]);";
+
     protected static final String ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE =
             "[MODULE].[TYPE].prototype.set_[ATTRIBUTE]([ATTRIBUTE]);\n";
 
+    protected static final String ATTRIBUTE_ARRAY_SET_PRIMITIVE_STATIC_TEMPLATE =
+            "[MODULE].[TYPE].prototype.set_[ATTRIBUTE](index, [ATTRIBUTE]);\n";
+
     protected static final String ATTRIBUTE_GET_OBJECT_VALUE_STATIC_TEMPLATE = ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE;
 
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_STATIC_TEMPLATE = ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_STATIC_TEMPLATE;
+
     protected static final String ATTRIBUTE_GET_OBJECT_VALUE_TEMPLATE = ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE;
+
+    protected static final String ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_TEMPLATE = ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_TEMPLATE;
 
     protected static final String ENUM_GET_INT_TEMPLATE =
             "\nreturn [MODULE].[ENUM];\n";
@@ -208,11 +264,11 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLConstructorGenerated(JParser jParser, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration, MethodDeclaration nativeMethodDeclaration) {
-//        convertLongToInt(constructorDeclaration.getBody(), nativeMethodDeclaration);
-
         String param = "";
 
-        String className = classDeclaration.getNameAsString();
+        IDLClass idlClass = idlConstructor.idlClass;
+
+        String className = idlClass.name; // teavm class cannot have prefix.
         MethodCallExpr caller = new MethodCallExpr();
         caller.setName(className);
 
@@ -254,7 +310,14 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     @Override
     public void onIDLDeConstructorGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration nativeMethodDeclaration) {
-        String returnTypeName = classDeclaration.getNameAsString();
+        String returnTypeName ;
+        if(idlClass.callbackImpl == null) {
+            returnTypeName = classDeclaration.getNameAsString();
+        }
+        else {
+            returnTypeName = idlClass.callbackImpl.name;
+        }
+
         String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_MODULE, module).replace(TEMPLATE_TAG_TYPE, returnTypeName);
 
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
@@ -355,7 +418,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             IDLParameter idlParameter = idParameters.get(i);
             Type type = parameter.getType();
             boolean isObject = type.isClassOrInterfaceType();
-            String paramName = getParam(idlParameter.idlFile, isObject, idlParameter.name, idlParameter.type, idlParameter.isRef, idlParameter.isValue);
+            String paramName = getParam(idlParameter.idlFile, isObject, idlParameter.name, idlParameter.getJavaType(), idlParameter.isRef, idlParameter.isValue);
             if(i > 0) {
                 param += ", ";
             }
@@ -377,7 +440,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
         String returnTypeName = classDeclaration.getNameAsString();
         String attributeName = idlAttribute.name;
-        String returnType = idlAttribute.type;
 
         String param = "";
         NodeList<Parameter> parameters = nativeMethod.getParameters();
@@ -398,11 +460,22 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             case SET_OBJECT_VALUE:
                 content = ATTRIBUTE_SET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case SET_ARRAY_OBJECT_VALUE:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case SET_OBJECT_VALUE_STATIC:
                 content = ATTRIBUTE_SET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case SET_ARRAY_OBJECT_VALUE_STATIC:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case GET_OBJECT_VALUE:
                 content = ATTRIBUTE_GET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_TYPE, returnTypeName)
+                        .replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_ARRAY_OBJECT_VALUE:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
                         .replace(TEMPLATE_TAG_TYPE, returnTypeName)
                         .replace(TEMPLATE_TAG_MODULE, module);
                 break;
@@ -411,29 +484,58 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                         .replace(TEMPLATE_TAG_TYPE, returnTypeName)
                         .replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case GET_ARRAY_OBJECT_VALUE_STATIC:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_VALUE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName)
+                        .replace(TEMPLATE_TAG_TYPE, returnTypeName)
+                        .replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case SET_OBJECT_POINTER:
                 content = ATTRIBUTE_SET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case SET_ARRAY_OBJECT_POINTER:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
             case SET_OBJECT_POINTER_STATIC:
                 content = ATTRIBUTE_SET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case SET_ARRAY_OBJECT_POINTER_STATIC:
+                content = ATTRIBUTE_ARRAY_SET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case GET_OBJECT_POINTER:
                 content = ATTRIBUTE_GET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_ARRAY_OBJECT_POINTER:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
             case GET_OBJECT_POINTER_STATIC:
                 content = ATTRIBUTE_GET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case GET_ARRAY_OBJECT_POINTER_STATIC:
+                content = ATTRIBUTE_ARRAY_GET_OBJECT_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case SET_PRIMITIVE:
                 content = ATTRIBUTE_SET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case SET_ARRAY_PRIMITIVE:
+                content = ATTRIBUTE_ARRAY_SET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
             case SET_PRIMITIVE_STATIC:
                 content = ATTRIBUTE_SET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case SET_ARRAY_PRIMITIVE_STATIC:
+                content = ATTRIBUTE_ARRAY_SET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case GET_PRIMITIVE:
                 content = ATTRIBUTE_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
+            case GET_ARRAY_PRIMITIVE:
+                content = ATTRIBUTE_ARRAY_GET_PRIMITIVE_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
             case GET_PRIMITIVE_STATIC:
                 content = ATTRIBUTE_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
+                break;
+            case GET_ARRAY_PRIMITIVE_STATIC:
+                content = ATTRIBUTE_ARRAY_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_ATTRIBUTE, attributeName).replace(TEMPLATE_TAG_TYPE, returnTypeName).replace(TEMPLATE_TAG_MODULE, module);
                 break;
         }
 
@@ -491,6 +593,143 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
+    public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        NodeList<Parameter> methodParameters = callbackDeclaration.getParameters();
+        IDLClass idlCallbackClass = idlClass.callbackImpl;
+        String callbackClassName = idlCallbackClass.name;
+        Type methodReturnType = callbackDeclaration.getType();
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.generateNativeMethod(callbackDeclaration.getNameAsString(), methodParameters, methodReturnType, false);
+        if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
+            NormalAnnotationExpr customAnnotation = new NormalAnnotationExpr();
+            customAnnotation.setName("org.teavm.jso.JSBody");
+            ArrayInitializerExpr paramsArray = new ArrayInitializerExpr();
+            NodeList<Expression> values = paramsArray.getValues();
+            String script = "var " + callbackClassName + " = "+ module + ".wrapPointer(this_addr, " + module + "." + callbackClassName + ");";
+            MethodCallExpr caller = IDLMethodParser.createCaller(nativeMethodDeclaration);
+
+            caller.addArgument("getNativeData().getCPointer()");
+
+            values.add(new StringLiteralExpr("this_addr"));
+            for(int i = 0; i < methods.size(); i++) {
+                Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
+                IDLMethod idlMethod = pair.a;
+                String methodName = idlMethod.name;
+                values.add(new StringLiteralExpr(methodName));
+                nativeMethodDeclaration.addParameter(methodName, methodName);
+                script += " " + callbackClassName + "." + methodName + " = " + methodName + ";";
+                caller.addArgument(methodName);
+            }
+
+            customAnnotation.addPair("params", paramsArray);
+            customAnnotation.addPair("script", new StringLiteralExpr(script));
+            nativeMethodDeclaration.addAnnotation(customAnnotation);
+            classDeclaration.getMembers().add(nativeMethodDeclaration);
+
+            BlockStmt callbackMethodBody = callbackDeclaration.getBody().get();
+
+            for(int i = 0; i < methods.size(); i++) {
+                Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
+                IDLMethod idlMethod = pair.a;
+                Pair<MethodDeclaration, MethodDeclaration> methodPair = pair.b;
+                MethodDeclaration internalMethod = methodPair.a;
+                MethodDeclaration publicMethod = methodPair.b;
+                String internalMethodName = internalMethod.getNameAsString();
+                String paramCode = "";
+                String methodName = idlMethod.name;
+
+                Type returnType = internalMethod.getType();
+                String returnTypeStr = returnType.asString();
+
+                NodeList<Parameter> parameters = internalMethod.getParameters();
+                createInterfaceClass(classDeclaration, methodName, returnTypeStr, parameters);
+                createInterfaceInstance(methodName, internalMethodName, returnTypeStr, parameters, callbackMethodBody);
+            }
+            callbackMethodBody.addStatement(caller);
+        }
+    }
+
+    private void createInterfaceClass(ClassOrInterfaceDeclaration classDeclaration, String methodName, String returnTypeStr, NodeList<Parameter> parameters) {
+        ClassOrInterfaceDeclaration interfaceDecl = new ClassOrInterfaceDeclaration();
+        interfaceDecl.setInterface(true); // Mark it as an interface
+        interfaceDecl.setName(methodName);
+        interfaceDecl.setPublic(true); // Optional, interfaces are public by default
+        interfaceDecl.addExtendedType("org.teavm.jso.JSObject");
+
+        NormalAnnotationExpr customAnnotation = new NormalAnnotationExpr();
+        customAnnotation.setName("org.teavm.jso.JSFunctor");
+        interfaceDecl.addAnnotation(customAnnotation);
+
+        MethodDeclaration method = interfaceDecl.addMethod(methodName);
+        method.removeBody();
+        method.setType(returnTypeStr);
+        for(int i1 = 0; i1 < parameters.size(); i1++) {
+            Parameter parameter = parameters.get(i1);
+            Type type = parameter.getType();
+            String typeStr = type.asString();
+            String paramName = parameter.getNameAsString();
+            if(typeStr.equals("String") || JParserHelper.isLong(type)) {
+                typeStr = "int";
+            }
+            method.addParameter(typeStr, paramName);
+        }
+        classDeclaration.addMember(interfaceDecl);
+    }
+
+    private void createInterfaceInstance(String methodName, String internalMethodName, String returnTypeStr, NodeList<Parameter> parameters, BlockStmt callbackMethodBody) {
+        ObjectCreationExpr anonymousClass = new ObjectCreationExpr();
+        anonymousClass.setType(new ClassOrInterfaceType().setName(methodName));
+
+        ClassOrInterfaceDeclaration anonymousBody = new ClassOrInterfaceDeclaration();
+        anonymousBody.setInterface(false); // This is a class, not an interface
+
+        // Implement onEvent method
+        MethodDeclaration implMethod1 = anonymousBody.addMethod(methodName, Modifier.Keyword.PUBLIC);
+        implMethod1.setType(returnTypeStr);
+        String params = "";
+        int paramSize = parameters.size();
+        for(int i1 = 0; i1 < paramSize; i1++) {
+            Parameter parameter = parameters.get(i1);
+            Type type = parameter.getType();
+            String typeStr = type.asString();
+            String paramNameOriginal = parameter.getNameAsString();
+            String paramName = paramNameOriginal;
+
+            if(typeStr.equals("String"))  {
+                // Edge case where String need to be converted
+                paramName = "IDLBase.getJSString(" + paramName + ")";
+                typeStr = "int";
+            }
+            if(JParserHelper.isLong(type)) {
+                typeStr = "int";
+            }
+            params += paramName;
+            if(i1 < paramSize-1) {
+                params += ", ";
+            }
+            implMethod1.addParameter(typeStr, paramNameOriginal);
+        }
+        BlockStmt body1 = new BlockStmt();
+        String methodCall = internalMethodName + "(" + params + ");";
+        String returnCode = "";
+        if(!returnTypeStr.equals("void")) {
+            returnCode = "return ";
+        }
+        body1.addStatement(returnCode + methodCall);
+        implMethod1.setBody(body1);
+
+        anonymousClass.setAnonymousClassBody(anonymousBody.getMembers());
+
+        VariableDeclarationExpr varDecl = new VariableDeclarationExpr(
+                new VariableDeclarator(
+                        new ClassOrInterfaceType().setName(methodName),
+                        methodName,
+                        anonymousClass
+                )
+        );
+        callbackMethodBody.addStatement(new ExpressionStmt(varDecl));
+    }
+
+    @Override
     public void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
         super.onParserComplete(jParser, parserItems);
         String prefix = "";
@@ -526,6 +765,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
                 boolean skipUnit = false;
                 if(!JParser.CREATE_IDL_HELPER) {
+                    //TODO implement better class renaming
                     // Hack to skip the generated lib and use the main one
                     ArrayList<String> baseIDLClasses = getBaseIDLClasses();
                     for(String baseIDLClass : baseIDLClasses) {
@@ -576,8 +816,6 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 ClassOrInterfaceDeclaration classDeclaration = classDeclarations.get(i1);
                 convertNativeMethodLongType(classDeclaration);
             }
-
-            List<MethodCallExpr> all = unit.findAll(MethodCallExpr.class);
         }
     }
 
@@ -595,6 +833,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         for(int i = 0; i < constructorDeclarations.size(); i++) {
             ConstructorDeclaration constructorDeclaration = constructorDeclarations.get(i);
             List<MethodCallExpr> methodCallerExprList = constructorDeclaration.findAll(MethodCallExpr.class);
+            NodeList<Parameter> constructorParameters = constructorDeclaration.getParameters();
             updateLongToInt(classDeclaration, methodCallerExprList);
         }
 
@@ -623,9 +862,19 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                     }
                     for(int argI = 0; argI < arguments.size(); argI++) {
                         Expression arg = arguments.get(argI);
+                        boolean isLong = false; // used in public native methods
+                        try {
+                            ResolvedType resolvedType = arg.calculateResolvedType();
+                            if(resolvedType.isPrimitive()) {
+                                ResolvedPrimitiveType primitive = resolvedType.asPrimitive();
+                                isLong = primitive.describe().equals("long");
+                            }
+                        }
+                        catch(Throwable t) {
+                        }
                         Parameter param = parameters.get(argI);
                         Type type = param.getType();
-                        if(JParserHelper.isLong(type)) {
+                        if(JParserHelper.isLong(type) || isLong) {
                             Optional<Node> parentNode = arg.getParentNode();
                             if(parentNode.isPresent()) {
                                 Node node = parentNode.get();
@@ -655,13 +904,55 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         }
     }
 
-    public MethodDeclaration getNativeMethod(ClassOrInterfaceDeclaration classDeclaration, MethodCallExpr methodCallExpr) {
+    private MethodDeclaration getNativeMethod(ClassOrInterfaceDeclaration classDeclaration, MethodCallExpr methodCallExpr) {
         String nativeMethodName = methodCallExpr.getNameAsString();
         NodeList<Expression> arguments = methodCallExpr.getArguments();
-        List<MethodDeclaration> methodsByName = getNativeMethodsByName(classDeclaration, nativeMethodName, arguments.size(), null);
+        ArrayList<String> paramTypes = new ArrayList<>();
+        if(arguments.size() > 0) {
+            for(int i = 0; i < arguments.size(); i++) {
+                Expression expression = arguments.get(i);
+                if(expression.isMethodCallExpr() || expression.isEnclosedExpr()) {
+                    paramTypes.add("long");
+                    continue;
+                }
+                else if(expression.isLambdaExpr()) {
+                    continue;
+                }
+                ResolvedType resolvedType = null;
+                try {
+                    resolvedType = expression.calculateResolvedType();
+                }
+                catch(Throwable t) {
+//                    t.printStackTrace();
+                    continue;
+                }
+                String type = null;
+                if(resolvedType.isPrimitive()) {
+                    type = resolvedType.asPrimitive().describe();
+                }
+                else if(resolvedType.isReferenceType()) {
+                    ResolvedReferenceType referenceType1 = resolvedType.asReferenceType();
+                    String[] split = referenceType1.describe().split("\\.");
+                    type = split[split.length-1];
+                }
+                else if(resolvedType.isArray()) {
+                    ResolvedArrayType arrayType = resolvedType.asArrayType();
+                    type = arrayType.describe();
+                }
+                paramTypes.add(type);
+            }
+        }
+        String[] paramT = new String[paramTypes.size()];
+        paramTypes.toArray(paramT);
+        List<MethodDeclaration> methodsByName = getNativeMethodsByName(classDeclaration, nativeMethodName, arguments.size(), paramT);
         int size = methodsByName.size();
         if(size == 0) {
-            return null;
+            // The current state is not possible to get all paramT correctly.
+            // If method list is 0 and without passing type is 1 then use this method.
+            methodsByName = getNativeMethodsByName(classDeclaration, nativeMethodName, arguments.size(), null);
+            if(methodsByName.size() != 1) {
+                return null;
+            }
         }
         if(methodsByName.size() == 1) {
             MethodDeclaration methodDeclaration = methodsByName.get(0);

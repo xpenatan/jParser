@@ -11,35 +11,40 @@ public class IDLClass extends IDLClassOrEnum {
     public IDLClassHeader classHeader;
 
     public String extendClass = "";
-    public final ArrayList<String> classLines = new ArrayList<>();
     public final ArrayList<IDLConstructor> constructors = new ArrayList<>();
     public final ArrayList<IDLMethod> methods = new ArrayList<>();
     public final ArrayList<IDLAttribute> attributes = new ArrayList<>();
     public ArrayList<String> settings = new ArrayList<>();
+
+    public boolean isCallback;
+    public IDLClass callbackImpl;
+    public boolean idlSkip = false;
 
     public IDLClass(IDLFile idlFile) {
         this.idlFile = idlFile;
     }
 
     public void initClass(ArrayList<String> lines) {
-        classLines.addAll(lines);
+        setupLines(lines);
         setupHeader();
-        setInterfaceName();
+        setupInterfaceName();
+        setupInterfacePackage();
         setupExtendClass();
-        setAttributesAndMethods();
+        setupAttributesAndMethods();
     }
 
-    private void setAttributesAndMethods() {
+    private void setupAttributesAndMethods() {
         for(int i = 1; i < classLines.size(); i++) {
-            String line = classLines.get(i);
+            IDLLine idlLine = classLines.get(i);
+            String line = idlLine.line;
             if(line.contains("attribute ")) {
                 IDLAttribute attribute = new IDLAttribute(idlFile);
-                attribute.initAttribute(line);
+                attribute.initAttribute(idlLine);
                 attributes.add(attribute);
             }
             else {
-                if(line.startsWith("void " + name)) {
-                    IDLConstructor constructor = new IDLConstructor(idlFile);
+                if(line.contains("void " + name)) {
+                    IDLConstructor constructor = new IDLConstructor(idlFile, this);
                     constructor.initConstructor(line);
                     constructors.add(constructor);
 
@@ -55,7 +60,7 @@ public class IDLClass extends IDLClassOrEnum {
                 else {
                     if(line.contains("(") && line.contains(")")) {
                         IDLMethod method = new IDLMethod(this, idlFile);
-                        method.initMethod(line);
+                        method.initMethod(idlLine);
                         methods.add(method);
 
                         int totalOptionalParams = method.getTotalOptionalParams();
@@ -72,74 +77,60 @@ public class IDLClass extends IDLClassOrEnum {
         }
     }
 
-    private void setInterfaceName() {
-        String line = searchLine("interface ", true, false);
-        if(line != null) {
-            name = line.split(" ")[1];
+    private void setupInterfaceName() {
+        IDLLine idlLine = searchLine("interface ", true);
+        if(idlLine != null) {
+            name = idlLine.line.split(" ")[1].trim();
+        }
+    }
+
+    private void setupInterfacePackage() {
+        IDLLine idlLine = searchLine("interface ", true);
+        if(idlLine != null && idlLine.containsCommand(IDLLine.CMD_SUB_PACKAGE)) {
+            subPackage = idlLine.getCommandValue(IDLLine.CMD_SUB_PACKAGE);
         }
     }
 
     private void setupHeader() {
-        String line = "";
+        String code = "";
         if(classLines.size() > 0) {
-            String headerLine = classLines.get(0);
+            IDLLine idlLine = classLines.get(0);
+            String headerLine = idlLine.line;
             if(IDLClassHeader.isLineHeader(headerLine)) {
-                line = headerLine;
+                code = headerLine;
             }
         }
-        classHeader = new IDLClassHeader(line, this);
+        classHeader = new IDLClassHeader(code, this);
     }
 
     private void setupExtendClass() {
-        String line = searchLine(" implements ", false, false);
-        if(line != null && !line.startsWith("//")) {
-            String[] split = line.split("implements");
+        IDLLine idlLine = searchLine(" implements ", false);
+        if(idlLine != null && !idlLine.line.startsWith("//")) {
+            String[] split = idlLine.line.split("implements");
             extendClass = split[1].trim().replace(";", "");
         }
-    }
-
-    private String searchLine(String text, boolean startsWith, boolean endsWith) {
-        for(int i = 0; i < classLines.size(); i++) {
-            String line = classLines.get(i);
-
-            if(startsWith) {
-                if(line.startsWith(text)) {
-                    return line;
-                }
-            }
-            else if(endsWith) {
-                if(line.endsWith(text)) {
-                    return line;
-                }
-            }
-            else {
-                if(line.contains(text)) {
-                    return line;
-                }
+        if(extendClass.isEmpty()) {
+            // If implements is not found check for :
+            IDLLine interfaceLine = searchLine("interface ", true);
+            if(interfaceLine != null && interfaceLine.line.contains(":")) {
+                String[] colonSplit = interfaceLine.line.split(":");
+                String[] spaceSplit = colonSplit[1].trim().split(" ");
+                extendClass = spaceSplit[0].trim();
             }
         }
-        return null;
     }
 
-    public String getName() {
+    public String getCPPName() {
         return classHeader.prefixName + name;
     }
 
     public IDLMethod getMethod(String methodName) {
         for(IDLMethod method : methods) {
-            if(method.name.equals(methodName)) {
+            if(method.nameEquals(methodName)) {
                 return method;
             }
         }
         return null;
     }
 
-    public IDLMethod getOperatorMethod(String operator) {
-        for(IDLMethod method : methods) {
-            if(method.operator.equals(operator)) {
-                return method;
-            }
-        }
-        return null;
-    }
 }

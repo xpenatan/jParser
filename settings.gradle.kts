@@ -25,7 +25,6 @@ include(":example:app:desktop")
 include(":example:app:teavm")
 include(":example:app:android")
 
-
 //includeBuild("E:\\Dev\\Projects\\java\\gdx-teavm") {
 //    dependencySubstitution {
 //        substitute(module("com.github.xpenatan.gdx-teavm:backend-teavm")).using(project(":backends:backend-teavm"))

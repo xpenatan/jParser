@@ -4,7 +4,6 @@ import com.github.xpenatan.jparser.builder.BuildConfig;
 import com.github.xpenatan.jparser.builder.DefaultBuildTarget;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
-import static com.github.xpenatan.jparser.builder.BuildTarget.isWindows;
 
 // Test Target
 @Deprecated
@@ -55,14 +54,8 @@ public class EmscriptenLibTarget extends DefaultBuildTarget {
     }
 
     @Override
-    protected boolean build(BuildConfig config) {
-        CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
-        if(childTarget.exists()) {
-            childTarget.delete();
-        }
-        childTarget.mkdirs();
-
-        CustomFileDescriptor jsglueDir = config.sourceDir.child("jsglue");
+    protected boolean build(BuildConfig config, CustomFileDescriptor buildTargetTemp) {
+        CustomFileDescriptor jsglueDir = config.buildSourceDir.child("jsglue");
         if(!jsglueDir.exists()) {
             jsglueDir.mkdirs();
         }
@@ -88,6 +81,6 @@ public class EmscriptenLibTarget extends DefaultBuildTarget {
         linkerFlags.add("-s");
         linkerFlags.add("EXPORT_NAME='" + libName + "'");
         cppFlags.add("-c");
-        return super.build(config);
+        return super.build(config, buildTargetTemp);
     }
 }

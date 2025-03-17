@@ -15,16 +15,14 @@ import java.util.Optional;
  */
 public class JParserItem {
     public CompilationUnit unit;
-    public String inputPath;
     public final String destinationBaseDir;
     public String packagePathName;
     public String className = "";
     public boolean notAllowed;
     public boolean isIDL;
 
-    public JParserItem(CompilationUnit unit, String inputPath, String destinationBaseDir) {
+    public JParserItem(CompilationUnit unit, String destinationBaseDir) {
         this.unit = unit;
-        this.inputPath = inputPath;
         this.destinationBaseDir = destinationBaseDir;
         List<EnumDeclaration> allEnum = unit.findAll(EnumDeclaration.class);
         List<ClassOrInterfaceDeclaration> all = unit.findAll(ClassOrInterfaceDeclaration.class);
@@ -32,7 +30,7 @@ public class JParserItem {
         if(all.size() > 0) {
             className = all.get(0).getNameAsString();
             String packageName = unit.getPackageDeclaration().get().getNameAsString();
-            this.packagePathName = packageName.replace(".", File.separator);
+            this.packagePathName = packageName.replace(".", "/");
         }
         //TODO support enum
 //        else if(allEnum.size() > 0) {

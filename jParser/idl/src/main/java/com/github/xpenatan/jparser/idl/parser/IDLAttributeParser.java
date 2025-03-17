@@ -33,7 +33,7 @@ public class IDLAttributeParser {
         MethodDeclaration containsGetMethod = containsGetMethod(classOrInterfaceDeclaration, idlAttribute);
 
         String attributeName = idlAttribute.name;
-        String attributeType = idlAttribute.type;
+        String attributeType = idlAttribute.getJavaType();
 
         attributeType = IDLHelper.convertEnumToInt(idlParser.idlReader, attributeType);
 
@@ -42,8 +42,8 @@ public class IDLAttributeParser {
             type = StaticJavaParser.parseType(attributeType);
         }
         catch(Exception e) {
-            e.printStackTrace();
-            return;
+            System.err.println("Type error: " + attributeType);
+            throw e;
         }
 
         JParserItem parserUnitItem = jParser.getParserUnitItem(type.toString());
@@ -94,15 +94,20 @@ public class IDLAttributeParser {
             if(getMethodDeclaration != null) {
                 getMethodDeclaration.remove();
             }
-            String getMethodName = attributeName;
+            String getMethodName = ATTRIBUTE_PREFIX_GET + attributeName;
             getMethodDeclaration = classOrInterfaceDeclaration.addMethod(getMethodName, Modifier.Keyword.PUBLIC);
             getMethodDeclaration.setStatic(idlAttribute.isStatic);
+
+            if(idlAttribute.isArray) {
+                getMethodDeclaration.addAndGetParameter("int", "index");
+            }
+
             getMethodDeclaration.setType(type);
             JParserHelper.addMissingImportType(jParser, unit, type);
             IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, type, getMethodDeclaration);
 
             if(idlParser.generateClass) {
-                setupAttributeMethod(idlParser, jParser, idlAttribute, false, classOrInterfaceDeclaration, getMethodDeclaration, ATTRIBUTE_PREFIX_GET + getMethodName);
+                setupAttributeMethod(idlParser, jParser, idlAttribute, false, classOrInterfaceDeclaration, getMethodDeclaration, getMethodName);
             }
         }
 
@@ -114,27 +119,30 @@ public class IDLAttributeParser {
             if(setMethodDeclaration != null) {
                 setMethodDeclaration.remove();
             }
-            String setMethodName = attributeName;
+            String setMethodName = ATTRIBUTE_PREFIX_SET + attributeName;
             setMethodDeclaration = classOrInterfaceDeclaration.addMethod(setMethodName, Modifier.Keyword.PUBLIC);
             setMethodDeclaration.setStatic(idlAttribute.isStatic);
+            if(idlAttribute.isArray) {
+                setMethodDeclaration.addAndGetParameter("int", "index");
+            }
             Parameter parameter = setMethodDeclaration.addAndGetParameter(type, attributeName);
             Type paramType = parameter.getType();
             JParserHelper.addMissingImportType(jParser, unit, paramType);
 
             if(idlParser.generateClass) {
-                setupAttributeMethod(idlParser, jParser, idlAttribute, true, classOrInterfaceDeclaration, setMethodDeclaration, ATTRIBUTE_PREFIX_SET + setMethodName);
+                setupAttributeMethod(idlParser, jParser, idlAttribute, true, classOrInterfaceDeclaration, setMethodDeclaration, setMethodName);
             }
         }
     }
 
     private static void setupAttributeMethod(IDLDefaultCodeParser idlParser, JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName) {
-        boolean isValue = idlAttribute.isValue;
-        boolean addCopyParam = false;
-        if(isValue && !isSet) {
-            //  When it's a get attribute method we pass a temp c++ object to copy to the returned temp c++ object.
+        IDLMethodParser.NativeMethodData methodData = new IDLMethodParser.NativeMethodData();
+        methodData.isStatic = idlAttribute.isStatic;
+        if(idlAttribute.idlClassOrEnum != null && idlAttribute.idlClassOrEnum.isClass()) {
+            IDLClass aClass = idlAttribute.idlClassOrEnum.asClass();
+            methodData.isNoDelete = aClass.classHeader.isNoDelete;
         }
-        isValue = false;
-        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(idlAttribute.isStatic, isValue, classDeclaration, methodDeclaration, methodName, "");
+        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(methodData, classDeclaration, methodDeclaration, methodName, "", null);
         if(nativeMethod != null) {
             idlParser.onIDLAttributeGenerated(jParser, idlAttribute, isSet, classDeclaration, methodDeclaration, nativeMethod);
         }
@@ -143,8 +151,6 @@ public class IDLAttributeParser {
     public static boolean shouldSkipMethod(MethodDeclaration containsMethod) {
         if(containsMethod != null) {
             boolean isNative = containsMethod.isNative();
-            boolean isStatic = containsMethod.isStatic();
-            boolean containsBlockComment = false;
             Optional<Comment> optionalComment = containsMethod.getComment();
             if(optionalComment.isPresent()) {
                 Comment comment = optionalComment.get();
@@ -181,8 +187,8 @@ public class IDLAttributeParser {
 
     private static MethodDeclaration containsSetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
         String[] paramTypes = new String[1];
-        paramTypes[0] = idlAttribute.type;
-        String methodName = idlAttribute.name;
+        paramTypes[0] = idlAttribute.getJavaType();
+        String methodName = ATTRIBUTE_PREFIX_SET + idlAttribute.name;
         List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
 
         if(methods.size() > 0) {
@@ -193,7 +199,7 @@ public class IDLAttributeParser {
 
     private static MethodDeclaration containsGetMethod(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLAttribute idlAttribute) {
         String[] paramTypes = new String[0];
-        String methodName = idlAttribute.name;
+        String methodName = ATTRIBUTE_PREFIX_GET + idlAttribute.name;
         List<MethodDeclaration> methods = classOrInterfaceDeclaration.getMethodsBySignature(methodName, paramTypes);
 
         if(methods.size() > 0) {

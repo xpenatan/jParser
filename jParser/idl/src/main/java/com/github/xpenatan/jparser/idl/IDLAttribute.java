@@ -5,8 +5,8 @@ package com.github.xpenatan.jparser.idl;
  */
 public class IDLAttribute {
     public IDLFile idlFile;
-    public String line;
-    public String type;
+    public IDLLine idlLine;
+    public String idlType;
     public String name;
     public boolean skip = false;
     public boolean isAny = false;
@@ -15,51 +15,48 @@ public class IDLAttribute {
     public boolean isConst = false;
     public boolean isValue = false;
     public boolean isArray = false;
+    public IDLClassOrEnum idlClassOrEnum;
 
     public IDLAttribute(IDLFile idlFile) {
         this.idlFile = idlFile;
     }
 
-    public void initAttribute(String line) {
-        this.line = line;
+    public void initAttribute(IDLLine idlLine) {
+        this.idlLine = idlLine;
+        String line = idlLine.line;
 
         String[] split = line.split("attribute");
         String leftSide = split[0].trim();
         String rightSide = split[1].trim();
         String[] rightSlideSplit = rightSide.split(" ");
         String name = rightSlideSplit[rightSlideSplit.length-1];
-        type = rightSide.replace(name, "").trim();
+        idlType = rightSide.replace(name, "").trim();
         this.name = name.replace(";", "").trim();
 
         if(leftSide.contains("static")) {
             isStatic = true;
         }
-        if(leftSide.contains("[Value]")) {
-            isValue = true;
-        }
-        if(leftSide.contains("[Const]")) {
-            isConst = true;
+
+        String tagsStr = IDLHelper.getTags(leftSide);
+        if(!tagsStr.isEmpty()) {
+            if(tagsStr.contains("Value")) {
+                isValue = true;
+            }
+            if(leftSide.contains("Const")) {
+                isConst = true;
+            }
         }
         if(leftSide.contains("readonly")) {
             isReadOnly = true;
         }
 
-
-        if(type.contains("[]")) {
+        if(idlType.contains("[]")) {
             isArray = true;
-            type = type.replace("[]", "").trim();
-            type = type+"[]";
+            idlType = idlType.replace("[]", "").trim();
+            idlType = idlType + "[]";
         }
 
-        if(type.endsWith("long") || type.endsWith("long[]")) {
-            type = type.replace("long", "int");
-        }
-
-        if(type.contains("unsigned")) {
-            type = type.replace("unsigned", "").trim();
-        }
-
-        if(type.equals("any")) {
+        if(idlType.equals("any")) {
             isAny = true;
         }
 
@@ -67,5 +64,20 @@ public class IDLAttribute {
             //TODO improve
             skip = true;
         }
+    }
+
+    public String getCPPType() {
+        //Attributes don't set/get arrays so we remove it
+        String fullType = idlType;
+        if(idlClassOrEnum != null && idlClassOrEnum.isClass()) {
+            IDLClass aClass = idlClassOrEnum.asClass();
+            fullType = aClass.getCPPName();
+        }
+        return IDLHelper.getCPPReturnType(fullType).replace("[]", "");
+    }
+
+    public String getJavaType() {
+        //Attributes don't set/get arrays so we remove it
+        return IDLHelper.getJavaType(false, idlType).replace("[]", "");
     }
 }

@@ -1,0 +1,251 @@
+// NOTE:
+// * Emscripten webidl does not support [Value] object passed by parameter. Better to pass it as [Ref]
+// * [BUG] Emscripten may give runtime errors if string is not at the same order in a overloading method or constructor parameter.
+//   See: TestStringConstructorClass.
+//   Error: VM41:980 Invalid UTF-8 leading byte 0x000000fe encountered when deserializing a UTF-8 string in wasm memory to a JS string!
+// * Emscripten WebIDL does not support overloading method/constructor with different types at the same parameter size.
+//   Ex: void myMethod(float param1, boolean param2) and void myMethod(boolean param1, float param2) will not compile.
+//   It needs to be at the same order if both have the same parameter size.
+//   TestConstructorClass works because it have different parameter size. From the [BUG] above, don't use string or it will fail at runtime.
+// * Arrays parameters for example "void method(int[] array)" is converted to IDLIntArray class object behind the scene because interacting with array is better using native code.
+//   For custom types is better to use 'using' alias. See TestObjectClassArray in CustomCode.h
+// * Array get_ shape the same object for every index. Don't keep object reference.
+// * Emscripten WebIDL callbacks don't work with overloaded methods so its better to use _[N] at the end of the method
+// * Emscripten class methods don't work with overloaded methods with different parameter order so its better to use _[N] at the end of the method
+
+interface TestObjectClass {
+    void TestObjectClass();
+    attribute long intValue01;
+    attribute float floatValue01;
+};
+
+interface TestObjectClassArray {
+    void TestObjectClassArray(long size);
+    void resize(long size);
+    void clear();
+    TestObjectClass getValue(long index);
+    void setValue(long index, TestObjectClass value);
+    long getSize();
+    any getPointer();
+};
+
+interface TestConstructorClass {
+    readonly attribute long intValue01;
+    readonly attribute long intValue02;
+    readonly attribute float floatValue01;
+    readonly attribute float floatValue02;
+    readonly attribute boolean boolValue01;
+
+    void TestConstructorClass(long intValue01);
+    void TestConstructorClass(float floatValue, long intValue01);
+    void TestConstructorClass(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
+    void TestConstructorClass(long intValue01, long[] intArray, float[] floatArray);
+};
+
+interface TestStringConstructorClass {
+    readonly attribute long intValue01;
+    [Value] readonly attribute IDLString strValue01;
+
+    void TestStringConstructorClass([Const] DOMString strValue01);
+    void TestStringConstructorClass([Const] DOMString strValue01, long intValue01);
+    void TestStringConstructorClass([Const] DOMString strValue01, float floatValue01, long intValue01);
+};
+
+interface TestAttributeClass {
+    void TestAttributeClass();
+    readonly attribute long readOnlyIntValue01;
+    attribute long intValue01;
+    attribute float floatValue01;
+    attribute double doubleValue01;
+    attribute boolean boolValue01;
+    [Value] attribute IDLString strValue01;
+    attribute any voidPointer01;
+    [Value] attribute TestObjectClass valueObject;
+    attribute TestObjectClass pointerObject;
+    attribute TestObjectClass nullPointerObject;
+};
+
+[NoDelete]
+interface TestStaticAttributeClass {
+    static attribute long staticIntValue01;
+    static readonly attribute long staticConstIntValue01;
+    static attribute float staticFloatValue01;
+    static attribute double staticDoubleValue01;
+    static attribute boolean staticBoolValue01;
+};
+
+interface TestAttributeArrayClass {
+    void TestAttributeArrayClass();
+    [BoundsChecked] attribute long[] intArray;
+    attribute float[] floatArray;
+    attribute byte[] byteArray;
+    attribute boolean[] boolArray;
+    [Value] attribute TestObjectClass[] valueObjectArray;
+    attribute TestObjectClass[] pointerObjectArray;
+};
+
+interface TestMethodClass {
+    void TestMethodClass();
+    void TestMethodClass([Const] DOMString strValue01);
+    void setMethod01(long intValue01);
+    void setMethod02(float floatValue01, boolean boolValue01);
+    void setMethod03(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
+    void setMethod04(long intValue01, long[] intArray, float[] floatArray);
+    void setMethod05([Const] DOMString strValue01);
+    void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
+    void setMethod07(TestObjectClass pointerObjectArray);
+    void setMethod08(long long longLongValue01);
+
+    long getIntValue01();
+    long getIntValue02();
+    float getFloatValue01();
+    float getFloatValue02();
+    float getBoolValue01();
+    [Const, Value] IDLStringView getStrValue01();
+    [Const, Ref] IDLString getRefStrValue01();
+    [Const] TestObjectClass getPointerObject01();
+    TestObjectClass getPointerObject02();
+    [Const, Ref] TestObjectClass getRefObject01();
+    [Ref] TestObjectClass getRefObject02();
+    [Value] TestObjectClass getValueObject();
+    long long getLongLongValue01();
+};
+
+[NoDelete]
+interface TestStaticMethodClass {
+    static void setMethod01(long intValue01);
+    static void setMethod02(float floatValue01, boolean boolValue01);
+    static void setMethod03(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
+    static void setMethod04(long intValue01, long[] intArray, float[] floatArray);
+    static void setMethod05([Const] DOMString strValue01);
+    static void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
+
+    static long getIntValue01();
+    static long getIntValue02();
+    static float getFloatValue01();
+    static float getFloatValue02();
+    static float getBoolValue01();
+    [Const, Value] static IDLStringView getStrValue01();
+    [Const] static TestObjectClass getPointerObject01();
+    static TestObjectClass getPointerObject02();
+    [Const, Ref] static TestObjectClass getRefObject01();
+    [Ref] static TestObjectClass getRefObject02();
+    [Value] static TestObjectClass getValueObject();
+};
+
+interface CallbackClass {
+    long addInt(long a, long b);
+};
+
+interface CallbackClassManual {
+    long addInt(long a, long b);
+};
+
+[JSImplementation="CallbackClass"]
+interface CallbackClassImpl {
+    void CallbackClassImpl();
+
+    [Const] void onVoidCallback([Ref] TestObjectClass refData, TestObjectClass pointerData);
+    [Const] long onIntCallback(long intValue01, long intValue02);
+    [Const] float onFloatCallback(float floatValue01, float floatValue02);
+    [Const] boolean onBoolCallback(boolean boolValue01);
+    [Const] void onStringCallback([Const] DOMString strValue01);
+    unsigned long onUnsignedIntCallback(unsigned long unsignedInt);
+    [Const] unsigned short onUnsignedShortCallback(unsigned short unsignedShort);
+    [Const] void onAnyCallback_1(any anyPtr);
+    [Const] void onAnyCallback_2(any anyPtr, long value);
+    [Const] void onLongLongValue(unsigned long long longLongValue);
+};
+CallbackClassImpl implements CallbackClass;
+
+[JSImplementation="CallbackClassManual"]
+interface CallbackClassManualImpl {
+    void CallbackClassManualImpl();
+
+    [Const] void onVoidCallback([Ref] TestObjectClass refData, TestObjectClass pointerData);
+    [Const] long onIntCallback(long intValue01, long intValue02);
+    [Const] float onFloatCallback(float floatValue01, float floatValue02);
+    [Const] boolean onBoolCallback(boolean boolValue01);
+    [Const] void onStringCallback([Const] DOMString strValue01);
+};
+CallbackClassManualImpl implements CallbackClassManual;
+
+interface DefaultCallbackClass : CallbackClass {
+    void DefaultCallbackClass();
+};
+
+//[JSImplementation="DefaultCallbackClass"]
+//interface DefaultCallbackClassImpl {
+//    void DefaultCallbackClassImpl();
+//
+//    [Const] long onIntCallback(long intValue01, long intValue02);
+//};
+//DefaultCallbackClassImpl implements DefaultCallbackClass;
+
+interface TestCallbackClass {
+    void TestCallbackClass();
+
+    attribute long intValue01;
+    attribute long intValue02;
+    attribute float floatValue01;
+    attribute float floatValue02;
+    attribute boolean boolValue01;
+    [Value] attribute IDLString strValue01;
+    [Value] attribute TestObjectClass valueObject;
+    attribute TestObjectClass pointerObject;
+
+    void callVoidCallback(CallbackClass callback);
+    long callIntCallback(CallbackClass callback);
+    float callFloatCallback(CallbackClass callback);
+    boolean callBoolCallback(CallbackClass callback);
+    void callStringCallback(CallbackClass callback);
+    unsigned long callUnsignedIntCallback(CallbackClass callback);
+    unsigned short callUnsignedShortCallback(CallbackClass callback);
+
+    void callManualVoidCallback(CallbackClassManual callback);
+    long callManualIntCallback(CallbackClassManual callback);
+    float callManualFloatCallback(CallbackClassManual callback);
+    boolean callManualBoolCallback(CallbackClassManual callback);
+    void callManualStringCallback(CallbackClassManual callback);
+};
+
+[Prefix="TestNamespace::"]
+interface TestNamespaceClass { //[-SUB_PACKAGE=core.sub]
+    attribute long intValue01;
+    void TestNamespaceClass();
+    void setMethod01Value(long intValue01);
+    long getMethod01Value();
+};
+
+interface TestOperatorClass { //[-SUB_PACKAGE=core.op]
+    void TestOperatorClass();
+    void TestOperatorClass(float value);
+    [Operator="+", Value] TestOperatorClass addValue([Const, Ref] TestOperatorClass other);
+    [Operator="-", Value] TestOperatorClass subValue([Const, Ref] TestOperatorClass other);
+    [Operator="*", Value] TestOperatorClass mulValue([Const, Ref] TestOperatorClass other);
+    [Operator="/", Value] TestOperatorClass divValue([Const, Ref] TestOperatorClass other);
+    [Operator="+=", Ref] TestOperatorClass addRef([Const, Ref] TestOperatorClass other);
+    [Operator="-=", Ref] TestOperatorClass subRef([Const, Ref] TestOperatorClass other);
+    [Operator="*=", Ref] TestOperatorClass mulRef([Const, Ref] TestOperatorClass other);
+    [Operator="/=", Ref] TestOperatorClass divRef([Const, Ref] TestOperatorClass other);
+    float getValue();
+    void setValue(float val);
+};
+
+enum TestEnumWithinClass { //[-SUB_PACKAGE=core.enums]
+    "TestEnumClass::e_val"
+};
+
+enum TestEnumClassWithinClass {
+    "TestEnumClassWithinClass::testEnum"
+};
+
+enum TestEnumInNamespace {
+    "TestEnumInNamespace::e_namespace_val"
+};
+
+enum TestEnumLib {
+    "TEST_DEFAULT",
+    "TEST_FIRST",
+    "TEST_SECOND"
+};

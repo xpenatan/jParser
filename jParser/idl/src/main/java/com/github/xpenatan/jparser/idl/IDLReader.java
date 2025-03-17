@@ -61,15 +61,44 @@ public class IDLReader {
         return null;
     }
 
-    public static IDLReader readIDL(String idlDir) {
-        IDLReader reader = new IDLReader();
-        try {
-            idlDir = new File(idlDir).getCanonicalPath() + File.separator;
-        } catch(IOException e) {
-            throw new RuntimeException("IDL file not found: " + idlDir);
+    public IDLClassOrEnum getClassOrEnum(String name) {
+        for(int i = 0; i < fileArray.size(); i++) {
+            IDLFile idlFile = fileArray.get(i);
+            IDLClass idlClass = idlFile.getClass(name);
+            if(idlClass != null) {
+                return idlClass;
+            }
+            IDLEnum idlEnum = idlFile.getEnum(name);
+            if(idlEnum != null) {
+                return idlEnum;
+            }
         }
-        IDLFile idlFile = parseFile(idlDir);
-        reader.fileArray.add(idlFile);
+        return null;
+    }
+
+    public ArrayList<IDLClassOrEnum> getAllClasses() {
+        ArrayList<IDLClassOrEnum> classes = new ArrayList<>();
+        for(int i = 0; i < fileArray.size(); i++) {
+            IDLFile idlFile = fileArray.get(i);
+            classes.addAll(idlFile.classArray);
+        }
+        return classes;
+    }
+
+    public static IDLReader readIDL(String ...idlDirs) {
+        IDLReader reader = new IDLReader();
+
+        for(int i = 0; i < idlDirs.length; i++) {
+            String idlDir = idlDirs[i];
+            try {
+                idlDir = new File(idlDir).getCanonicalPath() + File.separator;
+                IDLFile idlFile = parseFile(idlDir);
+                reader.fileArray.add(idlFile);
+            } catch(IOException e) {
+                throw new RuntimeException("IDL file not found: " + idlDir);
+            }
+        }
+
         return reader;
     }
 
@@ -81,15 +110,6 @@ public class IDLReader {
         }
         IDLFile idlFile = parseFile(idlDir);
         reader.fileArray.add(idlFile);
-    }
-
-    public static IDLReader readIDL(ArrayList<String> idlDirs) {
-        IDLReader reader = new IDLReader();
-        for(String idlDir : idlDirs) {
-            IDLFile idlFile = parseFile(idlDir);
-            reader.fileArray.add(idlFile);
-        }
-        return reader;
     }
 
     public static IDLFile parseFile(String path) {
@@ -138,12 +158,11 @@ public class IDLReader {
         ArrayList<String> settings = new ArrayList<>();
         int size = idlFile.lines.size();
         for(int i = 0; i < size; i++) {
-            String line = idlFile.lines.get(i).trim();
-            String nextLine = "";
-            if(i+1 < size) {
-                nextLine = idlFile.lines.get(i+1).trim();
-            }
-            if(line.startsWith("//") || line.isEmpty()) {
+            String originalLine = idlFile.lines.get(i).trim();
+            String line = removeComment(originalLine);
+            String nextLine = getNextLine(idlFile.lines, i);
+
+            if(line.isEmpty()) {
                 if(foundStartClass || foundStartEnum) {
                     String cmd = line.replace("//", "").trim();
                     if(cmd.startsWith("[-") && cmd.endsWith("]")) {
@@ -163,7 +182,7 @@ public class IDLReader {
             }
 
             if(foundStartEnum) {
-                classLines.add(line);
+                classLines.add(originalLine);
 
                 if(line.endsWith("};")) {
                     foundStartEnum = false;
@@ -181,21 +200,18 @@ public class IDLReader {
                     foundStartClass = true;
                     classLines.clear();
                     justAdded = true;
-                    classLines.add(line);
+                    classLines.add(originalLine);
                 }
             }
             if(foundStartClass) {
                 if(!justAdded) {
-                    classLines.add(line);
+                    classLines.add(originalLine);
                 }
                 if(line.endsWith("};")) {
-                    int nextLineIdx = i + 1;
-                    if(nextLineIdx < size) {
-                        String nextL = idlFile.lines.get(nextLineIdx);
-                        if(nextL.contains(" implements ")) {
-                            classLines.add(nextL.trim());
-                            i++; // add i so nextLine is not skipped on next loop
-                        }
+                    String nextL = getNextLine(idlFile.lines, i);;
+                    if(nextL.contains(" implements ")) {
+                        classLines.add(nextL.trim());
+                        i++; // add i so nextLine is not skipped on next loop
                     }
                     foundStartClass = false;
                     IDLClass parserLineClass = new IDLClass(idlFile);
@@ -207,5 +223,84 @@ public class IDLReader {
                 }
             }
         }
+    }
+
+    public static void setupClasses(IDLReader idlReader) {
+        ArrayList<IDLClassOrEnum> classList = idlReader.getAllClasses();
+        configClassType(idlReader, classList);
+        configCallbacks(idlReader, classList);
+    }
+
+    private static void configClassType(IDLReader idlReader, ArrayList<IDLClassOrEnum> classList) {
+        // Setup all attributes and parameters type
+        for(int i = 0; i < classList.size(); i++) {
+            IDLClassOrEnum idlClassOrEnum = classList.get(i);
+            if(idlClassOrEnum.isClass()) {
+                IDLClass idlClass = idlClassOrEnum.asClass();
+                for(IDLAttribute attribute : idlClass.attributes) {
+                    String idlType = attribute.idlType;
+                    IDLClassOrEnum childClassOrEnum = idlReader.getClassOrEnum(idlType);
+                    attribute.idlClassOrEnum = childClassOrEnum;
+                }
+                for(IDLMethod method : idlClass.methods) {
+                    for(IDLParameter parameter : method.parameters) {
+                        String idlType = parameter.idlType;
+                        IDLClassOrEnum childClassOrEnum = idlReader.getClassOrEnum(idlType);
+                        parameter.idlClassOrEnum = childClassOrEnum;
+                    }
+                    String returnType = method.returnType;
+                    IDLClassOrEnum childClassOrEnum = idlReader.getClassOrEnum(returnType);
+                    method.returnClassType = childClassOrEnum;
+                }
+            }
+        }
+    }
+
+    private static void configCallbacks(IDLReader idlReader, ArrayList<IDLClassOrEnum> classList) {
+        for(int i = 0; i < classList.size(); i++) {
+            IDLClassOrEnum idlClassOrEnum = classList.get(i);
+            if(idlClassOrEnum.isClass()) {
+                IDLClass idlCallbackImpl = idlClassOrEnum.asClass();
+                String jsImplementation = idlCallbackImpl.classHeader.jsImplementation;
+                if(jsImplementation != null) {
+                    jsImplementation = jsImplementation.trim();
+                    if(!jsImplementation.isEmpty()) {
+                        IDLClass callbackClass = idlReader.getClass(jsImplementation);
+                        if(callbackClass != null) {
+                            if(callbackClass.callbackImpl == null) {
+                                callbackClass.callbackImpl = idlCallbackImpl;
+                                callbackClass.isCallback = true;
+                            }
+                            else {
+                                throw new RuntimeException("Class " + callbackClass.name + " cannot have multiple JSImplementation");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static String removeComment(String line) {
+        int commentIndex = line.indexOf("//");
+        if(commentIndex != -1) {
+            line = line.substring(0, commentIndex);
+            line = line.trim();
+        }
+        return line;
+    }
+
+    private static String getNextLine(ArrayList<String> lines, int index) {
+        String nextLine = "";
+        int size = lines.size();
+        if(index + 1 < size) {
+            nextLine = lines.get(index+1).trim();
+            nextLine = removeComment(nextLine);
+            if(nextLine.isEmpty() && index + 2 < size) {
+                nextLine = lines.get(index+2).trim();
+                nextLine = removeComment(nextLine);
+            }
+        }
+        return nextLine;
     }
 }

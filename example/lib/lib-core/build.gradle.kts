@@ -1,13 +1,14 @@
 plugins {
     id("java")
+    id("java-library")
 }
 
 dependencies {
     if(LibExt.exampleUseRepoLibs) {
-        implementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
+        api("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
     }
     else {
-        implementation(project(":jParser:loader:loader-core"))
+        api(project(":jParser:loader:loader-core"))
     }
 }
 

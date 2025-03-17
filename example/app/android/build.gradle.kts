@@ -7,12 +7,11 @@ group = "jparser.app.android"
 
 android {
     namespace = "com.example.myapplication"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.myapplication"
         minSdk = 24
-        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
     }

@@ -9,15 +9,21 @@ import java.util.ArrayList;
 
 public class EmscriptenTarget extends DefaultBuildTarget {
 
-    public static boolean SKIP_GLUE_CODE;
-    public final static String EMSCRIPTEN_ROOT = System.getenv("EMSDK") + "/upstream/emscripten/";
+    public static boolean SKIP_GLUE_CODE = false;
+    public final static String EMSCRIPTEN_ROOT = (System.getenv("EMSDK") + "/upstream/emscripten/").replace("\\", "/").replace("//", "/");
 
     public IDLReader idlReader;
+
+    public static boolean DEBUG_BUILD = false;
+    public static boolean IS_WASM = true;
 
     public boolean isStatic = false;
     public boolean compileGlueCode = true;
 
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
+
+    public long initialMemory = 64 * 1024 * 1024;
+    public long stackSize = 1048576;
 
     public EmscriptenTarget() {
         this(null);
@@ -38,35 +44,40 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         cppCompiler.add(cppCompilerr);
         linkerCompiler.add(cppCompilerr);
 
-        libSuffix = ".wasm.js";
+        if(IS_WASM) {
+            libSuffix = ".wasm.js";
+        }
+        else {
+            libSuffix = ".js";
+        }
 
         cppFlags.add("-c");
         cppFlags.add("-std=c++17");
-        cppFlags.add("-Os");
-        cppFlags.add("-g0");
+
+        if(DEBUG_BUILD) {
+            cppFlags.add("-O0");
+            cppFlags.add("-g2");
+        }
+        else {
+            cppFlags.add("-O3");
+        }
     }
 
     @Override
-    protected boolean build(BuildConfig config) {
+    protected boolean build(BuildConfig config, CustomFileDescriptor buildTargetTemp) {
         String libName = this.libName;
         if(libName.isEmpty()) {
             libName = config.libName;
         }
 
-        CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
-        if(childTarget.exists()) {
-            childTarget.delete();
-        }
-        childTarget.mkdirs();
-
-        CustomFileDescriptor jsglueDir = config.sourceDir.child("jsglue");
+        CustomFileDescriptor jsglueDir = config.buildSourceDir.child("jsglue");
         if(!jsglueDir.exists()) {
             jsglueDir.mkdirs();
         }
 
         if(compileGlueCode && !isStatic) {
             cppInclude.add("**/jsglue/*.cpp");
-            copyHelperClass(jsglueDir);
+            headerDirs.add("-include" + idlHelperHFile.path());
         }
 
         if(idlReader != null) {
@@ -86,11 +97,10 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
             linkerCompiler.add(cppCompilerr);
             linkerFlags.add("rcs");
-            libSuffix = ".a";
+            libSuffix = "_.a";
         }
         else {
             String postPath = createPostJS(jsglueDir, libName);
-            long initialMemory = 64 * 1024 * 1024;
             linkerFlags.add("--llvm-lto");
             linkerFlags.add("1");
             linkerFlags.add("-s");
@@ -104,11 +114,29 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("-s");
             linkerFlags.add("INITIAL_MEMORY=" + initialMemory);
             linkerFlags.add("-s");
+            linkerFlags.add("STACK_SIZE=" + stackSize);
+            linkerFlags.add("-s");
             linkerFlags.add("EXPORTED_FUNCTIONS=['_free','_malloc']");
             linkerFlags.add("-s");
             linkerFlags.add("EXPORTED_RUNTIME_METHODS=['UTF8ToString']");
-            linkerFlags.add("-s");
-            linkerFlags.add("WASM=1");
+            if(DEBUG_BUILD) {
+                linkerFlags.add("-s");
+                linkerFlags.add("ASSERTIONS=1");
+                linkerFlags.add("-s");
+                linkerFlags.add("SAFE_HEAP=1");
+            }
+            if(IS_WASM) {
+                linkerFlags.add("-s");
+                linkerFlags.add("WASM=1");
+                linkerFlags.add("-s");
+
+                // Disable big int because of conversion bug
+                linkerFlags.add("WASM_BIGINT=0");
+            }
+            else {
+                linkerFlags.add("-s");
+                linkerFlags.add("WASM=0");
+            }
             linkerFlags.add("-s");
             linkerFlags.add("SINGLE_FILE=1");
 
@@ -120,7 +148,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("EXPORT_NAME='" + libName + "'");
         }
 
-        return super.build(config);
+        return super.build(config, buildTargetTemp);
     }
 
     @Override
@@ -157,14 +185,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         generateGlueCommand.add(mergedIDLFile.toString());
         generateGlueCommand.add("glue");
         return JProcess.startProcess(jsglueDir.file(), generateGlueCommand);
-    }
-
-    private void copyHelperClass(CustomFileDescriptor jsglueDir) {
-        // Copy IDLHelper from base module.
-        CustomFileDescriptor idlHelperCPP = new CustomFileDescriptor("IDLHelper.h", CustomFileDescriptor.FileType.Classpath);
-        idlHelperCPP.copyTo(jsglueDir, false);
-        CustomFileDescriptor cppFile = jsglueDir.child(idlHelperCPP.name());
-        headerDirs.add("-include" + cppFile.path());
     }
 
     private CustomFileDescriptor mergeIDLFile(CustomFileDescriptor jsglueDir) {

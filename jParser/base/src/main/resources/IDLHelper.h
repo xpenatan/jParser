@@ -1,147 +1,58 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <stddef.h>     // NULL
 #include <stdint.h>     // intptr_t
+#include <algorithm>
+#include <assert.h>
+
+template<typename T>
+class IDLArray {
+    private:
+        int size;
+        T* data;
+
+        void deleteData() { delete[] data; data = nullptr; }
+    public:
+        IDLArray(int size) : size(0), data(nullptr) { resize(size); }
+        ~IDLArray() { deleteData(); }
+        void resize(int newSize) {
+            if(newSize > 0 && size != newSize) {
+                T* newData = new T[newSize];
+                if (data != nullptr) {
+                    deleteData(); // Delete the old array
+                }
+                data = newData; // Update the data pointer
+                size = newSize; // Update the size
+                clear();
+            }
+        }
+        void clear() {
+            std::fill(data, data + size, T());
+        }
+        void copy(IDLArray<T>& src, int srcPos, int destPos, int length) {
+            assert(!(srcPos < 0 || destPos < 0 || length < 0 || srcPos + length > src.size || destPos + length > size));
+            std::copy(src.data + srcPos, src.data + srcPos + length, data + destPos);
+        }
+        T getValue(int index) {
+            assert(!(index < 0 || index >= size));
+            return data[index];
+         }
+        void setValue(int index, T value) {
+            assert(!(index < 0 || index >= size));
+            data[index] = value;
+        }
+        int getSize() { return size; }
+        void* getPointer() { return (void*)data; }
+        T* getData() { return data; }
+};
 
 typedef std::string IDLString;
-
-class IDLBoolArray {
-    private:
-        int size;
-    public:
-        bool * data;
-        IDLBoolArray(int size) { data = NULL; resize(size); }
-        ~IDLBoolArray() { if(data != NULL) { deleteData(); } }
-        void resize(int newSize) {
-            if(this->data != NULL) {
-                deleteData();
-            }
-            bool * newData = new bool[newSize];
-            this->data = newData;
-            size = newSize;
-            clear();
-        }
-        void clear() {
-            for(int i = 0; i < size; i++) {
-                data[i] = 0;
-            }
-        }
-        void deleteData() { delete data; }
-        bool getValue(int index) { return data[index]; }
-        void setValue(int index, bool value) { data[index] = value; }
-        intptr_t getPointer() { return (intptr_t)data; }
-        int getSize() { return size; }
-};
-
-class IDLIntArray {
-    private:
-        int size;
-    public:
-        int * data;
-        IDLIntArray(int size) { data = NULL; resize(size); }
-        ~IDLIntArray() { if(data != NULL) { deleteData(); } }
-        void resize(int newSize) {
-            if(this->data != NULL) {
-                deleteData();
-            }
-            int * newData = new int[newSize];
-            this->data = newData;
-            size = newSize;
-            clear();
-        }
-        void clear() {
-            for(int i = 0; i < size; i++) {
-                data[i] = 0;
-            }
-        }
-        void deleteData() { delete data; }
-        int getValue(int index) { return data[index]; }
-        void setValue(int index, int value) { data[index] = value; }
-        intptr_t getPointer() { return (intptr_t)data; }
-        int getSize() { return size; }
-};
-
-class IDLFloatArray {
-    private:
-        int size;
-    public:
-        float * data;
-        IDLFloatArray(int size) { data = NULL; resize(size); }
-        ~IDLFloatArray() { if(data != NULL) { deleteData(); } }
-        void resize(int newSize) {
-            if(this->data != NULL) {
-                deleteData();
-            }
-            float * newData = new float[newSize];
-            this->data = newData;
-            size = newSize;
-            clear();
-        }
-        void clear() {
-            for(int i = 0; i < size; i++) {
-                data[i] = 0;
-            }
-        }
-        void deleteData() { delete data; }
-        float getValue(int index) { return data[index]; }
-        void setValue(int index, float value) { data[index] = value; }
-        intptr_t getPointer() { return (intptr_t)data; }
-        int getSize() { return size; }
-};
-
-class IDLDoubleArray {
-    private:
-        int size;
-    public:
-        double * data;
-        IDLDoubleArray(int size) { data = NULL; resize(size); }
-        ~IDLDoubleArray() { if(data != NULL) { deleteData(); } }
-        void resize(int newSize) {
-            if(this->data != NULL) {
-                deleteData();
-            }
-            double * newData = new double[newSize];
-            this->data = newData;
-            size = newSize;
-            clear();
-        }
-        void clear() {
-            for(int i = 0; i < size; i++) {
-                data[i] = 0;
-            }
-        }
-        void deleteData() { delete data; }
-        double getValue(int index) { return data[index]; }
-        void setValue(int index, double value) { data[index] = value; }
-        intptr_t getPointer() { return (intptr_t)data; }
-        int getSize() { return size; }
-};
-
-class IDLByteArray {
-    private:
-        int size;
-    public:
-        char * data;
-        IDLByteArray(int size) { data = NULL; resize(size); }
-        ~IDLByteArray() { if(data != NULL) { deleteData(); } }
-        void resize(int newSize) {
-            if(this->data != NULL) {
-                deleteData();
-            }
-            char * newData = new char[newSize];
-            this->data = newData;
-            size = newSize;
-            clear();
-        }
-        void clear() {
-            for(int i = 0; i < size; i++) {
-                data[i] = 0;
-            }
-        }
-        void deleteData() { delete data; }
-        char getValue(int index) { return data[index]; }
-        void setValue(int index, char value) { data[index] = value; }
-        intptr_t getPointer() { return (intptr_t)data; }
-        int getSize() { return size; }
-};
+typedef std::string_view IDLStringView;
+typedef IDLArray<bool> IDLBoolArray;
+typedef IDLArray<int> IDLIntArray;
+typedef IDLArray<long long> IDLLongArray;
+typedef IDLArray<float> IDLFloatArray;
+typedef IDLArray<double> IDLDoubleArray;
+typedef IDLArray<char> IDLByteArray;

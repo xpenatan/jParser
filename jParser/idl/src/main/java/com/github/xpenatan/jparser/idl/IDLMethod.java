@@ -9,17 +9,22 @@ public class IDLMethod {
     public final IDLFile idlFile;
     public final IDLClass idlClass;
 
-    public String line;
+    public IDLLine idlLine;
     public String paramsLine;
     public String returnType;
+    public IDLClassOrEnum returnClassType;
     public String name;
     public boolean isReturnArray;
     public boolean skip = false;
     public boolean isAny = false;
     public boolean isReturnRef;
     public boolean isReturnValue;
+    public boolean isReturnConst;
+    public boolean isReturnNewObject;
+    public boolean isReturnMemoryOwned;
     public boolean isStaticMethod = false;
     public String operator = "";
+    public String bindsToName = null;
 
     public final ArrayList<IDLParameter> parameters = new ArrayList<>();
 
@@ -28,53 +33,89 @@ public class IDLMethod {
         this.idlFile = idlFile;
     }
 
-    public void initMethod(String line) {
-        this.line = line;
+    public void initMethod(IDLLine idlLine) {
+        this.idlLine = idlLine;
+        String line = idlLine.line;
         paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
+        for(IDLParameter parameter : parameters) {
+            parameter.idlMethod = this;
+        }
         int index = line.indexOf("(");
         String leftSide = line.substring(0, index).trim();
+        leftSide = IDLHelper.removeMultipleSpaces(leftSide.trim());
 
-        String tagsStr = getTags(leftSide);
+        isReturnNewObject = idlLine.containsCommand(IDLLine.CMD_NEW_OBJECT);
+        isReturnMemoryOwned = !idlLine.containsCommand(IDLLine.CMD_NOT_MEM_OWN);
+
+        String tagsStr = IDLHelper.getTags(leftSide);
         if(!tagsStr.isEmpty()) {
-            isReturnRef = tagsStr.contains("Ref");
-            isReturnValue = tagsStr.contains("Value");
-            leftSide = leftSide.replace(tagsStr, "");
-
+            leftSide = leftSide.replace(tagsStr, "").trim();
             tagsStr = tagsStr.substring(1, tagsStr.length()-1);
             for(String s : tagsStr.split(",")) {
+                s = s.trim();
                 if(s.contains("Operator")) {
                     int first = s.indexOf("\"");
                     int last = s.lastIndexOf("\"");
                     operator = s.substring(first, last + 1).replace("\"", "");
                 }
+                else if(s.equals("Ref")) {
+                    isReturnRef = true;
+                }
+                else if(s.equals("Value")) {
+                    isReturnValue = true;
+                }
+                else if(s.equals("Const")) {
+                    isReturnConst = true;
+                }
+                else if(s.startsWith("BindTo")) {
+                    s = s.replace("\"", "");
+                    bindsToName = s.split("=")[1];
+                }
             }
         }
 
         if(leftSide.contains("[]")) {
-            leftSide = leftSide.replace("[]", "");
+            leftSide = leftSide.replace("[]", "").trim();
             isReturnArray = true;
         }
-        leftSide = IDLHelper.removeMultipleSpaces(leftSide.trim());
 
         if(leftSide.contains("static")) {
+            leftSide = leftSide.replace("static", "").trim();
             isStaticMethod = true;
         }
 
-        String[] s = leftSide.split(" ");
-        name = s[s.length-1];
-        returnType = s[s.length-2];
+        String[] s1 = leftSide.split(" ");
+        name = s1[s1.length-1];
 
-        if(returnType.equals("long")) {
-            returnType = "int";
+        returnType = "";
+        int sss = s1.length - 1;
+        for(int i = 0; i < sss; i++) {
+            returnType += s1[i];
+            if(i < sss-1) {
+                returnType += " ";
+            }
         }
-        if(returnType.equals("DOMString")) {
-            returnType = "String";
+
+        if(isReturnArray) {
+            returnType = returnType + "[]";
         }
 
         if(returnType.contains("any") || returnType.contains("VoidPtr")) {
             isAny = true;
-            returnType = "long";
         }
+    }
+
+    public String getCPPReturnType() {
+        String fullType = returnType;
+        if(returnClassType != null && returnClassType.isClass()) {
+            IDLClass aClass = returnClassType.asClass();
+            fullType = aClass.getCPPName();
+        }
+        return IDLHelper.getCPPReturnType(fullType);
+    }
+
+    public String getJavaReturnType() {
+        return IDLHelper.getJavaType(returnType);
     }
 
     public int getTotalOptionalParams() {
@@ -94,14 +135,34 @@ public class IDLMethod {
         }
     }
 
+    public boolean nameEquals(String value) {
+        if(bindsToName != null) {
+            if(value.equals(bindsToName)) {
+                return true;
+            }
+        }
+        else {
+            return value.equals(name);
+        }
+        return false;
+    }
+
+    public String getCPPName() {
+        if(bindsToName != null) {
+            return bindsToName;
+        }
+        return name;
+    }
+
     public IDLMethod clone() {
         IDLMethod cloned = new IDLMethod(idlClass, idlFile);
-        cloned.line = line;
+        cloned.idlLine = idlLine.copy();
         cloned.paramsLine = paramsLine;
         cloned.returnType = returnType;
         cloned.name = name;
         cloned.skip = skip;
         cloned.isAny = isAny;
+        cloned.bindsToName = bindsToName;
         cloned.isReturnValue = isReturnValue;
         cloned.isReturnArray = isReturnArray;
         cloned.isStaticMethod = isStaticMethod;
@@ -113,32 +174,6 @@ public class IDLMethod {
             cloned.parameters.add(clonedParam);
         }
         return cloned;
-    }
-
-    private String getTags(String leftSide) {
-        int startIndex = leftSide.indexOf("[");
-        int endIndex = -1;
-        if(startIndex != -1 && leftSide.startsWith("[")) {
-            int count = 0;
-            for(int i = startIndex; i < leftSide.length(); i++) {
-                char c = leftSide.charAt(i);
-                if(c == '[') {
-                    count++;
-                }
-                else if(c == ']') {
-                    count--;
-                }
-                if(count == 0) {
-                    endIndex = i;
-                    break;
-                }
-            }
-        }
-
-        if(startIndex != -1 && endIndex != -1) {
-            return leftSide.substring(startIndex, endIndex + 1);
-        }
-        return "";
     }
 
     static String setParameters(IDLFile idlFile, String line, ArrayList<IDLParameter> out) {

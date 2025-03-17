@@ -10,8 +10,8 @@ public class IDLAttributeOperation {
 
     public static Op getEnum(boolean isSet, IDLAttribute idlAttribute, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethod) {
         boolean isStatic = methodDeclaration.isStatic();
-        Type nativeReturnType = nativeMethod.getType();
         boolean isValue = idlAttribute.isValue;
+        boolean isArray = idlAttribute.isArray;
         Type returnType = methodDeclaration.getType();
         NodeList<Parameter> parameters = methodDeclaration.getParameters();
 
@@ -46,31 +46,90 @@ public class IDLAttributeOperation {
                     }
                 }
             }
-        }
-        else if(returnType.isClassOrInterfaceType()) {
-            if(isValue) {
-                if(isStatic) {
-                    return Op.GET_OBJECT_VALUE_STATIC;
+            else if(isArray) {
+                if(parameters.get(1).getType().isClassOrInterfaceType()) {
+                    if(isValue) {
+                        if(isStatic) {
+                            return Op.SET_ARRAY_OBJECT_VALUE_STATIC;
+                        }
+                        else {
+                            return Op.SET_ARRAY_OBJECT_VALUE;
+                        }
+                    }
+                    else {
+                        // is pointer
+                        if(isStatic) {
+                            return Op.SET_ARRAY_OBJECT_POINTER_STATIC;
+                        }
+                        else {
+                            return Op.SET_ARRAY_OBJECT_POINTER;
+                        }
+                    }
                 }
                 else {
-                    return Op.GET_OBJECT_VALUE;
+                    if(isStatic) {
+                        return Op.SET_ARRAY_PRIMITIVE_STATIC;
+                    }
+                    else {
+                        return Op.SET_ARRAY_PRIMITIVE;
+                    }
+                }
+            }
+        }
+        else if(returnType.isClassOrInterfaceType()) {
+            if(isArray) {
+                if(isValue) {
+                    if(isStatic) {
+                        return Op.GET_ARRAY_OBJECT_VALUE_STATIC;
+                    }
+                    else {
+                        return Op.GET_ARRAY_OBJECT_VALUE;
+                    }
+                }
+                else {
+                    if(isStatic) {
+                        return Op.GET_ARRAY_OBJECT_POINTER_STATIC;
+                    }
+                    else {
+                        return Op.GET_ARRAY_OBJECT_POINTER;
+                    }
                 }
             }
             else {
-                if(isStatic) {
-                    return Op.GET_OBJECT_POINTER_STATIC;
+                if(isValue) {
+                    if(isStatic) {
+                        return Op.GET_OBJECT_VALUE_STATIC;
+                    }
+                    else {
+                        return Op.GET_OBJECT_VALUE;
+                    }
                 }
                 else {
-                    return Op.GET_OBJECT_POINTER;
+                    if(isStatic) {
+                        return Op.GET_OBJECT_POINTER_STATIC;
+                    }
+                    else {
+                        return Op.GET_OBJECT_POINTER;
+                    }
                 }
             }
         }
         else {
-            if(isStatic) {
-                return Op.GET_PRIMITIVE_STATIC;
+            if(isArray) {
+                if(isStatic) {
+                    return Op.GET_ARRAY_PRIMITIVE_STATIC;
+                }
+                else {
+                    return Op.GET_ARRAY_PRIMITIVE;
+                }
             }
             else {
-                return Op.GET_PRIMITIVE;
+                if(isStatic) {
+                    return Op.GET_PRIMITIVE_STATIC;
+                }
+                else {
+                    return Op.GET_PRIMITIVE;
+                }
             }
         }
         return null;
@@ -91,5 +150,22 @@ public class IDLAttributeOperation {
         SET_PRIMITIVE_STATIC,
         GET_PRIMITIVE,
         GET_PRIMITIVE_STATIC,
+
+        // Array
+
+        SET_ARRAY_OBJECT_VALUE,
+        SET_ARRAY_OBJECT_VALUE_STATIC,
+        GET_ARRAY_OBJECT_VALUE,
+        GET_ARRAY_OBJECT_VALUE_STATIC,
+
+        SET_ARRAY_OBJECT_POINTER,
+        SET_ARRAY_OBJECT_POINTER_STATIC,
+        GET_ARRAY_OBJECT_POINTER,
+        GET_ARRAY_OBJECT_POINTER_STATIC,
+
+        SET_ARRAY_PRIMITIVE,
+        SET_ARRAY_PRIMITIVE_STATIC,
+        GET_ARRAY_PRIMITIVE,
+        GET_ARRAY_PRIMITIVE_STATIC,
     }
 }
