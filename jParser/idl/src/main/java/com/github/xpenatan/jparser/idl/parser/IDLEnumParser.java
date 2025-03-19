@@ -10,18 +10,19 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.idl.IDLEnum;
+import com.github.xpenatan.jparser.idl.IDLEnumItem;
 import java.util.Optional;
 
 public class IDLEnumParser {
 
     public static void generateEnum(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, IDLEnum idlEnum) {
-        for(String anEnum : idlEnum.enums) {
-            generateField(idlParser, jParser, idlEnum, unit, classDeclaration, anEnum);
+        for(IDLEnumItem enumItem : idlEnum.enums) {
+            generateField(idlParser, jParser, idlEnum, unit, classDeclaration, enumItem);
         }
     }
 
-    private static void generateField(IDLDefaultCodeParser idlParser, JParser jParser, IDLEnum idlEnum, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, String enumStr) {
-        String enumVar = enumStr;
+    private static void generateField(IDLDefaultCodeParser idlParser, JParser jParser, IDLEnum idlEnum, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, IDLEnumItem enumItem) {
+        String enumVar = enumItem.name;
         if(enumVar.contains("::")) {
             enumVar = enumVar.split("::")[1];
         }
@@ -34,6 +35,11 @@ public class IDLEnumParser {
             String nativeMethodName = enumVar + "_NATIVE";
 
             expression.setName(nativeMethodName);
+
+            String name = enumItem.getRenamedName();
+            if(name != null) {
+                enumVar = name;
+            }
             FieldDeclaration fieldDeclaration = classDeclaration.addFieldWithInitializer(intType, enumVar, expression, Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
 
             MethodDeclaration nativeMethod = new MethodDeclaration();
@@ -42,7 +48,7 @@ public class IDLEnumParser {
             nativeMethod.removeBody();
             nativeMethod.setType(intType);
             classDeclaration.getMembers().add(nativeMethod);
-            idlParser.onIDLEnumMethodGenerated(jParser, idlEnum, classDeclaration, enumStr, fieldDeclaration, nativeMethod);
+            idlParser.onIDLEnumMethodGenerated(jParser, idlEnum, classDeclaration, enumItem, fieldDeclaration, nativeMethod);
         }
     }
 }

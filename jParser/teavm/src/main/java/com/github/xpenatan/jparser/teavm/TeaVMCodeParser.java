@@ -42,6 +42,7 @@ import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLEnum;
+import com.github.xpenatan.jparser.idl.IDLEnumItem;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
@@ -560,7 +561,8 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, IDLEnumItem enumItem, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        String enumStr = enumItem.name;
         String content  = "";
         if(enumStr.contains("::")) {
             String[] split = enumStr.split("::");
@@ -571,13 +573,8 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 enumStr = rightName;
             }
             else {
-                if(leftName.equals(idlEnum.name)) {
-                    // enum class cannot have child class name
-                    enumStr = rightName;
-                }
-                else {
-                    enumStr = enumStr.replace("::", ".");
-                }
+                // enum class cannot have child class name
+                enumStr = rightName;
             }
         }
         content = ENUM_GET_INT_TEMPLATE.replace(TEMPLATE_TAG_ENUM, enumStr).replace(TEMPLATE_TAG_MODULE, module);
