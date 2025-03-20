@@ -5,6 +5,8 @@ import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestConstructorClass;
+import com.github.xpenatan.jparser.example.testlib.TestEnumClassWithinClass;
+import com.github.xpenatan.jparser.example.testlib.TestEnumLib;
 import com.github.xpenatan.jparser.example.testlib.TestMethodClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClassArray;
@@ -16,7 +18,7 @@ import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
 public class TestLib {
 
     public static boolean test() {
-        int eVal = TestEnumWithinClass.e_val;
+        boolean enumTest = testEnum();
         boolean constructorTest = testConstructorClass();
         boolean stringConstructorTest = testStringConstructorClass();
         boolean attributeTest = testAttributeClass();
@@ -29,6 +31,7 @@ public class TestLib {
         boolean namespaceTest = testNamespaceClass();
         boolean operatorTest = testOperatorClass();
 
+        System.out.println("enumTest: " + enumTest);
         System.out.println("constructorTest: " + constructorTest);
         System.out.println("stringConstructorTest: " + stringConstructorTest);
         System.out.println("attributeTest: " + attributeTest);
@@ -40,9 +43,46 @@ public class TestLib {
         System.out.println("namespaceTest: " + namespaceTest);
         System.out.println("operatorTest: " + operatorTest);
 
-        return constructorTest && stringConstructorTest && attributeTest && staticAttributeTest
+        return enumTest && constructorTest && stringConstructorTest && attributeTest && staticAttributeTest
                 && attributeArrayTest && methodTest && staticMethodTest && callbackTest
                 && callbackTestManual && namespaceTest && operatorTest;
+    }
+
+    private static boolean testEnum() {
+        {
+            int testEnum = TestEnumClassWithinClass.testEnum;
+            try {
+                if(!(testEnum == 35)) {
+                    throw new RuntimeException("testEnum Error: !(testEnum == 35)");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        {
+            int testDefault = TestEnumLib.TEST_DEFAULT;
+            try {
+                if(!(testDefault == 7)) {
+                    throw new RuntimeException("testEnum Error: !(testDefault == 7)");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        {
+            int eVal = TestEnumWithinClass.e_val_renamed;
+            try {
+                if(!(eVal == 34)) {
+                    throw new RuntimeException("testEnum Error: !(eVal == 34)");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean testConstructorClass() {

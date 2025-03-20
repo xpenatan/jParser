@@ -233,7 +233,7 @@ interface TestOperatorClass { //[-SUB_PACKAGE=core.op]
 };
 
 enum TestEnumWithinClass { //[-SUB_PACKAGE=core.enums]
-    "TestEnumClass::e_val"
+    "TestEnumClass::e_val" //[-RENAME=e_val_renamed]
 };
 
 enum TestEnumClassWithinClass {

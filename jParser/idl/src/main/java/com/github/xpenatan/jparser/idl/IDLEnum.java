@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class IDLEnum extends IDLClassOrEnum {
     public final IDLFile idlFile;
 
-    public final ArrayList<String> enums = new ArrayList<>();
+    public final ArrayList<IDLEnumItem> enums = new ArrayList<>();
     public ArrayList<String> settings = new ArrayList<>();
 
     public boolean isNameSpace;
@@ -51,7 +51,8 @@ public class IDLEnum extends IDLClassOrEnum {
                 if(typePrefix.isEmpty() && enumLine.contains("::")) {
                     typePrefix = enumLine.split("::")[0];
                 }
-                enums.add(enumLine);
+                IDLEnumItem item = new IDLEnumItem(this, enumLine, idlLine);
+                enums.add(item);
             }
         }
     }

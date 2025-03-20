@@ -19,6 +19,7 @@ import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLEnum;
+import com.github.xpenatan.jparser.idl.IDLEnumItem;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
@@ -394,7 +395,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, String enumStr, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, IDLEnumItem enumItem, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+        String enumStr = enumItem.name;
         String content  = "";
         content = ENUM_GET_INT_TEMPLATE.replace(TEMPLATE_TAG_ENUM, enumStr);
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
