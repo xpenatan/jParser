@@ -59,6 +59,14 @@ public class JProcess {
                 }
 
                 private void printFileLineNumber (String line) {
+                    if(line.contains(": error")) {
+                        // Make error clickable
+                        String[] lineSplit = line.split(": error");
+                        String leftSide = lineSplit[0];
+                        String rightSide = lineSplit[1];
+                        String fixed = leftSide.replace("(", ":").replace(")", ":");
+                        line = fixed + " error" + rightSide;
+                    }
                     System.err.println(line);
                 }
             });
