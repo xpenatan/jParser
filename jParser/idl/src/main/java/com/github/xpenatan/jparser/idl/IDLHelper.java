@@ -82,6 +82,12 @@ public class IDLHelper {
         else if(idlType.equals("octet")) {
             type = "unsigned char";
         }
+        else if(idlType.contains("boolean")) {
+            type = idlType.replace("boolean", "bool");
+        }
+        else if(idlType.contains("byte")) {
+            type = idlType.replace("byte", "char");
+        }
         else {
             type = idlType;
         }
