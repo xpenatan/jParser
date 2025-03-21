@@ -223,6 +223,8 @@ public class IDLMethodParser {
     }
 
     public static void setupCallerParam(NativeMethodData paramData, MethodCallExpr caller, NodeList<Parameter> methodParameters, ArrayList<IDLParameter> idlParameters) {
+        boolean isAttribute = idlParameters == null;
+
         if(!paramData.isStatic) {
             caller.addArgument("(long)" + IDLDefaultCodeParser.CPOINTER_METHOD);
         }
@@ -242,7 +244,8 @@ public class IDLMethodParser {
                     //TODO create IDLParameter when is comming from attribute
                     isArray = idlParameter.isArray;
                 }
-                if(isArray && IDLHelper.getCArray(type.asClassOrInterfaceType().getNameAsString()) != null) {
+                if(isArray && !isAttribute) {
+                    // Only methods parameter array needs to call getPointer()
                     String methodCall = paramName + "." + IDLDefaultCodeParser.CPOINTER_ARRAY_METHOD;
                     paramName =  "(long)(" + variableName + " != null ? " + methodCall + " : 0)";
                 }

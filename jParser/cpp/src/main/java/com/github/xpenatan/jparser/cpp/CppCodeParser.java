@@ -780,7 +780,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             Parameter parameter = parameters.get(i);
             IDLParameter idlParameter = idParameters.get(i);
             Type type = parameter.getType();
-            String paramName = getParam(idlParameter.idlFile, type, idlParameter.name, idlParameter.getCPPType(), idlParameter.isAny, idlParameter.isRef, idlParameter.isValue, idlParameter.isArray);
+            String paramName = getParam(idlParameter, type);
             if(i > 0) {
                 param += ", ";
             }
@@ -789,21 +789,34 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         return param;
     }
 
-    private static String getParam(IDLFile idlFile, Type type, String paramName, String classType, boolean isAny, boolean isRef, boolean isValue, boolean isArray) {
+    private static String getParam(IDLParameter idlParameter, Type type) {
+        IDLFile idlFile = idlParameter.idlFile;
+        String paramName = idlParameter.name;
+        String cppType = idlParameter.getCPPType();
+        String classType = cppType;
+        boolean isAny = idlParameter.isAny;
+        boolean isRef = idlParameter.isRef;
+        boolean isValue = idlParameter.isValue;
+        boolean isArray = idlParameter.isArray;
         boolean isObject = type.isClassOrInterfaceType();
+
         if(isObject && !classType.equals("char*")) {
-            String idlArrayOrNull = IDLHelper.getIDLArrayOrNull(classType);
+            String idlArrayOrNull = IDLHelper.getIDLArrayClassOrNull(classType);
             if(idlArrayOrNull != null) {
                 classType = idlArrayOrNull;
             }
 
             paramName += "_addr";
-            IDLClass paramClass = idlFile.getClass(classType);
-            String cArray = IDLHelper.getCArray(classType);
-            if(isArray && cArray != null) {
-                paramName = "(" + cArray + ")" + paramName;
+            if(isArray) {
+                String idlType = cppType.replace("[]", "*");
+                if(idlParameter.idlClassOrEnum != null && !isRef) {
+                    // Is a class object and pointer of pointer
+                    idlType += "*";
+                }
+                paramName = "(" + idlType + ")" + paramName;
             }
             else {
+                IDLClass paramClass = idlFile.getClass(classType);
                 if(paramClass != null) {
                     classType = paramClass.getCPPName();
                 }

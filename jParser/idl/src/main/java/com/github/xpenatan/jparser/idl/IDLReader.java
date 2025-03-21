@@ -244,7 +244,7 @@ public class IDLReader {
                 }
                 for(IDLMethod method : idlClass.methods) {
                     for(IDLParameter parameter : method.parameters) {
-                        String idlType = parameter.idlType;
+                        String idlType = parameter.idlType.replace("[]", "");
                         IDLClassOrEnum childClassOrEnum = idlReader.getClassOrEnum(idlType);
                         parameter.idlClassOrEnum = childClassOrEnum;
                     }

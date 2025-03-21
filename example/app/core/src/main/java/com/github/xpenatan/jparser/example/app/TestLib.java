@@ -3,13 +3,14 @@ package com.github.xpenatan.jparser.example.app;
 import com.github.xpenatan.jparser.example.testlib.CallbackClass;
 import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
+import com.github.xpenatan.jparser.example.testlib.IDLArrayTestObjectClass;
+import com.github.xpenatan.jparser.example.testlib.TestAttributeArrayClass;
 import com.github.xpenatan.jparser.example.testlib.TestCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestConstructorClass;
 import com.github.xpenatan.jparser.example.testlib.TestEnumClassWithinClass;
 import com.github.xpenatan.jparser.example.testlib.TestEnumLib;
 import com.github.xpenatan.jparser.example.testlib.TestMethodClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
-import com.github.xpenatan.jparser.example.testlib.TestObjectClassArray;
 import com.github.xpenatan.jparser.example.testlib.core.enums.TestEnumWithinClass;
 import com.github.xpenatan.jparser.example.testlib.core.op.TestOperatorClass;
 import com.github.xpenatan.jparser.example.testlib.core.sub.TestNamespaceClass;
@@ -195,8 +196,19 @@ public class TestLib {
     }
 
     private static boolean testAttributeArrayClass() {
-
-
+        try {
+            TestAttributeArrayClass attributeArrayClass = new TestAttributeArrayClass();
+            TestObjectClass valueObjectArray1 = attributeArrayClass.get_valueObjectArray(0);
+            valueObjectArray1.set_intValue01(11);
+            TestObjectClass valueObjectArray2 = attributeArrayClass.get_valueObjectArray(0);
+            int value = valueObjectArray2.get_intValue01();
+            if(!(value == 11)) {
+                throw new RuntimeException("testAttributeArrayClass !(value == 11)");
+            }
+        } catch(Throwable e) {
+            e.printStackTrace();
+            return false;
+        }
         return true;
     }
 
@@ -219,7 +231,7 @@ public class TestLib {
         }
         {
             TestMethodClass test = new TestMethodClass();
-            TestObjectClassArray array = new TestObjectClassArray(2);
+            IDLArrayTestObjectClass array = new IDLArrayTestObjectClass(2);
             TestObjectClass obj1 = new TestObjectClass();
             TestObjectClass obj2 = new TestObjectClass();
             obj1.set_floatValue01(20.5f);
@@ -229,7 +241,7 @@ public class TestLib {
             array.setValue(0, obj1);
             array.setValue(1, obj2);
             try {
-                TestMethodClass.native_setMethod07(test.getNativeData().getCPointer(), array.getPointer());
+                test.setMethod07(array);
                 {
                     float intValue01 = obj1.get_intValue01();
                     if(!(intValue01 == 20)) {
