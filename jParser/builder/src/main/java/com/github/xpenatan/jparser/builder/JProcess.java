@@ -59,14 +59,9 @@ public class JProcess {
                 }
 
                 private void printFileLineNumber (String line) {
-                    if(line.contains(": error")) {
-                        // Make error clickable
-                        String[] lineSplit = line.split(": error");
-                        String leftSide = lineSplit[0];
-                        String rightSide = lineSplit[1];
-                        String fixed = leftSide.replace("(", ":").replace(")", ":");
-                        line = fixed + " error" + rightSide;
-                    }
+                    line = fixErrorPath(line, ": error");
+                    line = fixErrorPath(line, ": warning ");
+                    line = fixErrorPath(line, ": note: ");
                     System.err.println(line);
                 }
             });
@@ -79,5 +74,16 @@ public class JProcess {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private static String fixErrorPath(String line, String verification) {
+        if(line.contains(verification)) {
+            String[] lineSplit = line.split(verification);
+            String leftSide = lineSplit[0];
+            String rightSide = lineSplit[1];
+            String fixed = leftSide.replace("(", ":").replace(")", ":");
+            line = fixed + verification + rightSide;
+        }
+        return line;
     }
 }
