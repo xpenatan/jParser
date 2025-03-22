@@ -81,6 +81,7 @@ public class JProcess {
             String[] lineSplit = line.split(verification);
             String leftSide = lineSplit[0];
             String rightSide = lineSplit[1];
+            leftSide = leftSide.replace("\\", "/").replace("/", File.separator);
             String fixed = leftSide.replace("(", ":").replace(")", ":");
             line = fixed + verification + rightSide;
         }
