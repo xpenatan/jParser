@@ -25,8 +25,11 @@ To further streamline the lengthy process of manually porting each method, jPars
 
 The generated methods will match those defined in the WebIDL file. If the C++ code is case-sensitive, as seen in ImGui, the corresponding Java methods will also maintain case sensitivity. Additionally, C/C++ attributes are converted into methods prefixed with `set_` or `get_`.
 
-## WebIDL Classes
-IDL classes, such as `IDLInt` or `IDLIntArray`, provide a method for passing primitive pointers to C++ code, compatible with Emscripten, desktop, and mobile platforms. Use these classes when you need to pass a pointer array or a primitive that the C++ code will modify.
+## WebIDL Notes
+* IDL classes, such as IDLInt or IDLIntArray, provide a way to pass primitive pointers to C++ code. These classes are compatible with Emscripten, desktop, and mobile platforms. Use them when you need to pass a pointer array or a primitive that the C++ code will modify.
+* C++ enums are converted into classes, where each enum name represents an integer value.
+* Methods annotated with [Value] return a copy of the object. The object is cached in both C++ and Java. Each time you call the same method, it overwrites the previous data, so avoid retaining references to the returned object.
+* JParser does not automatically dispose of C++ objects. It will issue a warning if there is a memory leak, and it is your responsibility to call dispose to free the memory. For classes marked with [NoDelete], there is no need to call dispose.
 
 Libraries using jParser: <br>
 - [gdx-imgui](https://github.com/xpenatan/gdx-imgui)¹
