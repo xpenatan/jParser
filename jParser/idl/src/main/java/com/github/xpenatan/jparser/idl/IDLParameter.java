@@ -83,6 +83,9 @@ public class IDLParameter {
         if(idlClassOrEnum != null && idlClassOrEnum.isClass()) {
             IDLClass aClass = idlClassOrEnum.asClass();
             fullType = aClass.getCPPName();
+            if(isArray && !fullType.endsWith("[]")) {
+                fullType += "[]";
+            }
         }
         return IDLHelper.getCPPReturnType(fullType);
     }

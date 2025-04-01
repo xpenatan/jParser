@@ -17,28 +17,6 @@ public class IDLHelper {
         return classOrInterfaceType.getNameAsString().equals("String");
     }
 
-    public static String getCArray(String type) {
-        if(type.equals("IDLBoolArray")) {
-            return "bool *";
-        }
-        else if(type.equals("IDLIntArray")) {
-            return "int *";
-        }
-        else if(type.equals("IDLLongArray")) {
-            return "long long *";
-        }
-        else if(type.equals("IDLFloatArray")) {
-            return "float *";
-        }
-        else if(type.equals("IDLDoubleArray")) {
-            return "double *";
-        }
-        else if(type.equals("IDLByteArray")) {
-            return "char *";
-        }
-        return null;
-    }
-
     public static boolean isString(Type type) {
         return type.toString().equals("String");
     }
@@ -104,6 +82,12 @@ public class IDLHelper {
         else if(idlType.equals("octet")) {
             type = "unsigned char";
         }
+        else if(idlType.contains("boolean")) {
+            type = idlType.replace("boolean", "bool");
+        }
+        else if(idlType.contains("byte")) {
+            type = idlType.replace("byte", "char");
+        }
         else {
             type = idlType;
         }
@@ -155,7 +139,7 @@ public class IDLHelper {
             type = type + "[]";
         }
         if(useIDLArray) {
-            String idlArrayOrNull = getIDLArrayOrNull(type);
+            String idlArrayOrNull = getIDLArrayClassOrNull(type);
             if(idlArrayOrNull != null) {
                 type = idlArrayOrNull;
             }
@@ -163,7 +147,7 @@ public class IDLHelper {
         return type;
     }
 
-    public static String getIDLArrayOrNull(String type) {
+    public static String getIDLArrayClassOrNull(String type) {
         // Convert array to IDL object arrays
         if(type.equals("int[]")) {
             type = "IDLIntArray";
@@ -183,8 +167,10 @@ public class IDLHelper {
         else if(type.equals("double[]")) {
             type = "IDLDoubleArray";
         }
-        else {
-            return null;
+        else if(type.endsWith("[]")) {
+            type = type.replace("[]", "");
+            type = "IDLArray" + type;
+            return type;
         }
 
         return type;

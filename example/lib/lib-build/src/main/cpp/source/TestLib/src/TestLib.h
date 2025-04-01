@@ -170,8 +170,8 @@ class TestMethodClass {
             this->refObject01 = refObject01;
             this->refObject02 = refObject02;
         };
-        void setMethod07(TestObjectClass* pointerObjectArray) {
-            this->pointerObjectArray = ((TestObjectClass** )pointerObjectArray);
+        void setMethod07(TestObjectClass** pointerObjectArray) {
+            this->pointerObjectArray = pointerObjectArray;
 //            this->pointerObjectArray = &pointerObjectArray[0];
 //            this->pointerObjectArray = &(*array[0]);
 
