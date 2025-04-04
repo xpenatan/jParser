@@ -2,6 +2,7 @@ package com.github.xpenatan.jparser.example.app;
 
 import com.github.xpenatan.jparser.example.testlib.CallbackClass;
 import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
+import com.github.xpenatan.jparser.example.testlib.CallbackExceptionManual;
 import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.IDLArrayTestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.TestAttributeArrayClass;
@@ -9,6 +10,7 @@ import com.github.xpenatan.jparser.example.testlib.TestCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestConstructorClass;
 import com.github.xpenatan.jparser.example.testlib.TestEnumClassWithinClass;
 import com.github.xpenatan.jparser.example.testlib.TestEnumLib;
+import com.github.xpenatan.jparser.example.testlib.TestExceptionManual;
 import com.github.xpenatan.jparser.example.testlib.TestMethodClass;
 import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.core.enums.TestEnumWithinClass;
@@ -31,6 +33,7 @@ public class TestLib {
         boolean callbackTestManual = testCallbackClassManual();
         boolean namespaceTest = testNamespaceClass();
         boolean operatorTest = testOperatorClass();
+        boolean exceptionTest = testExceptionManual();
 
         System.out.println("enumTest: " + enumTest);
         System.out.println("constructorTest: " + constructorTest);
@@ -43,10 +46,11 @@ public class TestLib {
         System.out.println("callbackTest: " + callbackTest);
         System.out.println("namespaceTest: " + namespaceTest);
         System.out.println("operatorTest: " + operatorTest);
+        System.out.println("exceptionTest: " + exceptionTest);
 
         return enumTest && constructorTest && stringConstructorTest && attributeTest && staticAttributeTest
                 && attributeArrayTest && methodTest && staticMethodTest && callbackTest
-                && callbackTestManual && namespaceTest && operatorTest;
+                && callbackTestManual && namespaceTest && operatorTest && exceptionTest;
     }
 
     private static boolean testEnum() {
@@ -737,5 +741,42 @@ public class TestLib {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private static boolean testExceptionManual() {
+        boolean ret;
+        try {
+            ret = false;
+
+            CallbackExceptionManual callback = new CallbackExceptionManual() {
+                @Override
+                public void internal_callJava() {
+                    System.out.println("CALL_JAVA");
+                    throw new IllegalStateException("This is expected");
+                }
+            };
+
+            TestExceptionManual exceptionManual = new TestExceptionManual();
+            exceptionManual.callJavaMethod(callback);
+        }
+        catch(Throwable t) {
+            t.printStackTrace();
+            ret = true;
+        }
+
+        try {
+            ret = false;
+            // This test is calling a c++ method and the C++ code tries to set a value to a null object pointer.
+            // It will trigger an exception in native side.
+            TestExceptionManual exceptionManual = new TestExceptionManual();
+            int value = exceptionManual.setDataToNullPointer();
+            System.out.println("Value: " + value);
+        }
+        catch(Throwable t) {
+            // Javascript/Wasm catches the error in native side automatically. C++ does not, need to implement.
+            t.printStackTrace();
+            ret = true;
+        }
+        return ret;
     }
 }

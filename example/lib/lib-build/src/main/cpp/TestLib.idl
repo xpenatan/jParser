@@ -232,6 +232,21 @@ interface TestOperatorClass { //[-SUB_PACKAGE=core.op]
     void setValue(float val);
 };
 
+interface TestExceptionManual {
+    void TestExceptionManual();
+    long setDataToNullPointer();
+    void callJavaMethod(CallbackExceptionManual callback);
+};
+
+interface CallbackExceptionManual {
+};
+
+[JSImplementation="CallbackExceptionManual"]
+interface CallbackExceptionManualImpl {
+    void CallbackExceptionManualImpl();
+    [Const] void callJava();
+};
+
 enum TestEnumWithinClass { //[-SUB_PACKAGE=core.enums]
     "TestEnumClass::e_val" //[-RENAME=e_val_renamed]
 };

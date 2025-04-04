@@ -454,6 +454,27 @@ class TestCallbackClass {
 };
 
 
+class CallbackExceptionManual
+{
+public:
+    virtual void callJava() const = 0;
+};
+
+class TestExceptionManual {
+    private:
+    public:
+
+        int setDataToNullPointer() {
+            TestObjectClass* objectClass = NULL;
+            objectClass->intValue01 = 10;
+            return 10;
+        };
+
+        void callJavaMethod(CallbackExceptionManual* callback) {
+            callback->callJava();
+        };
+};
+
 namespace TestNamespace {
     class TestNamespaceClass {
         private:
