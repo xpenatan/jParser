@@ -1,5 +1,7 @@
 package com.github.xpenatan.jparser.example.app;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.github.xpenatan.jparser.example.testlib.CallbackClass;
 import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.CallbackExceptionManual;
@@ -744,6 +746,10 @@ public class TestLib {
     }
 
     private static boolean testExceptionManual() {
+        if(Gdx.app.getType() != Application.ApplicationType.WebGL) {
+            // TODO add JNI support
+            return true;
+        }
         boolean ret;
         try {
             ret = false;
