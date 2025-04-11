@@ -38,12 +38,13 @@ public class IDLMethodParser {
 
     public static final String NATIVE_METHOD = "internal_native_";
 
-    static final String NULL_POINTER_EXCEPTION = "throw new RuntimeException(\"Pointer is null\");";
+    // Return null. There are cases where C++ code return a null pointer
+    static final String NULL_POINTER = "return null;";
 
     static final String GET_OBJECT_TEMPLATE =
             "{\n" +
             "    long pointer = [METHOD];\n" +
-            "    if(pointer == 0) " + NULL_POINTER_EXCEPTION + "\n" +
+            "    if(pointer == 0) " + NULL_POINTER + "\n" +
             "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
             "    [TYPE]_TEMP_GEN_[NUM].getNativeData().reset(pointer, false);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
@@ -52,7 +53,7 @@ public class IDLMethodParser {
     static final String GET_NEW_OBJECT_TEMPLATE =
             "{\n" +
             "    long pointer = [METHOD];\n" +
-            "    if(pointer == 0) " + NULL_POINTER_EXCEPTION + "\n" +
+            "    if(pointer == 0) " + NULL_POINTER + "\n" +
             "    [TYPE] [TYPE]_NEW = new [TYPE]((byte)1, (char)1);\n" +
             "    [TYPE]_NEW.getNativeData().reset(pointer, [MEM_OWNED]);\n" +
             "    return [TYPE]_NEW;\n" +
