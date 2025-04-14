@@ -50,19 +50,21 @@ public class BuildToolOptions {
         this.libBasePackage = libBasePackage;
         this.modulePrefix = modulePrefix;
 
-        boolean exists = new CustomFileDescriptor(cppSourcePath).exists();
-        if(exists) {
-            this.sourcePath = cppSourcePath.replace("\\", "/");
-        }
-        else {
-            try {
-                this.sourcePath = new File(".", cppSourcePath).getCanonicalPath().replace("\\", "/");
-            } catch(IOException e) {
-                throw new RuntimeException(e);
+        if(cppSourcePath != null) {
+            boolean exists = new CustomFileDescriptor(cppSourcePath).exists();
+            if(exists) {
+                this.sourcePath = cppSourcePath.replace("\\", "/");
             }
-        }
-        if(!this.sourcePath.endsWith("/")) {
-            this.sourcePath += "/";
+            else {
+                try {
+                    this.sourcePath = new File(".", cppSourcePath).getCanonicalPath().replace("\\", "/");
+                } catch(IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if(!this.sourcePath.endsWith("/")) {
+                this.sourcePath += "/";
+            }
         }
         this.idlName = libName;
         this.moduleName = libName;

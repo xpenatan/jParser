@@ -22,7 +22,9 @@ public class BuildConfig {
 
         this.buildDir = new CustomFileDescriptor(buildDir);
         this.buildSourceDir = new CustomFileDescriptor(buildSourceDir);
-        additionalSourceDirs.add(new CustomFileDescriptor(sourcePath));
+        if(sourcePath != null) {
+            additionalSourceDirs.add(new CustomFileDescriptor(sourcePath));
+        }
         this.libDir = new CustomFileDescriptor(libsDir);
 
         this.libName = libName;
