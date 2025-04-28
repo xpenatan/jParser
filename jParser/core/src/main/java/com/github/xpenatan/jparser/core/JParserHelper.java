@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.Name;
@@ -141,19 +142,23 @@ public class JParserHelper {
     public static boolean addMissingImportType(JParser jParser, CompilationUnit unit, String className) {
         JParserItem parserUnitItem = jParser.getParserUnitItem(className);
         if(parserUnitItem != null) {
+            Optional<String> fullyQualifiedName = null;
             ClassOrInterfaceDeclaration classDeclaration = parserUnitItem.getClassDeclaration();
             if(classDeclaration != null) {
-                Optional<String> optionalFullyQualifiedName = classDeclaration.getFullyQualifiedName();
-                if(optionalFullyQualifiedName.isPresent()) {
-                    String fullyQualifiedName = optionalFullyQualifiedName.get();
-                    if(!JParserHelper.containsImport(unit, fullyQualifiedName, true)) {
-                        unit.addImport(fullyQualifiedName);
-                        return true;
-                    }
-                }
+                fullyQualifiedName = classDeclaration.getFullyQualifiedName();
             }
             else {
-                // TODO enum classes come here
+                EnumDeclaration enumDeclaration = parserUnitItem.getEnumDeclaration();
+                if(enumDeclaration != null) {
+                    fullyQualifiedName = enumDeclaration.getFullyQualifiedName();
+                }
+            }
+            if(fullyQualifiedName != null && fullyQualifiedName.isPresent()) {
+                String name = fullyQualifiedName.get();
+                if(!JParserHelper.containsImport(unit, name, true)) {
+                    unit.addImport(name);
+                    return true;
+                }
             }
         }
         return false;
@@ -161,6 +166,11 @@ public class JParserHelper {
 
     public static ClassOrInterfaceDeclaration getClassDeclaration(CompilationUnit unit) {
         Optional<ClassOrInterfaceDeclaration> first = unit.findFirst(ClassOrInterfaceDeclaration.class);
+        return first.orElse(null);
+    }
+
+    public static EnumDeclaration getEnumDeclaration(CompilationUnit unit) {
+        Optional<EnumDeclaration> first = unit.findFirst(EnumDeclaration.class);
         return first.orElse(null);
     }
 

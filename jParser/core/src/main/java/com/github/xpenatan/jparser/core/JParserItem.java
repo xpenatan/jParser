@@ -64,6 +64,10 @@ public class JParserItem {
         return JParserHelper.getClassDeclaration(unit);
     }
 
+    public EnumDeclaration getEnumDeclaration() {
+        return JParserHelper.getEnumDeclaration(unit);
+    }
+
     @Override
     public String toString() {
         String name = "";
