@@ -9,7 +9,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -51,6 +51,7 @@ import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodParser;
+import com.github.xpenatan.jparser.idl.parser.data.IDLParameterData;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -419,7 +420,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             IDLParameter idlParameter = idParameters.get(i);
             Type type = parameter.getType();
             boolean isObject = type.isClassOrInterfaceType();
-            String paramName = getParam(idlParameter.idlFile, isObject, idlParameter.name, idlParameter.getJavaType(), idlParameter.isRef, idlParameter.isValue);
+            String paramName = getParam(idlParameter.idlFile, idlParameter.isEnum(), isObject, idlParameter.name, idlParameter.getJavaType(), idlParameter.isRef, idlParameter.isValue);
             if(i > 0) {
                 param += ", ";
             }
@@ -428,8 +429,8 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         return param;
     }
 
-    private static String getParam(IDLFile idlFile, boolean isObject, String paramName, String classType, boolean isRef, boolean isValue) {
-        if(isObject && !classType.equals("String")) {
+    private static String getParam(IDLFile idlFile, boolean isEnum, boolean isObject, String paramName, String classType, boolean isRef, boolean isValue) {
+        if(!isEnum && isObject && !classType.equals("String")) {
             paramName += "_addr";
         }
         return paramName;
@@ -561,7 +562,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, IDLEnumItem enumItem, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, EnumDeclaration enumDeclaration, IDLEnumItem enumItem, MethodDeclaration nativeMethodDeclaration) {
         String enumStr = enumItem.name;
         String content  = "";
         if(enumStr.contains("::")) {
@@ -595,7 +596,14 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         IDLClass idlCallbackClass = idlClass.callbackImpl;
         String callbackClassName = idlCallbackClass.name;
         Type methodReturnType = callbackDeclaration.getType();
-        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.generateNativeMethod(callbackDeclaration.getNameAsString(), methodParameters, methodReturnType, false);
+        ArrayList<IDLParameterData> parameterArray = new ArrayList<>();
+        for(int i = 0; i < methodParameters.size(); i++) {
+            Parameter parameter = methodParameters.get(i);
+            IDLParameterData data = new IDLParameterData();
+            data.parameter = parameter;
+            parameterArray.add(data);
+        }
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.generateNativeMethod(idlReader, callbackDeclaration.getNameAsString(), parameterArray, methodReturnType, false);
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             NormalAnnotationExpr customAnnotation = new NormalAnnotationExpr();
             customAnnotation.setName("org.teavm.jso.JSBody");

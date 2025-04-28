@@ -18,6 +18,8 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLMethod;
+import com.github.xpenatan.jparser.idl.IDLParameter;
+import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.ArrayList;
 
 public class IDLCallbackParser {
@@ -33,7 +35,9 @@ public class IDLCallbackParser {
             if(constructorDeclaration.getBody().isEmpty()) {
                 MethodDeclaration callbackSetupDeclaration = classDeclaration.addMethod(callbackMethodName, Modifier.Keyword.PRIVATE);
                 ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods = createCallbackMethods(idlParser, jParser, unit, classDeclaration, idlClass);
-                MethodDeclaration nativeMethod = IDLConstructorParser.setupConstructor(idlConstructor, classDeclaration, constructorDeclaration);
+
+                IDLReader idlReader = idlParser.idlReader;
+                MethodDeclaration nativeMethod = IDLConstructorParser.setupConstructor(idlReader, idlConstructor, classDeclaration, constructorDeclaration);
                 idlParser.onIDLConstructorGenerated(jParser, idlConstructor, classDeclaration, constructorDeclaration, nativeMethod);
                 MethodCallExpr caller = IDLMethodParser.createCaller(callbackSetupDeclaration);
                 constructorDeclaration.getBody().addStatement(caller);
@@ -62,19 +66,27 @@ public class IDLCallbackParser {
             internalMethod.removeModifier(Modifier.Keyword.PUBLIC);
             internalMethod.addModifier(Modifier.Keyword.PRIVATE);
 
-            NodeList<Parameter> parameters = internalMethod.getParameters();
+            NodeList<Parameter> internalParameters = internalMethod.getParameters();
 
             MethodCallExpr caller = IDLMethodParser.createCaller(methodDeclaration);
 
             String createFieldObjectCode = "";
-            for(int i = 0; i < parameters.size(); i++) {
-                Parameter parameter = parameters.get(i);
+            for(int i = 0; i < internalParameters.size(); i++) {
+                Parameter parameter = internalParameters.get(i);
+                IDLParameter idlParameter = method.parameters.get(i);
+                boolean isEnum = idlParameter.isEnum();
                 String paramName = parameter.getNameAsString();
                 Type type = parameter.getType();
                 String typeStr = type.asString();
                 String fieldName = paramName;
 
-                if(type.isClassOrInterfaceType() && !typeStr.equals("String")) {
+                if(isEnum) {
+                    parameter.setType(StaticJavaParser.parseType("int"));
+                    fieldName = IDLMethodParser.CALLBACK_ENUM_TEMPLATE
+                            .replace(IDLMethodParser.TEMPLATE_TAG_TYPE, typeStr)
+                            .replace(IDLMethodParser.TEMPLATE_TAG_PARAM, paramName);
+                }
+                else if(type.isClassOrInterfaceType() && !typeStr.equals("String")) {
                     parameter.setType(PrimitiveType.longType());
                     fieldName = IDLMethodParser.generateFieldName(classDeclaration, typeStr, true);
                     String newBody = IDLMethodParser.CALLBACK_PARAM_TEMPLATE

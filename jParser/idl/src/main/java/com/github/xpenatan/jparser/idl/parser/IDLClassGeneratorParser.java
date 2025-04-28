@@ -9,12 +9,18 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.EnumConstantDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
@@ -129,6 +135,9 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         System.out.println(classCppPath);
 
         for(IDLFile idlFile : idlReader.fileArray) {
+            if(idlFile.skip) {
+                continue;
+            }
             for(IDLClassOrEnum idlClassOrEnum : idlFile.classArray) {
                 String className = idlClassOrEnum.name;
                 JParserItem parserItem = jParser.getParserUnitItem(className);
@@ -197,10 +206,10 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             subPackage = "." + subPackage;
         }
         compilationUnit.setPackageDeclaration(basePackage + subPackage);
-        ClassOrInterfaceDeclaration classDeclaration = compilationUnit.addClass(className);
-        classDeclaration.setPublic(true);
-
         if(idlClass.isClass()) {
+            ClassOrInterfaceDeclaration classDeclaration = compilationUnit.addClass(className);
+            classDeclaration.setPublic(true);
+
             IDLClass aClass = idlClass.asClass();
             if(aClass.isCallback) {
                 // Do nothing
@@ -212,20 +221,70 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 IDLMethodParser.generateFieldName("T_03", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
             }
         }
+        else if(idlClass.isEnum()) {
+            EnumDeclaration enumDeclaration = compilationUnit.addEnum(className);
+            EnumConstantDeclaration enumConstantDeclaration = enumDeclaration.addEnumConstant("CUSTOM");
+            enumConstantDeclaration.addArgument("0");
+
+            Type longType = StaticJavaParser.parseType(int.class.getSimpleName());
+            enumDeclaration.addField(longType, "value", Modifier.Keyword.PRIVATE);
+            ConstructorDeclaration constructorDeclaration = enumDeclaration.addConstructor(Modifier.Keyword.PRIVATE);
+            constructorDeclaration.addParameter(longType, "value");
+            constructorDeclaration.getBody().addStatement("this.value = value;");
+
+            MethodDeclaration getMethodDeclaration = enumDeclaration.addMethod("getValue", Modifier.Keyword.PUBLIC);
+            getMethodDeclaration.setType(longType);
+            getMethodDeclaration.getBody().get().addStatement("return value;");
+
+            MethodDeclaration setMethodDeclaration = enumDeclaration.addMethod("setValue", Modifier.Keyword.PUBLIC);
+            setMethodDeclaration.addParameter(longType, "value");
+            setMethodDeclaration.getBody().get().addStatement("this.value = value;");
+
+            MethodDeclaration getCustomMethodDeclaration = enumDeclaration.addMethod("getCustom", Modifier.Keyword.PUBLIC);
+            getCustomMethodDeclaration.setType(className);
+            getCustomMethodDeclaration.getBody().get().addStatement("return CUSTOM;");
+
+            String type = "Map<Integer, " + className + ">";
+            FieldDeclaration field = new FieldDeclaration()
+                    .addModifier(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL)
+                    .addVariable(
+                            new com.github.javaparser.ast.body.VariableDeclarator()
+                                    .setName("MAP")
+                                    .setType(type)
+                                    .setInitializer(new ObjectCreationExpr()
+                                            .setType(new ClassOrInterfaceType().setName("HashMap<>")))
+                    );
+            compilationUnit.addImport("java.util.Map");
+            compilationUnit.addImport("java.util.HashMap");
+
+            enumDeclaration.getMembers().add(field);
+
+            // Static block code as a string
+            String staticBlockCode = "" +
+            "static { " +
+            "    for (" + className + " value : values()) { " +
+            "        if (value != CUSTOM) { " +
+            "            MAP.put(value.value, value); " +
+            "        } " +
+            "    } " +
+            "} ";
+            enumDeclaration.addMember(StaticJavaParser.parseBodyDeclaration(staticBlockCode));
+        }
         // Hack to inject internal dependencies
         return StaticJavaParser.parse(compilationUnit.toString());
     }
 
     @Override
-    public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+    public void onParseClassStart(JParser jParser, CompilationUnit unit, TypeDeclaration classOrEnum) {
         if(!generateClass) {
             return;
         }
 
-        String className = classOrInterfaceDeclaration.getName().toString();
+        String className = classOrEnum.getName().toString();
 
         IDLEnum idlEnum = idlReader.getEnum(className);
         if(idlEnum != null) {
+            EnumDeclaration enumDeclaration = (EnumDeclaration)classOrEnum;
             JParserItem parentItem = jParser.getParserUnitItem(IDLENUM_CLASS_NAME);
             if(parentItem != null) {
                 ClassOrInterfaceDeclaration classDeclaration = parentItem.getClassDeclaration();
@@ -233,8 +292,8 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                     JParserHelper.removeImport(unit, IDLENUM_CLASS_NAME);
                     String importName = enumClassUnit.getPackageDeclaration().get().getNameAsString() + "." + IDLENUM_CLASS_NAME;
                     unit.addImport(importName);
-                    if(classOrInterfaceDeclaration.getImplementedTypes().isEmpty()) {
-                        classOrInterfaceDeclaration.addImplementedType(IDLENUM_CLASS_NAME);
+                    if(enumDeclaration.getImplementedTypes().isEmpty()) {
+                        enumDeclaration.addImplementedType(IDLENUM_CLASS_NAME + "<" + className + ">");
                     }
                 }
             }
@@ -242,6 +301,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
         IDLClass idlClass = idlReader.getClass(className);
         if(idlClass != null) {
+            ClassOrInterfaceDeclaration classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration)classOrEnum;
             if(!idlClass.extendClass.isEmpty()) {
                 JParserItem parentItem = jParser.getParserUnitItem(idlClass.extendClass);
                 if(parentItem != null) {

@@ -35,10 +35,11 @@ interface TestConstructorClass {
     readonly attribute float floatValue01;
     readonly attribute float floatValue02;
     readonly attribute boolean boolValue01;
+    readonly attribute TestEnumLib enumValue;
 
     void TestConstructorClass(long intValue01);
     void TestConstructorClass(float floatValue, long intValue01);
-    void TestConstructorClass(long intValue01, long intValue02, float floatValue01, float floatValue02, optional boolean boolValue01);
+    void TestConstructorClass(long intValue01, long intValue02, float floatValue01, float floatValue02, TestEnumLib enumValue, optional boolean boolValue01);
     void TestConstructorClass(long intValue01, long[] intArray, float[] floatArray);
 };
 
@@ -63,6 +64,7 @@ interface TestAttributeClass {
     [Value] attribute TestObjectClass valueObject;
     attribute TestObjectClass pointerObject;
     attribute TestObjectClass nullPointerObject;
+    attribute TestEnumLib enumValue;
 };
 
 [NoDelete]
@@ -95,6 +97,7 @@ interface TestMethodClass {
     void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
     void setMethod07(TestObjectClass[] pointerObjectArray);
     void setMethod08(long long longLongValue01);
+    void setMethod09(TestEnumLib enumValue);
 
     long getIntValue01();
     long getIntValue02();
@@ -109,6 +112,7 @@ interface TestMethodClass {
     [Ref] TestObjectClass getRefObject02();
     [Value] TestObjectClass getValueObject();
     long long getLongLongValue01();
+    TestEnumLib getEnumValue();
 };
 
 [NoDelete]
@@ -150,6 +154,7 @@ interface CallbackClassImpl {
     [Const] float onFloatCallback(float floatValue01, float floatValue02);
     [Const] boolean onBoolCallback(boolean boolValue01);
     [Const] void onStringCallback([Const] DOMString strValue01);
+    [Const] void onStdStringCallback(IDLString data);
     unsigned long onUnsignedIntCallback(unsigned long unsignedInt);
     [Const] unsigned short onUnsignedShortCallback(unsigned short unsignedShort);
     [Const] void onAnyCallback_1(any anyPtr);
@@ -199,6 +204,7 @@ interface TestCallbackClass {
     float callFloatCallback(CallbackClass callback);
     boolean callBoolCallback(CallbackClass callback);
     void callStringCallback(CallbackClass callback);
+    void callIDLStringCallback(CallbackClass callback);
     unsigned long callUnsignedIntCallback(CallbackClass callback);
     unsigned short callUnsignedShortCallback(CallbackClass callback);
 

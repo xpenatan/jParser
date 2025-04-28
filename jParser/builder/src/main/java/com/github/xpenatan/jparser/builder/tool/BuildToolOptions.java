@@ -4,6 +4,7 @@ import com.github.xpenatan.jparser.builder.BuildTarget;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class BuildToolOptions {
     public String libPath;
@@ -22,7 +23,8 @@ public class BuildToolOptions {
     private String moduleBuildCPPPath;
     private String moduleCorePath;
     private String moduleTeavmPath;
-    private String idlPath;
+    private ArrayList<String> idlPath = new ArrayList<>();
+    private ArrayList<String> idlPathRef = new ArrayList<>();
     private String moduleBaseJavaDir;
     private String sourcePath;
     private String customSourceDir;
@@ -123,12 +125,31 @@ public class BuildToolOptions {
         moduleTeavmPath = libPath + "/" + modulePrefix + "-teavm";
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
-        idlPath = moduleBuildPath + "/src/main/cpp/" + idlName + ".idl";
+        String idlPathItem = moduleBuildPath + "/src/main/cpp/" + idlName + ".idl";
+        idlPath.add(idlPathItem);
         customSourceDir = moduleBuildPath + "/src/main/cpp/custom/";
 
         moduleBuildCPPPath = moduleBuildPath + "/build/c++";
         libsDir = moduleBuildCPPPath + "/libs";
         cppDestinationPath = moduleBuildCPPPath + "/src";
+    }
+
+    public void addAdditionalIDLPath(String path) {
+        try {
+            String p = new File(path).getCanonicalPath();
+            idlPath.add(p);
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addAdditionalIDLRefPath(String path) {
+        try {
+            String p = new File(path).getCanonicalPath();
+            idlPathRef.add(p);
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getModulePrefix() {
@@ -155,8 +176,16 @@ public class BuildToolOptions {
         return moduleTeavmPath;
     }
 
-    public String getIDLPath() {
-        return idlPath;
+    public String[] getIDLPath() {
+        String [] path = new String[idlPath.size()];
+        idlPath.toArray(path);
+        return path;
+    }
+
+    public String[] getIDLRefPath() {
+        String [] path = new String[idlPathRef.size()];
+        idlPathRef.toArray(path);
+        return path;
     }
 
     public String getModuleBaseJavaDir() {

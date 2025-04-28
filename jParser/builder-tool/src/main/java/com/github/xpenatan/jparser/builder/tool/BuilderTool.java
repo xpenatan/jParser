@@ -31,6 +31,12 @@ public class BuilderTool {
 
         IDLReader idlReader = IDLReader.readIDL(op.getIDLPath());
 
+        String[] idlRefPath = op.getIDLRefPath();
+        for(int i = 0; i < idlRefPath.length; i++) {
+            String idlPath = idlRefPath[i];
+            IDLReader.addIDLRef(idlReader, idlPath);
+        }
+
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
         listener.onAddTarget(op, idlReader, targets);
         IDLReader.setupClasses(idlReader);

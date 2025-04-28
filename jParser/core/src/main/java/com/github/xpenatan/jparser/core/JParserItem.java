@@ -32,12 +32,11 @@ public class JParserItem {
             String packageName = unit.getPackageDeclaration().get().getNameAsString();
             this.packagePathName = packageName.replace(".", "/");
         }
-        //TODO support enum
-//        else if(allEnum.size() > 0) {
-//            className = allEnum.get(0).getNameAsString();
-//            String packageName = unit.getPackageDeclaration().get().getNameAsString();
-//            this.packagePathName = packageName.replace(".", File.separator);
-//        }
+        else if(allEnum.size() > 0) {
+            className = allEnum.get(0).getNameAsString();
+            String packageName = unit.getPackageDeclaration().get().getNameAsString();
+            this.packagePathName = packageName.replace(".", "/");
+        }
         else {
             notAllowed = true;
             List<CompilationUnit> compiAll = unit.findAll(CompilationUnit.class);

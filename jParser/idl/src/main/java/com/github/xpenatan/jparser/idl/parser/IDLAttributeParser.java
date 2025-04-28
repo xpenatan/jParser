@@ -17,6 +17,8 @@ import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLHelper;
+import com.github.xpenatan.jparser.idl.IDLParameter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,8 +36,6 @@ public class IDLAttributeParser {
 
         String attributeName = idlAttribute.name;
         String attributeType = idlAttribute.getJavaType();
-
-        attributeType = IDLHelper.convertEnumToInt(idlParser.idlReader, attributeType);
 
         Type type = null;
         try {
@@ -142,7 +142,25 @@ public class IDLAttributeParser {
             IDLClass aClass = idlAttribute.idlClassOrEnum.asClass();
             methodData.isNoDelete = aClass.classHeader.isNoDelete;
         }
-        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(methodData, classDeclaration, methodDeclaration, methodName, "", null);
+        ArrayList<IDLParameter> idlParameters = null;
+
+        if(idlAttribute.isArray) {
+            idlParameters = new ArrayList<>();
+            IDLParameter pointerParam = new IDLParameter(idlAttribute.idlFile);
+            Parameter parameter = methodDeclaration.getParameter(0);
+            pointerParam.name = parameter.getName().asString();
+            pointerParam.idlType = "long";
+            idlParameters.add(pointerParam);
+        }
+        if(isSet) {
+            if(idlParameters == null) {
+                idlParameters = new ArrayList<>();
+            }
+            IDLParameter idlParameter = new IDLParameter(idlAttribute);
+            idlParameter.isArray = false; // Need to be false to pass object to index
+            idlParameters.add(idlParameter);
+        }
+        MethodDeclaration nativeMethod = IDLMethodParser.prepareNativeMethod(idlParser.idlReader, methodData, classDeclaration, methodDeclaration, methodName, "", idlParameters);
         if(nativeMethod != null) {
             idlParser.onIDLAttributeGenerated(jParser, idlAttribute, isSet, classDeclaration, methodDeclaration, nativeMethod);
         }

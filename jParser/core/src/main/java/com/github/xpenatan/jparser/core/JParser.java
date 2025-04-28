@@ -5,6 +5,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
@@ -212,10 +214,10 @@ public class JParser {
 
             CodeParserItem codeParserItem = createParserItem(unit, node);
             wrapper.parseCode(codeParserItem);
-            if(node instanceof ClassOrInterfaceDeclaration) {
+            if(node instanceof ClassOrInterfaceDeclaration || node instanceof EnumDeclaration) {
                 if(node.getParentNode().isPresent()) {
-                    ClassOrInterfaceDeclaration nodeInterface = (ClassOrInterfaceDeclaration)node;
-                    parseClassInterface(jParser, unit, wrapper, nodeInterface);
+                    TypeDeclaration classOrEnum = (TypeDeclaration)node;
+                    parseClassInterface(jParser, unit, wrapper, classOrEnum);
                 }
                 else {
                     // Skip java file if there is no root class
@@ -228,24 +230,24 @@ public class JParser {
         return unit;
     }
 
-    private static void parseClassInterface(JParser jParser, CompilationUnit unit, CodeParser wrapper, ClassOrInterfaceDeclaration clazzInterface) {
+    private static void parseClassInterface(JParser jParser, CompilationUnit unit, CodeParser wrapper, TypeDeclaration classOrEnum) {
         wrapper.onParseCodeEnd();
-        wrapper.onParseClassStart(jParser, unit, clazzInterface);
+        wrapper.onParseClassStart(jParser, unit, classOrEnum);
         ArrayList<Node> array = new ArrayList<>();
-        array.addAll(clazzInterface.getChildNodes());
+        array.addAll(classOrEnum.getChildNodes());
         PositionUtils.sortByBeginPosition(array, false);
 
         for(int i = 0; i < array.size(); i++) {
             Node node = array.get(i);
             CodeParserItem parserItem = createParserItem(unit, node);
             wrapper.parseCode(parserItem);
-            if(node instanceof ClassOrInterfaceDeclaration && node.getParentNode().isPresent()) {
-                ClassOrInterfaceDeclaration nodeInterface = (ClassOrInterfaceDeclaration)node;
+            if(node instanceof TypeDeclaration && node.getParentNode().isPresent()) {
+                TypeDeclaration nodeInterface = (TypeDeclaration)node;
                 parseClassInterface(jParser, unit, wrapper, nodeInterface);
             }
         }
-        PositionUtils.sortByBeginPosition(clazzInterface.getMembers(), false);
-        wrapper.onParseClassEnd(jParser, unit, clazzInterface);
+        PositionUtils.sortByBeginPosition(classOrEnum.getMembers(), false);
+        wrapper.onParseClassEnd(jParser, unit, classOrEnum);
     }
 
     private static CodeParserItem createParserItem(CompilationUnit unit, Node node) {

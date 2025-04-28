@@ -13,6 +13,8 @@ import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.parser.data.IDLParameterData;
+import java.util.ArrayList;
 import java.util.List;
 
 public class IDLDeConstructorParser {
@@ -43,11 +45,18 @@ public class IDLDeConstructorParser {
                 deleteMethod = classOrInterfaceDeclaration.addMethod(DELETE_NATIVE, Modifier.Keyword.PROTECTED);
             }
 
-
             if(deleteMethod != null) {
                 NodeList<Parameter> parameters = deleteMethod.getParameters();
                 Type type = deleteMethod.getType();
-                MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(DELETE_NATIVE, parameters, type, false);
+
+                ArrayList<IDLParameterData> parameterArray = new ArrayList<>();
+                for(int i = 0; i < parameters.size(); i++) {
+                    Parameter parameter = parameters.get(i);
+                    IDLParameterData data = new IDLParameterData();
+                    data.parameter = parameter;
+                    parameterArray.add(data);
+                }
+                MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(idlParser.idlReader, DELETE_NATIVE, parameterArray, type, false);
 
                 if(!JParserHelper.containsMethod(classOrInterfaceDeclaration, nativeMethod)) {
                     classOrInterfaceDeclaration.getMembers().add(nativeMethod);

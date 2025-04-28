@@ -1,7 +1,7 @@
 package com.github.xpenatan.jparser.core.codeparser;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import java.util.ArrayList;
@@ -10,9 +10,9 @@ import java.util.ArrayList;
  * @author xpenatan
  */
 public interface CodeParser {
-    void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration);
+    void onParseClassStart(JParser jParser, CompilationUnit unit, TypeDeclaration classOrEnum);
 
-    void onParseClassEnd(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration);
+    void onParseClassEnd(JParser jParser, CompilationUnit unit, TypeDeclaration classOrEnum);
 
     void parseCode(CodeParserItem parserItem);
 

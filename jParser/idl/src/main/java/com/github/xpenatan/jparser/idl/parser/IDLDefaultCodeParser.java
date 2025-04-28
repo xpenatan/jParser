@@ -3,8 +3,9 @@ package com.github.xpenatan.jparser.idl.parser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -66,14 +67,15 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     }
 
     @Override
-    public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
-        super.onParseClassStart(jParser, unit, classOrInterfaceDeclaration);
+    public void onParseClassStart(JParser jParser, CompilationUnit unit, TypeDeclaration classOrEnum) {
+        super.onParseClassStart(jParser, unit, classOrEnum);
         if(idlReader != null) {
-            SimpleName name = classOrInterfaceDeclaration.getName();
+            SimpleName name = classOrEnum.getName();
             String nameStr = name.asString();
             IDLClass idlClass = idlReader.getClass(nameStr);
             if(idlClass != null) {
-                Optional<Comment> optionalComment = classOrInterfaceDeclaration.getComment();
+                ClassOrInterfaceDeclaration classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration)classOrEnum;
+                Optional<Comment> optionalComment = classOrEnum.getComment();
                 if(optionalComment.isPresent()) {
                     Comment comment = optionalComment.get();
                     if(comment instanceof BlockComment) {
@@ -119,7 +121,8 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
                 if(generateClass) {
                     IDLEnum idlEnum = idlReader.getEnum(nameStr);
                     if(idlEnum != null) {
-                        IDLEnumParser.generateEnum(this, jParser, unit, classOrInterfaceDeclaration, idlEnum);
+                        EnumDeclaration enumDeclaration = (EnumDeclaration)classOrEnum;
+                        IDLEnumParser.generateEnum(this, jParser, unit, enumDeclaration, idlEnum);
                     }
                 }
             }
@@ -164,7 +167,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
-    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, IDLEnumItem enumItem, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, EnumDeclaration enumDeclaration, IDLEnumItem enumItem, MethodDeclaration nativeMethodDeclaration) {
     }
 
     public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {

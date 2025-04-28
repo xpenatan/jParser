@@ -27,6 +27,18 @@ public class IDLParameter {
         this.idlFile = idlFile;
     }
 
+    public IDLParameter(IDLAttribute idlAttribute) {
+        this.idlFile = idlAttribute.idlFile;
+        idlType = idlAttribute.idlType;
+        name = idlAttribute.name;
+        isArray = idlAttribute.isArray;
+        isRef = false;
+        isConst = idlAttribute.isConst;
+        isValue = idlAttribute.isValue;
+        isAny = idlAttribute.isAny;
+        idlClassOrEnum = idlAttribute.idlClassOrEnum;
+    }
+
     public void initParameter(String line) {
         line = IDLHelper.removeMultipleSpaces(line);
         this.line = line;
@@ -92,6 +104,10 @@ public class IDLParameter {
 
     public String getJavaType() {
         return IDLHelper.getJavaType(idlType);
+    }
+
+    public boolean isEnum() {
+        return idlClassOrEnum != null && idlClassOrEnum.isEnum();
     }
 
     public IDLParameter clone() {

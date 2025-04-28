@@ -8,6 +8,7 @@ import com.github.xpenatan.jparser.example.testlib.CallbackExceptionManual;
 import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.IDLArrayTestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.TestAttributeArrayClass;
+import com.github.xpenatan.jparser.example.testlib.TestAttributeClass;
 import com.github.xpenatan.jparser.example.testlib.TestCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestConstructorClass;
 import com.github.xpenatan.jparser.example.testlib.TestEnumClassWithinClass;
@@ -57,9 +58,9 @@ public class TestLib {
 
     private static boolean testEnum() {
         {
-            int testEnum = TestEnumClassWithinClass.testEnum;
+            TestEnumClassWithinClass testEnum = TestEnumClassWithinClass.testEnum;
             try {
-                if(!(testEnum == 35)) {
+                if(!(testEnum.getValue() == 35)) {
                     throw new RuntimeException("testEnum Error: !(testEnum == 35)");
                 }
             } catch(Throwable e) {
@@ -68,9 +69,9 @@ public class TestLib {
             }
         }
         {
-            int testDefault = TestEnumLib.TEST_DEFAULT;
+            TestEnumLib testDefault = TestEnumLib.TEST_DEFAULT;
             try {
-                if(!(testDefault == 7)) {
+                if(!(testDefault.getValue() == 7)) {
                     throw new RuntimeException("testEnum Error: !(testDefault == 7)");
                 }
             } catch(Throwable e) {
@@ -79,9 +80,9 @@ public class TestLib {
             }
         }
         {
-            int eVal = TestEnumWithinClass.e_val_renamed;
+            TestEnumWithinClass eVal = TestEnumWithinClass.e_val_renamed;
             try {
-                if(!(eVal == 34)) {
+                if(!(eVal.getValue() == 34)) {
                     throw new RuntimeException("testEnum Error: !(eVal == 34)");
                 }
             } catch(Throwable e) {
@@ -130,7 +131,7 @@ public class TestLib {
             int intValue02 = 47;
             float floatValue01 = 42.5f;
             float floatValue02 = 72.9f;
-            TestConstructorClass test = new TestConstructorClass(intValue01, intValue02, floatValue01, floatValue02);
+            TestConstructorClass test = new TestConstructorClass(intValue01, intValue02, floatValue01, floatValue02, TestEnumLib.TEST_SECOND);
             try {
                 if(!(test.get_intValue01() == intValue01)) {
                     throw new RuntimeException("testConstructorClass Error: test.get_intValue01() == intValue01");
@@ -143,6 +144,9 @@ public class TestLib {
                 }
                 if(!(test.get_floatValue02() == floatValue02)) {
                     throw new RuntimeException("testConstructorClass Error: test.get_floatValue02() == floatValue02");
+                }
+                if(!(test.get_enumValue() == TestEnumLib.TEST_SECOND)) {
+                    throw new RuntimeException("test.get_enumValue() == TestEnumLib.TEST_SECOND");
                 }
             } catch(Throwable e) {
                 e.printStackTrace();
@@ -157,7 +161,7 @@ public class TestLib {
             float floatValue01 = 42.5f;
             float floatValue02 = 72.9f;
             boolean boolValue01 = true;
-            TestConstructorClass test = new TestConstructorClass(intValue01, intValue02, floatValue01, floatValue02, boolValue01);
+            TestConstructorClass test = new TestConstructorClass(intValue01, intValue02, floatValue01, floatValue02, TestEnumLib.TEST_SECOND, boolValue01);
             try {
                 if(!(test.get_intValue01() == intValue01)) {
                     throw new RuntimeException("testConstructorClass Error: test.get_intValue01() == intValue01");
@@ -170,6 +174,9 @@ public class TestLib {
                 }
                 if(!(test.get_floatValue02() == floatValue02)) {
                     throw new RuntimeException("testConstructorClass Error: test.get_floatValue02() == floatValue02");
+                }
+                if(!(test.get_enumValue() == TestEnumLib.TEST_SECOND)) {
+                    throw new RuntimeException("test.get_enumValue() == TestEnumLib.TEST_SECOND");
                 }
                 if(!(test.get_boolValue01() == boolValue01)) {
                     throw new RuntimeException("testConstructorClass Error: test.get_boolValue01() == boolValue01");
@@ -185,6 +192,19 @@ public class TestLib {
     }
 
     private static boolean testStringConstructorClass() {
+        {
+            TestAttributeClass test = new TestAttributeClass();
+            try {
+                test.set_enumValue(TestEnumLib.TEST_FIRST);
+                if(!(test.get_enumValue() == TestEnumLib.TEST_FIRST)) {
+                    throw new RuntimeException("test.get_enumValue() == TestEnumLib.TEST_FIRST)");
+                }
+            } catch(Throwable e){
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+        }
 
         return true;
     }
@@ -322,6 +342,21 @@ public class TestLib {
                 long retLongLongValue01 = test.getLongLongValue01();
                 if(!(longLongValue01 == retLongLongValue01)) {
                     throw new RuntimeException("longLongValue01 == retLongLongValue01");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
+        {
+            TestMethodClass test = new TestMethodClass();
+            try {
+                test.setMethod09(TestEnumLib.TEST_SECOND);
+                TestEnumLib retEnum = test.getEnumValue();
+                if(!(TestEnumLib.TEST_SECOND == retEnum)) {
+                    throw new RuntimeException("TestEnumLib.TEST_SECOND == retEnum");
                 }
             } catch(Throwable e) {
                 e.printStackTrace();

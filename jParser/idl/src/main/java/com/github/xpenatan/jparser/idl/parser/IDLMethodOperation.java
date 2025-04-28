@@ -13,6 +13,7 @@ public class IDLMethodOperation {
         boolean isReturnRef = idlMethod.isReturnRef;
         boolean isReturnValue = idlMethod.isReturnValue;
         Type returnType = methodDeclaration.getType();
+        boolean isReturnTypeEnum = idlMethod.returnClassType != null && idlMethod.returnClassType.isEnum();
         NodeList<Parameter> parameters = methodDeclaration.getParameters();
 
         if(returnType.isVoidType()) {
@@ -23,7 +24,7 @@ public class IDLMethodOperation {
                 return Op.CALL_VOID;
             }
         }
-        else if(returnType.isClassOrInterfaceType()) {
+        else if(!isReturnTypeEnum && returnType.isClassOrInterfaceType()) {
             if(isReturnRef) {
                 if(isStatic) {
                     return Op.GET_OBJ_REF_POINTER_STATIC;

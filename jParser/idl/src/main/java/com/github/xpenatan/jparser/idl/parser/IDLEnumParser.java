@@ -3,7 +3,8 @@ package com.github.xpenatan.jparser.idl.parser;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumConstantDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -15,19 +16,19 @@ import java.util.Optional;
 
 public class IDLEnumParser {
 
-    public static void generateEnum(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, IDLEnum idlEnum) {
+    public static void generateEnum(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, EnumDeclaration enumDeclaration, IDLEnum idlEnum) {
         for(IDLEnumItem enumItem : idlEnum.enums) {
-            generateField(idlParser, jParser, idlEnum, unit, classDeclaration, enumItem);
+            generateField(idlParser, jParser, idlEnum, unit, enumDeclaration, enumItem);
         }
     }
 
-    private static void generateField(IDLDefaultCodeParser idlParser, JParser jParser, IDLEnum idlEnum, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, IDLEnumItem enumItem) {
+    private static void generateField(IDLDefaultCodeParser idlParser, JParser jParser, IDLEnum idlEnum, CompilationUnit unit, EnumDeclaration enumDeclaration, IDLEnumItem enumItem) {
         String enumVar = enumItem.name;
         if(enumVar.contains("::")) {
             enumVar = enumVar.split("::")[1];
         }
 
-        Optional<FieldDeclaration> fieldByName = classDeclaration.getFieldByName(enumVar);
+        Optional<FieldDeclaration> fieldByName = enumDeclaration.getFieldByName(enumVar);
         if(fieldByName.isEmpty()) {
             Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
             MethodCallExpr expression = new MethodCallExpr();
@@ -40,15 +41,18 @@ public class IDLEnumParser {
             if(name != null) {
                 enumVar = name;
             }
-            FieldDeclaration fieldDeclaration = classDeclaration.addFieldWithInitializer(intType, enumVar, expression, Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL);
+
+            EnumConstantDeclaration enumConstantDeclaration = enumDeclaration.addEnumConstant(enumVar);
+
+            enumConstantDeclaration.addArgument(nativeMethodName + "()");
 
             MethodDeclaration nativeMethod = new MethodDeclaration();
             nativeMethod.setName(nativeMethodName);
             nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
             nativeMethod.removeBody();
             nativeMethod.setType(intType);
-            classDeclaration.getMembers().add(nativeMethod);
-            idlParser.onIDLEnumMethodGenerated(jParser, idlEnum, classDeclaration, enumItem, fieldDeclaration, nativeMethod);
+            enumDeclaration.getMembers().add(nativeMethod);
+            idlParser.onIDLEnumMethodGenerated(jParser, idlEnum, enumDeclaration, enumItem, nativeMethod);
         }
     }
 }

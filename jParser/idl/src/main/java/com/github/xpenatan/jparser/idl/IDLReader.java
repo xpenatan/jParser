@@ -112,6 +112,17 @@ public class IDLReader {
         reader.fileArray.add(idlFile);
     }
 
+    public static void addIDLRef(IDLReader reader, String idlDir) {
+        try {
+            idlDir = new File(idlDir).getCanonicalPath() + File.separator;
+        } catch(IOException e) {
+            throw new RuntimeException("IDL file not found: " + idlDir);
+        }
+        IDLFile idlFile = parseFile(idlDir);
+        idlFile.skip = true;
+        reader.fileArray.add(idlFile);
+    }
+
     public static IDLFile parseFile(String path) {
         path = path.replace("\\", File.separator);
         File file = new File(path);    //creates a new file instance
@@ -237,6 +248,13 @@ public class IDLReader {
             IDLClassOrEnum idlClassOrEnum = classList.get(i);
             if(idlClassOrEnum.isClass()) {
                 IDLClass idlClass = idlClassOrEnum.asClass();
+                for(IDLConstructor constructor : idlClass.constructors) {
+                    for(IDLParameter parameter : constructor.parameters) {
+                        String idlType = parameter.idlType.replace("[]", "");
+                        IDLClassOrEnum childClassOrEnum = idlReader.getClassOrEnum(idlType);
+                        parameter.idlClassOrEnum = childClassOrEnum;
+                    }
+                }
                 for(IDLAttribute attribute : idlClass.attributes) {
                     String idlType = attribute.idlType;
                     IDLClassOrEnum childClassOrEnum = idlReader.getClassOrEnum(idlType);

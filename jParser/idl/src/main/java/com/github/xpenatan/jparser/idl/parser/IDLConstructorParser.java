@@ -19,6 +19,8 @@ import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.IDLParameter;
+import com.github.xpenatan.jparser.idl.IDLReader;
+import com.github.xpenatan.jparser.idl.parser.data.IDLParameterData;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -33,7 +35,7 @@ public class IDLConstructorParser {
                 ConstructorDeclaration constructorDeclaration = IDLConstructorParser.getOrCreateConstructorDeclaration(idlParser, jParser, unit, classOrInterfaceDeclaration, idlConstructor);
 
                 if(constructorDeclaration.getBody().isEmpty()) {
-                    MethodDeclaration nativeMethod = IDLConstructorParser.setupConstructor(idlConstructor, classOrInterfaceDeclaration, constructorDeclaration);
+                    MethodDeclaration nativeMethod = IDLConstructorParser.setupConstructor(idlParser.idlReader, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration);
                     idlParser.onIDLConstructorGenerated(jParser, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration, nativeMethod);
                 }
             }
@@ -88,7 +90,6 @@ public class IDLConstructorParser {
             for(int i = 0; i < parameters.size(); i++) {
                 IDLParameter parameter = parameters.get(i);
                 String paramType = parameter.getJavaType();
-                paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
                 JParserHelper.addMissingImportType(jParser, unit, paramType);
                 constructorDeclaration.addAndGetParameter(paramType, parameter.name);
             }
@@ -96,7 +97,7 @@ public class IDLConstructorParser {
         return constructorDeclaration;
     }
 
-    public static MethodDeclaration setupConstructor(IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
+    public static MethodDeclaration setupConstructor(IDLReader idlReader, IDLConstructor idlConstructor, ClassOrInterfaceDeclaration classDeclaration, ConstructorDeclaration constructorDeclaration) {
         NodeList<Parameter> parameters = constructorDeclaration.getParameters();
         Type type = StaticJavaParser.parseType(classDeclaration.getNameAsString());
         boolean isStatic = true;
@@ -114,8 +115,19 @@ public class IDLConstructorParser {
             additionalName += "_" + typeName;
         }
 
+        ArrayList<IDLParameterData> parameterArray = new ArrayList<>();
+        ArrayList<IDLParameter> idlParameters = idlConstructor.parameters;
+        for(int i = 0; i < parameters.size(); i++) {
+            Parameter parameter = parameters.get(i);
+            IDLParameter idlParameter = idlParameters.get(i);
+            IDLParameterData data = new IDLParameterData();
+            data.parameter = parameter;
+            data.idlParameter = idlParameter;
+            parameterArray.add(data);
+        }
+
         String methodName = "create" + additionalName;
-        MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(methodName, parameters, type, isStatic);
+        MethodDeclaration nativeMethod = IDLMethodParser.generateNativeMethod(idlReader, methodName, parameterArray, type, isStatic);
 
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethod)) {
             //Add native method if it does not exist
@@ -126,7 +138,7 @@ public class IDLConstructorParser {
             BlockStmt blockStmt = constructorDeclaration.getBody();
             IDLMethodParser.NativeMethodData paramData = new IDLMethodParser.NativeMethodData();
             paramData.isStatic = isStatic;
-            IDLMethodParser.setupCallerParam(paramData, caller, parameters, idlConstructor.parameters);
+            IDLMethodParser.setupCallerParam(idlReader, paramData, caller, parameters, idlConstructor.parameters);
 
             String isMemoryOwned = String.valueOf(!idlConstructor.idlClass.classHeader.isNoDelete);
 

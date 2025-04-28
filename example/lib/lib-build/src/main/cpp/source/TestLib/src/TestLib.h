@@ -7,6 +7,46 @@
 
 using namespace std;
 
+namespace TestNamespace {
+    class TestNamespaceClass {
+        private:
+        public:
+            int intValue01;
+
+            void setMethod01Value(int intValue01) {
+                this->intValue01 = intValue01;
+            }
+            int getMethod01Value() {
+                return intValue01;
+            }
+    };
+};
+
+class TestEnumClass {
+    private:
+
+    public:
+        enum TestEnumWithinClass {
+            e_val = 34
+        };
+
+        enum class TestEnumClassWithinClass {
+            testEnum = 35
+        };
+};
+
+namespace TestEnumNamespace {
+    enum TestEnumInNamespace {
+        e_namespace_val = 78
+    };
+};
+
+enum TestEnumLib : int {
+    TEST_DEFAULT = 7,
+    TEST_FIRST,
+    TEST_SECOND
+};
+
 class TestObjectClass {
     private:
 
@@ -41,6 +81,7 @@ class TestAttributeClass {
         TestObjectClass valueObject;
         TestObjectClass* pointerObject;
         TestObjectClass* nullPointerObject;
+        TestEnumLib enumValue;
 
         TestAttributeClass(): readOnlyIntValue01(7) {
             pointerObject = new TestObjectClass();
@@ -71,6 +112,7 @@ class TestConstructorClass {
         float floatValue01;
         float floatValue02;
         bool boolValue01;
+        TestEnumLib enumValue;
 
         TestConstructorClass(int intValue01) {
             this->intValue01 = intValue01;
@@ -79,12 +121,13 @@ class TestConstructorClass {
             this->floatValue01 = floatValue01;
             this->intValue01 = intValue01;
         };
-        TestConstructorClass(int intValue01, int intValue02, float floatValue01, float floatValue02, bool boolValue01 = true) {
+        TestConstructorClass(int intValue01, int intValue02, float floatValue01, float floatValue02, TestEnumLib enumValue, bool boolValue01 = true) {
             this->intValue01 = intValue01;
             this->intValue02 = intValue02;
             this->floatValue01 = floatValue01;
             this->floatValue02 = floatValue02;
             this->boolValue01 = boolValue01;
+            this->enumValue = enumValue;
         };
         TestConstructorClass(int intValue01, int* intArraySize2, float* floatArraySize2) {
             this->intValue01 = intValue01;
@@ -131,6 +174,7 @@ class TestMethodClass {
         TestObjectClass** pointerObjectArray;
         TestObjectClass refObject01;
         TestObjectClass refObject02;
+        TestEnumLib enumValue;
     public:
         TestMethodClass() {
             pointerObject01 = NULL;
@@ -185,6 +229,9 @@ class TestMethodClass {
         void setMethod08(long long longLongValue01) {
             this->longLongValue01 = longLongValue01;
         };
+        void setMethod09(TestEnumLib enumValue) {
+            this->enumValue = enumValue;
+        };
 
         int getIntValue01() { return intValue01; };
         int getIntValue02() { return intValue02; };
@@ -199,6 +246,7 @@ class TestMethodClass {
         TestObjectClass& getRefObject02() { return refObject02; };
         TestObjectClass getValueObject() { return refObject02; };
         long long getLongLongValue01() { return longLongValue01; };
+        TestEnumLib getEnumValue() { return enumValue; };
 };
 
 class TestOperatorClass {
@@ -332,6 +380,7 @@ public:
     virtual float onFloatCallback(float floatValue01, float Value02) const = 0;
     virtual bool onBoolCallback(bool boolValue01) const = 0;
     virtual void onStringCallback(const char* strValue01) const = 0;
+    virtual void onStdStringCallback(std::string* data) const = 0;
     virtual unsigned int onUnsignedIntCallback(unsigned int unsignedInt) = 0;
     virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const = 0;
     virtual void onAnyCallback_1(void * anyPtr) const = 0;
@@ -366,6 +415,8 @@ public:
         return !boolValue01;
     }
     virtual void onStringCallback(const char* strValue01) const {
+    }
+    virtual void onStdStringCallback(std::string* data) const {
     }
     virtual unsigned int onUnsignedIntCallback(unsigned int unsignedInt) {
         return 10;
@@ -426,6 +477,9 @@ class TestCallbackClass {
             const char* text = strValue01.c_str();
             callback->onStringCallback(text);
         };
+        void callIDLStringCallback(CallbackClass* callback) {
+            callback->onStdStringCallback(&strValue01);
+        };
         unsigned int callUnsignedIntCallback(CallbackClass* callback) {
             unsigned int value = 13;
             return callback->onUnsignedIntCallback(value);
@@ -473,44 +527,4 @@ class TestExceptionManual {
         void callJavaMethod(CallbackExceptionManual* callback) {
             callback->callJava();
         };
-};
-
-namespace TestNamespace {
-    class TestNamespaceClass {
-        private:
-        public:
-            int intValue01;
-
-            void setMethod01Value(int intValue01) {
-                this->intValue01 = intValue01;
-            }
-            int getMethod01Value() {
-                return intValue01;
-            }
-    };
-};
-
-class TestEnumClass {
-    private:
-
-    public:
-        enum TestEnumWithinClass {
-            e_val = 34
-        };
-
-        enum class TestEnumClassWithinClass {
-            testEnum = 35
-        };
-};
-
-namespace TestEnumNamespace {
-    enum TestEnumInNamespace {
-        e_namespace_val = 78
-    };
-};
-
-enum TestEnumLib : int {
-    TEST_DEFAULT = 7,
-    TEST_FIRST,
-    TEST_SECOND
 };

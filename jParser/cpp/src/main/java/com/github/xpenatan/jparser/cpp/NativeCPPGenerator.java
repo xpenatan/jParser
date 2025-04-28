@@ -2,9 +2,9 @@ package com.github.xpenatan.jparser.cpp;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
@@ -159,10 +159,10 @@ public class NativeCPPGenerator implements CppGenerator {
     public void addNativeCode(MethodDeclaration nativeMethod, String content) {
         String methodName = nativeMethod.getNameAsString();
         boolean isStatic = nativeMethod.isStatic();
-        ClassOrInterfaceDeclaration classDeclaration = (ClassOrInterfaceDeclaration)nativeMethod.getParentNode().get();
-        CompilationUnit compilationUnit = classDeclaration.findCompilationUnit().get();
+        TypeDeclaration classOrEnum = (TypeDeclaration)nativeMethod.getParentNode().get();
+        CompilationUnit compilationUnit = classOrEnum.findCompilationUnit().get();
         String packageName = compilationUnit.getPackageDeclaration().get().getNameAsString();
-        String className = classDeclaration.getNameAsString();
+        String className = classOrEnum.getNameAsString();
         String packageNameCPP = packageName.replace(".", "_");
         String returnTypeStr = nativeMethod.getType().toString();
         String returnType = returnTypeStr.equals("void") ? returnTypeStr : getType(returnTypeStr).getJniType();

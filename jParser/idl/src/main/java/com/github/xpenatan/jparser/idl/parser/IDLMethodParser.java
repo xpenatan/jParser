@@ -8,6 +8,7 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -27,9 +28,12 @@ import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
+import com.github.xpenatan.jparser.idl.IDLReader;
+import com.github.xpenatan.jparser.idl.parser.data.IDLParameterData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +44,14 @@ public class IDLMethodParser {
 
     // Return null. There are cases where C++ code return a null pointer
     static final String NULL_POINTER = "return null;";
+
+    static final String GET_ENUM_TEMPLATE =
+            "{\n" +
+            "    int value = [METHOD];\n" +
+            "    return [TYPE].MAP.get(value);\n" +
+            "}";
+
+    static final String CALLBACK_ENUM_TEMPLATE = "[TYPE].MAP.get([PARAM])";
 
     static final String GET_OBJECT_TEMPLATE =
             "{\n" +
@@ -118,14 +130,13 @@ public class IDLMethodParser {
             IDLParameter idlParameter = parameters.get(i);
             String paramType = idlParameter.getJavaType();
             String paramName = idlParameter.name;
-            paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
             Parameter parameter = methodDeclaration.addAndGetParameter(paramType, paramName);
             Type type = parameter.getType();
             JParserHelper.addMissingImportType(jParser, unit, type);
         }
 
         if(returnType == null) {
-            String returnTypeStr = IDLHelper.convertEnumToInt(idlParser.idlReader, idlMethod.getJavaReturnType());
+            String returnTypeStr = idlMethod.getJavaReturnType();
             returnType = StaticJavaParser.parseType(returnTypeStr);
         }
         methodDeclaration.setType(returnType);
@@ -178,16 +189,32 @@ public class IDLMethodParser {
             IDLClass aClass = idlMethod.returnClassType.asClass();
             methodData.isNoDelete = aClass.classHeader.isNoDelete;
         }
-        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(methodData, classDeclaration, methodDeclaration, idlMethod.name, idlMethod.operator, idlMethod.parameters);
+        IDLReader idlReader = idlParser.idlReader;
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.prepareNativeMethod(idlReader, methodData, classDeclaration, methodDeclaration, idlMethod.name, idlMethod.operator, idlMethod.parameters);
         if(nativeMethodDeclaration != null) {
             idlParser.onIDLMethodGenerated(jParser, idlMethod, classDeclaration, methodDeclaration, nativeMethodDeclaration);
         }
     }
 
-    public static MethodDeclaration prepareNativeMethod(NativeMethodData paramData, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator, ArrayList<IDLParameter> idlParameters) {
+    public static MethodDeclaration prepareNativeMethod(IDLReader idlReader, NativeMethodData paramData, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator, ArrayList<IDLParameter> idlParameters) {
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
         Type methodReturnType = methodDeclaration.getType();
-        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(methodName, methodParameters, methodReturnType, methodDeclaration.isStatic());
+
+        ArrayList<IDLParameterData> parameterArray = new ArrayList<>();
+        for(int i = 0; i < methodParameters.size(); i++) {
+            Parameter parameter = methodParameters.get(i);
+            IDLParameterData data = new IDLParameterData();
+            data.parameter = parameter;
+            if(idlParameters != null) {
+//                if((!(i < idlParameters.size()))) {
+//                    System.out.println();
+//                }
+                data.idlParameter = idlParameters.get(i);
+            }
+            parameterArray.add(data);
+        }
+
+        MethodDeclaration nativeMethodDeclaration = generateNativeMethod(idlReader, methodName, parameterArray, methodReturnType, methodDeclaration.isStatic());
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             //Add native method if it does not exist
             classDeclaration.getMembers().add(nativeMethodDeclaration);
@@ -197,20 +224,20 @@ public class IDLMethodParser {
 
             if(methodReturnType.isVoidType()) {
                 // void types just call the method.
-                IDLMethodParser.setupCallerParam(paramData, caller, methodDeclaration.getParameters(), idlParameters);
+                IDLMethodParser.setupCallerParam(idlReader, paramData, caller, methodDeclaration.getParameters(), idlParameters);
                 BlockStmt blockStmt = methodDeclaration.getBody().get();
                 blockStmt.addStatement(caller);
             }
             else if(methodReturnType.isClassOrInterfaceType()) {
                 // Class object needs to generate some additional code.
                 // Needs to obtain the pointer and return a temp object.
-                BlockStmt blockStmt = IDLMethodParser.generateTempObjects(paramData, classDeclaration, methodDeclaration, caller, operator, idlParameters);
+                BlockStmt blockStmt = IDLMethodParser.generateReturnObject(idlReader, paramData, classDeclaration, methodDeclaration, caller, operator, idlParameters);
                 methodDeclaration.setBody(blockStmt);
             }
             else {
                 // Should be a primitive return type.
                 ReturnStmt returnStmt = IDLMethodParser.getReturnStmt(methodDeclaration);
-                IDLMethodParser.setupCallerParam(paramData, caller, methodDeclaration.getParameters(), idlParameters);
+                IDLMethodParser.setupCallerParam(idlReader, paramData, caller, methodDeclaration.getParameters(), idlParameters);
                 returnStmt.setExpression(caller);
             }
             return nativeMethodDeclaration;
@@ -225,7 +252,7 @@ public class IDLMethodParser {
         return caller;
     }
 
-    public static void setupCallerParam(NativeMethodData paramData, MethodCallExpr caller, NodeList<Parameter> methodParameters, ArrayList<IDLParameter> idlParameters) {
+    public static void setupCallerParam(IDLReader idlReader, NativeMethodData paramData, MethodCallExpr caller, NodeList<Parameter> methodParameters, ArrayList<IDLParameter> idlParameters) {
         boolean isAttribute = idlParameters == null;
 
         if(!paramData.isStatic) {
@@ -238,10 +265,12 @@ public class IDLMethodParser {
                 idlParameter = idlParameters.get(i);
             }
             Type type = parameter.getType();
+            String typeName = type.asString();
             SimpleName name = parameter.getName();
             String variableName = name.getIdentifier();
             String paramName = parameter.getNameAsString();
-            if(type.isClassOrInterfaceType()) {
+            IDLEnum idlEnum = idlReader.getEnum(typeName);
+            if(idlEnum == null && type.isClassOrInterfaceType()) {
                 boolean isArray = true;
                 if(idlParameter != null) {
                     //TODO create IDLParameter when is comming from attribute
@@ -258,6 +287,9 @@ public class IDLMethodParser {
                     paramName =  "(long)(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
             }
+            else if(idlEnum != null) {
+                paramName =  "(long)(" + variableName + " != null ? " + variableName + ".getValue() : 0)";
+            }
             else if(type.isArrayType()) {
                 //TODO implement array call
             }
@@ -266,14 +298,22 @@ public class IDLMethodParser {
         }
     }
 
-    private static BlockStmt generateTempObjects(NativeMethodData paramData, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodCallExpr caller, String operator, ArrayList<IDLParameter> idlParameters) {
+    private static BlockStmt generateReturnObject(IDLReader idlReader, NativeMethodData paramData, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodCallExpr caller, String operator, ArrayList<IDLParameter> idlParameters) {
         Type methodReturnType = methodDeclaration.getType();
         String className = classDeclaration.getNameAsString();
         String returnTypeName = methodReturnType.toString();
         String newBody = null;
 
+
+        IDLClass idlClass = idlReader.getClass(returnTypeName);
+        IDLEnum idlEnum = idlReader.getEnum(returnTypeName);
+
         boolean isStatic = methodDeclaration.isStatic();
         boolean isRetSameAsClass = false;
+        boolean isEnum = idlEnum != null;
+
+        IDLMethodParser.setupCallerParam(idlReader, paramData, caller, methodDeclaration.getParameters(), idlParameters);
+
         boolean isReturnMemOwned = paramData.isReturnMemoryOwned;
         if(paramData.isNoDelete) {
             // When NoDelete it means that the library is responsible to delete it.
@@ -285,11 +325,13 @@ public class IDLMethodParser {
             isRetSameAsClass = true;
         }
 
-        IDLMethodParser.setupCallerParam(paramData, caller, methodDeclaration.getParameters(), idlParameters);
-
         String methodCaller = caller.toString();
-
-        if(isRetSameAsClass) {
+        if(isEnum) {
+                newBody = GET_ENUM_TEMPLATE
+                        .replace(TEMPLATE_TAG_METHOD, methodCaller)
+                        .replace(TEMPLATE_TAG_TYPE, returnTypeName);
+        }
+        else if(isRetSameAsClass) {
             newBody = OPERATOR_OBJECT_TEMPLATE
                     .replace(TEMPLATE_TAG_METHOD, methodCaller);
         }
@@ -375,7 +417,7 @@ public class IDLMethodParser {
         }
     }
 
-    public static MethodDeclaration generateNativeMethod(String methodName, NodeList<Parameter> methodParameters, Type methodReturnType, boolean isStatic) {
+    public static MethodDeclaration generateNativeMethod(IDLReader idlReader, String methodName, ArrayList<IDLParameterData> methodParameters, Type methodReturnType, boolean isStatic) {
         boolean isClassOrInterfaceType = methodReturnType.isClassOrInterfaceType();
 
         // Clone some generated idl method settings
@@ -384,16 +426,23 @@ public class IDLMethodParser {
         nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
         nativeMethod.removeBody();
 
+        IDLEnum isEnum = idlReader.getEnum(methodReturnType.asString());
+
         if(!isStatic) {
             // Only generate addr if it's not a static method
             nativeMethod.addParameter("long", "this_addr");
         }
 
         for(int i = 0; i < methodParameters.size(); i++) {
-            Parameter parameter = methodParameters.get(i);
+            IDLParameterData idlParameterData = methodParameters.get(i);
+            Parameter parameter = idlParameterData.parameter;
             String nameAsString = parameter.getNameAsString();
             Type type = parameter.getType();
-            if(type.isPrimitiveType() || IDLHelper.isString(type)) {
+            if(idlParameterData.isEnum()) {
+                Type longType = StaticJavaParser.parseType(long.class.getSimpleName());
+                nativeMethod.addParameter(longType, nameAsString);
+            }
+            else if(type.isPrimitiveType() || IDLHelper.isString(type)) {
                 nativeMethod.addParameter(type.clone(), nameAsString);
             }
             else {
@@ -401,7 +450,11 @@ public class IDLMethodParser {
                 nativeMethod.addParameter("long", pointerMethod);
             }
         }
-        if(isClassOrInterfaceType) {
+        if(isEnum != null) {
+            Type type = StaticJavaParser.parseType(int.class.getSimpleName());
+            nativeMethod.setType(type);
+        }
+        else if(isClassOrInterfaceType) {
             // If the return type is an object we need to return a pointer.
             Type type = StaticJavaParser.parseType(long.class.getSimpleName());
             nativeMethod.setType(type);
@@ -433,7 +486,6 @@ public class IDLMethodParser {
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);
             String paramType = parameter.getJavaType();
-            paramType = IDLHelper.convertEnumToInt(idlParser.idlReader, paramType);
             paramTypes[i] = paramType;
         }
         List<MethodDeclaration> methods = JParserHelper.getMethodsByName(classOrInterfaceDeclaration, idlMethod.name);

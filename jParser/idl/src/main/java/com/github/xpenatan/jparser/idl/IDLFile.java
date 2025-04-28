@@ -7,6 +7,8 @@ import java.util.ArrayList;
  */
 public class IDLFile {
 
+    public boolean skip = false;
+
     public final String idlName;
 
     public ArrayList<String> lines = new ArrayList<>();

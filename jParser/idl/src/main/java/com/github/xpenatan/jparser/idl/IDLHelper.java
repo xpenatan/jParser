@@ -21,15 +21,6 @@ public class IDLHelper {
         return type.toString().equals("String");
     }
 
-    public static String convertEnumToInt(IDLReader idlReader, String type) {
-        IDLEnum idlEnum = idlReader.getEnum(type);
-        if(idlEnum != null) {
-            // if parameter is enum then convert to int.
-            type = "int";
-        }
-        return type;
-    }
-
     public static String getTags(String line) {
         line = line.trim();
         int startIndex = line.indexOf("[");

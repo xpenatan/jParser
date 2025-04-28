@@ -6,9 +6,10 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.Type;
@@ -30,6 +31,8 @@ import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodParser;
+import com.github.xpenatan.jparser.idl.parser.data.IDLMethodData;
+import com.github.xpenatan.jparser.idl.parser.data.IDLParameterData;
 import java.util.ArrayList;
 
 public class CppCodeParser extends IDLDefaultCodeParser {
@@ -395,7 +398,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, ClassOrInterfaceDeclaration classDeclaration, IDLEnumItem enumItem, FieldDeclaration fieldDeclaration, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, EnumDeclaration enumDeclaration, IDLEnumItem enumItem, MethodDeclaration nativeMethodDeclaration) {
         String enumStr = enumItem.name;
         String content  = "";
         content = ENUM_GET_INT_TEMPLATE.replace(TEMPLATE_TAG_ENUM, enumStr);
@@ -407,9 +410,16 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     @Override
     public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
         NodeList<Parameter> methodParameters = callbackDeclaration.getParameters();
+        ArrayList<IDLParameterData> parameterArray = new ArrayList<>();
+        for(int i = 0; i < methodParameters.size(); i++) {
+            Parameter parameter = methodParameters.get(i);
+            IDLParameterData data = new IDLParameterData();
+            data.parameter = parameter;
+            parameterArray.add(data);
+        }
         IDLClass idlCallbackClass = idlClass.callbackImpl;
         Type methodReturnType = callbackDeclaration.getType();
-        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.generateNativeMethod(callbackDeclaration.getNameAsString(), methodParameters, methodReturnType, false);
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.generateNativeMethod(idlReader, callbackDeclaration.getNameAsString(), parameterArray, methodReturnType, false);
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             nativeMethodDeclaration.removeModifier(Modifier.Keyword.STATIC);
 
@@ -591,7 +601,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                         tag = "& ";
                         callParamCast = "(jlong)&";
                     }
-                    else if(!isPrimitive && !idlParameter.isValue) {
+                    else if(!idlParameter.isEnum() && !isPrimitive && !idlParameter.isValue) {
                         tag = "* ";
                         callParamCast = "(jlong)";
                     }
@@ -794,13 +804,14 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         String paramName = idlParameter.name;
         String cppType = idlParameter.getCPPType();
         String classType = cppType;
+        boolean isEnum = idlParameter.isEnum();
         boolean isAny = idlParameter.isAny;
         boolean isRef = idlParameter.isRef;
         boolean isValue = idlParameter.isValue;
         boolean isArray = idlParameter.isArray;
         boolean isObject = type.isClassOrInterfaceType();
 
-        if(isObject && !classType.equals("char*")) {
+        if(!isEnum && isObject && !classType.equals("char*")) {
             String idlArrayOrNull = IDLHelper.getIDLArrayClassOrNull(classType);
             if(idlArrayOrNull != null) {
                 classType = idlArrayOrNull;
@@ -876,8 +887,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    public void onParseClassStart(JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
-        String nameAsString = classOrInterfaceDeclaration.getNameAsString();
+    public void onParseClassStart(JParser jParser, CompilationUnit unit, TypeDeclaration classOrEnum) {
+        String nameAsString = classOrEnum.getNameAsString();
 
         String include = classCppPath.get(nameAsString);
 
@@ -896,7 +907,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 //            classOrInterfaceDeclaration.getMembers().add(0, blockComment);
 //        }
 
-        super.onParseClassStart(jParser, unit, classOrInterfaceDeclaration);
+        super.onParseClassStart(jParser, unit, classOrEnum);
     }
 
     @Override
