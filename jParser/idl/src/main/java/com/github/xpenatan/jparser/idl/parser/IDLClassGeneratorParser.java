@@ -226,19 +226,26 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             EnumConstantDeclaration enumConstantDeclaration = enumDeclaration.addEnumConstant("CUSTOM");
             enumConstantDeclaration.addArgument("0");
 
-            Type longType = StaticJavaParser.parseType(int.class.getSimpleName());
-            enumDeclaration.addField(longType, "value", Modifier.Keyword.PRIVATE);
+            Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
+            enumDeclaration.addField(intType, "value", Modifier.Keyword.PRIVATE);
             ConstructorDeclaration constructorDeclaration = enumDeclaration.addConstructor(Modifier.Keyword.PRIVATE);
-            constructorDeclaration.addParameter(longType, "value");
+            constructorDeclaration.addParameter(intType, "value");
             constructorDeclaration.getBody().addStatement("this.value = value;");
 
             MethodDeclaration getMethodDeclaration = enumDeclaration.addMethod("getValue", Modifier.Keyword.PUBLIC);
-            getMethodDeclaration.setType(longType);
+            getMethodDeclaration.setType(intType);
             getMethodDeclaration.getBody().get().addStatement("return value;");
 
             MethodDeclaration setMethodDeclaration = enumDeclaration.addMethod("setValue", Modifier.Keyword.PUBLIC);
-            setMethodDeclaration.addParameter(longType, "value");
-            setMethodDeclaration.getBody().get().addStatement("this.value = value;");
+            setMethodDeclaration.addParameter(intType, "value");
+            setMethodDeclaration.setType(className);
+            BlockStmt blockStmt = setMethodDeclaration.getBody().get();
+            blockStmt.addStatement(
+                    "if(this != CUSTOM) {" +
+                        "throw new RuntimeException(\"Cannot change none CUSTOM value\"); " +
+                    "}");
+            blockStmt.addStatement("this.value = value;");
+            blockStmt.addStatement("return this;");
 
             MethodDeclaration getCustomMethodDeclaration = enumDeclaration.addMethod("getCustom", Modifier.Keyword.PUBLIC);
             getCustomMethodDeclaration.setType(className);
