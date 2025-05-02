@@ -25,6 +25,7 @@ public class BuildToolOptions {
     private String moduleTeavmPath;
     private ArrayList<String> idlPath = new ArrayList<>();
     private ArrayList<String> idlPathRef = new ArrayList<>();
+    private ArrayList<String> additionalSourceDirs = new ArrayList<>();
     private String moduleBaseJavaDir;
     private String sourcePath;
     private String customSourceDir;
@@ -185,6 +186,16 @@ public class BuildToolOptions {
     public String[] getIDLRefPath() {
         String [] path = new String[idlPathRef.size()];
         idlPathRef.toArray(path);
+        return path;
+    }
+
+    public void addAdditionalSourceDirs(String path) {
+        additionalSourceDirs.add(path);
+    }
+
+    public String[] getAdditionalSourceDirs() {
+        String [] path = new String[additionalSourceDirs.size()];
+        additionalSourceDirs.toArray(path);
         return path;
     }
 

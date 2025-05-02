@@ -17,6 +17,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
 
     public String tempBuildDir;
 
+    public final ArrayList<String> additionalSourceDirs = new ArrayList<>();
     private final ArrayList<String> compilerCommands = new ArrayList<>();
     protected final ArrayList<String> linkerCommands = new ArrayList<>();
 
@@ -75,11 +76,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     protected void setup(BuildConfig config) {}
 
     protected boolean build(BuildConfig config, CustomFileDescriptor buildTargetTemp) {
-        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.buildSourceDir, cppInclude, cppExclude, filterCPPSuffix);
-        for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
-            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
-            cppFiles.addAll(cppFiles1);
-        }
+        ArrayList<CustomFileDescriptor> cppFiles = addSources(config);
 
         if(shouldCompile && shouldLink && compile(config, buildTargetTemp, cppFiles)) {
             return link(config, buildTargetTemp);
@@ -93,6 +90,20 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         else {
             return false;
         }
+    }
+
+    protected ArrayList<CustomFileDescriptor> addSources(BuildConfig config) {
+        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.buildSourceDir, cppInclude, cppExclude, filterCPPSuffix);
+        for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
+            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
+            cppFiles.addAll(cppFiles1);
+        }
+        for(String dir : additionalSourceDirs) {
+            CustomFileDescriptor sourceDir = new CustomFileDescriptor(dir);
+            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
+            cppFiles.addAll(cppFiles1);
+        }
+        return cppFiles;
     }
 
     protected boolean compile(BuildConfig config, CustomFileDescriptor buildTargetTemp, ArrayList<CustomFileDescriptor> cppFiles) {
