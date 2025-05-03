@@ -1,15 +1,17 @@
 package emu.com.github.xpenatan.jparser.loader;
 
-import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetInstance;
-import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoader;
-import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoaderListener;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
 import java.util.HashSet;
 import javax.script.ScriptException;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSFunctor;
+import org.teavm.jso.browser.Window;
+import org.teavm.jso.dom.html.HTMLDocument;
+import org.teavm.jso.dom.html.HTMLScriptElement;
 
 public class JParserLibraryLoader {
+
+    public static String PREFIX = "";
 
     private static HashSet<String> loadedLibraries = new HashSet<>();
 
@@ -29,42 +31,62 @@ public class JParserLibraryLoader {
         }
 
         // Try to load wasm first
-        loadWasm(libraryName, listener);
+        loadWasm(libraryName, listener, PREFIX);
     }
 
-    private static void loadWasm(final String libraryName, JParserLibraryLoaderListener listener) {
-        AssetLoader instance = AssetInstance.getLoaderInstance();
-        instance.loadScript(libraryName + ".wasm.js", new AssetLoaderListener<>() {
+    private static void loadWasm(final String libraryName, JParserLibraryLoaderListener listener, String prefix) {
+        loadScript(libraryName, new JParserLibraryLoaderListener() {
             @Override
-            public void onSuccess(String url, String result) {
-                // Wasm requires to setup wasm first
-                String fullLibName = libraryName + "OnInit";
-                setOnLoadInit(fullLibName, () -> {
-                    loadedLibraries.add(libraryName);
-                    listener.onLoad(true, null);
-                });
+            public void onLoad(boolean isSuccess, Exception e) {
+                if(isSuccess) {
+                    // Wasm requires to setup wasm first
+                    String fullLibName = libraryName + "OnInit";
+                    setOnLoadInit(fullLibName, () -> {
+                        loadedLibraries.add(libraryName);
+                        listener.onLoad(true, null);
+                    });
+                }
+                else {
+                    // Fallback to javascript
+                    loadJS(libraryName, listener, prefix);
+                }
             }
-            @Override
-            public void onFailure(String url) {
-                // Fallback to javascript
-                loadJS(libraryName, listener);
-            }
-        });
+        }, prefix, ".wasm.js");
     }
 
-    private static void loadJS(final String libraryName, JParserLibraryLoaderListener listener) {
-        AssetLoader instance = AssetInstance.getLoaderInstance();
-        instance.loadScript(libraryName + ".js", new AssetLoaderListener<>() {
+    private static void loadJS(final String libraryName, JParserLibraryLoaderListener listener, String prefix) {
+        loadScript(libraryName, new JParserLibraryLoaderListener() {
             @Override
-            public void onSuccess(String url, String result) {
-                loadedLibraries.add(libraryName);
-                listener.onLoad(true, null);
+            public void onLoad(boolean isSuccess, Exception e) {
+                if(isSuccess) {
+                    // Wasm requires to setup wasm first
+                    String fullLibName = libraryName + "OnInit";
+                    setOnLoadInit(fullLibName, () -> {
+                        loadedLibraries.add(libraryName);
+                        listener.onLoad(true, null);
+                    });
+                }
+                else {
+                    listener.onLoad(false, e);
+                }
             }
-            @Override
-            public void onFailure(String url) {
-                listener.onLoad(false, new ScriptException("Failed to load script: " + url));
-            }
+        }, prefix, ".js");
+    }
+
+    private static void loadScript(String libraryName, JParserLibraryLoaderListener listener, String prefix, String postfix) {
+        String url = prefix + libraryName + postfix;
+        Window current = Window.current();
+        HTMLDocument document = current.getDocument();
+        HTMLScriptElement scriptElement = (HTMLScriptElement)document.createElement("script");
+        scriptElement.addEventListener("load", event -> {
+            listener.onLoad(true, null);
         });
+        scriptElement.addEventListener("error", (error) -> {
+            String str =  prefix + libraryName;
+            listener.onLoad(false, new ScriptException("Failed to load .wasm.js or .js script: " + str));
+        });
+        scriptElement.setSrc(url);
+        document.getBody().appendChild(scriptElement);
     }
 
     @JSFunctor
