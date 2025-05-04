@@ -1,6 +1,6 @@
 package emu.com.github.xpenatan.jparser.loader;
 
-import com.github.xpenatan.jmultiplaform.core.JMultiplatform;
+import com.github.xpenatan.jmultiplatform.core.JMultiplatform;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoaderPlatform;
 import java.util.HashSet;
@@ -37,7 +37,7 @@ public class JParserLibraryLoader {
             }
         };
 
-        String scriptPath = JMultiplatform.getInstance().getObject(JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH, String.class);
+        String scriptPath = JMultiplatform.getInstance().getMap().getObject(JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH, String.class);
         if(scriptPath != null) {
             if(libraryName.endsWith(".wasm.js")) {
                 loadWasm(lis, libraryName, scriptPath, "", false);
