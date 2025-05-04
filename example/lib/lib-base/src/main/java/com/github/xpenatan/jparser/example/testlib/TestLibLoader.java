@@ -12,6 +12,6 @@ public class TestLibLoader {
     */
 
     public static void init(JParserLibraryLoaderListener listener) {
-        JParserLibraryLoader.load(listener, LIB_NAME);
+        JParserLibraryLoader.load(LIB_NAME, listener);
     }
 }

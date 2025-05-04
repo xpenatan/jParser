@@ -17,11 +17,11 @@ public class JParserLibraryLoader {
 
     private JParserLibraryLoader() {}
 
-    public static void load(JParserLibraryLoaderListener listener, String libraryName) {
-        loadInternal(listener, libraryName);
+    public static void load(String libraryName, JParserLibraryLoaderListener listener) {
+        loadInternal(libraryName, listener);
     }
 
-    private static void loadInternal(JParserLibraryLoaderListener listener, String libraryName) {
+    private static void loadInternal(String libraryName, JParserLibraryLoaderListener listener) {
         if(listener == null) {
             throw new RuntimeException("Should implement listener");
         }
@@ -50,7 +50,9 @@ public class JParserLibraryLoader {
             }
         }
         else {
-            listener.onLoad(false, new ScriptException("JMultiplatform WEB_SCRIPT_PATH is not set"));
+            String platformWebScriptPath = JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH;
+            String error = "JMultiplatform " + platformWebScriptPath + " is not set";
+            listener.onLoad(false, new ScriptException(error));
         }
     }
 
