@@ -2,6 +2,7 @@ package emu.com.github.xpenatan.jparser.loader;
 
 import com.github.xpenatan.jmultiplaform.core.JMultiplatform;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
+import com.github.xpenatan.jparser.loader.JParserLibraryLoaderPlatform;
 import java.util.HashSet;
 import javax.script.ScriptException;
 import org.teavm.jso.JSBody;
@@ -12,21 +13,15 @@ import org.teavm.jso.dom.html.HTMLScriptElement;
 
 public class JParserLibraryLoader {
 
-    private static String WEB_SCRIPT_PATH = "WEB_SCRIPT_PATH";
-
     private static HashSet<String> loadedLibraries = new HashSet<>();
 
     private JParserLibraryLoader() {}
 
     public static void load(JParserLibraryLoaderListener listener, String libraryName) {
-        loadInternal(listener, libraryName, "");
+        loadInternal(listener, libraryName);
     }
 
-    public static void load(JParserLibraryLoaderListener listener, String libraryName, String prefix) {
-        loadInternal(listener, libraryName, prefix);
-    }
-
-    private static void loadInternal(JParserLibraryLoaderListener listener, String libraryName, String prefix) {
+    private static void loadInternal(JParserLibraryLoaderListener listener, String libraryName) {
         if(listener == null) {
             throw new RuntimeException("Should implement listener");
         }
@@ -42,58 +37,52 @@ public class JParserLibraryLoader {
             }
         };
 
-        if(libraryName.endsWith(".wasm.js")) {
-            loadWasm(lis, libraryName, prefix, "", false);
-        }
-        else if(libraryName.endsWith(".js")) {
-            loadJS(lis, libraryName, prefix);
-        }
-        else {
-            String scriptPath = JMultiplatform.getInstance().getObject(WEB_SCRIPT_PATH, String.class);
-            if(scriptPath != null) {
-                loadWasm(lis, libraryName, scriptPath, ".wasm.js",true);
+        String scriptPath = JMultiplatform.getInstance().getObject(JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH, String.class);
+        if(scriptPath != null) {
+            if(libraryName.endsWith(".wasm.js")) {
+                loadWasm(lis, libraryName, scriptPath, "", false);
+            }
+            else if(libraryName.endsWith(".js")) {
+                loadJS(lis, libraryName, scriptPath);
             }
             else {
-                loadWasm(lis, libraryName, prefix, ".wasm.js",true);
+                loadWasm(lis, libraryName, scriptPath, ".wasm.js",true);
             }
+        }
+        else {
+            listener.onLoad(false, new ScriptException("JMultiplatform WEB_SCRIPT_PATH is not set"));
         }
     }
 
     private static void loadWasm(JParserLibraryLoaderListener listener, String libraryName, String prefix, String postfix, boolean fallback) {
-        loadScript(libraryName, new JParserLibraryLoaderListener() {
-            @Override
-            public void onLoad(boolean isSuccess, Exception e) {
-                if(isSuccess) {
-                    // Wasm requires to setup wasm first
-                    String fullLibName = libraryName + "OnInit";
-                    setOnLoadInit(fullLibName, () -> {
-                        loadedLibraries.add(libraryName);
-                        listener.onLoad(true, null);
-                    });
+        loadScript(libraryName, (isSuccess, e) -> {
+            if(isSuccess) {
+                // Wasm requires to setup wasm first
+                String fullLibName = libraryName + "OnInit";
+                setOnLoadInit(fullLibName, () -> {
+                    loadedLibraries.add(libraryName);
+                    listener.onLoad(true, null);
+                });
+            }
+            else {
+                if(fallback) {
+                    // Fallback to javascript
+                    loadJS(listener, libraryName, prefix);
                 }
                 else {
-                    if(fallback) {
-                        // Fallback to javascript
-                        loadJS(listener, libraryName, prefix);
-                    }
-                    else {
-                        listener.onLoad(false, e);
-                    }
+                    listener.onLoad(false, e);
                 }
             }
         }, prefix, postfix);
     }
 
     private static void loadJS(JParserLibraryLoaderListener listener, String libraryName, String prefix) {
-        loadScript(libraryName, new JParserLibraryLoaderListener() {
-            @Override
-            public void onLoad(boolean isSuccess, Exception e) {
-                if(isSuccess) {
-                    listener.onLoad(true, null);
-                }
-                else {
-                    listener.onLoad(false, e);
-                }
+        loadScript(libraryName, (isSuccess, e) -> {
+            if(isSuccess) {
+                listener.onLoad(true, null);
+            }
+            else {
+                listener.onLoad(false, e);
             }
         }, prefix, ".js");
     }
