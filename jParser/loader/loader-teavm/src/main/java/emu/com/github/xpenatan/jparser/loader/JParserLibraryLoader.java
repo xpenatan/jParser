@@ -1,7 +1,6 @@
 package emu.com.github.xpenatan.jparser.loader;
 
-import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetInstance;
-import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoader;
+import com.github.xpenatan.jmultiplaform.core.JMultiplatform;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
 import java.util.HashSet;
 import javax.script.ScriptException;
@@ -12,6 +11,8 @@ import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLScriptElement;
 
 public class JParserLibraryLoader {
+
+    private static String WEB_SCRIPT_PATH = "WEB_SCRIPT_PATH";
 
     private static HashSet<String> loadedLibraries = new HashSet<>();
 
@@ -48,11 +49,9 @@ public class JParserLibraryLoader {
             loadJS(lis, libraryName, prefix);
         }
         else {
-            AssetLoader instance = AssetInstance.getLoaderInstance();
-            if(instance != null) {
-                // If gdx-teavm is used obtain the script path;
-                String scriptUrl = instance.getScriptUrl();
-                loadWasm(lis, libraryName, scriptUrl, ".wasm.js",true);
+            String scriptPath = JMultiplatform.getInstance().getObject(WEB_SCRIPT_PATH, String.class);
+            if(scriptPath != null) {
+                loadWasm(lis, libraryName, scriptPath, ".wasm.js",true);
             }
             else {
                 loadWasm(lis, libraryName, prefix, ".wasm.js",true);

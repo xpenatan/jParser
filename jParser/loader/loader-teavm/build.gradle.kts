@@ -9,7 +9,8 @@ dependencies {
     implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
     implementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
     implementation("org.teavm:teavm-jso-impl:${LibExt.teaVMVersion}")
-    implementation("com.github.xpenatan.gdx-teavm:asset-loader:${LibExt.gdxTeaVMVersion}")
+
+    implementation("com.github.xpenatan:jMultiplatform:0.1.0")
 }
 
 publishing {
