@@ -1,5 +1,7 @@
 package emu.com.github.xpenatan.jparser.loader;
 
+import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetInstance;
+import com.github.xpenatan.gdx.backends.teavm.assetloader.AssetLoader;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
 import java.util.HashSet;
 import javax.script.ScriptException;
@@ -11,17 +13,19 @@ import org.teavm.jso.dom.html.HTMLScriptElement;
 
 public class JParserLibraryLoader {
 
-    public static String PREFIX = "";
-
     private static HashSet<String> loadedLibraries = new HashSet<>();
 
     private JParserLibraryLoader() {}
 
-    public static void load(String libraryName, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, listener);
+    public static void load(JParserLibraryLoaderListener listener, String libraryName) {
+        loadInternal(listener, libraryName, "");
     }
 
-    private static void loadInternal(final String libraryName, JParserLibraryLoaderListener listener) {
+    public static void load(JParserLibraryLoaderListener listener, String libraryName, String prefix) {
+        loadInternal(listener, libraryName, prefix);
+    }
+
+    private static void loadInternal(JParserLibraryLoaderListener listener, String libraryName, String prefix) {
         if(listener == null) {
             throw new RuntimeException("Should implement listener");
         }
@@ -30,11 +34,33 @@ public class JParserLibraryLoader {
             return;
         }
 
-        // Try to load wasm first
-        loadWasm(libraryName, listener, PREFIX);
+        JParserLibraryLoaderListener lis = new JParserLibraryLoaderListener() {
+            @Override
+            public void onLoad(boolean isSuccess, Exception e) {
+                listener.onLoad(isSuccess, e);
+            }
+        };
+
+        if(libraryName.endsWith(".wasm.js")) {
+            loadWasm(lis, libraryName, prefix, "", false);
+        }
+        else if(libraryName.endsWith(".js")) {
+            loadJS(lis, libraryName, prefix);
+        }
+        else {
+            AssetLoader instance = AssetInstance.getLoaderInstance();
+            if(instance != null) {
+                // If gdx-teavm is used obtain the script path;
+                String scriptUrl = instance.getScriptUrl();
+                loadWasm(lis, libraryName, scriptUrl, ".wasm.js",true);
+            }
+            else {
+                loadWasm(lis, libraryName, prefix, ".wasm.js",true);
+            }
+        }
     }
 
-    private static void loadWasm(final String libraryName, JParserLibraryLoaderListener listener, String prefix) {
+    private static void loadWasm(JParserLibraryLoaderListener listener, String libraryName, String prefix, String postfix, boolean fallback) {
         loadScript(libraryName, new JParserLibraryLoaderListener() {
             @Override
             public void onLoad(boolean isSuccess, Exception e) {
@@ -47,24 +73,24 @@ public class JParserLibraryLoader {
                     });
                 }
                 else {
-                    // Fallback to javascript
-                    loadJS(libraryName, listener, prefix);
+                    if(fallback) {
+                        // Fallback to javascript
+                        loadJS(listener, libraryName, prefix);
+                    }
+                    else {
+                        listener.onLoad(false, e);
+                    }
                 }
             }
-        }, prefix, ".wasm.js");
+        }, prefix, postfix);
     }
 
-    private static void loadJS(final String libraryName, JParserLibraryLoaderListener listener, String prefix) {
+    private static void loadJS(JParserLibraryLoaderListener listener, String libraryName, String prefix) {
         loadScript(libraryName, new JParserLibraryLoaderListener() {
             @Override
             public void onLoad(boolean isSuccess, Exception e) {
                 if(isSuccess) {
-                    // Wasm requires to setup wasm first
-                    String fullLibName = libraryName + "OnInit";
-                    setOnLoadInit(fullLibName, () -> {
-                        loadedLibraries.add(libraryName);
-                        listener.onLoad(true, null);
-                    });
+                    listener.onLoad(true, null);
                 }
                 else {
                     listener.onLoad(false, e);
