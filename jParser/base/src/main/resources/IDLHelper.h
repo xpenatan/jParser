@@ -17,7 +17,7 @@ class IDLArray {
     public:
         IDLArray(int size) : size(0), data(nullptr) { resize(size); }
         ~IDLArray() {
-            clear(true);
+            clear(false); // Don't delete points data. This may be handled by the user.
             deleteData();
         }
         void resize(int newSize, bool deletePointers = false) {
