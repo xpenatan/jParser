@@ -95,9 +95,10 @@ interface TestMethodClass {
     void setMethod04(long intValue01, long[] intArray, float[] floatArray);
     void setMethod05([Const] DOMString strValue01);
     void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
-    void setMethod07(TestObjectClass[] pointerObjectArray);
-    void setMethod08(long long longLongValue01);
-    void setMethod09(TestEnumLib enumValue);
+    void setPtrToPtrArray(TestObjectClass[] array);
+    void setPtrObjectArray([Ref] TestObjectClass[] array);
+    void setMethod09(long long longLongValue01);
+    void setMethod10(TestEnumLib enumValue);
 
     long getIntValue01();
     long getIntValue02();

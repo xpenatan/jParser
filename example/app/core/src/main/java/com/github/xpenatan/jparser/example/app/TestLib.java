@@ -267,7 +267,7 @@ public class TestLib {
             array.setValue(0, obj1);
             array.setValue(1, obj2);
             try {
-                test.setMethod07(array);
+                test.setPtrToPtrArray(array);
                 {
                     float intValue01 = obj1.get_intValue01();
                     if(!(intValue01 == 20)) {
@@ -338,7 +338,7 @@ public class TestLib {
             TestMethodClass test = new TestMethodClass();
             try {
                 long longLongValue01 = 4;
-                test.setMethod08(longLongValue01);
+                test.setMethod09(longLongValue01);
                 long retLongLongValue01 = test.getLongLongValue01();
                 if(!(longLongValue01 == retLongLongValue01)) {
                     throw new RuntimeException("longLongValue01 == retLongLongValue01");
@@ -353,7 +353,7 @@ public class TestLib {
         {
             TestMethodClass test = new TestMethodClass();
             try {
-                test.setMethod09(TestEnumLib.TEST_SECOND);
+                test.setMethod10(TestEnumLib.TEST_SECOND);
                 TestEnumLib retEnum = test.getEnumValue();
                 if(!(TestEnumLib.TEST_SECOND == retEnum)) {
                     throw new RuntimeException("TestEnumLib.TEST_SECOND == retEnum");

@@ -171,6 +171,7 @@ class TestMethodClass {
         string strValue01;
         const TestObjectClass* pointerObject01;
         TestObjectClass* pointerObject02;
+        TestObjectClass* objectArray;
         TestObjectClass** pointerObjectArray;
         TestObjectClass refObject01;
         TestObjectClass refObject02;
@@ -214,11 +215,8 @@ class TestMethodClass {
             this->refObject01 = refObject01;
             this->refObject02 = refObject02;
         };
-        void setMethod07(TestObjectClass** pointerObjectArray) {
+        void setPtrToPtrArray(TestObjectClass** pointerObjectArray) {
             this->pointerObjectArray = pointerObjectArray;
-//            this->pointerObjectArray = &pointerObjectArray[0];
-//            this->pointerObjectArray = &(*array[0]);
-
             TestObjectClass* obj1 = this->pointerObjectArray[0];
             TestObjectClass* obj2 = this->pointerObjectArray[1];
             obj1->intValue01 = 20;
@@ -226,10 +224,19 @@ class TestMethodClass {
             obj2->intValue01 = 40;
             obj2->floatValue01 = 30.8;
         };
-        void setMethod08(long long longLongValue01) {
+        void setPtrObjectArray(TestObjectClass* objectArray) {
+            this->objectArray = objectArray;
+            TestObjectClass& obj1 = this->objectArray[0];
+            TestObjectClass& obj2 = this->objectArray[1];
+            obj1.intValue01 = 30;
+            obj1.floatValue01 = 20.4;
+            obj2.intValue01 = 50;
+            obj2.floatValue01 = 40.8;
+        };
+        void setMethod09(long long longLongValue01) {
             this->longLongValue01 = longLongValue01;
         };
-        void setMethod09(TestEnumLib enumValue) {
+        void setMethod10(TestEnumLib enumValue) {
             this->enumValue = enumValue;
         };
 
