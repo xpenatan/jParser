@@ -20,7 +20,7 @@ class IDLArray {
             clear(true);
             deleteData();
         }
-        void resize(int newSize, bool deletePointers = true) {
+        void resize(int newSize, bool deletePointers = false) {
             if(newSize > 0 && size != newSize) {
                 T* newData = new T[newSize];
                 clear(deletePointers);
