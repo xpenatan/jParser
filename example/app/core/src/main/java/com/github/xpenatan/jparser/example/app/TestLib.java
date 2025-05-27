@@ -24,6 +24,11 @@ import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
 public class TestLib {
 
     public static boolean test() {
+        long code = CallbackClassManual.GetAndroidCode();
+
+        // This is a custom code that will return 1 for android
+        System.out.println("Android Code: " + code);
+
         boolean enumTest = testEnum();
         boolean constructorTest = testConstructorClass();
         boolean stringConstructorTest = testStringConstructorClass();

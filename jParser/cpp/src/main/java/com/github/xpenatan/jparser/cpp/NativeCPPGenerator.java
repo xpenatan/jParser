@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Predicate;
 
 public class NativeCPPGenerator implements CppGenerator {
 
@@ -94,8 +95,6 @@ public class NativeCPPGenerator implements CppGenerator {
 
     private boolean init = true;
 
-    private HashSet<String> includes = new HashSet<>();
-
     private boolean exportJNIMethods;
 
     public NativeCPPGenerator(String cppDestinationDir) {
@@ -135,18 +134,11 @@ public class NativeCPPGenerator implements CppGenerator {
     @Override
     public void addNativeCode(Node node, String content) {
         Scanner scanner = new Scanner(content);
+        boolean haveInclude = content.contains("#include");
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
-            if(line.startsWith("#include")) {
-                line = line.replace("\\", "/");
-                line = line.replace("/", File.separator);
-                line = line.replaceFirst("\"", "<");
-                line = line.replace("\"", ">");
-
-                if(!includes.contains(line)) {
-                    includes.add(line);
-                    print(PrintType.HEADER, line);
-                }
+            if(haveInclude) {
+                print(PrintType.HEADER, line);
             }
             else {
                 print(PrintType.CODE, line);
@@ -223,9 +215,16 @@ public class NativeCPPGenerator implements CppGenerator {
             className = className.replace("_", "_1");
         }
 
-        if(content.contains("return")) {
-            content = content.replace("return", returnType + " returnValue =");
-            suffixCode += "return returnValue;";
+        boolean haveReturn = content.lines().anyMatch(s -> s.trim().startsWith("return "));
+        if(haveReturn) {
+            String wrappedLambda = "" +
+                    returnType + " wrappedReturn = [&]() -> " + returnType + " {\n" +
+                    content +
+                    "\n }();";
+
+            content = wrappedLambda;
+
+            suffixCode += "return wrappedReturn;";
         }
 
         content = prefixCode + "\n" + content + "\n" + suffixCode;

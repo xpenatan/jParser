@@ -5,6 +5,13 @@ import idl.IDLBase;
 public class CallbackClassManual extends IDLBase {
 
     /*[-JNI;-NATIVE]
+        #ifdef __ANDROID__
+            #include <android/native_window_jni.h>
+        #endif
+    */
+
+    /*[-JNI;-NATIVE]
+
         class CallbackClassManualImpl : public CallbackClassManual {
             private:
                 JNIEnv* env;
@@ -85,6 +92,24 @@ public class CallbackClassManual extends IDLBase {
         nativeData.reset(addr, true);
         setupCallbacks();
     }
+
+    public static long GetAndroidCode() {
+        return internal_getAndroidCode();
+    }
+
+    /*[-TEAVM;-NATIVE]
+        return -1;
+    */
+    /*[-JNI;-NATIVE]
+        long long myCode = 0;
+        myCode++;
+        #ifdef __ANDROID__
+            return 1;
+        #else
+            return 0;
+        #endif
+    */
+    private static native long internal_getAndroidCode();
 
     /*[-JNI;-NATIVE]
         return (jlong)new CallbackClassManualImpl();
