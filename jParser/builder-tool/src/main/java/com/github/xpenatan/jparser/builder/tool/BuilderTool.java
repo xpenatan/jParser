@@ -7,7 +7,7 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.cpp.CppCodeParser;
 import com.github.xpenatan.jparser.cpp.CppGenerator;
 import com.github.xpenatan.jparser.cpp.NativeCPPGenerator;
-import com.github.xpenatan.jparser.idl.IDLPackageRenaming;
+import com.github.xpenatan.jparser.idl.IDLRenaming;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.teavm.TeaVMCodeParser;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class BuilderTool {
         build(op, listener, null);
     }
 
-    public static void build(BuildToolOptions op, BuildToolListener listener, IDLPackageRenaming packageRenaming) {
+    public static void build(BuildToolOptions op, BuildToolListener listener, IDLRenaming packageRenaming) {
         try {
             generateAndBuild(op, listener, packageRenaming);
         } catch(Exception e) {
@@ -26,7 +26,7 @@ public class BuilderTool {
         }
     }
 
-    private static void generateAndBuild(BuildToolOptions op, BuildToolListener listener, IDLPackageRenaming packageRenaming) throws Exception {
+    private static void generateAndBuild(BuildToolOptions op, BuildToolListener listener, IDLRenaming packageRenaming) throws Exception {
         op.setup();
 
         IDLReader idlReader = IDLReader.readIDL(op.getIDLPath());
@@ -46,14 +46,14 @@ public class BuilderTool {
             CppGenerator cppGenerator = new NativeCPPGenerator(op.getCPPDestinationPath());
             CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.libBasePackage, op.getSourceDir());
             cppParser.generateClass = true;
-            cppParser.packageRenaming = packageRenaming;
+            cppParser.idlRenaming = packageRenaming;
             JParser.generate(cppParser, op.getModuleBaseJavaDir(), op.getModuleCorePath() + "/src/main/java");
         }
 
         if(op.generateTeaVM) {
 //            EmscriptenTarget.SKIP_GLUE_CODE = true;
             TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.moduleName, op.libBasePackage, op.getSourceDir());
-            teavmParser.packageRenaming = packageRenaming;
+            teavmParser.idlRenaming = packageRenaming;
             JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getModuleTeaVMPath() + "/src/main/java/");
         }
 

@@ -8,7 +8,6 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -121,8 +120,10 @@ public class IDLMethodParser {
 
         // Remove methods characters if it contains "_1", "_2", etc.
         String fixedMethodName = methodName.replaceFirst("_\\d$", "");
-
-        String updatedMethodName = idlParser.getIDLMethodName(fixedMethodName);
+        String updatedMethodName = fixedMethodName;
+        if(idlParser.idlRenaming != null) {
+            updatedMethodName = idlParser.idlRenaming.getIDLMethodName(fixedMethodName);
+        }
         ArrayList<IDLParameter> parameters = idlMethod.parameters;
         MethodDeclaration methodDeclaration = classDeclaration.addMethod(updatedMethodName, Modifier.Keyword.PUBLIC);
         methodDeclaration.setStatic(idlMethod.isStaticMethod);

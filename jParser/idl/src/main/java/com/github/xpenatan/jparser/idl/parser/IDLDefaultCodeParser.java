@@ -172,8 +172,4 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
     public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
     }
-
-    public String getIDLMethodName(String name) {
-        return name;
-    }
 }

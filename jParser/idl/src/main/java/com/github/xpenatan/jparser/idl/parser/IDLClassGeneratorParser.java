@@ -16,7 +16,6 @@ import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
@@ -39,7 +38,7 @@ import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.core.util.ResourceList;
-import com.github.xpenatan.jparser.idl.IDLPackageRenaming;
+import com.github.xpenatan.jparser.idl.IDLRenaming;
 import idl.IDLBase;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -71,7 +70,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     protected String includeDir;
 
-    public IDLPackageRenaming packageRenaming;
+    public IDLRenaming idlRenaming;
 
     /**
      * @param basePackage Base module source. This is used to generate other sources
@@ -163,8 +162,8 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                     if(idlClassOrEnum.subPackage != null) {
                         subPackage = idlClassOrEnum.subPackage;
                     }
-                    if(packageRenaming != null) {
-                        subPackage = packageRenaming.obtainNewPackage(className, subPackage);
+                    if(idlRenaming != null) {
+                        subPackage = idlRenaming.obtainNewPackage(className, subPackage);
                     }
                     CompilationUnit compilationUnit = setupClass(idlClassOrEnum, subPackage);
                     parserItem = new JParserItem(compilationUnit, genPath);
