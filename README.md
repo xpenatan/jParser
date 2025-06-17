@@ -1,9 +1,9 @@
 # jParser
 
-![Build](https://github.com/xpenatan/jParser/actions/workflows/release.yml/badge.svg)
 ![Build](https://github.com/xpenatan/jParser/actions/workflows/snapshot.yml/badge.svg)
-[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/releases/com.github.xpenatan.jParser/jParser-core?nexusVersion=2&server=https%3A%2F%2Foss.sonatype.org&label=release)](https://repo.maven.apache.org/maven2/com/github/xpenatan/jParser/)
-[![Static Badge](https://img.shields.io/badge/snapshot---SNAPSHOT-red)](https://oss.sonatype.org/content/repositories/snapshots/com/github/xpenatan/jParser/)
+[![Maven Central Version](https://img.shields.io/maven-central/v/com.github.xpenatan.jParser/jParser-core)](https://central.sonatype.com/artifact/com.github.xpenatan.jParser/jParser-core)
+[![Static Badge](https://img.shields.io/badge/snapshot---SNAPSHOT-red)](https://central.sonatype.com/service/rest/repository/browse/maven-snapshots/com/github/xpenatan/jParser/)
+
 
 jParser is a compact Java library designed to facilitate the integration of C/C++ code with desktop, mobile, and web platforms, enabling inline writing within Java source code.
 
