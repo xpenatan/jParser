@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "jParser-core"
+val moduleName = "${LibExt.libName}-core"
 
 dependencies {
     api("com.github.javaparser:javaparser-symbol-solver-core:${LibExt.javaparserVersion}")

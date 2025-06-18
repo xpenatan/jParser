@@ -112,7 +112,7 @@ configure(libProjects) {
     publishing.publications.configureEach {
         if (this is MavenPublication) {
             pom {
-                name.set("jParser")
+                name.set(LibExt.libName)
                 description.set("Java JNI code parser")
                 url.set("http://github.com/xpenatan/jParser")
                 developers {
@@ -180,7 +180,7 @@ if(!LibExt.libVersion.endsWith("-SNAPSHOT")) {
                 val username = System.getenv("CENTRAL_PORTAL_USERNAME") ?: throw GradleException("CENTRAL_PORTAL_USERNAME environment variable not set")
                 val password = System.getenv("CENTRAL_PORTAL_PASSWORD") ?: throw GradleException("CENTRAL_PORTAL_PASSWORD environment variable not set")
 
-                val rawBundleName = "jParser-${LibExt.libVersion}"
+                val rawBundleName = "${LibExt.libName}-${LibExt.libVersion}"
                 val encodedBundleName = URLEncoder.encode(rawBundleName, "UTF-8")
 
                 exec {

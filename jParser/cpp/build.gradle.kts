@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "jParser-cpp"
+val moduleName = "${LibExt.libName}-cpp"
 
 dependencies {
     implementation(project(":jParser:idl"))
