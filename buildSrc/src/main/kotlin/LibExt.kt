@@ -2,17 +2,21 @@ import java.io.File
 import java.util.*
 
 object LibExt {
-    val libName = "jParser"
+    const val libName = "jParser"
     val libVersion: String = getVersion()
-    const val jniGenVersion = "2.5.1"
-    const val javaparserVersion = "3.26.1"
-    const val jUnitVersion = "4.13.2"
     const val groupId = "com.github.xpenatan.jParser"
+
+    // Lib Dependencies
+    const val jniGenVersion = "2.5.1"
+    const val teaVMVersion = "0.12.1"
+    const val javaparserVersion = "3.26.1"
+
+    // Example Dependencies
     const val exampleUseRepoLibs = false
-    const val gdxVersion = "1.13.1"
-    const val teaVMVersion = "0.11.0"
+    const val gdxVersion = "1.13.5"
     const val gdxTeaVMVersion = "-SNAPSHOT"
 
+    const val jUnitVersion = "4.13.2"
 }
 
 private fun getVersion(): String {
