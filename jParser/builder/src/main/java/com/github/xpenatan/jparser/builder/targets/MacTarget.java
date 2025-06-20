@@ -79,13 +79,13 @@ public class MacTarget extends DefaultBuildTarget {
         else {
             linkerFlags.add("-shared");
             if(isArm) {
-                cppFlags.add("-arch");
-                cppFlags.add("arm64");
+                linkerFlags.add("-arch");
+                linkerFlags.add("arm64");
                 libSuffix = "arm64.dylib";
             }
             else {
-                cppFlags.add("-arch");
-                cppFlags.add("x86_64");
+                linkerFlags.add("-arch");
+                linkerFlags.add("x86_64");
                 libSuffix = "64.dylib";
             }
             linkerFlags.add("-mmacosx-version-min=" + macMinTarget);
