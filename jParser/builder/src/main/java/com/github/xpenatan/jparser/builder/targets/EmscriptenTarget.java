@@ -16,6 +16,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
     public static boolean DEBUG_BUILD = false;
     public static boolean IS_WASM = true;
+    public static boolean IS_X64 = false;
 
     public boolean isStatic = false;
     public boolean compileGlueCode = true;
@@ -98,6 +99,11 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerCompiler.add(cppCompilerr);
             linkerFlags.add("rcs");
             libSuffix = "_.a";
+
+            if(IS_X64) {
+                cppFlags.add("-s");
+                cppFlags.add("MEMORY64=1");
+            }
         }
         else {
             String postPath = createPostJS(jsglueDir, libName);
@@ -128,14 +134,25 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             if(IS_WASM) {
                 linkerFlags.add("-s");
                 linkerFlags.add("WASM=1");
-                linkerFlags.add("-s");
 
-                // Disable big int because of conversion bug
-                linkerFlags.add("WASM_BIGINT=0");
+                if(IS_X64) {
+                    linkerFlags.add("-s");
+                    linkerFlags.add("WASM_BIGINT=1");
+                }
+                else {
+                    linkerFlags.add("-s");
+                    linkerFlags.add("WASM_BIGINT=0");
+                }
             }
             else {
                 linkerFlags.add("-s");
                 linkerFlags.add("WASM=0");
+            }
+            if(IS_X64) {
+                linkerFlags.add("-s");
+                linkerFlags.add("MEMORY64=1");
+                cppFlags.add("-s");
+                cppFlags.add("MEMORY64=1");
             }
             linkerFlags.add("-s");
             linkerFlags.add("SINGLE_FILE=1");

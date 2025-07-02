@@ -59,6 +59,8 @@ import java.util.Optional;
 
 public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
+    public static boolean CAST_LONG_TO_INT = true;
+
     private static final String HEADER_CMD = "TEAVM";
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
@@ -815,11 +817,13 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
             //cast cpointer to int
 
-            List<ClassOrInterfaceDeclaration> classDeclarations = unit.findAll(ClassOrInterfaceDeclaration.class);
+            if(CAST_LONG_TO_INT) {
+                List<ClassOrInterfaceDeclaration> classDeclarations = unit.findAll(ClassOrInterfaceDeclaration.class);
 
-            for(int i1 = 0; i1 < classDeclarations.size(); i1++) {
-                ClassOrInterfaceDeclaration classDeclaration = classDeclarations.get(i1);
-                convertNativeMethodLongType(classDeclaration);
+                for(int i1 = 0; i1 < classDeclarations.size(); i1++) {
+                    ClassOrInterfaceDeclaration classDeclaration = classDeclarations.get(i1);
+                    convertNativeMethodLongType(classDeclaration);
+                }
             }
         }
     }
