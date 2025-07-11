@@ -25,35 +25,35 @@ public class NativeCPPGenerator implements CppGenerator {
     private static final Map<String, ArgumentType> arrayTypes;
     private static final Map<String, ArgumentType> bufferTypes;
     private static final Map<String, ArgumentType> otherTypes;
-    private static final Map<String, String> valueTypes;
+    private static final Map<ArgumentType, String> valueTypes;
 
     private static String helperName = "IDLHelper.h";
 
     static {
         valueTypes = new HashMap<>();
-        valueTypes.put(ArgumentType.Boolean.getJniType(), "Z");
-        valueTypes.put(ArgumentType.Byte.getJniType(), "B");
-        valueTypes.put(ArgumentType.Char.getJniType(), "C");
-        valueTypes.put(ArgumentType.Short.getJniType(), "S");
-        valueTypes.put(ArgumentType.Integer.getJniType(), "I");
-        valueTypes.put(ArgumentType.Long.getJniType(), "J");
-        valueTypes.put(ArgumentType.Float.getJniType(), "F");
-        valueTypes.put(ArgumentType.Double.getJniType(), "D");
-        valueTypes.put(ArgumentType.FloatArray.getJniType(), "_3F");
-        valueTypes.put(ArgumentType.IntegerArray.getJniType(), "_3I");
-        valueTypes.put(ArgumentType.DoubleArray.getJniType(), "_3D");
-        valueTypes.put(ArgumentType.LongArray.getJniType(), "_3J");
-        valueTypes.put(ArgumentType.ShortArray.getJniType(), "_3S");
-        valueTypes.put(ArgumentType.CharArray.getJniType(), "_3C");
-        valueTypes.put(ArgumentType.ByteArray.getJniType(), "_3B");
-        valueTypes.put(ArgumentType.BooleanArray.getJniType(), "_3Z");
-        valueTypes.put(ArgumentType.Object.getJniType(), "Ljava_lang_Object_2");
-        valueTypes.put(ArgumentType.String.getJniType(), "Ljava_lang_String_2");
-        valueTypes.put(ArgumentType.ByteBuffer.getJniType(), "Ljava_nio_ByteBuffer_2");
-        valueTypes.put(ArgumentType.IntBuffer.getJniType(), "Ljava_nio_IntBuffer_2");
-        valueTypes.put(ArgumentType.LongBuffer.getJniType(), "Ljava_nio_LongBuffer_2");
-        valueTypes.put(ArgumentType.FloatBuffer.getJniType(), "Ljava_nio_FloatBuffer_2");
-        valueTypes.put(ArgumentType.DoubleBuffer.getJniType(), "Ljava_nio_DoubleBuffer_2");
+        valueTypes.put(ArgumentType.Boolean, "Z");
+        valueTypes.put(ArgumentType.Byte, "B");
+        valueTypes.put(ArgumentType.Char, "C");
+        valueTypes.put(ArgumentType.Short, "S");
+        valueTypes.put(ArgumentType.Integer, "I");
+        valueTypes.put(ArgumentType.Long, "J");
+        valueTypes.put(ArgumentType.Float, "F");
+        valueTypes.put(ArgumentType.Double, "D");
+        valueTypes.put(ArgumentType.FloatArray, "_3F");
+        valueTypes.put(ArgumentType.IntegerArray, "_3I");
+        valueTypes.put(ArgumentType.DoubleArray, "_3D");
+        valueTypes.put(ArgumentType.LongArray, "_3J");
+        valueTypes.put(ArgumentType.ShortArray, "_3S");
+        valueTypes.put(ArgumentType.CharArray, "_3C");
+        valueTypes.put(ArgumentType.ByteArray, "_3B");
+        valueTypes.put(ArgumentType.BooleanArray, "_3Z");
+        valueTypes.put(ArgumentType.Object, "Ljava_lang_Object_2");
+        valueTypes.put(ArgumentType.String, "Ljava_lang_String_2");
+        valueTypes.put(ArgumentType.ByteBuffer, "Ljava_nio_ByteBuffer_2");
+        valueTypes.put(ArgumentType.IntBuffer, "Ljava_nio_IntBuffer_2");
+        valueTypes.put(ArgumentType.LongBuffer, "Ljava_nio_LongBuffer_2");
+        valueTypes.put(ArgumentType.FloatBuffer, "Ljava_nio_FloatBuffer_2");
+        valueTypes.put(ArgumentType.DoubleBuffer, "Ljava_nio_DoubleBuffer_2");
 
         plainOldDataTypes = new HashMap<String, ArgumentType>();
         plainOldDataTypes.put("boolean", ArgumentType.Boolean);
@@ -279,8 +279,7 @@ public class NativeCPPGenerator implements CppGenerator {
         String[] typeTokens = parameter.getType().toString().split("\\.");
         String type = typeTokens[typeTokens.length - 1];
         ArgumentType argumentType = getType(type);
-        String jniType = argumentType.getJniType();
-        String valueType = valueTypes.get(jniType);
+        String valueType = valueTypes.get(argumentType);
         return new Argument(argumentType, parameter.getNameAsString(), valueType);
     }
 
