@@ -49,6 +49,11 @@ public class NativeCPPGenerator implements CppGenerator {
         valueTypes.put(ArgumentType.BooleanArray.getJniType(), "_3Z");
         valueTypes.put(ArgumentType.Object.getJniType(), "Ljava_lang_Object_2");
         valueTypes.put(ArgumentType.String.getJniType(), "Ljava_lang_String_2");
+        valueTypes.put(ArgumentType.ByteBuffer.getJniType(), "Ljava_nio_ByteBuffer_2");
+        valueTypes.put(ArgumentType.IntBuffer.getJniType(), "Ljava_nio_IntBuffer_2");
+        valueTypes.put(ArgumentType.LongBuffer.getJniType(), "Ljava_nio_LongBuffer_2");
+        valueTypes.put(ArgumentType.FloatBuffer.getJniType(), "Ljava_nio_FloatBuffer_2");
+        valueTypes.put(ArgumentType.DoubleBuffer.getJniType(), "Ljava_nio_DoubleBuffer_2");
 
         plainOldDataTypes = new HashMap<String, ArgumentType>();
         plainOldDataTypes.put("boolean", ArgumentType.Boolean);
