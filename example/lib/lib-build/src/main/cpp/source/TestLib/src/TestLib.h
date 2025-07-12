@@ -239,6 +239,9 @@ class TestMethodClass {
         void setMethod10(TestEnumLib enumValue) {
             this->enumValue = enumValue;
         };
+        void setSkipMethod() {
+            // Skip method example
+        };
 
         int getIntValue01() { return intValue01; };
         int getIntValue02() { return intValue02; };

@@ -99,6 +99,7 @@ interface TestMethodClass {
     void setPtrObjectArray([Ref] TestObjectClass[] array);
     void setMethod09(long long longLongValue01);
     void setMethod10(TestEnumLib enumValue);
+    void setSkipMethod(); //[-SKIP]
 
     long getIntValue01();
     long getIntValue02();

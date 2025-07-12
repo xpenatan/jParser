@@ -46,6 +46,7 @@ public class IDLMethod {
 
         isReturnNewObject = idlLine.containsCommand(IDLLine.CMD_NEW_OBJECT);
         isReturnMemoryOwned = !idlLine.containsCommand(IDLLine.CMD_NOT_MEM_OWN);
+        skip = idlLine.containsCommand(IDLLine.CMD_SKIP);
 
         String tagsStr = IDLHelper.getTags(leftSide);
         if(!tagsStr.isEmpty()) {
