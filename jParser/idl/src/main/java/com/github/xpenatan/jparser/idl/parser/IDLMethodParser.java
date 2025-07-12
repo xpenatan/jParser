@@ -424,7 +424,7 @@ public class IDLMethodParser {
         // Clone some generated idl method settings
         MethodDeclaration nativeMethod = new MethodDeclaration();
         nativeMethod.setName(NATIVE_METHOD + methodName);
-        nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PRIVATE, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
+        nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
         nativeMethod.removeBody();
 
         IDLEnum isEnum = idlReader.getEnum(methodReturnType.asString());
