@@ -124,7 +124,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("-s");
             linkerFlags.add("EXPORTED_FUNCTIONS=['_free','_malloc']");
             linkerFlags.add("-s");
-            linkerFlags.add("EXPORTED_RUNTIME_METHODS=['UTF8ToString']");
+            linkerFlags.add("EXPORTED_RUNTIME_METHODS=['UTF8ToString', 'HEAP8', 'HEAPU8', 'HEAP16', 'HEAPU16', 'HEAP32', 'HEAPU32', 'HEAPF32']");
             if(DEBUG_BUILD) {
                 linkerFlags.add("-s");
                 linkerFlags.add("ASSERTIONS=1");

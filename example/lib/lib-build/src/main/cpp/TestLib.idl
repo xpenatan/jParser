@@ -86,6 +86,14 @@ interface TestAttributeArrayClass {
     attribute TestObjectClass[] pointerObjectArray;
 };
 
+interface TestBufferManualClass { //[-SKIP]
+
+    void updateByteBuffer(octet[] data, long size, octet value);
+    void updateIntBuffer(long[] data, long size, long value);
+    void updateShortBuffer(short[] data, long size, short value);
+    void updateFloatBuffer(float[] data, long size, float value);
+};
+
 interface TestMethodClass {
     void TestMethodClass();
     void TestMethodClass([Const] DOMString strValue01);

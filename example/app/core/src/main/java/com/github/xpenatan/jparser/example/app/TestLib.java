@@ -9,6 +9,7 @@ import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.IDLArrayTestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.TestAttributeArrayClass;
 import com.github.xpenatan.jparser.example.testlib.TestAttributeClass;
+import com.github.xpenatan.jparser.example.testlib.TestBufferManualClass;
 import com.github.xpenatan.jparser.example.testlib.TestCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.TestConstructorClass;
 import com.github.xpenatan.jparser.example.testlib.TestEnumClassWithinClass;
@@ -20,6 +21,7 @@ import com.github.xpenatan.jparser.example.testlib.core.enums.TestEnumWithinClas
 import com.github.xpenatan.jparser.example.testlib.core.op.TestOperatorClass;
 import com.github.xpenatan.jparser.example.testlib.core.sub.TestNamespaceClass;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
+import java.nio.ByteBuffer;
 
 public class TestLib {
 
@@ -35,6 +37,7 @@ public class TestLib {
         boolean attributeTest = testAttributeClass();
         boolean staticAttributeTest = testStaticAttributeClass();
         boolean attributeArrayTest = testAttributeArrayClass();
+        boolean bufferManualTest = testBufferManualClass();
         boolean methodTest = testMethodClass();
         boolean staticMethodTest = testStaticMethodClass();
         boolean callbackTest = testCallbackClass();
@@ -49,6 +52,7 @@ public class TestLib {
         System.out.println("attributeTest: " + attributeTest);
         System.out.println("staticAttributeTest: " + staticAttributeTest);
         System.out.println("attributeArrayTest: " + attributeArrayTest);
+        System.out.println("bufferManualTest: " + bufferManualTest);
         System.out.println("methodTest: " + methodTest);
         System.out.println("staticMethodTest: " + staticMethodTest);
         System.out.println("callbackTest: " + callbackTest);
@@ -57,7 +61,7 @@ public class TestLib {
         System.out.println("exceptionTest: " + exceptionTest);
 
         return enumTest && constructorTest && stringConstructorTest && attributeTest && staticAttributeTest
-                && attributeArrayTest && methodTest && staticMethodTest && callbackTest
+                && attributeArrayTest && bufferManualTest && methodTest && staticMethodTest && callbackTest
                 && callbackTestManual && namespaceTest && operatorTest && exceptionTest;
     }
 
@@ -240,6 +244,33 @@ public class TestLib {
             e.printStackTrace();
             return false;
         }
+        return true;
+    }
+
+    private static boolean testBufferManualClass() {
+        {
+            TestBufferManualClass test = new TestBufferManualClass();
+            try {
+                ByteBuffer byteBuffer = ByteBuffer.allocateDirect(3);
+                byteBuffer.put(0, (byte)1);
+                byteBuffer.put(1, (byte)2);
+                byteBuffer.put(2, (byte)3);
+                test.updateByteBuffer(byteBuffer, 3, (byte)2);
+                byte v0 = byteBuffer.get(0);
+                byte v1 = byteBuffer.get(1);
+                byte v2 = byteBuffer.get(2);
+                if(!(v0 == 0x02 && v1 == 0x02 && v2 == 0x02)) {
+                    System.out.println("v0: " + v0);
+                    System.out.println("v1: " + v1);
+                    System.out.println("v2: " + v2);
+                    throw new RuntimeException("v0 == 0x02 && v1 == 0x02 && v2 == 0x02");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
         return true;
     }
 

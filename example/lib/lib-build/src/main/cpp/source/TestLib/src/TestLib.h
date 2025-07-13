@@ -160,6 +160,46 @@ class TestStringConstructorClass {
         };
 };
 
+class TestBufferManualClass {
+    public:
+
+        void updateByteBuffer(uint8_t* data, int size, uint8_t value) {
+            for(int i = 0; i < size; i++) {
+                std::cout << "[" << i << "]: " <<  static_cast<int>(data[i]) << std::endl;
+            }
+            for(int i = 0; i < size; i++) {
+                data[i] = value;
+            }
+        }
+
+        void updateIntBuffer(int* data, int size, int value) {
+            for(int i = 0; i < size; i++) {
+                std::cout << "[" << i << "]: " <<  data[i] << std::endl;
+            }
+            for(int i = 0; i < size; i++) {
+                data[i] = value;
+            }
+        }
+
+        void updateShortBuffer(short* data, int size, short value) {
+            for(int i = 0; i < size; i++) {
+                std::cout << "[" << i << "]: " <<  data[i] << std::endl;
+            }
+            for(int i = 0; i < size; i++) {
+                data[i] = value;
+            }
+        }
+
+        void updateFloatBuffer(float* data, int size, float value) {
+            for(int i = 0; i < size; i++) {
+                std::cout << "[" << i << "]: " <<  data[i] << std::endl;
+            }
+            for(int i = 0; i < size; i++) {
+                data[i] = value;
+            }
+        }
+};
+
 class TestMethodClass {
     private:
         int intValue01;
