@@ -21,6 +21,7 @@ import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import java.util.ArrayList;
+import java.util.List;
 
 public class IDLCallbackParser {
 
@@ -70,6 +71,7 @@ public class IDLCallbackParser {
 
             MethodCallExpr caller = IDLMethodParser.createCaller(methodDeclaration);
 
+            String [] paramTypes = new String[internalParameters.size()];
             String createFieldObjectCode = "";
             for(int i = 0; i < internalParameters.size(); i++) {
                 Parameter parameter = internalParameters.get(i);
@@ -96,6 +98,7 @@ public class IDLCallbackParser {
 
                     createFieldObjectCode += newBody;
                 }
+                paramTypes[i] = parameter.getType().asString();
                 caller.addArgument(fieldName);
             }
             createFieldObjectCode = "{\n" + createFieldObjectCode + "}";
@@ -112,7 +115,14 @@ public class IDLCallbackParser {
             String internName = internalMethod.getNameAsString();
             internalMethod.setName("internal_" + internName);
             internalMethod.setBody(blockStmt);
-            classDeclaration.addMember(internalMethod);
+
+            List<MethodDeclaration> methodExist = classDeclaration.getMethodsBySignature(internalMethod.getNameAsString(), paramTypes);
+            if(methodExist != null && methodExist.size() > 0) {
+                internalMethod = methodExist.get(0);
+            }
+            else {
+                classDeclaration.addMember(internalMethod);
+            }
 
             Pair<MethodDeclaration, MethodDeclaration> methodDeclarationPair = new Pair<>(internalMethod, methodDeclaration);
 
