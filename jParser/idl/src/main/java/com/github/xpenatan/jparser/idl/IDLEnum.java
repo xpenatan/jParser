@@ -25,6 +25,11 @@ public class IDLEnum extends IDLClassOrEnum {
         setupInterfacePackage();
         setupEnumValues();
         setupSettings();
+
+        IDLLine idlLine = searchLine("enum ", true);
+        if(idlLine != null) {
+            idlSkip = idlLine.containsCommand(IDLLine.CMD_SKIP);
+        }
     }
 
     private void setupInterfaceName() {

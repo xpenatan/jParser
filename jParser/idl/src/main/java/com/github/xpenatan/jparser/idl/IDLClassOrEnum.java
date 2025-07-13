@@ -11,6 +11,8 @@ public class IDLClassOrEnum {
     public String subPackage;
     public final ArrayList<IDLLine> classLines = new ArrayList<>();
 
+    public boolean idlSkip = false;
+
     public boolean isEnum() {
         return this instanceof IDLEnum;
     }

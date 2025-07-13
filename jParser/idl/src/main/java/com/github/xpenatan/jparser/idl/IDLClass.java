@@ -18,7 +18,6 @@ public class IDLClass extends IDLClassOrEnum {
 
     public boolean isCallback;
     public IDLClass callbackImpl;
-    public boolean idlSkip = false;
 
     public IDLClass(IDLFile idlFile) {
         this.idlFile = idlFile;
@@ -31,6 +30,11 @@ public class IDLClass extends IDLClassOrEnum {
         setupInterfacePackage();
         setupExtendClass();
         setupAttributesAndMethods();
+
+        IDLLine idlLine = searchLine("interface ", true);
+        if(idlLine != null) {
+            idlSkip = idlLine.containsCommand(IDLLine.CMD_SKIP);
+        }
     }
 
     private void setupAttributesAndMethods() {

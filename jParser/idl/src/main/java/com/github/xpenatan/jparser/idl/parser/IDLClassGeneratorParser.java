@@ -149,6 +149,10 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         }
                     }
 
+                    if(idlClassOrEnum.idlSkip) {
+                        continue;
+                    }
+
                     String subPackage = "";
                     if(classCppPath.containsKey(className)) {
                         String includeClass = classCppPath.get(className);

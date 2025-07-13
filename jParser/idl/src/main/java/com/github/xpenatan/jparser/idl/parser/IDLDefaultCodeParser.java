@@ -86,10 +86,13 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
                             if(headerCommands.contains(IDLDefaultCodeParser.CMD_IDL_SKIP)) {
                                 //If skip is found then remove the method
                                 idlClass.idlSkip = true;
-                                return;
                             }
                         }
                     }
+                }
+
+                if(idlClass.idlSkip) {
+                    return;
                 }
 
                 if(generateClass) {
