@@ -18,7 +18,7 @@ public class IDLParameter {
     public boolean isRef;
     public boolean isConst;
     public boolean isValue;
-    public boolean isReuseParam;
+    public boolean isNewParam;
     public boolean isAny;
     public final ArrayList<String> tags = new ArrayList<>();
 
@@ -72,7 +72,7 @@ public class IDLParameter {
 
         String[] s1 = tmpLine.split(" ");
         name = s1[s1.length - 1];
-        isReuseParam = idlCommand.containsCommandValue(IDLCommand.CMD_REUSE_PARAM, name);
+        isNewParam = idlCommand.containsCommandValue(IDLCommand.CMD_NEW_PARAM, name);
 
         idlType = "";
         int sss = s1.length - 1;
@@ -122,7 +122,7 @@ public class IDLParameter {
         clonedParam.isArray = isArray;
         clonedParam.isValue = isValue;
         clonedParam.isConst = isConst;
-        clonedParam.isReuseParam = isReuseParam;
+        clonedParam.isNewParam = isNewParam;
         clonedParam.tags.addAll(tags);
         return clonedParam;
     }

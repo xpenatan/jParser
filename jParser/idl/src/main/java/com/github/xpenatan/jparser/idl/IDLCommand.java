@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class IDLCommand {
 
     public static final String CMD_NEW_OBJECT = "NEW_OBJECT";
-    public static final String CMD_REUSE_PARAM = "REUSE_PARAM";
+    public static final String CMD_NEW_PARAM = "NEW_PARAM";
     public static final String CMD_SKIP = "SKIP";
     public static final String CMD_MEM_OWN = "MEM_OWN";
     public static final String CMD_NOT_MEM_OWN = "NOT_MEM_OWN";

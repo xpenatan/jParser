@@ -70,9 +70,13 @@ public class IDLMethodParser {
             "    return [TYPE]_NEW;\n" +
             "}";
 
-    static final String CALLBACK_PARAM_TEMPLATE =
+    static final String CALLBACK_REUSE_PARAM_TEMPLATE =
             "if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
             "[TYPE]_TEMP_GEN_[NUM].getNativeData().reset([PARAM], false);\n";
+
+    static final String CALLBACK_NEW_PARAM_TEMPLATE =
+            "[TYPE] [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
+            "[TYPE]_TEMP_GEN_[NUM].getNativeData().reset([PARAM], true);\n";
 
     static final String OPERATOR_OBJECT_TEMPLATE =
             "{\n" +

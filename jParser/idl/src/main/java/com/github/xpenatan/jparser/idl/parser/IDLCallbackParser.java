@@ -76,6 +76,7 @@ public class IDLCallbackParser {
             for(int i = 0; i < internalParameters.size(); i++) {
                 Parameter parameter = internalParameters.get(i);
                 IDLParameter idlParameter = method.parameters.get(i);
+                boolean isNewParam = idlParameter.isNewParam;
                 boolean isEnum = idlParameter.isEnum();
                 String paramName = parameter.getNameAsString();
                 Type type = parameter.getType();
@@ -90,13 +91,24 @@ public class IDLCallbackParser {
                 }
                 else if(type.isClassOrInterfaceType() && !typeStr.equals("String")) {
                     parameter.setType(PrimitiveType.longType());
-                    fieldName = IDLMethodParser.generateFieldName(classDeclaration, typeStr, true);
-                    String newBody = IDLMethodParser.CALLBACK_PARAM_TEMPLATE
-                            .replace(IDLMethodParser.TEMPLATE_TEMP_FIELD, fieldName)
-                            .replace(IDLMethodParser.TEMPLATE_TAG_TYPE, typeStr)
-                            .replace(IDLMethodParser.TEMPLATE_TAG_PARAM, paramName);
+                    if(isNewParam) {
+                        fieldName = fieldName + "_reuse";
+                        String newBody = IDLMethodParser.CALLBACK_NEW_PARAM_TEMPLATE
+                                .replace(IDLMethodParser.TEMPLATE_TEMP_FIELD, fieldName)
+                                .replace(IDLMethodParser.TEMPLATE_TAG_TYPE, typeStr)
+                                .replace(IDLMethodParser.TEMPLATE_TAG_PARAM, paramName);
 
-                    createFieldObjectCode += newBody;
+                        createFieldObjectCode += newBody;
+                    }
+                    else {
+                        fieldName = IDLMethodParser.generateFieldName(classDeclaration, typeStr, true);
+                        String newBody = IDLMethodParser.CALLBACK_REUSE_PARAM_TEMPLATE
+                                .replace(IDLMethodParser.TEMPLATE_TEMP_FIELD, fieldName)
+                                .replace(IDLMethodParser.TEMPLATE_TAG_TYPE, typeStr)
+                                .replace(IDLMethodParser.TEMPLATE_TAG_PARAM, paramName);
+
+                        createFieldObjectCode += newBody;
+                    }
                 }
                 paramTypes[i] = parameter.getType().asString();
                 caller.addArgument(fieldName);
