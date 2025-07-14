@@ -22,8 +22,8 @@ public class TestBufferManualClass extends IDLBase {
     /*[-JNI;-NATIVE]
         TestBufferManualClass* nativeObject = (TestBufferManualClass*)this_addr;
         void* dataAddress = env->GetDirectBufferAddress(data);
-        char* byteData = static_cast<char*>(dataAddress);
-        nativeObject->updateByteBuffer(byteData, (int)size, (char)value);
+        uint8_t* byteData = static_cast<uint8_t*>(dataAddress);
+        nativeObject->updateByteBuffer(byteData, (int)size, (uint8_t)value);
     */
     private static native void internal_native_updateByteBuffer(long this_addr, ByteBuffer data, int size, byte value);
 }

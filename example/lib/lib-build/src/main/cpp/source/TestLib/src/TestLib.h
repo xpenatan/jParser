@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string>
 #include <iostream>
+#include <stdint.h>
 
 using namespace std;
 
