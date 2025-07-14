@@ -92,7 +92,7 @@ public class IDLCallbackParser {
                 else if(type.isClassOrInterfaceType() && !typeStr.equals("String")) {
                     parameter.setType(PrimitiveType.longType());
                     if(isNewParam) {
-                        fieldName = fieldName + "_reuse";
+                        fieldName = fieldName + "_new";
                         String newBody = IDLMethodParser.CALLBACK_NEW_PARAM_TEMPLATE
                                 .replace(IDLMethodParser.TEMPLATE_TEMP_FIELD, fieldName)
                                 .replace(IDLMethodParser.TEMPLATE_TAG_TYPE, typeStr)
