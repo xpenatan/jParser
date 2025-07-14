@@ -28,7 +28,7 @@ public class IDLEnum extends IDLClassOrEnum {
 
         IDLLine idlLine = searchLine("enum ", true);
         if(idlLine != null) {
-            idlSkip = idlLine.containsCommand(IDLLine.CMD_SKIP);
+            idlSkip = idlLine.idlCommand.containsCommand(IDLCommand.CMD_SKIP);
         }
     }
 
@@ -41,8 +41,8 @@ public class IDLEnum extends IDLClassOrEnum {
 
     private void setupInterfacePackage() {
         IDLLine idlLine = searchLine("enum ", true);
-        if(idlLine != null && idlLine.containsCommand(IDLLine.CMD_SUB_PACKAGE)) {
-            subPackage = idlLine.getCommandValue(IDLLine.CMD_SUB_PACKAGE);
+        if(idlLine != null && idlLine.idlCommand.containsCommand(IDLCommand.CMD_SUB_PACKAGE)) {
+            subPackage = idlLine.idlCommand.getCommandValue(IDLCommand.CMD_SUB_PACKAGE);
         }
     }
 

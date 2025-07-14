@@ -9,7 +9,7 @@ public class IDLConstructor {
     public final IDLFile idlFile;
 
     public IDLClass idlClass;
-    public String line;
+    public IDLLine idlLine;
     public String paramsLine;
 
     public final ArrayList<IDLParameter> parameters = new ArrayList<>();
@@ -19,9 +19,9 @@ public class IDLConstructor {
         this.idlClass = idlClass;
     }
 
-    public void initConstructor(String line) {
-        this.line = line;
-        paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
+    public void initConstructor(IDLLine idlLine) {
+        this.idlLine = idlLine;
+        paramsLine = IDLMethod.setParameters(idlFile, idlLine, parameters);
         for(IDLParameter parameter : parameters) {
             parameter.idlConstructor = this;
         }
@@ -46,7 +46,7 @@ public class IDLConstructor {
 
     public IDLConstructor clone() {
         IDLConstructor cloned = new IDLConstructor(idlFile, idlClass);
-        cloned.line = line;
+        cloned.idlLine = idlLine;
         cloned.paramsLine = paramsLine;
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);

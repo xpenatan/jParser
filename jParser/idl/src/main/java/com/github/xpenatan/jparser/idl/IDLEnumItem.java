@@ -12,8 +12,8 @@ public class IDLEnumItem {
     }
 
     public String getRenamedName() {
-        if(idlLine.containsCommand(IDLLine.CMD_RENAME)) {
-            String commandValue = idlLine.getCommandValue(IDLLine.CMD_RENAME);
+        if(idlLine.idlCommand.containsCommand(IDLCommand.CMD_RENAME)) {
+            String commandValue = idlLine.idlCommand.getCommandValue(IDLCommand.CMD_RENAME);
             return commandValue;
         }
         return null;

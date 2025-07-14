@@ -18,6 +18,7 @@ public class IDLParameter {
     public boolean isRef;
     public boolean isConst;
     public boolean isValue;
+    public boolean isReuseParam;
     public boolean isAny;
     public final ArrayList<String> tags = new ArrayList<>();
 
@@ -39,7 +40,7 @@ public class IDLParameter {
         idlClassOrEnum = idlAttribute.idlClassOrEnum;
     }
 
-    public void initParameter(String line) {
+    public void initParameter(String line, IDLCommand idlCommand) {
         line = IDLHelper.removeMultipleSpaces(line);
         this.line = line;
         String tmpLine = line;
@@ -71,6 +72,7 @@ public class IDLParameter {
 
         String[] s1 = tmpLine.split(" ");
         name = s1[s1.length - 1];
+        isReuseParam = idlCommand.containsCommandValue(IDLCommand.CMD_REUSE_PARAM, name);
 
         idlType = "";
         int sss = s1.length - 1;
@@ -120,6 +122,7 @@ public class IDLParameter {
         clonedParam.isArray = isArray;
         clonedParam.isValue = isValue;
         clonedParam.isConst = isConst;
+        clonedParam.isReuseParam = isReuseParam;
         clonedParam.tags.addAll(tags);
         return clonedParam;
     }

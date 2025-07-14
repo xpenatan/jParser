@@ -36,7 +36,7 @@ public class IDLMethod {
     public void initMethod(IDLLine idlLine) {
         this.idlLine = idlLine;
         String line = idlLine.line;
-        paramsLine = IDLMethod.setParameters(idlFile, line, parameters);
+        paramsLine = IDLMethod.setParameters(idlFile, idlLine, parameters);
         for(IDLParameter parameter : parameters) {
             parameter.idlMethod = this;
         }
@@ -44,9 +44,9 @@ public class IDLMethod {
         String leftSide = line.substring(0, index).trim();
         leftSide = IDLHelper.removeMultipleSpaces(leftSide.trim());
 
-        isReturnNewObject = idlLine.containsCommand(IDLLine.CMD_NEW_OBJECT);
-        isReturnMemoryOwned = !idlLine.containsCommand(IDLLine.CMD_NOT_MEM_OWN);
-        skip = idlLine.containsCommand(IDLLine.CMD_SKIP);
+        isReturnNewObject = idlLine.idlCommand.containsCommand(IDLCommand.CMD_NEW_OBJECT);
+        isReturnMemoryOwned = !idlLine.idlCommand.containsCommand(IDLCommand.CMD_NOT_MEM_OWN);
+        skip = idlLine.idlCommand.containsCommand(IDLCommand.CMD_SKIP);
 
         String tagsStr = IDLHelper.getTags(leftSide);
         if(!tagsStr.isEmpty()) {
@@ -177,7 +177,8 @@ public class IDLMethod {
         return cloned;
     }
 
-    static String setParameters(IDLFile idlFile, String line, ArrayList<IDLParameter> out) {
+    static String setParameters(IDLFile idlFile, IDLLine idlLine, ArrayList<IDLParameter> out) {
+        String line = idlLine.line;
         int firstIdx = line.indexOf("(");
         int lastIdx = line.indexOf(")");
         String params = line.substring(firstIdx, lastIdx + 1);
@@ -194,7 +195,7 @@ public class IDLMethod {
 
                 if(!containsTags || isArray) {
                     IDLParameter parameter = new IDLParameter(idlFile);
-                    parameter.initParameter(cur.trim());
+                    parameter.initParameter(cur.trim(), idlLine.idlCommand);
                     out.add(parameter);
                     cur = "";
                 }
@@ -202,7 +203,7 @@ public class IDLMethod {
                     // Small logic to keep getting the param if it contains [Const, Ref], [Const] or [Ref]
                     if(text.contains("]")) {
                         IDLParameter parameter = new IDLParameter(idlFile);
-                        parameter.initParameter(cur.trim());
+                        parameter.initParameter(cur.trim(), idlLine.idlCommand);
                         out.add(parameter);
                         cur = "";
                     }
