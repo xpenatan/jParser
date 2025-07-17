@@ -60,6 +60,7 @@ import java.util.Optional;
 public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     public static boolean CAST_LONG_TO_INT = true;
+    public static boolean USE_REF_ARRAY = false; // Not supported in WASM mode
 
     private static final String HEADER_CMD = "TEAVM";
 
@@ -233,7 +234,9 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             }
         }
 
-        convertJavaPrimitiveArrayToJavaScriptReferenceArray(parameters);
+        if(USE_REF_ARRAY) {
+            convertJavaPrimitiveArrayToJavaScriptReferenceArray(parameters);
+        }
 
         if(content != null) {
             content = content.replace("\n", "").replace("\r", "").replaceAll("[ ]+", " ");
