@@ -80,8 +80,8 @@ public class TestLib {
         {
             TestEnumLib testDefault = TestEnumLib.TEST_DEFAULT;
             try {
-                if(!(testDefault.getValue() == 7)) {
-                    throw new RuntimeException("testEnum Error: !(testDefault == 7)");
+                if(!(testDefault.getValue() == 1 << 0)) {
+                    throw new RuntimeException("testEnum Error: !(testDefault == 1 << 0)");
                 }
             } catch(Throwable e) {
                 e.printStackTrace();

@@ -43,9 +43,9 @@ namespace TestEnumNamespace {
 };
 
 enum TestEnumLib : int {
-    TEST_DEFAULT = 7,
-    TEST_FIRST,
-    TEST_SECOND
+    TEST_DEFAULT = 1 << 0,
+    TEST_FIRST = 1 << 1,
+    TEST_SECOND = 1 << 2
 };
 
 class TestObjectClass {
