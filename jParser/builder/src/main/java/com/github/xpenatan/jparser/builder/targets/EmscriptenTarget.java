@@ -26,6 +26,9 @@ public class EmscriptenTarget extends DefaultBuildTarget {
     public long initialMemory = 64 * 1024 * 1024;
     public long stackSize = 1048576;
 
+    public ArrayList<String> exportedFunctions = new ArrayList<>();
+    public ArrayList<String> exportedRuntimeMethods = new ArrayList<>();
+
     public EmscriptenTarget() {
         this(null);
     }
@@ -54,6 +57,18 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
         cppFlags.add("-c");
         cppFlags.add("-std=c++17");
+
+        exportedFunctions.add("_free");
+        exportedFunctions.add("_malloc");
+
+        exportedRuntimeMethods.add("UTF8ToString");
+        exportedRuntimeMethods.add("HEAP8");
+        exportedRuntimeMethods.add("HEAPU8");
+        exportedRuntimeMethods.add("HEAP16");
+        exportedRuntimeMethods.add("HEAPU16");
+        exportedRuntimeMethods.add("HEAP32");
+        exportedRuntimeMethods.add("HEAPU32");
+        exportedRuntimeMethods.add("HEAPF32");
 
         if(DEBUG_BUILD) {
             cppFlags.add("-O0");
@@ -122,9 +137,9 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("-s");
             linkerFlags.add("STACK_SIZE=" + stackSize);
             linkerFlags.add("-s");
-            linkerFlags.add("EXPORTED_FUNCTIONS=['_free','_malloc']");
+            linkerFlags.add("EXPORTED_FUNCTIONS=" + obtainList(exportedFunctions));
             linkerFlags.add("-s");
-            linkerFlags.add("EXPORTED_RUNTIME_METHODS=['UTF8ToString', 'HEAP8', 'HEAPU8', 'HEAP16', 'HEAPU16', 'HEAP32', 'HEAPU32', 'HEAPF32']");
+            linkerFlags.add("EXPORTED_RUNTIME_METHODS=" + obtainList(exportedRuntimeMethods));
             if(DEBUG_BUILD) {
                 linkerFlags.add("-s");
                 linkerFlags.add("ASSERTIONS=1");
@@ -209,5 +224,19 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         CustomFileDescriptor mergedIdlFile = jsglueDir.child("IDLMerged.idl");
         mergedIdlFile.writeString(idlStr, false);
         return mergedIdlFile;
+    }
+
+    private String obtainList(ArrayList<String> list) {
+        String items = "[";
+        int size = list.size();
+        for(int i = 0; i < size; i++) {
+            String item = "'" + list.get(i) + "'";
+            items += item;
+            if(i < size - 1) {
+                items += ", ";
+            }
+        }
+        items += "]";
+        return items;
     }
 }
