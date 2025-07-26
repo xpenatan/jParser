@@ -6,6 +6,10 @@ public class IDLNativeData {
     private long cPointer;
     private boolean cMemOwn;
     private boolean disposed;
+
+    /*[-TEAVM;-REPLACE]
+       public org.teavm.jso.JSObject nativeObject;
+    */
     public Object nativeObject;
 
     public IDLNativeData(IDLBase idlBase) {
