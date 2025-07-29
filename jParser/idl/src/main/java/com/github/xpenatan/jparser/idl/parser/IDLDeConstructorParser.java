@@ -23,9 +23,9 @@ public class IDLDeConstructorParser {
 
     public static void generateDeConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass) {
         if(!idlClass.classHeader.isNoDelete) {
-            MethodDeclaration disposeMethod = classOrInterfaceDeclaration.addMethod("dispose", Modifier.Keyword.PUBLIC, Modifier.Keyword.FINAL);
+            MethodDeclaration disposeMethod = classOrInterfaceDeclaration.addMethod("dispose", Modifier.Keyword.PUBLIC);
             disposeMethod.getBody().get().addStatement(new MethodCallExpr("super.dispose"));
-            MethodDeclaration isDisposeMethod = classOrInterfaceDeclaration.addMethod("isDisposed", Modifier.Keyword.PUBLIC, Modifier.Keyword.FINAL);
+            MethodDeclaration isDisposeMethod = classOrInterfaceDeclaration.addMethod("isDisposed", Modifier.Keyword.PUBLIC);
             isDisposeMethod.setType(PrimitiveType.booleanType());
             isDisposeMethod.getBody().get().addStatement(new MethodCallExpr("return super.isDisposed"));
 
