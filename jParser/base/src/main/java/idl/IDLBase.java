@@ -36,18 +36,18 @@ public abstract class IDLBase {
     /**
      * Take ownership of the native instance, causing the native object to be warned when this object gets out of scope.
      */
-    public void native_takeOwnership() {
+    public final void native_takeOwnership() {
         native_cMemOwn = true;
     }
 
     /**
      * Release ownership of the native instance, causing the native object NOT to be warned when this object gets out of scope.
      */
-    public void native_releaseOwnership() {
+    public final void native_releaseOwnership() {
         native_cMemOwn = false;
     }
 
-    public boolean hasOwnership() {
+    public boolean native_hasOwnership() {
         return native_cMemOwn;
     }
 

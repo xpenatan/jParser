@@ -25,7 +25,7 @@ public class IDLDeConstructorParser {
         if(!idlClass.classHeader.isNoDelete) {
             MethodDeclaration disposeMethod = classOrInterfaceDeclaration.addMethod("dispose", Modifier.Keyword.PUBLIC, Modifier.Keyword.FINAL);
             disposeMethod.getBody().get().addStatement(new MethodCallExpr("super.dispose"));
-            MethodDeclaration isDisposeMethod = classOrInterfaceDeclaration.addMethod("isDisposed", Modifier.Keyword.PUBLIC);
+            MethodDeclaration isDisposeMethod = classOrInterfaceDeclaration.addMethod("isDisposed", Modifier.Keyword.PUBLIC, Modifier.Keyword.FINAL);
             isDisposeMethod.setType(PrimitiveType.booleanType());
             isDisposeMethod.getBody().get().addStatement(new MethodCallExpr("return super.isDisposed"));
 
