@@ -61,7 +61,7 @@ public class IDLDeConstructorParser {
                 if(!JParserHelper.containsMethod(classOrInterfaceDeclaration, nativeMethod)) {
                     classOrInterfaceDeclaration.getMembers().add(nativeMethod);
                     MethodCallExpr caller = IDLMethodParser.createCaller(nativeMethod);
-                    caller.addArgument("(long)" + IDLDefaultCodeParser.CPOINTER_METHOD);
+                    caller.addArgument("(long)" + IDLDefaultCodeParser.NATIVE_ADDRESS);
                     BlockStmt blockStmt = deleteMethod.getBody().get();
                     blockStmt.addStatement(caller);
                     idlParser.onIDLDeConstructorGenerated(jParser, idlClass, classOrInterfaceDeclaration, nativeMethod);

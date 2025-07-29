@@ -57,7 +57,7 @@ public class IDLMethodParser {
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) " + NULL_POINTER + "\n" +
             "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
-            "    [TYPE]_TEMP_GEN_[NUM].getNativeData().reset(pointer, false);\n" +
+            "    [TYPE]_TEMP_GEN_[NUM].native_reset(pointer, false);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
 
@@ -66,17 +66,17 @@ public class IDLMethodParser {
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) " + NULL_POINTER + "\n" +
             "    [TYPE] [TYPE]_NEW = new [TYPE]((byte)1, (char)1);\n" +
-            "    [TYPE]_NEW.getNativeData().reset(pointer, [MEM_OWNED]);\n" +
+            "    [TYPE]_NEW.native_reset(pointer, [MEM_OWNED]);\n" +
             "    return [TYPE]_NEW;\n" +
             "}";
 
     static final String CALLBACK_REUSE_PARAM_TEMPLATE =
             "if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
-            "[TYPE]_TEMP_GEN_[NUM].getNativeData().reset([PARAM], false);\n";
+            "[TYPE]_TEMP_GEN_[NUM].native_reset([PARAM], false);\n";
 
     static final String CALLBACK_NEW_PARAM_TEMPLATE =
             "[TYPE] [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
-            "[TYPE]_TEMP_GEN_[NUM].getNativeData().reset([PARAM], true);\n";
+            "[TYPE]_TEMP_GEN_[NUM].native_reset([PARAM], true);\n";
 
     static final String OPERATOR_OBJECT_TEMPLATE =
             "{\n" +
@@ -261,7 +261,7 @@ public class IDLMethodParser {
         boolean isAttribute = idlParameters == null;
 
         if(!paramData.isStatic) {
-            caller.addArgument("(long)" + IDLDefaultCodeParser.CPOINTER_METHOD);
+            caller.addArgument("(long)" + IDLDefaultCodeParser.NATIVE_ADDRESS);
         }
         for(int i = 0; i < methodParameters.size(); i++) {
             Parameter parameter = methodParameters.get(i);
@@ -283,12 +283,12 @@ public class IDLMethodParser {
                 }
                 if(isArray && !isAttribute) {
                     // Only methods parameter array needs to call getPointer()
-                    String methodCall = paramName + "." + IDLDefaultCodeParser.CPOINTER_ARRAY_METHOD;
+                    String methodCall = paramName + "." + IDLDefaultCodeParser.NATIVE_ADDRESS_ARRAY_METHOD;
                     paramName =  "(long)(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
                 else if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
                     //All methods must contain a base class to get its pointer
-                    String methodCall = paramName + "." + IDLDefaultCodeParser.CPOINTER_METHOD;
+                    String methodCall = paramName + "." + IDLDefaultCodeParser.NATIVE_ADDRESS;
                     paramName =  "(long)(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
             }

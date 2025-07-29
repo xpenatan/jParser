@@ -617,7 +617,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             String script = "var " + callbackClassName + " = "+ module + ".wrapPointer(this_addr, " + module + "." + callbackClassName + ");";
             MethodCallExpr caller = IDLMethodParser.createCaller(nativeMethodDeclaration);
 
-            caller.addArgument("getNativeData().getCPointer()");
+            caller.addArgument(IDLDefaultCodeParser.NATIVE_ADDRESS);
 
             values.add(new StringLiteralExpr("this_addr"));
             for(int i = 0; i < methods.size(); i++) {
@@ -818,7 +818,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 }
             }
 
-            //cast cpointer to int
+            //cast native_address to int
 
             if(CAST_LONG_TO_INT) {
                 List<ClassOrInterfaceDeclaration> classDeclarations = unit.findAll(ClassOrInterfaceDeclaration.class);

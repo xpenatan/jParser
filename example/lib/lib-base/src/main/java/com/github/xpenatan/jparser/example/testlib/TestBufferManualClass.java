@@ -8,11 +8,11 @@ public class TestBufferManualClass extends IDLBase {
     /*[-TEAVM;-REPLACE_BLOCK]
         {
             org.teavm.jso.typedarrays.Uint8Array array = org.teavm.jso.typedarrays.Uint8Array.fromJavaBuffer(data);
-            internal_native_updateByteBuffer((int)getNativeData().getCPointer(), array, size, value);
+            internal_native_updateByteBuffer((int)native_address, array, size, value);
         }
     */
     public void updateByteBuffer(ByteBuffer data, int size, byte value) {
-        internal_native_updateByteBuffer(getNativeData().getCPointer(), data, size, value);
+        internal_native_updateByteBuffer(native_address, data, size, value);
     }
 
     /*[-TEAVM;-REPLACE]

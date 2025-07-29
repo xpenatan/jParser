@@ -6,7 +6,7 @@ public class TestExceptionManual extends IDLBase {
 
     public TestExceptionManual() {
         long addr = internal_native_create();
-        nativeData.reset(addr, true);
+        native_reset(addr, true);
     }
 
     /*[-JNI;-NATIVE]
@@ -19,7 +19,7 @@ public class TestExceptionManual extends IDLBase {
     private static native long internal_native_create();
 
     public int setDataToNullPointer() {
-        return internal_native_setDataToNullPointer(getNativeData().getCPointer());
+        return internal_native_setDataToNullPointer(native_address);
     }
 
     /*[-JNI;-NATIVE]
@@ -34,7 +34,7 @@ public class TestExceptionManual extends IDLBase {
 
 
     public void callJavaMethod(CallbackExceptionManual callback) {
-        internal_native_callJavaMethod(getNativeData().getCPointer(), (callback != null ? callback.getNativeData().getCPointer() : 0));
+        internal_native_callJavaMethod(native_address, (callback != null ? callback.native_address : 0));
     }
 
     /*[-JNI;-NATIVE]

@@ -6,26 +6,82 @@ package idl;
 public abstract class IDLBase {
 
     public static boolean ENABLE_LOGGING = true;
-    protected IDLNativeData nativeData = new IDLNativeData(this);
+
+    /**
+     * Native address. Used internally. Don't change.
+     */
+    public long native_address;
+    private boolean native_cMemOwn;
+    private boolean native_disposed;
+
+    /*[-TEAVM;-REPLACE]
+       public org.teavm.jso.JSObject nativeObject;
+    */
+    public Object nativeObject;
 
     public IDLBase() {
     }
 
-    public final IDLNativeData getNativeData() {
-        return nativeData;
+    public final void native_reset(long address, boolean cMemoryOwn) {
+        dispose();
+        native_cMemOwn = cMemoryOwn;
+        this.native_address = address;
+        native_disposed = false;
+        nativeObject = null;
+        if(address != 0) {
+            onNativeAddressChanged();
+        }
+    }
+
+    /**
+     * Take ownership of the native instance, causing the native object to be warned when this object gets out of scope.
+     */
+    public void native_takeOwnership() {
+        native_cMemOwn = true;
+    }
+
+    /**
+     * Release ownership of the native instance, causing the native object NOT to be warned when this object gets out of scope.
+     */
+    public void native_releaseOwnership() {
+        native_cMemOwn = false;
+    }
+
+    public boolean hasOwnership() {
+        return native_cMemOwn;
     }
 
     protected boolean isDisposed() {
-        return nativeData.isDisposed();
+        return native_disposed;
     }
 
     protected void dispose() {
-        nativeData.dispose();
+        if(native_cMemOwn) {
+            if(!native_disposed) {
+                if(native_address != 0) {
+                    native_disposed = true;
+                    deleteNative();
+                    native_address = 0;
+                    nativeObject = null;
+                    onNativeDispose();
+                }
+                else {
+                    if(IDLBase.ENABLE_LOGGING) {
+                        error("IDL", "Disposing error - " + this + " native_address is 0");
+                    }
+                }
+            }
+            else {
+                if(IDLBase.ENABLE_LOGGING) {
+                    error("IDL", "Disposing error - " + this + " is already disposed");
+                }
+            }
+        }
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " " + nativeData;
+        return getClass().getSimpleName() + "(" + native_address + "," + native_cMemOwn + ")";
     }
 
     /**
@@ -35,11 +91,9 @@ public abstract class IDLBase {
     }
 
     protected void onNativeAddressChanged() {
-
     }
 
     protected void onNativeDispose() {
-        nativeData = null;
     }
 
     /*[-TEAVM;-REPLACE]
@@ -52,6 +106,26 @@ public abstract class IDLBase {
 
     @Override
     public boolean equals(Object obj) {
-        return nativeData.equals(obj);
+        if(obj instanceof IDLBase) {
+            IDLBase idlBase = (IDLBase)obj;
+            return idlBase.native_address == this.native_address;
+        }
+        return false;
     }
+
+    /**
+     * Logs an error message to the console or logcat
+     */
+    public static void error(String tag, String message) {
+        System.err.println(tag + ": " + message);
+    }
+
+    // TODO change to other solution
+//    @Override
+//    protected void finalize() throws Throwable {
+//        if(cMemOwn && !disposed && IDLBase.ENABLE_LOGGING) {
+//            error("IDL", "Memory Leak - " + idlBase.getClass().getSimpleName() + " was not disposed correctly.");
+//        }
+//        super.finalize();
+//    }
 }

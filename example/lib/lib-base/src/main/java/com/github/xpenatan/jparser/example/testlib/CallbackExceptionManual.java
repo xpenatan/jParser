@@ -37,7 +37,7 @@ public class CallbackExceptionManual extends IDLBase {
 
     public CallbackExceptionManual() {
         long addr = internal_native_create();
-        nativeData.reset(addr, true);
+        native_reset(addr, true);
         setupCallbacks();
     }
 
@@ -58,11 +58,11 @@ public class CallbackExceptionManual extends IDLBase {
                     internal_callJava();
                 }
             };
-            internal_native_setupCallbacks((int)getNativeData().getCPointer(), callJava);
+            internal_native_setupCallbacks((int)native_address, callJava);
         }
     */
     private void setupCallbacks() {
-        internal_native_setupCallbacks(getNativeData().getCPointer());
+        internal_native_setupCallbacks(native_address);
     }
 
     /*[-JNI;-NATIVE]

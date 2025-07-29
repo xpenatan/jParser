@@ -31,7 +31,6 @@ import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodParser;
-import com.github.xpenatan.jparser.idl.parser.data.IDLMethodData;
 import com.github.xpenatan.jparser.idl.parser.data.IDLParameterData;
 import java.util.ArrayList;
 
@@ -426,7 +425,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             // Call setupMethod
             classDeclaration.getMembers().add(nativeMethodDeclaration);
             MethodCallExpr caller = IDLMethodParser.createCaller(nativeMethodDeclaration);
-            caller.addArgument(IDLDefaultCodeParser.CPOINTER_METHOD);
+            caller.addArgument(IDLDefaultCodeParser.NATIVE_ADDRESS);
             BlockStmt blockStmt = callbackDeclaration.getBody().get();
             blockStmt.addStatement(caller);
             String method = callbackDeclaration.getNameAsString() + "(env, object)";
