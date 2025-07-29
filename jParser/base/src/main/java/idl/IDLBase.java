@@ -15,9 +15,9 @@ public abstract class IDLBase {
     private boolean native_disposed;
 
     /*[-TEAVM;-REPLACE]
-       public org.teavm.jso.JSObject nativeObject;
+       public org.teavm.jso.JSObject native_object;
     */
-    public Object nativeObject;
+    public Object native_object;
 
     public IDLBase() {
     }
@@ -27,7 +27,7 @@ public abstract class IDLBase {
         native_cMemOwn = cMemoryOwn;
         this.native_address = address;
         native_disposed = false;
-        nativeObject = null;
+        native_object = null;
         if(address != 0) {
             onNativeAddressChanged();
         }
@@ -62,7 +62,7 @@ public abstract class IDLBase {
                     native_disposed = true;
                     deleteNative();
                     native_address = 0;
-                    nativeObject = null;
+                    native_object = null;
                     onNativeDispose();
                 }
                 else {
