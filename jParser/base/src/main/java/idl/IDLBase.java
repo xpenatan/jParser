@@ -70,11 +70,11 @@ public abstract class IDLBase {
         return native_cMemOwn;
     }
 
-    protected boolean isDisposed() {
+    public final boolean isDisposed() {
         return native_disposed;
     }
 
-    protected void dispose() {
+    public final void dispose() {
         if(native_cMemOwn) {
             if(!native_disposed) {
                 if(native_address != 0) {
