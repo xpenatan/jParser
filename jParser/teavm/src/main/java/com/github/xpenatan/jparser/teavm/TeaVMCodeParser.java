@@ -48,7 +48,6 @@ import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
-import com.github.xpenatan.jparser.idl.parser.IDLCallbackParser;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodParser;
@@ -860,26 +859,19 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 }
                 List<MethodCallExpr> methodCallerExprList = methodDeclaration.findAll(MethodCallExpr.class);
                 updateLongToInt(classDeclaration, methodCallerExprList);
-                updateCallbackInternalsToInt(classDeclaration, methodDeclaration);
+                updateMethodAddrParamsToInt(methodDeclaration);
             }
         }
     }
 
-    private void updateCallbackInternalsToInt(ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
-        String nameAsString = classDeclaration.getNameAsString();
-        IDLClass idlClass = idlReader.getClass(nameAsString);
-        if(idlClass != null && idlClass.isCallback) {
-            String methodName = methodDeclaration.getNameAsString();
-            if(methodName.startsWith(IDLCallbackParser.CALLBACK_INTERNAL_METHOD)) {
-                NodeList<Parameter> parameters = methodDeclaration.getParameters();
-                for(int argI = 0; argI < parameters.size(); argI++) {
-                    Parameter parameter = parameters.get(argI);
-                    Type type = parameter.getType();
-                    String paramName = parameter.getNameAsString();
-                    if(JParserHelper.isLong(type) && paramName.endsWith(IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS)) {
-                        parameter.setType(int.class);
-                    }
-                }
+    private void updateMethodAddrParamsToInt(MethodDeclaration methodDeclaration) {
+        NodeList<Parameter> parameters = methodDeclaration.getParameters();
+        for(int argI = 0; argI < parameters.size(); argI++) {
+            Parameter parameter = parameters.get(argI);
+            Type type = parameter.getType();
+            String paramName = parameter.getNameAsString();
+            if(JParserHelper.isLong(type) && paramName.endsWith(IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS)) {
+                parameter.setType(int.class);
             }
         }
     }
