@@ -26,6 +26,7 @@ import java.util.List;
 public class IDLCallbackParser {
 
     private final static String callbackMethodName = "setupCallback";
+    public final static String CALLBACK_INTERNAL_METHOD = "internal_";
 
     public static void generateCallback(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, IDLClass idlClass) {
         ArrayList<IDLConstructor> constructors = idlClass.callbackImpl.constructors;
@@ -78,8 +79,15 @@ public class IDLCallbackParser {
                 IDLParameter idlParameter = method.parameters.get(i);
                 boolean isNewParam = idlParameter.isNewParam;
                 boolean isEnum = idlParameter.isEnum();
-                String paramName = parameter.getNameAsString();
                 Type type = parameter.getType();
+                boolean isClass = type.isClassOrInterfaceType();
+                String paramName = parameter.getNameAsString();
+
+                if(isClass) {
+                    paramName += IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS;
+                    parameter.setName(paramName);
+                }
+
                 String typeStr = type.asString();
                 String fieldName = paramName;
 
@@ -89,7 +97,7 @@ public class IDLCallbackParser {
                             .replace(IDLMethodParser.TEMPLATE_TAG_TYPE, typeStr)
                             .replace(IDLMethodParser.TEMPLATE_TAG_PARAM, paramName);
                 }
-                else if(type.isClassOrInterfaceType() && !typeStr.equals("String")) {
+                else if(isClass && !typeStr.equals("String")) {
                     parameter.setType(PrimitiveType.longType());
                     if(isNewParam) {
                         fieldName = fieldName + "_new";
@@ -125,7 +133,7 @@ public class IDLCallbackParser {
                 blockStmt.addStatement(returnStmt);
             }
             String internName = internalMethod.getNameAsString();
-            internalMethod.setName("internal_" + internName);
+            internalMethod.setName(CALLBACK_INTERNAL_METHOD + internName);
             internalMethod.setBody(blockStmt);
 
             List<MethodDeclaration> methodExist = classDeclaration.getMethodsBySignature(internalMethod.getNameAsString(), paramTypes);

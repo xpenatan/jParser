@@ -6,7 +6,7 @@ public class TestExceptionManual extends IDLBase {
 
     public TestExceptionManual() {
         long addr = internal_native_create();
-        native_reset(addr, true);
+        internal_reset(addr, true);
     }
 
     /*[-JNI;-NATIVE]

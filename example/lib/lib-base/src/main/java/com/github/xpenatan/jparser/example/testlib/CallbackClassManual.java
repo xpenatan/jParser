@@ -89,7 +89,7 @@ public class CallbackClassManual extends IDLBase {
 
     public CallbackClassManual() {
         long addr = internal_native_create();
-        native_reset(addr, true);
+        internal_reset(addr, true);
         setupCallbacks();
     }
 

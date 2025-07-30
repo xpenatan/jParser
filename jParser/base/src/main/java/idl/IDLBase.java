@@ -10,6 +10,10 @@ public abstract class IDLBase {
     /**
      * Native address. Used internally. Don't change.
      */
+
+    /*[-TEAVM;-REPLACE]
+       public int native_address;
+    */
     public long native_address;
     private boolean native_cMemOwn;
     private boolean native_disposed;
@@ -22,7 +26,22 @@ public abstract class IDLBase {
     public IDLBase() {
     }
 
-    public final void native_reset(long address, boolean cMemoryOwn) {
+
+    /*[-TEAVM;-REPLACE_RAW]
+       public final void internal_reset(int address, boolean cMemoryOwn) {
+            dispose();
+            native_cMemOwn = cMemoryOwn;
+            this.native_address = address;
+            native_disposed = false;
+            native_object = null;
+            if(address != 0) {
+                onNativeAddressChanged();
+            }
+        }
+    */
+    @Deprecated
+    public final void internal_reset(long address, boolean cMemoryOwn) {
+        // This metho cannot be called from outside
         dispose();
         native_cMemOwn = cMemoryOwn;
         this.native_address = address;
@@ -34,7 +53,7 @@ public abstract class IDLBase {
     }
 
     /**
-     * Take ownership of the native instance, causing the native object to be warned when this object gets out of scope.
+     * Take ownership of the native instance, causing the native object to be warned when this object gets out of scope without disposing.
      */
     public final void native_takeOwnership() {
         native_cMemOwn = true;
@@ -118,6 +137,16 @@ public abstract class IDLBase {
      */
     public static void error(String tag, String message) {
         System.err.println(tag + ": " + message);
+    }
+
+    /**
+     * Copy the address data and set ownership/disposed to false
+     */
+    public void native_copy(IDLBase other) {
+        this.native_address = other.native_address;
+        this.native_object = other.native_object;
+        this.native_disposed = false;
+        this.native_cMemOwn = false;
     }
 
     // TODO change to other solution

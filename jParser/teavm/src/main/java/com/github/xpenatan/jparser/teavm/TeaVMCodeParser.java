@@ -48,6 +48,7 @@ import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.IDLAttributeOperation;
+import com.github.xpenatan.jparser.idl.parser.IDLCallbackParser;
 import com.github.xpenatan.jparser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodOperation;
 import com.github.xpenatan.jparser.idl.parser.IDLMethodParser;
@@ -436,7 +437,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     private static String getParam(IDLFile idlFile, boolean isEnum, boolean isObject, String paramName, String classType, boolean isRef, boolean isValue) {
         if(!isEnum && isObject && !classType.equals("String")) {
-            paramName += "_addr";
+            paramName += IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS;
         }
         return paramName;
     }
@@ -854,8 +855,31 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             MethodDeclaration methodDeclaration = methodDeclarations.get(i);
             if(!methodDeclaration.isNative()) {
                 String methodName = methodDeclaration.getNameAsString();
+                if(methodName.equals(IDLDefaultCodeParser.NATIVE_ADDRESS_ARRAY_METHOD_NAME)) {
+                    methodDeclaration.setType(StaticJavaParser.parseType("int"));
+                }
                 List<MethodCallExpr> methodCallerExprList = methodDeclaration.findAll(MethodCallExpr.class);
                 updateLongToInt(classDeclaration, methodCallerExprList);
+                updateCallbackInternalsToInt(classDeclaration, methodDeclaration);
+            }
+        }
+    }
+
+    private void updateCallbackInternalsToInt(ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration) {
+        String nameAsString = classDeclaration.getNameAsString();
+        IDLClass idlClass = idlReader.getClass(nameAsString);
+        if(idlClass != null && idlClass.isCallback) {
+            String methodName = methodDeclaration.getNameAsString();
+            if(methodName.startsWith(IDLCallbackParser.CALLBACK_INTERNAL_METHOD)) {
+                NodeList<Parameter> parameters = methodDeclaration.getParameters();
+                for(int argI = 0; argI < parameters.size(); argI++) {
+                    Parameter parameter = parameters.get(argI);
+                    Type type = parameter.getType();
+                    String paramName = parameter.getNameAsString();
+                    if(JParserHelper.isLong(type) && paramName.endsWith(IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS)) {
+                        parameter.setType(int.class);
+                    }
+                }
             }
         }
     }
@@ -887,6 +911,11 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                         Parameter param = parameters.get(argI);
                         Type type = param.getType();
                         if(JParserHelper.isLong(type) || isLong) {
+                            String paramName = param.getNameAsString();
+                            if(paramName.endsWith(IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS)) {
+                                // don't cast addr value because type is changed already.
+                                continue;
+                            }
                             Optional<Node> parentNode = arg.getParentNode();
                             if(parentNode.isPresent()) {
                                 Node node = parentNode.get();

@@ -816,7 +816,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 classType = idlArrayOrNull;
             }
 
-            paramName += "_addr";
+            paramName += IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS;
             if(isArray) {
                 String idlType = cppType.replace("[]", "*");
                 if(idlParameter.idlClassOrEnum != null && !isRef) {
