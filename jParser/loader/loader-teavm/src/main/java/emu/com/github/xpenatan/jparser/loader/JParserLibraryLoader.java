@@ -2,6 +2,7 @@ package emu.com.github.xpenatan.jparser.loader;
 
 import com.github.xpenatan.jmultiplatform.core.JMultiplatform;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoaderListener;
+import com.github.xpenatan.jparser.loader.JParserLibraryLoaderOptions;
 import com.github.xpenatan.jparser.loader.JParserLibraryLoaderPlatform;
 import java.util.HashSet;
 import javax.script.ScriptException;
@@ -18,10 +19,14 @@ public class JParserLibraryLoader {
     private JParserLibraryLoader() {}
 
     public static void load(String libraryName, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, listener);
+        loadInternal(libraryName, null, listener);
     }
 
-    private static void loadInternal(String libraryName, JParserLibraryLoaderListener listener) {
+    public static void load(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+        loadInternal(libraryName, options, listener);
+    }
+
+    private static void loadInternal(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
         if(listener == null) {
             throw new RuntimeException("Should implement listener");
         }

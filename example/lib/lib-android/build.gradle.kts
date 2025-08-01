@@ -7,7 +7,7 @@ group = "jparser.lib.android"
 
 android {
     namespace = "com.github.xpenatan.jparser.example.testlib"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 21

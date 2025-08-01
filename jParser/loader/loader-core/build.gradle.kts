@@ -5,7 +5,6 @@ plugins {
 val moduleName = "loader-core"
 
 dependencies {
-    api("com.badlogicgames.gdx:gdx-jnigen-loader:${LibExt.jniGenVersion}")
 }
 
 publishing {
