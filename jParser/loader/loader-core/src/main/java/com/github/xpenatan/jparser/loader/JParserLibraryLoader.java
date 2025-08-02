@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.zip.CRC32;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class JParserLibraryLoader {
 
@@ -57,14 +55,22 @@ public class JParserLibraryLoader {
     private JParserLibraryLoader() {}
 
     public static void load(String libraryName, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, null, listener);
+        loadInternal(libraryName, null, null, listener);
+    }
+
+    public static void load(String libraryName, String path, JParserLibraryLoaderListener listener) {
+        loadInternal(libraryName, path, null, listener);
     }
 
     public static void load(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, options, listener);
+        loadInternal(libraryName, null, options, listener);
     }
 
-    private static void loadInternal(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+    public static void load(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+        loadInternal(libraryName, path, options, listener);
+    }
+
+    private static void loadInternal(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
         if(listener == null) {
             throw new RuntimeException("Should implement listener");
         }
@@ -81,7 +87,7 @@ public class JParserLibraryLoader {
                     }
                     suffix = suffix + "." + os.getLibExtension();
                 }
-                load(libraryName, prefix, suffix);
+                load(libraryName, path, prefix, suffix);
                 listener.onLoad(true, null);
             }
             catch(Exception e) {
@@ -90,12 +96,21 @@ public class JParserLibraryLoader {
         }).start();
     }
 
-    private static void load(String libraryName, String prefix, String suffix) {
+    private static void load(String libraryName, String path, String prefix, String suffix) {
         if (os == Os.IOS) return;
+        if(path == null) {
+            path = "";
+        }
+        else {
+            path += "/";
+            path = path.replace("//", "/");
+        }
 
-        String sourcePath = prefix + libraryName + suffix;
+        final String fullLibraryName = path + libraryName;
+        final String sourcePath = path + prefix + libraryName + suffix;
+
         synchronized(JParserLibraryLoader.class) {
-            if(loadedLibraries.contains(libraryName)) {
+            if(loadedLibraries.contains(fullLibraryName)) {
                 // Already loaed. Just ignore.
                 return;
             }
@@ -109,8 +124,8 @@ public class JParserLibraryLoader {
                 String fileName = new File(sourcePath).getName();
 
                 // Temp directory with username in path.
-                File file = new File(System.getProperty("java.io.tmpdir") + "/jParser" + System.getProperty("user.name") + "/" + sourceCrc,
-                        fileName);
+                String tmpDir = System.getProperty("java.io.tmpdir") + "/jParser" + System.getProperty("user.name") + "/" + sourceCrc;
+                File file = new File(tmpDir, fileName);
                 Throwable ex = loadFile(sourcePath, sourceCrc, file);
                 if (ex == null) return;
 
@@ -137,7 +152,7 @@ public class JParserLibraryLoader {
                 }
             }
 
-            loadedLibraries.add(libraryName);
+            loadedLibraries.add(fullLibraryName);
         }
 
     }

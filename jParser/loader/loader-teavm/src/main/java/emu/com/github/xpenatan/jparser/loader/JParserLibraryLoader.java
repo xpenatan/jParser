@@ -19,19 +19,37 @@ public class JParserLibraryLoader {
     private JParserLibraryLoader() {}
 
     public static void load(String libraryName, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, null, listener);
+        loadInternal(libraryName, null, null, listener);
+    }
+
+    public static void load(String libraryName, String path, JParserLibraryLoaderListener listener) {
+        loadInternal(libraryName, path, null, listener);
     }
 
     public static void load(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, options, listener);
+        loadInternal(libraryName, null, options, listener);
     }
 
-    private static void loadInternal(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+    public static void load(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+        loadInternal(libraryName, path, options, listener);
+    }
+
+    private static void loadInternal(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
         if(listener == null) {
             throw new RuntimeException("Should implement listener");
         }
 
-        if(loadedLibraries.contains(libraryName)) {
+        if(path == null) {
+            path = "";
+        }
+        else {
+            path += "/";
+            path = path.replace("//", "/");
+        }
+
+        final String fullLibraryName = path + libraryName;
+
+        if(loadedLibraries.contains(fullLibraryName)) {
             return;
         }
 
@@ -44,14 +62,14 @@ public class JParserLibraryLoader {
 
         String scriptPath = JMultiplatform.getInstance().getMap().getObject(JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH, String.class);
         if(scriptPath != null) {
-            if(libraryName.endsWith(".wasm.js")) {
-                loadWasm(lis, libraryName, scriptPath, "", false);
+            if(fullLibraryName.endsWith(".wasm.js")) {
+                loadWasm(lis, fullLibraryName, scriptPath, "", false);
             }
-            else if(libraryName.endsWith(".js")) {
-                loadJS(lis, libraryName, scriptPath);
+            else if(fullLibraryName.endsWith(".js")) {
+                loadJS(lis, fullLibraryName, scriptPath);
             }
             else {
-                loadWasm(lis, libraryName, scriptPath, ".wasm.js",true);
+                loadWasm(lis, fullLibraryName, scriptPath, ".wasm.js",true);
             }
         }
         else {
