@@ -16,7 +16,7 @@ public class IOSTarget extends DefaultBuildTarget {
 
     public IOSTarget() {
         this.libDirSuffix = "ios/";
-        this.tempBuildDir = "target/ios";
+        this.tempBuildDir = "target/ios/";
 
         cppCompiler.clear();
         linkerCompiler.clear();

@@ -35,7 +35,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
     public EmscriptenTarget(IDLReader idlReader) {
         this.libDirSuffix = "emscripten/";
-        this.tempBuildDir = "target/emscripten";
+        this.tempBuildDir = "target/emscripten/";
         this.idlReader = idlReader;
 
         cppCompiler.clear();

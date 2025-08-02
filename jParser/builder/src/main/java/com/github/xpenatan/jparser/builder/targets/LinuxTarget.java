@@ -9,7 +9,7 @@ public class LinuxTarget extends DefaultBuildTarget {
 
     public LinuxTarget() {
         this.libDirSuffix = "linux/";
-        this.tempBuildDir = "target/linux";
+        this.tempBuildDir = "target/linux/";
         this.libPrefix = "lib";
 
         cppCompiler.clear();

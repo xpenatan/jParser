@@ -11,7 +11,7 @@ public class WindowsTarget extends DefaultBuildTarget {
 
     public WindowsTarget() {
         this.libDirSuffix = "windows/";
-        this.tempBuildDir = "target/windows";
+        this.tempBuildDir = "target/windows/";
 
         cppFlags.add("-c");
         cppFlags.add("-Wall");

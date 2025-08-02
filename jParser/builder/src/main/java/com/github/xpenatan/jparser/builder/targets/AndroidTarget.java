@@ -43,8 +43,8 @@ public class AndroidTarget extends DefaultBuildTarget {
 
         String targetPath = target.folder;
 
-        this.libDirSuffix = "android/" + targetPath;
-        this.tempBuildDir = "target/" + targetPath;
+        this.libDirSuffix = "android/" + targetPath + "/";
+        this.tempBuildDir = "target/" + targetPath + "/";
         linkObjSuffix = ".o";
 
         cppCompiler.add(compiler);

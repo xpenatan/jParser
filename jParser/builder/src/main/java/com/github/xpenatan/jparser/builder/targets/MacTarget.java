@@ -27,11 +27,11 @@ public class MacTarget extends DefaultBuildTarget {
 
         if(isArm) {
             this.libDirSuffix = "mac/arm/";
-            this.tempBuildDir = "target/mac/arm";
+            this.tempBuildDir = "target/mac/arm/";
         }
         else {
             this.libDirSuffix = "mac/";
-            this.tempBuildDir = "target/mac";
+            this.tempBuildDir = "target/mac/";
         }
         this.libPrefix = "lib";
 
