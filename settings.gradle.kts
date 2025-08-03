@@ -31,3 +31,14 @@ include(":example:app:android")
 //        substitute(module("com.github.xpenatan.gdx-teavm:asset-loader")).using(project(":extensions:asset-loader"))
 //    }
 //}
+//
+//includeBuild("E:/Dev/Projects/java/teavm") {
+//    dependencySubstitution {
+//        substitute(module("org.teavm:teavm-tooling")).using(project(":tools:core"))
+//        substitute(module("org.teavm:teavm-core")).using(project(":core"))
+//        substitute(module("org.teavm:teavm-classlib")).using(project(":classlib"))
+//        substitute(module("org.teavm:teavm-jso")).using(project(":jso:core"))
+//        substitute(module("org.teavm:teavm-jso-apis")).using(project(":jso:apis"))
+//        substitute(module("org.teavm:teavm-jso-impl")).using(project(":jso:impl"))
+//    }
+//}

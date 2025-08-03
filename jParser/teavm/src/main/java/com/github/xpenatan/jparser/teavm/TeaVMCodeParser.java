@@ -20,6 +20,7 @@ import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
@@ -751,12 +752,16 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             JParserItem parserItem = parserItems.get(i);
             String className = parserItem.className;
             ClassOrInterfaceDeclaration classDeclaration = parserItem.getClassDeclaration();
+            EnumDeclaration enumDeclaration = parserItem.getEnumDeclaration();
             String newName = prefix + className;
             parserItem.packagePathName = packagePrefixPath + parserItem.packagePathName;
             parserItem.className = newName;
 
             if(classDeclaration != null) {
                 classDeclaration.setName(newName);
+            }
+            if(enumDeclaration != null) {
+                enumDeclaration.setName(newName);
             }
         }
 
@@ -807,7 +812,8 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                     constructorDeclaration.setName(prefix + nameAsString);
                 }
             }
-            for(Type type : unit.findAll(Type.class)) {
+            List<Type> allTypes = unit.findAll(Type.class);
+            for(Type type : allTypes) {
                 if(type.isClassOrInterfaceType()) {
                     ClassOrInterfaceType classOrInterfaceType = type.asClassOrInterfaceType();
                     String nameAsString = classOrInterfaceType.getNameAsString();
@@ -815,6 +821,14 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                     if(parserUnitItem != null) {
                         classOrInterfaceType.setName(prefix + nameAsString);
                     }
+                }
+            }
+            List<NameExpr> nameExprs = unit.findAll(NameExpr.class);
+            for(NameExpr nameExpr : nameExprs) {
+                String name = nameExpr.getNameAsString();
+                JParserItem parserUnitItem = jParser.getParserUnitItem(prefix + name);
+                if(parserUnitItem != null) {
+                    nameExpr.setName(prefix + name);
                 }
             }
 
