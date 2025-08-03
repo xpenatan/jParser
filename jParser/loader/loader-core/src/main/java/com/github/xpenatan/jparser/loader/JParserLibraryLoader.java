@@ -98,7 +98,7 @@ public class JParserLibraryLoader {
 
     private static void load(String libraryName, String path, String prefix, String suffix) {
         if (os == Os.IOS) return;
-        if(path == null) {
+        if(path == null || os == Os.Android) {
             path = "";
         }
         else {
