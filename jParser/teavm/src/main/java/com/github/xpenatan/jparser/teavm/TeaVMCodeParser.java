@@ -41,6 +41,7 @@ import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
+import com.github.xpenatan.jparser.idl.IDLClassOrEnum;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
 import com.github.xpenatan.jparser.idl.IDLEnum;
 import com.github.xpenatan.jparser.idl.IDLEnumItem;
@@ -64,6 +65,8 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     public static boolean USE_REF_ARRAY = false; // Not supported in WASM mode
 
     private static final String HEADER_CMD = "TEAVM";
+
+    private static final String PACKAGE_PREFIX = "gen.";
 
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
@@ -744,9 +747,8 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     public void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
         super.onParserComplete(jParser, parserItems);
         String prefix = "";
-        String packagePrefix = "gen.";
 
-        String packagePrefixPath = packagePrefix.replace(".", File.separator);
+        String packagePrefixPath = PACKAGE_PREFIX.replace(".", File.separator);
         // Rename all classes to a prefix
         for(int i = 0; i < parserItems.size(); i++) {
             JParserItem parserItem = parserItems.get(i);
@@ -779,31 +781,28 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 String identifier = name.getIdentifier();
 
                 boolean skipUnit = false;
-                if(!JParser.CREATE_IDL_HELPER) {
-                    //TODO implement better class renaming
-                    // Hack to skip the generated lib and use the main one
-                    ArrayList<String> baseIDLClasses = getBaseIDLClasses();
-                    for(String baseIDLClass : baseIDLClasses) {
-                        String[] split = baseIDLClass.split("\\.");
-                        String s = split[split.length - 1];
-                        if(s.equals(identifier)) {
-                            skipUnit = true;
-                            break;
-                        }
-                    }
-                }
                 if(!skipUnit) {
                     JParserItem parserUnitItem = jParser.getParserUnitItem(prefix + identifier);
                     if(parserUnitItem != null) {
-                        String newImport = packagePrefix + importPath + ".";
+                        String newImport = PACKAGE_PREFIX + importPath + ".";
                         anImport.setName(newImport + prefix + identifier);
+                    }
+                    else {
+                        IDLClassOrEnum classOrEnum = idlReader.getClassOrEnum(identifier);
+                        if(classOrEnum != null) {
+                            //Contains dependency. It needs to have gen imports
+                            if(!importPath.startsWith(PACKAGE_PREFIX)) {
+                                String newImport = PACKAGE_PREFIX + importPath + "." + identifier;
+                                anImport.setName(newImport);
+                            }
+                        }
                     }
                 }
             }
 
             PackageDeclaration packageDeclaration = unit.getPackageDeclaration().get();
             String nameAsString1 = packageDeclaration.getNameAsString();
-            packageDeclaration.setName(packagePrefix + nameAsString1);
+            packageDeclaration.setName(PACKAGE_PREFIX + nameAsString1);
 
             for(ConstructorDeclaration constructorDeclaration : unit.findAll(ConstructorDeclaration.class)) {
                 String nameAsString = constructorDeclaration.getNameAsString();
