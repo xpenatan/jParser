@@ -15,72 +15,110 @@ class IDLArray {
 
         void deleteData() { delete[] data; data = nullptr; }
     public:
+        IDLArray() : size(0), data(nullptr) {}
         IDLArray(int size) : size(0), data(nullptr) { resize(size); }
         ~IDLArray() {
-            clear(false); // Don't delete points data. This may be handled by the user.
+            clear();
             deleteData();
         }
-        void resize(int newSize, bool deletePointers = false) {
-            if(newSize > 0 && size != newSize) {
-                T* newData = new T[newSize];
-                clear(deletePointers);
-                deleteData();
-                data = newData; // Update the data pointer
-                size = newSize; // Update the size
-            }
+
+        IDLArray(const IDLArray& other) : size(0), data(nullptr) {
+            resize(other.size);
+            std::copy(other.data, other.data + size, data);
         }
-        void clear(bool deletePointers = false) {
+
+        IDLArray& operator=(const IDLArray& other) {
+            if (this == &other) return *this;
+            resize(other.size);
+            std::copy(other.data, other.data + size, data);
+            return *this;
+        }
+
+        IDLArray(IDLArray&& other) noexcept : size(other.size), data(other.data) {
+            other.size = 0;
+            other.data = nullptr;
+        }
+
+        IDLArray& operator=(IDLArray&& other) noexcept {
+            if (this == &other) return *this;
+            clear();
+            deleteData();
+            data = other.data;
+            size = other.size;
+            other.data = nullptr;
+            other.size = 0;
+            return *this;
+        }
+
+        void resize(int newSize) {
+            if (newSize < 0) newSize = 0;
+            if (newSize == size) return;
+
+            if (newSize == 0) {
+                clear();
+                deleteData();
+                data = nullptr;
+                size = 0;
+                return;
+            }
+
+            T* newData = new T[newSize]();
+            int copySize = std::min(size, newSize);
+            std::copy(data, data + copySize, newData);
+
+            deleteData();
+            data = newData;
+            size = newSize;
+        }
+
+        void clear() {
             if (!data || size == 0) {
                 return;
             }
 
             if constexpr (std::is_pointer<T>::value) {
-                // Handle pointer types (e.g., T = std::string*)
-                if (deletePointers) {
-                    // Delete pointed-to objects
-                    for (int i = 0; i < size; ++i) {
-                        delete data[i]; // Safe if data[i] is nullptr
-                        data[i] = nullptr;
-                    }
-                } else {
-                    // Set pointers to nullptr without deleting
-                    std::fill(data, data + size, nullptr);
-                }
+                std::fill(data, data + size, nullptr);
             } else {
-                // Handle non-pointer types (primitives or objects)
-                static_assert(std::is_default_constructible<T>::value,
-                              "T must be default constructible for clear()");
+                static_assert(std::is_default_constructible<T>::value, "T must be default constructible for clear()");
                 std::fill(data, data + size, T());
             }
         }
+
         void copy(IDLArray<T>& src, int srcPos, int destPos, int length) {
             assert(!(srcPos < 0 || destPos < 0 || length < 0 || srcPos + length > src.size || destPos + length > size));
             std::copy(src.data + srcPos, src.data + srcPos + length, data + destPos);
         }
+
         T getValue(int index) {
             assert(!(index < 0 || index >= size));
             return data[index];
         }
+
         T& getValueRef(int index) {
             assert(!(index < 0 || index >= size));
             return data[index];
         }
+
         T* getValuePtr(int index) {
             assert(!(index < 0 || index >= size));
             return &data[index];
         }
+
         void setValue(int index, T value) {
             assert(!(index < 0 || index >= size));
             data[index] = value;
         }
+
         void setValueRef(int index, T& value) {
             assert(!(index < 0 || index >= size));
             data[index] = value;
         }
+
         void setValuePtr(int index, T* value) {
             assert(!(index < 0 || index >= size));
             data[index] = *value;
         }
+
         int getSize() { return size; }
         void* getPointer() { return (void*)data; }
         T* getData() { return data; }
