@@ -66,7 +66,7 @@ public class IDLConstructorParser {
         if(parent.isPresent()) {
             parentName = parent.get().getNameAsString();
         }
-        if(!parentName.equals("IDLBase")) {
+        if(!parentName.equals(IDLDefaultCodeParser.IDL_BASE_CLASS)) {
             BlockStmt body = constructorDeclaration.getBody();
             Optional<Statement> first = body.getStatements().getFirst();
             boolean addSuperByte = true;

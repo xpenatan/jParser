@@ -283,7 +283,7 @@ public class IDLMethodParser {
                 }
                 if(isArray && !isAttribute) {
                     // Only methods parameter array needs to call getPointer()
-                    String methodCall = paramName + "." + IDLDefaultCodeParser.NATIVE_ADDRESS_ARRAY_METHOD;
+                    String methodCall = paramName + "." + IDLDefaultCodeParser.NATIVE_VOID_ADDRESS;
                     paramName =  "(" + variableName + " != null ? " + methodCall + " : 0)";
                 }
                 else if(!IDLHelper.isString(type.asClassOrInterfaceType())) {

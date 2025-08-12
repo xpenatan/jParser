@@ -40,8 +40,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     protected boolean enableAttributeParsing = true;
 
     protected static final String NATIVE_ADDRESS = "native_address";
-    protected static final String NATIVE_ADDRESS_ARRAY_METHOD_NAME = "getPointer";
-    protected static final String NATIVE_ADDRESS_ARRAY_METHOD = NATIVE_ADDRESS_ARRAY_METHOD_NAME + "()";
+    protected static final String NATIVE_VOID_ADDRESS = "native_void_address";
     protected static final String NATIVE_PARAM_ADDRESS = "_addr";
 
     public IDLDefaultCodeParser(String headerCMD, IDLReader idlReader, String cppDir) {

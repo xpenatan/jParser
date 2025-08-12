@@ -3,7 +3,7 @@ package idl;
 /**
  * @author xpenatan
  */
-public abstract class IDLBase {
+public class IDLBase {
 
     public static boolean ENABLE_LOGGING = true;
 
@@ -15,6 +15,12 @@ public abstract class IDLBase {
        public int native_address;
     */
     public long native_address;
+
+    /*[-TEAVM;-REPLACE]
+       public int native_void_address;
+    */
+    public long native_void_address;
+
     private boolean native_cMemOwn;
     private boolean native_disposed;
 
@@ -26,6 +32,9 @@ public abstract class IDLBase {
     public IDLBase() {
     }
 
+    @Deprecated()
+    public IDLBase(byte b, char c) {
+    }
 
     /*[-TEAVM;-REPLACE_RAW]
        public final void internal_reset(int address, boolean cMemoryOwn) {
@@ -45,6 +54,7 @@ public abstract class IDLBase {
         dispose();
         native_cMemOwn = cMemoryOwn;
         this.native_address = address;
+        native_void_address = address;
         native_disposed = false;
         native_object = null;
         if(address != 0) {
@@ -81,6 +91,7 @@ public abstract class IDLBase {
                     native_disposed = true;
                     deleteNative();
                     native_address = 0;
+                    native_void_address = 0;
                     native_object = null;
                     onNativeDispose();
                 }
@@ -145,6 +156,7 @@ public abstract class IDLBase {
     public void native_copy(IDLBase other) {
         this.native_address = other.native_address;
         this.native_object = other.native_object;
+        this.native_void_address = other.native_void_address;
         this.native_disposed = false;
         this.native_cMemOwn = false;
     }

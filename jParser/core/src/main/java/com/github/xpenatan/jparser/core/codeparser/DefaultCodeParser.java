@@ -20,6 +20,7 @@ import java.util.Optional;
  * @author xpenatan
  */
 public abstract class DefaultCodeParser implements CodeParser {
+    public static final String IDL_BASE_CLASS = "IDLBase";
 
     public static final String CMD_HEADER_START = "[-";
     public static final String CMD_HEADER_END = "]";

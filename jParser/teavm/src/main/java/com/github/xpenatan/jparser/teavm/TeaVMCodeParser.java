@@ -867,7 +867,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             MethodDeclaration methodDeclaration = methodDeclarations.get(i);
             if(!methodDeclaration.isNative()) {
                 String methodName = methodDeclaration.getNameAsString();
-                if(methodName.equals(IDLDefaultCodeParser.NATIVE_ADDRESS_ARRAY_METHOD_NAME)) {
+                if(methodName.equals("getPointer")) { // TODO improve solution
                     methodDeclaration.setType(StaticJavaParser.parseType("int"));
                 }
                 List<MethodCallExpr> methodCallerExprList = methodDeclaration.findAll(MethodCallExpr.class);

@@ -2,6 +2,7 @@ package com.github.xpenatan.jparser.idl;
 
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 
 public class IDLHelper {
 
@@ -109,7 +110,7 @@ public class IDLHelper {
         }
 
         if(idlType.equals("any") || idlType.equals("VoidPtr")) {
-            type = "long";
+            type = DefaultCodeParser.IDL_BASE_CLASS;
         }
         else if(idlType.contains("long long")) {
             type = "long";

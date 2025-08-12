@@ -587,7 +587,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             for(int i1 = 0; i1 < idlMethod.parameters.size(); i1++) {
                 IDLParameter idlParameter = idlMethod.parameters.get(i1);
                 Parameter parameter = publicMethodParameters.get(i1);
-                boolean isPrimitive = parameter.getType().isPrimitiveType();
+                boolean isPrimitive = parameter.getType().isPrimitiveType() || idlParameter.isAny;
                 String paramName = idlParameter.name;
                 String callParamName = idlParameter.name;
                 String paramType = idlParameter.getCPPType();
@@ -808,7 +808,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         boolean isRef = idlParameter.isRef;
         boolean isValue = idlParameter.isValue;
         boolean isArray = idlParameter.isArray;
-        boolean isObject = type.isClassOrInterfaceType();
+        boolean isObject = type.isClassOrInterfaceType() && !idlParameter.isAny;
 
         if(!isEnum && isObject && !classType.equals("char*")) {
             String idlArrayOrNull = IDLHelper.getIDLArrayClassOrNull(classType);

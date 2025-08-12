@@ -21,13 +21,10 @@ interface TestObjectClass {
 
 interface IDLArrayTestObjectClass {
     void IDLArrayTestObjectClass(long size);
-    void resize(long size);
-    void clear();
     TestObjectClass getValue(long index);
     void setValue(long index, TestObjectClass value);
-    long getSize();
-    any getPointer();
 };
+IDLIntArray implements IDLArrayBase;
 
 interface TestConstructorClass {
     readonly attribute long intValue01;
