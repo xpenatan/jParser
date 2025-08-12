@@ -1,8 +1,6 @@
 package idl.helper;
 
-import idl.IDLBase;
-
-public class IDLFloatArray extends IDLBase {
+public class IDLFloatArray extends IDLArrayBase {
 
     public IDLFloatArray(int size) {
     }
@@ -17,8 +15,5 @@ public class IDLFloatArray extends IDLBase {
     }
 
     public native void setValue(int index, float value);
-    public native void resize(int size);
     public native float getValue(int index);
-    public native long getPointer();
-    public native int getSize();
 }

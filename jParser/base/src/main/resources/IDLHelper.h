@@ -7,8 +7,16 @@
 #include <algorithm>
 #include <assert.h>
 
+class IDLArrayBase {
+    public:
+        virtual void clear() = 0;
+        virtual int getSize() = 0;
+        virtual void resize(int newSize) = 0;
+        virtual void* getPointer() = 0; // TODO change to getArrayAddress
+};
+
 template<typename T>
-class IDLArray {
+class IDLArray : public IDLArrayBase {
     private:
         int size;
         T* data;
@@ -50,7 +58,7 @@ class IDLArray {
             return *this;
         }
 
-        void resize(int newSize) {
+        void resize(int newSize) override {
             if (newSize < 0) newSize = 0;
             if (newSize == size) return;
 
@@ -71,7 +79,7 @@ class IDLArray {
             size = newSize;
         }
 
-        void clear() {
+        void clear() override {
             if (!data || size == 0) {
                 return;
             }
@@ -119,8 +127,8 @@ class IDLArray {
             data[index] = *value;
         }
 
-        int getSize() { return size; }
-        void* getPointer() { return (void*)data; }
+        int getSize() override { return size; }
+        void* getPointer() override { return (void*)data; }
         T* getData() { return data; }
 };
 

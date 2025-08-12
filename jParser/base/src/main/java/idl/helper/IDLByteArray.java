@@ -1,8 +1,6 @@
 package idl.helper;
 
-import idl.IDLBase;
-
-public class IDLByteArray extends IDLBase {
+public class IDLByteArray extends IDLArrayBase {
 
     public IDLByteArray(int size) {
     }
@@ -17,10 +15,7 @@ public class IDLByteArray extends IDLBase {
     }
 
     public native void setValue(int index, byte value);
-    public native void resize(int size);
     public native byte getValue(int index);
-    public native long getPointer();
-    public native int getSize();
 
     public static void arraycopy(byte[] src, int  srcPos,
                                  IDLByteArray dest, int destPos,

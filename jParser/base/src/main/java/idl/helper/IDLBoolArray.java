@@ -1,8 +1,6 @@
 package idl.helper;
 
-import idl.IDLBase;
-
-public class IDLBoolArray extends IDLBase {
+public class IDLBoolArray extends IDLArrayBase {
 
     public IDLBoolArray(int size) {
     }
@@ -17,8 +15,5 @@ public class IDLBoolArray extends IDLBase {
     }
 
     public native void setValue(int index, boolean value);
-    public native void resize(int size);
     public native boolean getValue(int index);
-    public native long getPointer();
-    public native int getSize();
 }

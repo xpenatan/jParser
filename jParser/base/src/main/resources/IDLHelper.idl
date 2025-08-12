@@ -1,4 +1,11 @@
 
+interface IDLArrayBase {
+    void clear();
+    long getSize();
+    void resize(long size);
+    any getPointer();
+};
+
 interface IDLString {
     void IDLString();
     void clear();
@@ -20,66 +27,48 @@ interface IDLStringView {
 
 interface IDLBoolArray {
     void IDLBoolArray(long size);
-    void resize(long size);
-    void clear();
     boolean getValue(long index);
     void setValue(long index, boolean value);
-    long getSize();
-    any getPointer();
     void copy([Ref] IDLBoolArray src, long srcOffset, long destOffset, long length);
 };
+IDLBoolArray implements IDLArrayBase;
 
 interface IDLIntArray {
     void IDLIntArray(long size);
-    void resize(long size);
-    void clear();
     long getValue(long index);
     void setValue(long index, long value);
-    long getSize();
-    any getPointer();
     void copy([Ref] IDLIntArray src, long srcOffset, long destOffset, long length);
 };
+IDLIntArray implements IDLArrayBase;
 
 interface IDLLongArray {
     void IDLLongArray(long size);
-    void resize(long size);
-    void clear();
     long long getValue(long index);
     void setValue(long index, long long value);
-    long getSize();
-    any getPointer();
     void copy([Ref] IDLLongArray src, long srcOffset, long destOffset, long length);
 };
+IDLLongArray implements IDLArrayBase;
 
 interface IDLFloatArray {
     void IDLFloatArray(long size);
-    void resize(long size);
-    void clear();
     float getValue(long index);
     void setValue(long index, float value);
-    long getSize();
-    any getPointer();
     void copy([Ref] IDLFloatArray src, long srcOffset, long destOffset, long length);
 };
+IDLDoubleArray implements IDLArrayBase;
 
 interface IDLDoubleArray {
     void IDLDoubleArray(long size);
-    void resize(long size);
-    void clear();
     double getValue(long index);
     void setValue(long index, double value);
-    long getSize();
-    any getPointer();
     void copy([Ref] IDLDoubleArray src, long srcOffset, long destOffset, long length);
 };
+IDLDoubleArray implements IDLArrayBase;
 
 interface IDLByteArray {
     void IDLByteArray(long size);
-    void resize(long size);
-    void clear();
     byte getValue(long index);
     void setValue(long index, byte value);
-    long getSize();
-    any getPointer();
     void copy([Ref] IDLByteArray src, long srcOffset, long destOffset, long length);
 };
+IDLByteArray implements IDLArrayBase;
