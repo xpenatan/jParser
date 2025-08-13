@@ -277,11 +277,13 @@ public class IDLMethodParser {
             IDLEnum idlEnum = idlReader.getEnum(typeName);
             if(idlEnum == null && type.isClassOrInterfaceType()) {
                 boolean isArray = true;
+                boolean isAny = false;
                 if(idlParameter != null) {
                     //TODO create IDLParameter when is comming from attribute
                     isArray = idlParameter.isArray;
+                    isAny = idlParameter.isAny;
                 }
-                if(isArray && !isAttribute) {
+                if(isArray && !isAttribute || isAny) {
                     // Only methods parameter array needs to call getPointer()
                     String methodCall = paramName + "." + IDLDefaultCodeParser.NATIVE_VOID_ADDRESS;
                     paramName =  "(" + variableName + " != null ? " + methodCall + " : 0)";
@@ -450,6 +452,10 @@ public class IDLMethodParser {
             else if(type.isPrimitiveType() || IDLHelper.isString(type)) {
                 nativeMethod.addParameter(type.clone(), nameAsString);
             }
+//            else if(idlParameterData.idlParameter.isAny) {
+//                String pointerMethod = nameAsString;
+//                nativeMethod.addParameter("long", pointerMethod);
+//            }
             else {
                 String pointerMethod = nameAsString + IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS;
                 nativeMethod.addParameter("long", pointerMethod);

@@ -808,7 +808,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         boolean isRef = idlParameter.isRef;
         boolean isValue = idlParameter.isValue;
         boolean isArray = idlParameter.isArray;
-        boolean isObject = type.isClassOrInterfaceType() && !idlParameter.isAny;
+        boolean isObject = type.isClassOrInterfaceType();
 
         if(!isEnum && isObject && !classType.equals("char*")) {
             String idlArrayOrNull = IDLHelper.getIDLArrayClassOrNull(classType);
