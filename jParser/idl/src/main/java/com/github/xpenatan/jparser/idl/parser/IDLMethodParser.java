@@ -452,10 +452,6 @@ public class IDLMethodParser {
             else if(type.isPrimitiveType() || IDLHelper.isString(type)) {
                 nativeMethod.addParameter(type.clone(), nameAsString);
             }
-//            else if(idlParameterData.idlParameter.isAny) {
-//                String pointerMethod = nameAsString;
-//                nativeMethod.addParameter("long", pointerMethod);
-//            }
             else {
                 String pointerMethod = nameAsString + IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS;
                 nativeMethod.addParameter("long", pointerMethod);
