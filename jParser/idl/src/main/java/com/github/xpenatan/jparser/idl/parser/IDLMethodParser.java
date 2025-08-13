@@ -41,6 +41,8 @@ public class IDLMethodParser {
 
     public static final String NATIVE_METHOD = "internal_native_";
 
+    public static final boolean ENABLE_NULL_CHECKING = false;
+
     // Return null. There are cases where C++ code return a null pointer
     static final String NULL_POINTER = "return null;";
 
@@ -274,6 +276,7 @@ public class IDLMethodParser {
             SimpleName name = parameter.getName();
             String variableName = name.getIdentifier();
             String paramName = parameter.getNameAsString();
+            String expressionCode = paramName;
             IDLEnum idlEnum = idlReader.getEnum(typeName);
             if(idlEnum == null && type.isClassOrInterfaceType()) {
                 boolean isArray = true;
@@ -286,21 +289,36 @@ public class IDLMethodParser {
                 if(isArray && !isAttribute || isAny) {
                     // Only methods parameter array needs to call getPointer()
                     String methodCall = paramName + "." + IDLDefaultCodeParser.NATIVE_VOID_ADDRESS;
-                    paramName =  "(" + variableName + " != null ? " + methodCall + " : 0)";
+                    if(ENABLE_NULL_CHECKING) {
+                        expressionCode =  "(" + variableName + " != null ? " + methodCall + " : 0)";
+                    }
+                    else {
+                        expressionCode = methodCall;
+                    }
                 }
                 else if(!IDLHelper.isString(type.asClassOrInterfaceType())) {
                     //All methods must contain a base class to get its pointer
                     String methodCall = paramName + "." + IDLDefaultCodeParser.NATIVE_ADDRESS;
-                    paramName =  "(" + variableName + " != null ? " + methodCall + " : 0)";
+                    if(ENABLE_NULL_CHECKING) {
+                        expressionCode =  "(" + variableName + " != null ? " + methodCall + " : 0)";
+                    }
+                    else {
+                        expressionCode = methodCall;
+                    }
                 }
             }
             else if(idlEnum != null) {
-                paramName =  "(" + variableName + " != null ? " + variableName + ".getValue() : 0)";
+                if(ENABLE_NULL_CHECKING) {
+                    expressionCode =  "(" + variableName + " != null ? " + variableName + ".getValue() : 0)";
+                }
+                else {
+                    expressionCode = variableName + ".getValue()";
+                }
             }
             else if(type.isArrayType()) {
                 //TODO implement array call
             }
-            Expression expression = StaticJavaParser.parseExpression(paramName);
+            Expression expression = StaticJavaParser.parseExpression(expressionCode);
             caller.addArgument(expression);
         }
     }
