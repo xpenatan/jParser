@@ -5,6 +5,18 @@ package idl;
  */
 public class IDLBase {
 
+    public final static IDLBase NULL;
+
+    static {
+        NULL = create();
+    }
+
+    public static IDLBase create() {
+        IDLBase idlBase = new IDLBase((byte)0, (char)0);
+        idlBase.native_reset();
+        return idlBase;
+    }
+
     public static boolean ENABLE_LOGGING = true;
 
     /**
@@ -62,6 +74,25 @@ public class IDLBase {
         }
     }
 
+    public final IDLBase native_setVoid(int voidValue) {
+        native_address = voidValue;
+        native_void_address = voidValue;
+        return this;
+    }
+
+    /**
+     * Reset this instance to default state. Use only in instance created by you.
+     * Caution: Resetting an owned native instance will cause a memory leak if not disposed.
+     */
+    public final IDLBase native_reset() {
+        native_cMemOwn = false;
+        native_disposed = false;
+        native_object = null;
+        native_address = 0;
+        native_void_address = 0;
+        return this;
+    }
+
     /**
      * Take ownership of the native instance, causing the native object to be warned when this object gets out of scope without disposing.
      */
@@ -78,6 +109,17 @@ public class IDLBase {
 
     public boolean native_hasOwnership() {
         return native_cMemOwn;
+    }
+
+    /**
+     * Copy the address data and set ownership/disposed to false
+     */
+    public final void native_copy(IDLBase other) {
+        this.native_address = other.native_address;
+        this.native_object = other.native_object;
+        this.native_void_address = other.native_void_address;
+        this.native_disposed = false;
+        this.native_cMemOwn = false;
     }
 
     public final boolean isDisposed() {
@@ -148,17 +190,6 @@ public class IDLBase {
      */
     public static void error(String tag, String message) {
         System.err.println(tag + ": " + message);
-    }
-
-    /**
-     * Copy the address data and set ownership/disposed to false
-     */
-    public void native_copy(IDLBase other) {
-        this.native_address = other.native_address;
-        this.native_object = other.native_object;
-        this.native_void_address = other.native_void_address;
-        this.native_disposed = false;
-        this.native_cMemOwn = false;
     }
 
     // TODO change to other solution
