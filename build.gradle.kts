@@ -47,17 +47,6 @@ allprojects()  {
     }
 }
 
-configure(allprojects
-        - project(":example:app:android")
-        - project(":example:lib:lib-android")
-) {
-    apply {
-        plugin("java")
-    }
-    java.sourceCompatibility = JavaVersion.VERSION_11
-    java.targetCompatibility = JavaVersion.VERSION_11
-}
-
 var libProjects = mutableSetOf(
     project(":jParser:core"),
     project(":jParser:builder"),
@@ -102,11 +91,6 @@ configure(libProjects) {
     tasks.withType<Javadoc> {
         options.encoding = "UTF-8"
         (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
-    }
-
-    java {
-        withJavadocJar()
-        withSourcesJar()
     }
 
     publishing.publications.configureEach {

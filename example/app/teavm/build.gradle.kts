@@ -1,5 +1,11 @@
 plugins {
+    id("java")
     id("org.gretty") version("3.1.0")
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(LibExt.java11Target)
+    targetCompatibility = JavaVersion.toVersion(LibExt.java11Target)
 }
 
 gretty {

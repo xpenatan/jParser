@@ -4,6 +4,14 @@ plugins {
 
 val moduleName = "${LibExt.libName}-base"
 
+dependencies {
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+    targetCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+}
+
 tasks {
     withType<Jar> {
         from(sourceSets["main"].allSource)
@@ -11,7 +19,9 @@ tasks {
     }
 }
 
-dependencies {
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 publishing {

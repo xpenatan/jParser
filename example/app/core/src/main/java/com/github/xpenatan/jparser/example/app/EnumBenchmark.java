@@ -34,31 +34,31 @@ public class EnumBenchmark {
 
     static void benchmarkEnumSet() {
         System.gc();
-        var beg = System.nanoTime();
+        long beg = System.nanoTime();
         Set<Flag> a = EnumSet.of(Flag.A, Flag.B, Flag.G);
         for (long i = 0; i < size; i++) {
             Set<Flag> b = EnumSet.of(Flag.A, Flag.B, Flag.G);
             assert a.equals(b);
         }
-        var end = System.nanoTime();
+        long end = System.nanoTime();
         System.out.println((end - beg)/1e9 + "\t\tEnumSet");
     }
 
     static void benchmarkHashSet() {
         System.gc();
-        var beg = System.nanoTime();
+        long beg = System.nanoTime();
         Set<Flag> a = new HashSet<>(Arrays.asList(Flag.A, Flag.B, Flag.G));
         for (long i = 0; i < size; i++) {
             Set<Flag> b = new HashSet<>(Arrays.asList(Flag.A, Flag.B, Flag.G));
             assert a.equals(b);
         }
-        var end = System.nanoTime();
+        long end = System.nanoTime();
         System.out.println((end - beg)/1e9 + "\t\tHashSet");
     }
 
     static void benchmarkHashSetCache() {
         System.gc();
-        var beg = System.nanoTime();
+        long beg = System.nanoTime();
         Set<Flag> a = new HashSet<>(Arrays.asList(Flag.A, Flag.B, Flag.G));
         Set<Flag> b = new HashSet<>();
         for (long i = 0; i < size; i++) {
@@ -68,7 +68,7 @@ public class EnumBenchmark {
             b.add(Flag.G);
             assert a.equals(b);
         }
-        var end = System.nanoTime();
+        long end = System.nanoTime();
         System.out.println((end - beg)/1e9 + "\t\tHashSetCache");
     }
 
@@ -82,31 +82,31 @@ public class EnumBenchmark {
 
     static void benchmarkBitflags() {
         System.gc();
-        var beg = System.nanoTime();
-        var a = A | B | G;
+        long beg = System.nanoTime();
+        long a = A | B | G;
         for (long i = 0; i < size; i++) {
-            var b = A | B | G;
+            long b = A | B | G;
             assert a == b;
         }
-        var end = System.nanoTime();
+        long end = System.nanoTime();
         System.out.println((end - beg)/1e9 + "\t\tbitfield");
     }
 
     static void benchmarkTestEnumLib() {
         System.gc();
-        var beg = System.nanoTime();
+        long beg = System.nanoTime();
         int value = TestEnumLib.TEST_DEFAULT.or(TestEnumLib.TEST_FIRST).or(TestEnumLib.TEST_SECOND).getValue();
         for (long i = 0; i < size; i++) {
             int val = TestEnumLib.TEST_DEFAULT.or(TestEnumLib.TEST_FIRST).or(TestEnumLib.TEST_SECOND).getValue();
             assert val == value;
         }
-        var end = System.nanoTime();
+        long end = System.nanoTime();
         System.out.println((end - beg)/1e9 + "\t\tTestEnumLib");
     }
 
     static void benchmarkTestEnumLibCustom_1() {
         System.gc();
-        var beg = System.nanoTime();
+        long beg = System.nanoTime();
         int value11 = TestEnumLib.TEST_DEFAULT.getValue();
         int value22 = TestEnumLib.TEST_FIRST.getValue();
         int value33 = TestEnumLib.TEST_SECOND.getValue();
@@ -118,13 +118,13 @@ public class EnumBenchmark {
             int val = value1 | value2 | value3;
             assert val == value;
         }
-        var end = System.nanoTime();
+        long end = System.nanoTime();
         System.out.println((end - beg)/1e9 + "\t\tTestEnumLibCustom1");
     }
 
     static void benchmarkTestEnumLibCustom_2() {
         System.gc();
-        var beg = System.nanoTime();
+        long beg = System.nanoTime();
         int value1 = TestEnumLib.TEST_DEFAULT.getValue();
         int value2 = TestEnumLib.TEST_FIRST.getValue();
         int value3 = TestEnumLib.TEST_SECOND.getValue();
@@ -133,7 +133,7 @@ public class EnumBenchmark {
             int val = value1 | value2 | value3;
             assert val == value;
         }
-        var end = System.nanoTime();
+        long end = System.nanoTime();
         System.out.println((end - beg)/1e9 + "\t\tTestEnumLibCustom2");
     }
 }

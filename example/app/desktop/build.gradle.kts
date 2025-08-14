@@ -1,5 +1,14 @@
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
+plugins {
+    id("java")
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+    targetCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+}
+
 dependencies {
     implementation(project(":example:app:core"))
     implementation(project(":example:lib:lib-core"))

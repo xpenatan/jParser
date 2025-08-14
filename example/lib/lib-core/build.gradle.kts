@@ -3,6 +3,11 @@ plugins {
     id("java-library")
 }
 
+java {
+    sourceCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+    targetCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+}
+
 dependencies {
     if(LibExt.exampleUseRepoLibs) {
         api("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")

@@ -2,6 +2,11 @@ plugins {
     id("java")
 }
 
+java {
+    sourceCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+    targetCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+}
+
 val libDir = "${projectDir}/../lib-build/build/c++/libs"
 //val windowsFile = "$libDir/windows/TestLib64.dll"
 val windowsFile = "$libDir/windows/vc/TestLib64.dll"

@@ -2,6 +2,11 @@ plugins {
     id("java")
 }
 
+java {
+    sourceCompatibility = JavaVersion.toVersion(LibExt.java11Target)
+    targetCompatibility = JavaVersion.toVersion(LibExt.java11Target)
+}
+
 val emscriptenFile = "$projectDir/../lib-build/build/c++/libs/emscripten/TestLib.wasm.js"
 val emscriptenSideFile = "$projectDir/../lib-build/build/c++/libs/emscripten/TestLibside.wasm"
 

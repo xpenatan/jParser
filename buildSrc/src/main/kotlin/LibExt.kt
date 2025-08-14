@@ -6,6 +6,9 @@ object LibExt {
     val libVersion: String = getVersion()
     const val groupId = "com.github.xpenatan.jParser"
 
+    const val java8Target = "1.8"
+    const val java11Target = "11"
+
     // Lib Dependencies
     const val jniGenVersion = "2.5.1"
     const val teaVMVersion = "0.12.3"
