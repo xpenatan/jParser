@@ -3,8 +3,12 @@ import java.util.*
 
 object LibExt {
     const val libName = "jParser"
-    val libVersion: String = getVersion()
     const val groupId = "com.github.xpenatan.jParser"
+    var isRelease = false
+    var libVersion: String = ""
+        get() {
+            return getVersion()
+        }
 
     const val java8Target = "1.8"
     const val java11Target = "11"
@@ -24,23 +28,20 @@ object LibExt {
 }
 
 private fun getVersion(): String {
-    val isReleaseStr = System.getenv("RELEASE")
-    val isRelease = isReleaseStr != null && isReleaseStr.toBoolean()
     var libVersion = "-SNAPSHOT"
     val file = File("gradle.properties")
     if(file.exists()) {
         val properties = Properties()
         properties.load(file.inputStream())
         val version = properties.getProperty("version")
-        if(isRelease) {
+        if(LibExt.isRelease) {
             libVersion = version
         }
     }
     else {
-        if(isRelease) {
+        if(LibExt.isRelease) {
             throw RuntimeException("properties should exist")
         }
     }
-    println("Lib Version: $libVersion")
     return libVersion
 }
