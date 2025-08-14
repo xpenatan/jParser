@@ -32,21 +32,6 @@ public class BuildToolOptions {
     private String libsDir;
     private String cppDestinationPath;
 
-    @Deprecated
-    public final boolean windows64;
-    @Deprecated
-    public final boolean linux64;
-    @Deprecated
-    public final boolean mac64;
-    @Deprecated
-    public final boolean macArm;
-    @Deprecated
-    public final boolean android;
-    @Deprecated
-    public final boolean iOS;
-    @Deprecated
-    public final boolean teavm;
-
     private String[] args;
 
     /**
@@ -81,45 +66,6 @@ public class BuildToolOptions {
         }
         this.idlName = libName;
         this.moduleName = libName;
-
-        boolean windows64tmp = false;
-        boolean linux64tmp = false;
-        boolean mac64tmp = false;
-        boolean macArmtmp = false;
-        boolean androidtmp = false;
-        boolean iOStmp = false;
-        boolean teavmtmp = false;
-        for(int i = 0; i < args.length; i++) {
-            String arg = args[i];
-            if(arg.equals("windows64") && (BuildTarget.isWindows())) {
-                windows64tmp = true;
-            }
-            else if(arg.equals("linux64") && BuildTarget.isUnix()) {
-                linux64tmp = true;
-            }
-            else if(arg.equals("mac64") && BuildTarget.isMac()) {
-                mac64tmp = true;
-            }
-            else if(arg.equals("macArm") && BuildTarget.isMac()) {
-                macArmtmp = true;
-            }
-            else if(arg.equals("android")) {
-                androidtmp = true;
-            }
-            else if(arg.equals("ios") && BuildTarget.isMac()) {
-                iOStmp = true;
-            }
-            else if(arg.equals("teavm")) {
-                teavmtmp = true;
-            }
-        }
-        windows64 = windows64tmp;
-        linux64 = linux64tmp;
-        mac64 = mac64tmp;
-        macArm = macArmtmp;
-        android = androidtmp;
-        iOS = iOStmp;
-        teavm = teavmtmp;
     }
 
     void setup() {
