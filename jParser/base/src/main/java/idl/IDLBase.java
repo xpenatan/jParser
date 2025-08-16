@@ -74,6 +74,19 @@ public class IDLBase {
         }
     }
 
+    /*[-TEAVM;-REPLACE]
+        public final IDLBase native_setVoid(long voidValue) {
+            native_address = (int)voidValue;
+            native_void_address = (int)voidValue;
+            return this;
+        }
+    */
+    public final IDLBase native_setVoid(long voidValue) {
+        native_address = voidValue;
+        native_void_address = voidValue;
+        return this;
+    }
+
     public final IDLBase native_setVoid(int voidValue) {
         native_address = voidValue;
         native_void_address = voidValue;
