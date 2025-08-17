@@ -2,6 +2,18 @@ package idl.helper;
 
 public class IDLDoubleArray extends IDLArrayBase {
 
+    public static final IDLDoubleArray NULL = createInstance();
+
+    /**
+     * @return An empty instance without a native address
+     */
+    public static IDLDoubleArray createInstance() {
+        return new IDLDoubleArray((byte) 1, (char) 1);
+    }
+
+    protected IDLDoubleArray(byte b, char c) {
+    }
+
     public IDLDoubleArray(int size) {
     }
 

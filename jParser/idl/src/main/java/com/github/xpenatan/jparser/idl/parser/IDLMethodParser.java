@@ -16,6 +16,7 @@ import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -58,7 +59,7 @@ public class IDLMethodParser {
             "{\n" +
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) " + NULL_POINTER + "\n" +
-            "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
+            "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = [TYPE].createInstance();\n" +
             "    [TYPE]_TEMP_GEN_[NUM].internal_reset(pointer, false);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
@@ -67,17 +68,17 @@ public class IDLMethodParser {
             "{\n" +
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) " + NULL_POINTER + "\n" +
-            "    [TYPE] [TYPE]_NEW = new [TYPE]((byte)1, (char)1);\n" +
+            "    [TYPE] [TYPE]_NEW = new [TYPE].createInstance();\n" +
             "    [TYPE]_NEW.internal_reset(pointer, [MEM_OWNED]);\n" +
             "    return [TYPE]_NEW;\n" +
             "}";
 
     static final String CALLBACK_REUSE_PARAM_TEMPLATE =
-            "if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
+            "if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = [TYPE].createInstance();\n" +
             "[TYPE]_TEMP_GEN_[NUM].internal_reset([PARAM], false);\n";
 
     static final String CALLBACK_NEW_PARAM_TEMPLATE =
-            "[TYPE] [TYPE]_TEMP_GEN_[NUM] = new [TYPE]((byte)1, (char)1);\n" +
+            "[TYPE] [TYPE]_TEMP_GEN_[NUM] = [TYPE].createInstance();\n" +
             "[TYPE]_TEMP_GEN_[NUM].internal_reset([PARAM], true);\n";
 
     static final String OPERATOR_OBJECT_TEMPLATE =
@@ -411,10 +412,7 @@ public class IDLMethodParser {
             FieldDeclaration fieldDeclaration;
             if(isStatic) {
                 if(initializeStatic) {
-                    ObjectCreationExpr expression = new ObjectCreationExpr();
-                    expression.setType(fieldType);
-                    expression.addArgument(StaticJavaParser.parseExpression("(byte)1"));
-                    expression.addArgument(StaticJavaParser.parseExpression("(char)1"));
+                    MethodCallExpr expression = new MethodCallExpr(new NameExpr(fieldType), "createInstance");
                     fieldDeclaration = classDeclaration.addFieldWithInitializer(fieldType, fieldName, expression, Modifier.Keyword.STATIC, keyword, Modifier.Keyword.FINAL);
                 }
                 else {

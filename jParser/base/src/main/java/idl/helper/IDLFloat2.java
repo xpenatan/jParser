@@ -2,12 +2,24 @@ package idl.helper;
 
 public class IDLFloat2 extends IDLFloatArray {
 
+    public static final IDLFloat2 NULL = createInstance();
     public static IDLFloat2 TMP_1 = new IDLFloat2();
     public static IDLFloat2 TMP_2 = new IDLFloat2();
 
     public static void disposeTEMP() {
         TMP_1.dispose();
         TMP_2.dispose();
+    }
+
+    /**
+     * @return An empty instance without a native address
+     */
+    public static IDLFloat2 createInstance() {
+        return new IDLFloat2((byte) 1, (char) 1);
+    }
+
+    private IDLFloat2(byte b, char c) {
+        super(b, c);
     }
 
     public IDLFloat2() {

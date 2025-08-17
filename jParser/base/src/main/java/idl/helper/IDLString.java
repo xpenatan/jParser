@@ -4,8 +4,7 @@ import idl.IDLBase;
 
 public class IDLString extends IDLBase {
 
-    public static IDLString TMP_EMPTY_1 = new IDLString((byte)0, '0');
-
+    public static final IDLString NULL = createInstance();
     public static IDLString TMP_1 = new IDLString();
     public static IDLString TMP_2 = new IDLString();
 
@@ -14,10 +13,17 @@ public class IDLString extends IDLBase {
         TMP_2.dispose();
     }
 
-    public IDLString() {
+    /**
+     * @return An empty instance without a native address
+     */
+    public static IDLString createInstance() {
+        return new IDLString((byte) 1, (char) 1);
     }
 
-    public IDLString(byte b, char c) {}
+    protected IDLString(byte b, char c) {}
+
+    public IDLString() {
+    }
 
     public String c_str() {
         String text = internal_native_c_str(native_address);

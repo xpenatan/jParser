@@ -2,6 +2,18 @@ package idl.helper;
 
 public class IDLBoolArray extends IDLArrayBase {
 
+    public static final IDLBoolArray NULL = createInstance();
+
+    /**
+     * @return An empty instance without a native address
+     */
+    public static IDLBoolArray createInstance() {
+        return new IDLBoolArray((byte) 1, (char) 1);
+    }
+
+    protected IDLBoolArray(byte b, char c) {
+    }
+
     public IDLBoolArray(int size) {
     }
 

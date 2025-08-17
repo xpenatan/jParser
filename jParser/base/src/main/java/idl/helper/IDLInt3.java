@@ -2,12 +2,24 @@ package idl.helper;
 
 public class IDLInt3 extends IDLIntArray {
 
+    public static final IDLInt3 NULL = createInstance();
     public static IDLInt3 TMP_1 = new IDLInt3();
     public static IDLInt3 TMP_2 = new IDLInt3();
 
     public static void disposeTEMP() {
         TMP_1.dispose();
         TMP_2.dispose();
+    }
+
+    /**
+     * @return An empty instance without a native address
+     */
+    public static IDLInt3 createInstance() {
+        return new IDLInt3((byte) 1, (char) 1);
+    }
+
+    private IDLInt3(byte b, char c) {
+        super(b, c);
     }
 
     public IDLInt3() {

@@ -4,8 +4,7 @@ import idl.IDLBase;
 
 public class IDLStringView extends IDLBase {
 
-    public static IDLStringView TMP_EMPTY_1 = new IDLStringView((byte)0, '0');
-
+    public static final IDLStringView NULL = createInstance();
     public static IDLStringView TMP_1 = new IDLStringView();
     public static IDLStringView TMP_2 = new IDLStringView();
 
@@ -14,10 +13,17 @@ public class IDLStringView extends IDLBase {
         TMP_2.dispose();
     }
 
+    /**
+     * @return An empty instance without a native address
+     */
+    public static IDLStringView createInstance() {
+        return new IDLStringView((byte) 1, (char) 1);
+    }
+
     public IDLStringView() {
     }
 
-    public IDLStringView(byte b, char c) {}
+    protected IDLStringView(byte b, char c) {}
 
     public String data() {
         String text = internal_native_data(native_address);

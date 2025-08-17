@@ -2,6 +2,7 @@ package idl.helper;
 
 public class IDLFloat extends IDLFloatArray {
 
+    public static final IDLFloat NULL = createInstance();
     public static IDLFloat TMP_1 = new IDLFloat();
     public static IDLFloat TMP_2 = new IDLFloat();
     public static IDLFloat TMP_3 = new IDLFloat();
@@ -12,6 +13,17 @@ public class IDLFloat extends IDLFloatArray {
         TMP_2.dispose();
         TMP_3.dispose();
         TMP_4.dispose();
+    }
+
+    /**
+     * @return An empty instance without a native address
+     */
+    public static IDLFloat createInstance() {
+        return new IDLFloat((byte) 1, (char) 1);
+    }
+
+    private IDLFloat(byte b, char c) {
+        super(b, c);
     }
 
     public IDLFloat() {

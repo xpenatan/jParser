@@ -2,12 +2,24 @@ package idl.helper;
 
 public class IDLDouble2 extends IDLDoubleArray {
 
+    public static final IDLDouble2 NULL = createInstance();
     public static IDLDouble2 TMP_1 = new IDLDouble2();
     public static IDLDouble2 TMP_2 = new IDLDouble2();
 
     public static void disposeTEMP() {
         TMP_1.dispose();
         TMP_2.dispose();
+    }
+
+    /**
+     * @return An empty instance without a native address
+     */
+    public static IDLDouble2 createInstance() {
+        return new IDLDouble2((byte) 1, (char) 1);
+    }
+
+    private IDLDouble2(byte b, char c) {
+        super(b, c);
     }
 
     public IDLDouble2() {

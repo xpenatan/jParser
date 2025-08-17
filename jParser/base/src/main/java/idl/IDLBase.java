@@ -8,13 +8,11 @@ public class IDLBase {
     public final static IDLBase NULL;
 
     static {
-        NULL = create();
+        NULL = createInstance();
     }
 
-    public static IDLBase create() {
-        IDLBase idlBase = new IDLBase((byte)0, (char)0);
-        idlBase.native_reset();
-        return idlBase;
+    public static IDLBase createInstance() {
+        return new IDLBase((byte)0, (char)0);
     }
 
     public static boolean ENABLE_LOGGING = true;

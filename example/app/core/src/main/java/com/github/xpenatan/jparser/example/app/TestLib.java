@@ -21,13 +21,14 @@ import com.github.xpenatan.jparser.example.testlib.core.enums.TestEnumWithinClas
 import com.github.xpenatan.jparser.example.testlib.core.op.TestOperatorClass;
 import com.github.xpenatan.jparser.example.testlib.core.sub.TestNamespaceClass;
 import com.github.xpenatan.jparser.example.testlib.idl.IDLBase;
+import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLInt;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
 import java.nio.ByteBuffer;
 
 public class TestLib {
 
     public static boolean test() {
-        IDLBase idlVoid = IDLBase.create();
+        IDLBase idlVoid = IDLBase.createInstance();
         long voidLongData = 1000;
         int voidIntData = 2000;
         idlVoid.native_setVoid(voidLongData);
@@ -301,6 +302,8 @@ public class TestLib {
             test.dispose();
         }
         {
+            IDLInt a;
+
             TestMethodClass test = new TestMethodClass();
             IDLArrayTestObjectClass array = new IDLArrayTestObjectClass(2);
             TestObjectClass obj1 = new TestObjectClass();

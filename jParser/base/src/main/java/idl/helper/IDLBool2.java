@@ -2,12 +2,24 @@ package idl.helper;
 
 public class IDLBool2 extends IDLBoolArray {
 
+    public static final IDLBool2 NULL = createInstance();
     public static IDLBool2 TMP_1 = new IDLBool2();
     public static IDLBool2 TMP_2 = new IDLBool2();
 
     public static void disposeTEMP() {
         TMP_1.dispose();
         TMP_2.dispose();
+    }
+
+    /**
+     * @return An empty instance without a native address
+     */
+    public static IDLBool2 createInstance() {
+        return new IDLBool2((byte) 1, (char) 1);
+    }
+
+    private IDLBool2(byte b, char c) {
+        super(b, c);
     }
 
     public IDLBool2() {

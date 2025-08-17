@@ -9,7 +9,9 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
@@ -47,11 +49,22 @@ public class IDLConstructorParser {
             Optional<ConstructorDeclaration> constructorDeclarationOptional = classDeclaration.getConstructorByParameterTypes("byte", "char");
             if(constructorDeclarationOptional.isEmpty()) {
                 //Only add temp constructor if it does not exist
-                ConstructorDeclaration constructorDeclaration = classDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
+                ConstructorDeclaration constructorDeclaration = classDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
                 constructorDeclaration.addParameter("byte", "b");
                 constructorDeclaration.addParameter("char", "c");
                 constructorDeclaration.addAnnotation(Deprecated.class);
                 constructorDeclaration.setJavadocComment("Dummy constructor, used internally to creates objects without C++ pointer");
+
+                MethodDeclaration createMethod = classDeclaration.addMethod("createInstance", Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC);
+                createMethod.setJavadocComment("@return An empty instance without a native address");
+                createMethod.setType(classDeclaration.getNameAsString());
+                createMethod.createBody().addStatement(
+                        new ReturnStmt(
+                                new ObjectCreationExpr().setType(classDeclaration.getNameAsString())
+                                        .addArgument(StaticJavaParser.parseExpression("(byte)0"))
+                                        .addArgument(StaticJavaParser.parseExpression("(char)0"))
+                        )
+                );
             }
         }
 
