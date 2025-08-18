@@ -68,7 +68,7 @@ public class IDLMethodParser {
             "{\n" +
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) " + NULL_POINTER + "\n" +
-            "    [TYPE] [TYPE]_NEW = new [TYPE].createInstance();\n" +
+            "    [TYPE] [TYPE]_NEW = [TYPE].createInstance();\n" +
             "    [TYPE]_NEW.internal_reset(pointer, [MEM_OWNED]);\n" +
             "    return [TYPE]_NEW;\n" +
             "}";
