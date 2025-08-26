@@ -190,6 +190,7 @@ public class JParser {
 
     private static void generateFile(String destinationPath, String javaContent) {
         CustomFileDescriptor fileDescriptor = new CustomFileDescriptor(destinationPath);
+        javaContent = javaContent.replace("\r\n", "\n"); // Convert CRLF to LF
         fileDescriptor.writeString(javaContent, false);
     }
 
