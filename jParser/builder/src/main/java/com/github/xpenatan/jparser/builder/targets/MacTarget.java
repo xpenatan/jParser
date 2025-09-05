@@ -54,7 +54,6 @@ public class MacTarget extends DefaultBuildTarget {
         }
         cppFlags.add("-DFIXED_POINT");
 
-        cppFlags.add("-msse2");
         cppFlags.add("-fmessage-length=0");
         cppFlags.add("-fPIC");
         cppFlags.add("-std=c++17");

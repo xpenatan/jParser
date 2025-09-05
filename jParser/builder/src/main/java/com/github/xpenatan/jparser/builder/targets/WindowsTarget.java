@@ -23,7 +23,6 @@ public class WindowsTarget extends DefaultBuildTarget {
             cppFlags.add("-O2");
         }
         cppFlags.add("-mfpmath=sse");
-        cppFlags.add("-msse2");
         cppFlags.add("-fmessage-length=0");
         cppFlags.add("-m64");
         cppFlags.add("-std=c++17");

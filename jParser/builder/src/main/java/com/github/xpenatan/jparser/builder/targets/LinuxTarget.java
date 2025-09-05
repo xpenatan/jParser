@@ -21,7 +21,6 @@ public class LinuxTarget extends DefaultBuildTarget {
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
         cppFlags.add("-mfpmath=sse");
-        cppFlags.add("-msse2");
         cppFlags.add("-fmessage-length=0");
         cppFlags.add("-m64");
         cppFlags.add("-fPIC");
