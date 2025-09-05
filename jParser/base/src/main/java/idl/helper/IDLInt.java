@@ -2,7 +2,7 @@ package idl.helper;
 
 public class IDLInt extends IDLIntArray {
 
-    public static final IDLInt NULL = createInstance();
+    public static final IDLInt NULL = native_new();
     public static IDLInt TMP_1 = new IDLInt();
     public static IDLInt TMP_2 = new IDLInt();
     public static IDLInt TMP_3 = new IDLInt();
@@ -18,7 +18,7 @@ public class IDLInt extends IDLIntArray {
     /**
      * @return An empty instance without a native address
      */
-    public static IDLInt createInstance() {
+    public static IDLInt native_new() {
         return new IDLInt((byte) 1, (char) 1);
     }
 

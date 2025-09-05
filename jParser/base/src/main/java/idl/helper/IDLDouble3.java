@@ -2,7 +2,7 @@ package idl.helper;
 
 public class IDLDouble3 extends IDLDoubleArray {
 
-    public static final IDLDouble3 NULL = createInstance();
+    public static final IDLDouble3 NULL = native_new();
     public static IDLDouble3 TMP_1 = new IDLDouble3();
     public static IDLDouble3 TMP_2 = new IDLDouble3();
 
@@ -14,7 +14,7 @@ public class IDLDouble3 extends IDLDoubleArray {
     /**
      * @return An empty instance without a native address
      */
-    public static IDLDouble3 createInstance() {
+    public static IDLDouble3 native_new() {
         return new IDLDouble3((byte) 1, (char) 1);
     }
 

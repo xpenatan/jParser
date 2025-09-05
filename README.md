@@ -11,9 +11,9 @@ Inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen), jParser allows y
 
 For web applications, jParser requires Emscripten to produce JS/WASM files and utilizes [TeaVM](https://github.com/konsoletyper/teavm). The classes generated in the TeaVM module use `JSBody` annotation solution to interact with JavaScript.
 
-Currently, jParser supports only `JNI` and `TEAVM` code targets.
+Currently, jParser supports only `JNI` and `TEAVM` code targets. There are plans to support the Java Foreign Function and Memory API (FFM).
 
-### How it Works
+## How it Works
 jParser consists of two main components:
 
 1. **Code Generation**: It reads the Java source code containing the jParser solution and generates new Java source code for each target platform. The `base` module is used for this purpose. For desktop and mobile platforms, the generated JNI code is located in the `core` module, while the web-specific code is placed in the `teavm` module.
@@ -27,11 +27,30 @@ The generated methods will match those defined in the WebIDL file. If the C++ co
 
 ## WebIDL Notes
 * IDL classes, such as IDLInt or IDLIntArray, provide a way to pass primitive pointers to C++ code. These classes are compatible with Emscripten, desktop, and mobile platforms. Use them when you need to pass a pointer array or a primitive that the C++ code will modify.
-* C++ enums are converted into classes, where each enum name represents an integer value.
+* C++ enums are converted into Java Enums, where each enum name contains the integer value from the native code.
 * Methods annotated with [Value] return a copy of the object. The object is cached in both C++ and Java. Each time you call the same method, it overwrites the previous data, so avoid retaining references to the returned object.
-* JParser does not automatically dispose of C++ objects. It will issue a warning if there is a memory leak, and it is your responsibility to call dispose to free the memory. For classes marked with [NoDelete], there is no need to call dispose.
+* JParser does not automatically dispose C++ objects. It's your responsibility to call dispose to free the memory. For classes marked with [NoDelete], there is no need to call dispose.
 
-Libraries using jParser: <br>
+## IDLBase methods
+Every native class extends IDLBase, a parent class that provides common functionality. One commonly used method is dispose, which frees the memory allocated for a native object to prevent memory leaks. 
+You must call this method when you're done using it. However, not all classes require calling dispose. Only objects you create manually, or those created by a library and explicitly owned by you, need to have their dispose method called. 
+Creating a native class and disposing is expensive, so avoid calling these operations every frame. <br><br>
+Here is a list of all IDLBase methods:
+* **static [ClassName].native_new()**: Creates a new empty instance without any associated native data.
+* **static [ClassName].NULL**: Returns a NULL instance. Every method parameter must not be null. Use this when a native methods needs a null parameter.
+* **dispose()**: Deletes the native instance, but only if you own it.
+* **isDisposed()**: Checks whether the native instance has been disposed.
+* **native_setVoid(...)**: Sets an integer or long memory address. In TeaVM, the long is cast to an integer.
+* **native_reset()**: Resets the Java instance to its default state, removing any associated native data.
+* **native_takeOwnership()**: Takes ownership of the native data, enabling dispose() to delete the object.
+* **native_releaseOwnership()**: Releases ownership of the native data, preventing dispose() from deleting the object.
+* **native_hasOwnership()**: Checks whether you own the native instance.
+* **native_copy(...)**: Copies the memory address and all other native data from another Java instance to this Java instance.
+
+The **native** method keyword is primarily used to avoid conflicts with C/C++ methods.
+
+## Libraries using jParser: <br>
+- [jWebGPU](https://github.com/xpenatan/jWebGPU)¹
 - [gdx-imgui](https://github.com/xpenatan/gdx-imgui)¹
 - [gdx-jolt](https://github.com/xpenatan/gdx-jolt)¹
 - [gdx-lua](https://github.com/xpenatan/gdx-lua)¹

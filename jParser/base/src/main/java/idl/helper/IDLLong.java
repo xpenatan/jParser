@@ -2,7 +2,7 @@ package idl.helper;
 
 public class IDLLong extends IDLLongArray {
 
-    public static final IDLLong NULL = createInstance();
+    public static final IDLLong NULL = native_new();
     public static IDLLong TMP_1 = new IDLLong();
     public static IDLLong TMP_2 = new IDLLong();
     public static IDLLong TMP_3 = new IDLLong();
@@ -18,7 +18,7 @@ public class IDLLong extends IDLLongArray {
     /**
      * @return An empty instance without a native address
      */
-    public static IDLLong createInstance() {
+    public static IDLLong native_new() {
         return new IDLLong((byte) 1, (char) 1);
     }
 

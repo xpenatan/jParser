@@ -4,7 +4,7 @@ import idl.IDLBase;
 
 public class IDLString extends IDLBase {
 
-    public static final IDLString NULL = createInstance();
+    public static final IDLString NULL = native_new();
     public static IDLString TMP_1 = new IDLString();
     public static IDLString TMP_2 = new IDLString();
 
@@ -16,7 +16,7 @@ public class IDLString extends IDLBase {
     /**
      * @return An empty instance without a native address
      */
-    public static IDLString createInstance() {
+    public static IDLString native_new() {
         return new IDLString((byte) 1, (char) 1);
     }
 

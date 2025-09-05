@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
 public class TestLib {
 
     public static boolean test() {
-        IDLBase idlVoid = IDLBase.createInstance();
+        IDLBase idlVoid = IDLBase.native_new();
         long voidLongData = 1000;
         int voidIntData = 2000;
         idlVoid.native_setVoid(voidLongData);

@@ -28,6 +28,8 @@ import java.util.Optional;
 
 public class IDLConstructorParser {
 
+    public static final String EMPTY_INSTANCE_METHOD = "native_new";
+
     public static void generateConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass) {
         ArrayList<IDLConstructor> constructors = idlClass.constructors;
         if(idlClass.callbackImpl == null) {
@@ -47,7 +49,7 @@ public class IDLConstructorParser {
         if(idlParser.baseClassUnit != unit) {
             ClassOrInterfaceDeclaration classDeclaration = JParserHelper.getClassDeclaration(unit);
             Optional<ConstructorDeclaration> constructorDeclarationOptional = classDeclaration.getConstructorByParameterTypes("byte", "char");
-            if(constructorDeclarationOptional.isEmpty()) {
+            if(!constructorDeclarationOptional.isPresent()) {
                 //Only add temp constructor if it does not exist
                 ConstructorDeclaration constructorDeclaration = classDeclaration.addConstructor(Modifier.Keyword.PROTECTED);
                 constructorDeclaration.addParameter("byte", "b");
@@ -55,7 +57,7 @@ public class IDLConstructorParser {
                 constructorDeclaration.addAnnotation(Deprecated.class);
                 constructorDeclaration.setJavadocComment("Dummy constructor, used internally to creates objects without C++ pointer");
 
-                MethodDeclaration createMethod = classDeclaration.addMethod("createInstance", Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC);
+                MethodDeclaration createMethod = classDeclaration.addMethod(EMPTY_INSTANCE_METHOD, Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC);
                 createMethod.setJavadocComment("@return An empty instance without a native address");
                 createMethod.setType(classDeclaration.getNameAsString());
                 createMethod.createBody().addStatement(

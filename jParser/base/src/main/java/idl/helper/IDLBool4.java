@@ -2,7 +2,7 @@ package idl.helper;
 
 public class IDLBool4 extends IDLBoolArray {
 
-    public static final IDLBool4 NULL = createInstance();
+    public static final IDLBool4 NULL = native_new();
     public static IDLBool4 TMP_1 = new IDLBool4();
     public static IDLBool4 TMP_2 = new IDLBool4();
 
@@ -14,7 +14,7 @@ public class IDLBool4 extends IDLBoolArray {
     /**
      * @return An empty instance without a native address
      */
-    public static IDLBool4 createInstance() {
+    public static IDLBool4 native_new() {
         return new IDLBool4((byte) 1, (char) 1);
     }
 

@@ -59,7 +59,7 @@ public class IDLMethodParser {
             "{\n" +
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) " + NULL_POINTER + "\n" +
-            "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = [TYPE].createInstance();\n" +
+            "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = [TYPE]." + IDLConstructorParser.EMPTY_INSTANCE_METHOD + "();\n" +
             "    [TYPE]_TEMP_GEN_[NUM].internal_reset(pointer, false);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
@@ -68,17 +68,17 @@ public class IDLMethodParser {
             "{\n" +
             "    long pointer = [METHOD];\n" +
             "    if(pointer == 0) " + NULL_POINTER + "\n" +
-            "    [TYPE] [TYPE]_NEW = [TYPE].createInstance();\n" +
+            "    [TYPE] [TYPE]_NEW = [TYPE]." + IDLConstructorParser.EMPTY_INSTANCE_METHOD + "();\n" +
             "    [TYPE]_NEW.internal_reset(pointer, [MEM_OWNED]);\n" +
             "    return [TYPE]_NEW;\n" +
             "}";
 
     static final String CALLBACK_REUSE_PARAM_TEMPLATE =
-            "if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = [TYPE].createInstance();\n" +
+            "if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = [TYPE]." + IDLConstructorParser.EMPTY_INSTANCE_METHOD + "();\n" +
             "[TYPE]_TEMP_GEN_[NUM].internal_reset([PARAM], false);\n";
 
     static final String CALLBACK_NEW_PARAM_TEMPLATE =
-            "[TYPE] [TYPE]_TEMP_GEN_[NUM] = [TYPE].createInstance();\n" +
+            "[TYPE] [TYPE]_TEMP_GEN_[NUM] = [TYPE]." + IDLConstructorParser.EMPTY_INSTANCE_METHOD + "();\n" +
             "[TYPE]_TEMP_GEN_[NUM].internal_reset([PARAM], true);\n";
 
     static final String OPERATOR_OBJECT_TEMPLATE =
@@ -408,11 +408,11 @@ public class IDLMethodParser {
 
     public static String generateFieldName(String fieldName, ClassOrInterfaceDeclaration classDeclaration, String fieldType, boolean isStatic, Modifier.Keyword keyword, boolean initializeStatic) {
         Optional<FieldDeclaration> fieldByName = classDeclaration.getFieldByName(fieldName);
-        if(fieldByName.isEmpty()) {
+        if(!fieldByName.isPresent()) {
             FieldDeclaration fieldDeclaration;
             if(isStatic) {
                 if(initializeStatic) {
-                    MethodCallExpr expression = new MethodCallExpr(new NameExpr(fieldType), "createInstance");
+                    MethodCallExpr expression = new MethodCallExpr(new NameExpr(fieldType), IDLConstructorParser.EMPTY_INSTANCE_METHOD);
                     fieldDeclaration = classDeclaration.addFieldWithInitializer(fieldType, fieldName, expression, Modifier.Keyword.STATIC, keyword, Modifier.Keyword.FINAL);
                 }
                 else {
