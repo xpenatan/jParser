@@ -20,7 +20,6 @@ public class LinuxTarget extends DefaultBuildTarget {
         cppFlags.add("-c");
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
-        cppFlags.add("-mfpmath=sse");
         cppFlags.add("-fmessage-length=0");
         cppFlags.add("-m64");
         cppFlags.add("-fPIC");
