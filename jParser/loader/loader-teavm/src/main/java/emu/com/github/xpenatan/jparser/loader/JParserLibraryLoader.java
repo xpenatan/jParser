@@ -34,6 +34,22 @@ public class JParserLibraryLoader {
         loadInternal(libraryName, path, options, listener);
     }
 
+    public static void loadSync(String libraryName, JParserLibraryLoaderListener listener) {
+        loadSync(null, null, null, null);
+    }
+
+    public static void loadSync(String libraryName, String path, JParserLibraryLoaderListener listener) {
+        loadSync(null, null, null, null);
+    }
+
+    public static void loadSync(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+        loadSync(null, null, null, null);
+    }
+
+    public static void loadSync(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+        throw new RuntimeException("Sync loading not supported");
+    }
+
     private static void loadInternal(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
         if(listener == null) {
             throw new RuntimeException("Should implement listener");

@@ -54,46 +54,98 @@ public class JParserLibraryLoader {
 
     private JParserLibraryLoader() {}
 
+    /**
+     * Async loading that works for desktop, mobile and web
+     */
     public static void load(String libraryName, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, null, null, listener);
+        loadInternal(true, libraryName, null, null, listener);
     }
 
+    /**
+     * Async loading that works for desktop, mobile and web
+     */
     public static void load(String libraryName, String path, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, path, null, listener);
+        loadInternal(true, libraryName, path, null, listener);
     }
 
+    /**
+     * Async loading that works for desktop, mobile and web
+     */
     public static void load(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, null, options, listener);
+        loadInternal(true, libraryName, null, options, listener);
     }
 
+    /**
+     * Async loading that works for desktop, mobile and web
+     */
     public static void load(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, path, options, listener);
+        loadInternal(true, libraryName, path, options, listener);
     }
 
-    private static void loadInternal(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+    /**
+     * Sync loading that only works for desktop and mobile
+     */
+    public static void loadSync(String libraryName, JParserLibraryLoaderListener listener) {
+        loadInternal(false, libraryName, null, null, listener);
+    }
+
+    /**
+     * Sync loading that only works for desktop and mobile
+     */
+    public static void loadSync(String libraryName, String path, JParserLibraryLoaderListener listener) {
+        loadInternal(false, libraryName, path, null, listener);
+    }
+
+    /**
+     * Sync loading that only works for desktop and mobile
+     */
+    public static void loadSync(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+        loadInternal(false, libraryName, null, options, listener);
+    }
+
+    /**
+     * Sync loading that only works for desktop and mobile
+     */
+    public static void loadSync(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+        loadInternal(false, libraryName, path, options, listener);
+    }
+
+    private static void loadInternal(boolean async, String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
         if(listener == null) {
             throw new RuntimeException("Should implement listener");
         }
-        new Thread(() -> {
-            try {
-                String prefix = "";
-                String suffix = "";
-                if (os != Os.Android) {
-                    if(options == null || options.autoAddPrefix) {
-                        prefix = os.getLibPrefix();
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String prefix = "";
+                    String suffix = "";
+                    if (os != Os.Android) {
+                        if(options == null || options.autoAddPrefix) {
+                            prefix = os.getLibPrefix();
+                        }
+                        if(options == null || options.autoAddSuffix) {
+                            suffix = architecture.toSuffix() + bitness.toSuffix();
+                        }
+                        suffix = suffix + "." + os.getLibExtension();
                     }
-                    if(options == null || options.autoAddSuffix) {
-                        suffix = architecture.toSuffix() + bitness.toSuffix();
-                    }
-                    suffix = suffix + "." + os.getLibExtension();
+                    load(libraryName, path, prefix, suffix);
+                    listener.onLoad(true, null);
                 }
-                load(libraryName, path, prefix, suffix);
-                listener.onLoad(true, null);
+                catch(Exception e) {
+                    listener.onLoad(false, e);
+                }
             }
-            catch(Exception e) {
-                listener.onLoad(false, e);
-            }
-        }).start();
+        };
+
+        if(async) {
+            new Thread(() -> {
+                run.run();
+            }).start();
+        }
+        else {
+            run.run();
+        }
     }
 
     private static void load(String libraryName, String path, String prefix, String suffix) {
