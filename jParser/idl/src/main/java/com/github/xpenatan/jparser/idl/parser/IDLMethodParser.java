@@ -45,7 +45,7 @@ public class IDLMethodParser {
     public static final boolean ENABLE_NULL_CHECKING = false;
 
     // Return null. There are cases where C++ code return a null pointer
-    static final String NULL_POINTER = "return null;";
+    static final String NULL_POINTER = "return [TYPE].NULL;";
 
     static final String GET_ENUM_TEMPLATE =
             "{\n" +
