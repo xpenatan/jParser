@@ -125,8 +125,8 @@ public class IDLMethodParser {
             }
         }
 
-        // Remove methods characters if it contains "_1", "_2", etc.
-        String fixedMethodName = methodName.replaceFirst("_\\d$", "");
+        // Remove methods characters if it contains "__1", "__2", etc.
+        String fixedMethodName = methodName.replaceFirst("__\\d$", "");
         String updatedMethodName = fixedMethodName;
         if(idlParser.idlRenaming != null) {
             updatedMethodName = idlParser.idlRenaming.getIDLMethodName(fixedMethodName);
