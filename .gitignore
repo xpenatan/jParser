@@ -36,3 +36,4 @@ out/
 **/lib/lib-core/src/main/java/**
 **/app/android/libs/
 .codiumai
+.kotlin/
