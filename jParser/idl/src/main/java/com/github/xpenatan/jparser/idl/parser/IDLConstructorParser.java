@@ -32,6 +32,11 @@ public class IDLConstructorParser {
 
     public static void generateConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass) {
         ArrayList<IDLConstructor> constructors = idlClass.constructors;
+
+        if(idlClass.classHeader.isNoDelete && !constructors.isEmpty()) {
+            throw new RuntimeException("Cannot generate constructor for class " + idlClass.name + " because it has [NoDelete]. Please remove constructors or remove [NoDelete].");
+        }
+
         if(idlClass.callbackImpl == null) {
             // Generate constructors only if it's not callback
             for(int i = 0; i < constructors.size(); i++) {
