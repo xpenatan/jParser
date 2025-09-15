@@ -61,7 +61,6 @@ public class IDLBase {
     @Deprecated
     public final void internal_reset(long address, boolean cMemoryOwn) {
         // This metho cannot be called from outside
-        dispose();
         native_cMemOwn = cMemoryOwn;
         this.native_address = address;
         native_void_address = address;
