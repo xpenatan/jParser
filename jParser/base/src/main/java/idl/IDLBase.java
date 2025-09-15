@@ -160,8 +160,13 @@ public class IDLBase {
             }
             else {
                 if(IDLBase.ENABLE_LOGGING) {
-                    error("IDL", "Disposing error - " + this + " is already disposed");
+                    error("IDL", "Disposing warning - " + this + " is already disposed");
                 }
+            }
+        }
+        else {
+            if(IDLBase.ENABLE_LOGGING) {
+                error("IDL", "Disposing warning - " + this + " is not memory owned");
             }
         }
     }
