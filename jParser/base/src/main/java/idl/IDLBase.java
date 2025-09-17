@@ -48,7 +48,6 @@ public class IDLBase {
 
     /*[-TEAVM;-REPLACE_RAW]
        public final void internal_reset(int address, boolean cMemoryOwn) {
-            dispose();
             native_cMemOwn = cMemoryOwn;
             this.native_address = address;
             native_disposed = false;
