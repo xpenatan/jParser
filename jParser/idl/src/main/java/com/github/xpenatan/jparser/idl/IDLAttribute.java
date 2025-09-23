@@ -66,6 +66,14 @@ public class IDLAttribute {
         }
     }
 
+    public String getRenamedName() {
+        if(idlLine.idlCommand.containsCommand(IDLCommand.CMD_RENAME)) {
+            String commandValue = idlLine.idlCommand.getCommandValue(IDLCommand.CMD_RENAME);
+            return commandValue;
+        }
+        return null;
+    }
+
     public String getCPPType() {
         //Attributes don't set/get arrays so we remove it
         String fullType = idlType;

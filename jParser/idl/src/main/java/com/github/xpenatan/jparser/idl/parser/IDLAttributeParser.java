@@ -35,6 +35,13 @@ public class IDLAttributeParser {
         MethodDeclaration containsGetMethod = containsGetMethod(classOrInterfaceDeclaration, idlAttribute);
 
         String attributeName = idlAttribute.name;
+        String updatedName = attributeName;
+
+        String renamedName = idlAttribute.getRenamedName();
+        if(renamedName != null) {
+            updatedName = renamedName;
+        }
+
         String attributeType = idlAttribute.getJavaType();
 
         Type type = null;
@@ -57,7 +64,7 @@ public class IDLAttributeParser {
         boolean addGet = true;
         boolean addSet = true;
         MethodDeclaration getMethodDeclaration = null;
-        List<MethodDeclaration> getMethods = classOrInterfaceDeclaration.getMethodsBySignature(attributeName);
+        List<MethodDeclaration> getMethods = classOrInterfaceDeclaration.getMethodsBySignature(updatedName);
         if(getMethods.size() > 0) {
             getMethodDeclaration = getMethods.get(0);
             Optional<Comment> optionalComment = getMethodDeclaration.getComment();
@@ -74,7 +81,7 @@ public class IDLAttributeParser {
             }
         }
         MethodDeclaration setMethodDeclaration = null;
-        List<MethodDeclaration> setMethods = classOrInterfaceDeclaration.getMethodsBySignature(attributeName, attributeType);
+        List<MethodDeclaration> setMethods = classOrInterfaceDeclaration.getMethodsBySignature(updatedName, attributeType);
         if(setMethods.size() > 0) {
             setMethodDeclaration = setMethods.get(0);
             Optional<Comment> optionalComment = setMethodDeclaration.getComment();
@@ -94,7 +101,7 @@ public class IDLAttributeParser {
             if(getMethodDeclaration != null) {
                 getMethodDeclaration.remove();
             }
-            String getMethodName = ATTRIBUTE_PREFIX_GET + attributeName;
+            String getMethodName = ATTRIBUTE_PREFIX_GET + updatedName;
             getMethodDeclaration = classOrInterfaceDeclaration.addMethod(getMethodName, Modifier.Keyword.PUBLIC);
             getMethodDeclaration.setStatic(idlAttribute.isStatic);
 
@@ -119,7 +126,7 @@ public class IDLAttributeParser {
             if(setMethodDeclaration != null) {
                 setMethodDeclaration.remove();
             }
-            String setMethodName = ATTRIBUTE_PREFIX_SET + attributeName;
+            String setMethodName = ATTRIBUTE_PREFIX_SET + updatedName;
             setMethodDeclaration = classOrInterfaceDeclaration.addMethod(setMethodName, Modifier.Keyword.PUBLIC);
             setMethodDeclaration.setStatic(idlAttribute.isStatic);
             if(idlAttribute.isArray) {

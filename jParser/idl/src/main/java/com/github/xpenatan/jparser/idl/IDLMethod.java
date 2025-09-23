@@ -155,6 +155,14 @@ public class IDLMethod {
         return name;
     }
 
+    public String getRenamedName() {
+        if(idlLine.idlCommand.containsCommand(IDLCommand.CMD_RENAME)) {
+            String commandValue = idlLine.idlCommand.getCommandValue(IDLCommand.CMD_RENAME);
+            return commandValue;
+        }
+        return null;
+    }
+
     public IDLMethod clone() {
         IDLMethod cloned = new IDLMethod(idlClass, idlFile);
         cloned.idlLine = idlLine.copy();

@@ -111,8 +111,12 @@ public class IDLMethodParser {
         if(idlMethod.skip) {
             return null;
         }
-
         String methodName = idlMethod.name;
+        String renamedName = idlMethod.getRenamedName();
+        if(renamedName != null) {
+            methodName = renamedName;
+        }
+
         Type returnType = null;
 
         MethodDeclaration containsMethod = containsMethod(idlParser, classDeclaration, idlMethod);
