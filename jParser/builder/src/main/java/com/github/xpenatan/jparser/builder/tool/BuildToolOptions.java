@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class BuildToolOptions {
-    public String libPath;
-    public String libName;
-    public String moduleName;
-    public String libBasePackage;
+    private String libPath;
+    public final String libName;
+    public final String moduleName;
+    public final String libBasePackage;
     public boolean generateTeaVM = true;
     public boolean generateCPP = true;
 
@@ -31,7 +31,7 @@ public class BuildToolOptions {
     private String customSourceDir;
     private String libsDir;
     private String cppDestinationPath;
-
+    private String cppPath;
     private String[] args;
 
     /**
@@ -43,6 +43,19 @@ public class BuildToolOptions {
      * @param args windows64, linux64, mac64, mac64arm, android, ios, teavm
      */
     public BuildToolOptions(String libName, String libBasePackage, String modulePrefix, String cppSourcePath, String ... args) {
+        this(libName, libBasePackage, modulePrefix, cppSourcePath, null, args);
+    }
+
+    /**
+     *
+     * @param libName module name
+     * @param libBasePackage module package that all classes will be in
+     * @param modulePrefix module prefix name. ex: imgui. So it will be imgui-core, imgui-teavm, etc.
+     * @param cppSourcePath full path where the source is located
+     * @param libPath root path
+     * @param args windows64, linux64, mac64, mac64arm, android, ios, teavm
+     */
+    public BuildToolOptions(String libName, String libBasePackage, String modulePrefix, String cppSourcePath, String libPath, String ... args) {
         this.libName = libName;
         this.libBasePackage = libBasePackage;
         this.modulePrefix = modulePrefix;
@@ -66,9 +79,12 @@ public class BuildToolOptions {
         }
         this.idlName = libName;
         this.moduleName = libName;
+        this.libPath = libPath;
+
+        setup();
     }
 
-    void setup() {
+    private void setup() {
         if(libPath == null) {
             try {
                 libPath = new File("./../").getCanonicalPath().replace("\\", "/");
@@ -82,9 +98,10 @@ public class BuildToolOptions {
         moduleTeavmPath = libPath + "/" + modulePrefix + "-teavm";
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
-        String idlPathItem = moduleBuildPath + "/src/main/cpp/" + idlName + ".idl";
+        cppPath = moduleBuildPath + "/src/main/cpp/";
+        String idlPathItem = cppPath + idlName + ".idl";
         idlPath.add(idlPathItem);
-        customSourceDir = moduleBuildPath + "/src/main/cpp/custom/";
+        customSourceDir = cppPath + "custom/";
 
         moduleBuildCPPPath = moduleBuildPath + "/build/c++";
         libsDir = moduleBuildCPPPath + "/libs";
@@ -137,6 +154,10 @@ public class BuildToolOptions {
 
     public String getModuleCorePath() {
         return moduleCorePath;
+    }
+
+    public String getCPPPath() {
+        return cppPath;
     }
 
     public String getModuleTeaVMPath() {

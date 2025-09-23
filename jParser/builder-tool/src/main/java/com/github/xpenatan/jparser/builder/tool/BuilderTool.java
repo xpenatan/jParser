@@ -27,8 +27,6 @@ public class BuilderTool {
     }
 
     private static void generateAndBuild(BuildToolOptions op, BuildToolListener listener, IDLRenaming packageRenaming) throws Exception {
-        op.setup();
-
         IDLReader idlReader = IDLReader.readIDL(op.getIDLPath());
 
         String[] idlRefPath = op.getIDLRefPath();
