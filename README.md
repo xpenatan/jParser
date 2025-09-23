@@ -51,11 +51,11 @@ The **native** method keyword is primarily used to avoid conflicts with C/C++ me
 
 ## Libraries using jParser: <br>
 - [jWebGPU](https://github.com/xpenatan/jWebGPU)¹
-- [gdx-imgui](https://github.com/xpenatan/gdx-imgui)¹
-- [gdx-jolt](https://github.com/xpenatan/gdx-jolt)¹
-- [gdx-lua](https://github.com/xpenatan/gdx-lua)¹
+- [xImGui](https://github.com/xpenatan/xImGui)¹
+- [xJolt](https://github.com/xpenatan/xJolt)¹
+- [xLua](https://github.com/xpenatan/XLua)¹
+- [xBullet](https://github.com/xpenatan/xBullet)¹
 - [gdx-box2d](https://github.com/xpenatan/gdx-box2d)²
-- [gdx-bullet](https://github.com/xpenatan/gdx-bullet)²
 - [gdx-physx](https://github.com/xpenatan/gdx-physx)²
 
 ¹: The focus is on maintaining this project. <br>
