@@ -1,6 +1,5 @@
 package com.github.xpenatan.jparser.builder.tool;
 
-import com.github.xpenatan.jparser.builder.BuildTarget;
 import com.github.xpenatan.jparser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.io.IOException;
