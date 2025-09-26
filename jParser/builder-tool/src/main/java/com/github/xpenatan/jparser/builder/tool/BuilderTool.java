@@ -42,7 +42,7 @@ public class BuilderTool {
         if(op.generateCPP) {
 //            NativeCPPGenerator.SKIP_GLUE_CODE = true;
             CppGenerator cppGenerator = new NativeCPPGenerator(op.getCPPDestinationPath());
-            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.libBasePackage, op.getSourceDir());
+            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.packageName, op.getSourceDir());
             cppParser.generateClass = true;
             cppParser.idlRenaming = packageRenaming;
             JParser.generate(cppParser, op.getModuleBaseJavaDir(), op.getModuleCorePath() + "/src/main/java");
@@ -50,7 +50,7 @@ public class BuilderTool {
 
         if(op.generateTeaVM) {
 //            EmscriptenTarget.SKIP_GLUE_CODE = true;
-            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.moduleName, op.libBasePackage, op.getSourceDir());
+            TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.webModuleName, op.packageName, op.getSourceDir());
             teavmParser.idlRenaming = packageRenaming;
             JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getModuleTeaVMPath() + "/src/main/java/");
         }

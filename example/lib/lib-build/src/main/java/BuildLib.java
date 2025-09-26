@@ -27,8 +27,8 @@ public class BuildLib {
         BuildToolOptions.BuildToolParams data = new BuildToolOptions.BuildToolParams();
         data.libName = libName;
         data.idlName = libName;
-        data.moduleName = libName;
-        data.libBasePackage = basePackage;
+        data.webModuleName = libName;
+        data.packageName = basePackage;
         data.cppSourcePath = sourceDir;
         data.modulePrefix = modulePrefix;
 

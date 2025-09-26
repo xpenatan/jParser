@@ -8,8 +8,8 @@ import java.util.ArrayList;
 public class BuildToolOptions {
     private String modulePath;
     public final String libName;
-    public final String moduleName;
-    public final String libBasePackage;
+    public final String webModuleName;
+    public final String packageName;
     public boolean generateTeaVM = true;
     public boolean generateCPP = true;
 
@@ -52,8 +52,8 @@ public class BuildToolOptions {
     public BuildToolOptions(BuildToolParams params, String ... args) {
         this.libName = params.libName;
         this.idlName = params.idlName;
-        this.moduleName = params.moduleName;
-        this.libBasePackage = params.libBasePackage;
+        this.webModuleName = params.webModuleName;
+        this.packageName = params.packageName;
         this.modulePrefix = params.modulePrefix;
         this.modulePath = params.modulePath;
         this.args = args;
@@ -203,11 +203,34 @@ public class BuildToolOptions {
     }
 
     public static class BuildToolParams {
+        /**
+         * Name of the native file that will be generated.
+         */
         public String libName;
+
+        /**
+         * Name of the idl file located in [Module Build Path] + src/main/cpp/myidl.idl.
+         */
         public String idlName;
-        public String moduleName;
-        public String libBasePackage;
+
+        /**
+         * Emscripten module name that will use in the generated classes to call Javascript code. It can be the same as libName. <br>
+         */
+        public String webModuleName;
+
+        /**
+         * The package name that the generated classes will use.
+         */
+        public String packageName;
+
+        /**
+         * Module prefix name. ex: imgui. So it will be imgui-core, imgui-teavm, etc.
+         */
         public String modulePrefix;
+
+        /**
+         * The C++ source path or relative path specifies the location where the build is executed, such as "/build/MyCPlusPlusLib".
+         */
         public String cppSourcePath;
 
         /**
