@@ -24,7 +24,15 @@ public class BuildLib {
 //        WindowsMSVCTarget.DEBUG_BUILD = true;
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
 
-        BuilderTool.build(new BuildToolOptions(libName, basePackage, modulePrefix, sourceDir, args), new BuildToolListener() {
+        BuildToolOptions.BuildToolParams data = new BuildToolOptions.BuildToolParams();
+        data.libName = libName;
+        data.idlName = libName;
+        data.moduleName = libName;
+        data.libBasePackage = basePackage;
+        data.cppSourcePath = sourceDir;
+        data.modulePrefix = modulePrefix;
+
+        BuilderTool.build(new BuildToolOptions(data, args), new BuildToolListener() {
             @Override
             public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
                 if(op.containsArg("teavm")) {

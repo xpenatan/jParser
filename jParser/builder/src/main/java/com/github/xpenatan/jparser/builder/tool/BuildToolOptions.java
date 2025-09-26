@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class BuildToolOptions {
-    private String libPath;
+    private String modulePath;
     public final String libName;
     public final String moduleName;
     public final String libBasePackage;
@@ -33,41 +33,39 @@ public class BuildToolOptions {
     private String cppPath;
     private String[] args;
 
-    /**
-     *
-     * @param libName module name
-     * @param libBasePackage module package that all classes will be in
-     * @param modulePrefix module prefix name. ex: imgui. So it will be imgui-core, imgui-teavm, etc.
-     * @param cppSourcePath full path where the source is located
-     * @param args windows64, linux64, mac64, mac64arm, android, ios, teavm
-     */
-    public BuildToolOptions(String libName, String libBasePackage, String modulePrefix, String cppSourcePath, String ... args) {
-        this(libName, libBasePackage, modulePrefix, cppSourcePath, null, args);
-    }
+//    public BuildToolOptions(String libName, String libBasePackage, String modulePrefix, String cppSourcePath, String ... args) {
+//        this(libName, libBasePackage, modulePrefix, cppSourcePath, null, args);
+//    }
+//
+//    /**
+//     *
+//     * @param libName module name
+//     * @param libBasePackage module package that all classes will be in
+//     * @param modulePrefix module prefix name. ex: imgui. So it will be imgui-core, imgui-teavm, etc.
+//     * @param cppSourcePath full path where the source is located
+//     * @param libPath root path
+//     * @param args windows64, linux64, mac64, mac64arm, android, ios, teavm
+//     */
+//    public BuildToolOptions(String libName, String libBasePackage, String modulePrefix, String cppSourcePath, String libPath, String ... args) {
+//    }
 
-    /**
-     *
-     * @param libName module name
-     * @param libBasePackage module package that all classes will be in
-     * @param modulePrefix module prefix name. ex: imgui. So it will be imgui-core, imgui-teavm, etc.
-     * @param cppSourcePath full path where the source is located
-     * @param libPath root path
-     * @param args windows64, linux64, mac64, mac64arm, android, ios, teavm
-     */
-    public BuildToolOptions(String libName, String libBasePackage, String modulePrefix, String cppSourcePath, String libPath, String ... args) {
-        this.libName = libName;
-        this.libBasePackage = libBasePackage;
-        this.modulePrefix = modulePrefix;
+    public BuildToolOptions(BuildToolParams params, String ... args) {
+        this.libName = params.libName;
+        this.idlName = params.idlName;
+        this.moduleName = params.moduleName;
+        this.libBasePackage = params.libBasePackage;
+        this.modulePrefix = params.modulePrefix;
+        this.modulePath = params.modulePath;
         this.args = args;
 
-        if(cppSourcePath != null) {
-            boolean exists = new CustomFileDescriptor(cppSourcePath).exists();
+        if(params.cppSourcePath != null) {
+            boolean exists = new CustomFileDescriptor(params.cppSourcePath).exists();
             if(exists) {
-                this.sourcePath = cppSourcePath.replace("\\", "/");
+                this.sourcePath = params.cppSourcePath.replace("\\", "/");
             }
             else {
                 try {
-                    this.sourcePath = new File(".", cppSourcePath).getCanonicalPath().replace("\\", "/");
+                    this.sourcePath = new File(".", params.cppSourcePath).getCanonicalPath().replace("\\", "/");
                 } catch(IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -76,25 +74,21 @@ public class BuildToolOptions {
                 this.sourcePath += "/";
             }
         }
-        this.idlName = libName;
-        this.moduleName = libName;
-        this.libPath = libPath;
-
         setup();
     }
 
     private void setup() {
-        if(libPath == null) {
+        if(modulePath == null) {
             try {
-                libPath = new File("./../").getCanonicalPath().replace("\\", "/");
+                modulePath = new File("./../").getCanonicalPath().replace("\\", "/");
             } catch(IOException e) {
                 throw new RuntimeException(e);
             }
         }
-        moduleBasePath = libPath + "/" + modulePrefix + "-base";
-        moduleBuildPath = libPath + "/" + modulePrefix + "-build";
-        moduleCorePath = libPath + "/" + modulePrefix + "-core";
-        moduleTeavmPath = libPath + "/" + modulePrefix + "-teavm";
+        moduleBasePath = modulePath + "/" + modulePrefix + "-base";
+        moduleBuildPath = modulePath + "/" + modulePrefix + "-build";
+        moduleCorePath = modulePath + "/" + modulePrefix + "-core";
+        moduleTeavmPath = modulePath + "/" + modulePrefix + "-teavm";
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         cppPath = moduleBuildPath + "/src/main/cpp/";
@@ -206,5 +200,20 @@ public class BuildToolOptions {
 
     public String getCPPDestinationPath() {
         return cppDestinationPath;
+    }
+
+    public static class BuildToolParams {
+        public String libName;
+        public String idlName;
+        public String moduleName;
+        public String libBasePackage;
+        public String modulePrefix;
+        public String cppSourcePath;
+
+        /**
+         * The full parent path that contains all the required modules. (Lib-core, Lib-teavm, Lib-desktop, etc.)<br>
+         * If not specified, it will be the current parent directory of the build instance.
+         */
+        public String modulePath;
     }
 }
