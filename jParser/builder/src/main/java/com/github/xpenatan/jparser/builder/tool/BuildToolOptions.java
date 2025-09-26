@@ -33,22 +33,6 @@ public class BuildToolOptions {
     private String cppPath;
     private String[] args;
 
-//    public BuildToolOptions(String libName, String libBasePackage, String modulePrefix, String cppSourcePath, String ... args) {
-//        this(libName, libBasePackage, modulePrefix, cppSourcePath, null, args);
-//    }
-//
-//    /**
-//     *
-//     * @param libName module name
-//     * @param libBasePackage module package that all classes will be in
-//     * @param modulePrefix module prefix name. ex: imgui. So it will be imgui-core, imgui-teavm, etc.
-//     * @param cppSourcePath full path where the source is located
-//     * @param libPath root path
-//     * @param args windows64, linux64, mac64, mac64arm, android, ios, teavm
-//     */
-//    public BuildToolOptions(String libName, String libBasePackage, String modulePrefix, String cppSourcePath, String libPath, String ... args) {
-//    }
-
     public BuildToolOptions(BuildToolParams params, String ... args) {
         this.libName = params.libName;
         this.idlName = params.idlName;
