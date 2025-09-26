@@ -186,6 +186,10 @@ public class BuildToolOptions {
         return cppDestinationPath;
     }
 
+    public String getModulePath() {
+        return modulePath;
+    }
+
     public static class BuildToolParams {
         /**
          * Name of the native file that will be generated.
