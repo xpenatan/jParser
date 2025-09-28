@@ -220,9 +220,6 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             else {
                 // For every class we generate empty object that can be used when needed.
                 IDLMethodParser.generateFieldName("NULL", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
-                IDLMethodParser.generateFieldName("EMPTY_01", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
-                IDLMethodParser.generateFieldName("EMPTY_02", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
-                IDLMethodParser.generateFieldName("EMPTY_03", classDeclaration, className, true, Modifier.Keyword.PUBLIC, true);
             }
         }
         else if(idlClass.isEnum()) {

@@ -7,10 +7,6 @@ public class IDLBase {
 
     public final static IDLBase NULL;
 
-    static public final IDLBase EMPTY_01 = IDLBase.native_new();
-    static public final IDLBase EMPTY_02 = IDLBase.native_new();
-    static public final IDLBase EMPTY_03 = IDLBase.native_new();
-
     static {
         NULL = native_new();
     }
