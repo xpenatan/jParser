@@ -3,12 +3,8 @@ package idl.helper;
 public class IDLInt2 extends IDLIntArray {
 
     public static final IDLInt2 NULL = native_new();
-    public static IDLInt2 TMP_1 = new IDLInt2();
-    public static IDLInt2 TMP_2 = new IDLInt2();
 
     public static void disposeTEMP() {
-        TMP_1.dispose();
-        TMP_2.dispose();
     }
 
     /**

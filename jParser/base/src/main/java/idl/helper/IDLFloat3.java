@@ -3,13 +3,6 @@ package idl.helper;
 public class IDLFloat3 extends IDLFloatArray {
 
     public static final IDLFloat3 NULL = native_new();
-    public static IDLFloat3 TMP_1 = new IDLFloat3();
-    public static IDLFloat3 TMP_2 = new IDLFloat3();
-
-    public static void disposeTEMP() {
-        TMP_1.dispose();
-        TMP_2.dispose();
-    }
 
     /**
      * @return An empty instance without a native address
