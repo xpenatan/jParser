@@ -12,8 +12,10 @@ public class IDLAttributeOperation {
         boolean isStatic = methodDeclaration.isStatic();
         boolean isValue = idlAttribute.isValue;
         boolean isArray = idlAttribute.isArray;
+        boolean isReturnAny = idlAttribute.isAny;
         Type returnType = methodDeclaration.getType();
         boolean isReturnTypeEnum = idlAttribute.idlClassOrEnum != null && idlAttribute.idlClassOrEnum.isEnum();
+        boolean isReturnTypeInterface = returnType.isClassOrInterfaceType() && !isReturnAny;
         NodeList<Parameter> parameters = methodDeclaration.getParameters();
 
         if(returnType.isVoidType()) {
@@ -77,7 +79,7 @@ public class IDLAttributeOperation {
                 }
             }
         }
-        else if(!isReturnTypeEnum && returnType.isClassOrInterfaceType()) {
+        else if(!isReturnTypeEnum && isReturnTypeInterface) {
             if(isArray) {
                 if(isValue) {
                     if(isStatic) {

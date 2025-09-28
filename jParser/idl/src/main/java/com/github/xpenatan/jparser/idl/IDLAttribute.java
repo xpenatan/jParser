@@ -59,11 +59,6 @@ public class IDLAttribute {
         if(idlType.equals("any")) {
             isAny = true;
         }
-
-        if(isAny) {
-            //TODO improve
-            skip = true;
-        }
     }
 
     public String getRenamedName() {

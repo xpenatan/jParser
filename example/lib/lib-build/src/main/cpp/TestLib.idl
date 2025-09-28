@@ -105,12 +105,14 @@ interface TestMethodClass {
     void setMethod09(long long longLongValue01);
     void setMethod10(TestEnumLib enumValue);
     void setSkipMethod(); //[-SKIP]
+    void setAny(TestObjectClass pointerObject02);
 
     long getIntValue01();
     long getIntValue02();
     float getFloatValue01();
     float getFloatValue02();
     float getBoolValue01();
+    any getAny();
     [Const, Value] IDLStringView getStrValue01();
     [Const, Ref] IDLString getRefStrValue01();
     [Const] TestObjectClass getPointerObject01();

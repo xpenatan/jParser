@@ -224,6 +224,23 @@ public class TestLib {
                 return false;
             }
         }
+        {
+            TestAttributeClass test = new TestAttributeClass();
+            try {
+                IDLBase voidTest = new IDLBase();
+                voidTest.native_setVoid(1000);
+                test.set_voidPointer01(voidTest);
+                IDLBase voidPointer01 = test.get_voidPointer01();
+                if(!(voidPointer01.equals(voidTest))) {
+                    throw new RuntimeException("voidPointer01.equals(voidTest)");
+                }
+
+            } catch(Throwable e){
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+        }
 
         return true;
     }

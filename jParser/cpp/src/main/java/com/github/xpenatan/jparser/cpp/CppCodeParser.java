@@ -275,6 +275,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             attributeType = retTypeClass.getCPPName();
         }
 
+        if(idlAttribute.isAny) {
+            getPrimitiveCast = "(jlong)";
+        }
+
         String attributeReturnCast = "";
 
         IDLEnum idlEnum = idlAttribute.idlFile.getEnum(attributeType);

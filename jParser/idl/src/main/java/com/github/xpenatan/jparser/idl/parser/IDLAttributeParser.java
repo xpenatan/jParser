@@ -63,6 +63,11 @@ public class IDLAttributeParser {
 
         boolean addGet = true;
         boolean addSet = true;
+
+        if(idlAttribute.isReadOnly) {
+            addSet = false;
+        }
+
         MethodDeclaration getMethodDeclaration = null;
         List<MethodDeclaration> getMethods = classOrInterfaceDeclaration.getMethodsBySignature(updatedName);
         if(getMethods.size() > 0) {
@@ -116,10 +121,6 @@ public class IDLAttributeParser {
             if(idlParser.generateClass) {
                 setupAttributeMethod(idlParser, jParser, idlAttribute, false, classOrInterfaceDeclaration, getMethodDeclaration, getMethodName);
             }
-        }
-
-        if(idlAttribute.isReadOnly) {
-            addSet = false;
         }
 
         if(addSet && !shouldSkipMethod(containsSetMethod)) {

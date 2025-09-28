@@ -212,6 +212,7 @@ class TestMethodClass {
         string strValue01;
         const TestObjectClass* pointerObject01;
         TestObjectClass* pointerObject02;
+        TestObjectClass* anyObject;
         TestObjectClass* objectArray;
         TestObjectClass** pointerObjectArray;
         TestObjectClass refObject01;
@@ -284,6 +285,10 @@ class TestMethodClass {
             // Skip method example
         };
 
+        void setAny(TestObjectClass* anyObject) {
+            this->anyObject = anyObject;
+        }
+
         int getIntValue01() { return intValue01; };
         int getIntValue02() { return intValue02; };
         float getFloatValue01() { return floatValue01; };
@@ -298,6 +303,8 @@ class TestMethodClass {
         TestObjectClass getValueObject() { return refObject02; };
         long long getLongLongValue01() { return longLongValue01; };
         TestEnumLib getEnumValue() { return enumValue; };
+
+        TestObjectClass* getAny() { return anyObject; };
 };
 
 class TestOperatorClass {
