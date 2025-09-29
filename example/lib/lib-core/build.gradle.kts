@@ -13,7 +13,7 @@ dependencies {
         api("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
     }
     else {
-        api(project(":jParser:loader:loader-core"))
+        api(project(":loader:loader-core"))
     }
 }
 

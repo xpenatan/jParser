@@ -1,13 +1,15 @@
 plugins {
-    id("java-library")
+    id("java")
 }
 
-val moduleName = "${LibExt.libName}-build"
+val moduleName = "${LibExt.libName}-build-tool"
 
 dependencies {
-    implementation(project(":jParser:core"))
-    implementation(project(":jParser:base"))
-    implementation(project(":jParser:idl"))
+    implementation(project(":jParser:jParser-core"))
+    implementation(project(":jParser:jParser-idl"))
+    implementation(project(":jParser:jParser-teavm"))
+    implementation(project(":jParser:jParser-cpp"))
+    implementation(project(":jParser:jParser-build"))
 }
 
 java {

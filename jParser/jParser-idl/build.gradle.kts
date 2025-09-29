@@ -2,11 +2,12 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "jParser-teavm"
+val moduleName = "${LibExt.libName}-idl"
 
 dependencies {
-    api(project(":jParser:idl"))
-    implementation(project(":jParser:core"))
+    implementation(project(":jParser:jParser-base"))
+    implementation(project(":jParser:jParser-core"))
+    testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 
 java {

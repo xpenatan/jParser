@@ -24,8 +24,8 @@ dependencies {
         implementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
     }
     else {
-        implementation(project(":jParser:loader:loader-core"))
-        implementation(project(":jParser:loader:loader-teavm"))
+        implementation(project(":loader:loader-core"))
+        implementation(project(":loader:loader-teavm"))
     }
 //    testImplementation(project(":example:lib:lib-core"))
 //    testImplementation("junit:junit:${LibExt.jUnitVersion}")

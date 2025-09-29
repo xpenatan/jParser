@@ -2,11 +2,13 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "${LibExt.libName}-idl"
+val moduleName = "${LibExt.libName}-cpp"
 
 dependencies {
-    implementation(project(":jParser:base"))
-    implementation(project(":jParser:core"))
+    implementation(project(":jParser:jParser-idl"))
+    implementation(project(":jParser:jParser-core"))
+
+    testImplementation(project(":loader:loader-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 

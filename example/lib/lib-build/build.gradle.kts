@@ -21,12 +21,12 @@ dependencies {
         implementation("com.github.xpenatan.jParser:builder-tool:${LibExt.libVersion}")
     }
     else {
-        implementation(project(":jParser:core"))
-        implementation(project(":jParser:idl"))
-        implementation(project(":jParser:teavm"))
-        implementation(project(":jParser:cpp"))
-        implementation(project(":jParser:builder"))
-        implementation(project(":jParser:builder-tool"))
+        implementation(project(":jParser:jParser-core"))
+        implementation(project(":jParser:jParser-idl"))
+        implementation(project(":jParser:jParser-teavm"))
+        implementation(project(":jParser:jParser-cpp"))
+        implementation(project(":jParser:jParser-build"))
+        implementation(project(":jParser:jParser-build-tool"))
     }
 }
 

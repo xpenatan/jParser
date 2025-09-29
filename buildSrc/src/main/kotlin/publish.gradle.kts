@@ -3,15 +3,15 @@ import java.nio.file.Paths
 import java.net.URLEncoder
 
 var libProjects = mutableSetOf(
-    project(":jParser:core"),
-    project(":jParser:builder"),
-    project(":jParser:builder-tool"),
-    project(":jParser:base"),
-    project(":jParser:idl"),
-    project(":jParser:loader:loader-core"),
-    project(":jParser:loader:loader-teavm"),
-    project(":jParser:cpp"),
-    project(":jParser:teavm")
+    project(":jParser:jParser-core"),
+    project(":jParser:jParser-build"),
+    project(":jParser:jParser-build-tool"),
+    project(":jParser:jParser-base"),
+    project(":jParser:jParser-idl"),
+    project(":jParser:jParser-cpp"),
+    project(":jParser:jParser-teavm"),
+    project(":loader:loader-core"),
+    project(":loader:loader-teavm"),
 )
 
 LibExt.isRelease = gradle.startParameter.taskNames.any { it == "publishRelease" }

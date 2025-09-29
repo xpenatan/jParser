@@ -5,7 +5,7 @@ plugins {
 val moduleName = "loader-teavm"
 
 dependencies {
-    implementation(project(":jParser:loader:loader-core"))
+    implementation(project(":loader:loader-core"))
     implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
     implementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
     implementation("org.teavm:teavm-jso-impl:${LibExt.teaVMVersion}")
