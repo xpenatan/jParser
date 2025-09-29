@@ -7,14 +7,15 @@ val moduleName = "${LibExt.libName}-cpp"
 dependencies {
     implementation(project(":jParser:jParser-idl"))
     implementation(project(":jParser:jParser-core"))
+    implementation(project(":idl:idl-core"))
 
     testImplementation(project(":loader:loader-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.java8Target)
-    targetCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+    sourceCompatibility = JavaVersion.toVersion(LibExt.java11Target)
+    targetCompatibility = JavaVersion.toVersion(LibExt.java11Target)
 }
 
 java {

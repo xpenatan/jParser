@@ -1,7 +1,7 @@
 package com.github.xpenatan.jparser.idl;
 
 import com.github.xpenatan.jparser.core.JParser;
-import idl.IDLBase;
+import idl.helper.IDLArrayBase;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,7 +22,7 @@ public class IDLReader {
 
         if(JParser.CREATE_IDL_HELPER) {
             String baseIDLPath = "IDLHelper.idl";
-            InputStream resourceAsStream = IDLBase.class.getClassLoader().getResourceAsStream(baseIDLPath);
+            InputStream resourceAsStream = IDLArrayBase.class.getClassLoader().getResourceAsStream(baseIDLPath);
             InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
             IDLFile baseIDLFile = IDLReader.parseFile(streamReader, baseIDLPath);
             fileArray.add(baseIDLFile);
@@ -50,10 +50,10 @@ public class IDLReader {
         return null;
     }
 
-    public IDLEnum getEnum(String name) {
+    public IDLEnumClass getEnum(String name) {
         for(int i = 0; i < fileArray.size(); i++) {
             IDLFile idlFile = fileArray.get(i);
-            IDLEnum idlEnum = idlFile.getEnum(name);
+            IDLEnumClass idlEnum = idlFile.getEnum(name);
             if(idlEnum != null) {
                 return idlEnum;
             }
@@ -68,7 +68,7 @@ public class IDLReader {
             if(idlClass != null) {
                 return idlClass;
             }
-            IDLEnum idlEnum = idlFile.getEnum(name);
+            IDLEnumClass idlEnum = idlFile.getEnum(name);
             if(idlEnum != null) {
                 return idlEnum;
             }
@@ -197,7 +197,7 @@ public class IDLReader {
 
                 if(line.endsWith("};")) {
                     foundStartEnum = false;
-                    IDLEnum parserLineEnum = new IDLEnum(idlFile);
+                    IDLEnumClass parserLineEnum = new IDLEnumClass(idlFile);
                     parserLineEnum.settings.addAll(settings);
                     parserLineEnum.initEnum(classLines);
                     classLines.clear();

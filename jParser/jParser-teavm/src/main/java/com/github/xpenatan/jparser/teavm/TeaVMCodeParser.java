@@ -43,7 +43,7 @@ import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLClassOrEnum;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
-import com.github.xpenatan.jparser.idl.IDLEnum;
+import com.github.xpenatan.jparser.idl.IDLEnumClass;
 import com.github.xpenatan.jparser.idl.IDLEnumItem;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLMethod;
@@ -571,7 +571,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, EnumDeclaration enumDeclaration, IDLEnumItem enumItem, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnumClass idlEnum, EnumDeclaration enumDeclaration, IDLEnumItem enumItem, MethodDeclaration nativeMethodDeclaration) {
         String enumStr = enumItem.name;
         String content  = "";
         if(enumStr.contains("::")) {
@@ -656,7 +656,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
                 NodeList<Parameter> parameters = internalMethod.getParameters();
                 createInterfaceClass(classDeclaration, methodName, returnTypeStr, parameters);
-                createInterfaceInstance(methodName, internalMethodName, returnTypeStr, parameters, callbackMethodBody);
+                createInterfaceInstance(jParser, classDeclaration.findCompilationUnit().get(), methodName, internalMethodName, returnTypeStr, parameters, callbackMethodBody);
             }
             callbackMethodBody.addStatement(caller);
         }
@@ -689,7 +689,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         classDeclaration.addMember(interfaceDecl);
     }
 
-    private void createInterfaceInstance(String methodName, String internalMethodName, String returnTypeStr, NodeList<Parameter> parameters, BlockStmt callbackMethodBody) {
+    private void createInterfaceInstance(JParser jParser, CompilationUnit unit, String methodName, String internalMethodName, String returnTypeStr, NodeList<Parameter> parameters, BlockStmt callbackMethodBody) {
         ObjectCreationExpr anonymousClass = new ObjectCreationExpr();
         anonymousClass.setType(new ClassOrInterfaceType().setName(methodName));
 
@@ -710,8 +710,9 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
             if(typeStr.equals("String"))  {
                 // Edge case where String need to be converted
-                paramName = "IDLBase.getJSString(" + paramName + ")";
+                paramName = "IDLUtils.getJSString(" + paramName + ")";
                 typeStr = "int";
+                JParserHelper.addMissingImportType(jParser, unit, "IDLUtils");
             }
             if(JParserHelper.isLong(type)) {
                 typeStr = "int";

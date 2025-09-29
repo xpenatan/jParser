@@ -42,7 +42,7 @@ public class IDLFile {
         return null;
     }
 
-    public IDLEnum getEnum(String name) {
+    public IDLEnumClass getEnum(String name) {
         int size = classArray.size();
         for(int i = 0; i < size; i++) {
             IDLClassOrEnum idlClass = classArray.get(i);

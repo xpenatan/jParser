@@ -6,6 +6,9 @@ include(":jParser:jParser-idl")
 include(":jParser:jParser-cpp")
 include(":jParser:jParser-teavm")
 
+include(":idl:idl-core")
+include(":idl:idl-teavm")
+
 include(":loader:loader-core")
 include(":loader:loader-teavm")
 

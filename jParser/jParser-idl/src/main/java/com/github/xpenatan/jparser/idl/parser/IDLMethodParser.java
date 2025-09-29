@@ -17,7 +17,6 @@ import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
@@ -28,7 +27,7 @@ import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.core.codeparser.DefaultCodeParser;
 import com.github.xpenatan.jparser.idl.IDLClass;
-import com.github.xpenatan.jparser.idl.IDLEnum;
+import com.github.xpenatan.jparser.idl.IDLEnumClass;
 import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLParameter;
@@ -282,7 +281,7 @@ public class IDLMethodParser {
             String variableName = name.getIdentifier();
             String paramName = parameter.getNameAsString();
             String expressionCode = paramName;
-            IDLEnum idlEnum = idlReader.getEnum(typeName);
+            IDLEnumClass idlEnum = idlReader.getEnum(typeName);
             if(idlEnum == null && type.isClassOrInterfaceType()) {
                 boolean isArray = true;
                 boolean isAny = false;
@@ -336,7 +335,7 @@ public class IDLMethodParser {
 
 
         IDLClass idlClass = idlReader.getClass(returnTypeName);
-        IDLEnum idlEnum = idlReader.getEnum(returnTypeName);
+        IDLEnumClass idlEnum = idlReader.getEnum(returnTypeName);
 
         boolean isStatic = methodDeclaration.isStatic();
         boolean isRetSameAsClass = false;
@@ -453,7 +452,7 @@ public class IDLMethodParser {
         nativeMethod.setModifiers(Modifier.createModifierList(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.NATIVE));
         nativeMethod.removeBody();
 
-        IDLEnum isEnum = idlReader.getEnum(methodReturnType.asString());
+        IDLEnumClass isEnum = idlReader.getEnum(methodReturnType.asString());
 
         if(!isStatic) {
             // Only generate addr if it's not a static method

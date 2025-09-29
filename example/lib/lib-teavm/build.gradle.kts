@@ -22,10 +22,14 @@ dependencies {
     if(LibExt.exampleUseRepoLibs) {
         implementation("com.github.xpenatan.jParser:loader-teavm:${LibExt.libVersion}")
         implementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:idl-teavm:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:idl-core:${LibExt.libVersion}")
     }
     else {
-        implementation(project(":loader:loader-core"))
         implementation(project(":loader:loader-teavm"))
+        implementation(project(":loader:loader-core"))
+        implementation(project(":idl:idl-teavm"))
+        implementation(project(":idl:idl-core"))
     }
 //    testImplementation(project(":example:lib:lib-core"))
 //    testImplementation("junit:junit:${LibExt.jUnitVersion}")

@@ -1,11 +1,11 @@
 package com.github.xpenatan.jparser.idl;
 
 public class IDLEnumItem {
-    public IDLEnum idlEnum;
+    public IDLEnumClass idlEnum;
     public String name;
     public IDLLine idlLine;
 
-    public IDLEnumItem(IDLEnum idlEnum, String name, IDLLine idlLine) {
+    public IDLEnumItem(IDLEnumClass idlEnum, String name, IDLLine idlLine) {
         this.idlEnum = idlEnum;
         this.name = name;
         this.idlLine = idlLine;

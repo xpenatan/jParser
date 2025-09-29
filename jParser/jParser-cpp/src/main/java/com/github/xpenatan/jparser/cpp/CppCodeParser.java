@@ -19,7 +19,7 @@ import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.core.JParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
-import com.github.xpenatan.jparser.idl.IDLEnum;
+import com.github.xpenatan.jparser.idl.IDLEnumClass;
 import com.github.xpenatan.jparser.idl.IDLEnumItem;
 import com.github.xpenatan.jparser.idl.IDLFile;
 import com.github.xpenatan.jparser.idl.IDLHelper;
@@ -281,7 +281,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
         String attributeReturnCast = "";
 
-        IDLEnum idlEnum = idlAttribute.idlFile.getEnum(attributeType);
+        IDLEnumClass idlEnum = idlAttribute.idlFile.getEnum(attributeType);
         if(idlEnum != null) {
             if(idlEnum.typePrefix.equals(attributeType)) {
                 attributeReturnCast = "(" + attributeType + ")";
@@ -401,7 +401,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     }
 
     @Override
-    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, EnumDeclaration enumDeclaration, IDLEnumItem enumItem, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnumClass idlEnum, EnumDeclaration enumDeclaration, IDLEnumItem enumItem, MethodDeclaration nativeMethodDeclaration) {
         String enumStr = enumItem.name;
         String content  = "";
         content = ENUM_GET_INT_TEMPLATE.replace(TEMPLATE_TAG_ENUM, enumStr);
@@ -861,7 +861,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             }
         }
 
-        IDLEnum anEnum = idlFile.getEnum(classType);
+        IDLEnumClass anEnum = idlFile.getEnum(classType);
         if(anEnum != null) {
             if(anEnum.typePrefix.equals(classType)) {
                 paramName = "(" + classType + ")" + paramName;

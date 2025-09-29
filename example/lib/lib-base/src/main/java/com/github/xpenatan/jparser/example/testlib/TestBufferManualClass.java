@@ -1,6 +1,6 @@
 package com.github.xpenatan.jparser.example.testlib;
 
-import idl.IDLBase;
+import com.github.xpenatan.jParser.idl.IDLBase;
 import java.nio.ByteBuffer;
 
 public class TestBufferManualClass extends IDLBase {

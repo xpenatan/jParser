@@ -1,14 +1,18 @@
 plugins {
-    id("java-library")
+    id("java")
 }
 
-val moduleName = "${LibExt.libName}-idl"
+val moduleName = "idl-teavm"
 
 dependencies {
-    implementation(project(":jParser:jParser-base"))
-    implementation(project(":jParser:jParser-core"))
     implementation(project(":idl:idl-core"))
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+
+    implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
+    implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
+
+    implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
+    implementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
+    implementation("org.teavm:teavm-jso-impl:${LibExt.teaVMVersion}")
 }
 
 java {

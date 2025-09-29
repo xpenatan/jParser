@@ -24,27 +24,29 @@ public class JParserItem {
     public JParserItem(CompilationUnit unit, String destinationBaseDir) {
         this.unit = unit;
         this.destinationBaseDir = destinationBaseDir;
-        List<EnumDeclaration> allEnum = unit.findAll(EnumDeclaration.class);
-        List<ClassOrInterfaceDeclaration> all = unit.findAll(ClassOrInterfaceDeclaration.class);
+        if(unit != null) {
+            List<EnumDeclaration> allEnum = unit.findAll(EnumDeclaration.class);
+            List<ClassOrInterfaceDeclaration> all = unit.findAll(ClassOrInterfaceDeclaration.class);
 
-        if(all.size() > 0) {
-            className = all.get(0).getNameAsString();
-            String packageName = unit.getPackageDeclaration().get().getNameAsString();
-            this.packagePathName = packageName.replace(".", "/");
-        }
-        else if(allEnum.size() > 0) {
-            className = allEnum.get(0).getNameAsString();
-            String packageName = unit.getPackageDeclaration().get().getNameAsString();
-            this.packagePathName = packageName.replace(".", "/");
-        }
-        else {
-            notAllowed = true;
-            List<CompilationUnit> compiAll = unit.findAll(CompilationUnit.class);
-            if(compiAll.size() > 0) {
-                CompilationUnit compilationUnit = compiAll.get(0);
-                NodeList<TypeDeclaration<?>> types = compilationUnit.getTypes();
-                if(types.size() > 0) {
-                    className = types.get(0).getNameAsString();
+            if(all.size() > 0) {
+                className = all.get(0).getNameAsString();
+                String packageName = unit.getPackageDeclaration().get().getNameAsString();
+                this.packagePathName = packageName.replace(".", "/");
+            }
+            else if(allEnum.size() > 0) {
+                className = allEnum.get(0).getNameAsString();
+                String packageName = unit.getPackageDeclaration().get().getNameAsString();
+                this.packagePathName = packageName.replace(".", "/");
+            }
+            else {
+                notAllowed = true;
+                List<CompilationUnit> compiAll = unit.findAll(CompilationUnit.class);
+                if(compiAll.size() > 0) {
+                    CompilationUnit compilationUnit = compiAll.get(0);
+                    NodeList<TypeDeclaration<?>> types = compilationUnit.getTypes();
+                    if(types.size() > 0) {
+                        className = types.get(0).getNameAsString();
+                    }
                 }
             }
         }
@@ -56,15 +58,24 @@ public class JParserItem {
     }
 
     public PackageDeclaration getPackage() {
+        if(unit == null) {
+            return null;
+        }
         Optional<PackageDeclaration> optionalPackageDeclaration = unit.getPackageDeclaration();
         return optionalPackageDeclaration.orElse(null);
     }
 
     public ClassOrInterfaceDeclaration getClassDeclaration() {
+        if(unit == null) {
+            return null;
+        }
         return JParserHelper.getClassDeclaration(unit);
     }
 
     public EnumDeclaration getEnumDeclaration() {
+        if(unit == null) {
+            return null;
+        }
         return JParserHelper.getEnumDeclaration(unit);
     }
 

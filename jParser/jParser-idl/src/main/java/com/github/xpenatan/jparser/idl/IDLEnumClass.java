@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * @author xpenatan
  */
-public class IDLEnum extends IDLClassOrEnum {
+public class IDLEnumClass extends IDLClassOrEnum {
     public final IDLFile idlFile;
 
     public final ArrayList<IDLEnumItem> enums = new ArrayList<>();
@@ -15,7 +15,7 @@ public class IDLEnum extends IDLClassOrEnum {
 
     public String typePrefix = "";
 
-    public IDLEnum(IDLFile idlFile) {
+    public IDLEnumClass(IDLFile idlFile) {
         this.idlFile = idlFile;
     }
 

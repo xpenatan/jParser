@@ -19,7 +19,6 @@ import com.github.xpenatan.jparser.core.JParser;
 import com.github.xpenatan.jparser.core.JParserHelper;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
-import com.github.xpenatan.jparser.idl.IDLHelper;
 import com.github.xpenatan.jparser.idl.IDLParameter;
 import com.github.xpenatan.jparser.idl.IDLReader;
 import com.github.xpenatan.jparser.idl.parser.data.IDLParameterData;
@@ -51,7 +50,7 @@ public class IDLConstructorParser {
         }
 
         // All classes contain a temp constructor so temp objects can be reused
-        if(idlParser.baseClassUnit != unit) {
+        {
             ClassOrInterfaceDeclaration classDeclaration = JParserHelper.getClassDeclaration(unit);
             Optional<ConstructorDeclaration> constructorDeclarationOptional = classDeclaration.getConstructorByParameterTypes("byte", "char");
             if(!constructorDeclarationOptional.isPresent()) {

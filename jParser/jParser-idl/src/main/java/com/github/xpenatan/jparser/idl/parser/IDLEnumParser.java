@@ -10,19 +10,19 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jparser.core.JParser;
-import com.github.xpenatan.jparser.idl.IDLEnum;
+import com.github.xpenatan.jparser.idl.IDLEnumClass;
 import com.github.xpenatan.jparser.idl.IDLEnumItem;
 import java.util.Optional;
 
 public class IDLEnumParser {
 
-    public static void generateEnum(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, EnumDeclaration enumDeclaration, IDLEnum idlEnum) {
+    public static void generateEnum(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, EnumDeclaration enumDeclaration, IDLEnumClass idlEnum) {
         for(IDLEnumItem enumItem : idlEnum.enums) {
             generateField(idlParser, jParser, idlEnum, unit, enumDeclaration, enumItem);
         }
     }
 
-    private static void generateField(IDLDefaultCodeParser idlParser, JParser jParser, IDLEnum idlEnum, CompilationUnit unit, EnumDeclaration enumDeclaration, IDLEnumItem enumItem) {
+    private static void generateField(IDLDefaultCodeParser idlParser, JParser jParser, IDLEnumClass idlEnum, CompilationUnit unit, EnumDeclaration enumDeclaration, IDLEnumItem enumItem) {
         String enumVar = enumItem.name;
         if(enumVar.contains("::")) {
             enumVar = enumVar.split("::")[1];

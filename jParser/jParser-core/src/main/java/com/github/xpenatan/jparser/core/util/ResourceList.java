@@ -19,7 +19,8 @@ public class ResourceList {
         final String classPath = System.getProperty("java.class.path", ".");
         final String[] classPathElements = classPath.split(System.getProperty("path.separator"));
         for(final String element : classPathElements){
-            retval.addAll(getResources(element, pattern));
+            Collection<String> resources = getResources(element, pattern);
+            retval.addAll(resources);
         }
         return retval;
     }

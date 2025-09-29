@@ -1,23 +1,15 @@
 plugins {
-    id("java-library")
+    id("java")
 }
 
-val moduleName = "${LibExt.libName}-base"
+val moduleName = "idl-core"
 
 dependencies {
-    implementation(project(":idl:idl-core"))
 }
 
 java {
     sourceCompatibility = JavaVersion.toVersion(LibExt.java8Target)
     targetCompatibility = JavaVersion.toVersion(LibExt.java8Target)
-}
-
-tasks {
-    withType<Jar> {
-        from(sourceSets["main"].allSource)
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    }
 }
 
 java {

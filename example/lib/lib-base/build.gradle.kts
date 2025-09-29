@@ -15,5 +15,6 @@ dependencies {
     else {
         implementation(project(":jParser:jParser-base"))
         implementation(project(":loader:loader-core"))
+        implementation(project(":idl:idl-core"))
     }
 }

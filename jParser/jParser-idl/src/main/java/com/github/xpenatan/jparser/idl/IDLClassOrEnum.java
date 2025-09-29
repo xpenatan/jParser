@@ -14,7 +14,7 @@ public class IDLClassOrEnum {
     public boolean idlSkip = false;
 
     public boolean isEnum() {
-        return this instanceof IDLEnum;
+        return this instanceof IDLEnumClass;
     }
 
     public boolean isClass() {
@@ -25,8 +25,8 @@ public class IDLClassOrEnum {
         return (IDLClass)this;
     }
 
-    public IDLEnum asEnum() {
-        return (IDLEnum)this;
+    public IDLEnumClass asEnum() {
+        return (IDLEnumClass)this;
     }
 
     @Override

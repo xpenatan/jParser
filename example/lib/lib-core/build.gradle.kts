@@ -11,9 +11,11 @@ java {
 dependencies {
     if(LibExt.exampleUseRepoLibs) {
         api("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
+        api("com.github.xpenatan.jParser:idl-core:${LibExt.libVersion}")
     }
     else {
         api(project(":loader:loader-core"))
+        api(project(":idl:idl-core"))
     }
 }
 

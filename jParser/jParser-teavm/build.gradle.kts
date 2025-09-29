@@ -7,11 +7,12 @@ val moduleName = "jParser-teavm"
 dependencies {
     api(project(":jParser:jParser-idl"))
     implementation(project(":jParser:jParser-core"))
+    implementation(project(":idl:idl-core"))
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.java8Target)
-    targetCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+    sourceCompatibility = JavaVersion.toVersion(LibExt.java11Target)
+    targetCompatibility = JavaVersion.toVersion(LibExt.java11Target)
 }
 
 java {

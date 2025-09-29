@@ -20,7 +20,7 @@ import com.github.xpenatan.jparser.core.codeparser.CodeParserItem;
 import com.github.xpenatan.jparser.idl.IDLAttribute;
 import com.github.xpenatan.jparser.idl.IDLClass;
 import com.github.xpenatan.jparser.idl.IDLConstructor;
-import com.github.xpenatan.jparser.idl.IDLEnum;
+import com.github.xpenatan.jparser.idl.IDLEnumClass;
 import com.github.xpenatan.jparser.idl.IDLEnumItem;
 import com.github.xpenatan.jparser.idl.IDLMethod;
 import com.github.xpenatan.jparser.idl.IDLReader;
@@ -123,7 +123,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
             }
             else {
                 if(generateClass) {
-                    IDLEnum idlEnum = idlReader.getEnum(nameStr);
+                    IDLEnumClass idlEnum = idlReader.getEnum(nameStr);
                     if(idlEnum != null) {
                         EnumDeclaration enumDeclaration = (EnumDeclaration)classOrEnum;
                         IDLEnumParser.generateEnum(this, jParser, unit, enumDeclaration, idlEnum);
@@ -171,7 +171,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     public void onIDLAttributeGenerated(JParser jParser, IDLAttribute idlAttribute, boolean isSet, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, MethodDeclaration nativeMethodDeclaration) {
     }
 
-    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnum idlEnum, EnumDeclaration enumDeclaration, IDLEnumItem enumItem, MethodDeclaration nativeMethodDeclaration) {
+    public void onIDLEnumMethodGenerated(JParser jParser, IDLEnumClass idlEnum, EnumDeclaration enumDeclaration, IDLEnumItem enumItem, MethodDeclaration nativeMethodDeclaration) {
     }
 
     public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {

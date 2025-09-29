@@ -2,6 +2,7 @@ package com.github.xpenatan.jparser.example.app;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.github.xpenatan.jParser.idl.IDLBase;
 import com.github.xpenatan.jparser.example.testlib.CallbackClass;
 import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.CallbackExceptionManual;
@@ -20,7 +21,6 @@ import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.core.enums.TestEnumWithinClass;
 import com.github.xpenatan.jparser.example.testlib.core.op.TestOperatorClass;
 import com.github.xpenatan.jparser.example.testlib.core.sub.TestNamespaceClass;
-import com.github.xpenatan.jparser.example.testlib.idl.IDLBase;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLInt;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
 import java.nio.ByteBuffer;

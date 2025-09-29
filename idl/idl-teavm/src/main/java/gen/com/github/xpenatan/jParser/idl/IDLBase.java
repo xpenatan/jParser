@@ -1,4 +1,4 @@
-package idl;
+package gen.com.github.xpenatan.jParser.idl;
 
 /**
  * @author xpenatan
@@ -21,23 +21,13 @@ public class IDLBase {
      * Native address. Used internally. Don't change.
      */
 
-    /*[-TEAVM;-REPLACE]
-       public int native_address;
-    */
-    public long native_address;
-
-    /*[-TEAVM;-REPLACE]
-       public int native_void_address;
-    */
-    public long native_void_address;
+    public int native_address;
+    public int native_void_address;
 
     private boolean native_cMemOwn;
     private boolean native_disposed;
 
-    /*[-TEAVM;-REPLACE]
-       public org.teavm.jso.JSObject native_object;
-    */
-    public Object native_object;
+    public org.teavm.jso.JSObject native_object;
 
     public IDLBase() {
     }
@@ -46,22 +36,10 @@ public class IDLBase {
     public IDLBase(byte b, char c) {
     }
 
-    /*[-TEAVM;-REPLACE_RAW]
-       public final void internal_reset(int address, boolean cMemoryOwn) {
-            native_cMemOwn = cMemoryOwn;
-            this.native_address = address;
-            native_disposed = false;
-            native_object = null;
-            if(address != 0) {
-                onNativeAddressChanged();
-            }
-        }
-    */
     @Deprecated
-    public final void internal_reset(long address, boolean cMemoryOwn) {
-        // This metho cannot be called from outside
+    public final void internal_reset(int address, boolean cMemoryOwn) {
         native_cMemOwn = cMemoryOwn;
-        this.native_address = address;
+        native_address = address;
         native_void_address = address;
         native_disposed = false;
         native_object = null;
@@ -70,16 +48,9 @@ public class IDLBase {
         }
     }
 
-    /*[-TEAVM;-REPLACE]
-        public final IDLBase native_setVoid(long voidValue) {
-            native_address = (int)voidValue;
-            native_void_address = (int)voidValue;
-            return this;
-        }
-    */
     public final IDLBase native_setVoid(long voidValue) {
-        native_address = voidValue;
-        native_void_address = voidValue;
+        native_address = (int)voidValue;
+        native_void_address = (int)voidValue;
         return this;
     }
 
@@ -184,14 +155,6 @@ public class IDLBase {
     }
 
     protected void onNativeDispose() {
-    }
-
-    /*[-TEAVM;-REPLACE]
-       @org.teavm.jso.JSBody(params = { "addr" }, script = "return [MODULE].UTF8ToString(addr);")
-       public static native String getJSString(int addr);
-    */
-    public static String getJSString(long addr) {
-        return null;
     }
 
     @Override
