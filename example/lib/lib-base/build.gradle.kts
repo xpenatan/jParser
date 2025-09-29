@@ -9,8 +9,8 @@ java {
 
 dependencies {
     if(LibExt.exampleUseRepoLibs) {
-        implementation("com.github.xpenatan.jParser:base:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:jParser-base:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
     }
     else {
         implementation(project(":jParser:jParser-base"))

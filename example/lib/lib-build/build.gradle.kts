@@ -13,12 +13,12 @@ dependencies {
     implementation(project(":example:lib:lib-base"))
 
     if(LibExt.exampleUseRepoLibs) {
-        implementation("com.github.xpenatan.jParser:core:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:idl:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:teavm:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:cpp:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:builder:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:builder-tool:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:jParser-core:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:jParser-idl:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:jParser-teavm:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:jParser-cpp:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:jParser-build:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:jParser-build-tool:-SNAPSHOT")
     }
     else {
         implementation(project(":jParser:jParser-core"))

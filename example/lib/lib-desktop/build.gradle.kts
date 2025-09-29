@@ -23,7 +23,7 @@ tasks.jar {
 
 dependencies {
     if(LibExt.exampleUseRepoLibs) {
-        testImplementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
+        testImplementation("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
     }
     else {
         testImplementation(project(":loader:loader-core"))

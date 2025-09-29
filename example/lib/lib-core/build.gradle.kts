@@ -10,8 +10,8 @@ java {
 
 dependencies {
     if(LibExt.exampleUseRepoLibs) {
-        api("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
-        api("com.github.xpenatan.jParser:idl-core:${LibExt.libVersion}")
+        api("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
+        api("com.github.xpenatan.jParser:idl-core:-SNAPSHOT")
     }
     else {
         api(project(":loader:loader-core"))

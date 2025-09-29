@@ -24,11 +24,6 @@ buildscript {
 }
 
 allprojects()  {
-    apply {
-        plugin("maven-publish")
-    }
-    apply(plugin = "maven-publish")
-
     repositories {
         mavenLocal()
         google()

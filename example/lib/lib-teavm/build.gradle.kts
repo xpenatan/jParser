@@ -20,10 +20,10 @@ dependencies {
     implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 
     if(LibExt.exampleUseRepoLibs) {
-        implementation("com.github.xpenatan.jParser:loader-teavm:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:loader-core:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:idl-teavm:${LibExt.libVersion}")
-        implementation("com.github.xpenatan.jParser:idl-core:${LibExt.libVersion}")
+        implementation("com.github.xpenatan.jParser:loader-teavm:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:idl-teavm:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:idl-core:-SNAPSHOT")
     }
     else {
         implementation(project(":loader:loader-teavm"))
