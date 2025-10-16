@@ -815,11 +815,6 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         boolean isObject = type.isClassOrInterfaceType();
 
         if(!isEnum && isObject && !classType.equals("char*")) {
-            String idlArrayOrNull = IDLHelper.getIDLArrayClassOrNull(classType);
-            if(idlArrayOrNull != null) {
-                classType = idlArrayOrNull;
-            }
-
             paramName += IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS;
             if(isArray) {
                 String idlType = cppType.replace("[]", "*");
@@ -830,12 +825,20 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 paramName = "(" + idlType + ")" + paramName;
             }
             else {
+                String idlArrayOrNull = IDLHelper.getIDLArrayClassOrNull(classType);
+                if(idlArrayOrNull != null) {
+                    classType = idlArrayOrNull;
+                }
+
                 IDLClass paramClass = idlFile.getClass(classType);
                 if(paramClass != null) {
                     classType = paramClass.getCPPName();
                 }
                 if(isRef || isValue) {
                     paramName = "*((" + classType + "* )" + paramName + ")";
+                }
+                else if(isAny) {
+                    paramName = "(" + classType + ")" + paramName;
                 }
                 else {
                     paramName = "(" + classType + "* )" + paramName;

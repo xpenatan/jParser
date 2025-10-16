@@ -288,6 +288,9 @@ class TestMethodClass {
         void setAny(TestObjectClass* anyObject) {
             this->anyObject = anyObject;
         }
+        void testVoid(void* voidValue) {
+
+        }
 
         int getIntValue01() { return intValue01; };
         int getIntValue02() { return intValue02; };
