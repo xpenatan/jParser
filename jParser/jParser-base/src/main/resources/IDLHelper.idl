@@ -1,4 +1,21 @@
 
+interface IDLTemp {
+    [BindTo="Int_1"] static IDLIntArray Int_1__0(long value);
+    [BindTo="Int_2"] static IDLIntArray Int_2__0(long value);
+    [BindTo="Int_3"] static IDLIntArray Int_3__0(long value);
+    [BindTo="Int_4"] static IDLIntArray Int_4__0(long value);
+
+    [BindTo="Float_1"] static IDLFloatArray Float_1__0(float value);
+    [BindTo="Float_2"] static IDLFloatArray Float_2__0(float value);
+    [BindTo="Float_3"] static IDLFloatArray Float_3__0(float value);
+    [BindTo="Float_4"] static IDLFloatArray Float_4__0(float value);
+
+    [BindTo="Bool_1"] static IDLBoolArray Bool_1__0(boolean value);
+    [BindTo="Bool_2"] static IDLBoolArray Bool_2__0(boolean value);
+    [BindTo="Bool_3"] static IDLBoolArray Bool_3__0(boolean value);
+    [BindTo="Bool_4"] static IDLBoolArray Bool_4__0(boolean value);
+};
+
 interface IDLArrayBase {
     void clear();
     long getSize();

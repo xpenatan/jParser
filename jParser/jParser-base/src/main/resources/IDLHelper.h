@@ -140,3 +140,82 @@ typedef IDLArray<long long> IDLLongArray;
 typedef IDLArray<float> IDLFloatArray;
 typedef IDLArray<double> IDLDoubleArray;
 typedef IDLArray<char> IDLByteArray;
+
+IDLIntArray int_temp1(1);
+IDLIntArray int_temp2(1);
+IDLIntArray int_temp3(1);
+IDLIntArray int_temp4(1);
+
+IDLFloatArray float_temp1(1);
+IDLFloatArray float_temp2(1);
+IDLFloatArray float_temp3(1);
+IDLFloatArray float_temp4(1);
+
+IDLBoolArray bool_temp1(1);
+IDLBoolArray bool_temp2(1);
+IDLBoolArray bool_temp3(1);
+IDLBoolArray bool_temp4(1);
+
+class IDLTemp {
+    public:
+
+        static IDLIntArray* Int_1(int value) {
+            int_temp1.setValue(0, value);
+            return &int_temp1;
+        }
+
+        static IDLIntArray* Int_2(int value) {
+            int_temp2.setValue(0, value);
+            return &int_temp2;
+        }
+
+        static IDLIntArray* Int_3(int value) {
+            int_temp3.setValue(0, value);
+            return &int_temp3;
+        }
+
+        static IDLIntArray* Int_4(int value) {
+            int_temp4.setValue(0, value);
+            return &int_temp4;
+        }
+
+        static IDLFloatArray* Float_1(float value) {
+            float_temp1.setValue(0, value);
+            return &float_temp1;
+        }
+
+        static IDLFloatArray* Float_2(float value) {
+            float_temp2.setValue(0, value);
+            return &float_temp2;
+        }
+
+        static IDLFloatArray* Float_3(float value) {
+            float_temp3.setValue(0, value);
+            return &float_temp3;
+        }
+
+        static IDLFloatArray* Float_4(float value) {
+            float_temp4.setValue(0, value);
+            return &float_temp4;
+        }
+
+        static IDLBoolArray* Bool_1(bool value) {
+            bool_temp1.setValue(0, value);
+            return &bool_temp1;
+        }
+
+        static IDLBoolArray* Bool_2(bool value) {
+            bool_temp2.setValue(0, value);
+            return &bool_temp2;
+        }
+
+        static IDLBoolArray* Bool_3(bool value) {
+            bool_temp3.setValue(0, value);
+            return &bool_temp3;
+        }
+
+        static IDLBoolArray* Bool_4(bool value) {
+            bool_temp4.setValue(0, value);
+            return &bool_temp4;
+        }
+};
