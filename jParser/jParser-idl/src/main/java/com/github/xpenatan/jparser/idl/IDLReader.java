@@ -1,7 +1,7 @@
 package com.github.xpenatan.jparser.idl;
 
 import com.github.xpenatan.jparser.core.JParser;
-import idl.helper.IDLArrayBase;
+import idl.helper.IDLArray;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,7 +22,7 @@ public class IDLReader {
 
         if(JParser.CREATE_IDL_HELPER) {
             String baseIDLPath = "IDLHelper.idl";
-            InputStream resourceAsStream = IDLArrayBase.class.getClassLoader().getResourceAsStream(baseIDLPath);
+            InputStream resourceAsStream = IDLArray.class.getClassLoader().getResourceAsStream(baseIDLPath);
             InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
             IDLFile baseIDLFile = IDLReader.parseFile(streamReader, baseIDLPath);
             fileArray.add(baseIDLFile);

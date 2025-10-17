@@ -1,6 +1,6 @@
 package idl.helper;
 
-public class IDLFloat extends IDLFloatArray {
+public class IDLFloat extends IDLPointer {
 
     public static final IDLFloat NULL = native_new();
 
@@ -11,30 +11,12 @@ public class IDLFloat extends IDLFloatArray {
         return new IDLFloat((byte) 1, (char) 1);
     }
 
-    private IDLFloat(byte b, char c) {
-        super(b, c);
+    protected IDLFloat(byte b, char c) {
     }
 
     public IDLFloat() {
-        super(1);
     }
 
-    public IDLFloat(float value) {
-        this();
-        set(value);
-    }
-
-    public IDLFloat set(float value) {
-        setValue(0, value);
-        return this;
-    }
-
-    public float getValue() {
-        return getValue(0);
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(getValue());
-    }
+    public native void setValue(float value);
+    public native float getValue();
 }

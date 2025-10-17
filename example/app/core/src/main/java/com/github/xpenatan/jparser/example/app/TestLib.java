@@ -8,6 +8,7 @@ import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.CallbackExceptionManual;
 import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.IDLArrayTestObjectClass;
+import com.github.xpenatan.jparser.example.testlib.IDLInt;
 import com.github.xpenatan.jparser.example.testlib.TestAttributeArrayClass;
 import com.github.xpenatan.jparser.example.testlib.TestAttributeClass;
 import com.github.xpenatan.jparser.example.testlib.TestBufferManualClass;
@@ -21,7 +22,7 @@ import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.core.enums.TestEnumWithinClass;
 import com.github.xpenatan.jparser.example.testlib.core.op.TestOperatorClass;
 import com.github.xpenatan.jparser.example.testlib.core.sub.TestNamespaceClass;
-import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLInt;
+import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLIntArray;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
 import java.nio.ByteBuffer;
 
@@ -55,6 +56,8 @@ public class TestLib {
         boolean namespaceTest = testNamespaceClass();
         boolean operatorTest = testOperatorClass();
         boolean exceptionTest = testExceptionManual();
+        boolean testPrimitivePointers = testPrimitivePointers();
+        boolean testPrimitiveArray = testPrimitiveArray();
 
         System.out.println("enumTest: " + enumTest);
         System.out.println("constructorTest: " + constructorTest);
@@ -69,10 +72,12 @@ public class TestLib {
         System.out.println("namespaceTest: " + namespaceTest);
         System.out.println("operatorTest: " + operatorTest);
         System.out.println("exceptionTest: " + exceptionTest);
+        System.out.println("testPrimitivePointers: " + testPrimitivePointers);
+        System.out.println("testPrimitiveArray: " + testPrimitiveArray);
 
         return enumTest && constructorTest && stringConstructorTest && attributeTest && staticAttributeTest
                 && attributeArrayTest && bufferManualTest && methodTest && staticMethodTest && callbackTest
-                && callbackTestManual && namespaceTest && operatorTest && exceptionTest;
+                && callbackTestManual && namespaceTest && operatorTest && exceptionTest && testPrimitivePointers && testPrimitiveArray;
     }
 
     private static boolean testEnum() {
@@ -319,8 +324,6 @@ public class TestLib {
             test.dispose();
         }
         {
-            IDLInt a;
-
             TestMethodClass test = new TestMethodClass();
             IDLArrayTestObjectClass array = new IDLArrayTestObjectClass(2);
             TestObjectClass obj1 = new TestObjectClass();
@@ -884,5 +887,51 @@ public class TestLib {
             ret = true;
         }
         return ret;
+    }
+
+    private static boolean testPrimitivePointers() {
+        {
+            IDLInt test = null;
+            try {
+                test = new IDLInt();
+                test.setValue(10);
+                int value = test.getValue();
+                if(!(value == 10)) {
+                    test.dispose();
+                    throw new RuntimeException();
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                return false;
+            } finally {
+
+                test.dispose();
+            }
+        }
+        return true;
+    }
+
+    private static boolean testPrimitiveArray() {
+        {
+            IDLIntArray test = null;
+            try {
+                test = new IDLIntArray(2);
+                test.setValue(0, 10);
+                test.setValue(1, 20);
+                int value01 = test.getValue(0);
+                int value02 = test.getValue(1);
+                if(!(value01 == 10 && value02 == 20)) {
+                    test.dispose();
+                    throw new RuntimeException();
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                return false;
+            } finally {
+
+                test.dispose();
+            }
+        }
+        return true;
     }
 }

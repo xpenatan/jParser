@@ -1,6 +1,6 @@
 package idl.helper;
 
-public class IDLLongArray extends IDLArrayBase {
+public class IDLLongArray extends IDLArray {
 
     public static final IDLLongArray NULL = native_new();
 

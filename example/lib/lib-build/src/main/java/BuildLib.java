@@ -21,7 +21,7 @@ public class BuildLib {
         String basePackage = "com.github.xpenatan.jparser.example.testlib";
         String sourceDir = "/src/main/cpp/source/TestLib/src";
 
-//        WindowsMSVCTarget.DEBUG_BUILD = true;
+        WindowsMSVCTarget.DEBUG_BUILD = true;
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
 
         BuildToolOptions.BuildToolParams data = new BuildToolOptions.BuildToolParams();

@@ -24,7 +24,7 @@ interface IDLArrayTestObjectClass {
     TestObjectClass getValue(long index);
     void setValue(long index, TestObjectClass value);
 };
-IDLIntArray implements IDLArrayBase;
+IDLArrayTestObjectClass implements IDLArray;
 
 interface TestConstructorClass {
     readonly attribute long intValue01;

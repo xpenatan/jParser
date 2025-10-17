@@ -1,6 +1,6 @@
 package idl.helper;
 
-public class IDLInt extends IDLIntArray {
+public class IDLInt extends IDLPointer {
 
     public static final IDLInt NULL = native_new();
 
@@ -11,30 +11,12 @@ public class IDLInt extends IDLIntArray {
         return new IDLInt((byte) 1, (char) 1);
     }
 
-    private IDLInt(byte b, char c) {
-        super(b, c);
+    protected IDLInt(byte b, char c) {
     }
 
     public IDLInt() {
-        super(1);
     }
 
-    public IDLInt(int value) {
-        this();
-        set(value);
-    }
-
-    public IDLInt set(int value) {
-        setValue(0, value);
-        return this;
-    }
-
-    public int getValue() {
-        return getValue(0);
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(getValue());
-    }
+    public native void setValue(int value);
+    public native int getValue();
 }
