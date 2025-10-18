@@ -917,12 +917,26 @@ public class TestLib {
             IDLIntArray test = null;
             try {
                 test = new IDLIntArray(2);
-                test.setValue(0, 10);
-                test.setValue(1, 20);
-                int value01 = test.getValue(0);
-                int value02 = test.getValue(1);
-                if(!(value01 == 10 && value02 == 20)) {
-                    throw new RuntimeException();
+                {
+                    test.setValue(0, 10);
+                    test.setValue(1, 20);
+                    int value01 = test.getValue(0);
+                    int value02 = test.getValue(1);
+                    if(!(value01 == 10 && value02 == 20)) {
+                        throw new RuntimeException();
+                    }
+                }
+                {
+                    test.resize(3);
+                    test.setValue(0, 9);
+                    test.setValue(1, 8);
+                    test.setValue(2, 7);
+                    int value01 = test.getValue(0);
+                    int value02 = test.getValue(1);
+                    int value03 = test.getValue(2);
+                    if(!(value01 == 9 && value02 == 8 && value03 == 7)) {
+                        throw new RuntimeException();
+                    }
                 }
             } catch(Throwable e) {
                 e.printStackTrace();

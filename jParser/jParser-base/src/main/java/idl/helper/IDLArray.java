@@ -31,5 +31,13 @@ public class IDLArray extends IDLBase {
 
     public native int getSize();
 
+    /*[-TEAVM;-NATIVE]
+      var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].IDLArray);
+      jsObj.resize(size);
+    */
+    /*[-JNI;-NATIVE]
+      IDL::IDLArray* nativeObject = (IDL::IDLArray*)this_addr;
+      nativeObject->resize(size);
+    */
     public static native void internal_native_resize(long this_addr, int size);
 }
