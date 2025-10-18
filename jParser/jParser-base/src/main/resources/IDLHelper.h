@@ -35,7 +35,11 @@ class IDLArray : public IDL::IDLArray {
         }
 
     public:
-        IDLArray(int size, bool isResizeEnabled = true) : isResizeEnabled(isResizeEnabled) { resize(size); }
+        IDLArray(int size, bool isResizeEnabled = true) {
+            this->isResizeEnabled = true;
+            resize(size);
+            this->isResizeEnabled = isResizeEnabled;
+        }
         ~IDLArray() override {
             clear();
             deleteData();
@@ -148,7 +152,7 @@ class IDLInt2 : public IDLArrayInt {
     public:
         IDLInt2() : IDLArrayInt(2, false) {}
 
-        void setValue(int x, int y) {
+        void set(int x, int y) {
             IDLArrayInt::setValue(0, x);
             IDLArrayInt::setValue(1, y);
         }
@@ -161,7 +165,7 @@ class IDLInt3 : public IDLArrayInt {
     public:
         IDLInt3() : IDLArrayInt(3, false) {}
 
-        void setValue(int x, int y, int z) {
+        void set(int x, int y, int z) {
             IDLArrayInt::setValue(0, x);
             IDLArrayInt::setValue(1, y);
             IDLArrayInt::setValue(2, z);
@@ -176,7 +180,7 @@ class IDLInt4 : public IDLArrayInt {
     public:
         IDLInt4() : IDLArrayInt(4, false) {}
 
-        void setValue(int x, int y, int z, int w) {
+        void set(int x, int y, int z, int w) {
             IDLArrayInt::setValue(0, x);
             IDLArrayInt::setValue(1, y);
             IDLArrayInt::setValue(2, z);
@@ -198,7 +202,7 @@ class IDLLong2 : public IDLArrayLong {
     public:
         IDLLong2() : IDLArrayLong(2, false) {}
 
-        void setValue(long long x, long long y) {
+        void set(long long x, long long y) {
             IDLArrayLong::setValue(0, x);
             IDLArrayLong::setValue(1, y);
         }
@@ -211,7 +215,7 @@ class IDLLong3 : public IDLArrayLong {
     public:
         IDLLong3() : IDLArrayLong(3, false) {}
 
-        void setValue(long long x, long long y, long long z) {
+        void set(long long x, long long y, long long z) {
             IDLArrayLong::setValue(0, x);
             IDLArrayLong::setValue(1, y);
             IDLArrayLong::setValue(2, z);
@@ -226,7 +230,7 @@ class IDLLong4 : public IDLArrayLong {
     public:
         IDLLong4() : IDLArrayLong(4, false) {}
 
-        void setValue(long long x, long long y, long long z, long long w) {
+        void set(long long x, long long y, long long z, long long w) {
             IDLArrayLong::setValue(0, x);
             IDLArrayLong::setValue(1, y);
             IDLArrayLong::setValue(2, z);
@@ -248,7 +252,7 @@ class IDLFloat2 : public IDLArrayFloat {
     public:
         IDLFloat2() : IDLArrayFloat(2, false) {}
 
-        void setValue(float x, float y) {
+        void set(float x, float y) {
             IDLArrayFloat::setValue(0, x);
             IDLArrayFloat::setValue(1, y);
         }
@@ -261,7 +265,7 @@ class IDLFloat3 : public IDLArrayFloat {
     public:
         IDLFloat3() : IDLArrayFloat(3, false) {}
 
-        void setValue(float x, float y, float z) {
+        void set(float x, float y, float z) {
             IDLArrayFloat::setValue(0, x);
             IDLArrayFloat::setValue(1, y);
             IDLArrayFloat::setValue(2, z);
@@ -276,7 +280,7 @@ class IDLFloat4 : public IDLArrayFloat {
     public:
         IDLFloat4() : IDLArrayFloat(4, false) {}
 
-        void setValue(float x, float y, float z, float w) {
+        void set(float x, float y, float z, float w) {
             IDLArrayFloat::setValue(0, x);
             IDLArrayFloat::setValue(1, y);
             IDLArrayFloat::setValue(2, z);
@@ -298,7 +302,7 @@ class IDLDouble2 : public IDLArrayDouble {
     public:
         IDLDouble2() : IDLArrayDouble(2, false) {}
 
-        void setValue(double x, double y) {
+        void set(double x, double y) {
             IDLArrayDouble::setValue(0, x);
             IDLArrayDouble::setValue(1, y);
         }
@@ -311,7 +315,7 @@ class IDLDouble3 : public IDLArrayDouble {
     public:
         IDLDouble3() : IDLArrayDouble(3, false) {}
 
-        void setValue(double x, double y, double z) {
+        void set(double x, double y, double z) {
             IDLArrayDouble::setValue(0, x);
             IDLArrayDouble::setValue(1, y);
             IDLArrayDouble::setValue(2, z);
@@ -326,7 +330,7 @@ class IDLDouble4 : public IDLArrayDouble {
     public:
         IDLDouble4() : IDLArrayDouble(4, false) {}
 
-        void setValue(double x, double y, double z, double w) {
+        void set(double x, double y, double z, double w) {
             IDLArrayDouble::setValue(0, x);
             IDLArrayDouble::setValue(1, y);
             IDLArrayDouble::setValue(2, z);
@@ -463,145 +467,145 @@ class IDLTemp {
 
         static IDLInt2* Int2_1(int x, int y) {
             static IDLInt2 intArray2_temp1;
-            intArray2_temp1.setValue(x, y);
+            intArray2_temp1.set(x, y);
             return &intArray2_temp1;
         }
 
         static IDLInt2* Int2_2(int x, int y) {
             static IDLInt2 intArray2_temp2;
-            intArray2_temp2.setValue(x, y);
+            intArray2_temp2.set(x, y);
             return &intArray2_temp2;
         }
 
         static IDLInt3* Int3_1(int x, int y, int z) {
             static IDLInt3 intArray3_temp1;
-            intArray3_temp1.setValue(x, y, z);
+            intArray3_temp1.set(x, y, z);
             return &intArray3_temp1;
         }
 
         static IDLInt3* Int3_2(int x, int y, int z) {
             static IDLInt3 intArray3_temp2;
-            intArray3_temp2.setValue(x, y, z);
+            intArray3_temp2.set(x, y, z);
             return &intArray3_temp2;
         }
 
         static IDLInt4* Int4_1(int x, int y, int z, int w) {
             static IDLInt4 intArray4_temp1;
-            intArray4_temp1.setValue(x, y, z, w);
+            intArray4_temp1.set(x, y, z, w);
             return &intArray4_temp1;
         }
 
         static IDLInt4* Int4_2(int x, int y, int z, int w) {
             static IDLInt4 intArray4_temp2;
-            intArray4_temp2.setValue(x, y, z, w);
+            intArray4_temp2.set(x, y, z, w);
             return &intArray4_temp2;
         }
 
         static IDLLong2* Long2_1(long long x, long long y) {
             static IDLLong2 longArray2_temp1;
-            longArray2_temp1.setValue(x, y);
+            longArray2_temp1.set(x, y);
             return &longArray2_temp1;
         }
 
         static IDLLong2* Long2_2(long long x, long long y) {
             static IDLLong2 longArray2_temp2;
-            longArray2_temp2.setValue(x, y);
+            longArray2_temp2.set(x, y);
             return &longArray2_temp2;
         }
 
         static IDLLong3* Long3_1(long long x, long long y, long long z) {
             static IDLLong3 longArray3_temp1;
-            longArray3_temp1.setValue(x, y, z);
+            longArray3_temp1.set(x, y, z);
             return &longArray3_temp1;
         }
 
         static IDLLong3* Long3_2(long long x, long long y, long long z) {
             static IDLLong3 longArray3_temp2;
-            longArray3_temp2.setValue(x, y, z);
+            longArray3_temp2.set(x, y, z);
             return &longArray3_temp2;
         }
 
         static IDLLong4* Long4_1(long long x, long long y, long long z, long long w) {
             static IDLLong4 longArray4_temp1;
-            longArray4_temp1.setValue(x, y, z, w);
+            longArray4_temp1.set(x, y, z, w);
             return &longArray4_temp1;
         }
 
         static IDLLong4* Long4_2(long long x, long long y, long long z, long long w) {
             static IDLLong4 longArray4_temp2;
-            longArray4_temp2.setValue(x, y, z, w);
+            longArray4_temp2.set(x, y, z, w);
             return &longArray4_temp2;
         }
 
         static IDLFloat2* Float2_1(float x, float y) {
             static IDLFloat2 floatArray2_temp1;
-            floatArray2_temp1.setValue(x, y);
+            floatArray2_temp1.set(x, y);
             return &floatArray2_temp1;
         }
 
         static IDLFloat2* Float2_2(float x, float y) {
             static IDLFloat2 floatArray2_temp2;
-            floatArray2_temp2.setValue(x, y);
+            floatArray2_temp2.set(x, y);
             return &floatArray2_temp2;
         }
 
         static IDLFloat3* Float3_1(float x, float y, float z) {
             static IDLFloat3 floatArray3_temp1;
-            floatArray3_temp1.setValue(x, y, z);
+            floatArray3_temp1.set(x, y, z);
             return &floatArray3_temp1;
         }
 
         static IDLFloat3* Float3_2(float x, float y, float z) {
             static IDLFloat3 floatArray3_temp2;
-            floatArray3_temp2.setValue(x, y, z);
+            floatArray3_temp2.set(x, y, z);
             return &floatArray3_temp2;
         }
 
         static IDLFloat4* Float4_1(float x, float y, float z, float w) {
             static IDLFloat4 floatArray4_temp1;
-            floatArray4_temp1.setValue(x, y, z, w);
+            floatArray4_temp1.set(x, y, z, w);
             return &floatArray4_temp1;
         }
 
         static IDLFloat4* Float4_2(float x, float y, float z, float w) {
             static IDLFloat4 floatArray4_temp2;
-            floatArray4_temp2.setValue(x, y, z, w);
+            floatArray4_temp2.set(x, y, z, w);
             return &floatArray4_temp2;
         }
 
         static IDLDouble2* Double2_1(double x, double y) {
             static IDLDouble2 doubleArray2_temp1;
-            doubleArray2_temp1.setValue(x, y);
+            doubleArray2_temp1.set(x, y);
             return &doubleArray2_temp1;
         }
 
         static IDLDouble2* Double2_2(double x, double y) {
             static IDLDouble2 doubleArray2_temp2;
-            doubleArray2_temp2.setValue(x, y);
+            doubleArray2_temp2.set(x, y);
             return &doubleArray2_temp2;
         }
 
         static IDLDouble3* Double3_1(double x, double y, double z) {
             static IDLDouble3 doubleArray3_temp1;
-            doubleArray3_temp1.setValue(x, y, z);
+            doubleArray3_temp1.set(x, y, z);
             return &doubleArray3_temp1;
         }
 
         static IDLDouble3* Double3_2(double x, double y, double z) {
             static IDLDouble3 doubleArray3_temp2;
-            doubleArray3_temp2.setValue(x, y, z);
+            doubleArray3_temp2.set(x, y, z);
             return &doubleArray3_temp2;
         }
 
         static IDLDouble4* Double4_1(double x, double y, double z, double w) {
             static IDLDouble4 doubleArray4_temp1;
-            doubleArray4_temp1.setValue(x, y, z, w);
+            doubleArray4_temp1.set(x, y, z, w);
             return &doubleArray4_temp1;
         }
 
         static IDLDouble4* Double4_2(double x, double y, double z, double w) {
             static IDLDouble4 doubleArray4_temp2;
-            doubleArray4_temp2.setValue(x, y, z, w);
+            doubleArray4_temp2.set(x, y, z, w);
             return &doubleArray4_temp2;
         }
 };

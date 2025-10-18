@@ -152,7 +152,7 @@ IDLInt implements IDLArrayInt;
 
 interface IDLInt2 {
     void IDLInt2();
-    void setValue(long x, long y);
+    void set(long x, long y);
     long getX();
     long getY();
 };
@@ -160,7 +160,7 @@ IDLInt2 implements IDLArrayInt;
 
 interface IDLInt3 {
     void IDLInt3();
-    void setValue(long x, long y, long z);
+    void set(long x, long y, long z);
     long getX();
     long getY();
     long getZ();
@@ -169,7 +169,7 @@ IDLInt3 implements IDLArrayInt;
 
 interface IDLInt4 {
     void IDLInt4();
-    void setValue(long x, long y, long z, long w);
+    void set(long x, long y, long z, long w);
     long getX();
     long getY();
     long getZ();
@@ -186,7 +186,7 @@ IDLLong implements IDLArrayLong;
 
 interface IDLLong2 {
     void IDLLong2();
-    void setValue(long long x, long long y);
+    void set(long long x, long long y);
     long long getX();
     long long getY();
 };
@@ -194,7 +194,7 @@ IDLLong2 implements IDLArrayLong;
 
 interface IDLLong3 {
     void IDLLong3();
-    void setValue(long long x, long long y, long long z);
+    void set(long long x, long long y, long long z);
     long long getX();
     long long getY();
     long long getZ();
@@ -203,7 +203,7 @@ IDLLong3 implements IDLArrayLong;
 
 interface IDLLong4 {
     void IDLLong4();
-    void setValue(long long x, long long y, long long z, long long w);
+    void set(long long x, long long y, long long z, long long w);
     long long getX();
     long long getY();
     long long getZ();
@@ -220,7 +220,7 @@ IDLFloat implements IDLArrayFloat;
 
 interface IDLFloat2 {
     void IDLFloat2();
-    void setValue(float x, float y);
+    void set(float x, float y);
     float getX();
     float getY();
 };
@@ -228,7 +228,7 @@ IDLLong2 implements IDLArrayLong;
 
 interface IDLFloat3 {
     void IDLFloat3();
-    void setValue(float x, float y, float z);
+    void set(float x, float y, float z);
     float getX();
     float getY();
     float getZ();
@@ -237,7 +237,7 @@ IDLLong3 implements IDLArrayLong;
 
 interface IDLFloat4 {
     void IDLFloat4();
-    void setValue(float x, float y, float z, float w);
+    void set(float x, float y, float z, float w);
     float getX();
     float getY();
     float getZ();
@@ -254,7 +254,7 @@ IDLDouble implements IDLArrayDouble;
 
 interface IDLDouble2 {
     void IDLDouble2();
-    void setValue(double x, double y);
+    void set(double x, double y);
     double getX();
     double getY();
 };
@@ -262,7 +262,7 @@ IDLDouble2 implements IDLArrayDouble;
 
 interface IDLDouble3 {
     void IDLDouble3();
-    void setValue(double x, double y, double z);
+    void set(double x, double y, double z);
     double getX();
     double getY();
     double getZ();
@@ -271,7 +271,7 @@ IDLDouble3 implements IDLArrayDouble;
 
 interface IDLDouble4 {
     void IDLDouble4();
-    void setValue(double x, double y, double z, double w);
+    void set(double x, double y, double z, double w);
     double getX();
     double getY();
     double getZ();

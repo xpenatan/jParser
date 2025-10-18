@@ -8,6 +8,7 @@ import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.CallbackExceptionManual;
 import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.IDLArrayTestObjectClass;
+import com.github.xpenatan.jparser.example.testlib.IDLInt4;
 import com.github.xpenatan.jparser.example.testlib.TestAttributeArrayClass;
 import com.github.xpenatan.jparser.example.testlib.TestAttributeClass;
 import com.github.xpenatan.jparser.example.testlib.TestBufferManualClass;
@@ -921,14 +922,44 @@ public class TestLib {
                 int value01 = test.getValue(0);
                 int value02 = test.getValue(1);
                 if(!(value01 == 10 && value02 == 20)) {
-                    test.dispose();
                     throw new RuntimeException();
                 }
             } catch(Throwable e) {
                 e.printStackTrace();
                 return false;
             } finally {
+                test.dispose();
+            }
+        }
+        {
+            IDLInt4 test = null;
+            try {
+                test = new IDLInt4();
 
+                test.set(1,2,3, 4);
+                int x = test.getX();
+                int y = test.getY();
+                int z = test.getZ();
+                int w = test.getW();
+                if(!(x == 1 && y == 2 && z == 3 && w == 4)) {
+                    throw new RuntimeException();
+                }
+
+                test.setValue(0, 11);
+                test.setValue(1, 12);
+                test.setValue(2, 13);
+                test.setValue(3, 14);
+                int x2 = test.getValue(0);
+                int y2 = test.getValue(1);
+                int z2 = test.getValue(2);
+                int w2 = test.getValue(3);
+                if(!(x2 == 11 && y2 == 12 && z2 == 13 && w2 == 14)) {
+                    throw new RuntimeException();
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                return false;
+            } finally {
                 test.dispose();
             }
         }
