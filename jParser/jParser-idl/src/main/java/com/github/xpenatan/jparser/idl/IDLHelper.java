@@ -142,22 +142,22 @@ public class IDLHelper {
     public static String getIDLArrayClassOrNull(String type) {
         // Convert array to IDL object arrays
         if(type.equals("int[]")) {
-            type = "IDLArrayInt";
+            type = "IDLIntArray";
         }
         else if(type.equals("long[]") || type.equals("long long[]")) {
-            type = "IDLArrayLong";
+            type = "IDLLongArray";
         }
         else if(type.equals("float[]")) {
-            type = "IDLArrayFloat";
+            type = "IDLFloatArray";
         }
         else if(type.equals("byte[]")) {
-            type = "IDLArrayByte";
+            type = "IDLByteArray";
         }
         else if(type.equals("boolean[]")) {
-            type = "IDLArrayBool";
+            type = "IDLBoolArray";
         }
         else if(type.equals("double[]")) {
-            type = "IDLArrayDouble";
+            type = "IDLDoubleArray";
         }
         else if(type.endsWith("[]")) {
             type = type.replace("[]", "");

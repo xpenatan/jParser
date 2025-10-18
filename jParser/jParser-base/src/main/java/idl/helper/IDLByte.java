@@ -1,6 +1,6 @@
 package idl.helper;
 
-public class IDLByte extends IDLArrayByte {
+public class IDLByte extends IDLByteArray {
 
     public static final IDLByte NULL = native_new();
 

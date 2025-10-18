@@ -1,6 +1,6 @@
 package idl.helper;
 
-public class IDLLong extends IDLArrayLong {
+public class IDLLong extends IDLLongArray {
 
     public static final IDLLong NULL = native_new();
 

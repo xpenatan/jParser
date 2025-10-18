@@ -22,8 +22,8 @@ import com.github.xpenatan.jparser.example.testlib.TestObjectClass;
 import com.github.xpenatan.jparser.example.testlib.core.enums.TestEnumWithinClass;
 import com.github.xpenatan.jparser.example.testlib.core.op.TestOperatorClass;
 import com.github.xpenatan.jparser.example.testlib.core.sub.TestNamespaceClass;
-import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLArrayInt;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLInt;
+import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLIntArray;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
 import java.nio.ByteBuffer;
 
@@ -914,9 +914,9 @@ public class TestLib {
 
     private static boolean testPrimitiveArray() {
         {
-            IDLArrayInt test = null;
+            IDLIntArray test = null;
             try {
-                test = new IDLArrayInt(2);
+                test = new IDLIntArray(2);
                 test.setValue(0, 10);
                 test.setValue(1, 20);
                 int value01 = test.getValue(0);

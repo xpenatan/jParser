@@ -126,221 +126,221 @@ class IDLArray : public IDL::IDLArray {
 
 using IDLString = std::string;
 using IDLStringView = std::string_view;
-using IDLArrayBool = IDLArray<bool>;
-using IDLArrayInt = IDLArray<int>;
-using IDLArrayLong = IDLArray<long long>;
-using IDLArrayFloat = IDLArray<float>;
-using IDLArrayDouble = IDLArray<double>;
-using IDLArrayByte = IDLArray<char>;
+using IDLBoolArray = IDLArray<bool>;
+using IDLIntArray = IDLArray<int>;
+using IDLLongArray = IDLArray<long long>;
+using IDLFloatArray = IDLArray<float>;
+using IDLDoubleArray = IDLArray<double>;
+using IDLByteArray = IDLArray<char>;
 
-class IDLBool : public IDLArrayBool {
+class IDLBool : public IDLBoolArray {
     public:
-        IDLBool() : IDLArrayBool(1) {}
+        IDLBool() : IDLBoolArray(1) {}
 };
 
-class IDLByte : public IDLArrayByte {
+class IDLByte : public IDLByteArray {
     public:
-        IDLByte() : IDLArrayByte(1) {}
+        IDLByte() : IDLByteArray(1) {}
 };
 
-class IDLInt : public IDLArrayInt {
+class IDLInt : public IDLIntArray {
     public:
-        IDLInt() : IDLArrayInt(1) {}
+        IDLInt() : IDLIntArray(1) {}
 };
 
-class IDLInt2 : public IDLArrayInt {
+class IDLInt2 : public IDLIntArray {
     public:
-        IDLInt2() : IDLArrayInt(2, false) {}
+        IDLInt2() : IDLIntArray(2, false) {}
 
         void set(int x, int y) {
-            IDLArrayInt::setValue(0, x);
-            IDLArrayInt::setValue(1, y);
+            IDLIntArray::setValue(0, x);
+            IDLIntArray::setValue(1, y);
         }
 
-        int getX() { return IDLArrayInt::getValue(0); }
-        int getY() { return IDLArrayInt::getValue(1); }
+        int getX() { return IDLIntArray::getValue(0); }
+        int getY() { return IDLIntArray::getValue(1); }
 };
 
-class IDLInt3 : public IDLArrayInt {
+class IDLInt3 : public IDLIntArray {
     public:
-        IDLInt3() : IDLArrayInt(3, false) {}
+        IDLInt3() : IDLIntArray(3, false) {}
 
         void set(int x, int y, int z) {
-            IDLArrayInt::setValue(0, x);
-            IDLArrayInt::setValue(1, y);
-            IDLArrayInt::setValue(2, z);
+            IDLIntArray::setValue(0, x);
+            IDLIntArray::setValue(1, y);
+            IDLIntArray::setValue(2, z);
         }
 
-        int getX() { return IDLArrayInt::getValue(0); }
-        int getY() { return IDLArrayInt::getValue(1); }
-        int getZ() { return IDLArrayInt::getValue(2); }
+        int getX() { return IDLIntArray::getValue(0); }
+        int getY() { return IDLIntArray::getValue(1); }
+        int getZ() { return IDLIntArray::getValue(2); }
 };
 
-class IDLInt4 : public IDLArrayInt {
+class IDLInt4 : public IDLIntArray {
     public:
-        IDLInt4() : IDLArrayInt(4, false) {}
+        IDLInt4() : IDLIntArray(4, false) {}
 
         void set(int x, int y, int z, int w) {
-            IDLArrayInt::setValue(0, x);
-            IDLArrayInt::setValue(1, y);
-            IDLArrayInt::setValue(2, z);
-            IDLArrayInt::setValue(3, w);
+            IDLIntArray::setValue(0, x);
+            IDLIntArray::setValue(1, y);
+            IDLIntArray::setValue(2, z);
+            IDLIntArray::setValue(3, w);
         }
 
-        int getX() { return IDLArrayInt::getValue(0); }
-        int getY() { return IDLArrayInt::getValue(1); }
-        int getZ() { return IDLArrayInt::getValue(2); }
-        int getW() { return IDLArrayInt::getValue(3); }
+        int getX() { return IDLIntArray::getValue(0); }
+        int getY() { return IDLIntArray::getValue(1); }
+        int getZ() { return IDLIntArray::getValue(2); }
+        int getW() { return IDLIntArray::getValue(3); }
 };
 
-class IDLLong : public IDLArrayLong {
+class IDLLong : public IDLLongArray {
     public:
-        IDLLong() : IDLArrayLong(1) {}
+        IDLLong() : IDLLongArray(1) {}
 };
 
-class IDLLong2 : public IDLArrayLong {
+class IDLLong2 : public IDLLongArray {
     public:
-        IDLLong2() : IDLArrayLong(2, false) {}
+        IDLLong2() : IDLLongArray(2, false) {}
 
         void set(long long x, long long y) {
-            IDLArrayLong::setValue(0, x);
-            IDLArrayLong::setValue(1, y);
+            IDLLongArray::setValue(0, x);
+            IDLLongArray::setValue(1, y);
         }
 
-        long long getX() { return IDLArrayLong::getValue(0); }
-        long long getY() { return IDLArrayLong::getValue(1); }
+        long long getX() { return IDLLongArray::getValue(0); }
+        long long getY() { return IDLLongArray::getValue(1); }
 };
 
-class IDLLong3 : public IDLArrayLong {
+class IDLLong3 : public IDLLongArray {
     public:
-        IDLLong3() : IDLArrayLong(3, false) {}
+        IDLLong3() : IDLLongArray(3, false) {}
 
         void set(long long x, long long y, long long z) {
-            IDLArrayLong::setValue(0, x);
-            IDLArrayLong::setValue(1, y);
-            IDLArrayLong::setValue(2, z);
+            IDLLongArray::setValue(0, x);
+            IDLLongArray::setValue(1, y);
+            IDLLongArray::setValue(2, z);
         }
 
-        long long getX() { return IDLArrayLong::getValue(0); }
-        long long getY() { return IDLArrayLong::getValue(1); }
-        long long getZ() { return IDLArrayLong::getValue(2); }
+        long long getX() { return IDLLongArray::getValue(0); }
+        long long getY() { return IDLLongArray::getValue(1); }
+        long long getZ() { return IDLLongArray::getValue(2); }
 };
 
-class IDLLong4 : public IDLArrayLong {
+class IDLLong4 : public IDLLongArray {
     public:
-        IDLLong4() : IDLArrayLong(4, false) {}
+        IDLLong4() : IDLLongArray(4, false) {}
 
         void set(long long x, long long y, long long z, long long w) {
-            IDLArrayLong::setValue(0, x);
-            IDLArrayLong::setValue(1, y);
-            IDLArrayLong::setValue(2, z);
-            IDLArrayLong::setValue(3, w);
+            IDLLongArray::setValue(0, x);
+            IDLLongArray::setValue(1, y);
+            IDLLongArray::setValue(2, z);
+            IDLLongArray::setValue(3, w);
         }
 
-        long long getX() { return IDLArrayLong::getValue(0); }
-        long long getY() { return IDLArrayLong::getValue(1); }
-        long long getZ() { return IDLArrayLong::getValue(2); }
-        long long getW() { return IDLArrayLong::getValue(3); }
+        long long getX() { return IDLLongArray::getValue(0); }
+        long long getY() { return IDLLongArray::getValue(1); }
+        long long getZ() { return IDLLongArray::getValue(2); }
+        long long getW() { return IDLLongArray::getValue(3); }
 };
 
-class IDLFloat : public IDLArrayFloat {
+class IDLFloat : public IDLFloatArray {
     public:
-        IDLFloat() : IDLArrayFloat(1) {}
+        IDLFloat() : IDLFloatArray(1) {}
 };
 
-class IDLFloat2 : public IDLArrayFloat {
+class IDLFloat2 : public IDLFloatArray {
     public:
-        IDLFloat2() : IDLArrayFloat(2, false) {}
+        IDLFloat2() : IDLFloatArray(2, false) {}
 
         void set(float x, float y) {
-            IDLArrayFloat::setValue(0, x);
-            IDLArrayFloat::setValue(1, y);
+            IDLFloatArray::setValue(0, x);
+            IDLFloatArray::setValue(1, y);
         }
 
-        float getX() { return IDLArrayFloat::getValue(0); }
-        float getY() { return IDLArrayFloat::getValue(1); }
+        float getX() { return IDLFloatArray::getValue(0); }
+        float getY() { return IDLFloatArray::getValue(1); }
 };
 
-class IDLFloat3 : public IDLArrayFloat {
+class IDLFloat3 : public IDLFloatArray {
     public:
-        IDLFloat3() : IDLArrayFloat(3, false) {}
+        IDLFloat3() : IDLFloatArray(3, false) {}
 
         void set(float x, float y, float z) {
-            IDLArrayFloat::setValue(0, x);
-            IDLArrayFloat::setValue(1, y);
-            IDLArrayFloat::setValue(2, z);
+            IDLFloatArray::setValue(0, x);
+            IDLFloatArray::setValue(1, y);
+            IDLFloatArray::setValue(2, z);
         }
 
-        float getX() { return IDLArrayFloat::getValue(0); }
-        float getY() { return IDLArrayFloat::getValue(1); }
-        float getZ() { return IDLArrayFloat::getValue(2); }
+        float getX() { return IDLFloatArray::getValue(0); }
+        float getY() { return IDLFloatArray::getValue(1); }
+        float getZ() { return IDLFloatArray::getValue(2); }
 };
 
-class IDLFloat4 : public IDLArrayFloat {
+class IDLFloat4 : public IDLFloatArray {
     public:
-        IDLFloat4() : IDLArrayFloat(4, false) {}
+        IDLFloat4() : IDLFloatArray(4, false) {}
 
         void set(float x, float y, float z, float w) {
-            IDLArrayFloat::setValue(0, x);
-            IDLArrayFloat::setValue(1, y);
-            IDLArrayFloat::setValue(2, z);
-            IDLArrayFloat::setValue(3, w);
+            IDLFloatArray::setValue(0, x);
+            IDLFloatArray::setValue(1, y);
+            IDLFloatArray::setValue(2, z);
+            IDLFloatArray::setValue(3, w);
         }
 
-        float getX() { return IDLArrayFloat::getValue(0); }
-        float getY() { return IDLArrayFloat::getValue(1); }
-        float getZ() { return IDLArrayFloat::getValue(2); }
-        float getW() { return IDLArrayFloat::getValue(3); }
+        float getX() { return IDLFloatArray::getValue(0); }
+        float getY() { return IDLFloatArray::getValue(1); }
+        float getZ() { return IDLFloatArray::getValue(2); }
+        float getW() { return IDLFloatArray::getValue(3); }
 };
 
-class IDLDouble : public IDLArrayDouble {
+class IDLDouble : public IDLDoubleArray {
     public:
-        IDLDouble() : IDLArrayDouble(1) {}
+        IDLDouble() : IDLDoubleArray(1) {}
 };
 
-class IDLDouble2 : public IDLArrayDouble {
+class IDLDouble2 : public IDLDoubleArray {
     public:
-        IDLDouble2() : IDLArrayDouble(2, false) {}
+        IDLDouble2() : IDLDoubleArray(2, false) {}
 
         void set(double x, double y) {
-            IDLArrayDouble::setValue(0, x);
-            IDLArrayDouble::setValue(1, y);
+            IDLDoubleArray::setValue(0, x);
+            IDLDoubleArray::setValue(1, y);
         }
 
-        double getX() { return IDLArrayDouble::getValue(0); }
-        double getY() { return IDLArrayDouble::getValue(1); }
+        double getX() { return IDLDoubleArray::getValue(0); }
+        double getY() { return IDLDoubleArray::getValue(1); }
 };
 
-class IDLDouble3 : public IDLArrayDouble {
+class IDLDouble3 : public IDLDoubleArray {
     public:
-        IDLDouble3() : IDLArrayDouble(3, false) {}
+        IDLDouble3() : IDLDoubleArray(3, false) {}
 
         void set(double x, double y, double z) {
-            IDLArrayDouble::setValue(0, x);
-            IDLArrayDouble::setValue(1, y);
-            IDLArrayDouble::setValue(2, z);
+            IDLDoubleArray::setValue(0, x);
+            IDLDoubleArray::setValue(1, y);
+            IDLDoubleArray::setValue(2, z);
         }
 
-        double getX() { return IDLArrayDouble::getValue(0); }
-        double getY() { return IDLArrayDouble::getValue(1); }
-        double getZ() { return IDLArrayDouble::getValue(2); }
+        double getX() { return IDLDoubleArray::getValue(0); }
+        double getY() { return IDLDoubleArray::getValue(1); }
+        double getZ() { return IDLDoubleArray::getValue(2); }
 };
 
-class IDLDouble4 : public IDLArrayDouble {
+class IDLDouble4 : public IDLDoubleArray {
     public:
-        IDLDouble4() : IDLArrayDouble(4, false) {}
+        IDLDouble4() : IDLDoubleArray(4, false) {}
 
         void set(double x, double y, double z, double w) {
-            IDLArrayDouble::setValue(0, x);
-            IDLArrayDouble::setValue(1, y);
-            IDLArrayDouble::setValue(2, z);
-            IDLArrayDouble::setValue(3, w);
+            IDLDoubleArray::setValue(0, x);
+            IDLDoubleArray::setValue(1, y);
+            IDLDoubleArray::setValue(2, z);
+            IDLDoubleArray::setValue(3, w);
         }
 
-        double getX() { return IDLArrayDouble::getValue(0); }
-        double getY() { return IDLArrayDouble::getValue(1); }
-        double getZ() { return IDLArrayDouble::getValue(2); }
-        double getW() { return IDLArrayDouble::getValue(3); }
+        double getX() { return IDLDoubleArray::getValue(0); }
+        double getY() { return IDLDoubleArray::getValue(1); }
+        double getZ() { return IDLDoubleArray::getValue(2); }
+        double getW() { return IDLDoubleArray::getValue(3); }
 };
 
 class IDLTemp {

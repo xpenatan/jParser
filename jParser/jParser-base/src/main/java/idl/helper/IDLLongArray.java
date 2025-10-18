@@ -1,21 +1,21 @@
 package idl.helper;
 
-public class IDLArrayLong extends IDLArray {
+public class IDLLongArray extends IDLArray {
 
-    public static final IDLArrayLong NULL = native_new();
+    public static final IDLLongArray NULL = native_new();
 
     /**
      * @return An empty instance without a native address
      */
-    public static IDLArrayLong native_new() {
-        return new IDLArrayLong((byte) 1, (char) 1);
+    public static IDLLongArray native_new() {
+        return new IDLLongArray((byte) 1, (char) 1);
     }
 
-    protected IDLArrayLong(byte b, char c) {}
+    protected IDLLongArray(byte b, char c) {}
 
-    protected IDLArrayLong() {}
+    protected IDLLongArray() {}
 
-    public IDLArrayLong(int size) {
+    public IDLLongArray(int size) {
     }
 
     public void copy(long[] array) {

@@ -1,22 +1,22 @@
 package idl.helper;
 
-public class IDLArrayDouble extends IDLArray {
+public class IDLDoubleArray extends IDLArray {
 
-    public static final IDLArrayDouble NULL = native_new();
+    public static final IDLDoubleArray NULL = native_new();
 
     /**
      * @return An empty instance without a native address
      */
-    public static IDLArrayDouble native_new() {
-        return new IDLArrayDouble((byte) 1, (char) 1);
+    public static IDLDoubleArray native_new() {
+        return new IDLDoubleArray((byte) 1, (char) 1);
     }
 
-    protected IDLArrayDouble(byte b, char c) {
+    protected IDLDoubleArray(byte b, char c) {
     }
 
-    protected IDLArrayDouble() {}
+    protected IDLDoubleArray() {}
 
-    public IDLArrayDouble(int size) {
+    public IDLDoubleArray(int size) {
     }
 
     public void copy(double [] array) {

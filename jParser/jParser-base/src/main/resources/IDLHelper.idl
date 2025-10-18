@@ -81,74 +81,74 @@ interface IDLStringView {
     [Const] DOMString data();
 };
 
-interface IDLArrayBool {
-    void IDLArrayBool(long size);
+interface IDLBoolArray {
+    void IDLBoolArray(long size);
     boolean getValue(long index);
     void setValue(long index, boolean value);
-    void copy([Ref] IDLArrayBool src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLBoolArray src, long srcOffset, long destOffset, long length);
 };
-IDLArrayBool implements IDLArray;
+IDLBoolArray implements IDLArray;
 
-interface IDLArrayInt {
-    void IDLArrayInt(long size);
+interface IDLIntArray {
+    void IDLIntArray(long size);
     long getValue(long index);
     void setValue(long index, long value);
-    void copy([Ref] IDLArrayInt src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLIntArray src, long srcOffset, long destOffset, long length);
 };
-IDLArrayInt implements IDLArray;
+IDLIntArray implements IDLArray;
 
-interface IDLArrayLong {
-    void IDLArrayLong(long size);
+interface IDLLongArray {
+    void IDLLongArray(long size);
     long long getValue(long index);
     void setValue(long index, long long value);
-    void copy([Ref] IDLArrayLong src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLLongArray src, long srcOffset, long destOffset, long length);
 };
-IDLArrayLong implements IDLArray;
+IDLLongArray implements IDLArray;
 
-interface IDLArrayFloat {
-    void IDLArrayFloat(long size);
+interface IDLFloatArray {
+    void IDLFloatArray(long size);
     float getValue(long index);
     void setValue(long index, float value);
-    void copy([Ref] IDLArrayFloat src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLFloatArray src, long srcOffset, long destOffset, long length);
 };
-IDLArrayFloat implements IDLArray;
+IDLFloatArray implements IDLArray;
 
-interface IDLArrayDouble {
-    void IDLArrayDouble(long size);
+interface IDLDoubleArray {
+    void IDLDoubleArray(long size);
     double getValue(long index);
     void setValue(long index, double value);
-    void copy([Ref] IDLArrayDouble src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLDoubleArray src, long srcOffset, long destOffset, long length);
 };
-IDLArrayDouble implements IDLArray;
+IDLDoubleArray implements IDLArray;
 
-interface IDLArrayByte {
-    void IDLArrayByte(long size);
+interface IDLByteArray {
+    void IDLByteArray(long size);
     byte getValue(long index);
     void setValue(long index, byte value);
-    void copy([Ref] IDLArrayByte src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLByteArray src, long srcOffset, long destOffset, long length);
 };
-IDLArrayByte implements IDLArray;
+IDLByteArray implements IDLArray;
 
 interface IDLBool {
     void IDLBool();
     boolean getValue();
     void setValue(boolean value);
 };
-IDLBool implements IDLArrayBool;
+IDLBool implements IDLBoolArray;
 
 interface IDLByte {
     void IDLByte();
     byte getValue();
     void setValue(byte value);
 };
-IDLByte implements IDLArrayByte;
+IDLByte implements IDLByteArray;
 
 interface IDLInt {
     void IDLInt();
     long getValue();
     void setValue(long value);
 };
-IDLInt implements IDLArrayInt;
+IDLInt implements IDLIntArray;
 
 interface IDLInt2 {
     void IDLInt2();
@@ -156,7 +156,7 @@ interface IDLInt2 {
     long getX();
     long getY();
 };
-IDLInt2 implements IDLArrayInt;
+IDLInt2 implements IDLIntArray;
 
 interface IDLInt3 {
     void IDLInt3();
@@ -165,7 +165,7 @@ interface IDLInt3 {
     long getY();
     long getZ();
 };
-IDLInt3 implements IDLArrayInt;
+IDLInt3 implements IDLIntArray;
 
 interface IDLInt4 {
     void IDLInt4();
@@ -175,14 +175,14 @@ interface IDLInt4 {
     long getZ();
     long getW();
 };
-IDLInt4 implements IDLArrayInt;
+IDLInt4 implements IDLIntArray;
 
 interface IDLLong {
     void IDLLong();
     long long getValue();
     void setValue(long long value);
 };
-IDLLong implements IDLArrayLong;
+IDLLong implements IDLLongArray;
 
 interface IDLLong2 {
     void IDLLong2();
@@ -190,7 +190,7 @@ interface IDLLong2 {
     long long getX();
     long long getY();
 };
-IDLLong2 implements IDLArrayLong;
+IDLLong2 implements IDLLongArray;
 
 interface IDLLong3 {
     void IDLLong3();
@@ -199,7 +199,7 @@ interface IDLLong3 {
     long long getY();
     long long getZ();
 };
-IDLLong3 implements IDLArrayLong;
+IDLLong3 implements IDLLongArray;
 
 interface IDLLong4 {
     void IDLLong4();
@@ -209,14 +209,14 @@ interface IDLLong4 {
     long long getZ();
     long long getW();
 };
-IDLLong4 implements IDLArrayLong;
+IDLLong4 implements IDLLongArray;
 
 interface IDLFloat {
     void IDLFloat();
     float getValue();
     void setValue(float value);
 };
-IDLFloat implements IDLArrayFloat;
+IDLFloat implements IDLFloatArray;
 
 interface IDLFloat2 {
     void IDLFloat2();
@@ -224,7 +224,7 @@ interface IDLFloat2 {
     float getX();
     float getY();
 };
-IDLLong2 implements IDLArrayLong;
+IDLFloat2 implements IDLFloatArray;
 
 interface IDLFloat3 {
     void IDLFloat3();
@@ -233,7 +233,7 @@ interface IDLFloat3 {
     float getY();
     float getZ();
 };
-IDLLong3 implements IDLArrayLong;
+IDLFloat3 implements IDLFloatArray;
 
 interface IDLFloat4 {
     void IDLFloat4();
@@ -243,14 +243,14 @@ interface IDLFloat4 {
     float getZ();
     float getW();
 };
-IDLLong4 implements IDLArrayLong;
+IDLFloat4 implements IDLFloatArray;
 
 interface IDLDouble {
     void IDLDouble();
     double getValue();
     void setValue(double value);
 };
-IDLDouble implements IDLArrayDouble;
+IDLDouble implements IDLDoubleArray;
 
 interface IDLDouble2 {
     void IDLDouble2();
@@ -258,7 +258,7 @@ interface IDLDouble2 {
     double getX();
     double getY();
 };
-IDLDouble2 implements IDLArrayDouble;
+IDLDouble2 implements IDLDoubleArray;
 
 interface IDLDouble3 {
     void IDLDouble3();
@@ -267,7 +267,7 @@ interface IDLDouble3 {
     double getY();
     double getZ();
 };
-IDLDouble3 implements IDLArrayDouble;
+IDLDouble3 implements IDLDoubleArray;
 
 interface IDLDouble4 {
     void IDLDouble4();
@@ -277,4 +277,4 @@ interface IDLDouble4 {
     double getZ();
     double getW();
 };
-IDLDouble4 implements IDLArrayDouble;
+IDLDouble4 implements IDLDoubleArray;
