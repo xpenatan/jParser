@@ -1,6 +1,6 @@
 package idl.helper;
 
-public class IDLDouble extends IDLPointer {
+public class IDLDouble extends IDLArrayDouble {
 
     public static final IDLDouble NULL = native_new();
 

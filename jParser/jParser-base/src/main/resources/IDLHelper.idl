@@ -25,38 +25,33 @@ interface IDLTemp {
     [BindTo="Double_3"] static IDLDouble Double_3__0(double value);
     [BindTo="Double_4"] static IDLDouble Double_4__0(double value);
 
-    [BindTo="Int2_1"] static IDLIntArray Int2_1__0(long x, long y);
-    [BindTo="Int2_2"] static IDLIntArray Int2_2__0(long x, long y);
-    [BindTo="Int3_1"] static IDLIntArray Int3_1__0(long x, long y, long z);
-    [BindTo="Int3_2"] static IDLIntArray Int3_2__0(long x, long y, long z);
-    [BindTo="Int4_1"] static IDLIntArray Int4_1__0(long x, long y, long z, long w);
-    [BindTo="Int4_2"] static IDLIntArray Int4_2__0(long x, long y, long z, long w);
+    [BindTo="Int2_1"] static IDLInt2 Int2_1__0(long x, long y);
+    [BindTo="Int2_2"] static IDLInt2 Int2_2__0(long x, long y);
+    [BindTo="Int3_1"] static IDLInt3 Int3_1__0(long x, long y, long z);
+    [BindTo="Int3_2"] static IDLInt3 Int3_2__0(long x, long y, long z);
+    [BindTo="Int4_1"] static IDLInt4 Int4_1__0(long x, long y, long z, long w);
+    [BindTo="Int4_2"] static IDLInt4 Int4_2__0(long x, long y, long z, long w);
 
-    [BindTo="Long2_1"] static IDLLongArray Long2_1__0(long long x, long long y);
-    [BindTo="Long2_2"] static IDLLongArray Long2_2__0(long long x, long long y);
-    [BindTo="Long3_1"] static IDLLongArray Long3_1__0(long long x, long long y, long long z);
-    [BindTo="Long3_2"] static IDLLongArray Long3_2__0(long long x, long long y, long long z);
-    [BindTo="Long4_1"] static IDLLongArray Long4_1__0(long long x, long long y, long long z, long long w);
-    [BindTo="Long4_2"] static IDLLongArray Long4_2__0(long long x, long long y, long long z, long long w);
+    [BindTo="Long2_1"] static IDLLong2 Long2_1__0(long long x, long long y);
+    [BindTo="Long2_2"] static IDLLong2 Long2_2__0(long long x, long long y);
+    [BindTo="Long3_1"] static IDLLong3 Long3_1__0(long long x, long long y, long long z);
+    [BindTo="Long3_2"] static IDLLong3 Long3_2__0(long long x, long long y, long long z);
+    [BindTo="Long4_1"] static IDLLong4 Long4_1__0(long long x, long long y, long long z, long long w);
+    [BindTo="Long4_2"] static IDLLong4 Long4_2__0(long long x, long long y, long long z, long long w);
 
-    [BindTo="Float2_1"] static IDLFloatArray Float2_1__0(float x, float y);
-    [BindTo="Float2_2"] static IDLFloatArray Float2_2__0(float x, float y);
-    [BindTo="Float3_1"] static IDLFloatArray Float3_1__0(float x, float y, float z);
-    [BindTo="Float3_2"] static IDLFloatArray Float3_2__0(float x, float y, float z);
-    [BindTo="Float4_1"] static IDLFloatArray Float4_1__0(float x, float y, float z, float w);
-    [BindTo="Float4_2"] static IDLFloatArray Float4_2__0(float x, float y, float z, float w);
+    [BindTo="Float2_1"] static IDLFloat2 Float2_1__0(float x, float y);
+    [BindTo="Float2_2"] static IDLFloat2 Float2_2__0(float x, float y);
+    [BindTo="Float3_1"] static IDLFloat3 Float3_1__0(float x, float y, float z);
+    [BindTo="Float3_2"] static IDLFloat3 Float3_2__0(float x, float y, float z);
+    [BindTo="Float4_1"] static IDLFloat4 Float4_1__0(float x, float y, float z, float w);
+    [BindTo="Float4_2"] static IDLFloat4 Float4_2__0(float x, float y, float z, float w);
 
-    [BindTo="Double2_1"] static IDLDoubleArray Double2_1__0(double x, double y);
-    [BindTo="Double2_2"] static IDLDoubleArray Double2_2__0(double x, double y);
-    [BindTo="Double3_1"] static IDLDoubleArray Double3_1__0(double x, double y, double z);
-    [BindTo="Double3_2"] static IDLDoubleArray Double3_2__0(double x, double y, double z);
-    [BindTo="Double4_1"] static IDLDoubleArray Double4_1__0(double x, double y, double z, double w);
-    [BindTo="Double4_2"] static IDLDoubleArray Double4_2__0(double x, double y, double z, double w);
-};
-
-[Prefix="IDL::", NoDelete]
-interface IDLPointer {
-    any getVoidData();
+    [BindTo="Double2_1"] static IDLDouble2 Double2_1__0(double x, double y);
+    [BindTo="Double2_2"] static IDLDouble2 Double2_2__0(double x, double y);
+    [BindTo="Double3_1"] static IDLDouble3 Double3_1__0(double x, double y, double z);
+    [BindTo="Double3_2"] static IDLDouble3 Double3_2__0(double x, double y, double z);
+    [BindTo="Double4_1"] static IDLDouble4 Double4_1__0(double x, double y, double z, double w);
+    [BindTo="Double4_2"] static IDLDouble4 Double4_2__0(double x, double y, double z, double w);
 };
 
 [Prefix="IDL::", NoDelete]
@@ -64,8 +59,8 @@ interface IDLArray {
     void clear();
     long getSize();
     void resize(long size);
+    any getVoidData();
 };
-IDLArray implements IDLPointer;
 
 interface IDLString {
     void IDLString();
@@ -86,85 +81,200 @@ interface IDLStringView {
     [Const] DOMString data();
 };
 
-interface IDLBoolArray {
-    void IDLBoolArray(long size);
+interface IDLArrayBool {
+    void IDLArrayBool(long size);
     boolean getValue(long index);
     void setValue(long index, boolean value);
-    void copy([Ref] IDLBoolArray src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLArrayBool src, long srcOffset, long destOffset, long length);
 };
-IDLBoolArray implements IDLArray;
+IDLArrayBool implements IDLArray;
 
-interface IDLIntArray {
-    void IDLIntArray(long size);
+interface IDLArrayInt {
+    void IDLArrayInt(long size);
     long getValue(long index);
     void setValue(long index, long value);
-    void copy([Ref] IDLIntArray src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLArrayInt src, long srcOffset, long destOffset, long length);
 };
-IDLIntArray implements IDLArray;
+IDLArrayInt implements IDLArray;
 
-interface IDLLongArray {
-    void IDLLongArray(long size);
+interface IDLArrayLong {
+    void IDLArrayLong(long size);
     long long getValue(long index);
     void setValue(long index, long long value);
-    void copy([Ref] IDLLongArray src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLArrayLong src, long srcOffset, long destOffset, long length);
 };
-IDLLongArray implements IDLArray;
+IDLArrayLong implements IDLArray;
 
-interface IDLFloatArray {
-    void IDLFloatArray(long size);
+interface IDLArrayFloat {
+    void IDLArrayFloat(long size);
     float getValue(long index);
     void setValue(long index, float value);
-    void copy([Ref] IDLFloatArray src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLArrayFloat src, long srcOffset, long destOffset, long length);
 };
-IDLDoubleArray implements IDLArray;
+IDLArrayFloat implements IDLArray;
 
-interface IDLDoubleArray {
-    void IDLDoubleArray(long size);
+interface IDLArrayDouble {
+    void IDLArrayDouble(long size);
     double getValue(long index);
     void setValue(long index, double value);
-    void copy([Ref] IDLDoubleArray src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLArrayDouble src, long srcOffset, long destOffset, long length);
 };
-IDLDoubleArray implements IDLArray;
+IDLArrayDouble implements IDLArray;
 
-interface IDLByteArray {
-    void IDLByteArray(long size);
+interface IDLArrayByte {
+    void IDLArrayByte(long size);
     byte getValue(long index);
     void setValue(long index, byte value);
-    void copy([Ref] IDLByteArray src, long srcOffset, long destOffset, long length);
+    void copy([Ref] IDLArrayByte src, long srcOffset, long destOffset, long length);
 };
-IDLByteArray implements IDLArray;
+IDLArrayByte implements IDLArray;
 
 interface IDLBool {
     void IDLBool();
     boolean getValue();
     void setValue(boolean value);
 };
-IDLBool implements IDLPointer;
+IDLBool implements IDLArrayBool;
+
+interface IDLByte {
+    void IDLByte();
+    byte getValue();
+    void setValue(byte value);
+};
+IDLByte implements IDLArrayByte;
 
 interface IDLInt {
     void IDLInt();
     long getValue();
     void setValue(long value);
 };
-IDLInt implements IDLPointer;
+IDLInt implements IDLArrayInt;
+
+interface IDLInt2 {
+    void IDLInt2();
+    void setValue(long x, long y);
+    long getX();
+    long getY();
+};
+IDLInt2 implements IDLArrayInt;
+
+interface IDLInt3 {
+    void IDLInt3();
+    void setValue(long x, long y, long z);
+    long getX();
+    long getY();
+    long getZ();
+};
+IDLInt3 implements IDLArrayInt;
+
+interface IDLInt4 {
+    void IDLInt4();
+    void setValue(long x, long y, long z, long w);
+    long getX();
+    long getY();
+    long getZ();
+    long getW();
+};
+IDLInt4 implements IDLArrayInt;
 
 interface IDLLong {
     void IDLLong();
     long long getValue();
     void setValue(long long value);
 };
-IDLLong implements IDLPointer;
+IDLLong implements IDLArrayLong;
+
+interface IDLLong2 {
+    void IDLLong2();
+    void setValue(long long x, long long y);
+    long long getX();
+    long long getY();
+};
+IDLLong2 implements IDLArrayLong;
+
+interface IDLLong3 {
+    void IDLLong3();
+    void setValue(long long x, long long y, long long z);
+    long long getX();
+    long long getY();
+    long long getZ();
+};
+IDLLong3 implements IDLArrayLong;
+
+interface IDLLong4 {
+    void IDLLong4();
+    void setValue(long long x, long long y, long long z, long long w);
+    long long getX();
+    long long getY();
+    long long getZ();
+    long long getW();
+};
+IDLLong4 implements IDLArrayLong;
 
 interface IDLFloat {
     void IDLFloat();
     float getValue();
     void setValue(float value);
 };
-IDLFloat implements IDLPointer;
+IDLFloat implements IDLArrayFloat;
+
+interface IDLFloat2 {
+    void IDLFloat2();
+    void setValue(float x, float y);
+    float getX();
+    float getY();
+};
+IDLLong2 implements IDLArrayLong;
+
+interface IDLFloat3 {
+    void IDLFloat3();
+    void setValue(float x, float y, float z);
+    float getX();
+    float getY();
+    float getZ();
+};
+IDLLong3 implements IDLArrayLong;
+
+interface IDLFloat4 {
+    void IDLFloat4();
+    void setValue(float x, float y, float z, float w);
+    float getX();
+    float getY();
+    float getZ();
+    float getW();
+};
+IDLLong4 implements IDLArrayLong;
 
 interface IDLDouble {
     void IDLDouble();
     double getValue();
     void setValue(double value);
 };
-IDLDouble implements IDLPointer;
+IDLDouble implements IDLArrayDouble;
+
+interface IDLDouble2 {
+    void IDLDouble2();
+    void setValue(double x, double y);
+    double getX();
+    double getY();
+};
+IDLDouble2 implements IDLArrayDouble;
+
+interface IDLDouble3 {
+    void IDLDouble3();
+    void setValue(double x, double y, double z);
+    double getX();
+    double getY();
+    double getZ();
+};
+IDLDouble3 implements IDLArrayDouble;
+
+interface IDLDouble4 {
+    void IDLDouble4();
+    void setValue(double x, double y, double z, double w);
+    double getX();
+    double getY();
+    double getZ();
+    double getW();
+};
+IDLDouble4 implements IDLArrayDouble;

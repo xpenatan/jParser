@@ -1,20 +1,22 @@
 package idl.helper;
 
-public class IDLByteArray extends IDLArray {
+public class IDLArrayByte extends IDLArray {
 
-    public static final IDLByteArray NULL = native_new();
+    public static final IDLArrayByte NULL = native_new();
 
     /**
      * @return An empty instance without a native address
      */
-    public static IDLByteArray native_new() {
-        return new IDLByteArray((byte) 1, (char) 1);
+    public static IDLArrayByte native_new() {
+        return new IDLArrayByte((byte) 1, (char) 1);
     }
 
-    protected IDLByteArray(byte b, char c) {
+    protected IDLArrayByte(byte b, char c) {
     }
 
-    public IDLByteArray(int size) {
+    protected IDLArrayByte() {}
+
+    public IDLArrayByte(int size) {
     }
 
     public void copy(byte [] array) {
@@ -30,7 +32,7 @@ public class IDLByteArray extends IDLArray {
     public native byte getValue(int index);
 
     public static void arraycopy(byte[] src, int  srcPos,
-                                 IDLByteArray dest, int destPos,
+                                 IDLArrayByte dest, int destPos,
                                  int length) {
         int srcP = srcPos;
         int destP = destPos;
@@ -44,7 +46,7 @@ public class IDLByteArray extends IDLArray {
         }
     }
 
-    public static void arraycopy(IDLByteArray src, int  srcPos,
+    public static void arraycopy(IDLArrayByte src, int  srcPos,
                                  byte[] dest, int destPos,
                                  int length) {
         int srcP = srcPos;

@@ -1,6 +1,6 @@
 package idl.helper;
 
-public class IDLInt extends IDLPointer {
+public class IDLInt extends IDLArrayInt {
 
     public static final IDLInt NULL = native_new();
 

@@ -1,21 +1,23 @@
 package idl.helper;
 
-public class IDLFloatArray extends IDLArray {
+public class IDLArrayFloat extends IDLArray {
 
 
-    public static final IDLFloatArray NULL = native_new();
+    public static final IDLArrayFloat NULL = native_new();
 
     /**
      * @return An empty instance without a native address
      */
-    public static IDLFloatArray native_new() {
-        return new IDLFloatArray((byte) 1, (char) 1);
+    public static IDLArrayFloat native_new() {
+        return new IDLArrayFloat((byte) 1, (char) 1);
     }
 
-    protected IDLFloatArray(byte b, char c) {
+    protected IDLArrayFloat() {}
+
+    protected IDLArrayFloat(byte b, char c) {
     }
 
-    public IDLFloatArray(int size) {
+    public IDLArrayFloat(int size) {
     }
 
     public void copy(float [] array) {

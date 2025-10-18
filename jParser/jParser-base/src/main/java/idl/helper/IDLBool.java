@@ -1,6 +1,6 @@
 package idl.helper;
 
-public class IDLBool extends IDLPointer {
+public class IDLBool extends IDLArrayBool {
 
     public static final IDLBool NULL = native_new();
 
