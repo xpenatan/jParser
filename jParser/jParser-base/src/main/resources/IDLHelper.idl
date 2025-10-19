@@ -132,21 +132,21 @@ IDLByteArray implements IDLArray;
 interface IDLBool {
     void IDLBool();
     boolean getValue();
-    void setValue(boolean value);
+    void set(boolean value);
 };
 IDLBool implements IDLBoolArray;
 
 interface IDLByte {
     void IDLByte();
     byte getValue();
-    void setValue(byte value);
+    void set(byte value);
 };
 IDLByte implements IDLByteArray;
 
 interface IDLInt {
     void IDLInt();
     long getValue();
-    void setValue(long value);
+    void set(long value);
 };
 IDLInt implements IDLIntArray;
 
@@ -180,7 +180,7 @@ IDLInt4 implements IDLIntArray;
 interface IDLLong {
     void IDLLong();
     long long getValue();
-    void setValue(long long value);
+    void set(long long value);
 };
 IDLLong implements IDLLongArray;
 
@@ -214,7 +214,7 @@ IDLLong4 implements IDLLongArray;
 interface IDLFloat {
     void IDLFloat();
     float getValue();
-    void setValue(float value);
+    void set(float value);
 };
 IDLFloat implements IDLFloatArray;
 
@@ -248,7 +248,7 @@ IDLFloat4 implements IDLFloatArray;
 interface IDLDouble {
     void IDLDouble();
     double getValue();
-    void setValue(double value);
+    void set(double value);
 };
 IDLDouble implements IDLDoubleArray;
 

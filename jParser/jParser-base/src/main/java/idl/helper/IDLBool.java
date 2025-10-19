@@ -17,6 +17,6 @@ public class IDLBool extends IDLBoolArray {
     public IDLBool() {
     }
 
-    public native void setValue(boolean value);
+    public native void set(boolean value);
     public native boolean getValue();
 }

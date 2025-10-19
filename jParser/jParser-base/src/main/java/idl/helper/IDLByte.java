@@ -17,6 +17,6 @@ public class IDLByte extends IDLByteArray {
     public IDLByte() {
     }
 
-    public native void setValue(byte value);
+    public native void set(byte value);
     public native byte getValue();
 }

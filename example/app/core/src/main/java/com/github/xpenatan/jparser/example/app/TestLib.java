@@ -895,7 +895,7 @@ public class TestLib {
             IDLInt test = null;
             try {
                 test = new IDLInt();
-                test.setValue(10);
+                test.set(10);
                 int value = test.getValue();
                 if(!(value == 10)) {
                     test.dispose();

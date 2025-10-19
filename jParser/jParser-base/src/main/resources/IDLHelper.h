@@ -89,7 +89,7 @@ class IDLArray : public IDL::IDLArray {
             return *this->data;
         }
 
-        void setValue(T value) {
+        void set(T value) {
             *this->data = value;
         }
 
@@ -347,121 +347,121 @@ class IDLTemp {
     public:
         static IDLBool* Bool_1(bool value) {
             static IDLBool bool_temp1;
-            bool_temp1.setValue(value);
+            bool_temp1.set(value);
             return &bool_temp1;
         }
 
         static IDLBool* Bool_2(bool value) {
             static IDLBool bool_temp2;
-            bool_temp2.setValue(value);
+            bool_temp2.set(value);
             return &bool_temp2;
         }
 
         static IDLBool* Bool_3(bool value) {
             static IDLBool bool_temp3;
-            bool_temp3.setValue(value);
+            bool_temp3.set(value);
             return &bool_temp3;
         }
 
         static IDLBool* Bool_4(bool value) {
             static IDLBool bool_temp4;
-            bool_temp4.setValue(value);
+            bool_temp4.set(value);
             return &bool_temp4;
         }
 
         static IDLInt* Int_1(int value) {
             static IDLInt int_temp1;
-            int_temp1.setValue(value);
+            int_temp1.set(value);
             return &int_temp1;
         }
 
         static IDLInt* Int_2(int value) {
             static IDLInt int_temp2;
-            int_temp2.setValue(value);
+            int_temp2.set(value);
             return &int_temp2;
         }
 
         static IDLInt* Int_3(int value) {
             static IDLInt int_temp3;
-            int_temp3.setValue(value);
+            int_temp3.set(value);
             return &int_temp3;
         }
 
         static IDLInt* Int_4(int value) {
             static IDLInt int_temp4;
-            int_temp4.setValue(value);
+            int_temp4.set(value);
             return &int_temp4;
         }
 
         static IDLLong* Long_1(long long value) {
             static IDLLong long_temp1;
-            long_temp1.setValue(value);
+            long_temp1.set(value);
             return &long_temp1;
         }
 
         static IDLLong* Long_2(long long value) {
             static IDLLong long_temp2;
-            long_temp2.setValue(value);
+            long_temp2.set(value);
             return &long_temp2;
         }
 
         static IDLLong* Long_3(long long value) {
             static IDLLong long_temp3;
-            long_temp3.setValue(value);
+            long_temp3.set(value);
             return &long_temp3;
         }
 
         static IDLLong* Long_4(long long value) {
             static IDLLong long_temp4;
-            long_temp4.setValue(value);
+            long_temp4.set(value);
             return &long_temp4;
         }
 
         static IDLFloat* Float_1(float value) {
             static IDLFloat float_temp1;
-            float_temp1.setValue(value);
+            float_temp1.set(value);
             return &float_temp1;
         }
 
         static IDLFloat* Float_2(float value) {
             static IDLFloat float_temp2;
-            float_temp2.setValue(value);
+            float_temp2.set(value);
             return &float_temp2;
         }
 
         static IDLFloat* Float_3(float value) {
             static IDLFloat float_temp3;
-            float_temp3.setValue(value);
+            float_temp3.set(value);
             return &float_temp3;
         }
 
         static IDLFloat* Float_4(float value) {
             static IDLFloat float_temp4;
-            float_temp4.setValue(value);
+            float_temp4.set(value);
             return &float_temp4;
         }
 
         static IDLDouble* Double_1(double value) {
             static IDLDouble double_temp1;
-            double_temp1.setValue(value);
+            double_temp1.set(value);
             return &double_temp1;
         }
 
         static IDLDouble* Double_2(double value) {
             static IDLDouble double_temp2;
-            double_temp2.setValue(value);
+            double_temp2.set(value);
             return &double_temp2;
         }
 
         static IDLDouble* Double_3(double value) {
             static IDLDouble double_temp3;
-            double_temp3.setValue(value);
+            double_temp3.set(value);
             return &double_temp3;
         }
 
         static IDLDouble* Double_4(double value) {
             static IDLDouble double_temp4;
-            double_temp4.setValue(value);
+            double_temp4.set(value);
             return &double_temp4;
         }
 
