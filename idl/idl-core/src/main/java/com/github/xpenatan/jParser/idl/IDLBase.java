@@ -59,6 +59,22 @@ public class IDLBase {
         return this;
     }
 
+    public final long getLongNativeAddress() {
+        return native_address;
+    }
+
+    public final long getLongVoidAddress() {
+        return native_void_address;
+    }
+
+    public final int getIntNativeAddress() {
+        return (int)native_address;
+    }
+
+    public final int getIntVoidAddress() {
+        return (int)native_void_address;
+    }
+
     public final boolean native_isNULL() {
         return native_address == 0;
     }
