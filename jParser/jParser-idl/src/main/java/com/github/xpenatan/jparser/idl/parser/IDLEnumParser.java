@@ -41,7 +41,9 @@ public class IDLEnumParser {
             if(name != null) {
                 enumVar = name;
             }
-
+            if(idlParser.idlRenaming != null) {
+                enumVar = idlParser.idlRenaming.getIDLEnumName(enumVar);
+            }
             EnumConstantDeclaration enumConstantDeclaration = enumDeclaration.addEnumConstant(enumVar);
 
             enumConstantDeclaration.addArgument(nativeMethodName + "()");

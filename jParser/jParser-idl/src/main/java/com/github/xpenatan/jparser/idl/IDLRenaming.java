@@ -8,4 +8,8 @@ public interface IDLRenaming {
     default String getIDLMethodName(String methodName) {
         return methodName;
     }
+
+    default String getIDLEnumName(String enumName) {
+        return enumName;
+    }
 }
