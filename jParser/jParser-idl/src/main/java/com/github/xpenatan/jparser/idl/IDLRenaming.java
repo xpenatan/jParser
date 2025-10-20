@@ -1,7 +1,7 @@
 package com.github.xpenatan.jparser.idl;
 
 public interface IDLRenaming {
-    default String obtainNewPackage(String className, String classPackage) {
+    default String obtainNewPackage(IDLClassOrEnum idlClassOrEnum, String classPackage) {
         return classPackage;
     }
 

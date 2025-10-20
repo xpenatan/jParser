@@ -155,7 +155,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         subPackage = idlClassOrEnum.subPackage;
                     }
                     if(idlRenaming != null) {
-                        subPackage = idlRenaming.obtainNewPackage(className, subPackage);
+                        subPackage = idlRenaming.obtainNewPackage(idlClassOrEnum, subPackage);
                     }
                     CompilationUnit compilationUnit = setupClass(idlClassOrEnum, subPackage);
                     parserItem = new JParserItem(compilationUnit, genPath);
