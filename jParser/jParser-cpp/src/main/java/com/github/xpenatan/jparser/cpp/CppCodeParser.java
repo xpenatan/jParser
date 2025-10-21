@@ -176,6 +176,11 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             "[CONST][RETURN_TYPE]* obj = nativeObject->[METHOD];\n" +
             "return (jlong)obj;\n";
 
+    protected static final String METHOD_GET_OBJ_POINTER_OPERATOR_TEMPLATE =
+            "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
+            "[CONST][RETURN_TYPE]* obj = [OPERATOR];\n" +
+            "return (jlong)obj;\n";
+
     protected static final String METHOD_GET_REF_OBJ_POINTER_STATIC_TEMPLATE =
             "\nreturn (jlong)&[TYPE]::[METHOD];\n";
 
@@ -745,7 +750,20 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                 content = METHOD_GET_OBJ_POINTER_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName);
                 break;
             case GET_OBJ_POINTER:
-                content = METHOD_GET_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_RETURN_TYPE, cppReturnType).replace(TEMPLATE_TAG_CONST, constTag);
+                if(operator.isEmpty()) {
+                    content = METHOD_GET_OBJ_POINTER_TEMPLATE
+                            .replace(TEMPLATE_TAG_METHOD, methodCaller)
+                            .replace(TEMPLATE_TAG_TYPE, classTypeName)
+                            .replace(TEMPLATE_TAG_RETURN_TYPE, cppReturnType)
+                            .replace(TEMPLATE_TAG_CONST, constTag);
+                }
+                else {
+                    content = METHOD_GET_OBJ_POINTER_OPERATOR_TEMPLATE
+                            .replace(TEMPLATE_TAG_OPERATOR, operator)
+                            .replace(TEMPLATE_TAG_TYPE, classTypeName)
+                            .replace(TEMPLATE_TAG_RETURN_TYPE, cppReturnType)
+                            .replace(TEMPLATE_TAG_CONST, constTag);
+                }
                 break;
             case GET_PRIMITIVE_STATIC:
                 content = METHOD_GET_PRIMITIVE_STATIC_TEMPLATE.replace(TEMPLATE_TAG_METHOD, methodCaller).replace(TEMPLATE_TAG_TYPE, classTypeName).replace(TEMPLATE_TAG_CAST, returnCastStr);

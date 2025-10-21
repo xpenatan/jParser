@@ -839,6 +839,12 @@ public class TestLib {
                     throw new RuntimeException("testOperatorClass '/' !(value == 10)");
                 }
             }
+            {
+                TestOperatorClass data = operatorClass.getData(0);
+                if(!(data.equals(operatorClass))) {
+                    throw new RuntimeException("data.equals(operatorClass)");
+                }
+            }
             operatorClass.dispose();
             otherOPClass.dispose();
 

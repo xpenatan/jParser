@@ -244,6 +244,7 @@ interface TestOperatorClass { //[-SUB_PACKAGE=core.op]
     [Operator="-=", Ref] TestOperatorClass subRef([Const, Ref] TestOperatorClass other);
     [Operator="*=", Ref] TestOperatorClass mulRef([Const, Ref] TestOperatorClass other);
     [Operator="/=", Ref] TestOperatorClass divRef([Const, Ref] TestOperatorClass other);
+    [Operator="[]"] TestOperatorClass getData(long index);
     float getValue();
     void setValue(float val);
 };

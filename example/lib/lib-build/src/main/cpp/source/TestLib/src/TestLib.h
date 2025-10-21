@@ -347,6 +347,11 @@ public:
     bool operator>(const TestOperatorClass& other) const { return value > other.value; }
     bool operator<=(const TestOperatorClass& other) const { return value <= other.value; }
     bool operator>=(const TestOperatorClass& other) const { return value >= other.value; }
+    TestOperatorClass* operator[](int index) {
+        if (index == 0) return this;
+        cout << "Error: Invalid index " << index << ". Only index 0 is supported." << endl;
+        return nullptr;
+    }
 
     // Increment and Decrement Operators
     TestOperatorClass& operator++() { value += 1.0; return *this; } // Prefix increment
