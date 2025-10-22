@@ -49,10 +49,10 @@ public class IDLMethodParser {
     static final String GET_ENUM_TEMPLATE =
             "{\n" +
             "    int value = [METHOD];\n" +
-            "    return [TYPE].MAP.get(value);\n" +
+            "    return [TYPE].CUSTOM.setValue(value);\n" +
             "}";
 
-    static final String CALLBACK_ENUM_TEMPLATE = "[TYPE].MAP.get([PARAM])";
+    static final String CALLBACK_ENUM_TEMPLATE = "[TYPE].CUSTOM.setValue(([PARAM])";
 
     static final String GET_OBJECT_TEMPLATE =
             "{\n" +

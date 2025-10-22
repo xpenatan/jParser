@@ -170,7 +170,7 @@ public class TestLib {
                 if(!(test.get_floatValue02() == floatValue02)) {
                     throw new RuntimeException("testConstructorClass Error: test.get_floatValue02() == floatValue02");
                 }
-                if(!(test.get_enumValue() == TestEnumLib.TEST_SECOND)) {
+                if(!(test.get_enumValue().isEqual(TestEnumLib.TEST_SECOND))) {
                     throw new RuntimeException("test.get_enumValue() == TestEnumLib.TEST_SECOND");
                 }
             } catch(Throwable e) {
@@ -200,7 +200,7 @@ public class TestLib {
                 if(!(test.get_floatValue02() == floatValue02)) {
                     throw new RuntimeException("testConstructorClass Error: test.get_floatValue02() == floatValue02");
                 }
-                if(!(test.get_enumValue() == TestEnumLib.TEST_SECOND)) {
+                if(!(test.get_enumValue().isEqual(TestEnumLib.TEST_SECOND))) {
                     throw new RuntimeException("test.get_enumValue() == TestEnumLib.TEST_SECOND");
                 }
                 if(!(test.get_boolValue01() == boolValue01)) {
@@ -221,7 +221,7 @@ public class TestLib {
             TestAttributeClass test = new TestAttributeClass();
             try {
                 test.set_enumValue(TestEnumLib.TEST_FIRST);
-                if(!(test.get_enumValue() == TestEnumLib.TEST_FIRST)) {
+                if(!(test.get_enumValue().isEqual(TestEnumLib.TEST_FIRST))) {
                     throw new RuntimeException("test.get_enumValue() == TestEnumLib.TEST_FIRST)");
                 }
             } catch(Throwable e){
@@ -424,7 +424,7 @@ public class TestLib {
             try {
                 test.setMethod10(TestEnumLib.TEST_SECOND);
                 TestEnumLib retEnum = test.getEnumValue();
-                if(!(TestEnumLib.TEST_SECOND == retEnum)) {
+                if(!(TestEnumLib.TEST_SECOND.isEqual(retEnum))) {
                     throw new RuntimeException("TestEnumLib.TEST_SECOND == retEnum");
                 }
             } catch(Throwable e) {

@@ -23,6 +23,10 @@ public interface IDLEnum<T extends IDLEnum<T>> {
         return and(this, other);
     }
 
+    default boolean isEqual(T other) {
+        return getValue() == other.getValue();
+    }
+
     static <T extends IDLEnum<T>> T combine(IDLEnum<T> flag1, IDLEnum<?> flag2) {
         if (flag1 == null || flag2 == null) {
             throw new IllegalArgumentException("Flags cannot be null");

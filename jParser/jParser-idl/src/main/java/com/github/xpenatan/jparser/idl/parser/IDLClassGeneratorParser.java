@@ -239,32 +239,6 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             MethodDeclaration getCustomMethodDeclaration = enumDeclaration.addMethod("getCustom", Modifier.Keyword.PUBLIC);
             getCustomMethodDeclaration.setType(className);
             getCustomMethodDeclaration.getBody().get().addStatement("return CUSTOM;");
-
-            String type = "Map<Integer, " + className + ">";
-            FieldDeclaration field = new FieldDeclaration()
-                    .addModifier(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC, Modifier.Keyword.FINAL)
-                    .addVariable(
-                            new com.github.javaparser.ast.body.VariableDeclarator()
-                                    .setName("MAP")
-                                    .setType(type)
-                                    .setInitializer(new ObjectCreationExpr()
-                                            .setType(new ClassOrInterfaceType().setName("HashMap<>")))
-                    );
-            compilationUnit.addImport("java.util.Map");
-            compilationUnit.addImport("java.util.HashMap");
-
-            enumDeclaration.getMembers().add(field);
-
-            // Static block code as a string
-            String staticBlockCode = "" +
-            "static { " +
-            "    for (" + className + " value : values()) { " +
-            "        if (value != CUSTOM) { " +
-            "            MAP.put(value.value, value); " +
-            "        } " +
-            "    } " +
-            "} ";
-            enumDeclaration.addMember(StaticJavaParser.parseBodyDeclaration(staticBlockCode));
         }
         // Hack to inject internal dependencies
         return StaticJavaParser.parse(compilationUnit.toString());
