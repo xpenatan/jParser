@@ -25,7 +25,10 @@ import com.github.xpenatan.jparser.example.testlib.core.sub.TestNamespaceClass;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLInt;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLIntArray;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
+import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLUtils;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 
 public class TestLib {
 
@@ -59,6 +62,7 @@ public class TestLib {
         boolean exceptionTest = testExceptionManual();
         boolean testPrimitivePointers = testPrimitivePointers();
         boolean testPrimitiveArray = testPrimitiveArray();
+        boolean testArrayToByteBuffer = testArrayToByteBuffer();
 
         System.out.println("enumTest: " + enumTest);
         System.out.println("constructorTest: " + constructorTest);
@@ -75,10 +79,12 @@ public class TestLib {
         System.out.println("exceptionTest: " + exceptionTest);
         System.out.println("testPrimitivePointers: " + testPrimitivePointers);
         System.out.println("testPrimitiveArray: " + testPrimitiveArray);
+        System.out.println("testArrayToByteBuffer: " + testArrayToByteBuffer);
 
         return enumTest && constructorTest && stringConstructorTest && attributeTest && staticAttributeTest
                 && attributeArrayTest && bufferManualTest && methodTest && staticMethodTest && callbackTest
-                && callbackTestManual && namespaceTest && operatorTest && exceptionTest && testPrimitivePointers && testPrimitiveArray;
+                && callbackTestManual && namespaceTest && operatorTest && exceptionTest && testPrimitivePointers
+                && testPrimitiveArray && testArrayToByteBuffer;
     }
 
     private static boolean testEnum() {
@@ -975,6 +981,38 @@ public class TestLib {
                 int w2 = test.getValue(3);
                 if(!(x2 == 11 && y2 == 12 && z2 == 13 && w2 == 14)) {
                     throw new RuntimeException();
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                return false;
+            } finally {
+                test.dispose();
+            }
+        }
+        return true;
+    }
+
+    private static boolean testArrayToByteBuffer() {
+        {
+            IDLIntArray test = null;
+            try {
+                test = new IDLIntArray(3);
+                {
+                    test.setValue(0, 10);
+                    test.setValue(1, 20);
+                    test.setValue(2, 30);
+                    int sizeInBytes = 3 * Integer.BYTES;
+                    ByteBuffer byteBuffer = ByteBuffer.allocateDirect(sizeInBytes);
+                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                    IntBuffer intBuffer = byteBuffer.asIntBuffer();
+                    IDLUtils.copyToByteBuffer(test, byteBuffer, 0, sizeInBytes);
+                    int x = intBuffer.get(0);
+                    int y = intBuffer.get(1);
+                    int z = intBuffer.get(2);
+
+                    if(!(x == 10 && y == 20 && z == 30)) {
+                        throw new RuntimeException();
+                    }
                 }
             } catch(Throwable e) {
                 e.printStackTrace();
