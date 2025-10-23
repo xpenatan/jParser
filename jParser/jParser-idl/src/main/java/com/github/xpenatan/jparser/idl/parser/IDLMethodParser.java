@@ -52,7 +52,7 @@ public class IDLMethodParser {
             "    return [TYPE].CUSTOM.setValue(value);\n" +
             "}";
 
-    static final String CALLBACK_ENUM_TEMPLATE = "[TYPE].CUSTOM.setValue(([PARAM])";
+    static final String CALLBACK_ENUM_TEMPLATE = "[TYPE].CUSTOM.setValue([PARAM])";
 
     static final String GET_OBJECT_TEMPLATE =
             "{\n" +
