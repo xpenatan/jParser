@@ -33,7 +33,7 @@ public class IDLUtils {
     /*[-JNI;-NATIVE]
         void* data = (void*)data_addr;
         char* bufferAddress = (char*)env->GetDirectBufferAddress(destination);
-        memcpy(bufferAddress + offset, data, sizeInBytes);
+        std::memcpy(bufferAddress + offset, data, sizeInBytes);
     */
     public static native void internal_native_copyToByteBuffer(long data_addr, ByteBuffer destination, long offset, long sizeInBytes);
 }
