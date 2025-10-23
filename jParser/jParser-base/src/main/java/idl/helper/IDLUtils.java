@@ -5,6 +5,10 @@ import java.nio.ByteBuffer;
 
 public class IDLUtils {
 
+    /*[-JNI;-NATIVE]
+        #include <cstring>
+    */
+
     /*[-TEAVM;-REPLACE]
        @org.teavm.jso.JSBody(params = { "addr" }, script = "return [MODULE].UTF8ToString(addr);")
        public static native String getJSString(int addr);
@@ -33,7 +37,7 @@ public class IDLUtils {
     /*[-JNI;-NATIVE]
         void* data = (void*)data_addr;
         char* bufferAddress = (char*)env->GetDirectBufferAddress(destination);
-        std::memcpy(bufferAddress + offset, data, sizeInBytes);
+        memcpy(bufferAddress + offset, data, sizeInBytes);
     */
     public static native void internal_native_copyToByteBuffer(long data_addr, ByteBuffer destination, long offset, long sizeInBytes);
 }
