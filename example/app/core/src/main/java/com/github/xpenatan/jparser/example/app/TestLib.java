@@ -8,7 +8,6 @@ import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.CallbackExceptionManual;
 import com.github.xpenatan.jparser.example.testlib.DefaultCallbackClass;
 import com.github.xpenatan.jparser.example.testlib.IDLArrayTestObjectClass;
-import com.github.xpenatan.jparser.example.testlib.IDLInt4;
 import com.github.xpenatan.jparser.example.testlib.TestAttributeArrayClass;
 import com.github.xpenatan.jparser.example.testlib.TestAttributeClass;
 import com.github.xpenatan.jparser.example.testlib.TestBufferManualClass;
@@ -23,6 +22,7 @@ import com.github.xpenatan.jparser.example.testlib.core.enums.TestEnumWithinClas
 import com.github.xpenatan.jparser.example.testlib.core.op.TestOperatorClass;
 import com.github.xpenatan.jparser.example.testlib.core.sub.TestNamespaceClass;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLInt;
+import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLInt4;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLIntArray;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLString;
 import com.github.xpenatan.jparser.example.testlib.idl.helper.IDLUtils;
