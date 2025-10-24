@@ -48,11 +48,25 @@ public class IDLMethodParser {
 
     static final String GET_ENUM_TEMPLATE =
             "{\n" +
-            "    int value = [METHOD];\n" +
-            "    return [TYPE].CUSTOM.setValue(value);\n" +
+            "   int value = [METHOD];\n" + // TODO change to long
+            "   [TYPE][] values = [TYPE].values();\n" +
+            "   for(int i = 0; i < values.length; i++) {\n" +
+            "       [TYPE] enumVal = values[i];\n" +
+            "       if(enumVal != [TYPE].CUSTOM && enumVal.getValue() ==  value) return enumVal;\n" +
+            "   } \n" +
+            "   return [TYPE].CUSTOM.setValue(value);\n" +
             "}";
 
-    static final String CALLBACK_ENUM_TEMPLATE = "[TYPE].CUSTOM.setValue([PARAM])";
+    static final String CALLBACK_ENUM_TEMPLATE = "" +
+            "[TYPE] [FIELD] = [TYPE].CUSTOM.setValue([PARAM]);\n" +
+            "[TYPE][] [FIELD]_values = [TYPE].values();\n" +
+            "for(int i = 0; i < [FIELD]_values.length; i++) {\n" +
+            "   [TYPE] enumVal = [FIELD]_values[i]; \n" +
+            "   if(enumVal != [TYPE].CUSTOM && enumVal.getValue() == [PARAM]) { \n" +
+            "       [FIELD] = [FIELD]_values[i];\n" +
+            "       break; \n" +
+            "   }\n" +
+            "}\n";
 
     static final String GET_OBJECT_TEMPLATE =
             "{\n" +
@@ -94,6 +108,8 @@ public class IDLMethodParser {
     static final String TEMPLATE_TAG_PARAM = "[PARAM]";
 
     static final String TEMPLATE_TAG_TYPE = "[TYPE]";
+
+    static final String TEMPLATE_TAG_FIELD = "[FIELD]";
 
     static final String TEMPLATE_TAG_NUM = "[NUM]";
 

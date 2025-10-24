@@ -92,10 +92,13 @@ public class IDLCallbackParser {
                 String fieldName = paramName;
 
                 if(isEnum) {
-                    parameter.setType(StaticJavaParser.parseType("int"));
-                    fieldName = IDLMethodParser.CALLBACK_ENUM_TEMPLATE
+                    parameter.setType(StaticJavaParser.parseType("int")); //TODO change to long?
+                    fieldName = fieldName + "_enum";
+                    String newBody = IDLMethodParser.CALLBACK_ENUM_TEMPLATE
                             .replace(IDLMethodParser.TEMPLATE_TAG_TYPE, typeStr)
+                            .replace(IDLMethodParser.TEMPLATE_TAG_FIELD, fieldName)
                             .replace(IDLMethodParser.TEMPLATE_TAG_PARAM, paramName);
+                    createFieldObjectCode += newBody;
                 }
                 else if(isClass && !typeStr.equals("String")) {
                     parameter.setType(PrimitiveType.longType());
