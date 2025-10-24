@@ -16,7 +16,4 @@ public class IDLLong3 extends IDLLongArray {
 
     public IDLLong3() {
     }
-
-    public native void set(long value);
-    public native long getValue();
 }

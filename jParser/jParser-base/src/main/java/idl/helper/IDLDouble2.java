@@ -16,7 +16,4 @@ public class IDLDouble2 extends IDLDoubleArray {
 
     public IDLDouble2() {
     }
-
-    public native void set(double value);
-    public native double getValue();
 }

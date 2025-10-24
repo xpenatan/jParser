@@ -16,7 +16,4 @@ public class IDLFloat3 extends IDLFloatArray {
 
     public IDLFloat3() {
     }
-
-    public native void set(float value);
-    public native float getValue();
 }

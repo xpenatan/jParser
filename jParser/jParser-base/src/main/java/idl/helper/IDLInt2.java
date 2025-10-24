@@ -16,7 +16,4 @@ public class IDLInt2 extends IDLIntArray {
 
     public IDLInt2() {
     }
-
-    public native void set(int value);
-    public native int getValue();
 }
