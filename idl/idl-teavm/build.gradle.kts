@@ -1,18 +1,16 @@
 plugins {
-    id("java")
+    id("java-library")
 }
 
 val moduleName = "idl-teavm"
 
 dependencies {
     implementation(project(":idl:idl-core"))
-
-    implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
-    implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
-
-    implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
-    implementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
-    implementation("org.teavm:teavm-jso-impl:${LibExt.teaVMVersion}")
+    api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
+    api("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
+    api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
+    api("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
+    api("org.teavm:teavm-jso-impl:${LibExt.teaVMVersion}")
 }
 
 java {
