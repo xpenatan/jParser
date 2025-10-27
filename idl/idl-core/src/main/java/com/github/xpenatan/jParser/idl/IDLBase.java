@@ -47,32 +47,24 @@ public class IDLBase {
         }
     }
 
-    public final IDLBase native_setVoid(long voidValue) {
+    public final IDLBase native_setAddress(long voidValue) {
         native_address = voidValue;
         native_void_address = voidValue;
         return this;
     }
 
-    public final IDLBase native_setVoid(int voidValue) {
+    public final IDLBase native_setAddress(int voidValue) {
         native_address = voidValue;
         native_void_address = voidValue;
         return this;
     }
 
-    public final long getLongNativeAddress() {
+    public final long native_getAddressLong() {
         return native_address;
     }
 
-    public final long getLongVoidAddress() {
-        return native_void_address;
-    }
-
-    public final int getIntNativeAddress() {
+    public final int native_getAddressInt() {
         return (int)native_address;
-    }
-
-    public final int getIntVoidAddress() {
-        return (int)native_void_address;
     }
 
     public final boolean native_isNULL() {

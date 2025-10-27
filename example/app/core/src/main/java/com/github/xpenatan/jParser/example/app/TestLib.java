@@ -36,9 +36,9 @@ public class TestLib {
         IDLBase idlVoid = IDLBase.native_new();
         long voidLongData = 1000;
         int voidIntData = 2000;
-        idlVoid.native_setVoid(voidLongData);
+        idlVoid.native_setAddress(voidLongData);
         System.out.println("voidLongData: " + idlVoid);
-        idlVoid.native_setVoid(voidIntData);
+        idlVoid.native_setAddress(voidIntData);
         System.out.println("voidIntData: " + idlVoid);
 
         long code = CallbackClassManual.GetAndroidCode();
@@ -240,7 +240,7 @@ public class TestLib {
             TestAttributeClass test = new TestAttributeClass();
             try {
                 IDLBase voidTest = new IDLBase();
-                voidTest.native_setVoid(1000);
+                voidTest.native_setAddress(1000);
                 test.set_voidPointer01(voidTest);
                 IDLBase voidPointer01 = test.get_voidPointer01();
                 if(!(voidPointer01.equals(voidTest))) {
