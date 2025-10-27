@@ -1,21 +1,9 @@
 package com.github.xpenatan.jparser.example;
 
-import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.teavm.jso.JSBody;
-import org.teavm.jso.ajax.ReadyStateChangeHandler;
-import org.teavm.jso.ajax.XMLHttpRequest;
-import org.teavm.jso.browser.Window;
-import org.teavm.jso.dom.html.HTMLDocument;
-import org.teavm.jso.dom.html.HTMLElement;
 import org.teavm.junit.SkipJVM;
 import org.teavm.junit.TeaVMTestRunner;
 import org.teavm.junit.WholeClassCompilation;

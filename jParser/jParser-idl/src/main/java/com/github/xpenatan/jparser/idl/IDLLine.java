@@ -1,7 +1,5 @@
 package com.github.xpenatan.jparser.idl;
 
-import java.util.ArrayList;
-
 public class IDLLine {
     public final String line;
     public final String comment;

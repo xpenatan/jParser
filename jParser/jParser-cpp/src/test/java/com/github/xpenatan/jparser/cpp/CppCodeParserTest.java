@@ -1,14 +1,9 @@
 package com.github.xpenatan.jparser.cpp;
 
-import com.github.xpenatan.jparser.core.JParser;
-import com.github.xpenatan.jparser.cpp.tests.CppTestClass;
-import com.github.xpenatan.jparser.loader.JParserLibraryLoader;
-import java.nio.ByteBuffer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class CppCodeParserTest {
 

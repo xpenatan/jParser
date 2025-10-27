@@ -1,6 +1,5 @@
 package com.github.xpenatan.jparser.core.util;
 
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;

@@ -12,10 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.function.Predicate;
 
 public class NativeCPPGenerator implements CppGenerator {
 

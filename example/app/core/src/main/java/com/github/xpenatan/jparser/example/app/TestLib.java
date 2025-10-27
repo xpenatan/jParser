@@ -2,7 +2,7 @@ package com.github.xpenatan.jparser.example.app;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
-import com.github.xpenatan.jParser.idl.IDLBase;
+import com.github.xpenatan.jparser.idl.IDLBase;
 import com.github.xpenatan.jparser.example.testlib.CallbackClass;
 import com.github.xpenatan.jparser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jparser.example.testlib.CallbackExceptionManual;

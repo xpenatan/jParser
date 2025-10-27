@@ -21,6 +21,7 @@ import java.util.Optional;
  */
 public abstract class DefaultCodeParser implements CodeParser {
     public static final String IDL_BASE_CLASS = "IDLBase";
+    public static final String IDL_ENUM_CLASS = "IDLEnum";
 
     public static final String CMD_HEADER_START = "[-";
     public static final String CMD_HEADER_END = "]";

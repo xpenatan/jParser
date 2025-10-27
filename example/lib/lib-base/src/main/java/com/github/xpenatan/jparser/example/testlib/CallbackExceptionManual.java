@@ -1,6 +1,6 @@
 package com.github.xpenatan.jparser.example.testlib;
 
-import com.github.xpenatan.jParser.idl.IDLBase;
+import com.github.xpenatan.jparser.idl.IDLBase;
 
 /*[-IDL_SKIP]*/
 public class CallbackExceptionManual extends IDLBase {

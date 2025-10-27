@@ -481,8 +481,8 @@ public class IDLMethodParser {
             String nameAsString = parameter.getNameAsString();
             Type type = parameter.getType();
             if(idlParameterData.isEnum()) {
-                Type longType = StaticJavaParser.parseType(long.class.getSimpleName());
-                nativeMethod.addParameter(longType, nameAsString);
+                Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
+                nativeMethod.addParameter(intType, nameAsString);
             }
             else if(type.isPrimitiveType() || IDLHelper.isString(type)) {
                 nativeMethod.addParameter(type.clone(), nameAsString);

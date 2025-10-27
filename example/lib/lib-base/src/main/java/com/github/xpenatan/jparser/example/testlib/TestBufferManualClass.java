@@ -1,6 +1,6 @@
 package com.github.xpenatan.jparser.example.testlib;
 
-import com.github.xpenatan.jParser.idl.IDLBase;
+import com.github.xpenatan.jparser.idl.IDLBase;
 import java.nio.ByteBuffer;
 
 public class TestBufferManualClass extends IDLBase {
@@ -8,7 +8,7 @@ public class TestBufferManualClass extends IDLBase {
     /*[-TEAVM;-REPLACE_BLOCK]
         {
             org.teavm.jso.typedarrays.Uint8Array array = org.teavm.jso.typedarrays.Uint8Array.fromJavaBuffer(data);
-            internal_native_updateByteBuffer((int)native_address, array, size, value);
+            internal_native_updateByteBuffer(native_address, array, size, value);
         }
     */
     public void updateByteBuffer(ByteBuffer data, int size, byte value) {
