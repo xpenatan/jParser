@@ -1,6 +1,6 @@
 import com.github.xpenatan.gdx.backends.teavm.TeaApplication;
 import com.github.xpenatan.gdx.backends.teavm.TeaApplicationConfiguration;
-import com.github.xpenatan.jparser.example.app.AppTest;
+import com.github.xpenatan.jParser.example.app.AppTest;
 
 public class TeaVMLauncher {
     public static void main(String[] args) {

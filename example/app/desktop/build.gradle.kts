@@ -21,7 +21,7 @@ dependencies {
 tasks.register<JavaExec>("run-app-desktop") {
     group = "example-desktop"
     description = "Run desktop app"
-    mainClass.set("com.github.xpenatan.jparser.example.app.Main")
+    mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath
 
     if(DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX) {
@@ -32,7 +32,7 @@ tasks.register<JavaExec>("run-app-desktop") {
 tasks.register<JavaExec>("run-benchmark-desktop") {
     group = "example-desktop"
     description = "Run desktop app"
-    mainClass.set("com.github.xpenatan.jparser.example.app.BenchmarkMain")
+    mainClass.set("com.github.xpenatan.jParser.example.app.BenchmarkMain")
     classpath = sourceSets["main"].runtimeClasspath
 
     if(DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX) {

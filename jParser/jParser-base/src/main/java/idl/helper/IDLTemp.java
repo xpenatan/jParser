@@ -1,6 +1,6 @@
 package idl.helper;
 
-import com.github.xpenatan.jparser.idl.IDLBase;
+import com.github.xpenatan.jParser.idl.IDLBase;
 
 public class IDLTemp extends IDLBase {
 

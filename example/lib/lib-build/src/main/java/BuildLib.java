@@ -1,16 +1,16 @@
-import com.github.xpenatan.jparser.builder.BuildMultiTarget;
-import com.github.xpenatan.jparser.builder.targets.AndroidTargetOld;
-import com.github.xpenatan.jparser.builder.targets.AndroidTarget;
-import com.github.xpenatan.jparser.builder.targets.EmscriptenTarget;
-import com.github.xpenatan.jparser.builder.targets.IOSTarget;
-import com.github.xpenatan.jparser.builder.targets.LinuxTarget;
-import com.github.xpenatan.jparser.builder.targets.MacTarget;
-import com.github.xpenatan.jparser.builder.targets.WindowsMSVCTarget;
-import com.github.xpenatan.jparser.builder.targets.WindowsTarget;
-import com.github.xpenatan.jparser.builder.tool.BuildToolListener;
-import com.github.xpenatan.jparser.builder.tool.BuildToolOptions;
-import com.github.xpenatan.jparser.builder.tool.BuilderTool;
-import com.github.xpenatan.jparser.idl.IDLReader;
+import com.github.xpenatan.jParser.builder.BuildMultiTarget;
+import com.github.xpenatan.jParser.builder.targets.AndroidTargetOld;
+import com.github.xpenatan.jParser.builder.targets.AndroidTarget;
+import com.github.xpenatan.jParser.builder.targets.EmscriptenTarget;
+import com.github.xpenatan.jParser.builder.targets.IOSTarget;
+import com.github.xpenatan.jParser.builder.targets.LinuxTarget;
+import com.github.xpenatan.jParser.builder.targets.MacTarget;
+import com.github.xpenatan.jParser.builder.targets.WindowsMSVCTarget;
+import com.github.xpenatan.jParser.builder.targets.WindowsTarget;
+import com.github.xpenatan.jParser.builder.tool.BuildToolListener;
+import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
+import com.github.xpenatan.jParser.builder.tool.BuilderTool;
+import com.github.xpenatan.jParser.idl.IDLReader;
 import java.util.ArrayList;
 
 public class BuildLib {
@@ -18,7 +18,7 @@ public class BuildLib {
     public static void main(String[] args) throws Exception {
         String libName = "TestLib";
         String modulePrefix = "lib";
-        String basePackage = "com.github.xpenatan.jparser.example.testlib";
+        String basePackage = "com.github.xpenatan.jParser.example.testlib";
         String sourceDir = "/src/main/cpp/source/TestLib/src";
 
         WindowsMSVCTarget.DEBUG_BUILD = true;
