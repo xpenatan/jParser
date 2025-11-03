@@ -10,10 +10,10 @@ interface IDLTemp {
     [BindTo="Int_3"] static IDLInt Int_3__0(long value);
     [BindTo="Int_4"] static IDLInt Int_4__0(long value);
 
-    [BindTo="Long_1"] static IDLLong Long_1__0(long value);
-    [BindTo="Long_2"] static IDLLong Long_2__0(long value);
-    [BindTo="Long_3"] static IDLLong Long_3__0(long value);
-    [BindTo="Long_4"] static IDLLong Long_4__0(long value);
+    [BindTo="Long_1"] static IDLLong Long_1__0(long long value);
+    [BindTo="Long_2"] static IDLLong Long_2__0(long long value);
+    [BindTo="Long_3"] static IDLLong Long_3__0(long long value);
+    [BindTo="Long_4"] static IDLLong Long_4__0(long long value);
 
     [BindTo="Float_1"] static IDLFloat Float_1__0(float value);
     [BindTo="Float_2"] static IDLFloat Float_2__0(float value);
