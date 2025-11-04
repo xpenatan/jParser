@@ -22,7 +22,7 @@ object LibExt {
     // Example Dependencies
     const val exampleUseRepoLibs = false
     const val gdxVersion = "1.14.0"
-    const val gdxTeaVMVersion = "-SNAPSHOT"
+    const val gdxTeaVMVersion = "1.4.0"
 
     const val jUnitVersion = "4.13.2"
 }
