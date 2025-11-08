@@ -1,5 +1,12 @@
 
 interface IDLTemp {
+    static IDLByteArray ByteArrayNotOwned(any dataAddress, long size);
+    static IDLBoolArray BoolArrayNotOwned(any dataAddress, long size);
+    static IDLIntArray IntArrayNotOwned(any dataAddress, long size);
+    static IDLLongArray LongArrayNotOwned(any dataAddress, long size);
+    static IDLFloatArray FloatArrayNotOwned(any dataAddress, long size);
+    static IDLDoubleArray DoubleArrayNotOwned(any dataAddress, long size);
+
     [BindTo="Bool_1"] static IDLBool Bool_1__0(boolean value);
     [BindTo="Bool_2"] static IDLBool Bool_2__0(boolean value);
     [BindTo="Bool_3"] static IDLBool Bool_3__0(boolean value);
@@ -59,6 +66,7 @@ interface IDLArray {
     void clear();
     long getSize();
     void resize(long size);
+    boolean ownsDataAddress();
     any getVoidData();
 };
 

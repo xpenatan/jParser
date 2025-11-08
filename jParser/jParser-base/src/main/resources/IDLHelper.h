@@ -16,6 +16,8 @@ public:
     virtual int getSize() = 0;
     virtual void resize(int newSize) = 0;
     virtual void* getVoidData() = 0;
+    virtual bool ownsDataAddress() = 0;
+    virtual void setData(void* newData, int size) = 0;
     virtual ~IDLArray() = default;
 };
 
@@ -24,12 +26,15 @@ public:
 template<typename T>
 class IDLArray : public IDL::IDLArray {
     private:
+        bool ownsData = true;
         int size = 0;
         bool isResizeEnabled;
         T* data = nullptr;
 
         void deleteData() {
-            delete[] data;
+            if(ownsData && data != nullptr) {
+                delete[] data;
+            }
             data = nullptr;
             size = 0;
         }
@@ -40,9 +45,26 @@ class IDLArray : public IDL::IDLArray {
             resize(size);
             this->isResizeEnabled = isResizeEnabled;
         }
+        IDLArray(bool ownsData) {
+            this->ownsData = ownsData;
+            resize(0);
+        }
         ~IDLArray() override {
-            clear();
+            if(ownsData) {
+                clear();
+            }
             deleteData();
+        }
+
+        bool ownsDataAddress() override {
+            return this->ownsData;
+        }
+
+        void setData(void* newData, int newSize) override {
+            if(!ownsData) {
+                size = newSize;
+                data = static_cast<T*>(newData);
+            }
         }
 
         int getSize() override { return this->size; }
@@ -50,7 +72,7 @@ class IDLArray : public IDL::IDLArray {
         void* getVoidData() override { return (void*)data; }
 
         void resize(int newSize) override {
-            if (!isResizeEnabled || newSize == size) return;
+            if (!ownsData || !isResizeEnabled || newSize == size) return;
             if (newSize < 0) newSize = 0;
 
             if (newSize == 0) {
@@ -135,17 +157,17 @@ using IDLByteArray = IDLArray<char>;
 
 class IDLBool : public IDLBoolArray {
     public:
-        IDLBool() : IDLBoolArray(1) {}
+        IDLBool() : IDLBoolArray(1, false) {}
 };
 
 class IDLByte : public IDLByteArray {
     public:
-        IDLByte() : IDLByteArray(1) {}
+        IDLByte() : IDLByteArray(1, false) {}
 };
 
 class IDLInt : public IDLIntArray {
     public:
-        IDLInt() : IDLIntArray(1) {}
+        IDLInt() : IDLIntArray(1, false) {}
 };
 
 class IDLInt2 : public IDLIntArray {
@@ -195,7 +217,7 @@ class IDLInt4 : public IDLIntArray {
 
 class IDLLong : public IDLLongArray {
     public:
-        IDLLong() : IDLLongArray(1) {}
+        IDLLong() : IDLLongArray(1, false) {}
 };
 
 class IDLLong2 : public IDLLongArray {
@@ -245,7 +267,7 @@ class IDLLong4 : public IDLLongArray {
 
 class IDLFloat : public IDLFloatArray {
     public:
-        IDLFloat() : IDLFloatArray(1) {}
+        IDLFloat() : IDLFloatArray(1, false) {}
 };
 
 class IDLFloat2 : public IDLFloatArray {
@@ -295,7 +317,7 @@ class IDLFloat4 : public IDLFloatArray {
 
 class IDLDouble : public IDLDoubleArray {
     public:
-        IDLDouble() : IDLDoubleArray(1) {}
+        IDLDouble() : IDLDoubleArray(1, false) {}
 };
 
 class IDLDouble2 : public IDLDoubleArray {
@@ -345,6 +367,37 @@ class IDLDouble4 : public IDLDoubleArray {
 
 class IDLTemp {
     public:
+        static IDLByteArray* ByteArrayNotOwned(void* dataAddress, int size) {
+            static IDLByteArray byteArray_temp(false);
+            byteArray_temp.setData(dataAddress, size);
+            return &byteArray_temp;
+        }
+        static IDLBoolArray* BoolArrayNotOwned(void* dataAddress, int size) {
+            static IDLBoolArray boolArray_temp(false);
+            boolArray_temp.setData(dataAddress, size);
+            return &boolArray_temp;
+        }
+        static IDLIntArray* IntArrayNotOwned(void* dataAddress, int size) {
+            static IDLIntArray intArray_temp(false);
+            intArray_temp.setData(dataAddress, size);
+            return &intArray_temp;
+        }
+        static IDLLongArray* LongArrayNotOwned(void* dataAddress, int size) {
+            static IDLLongArray longArray_temp(false);
+            longArray_temp.setData(dataAddress, size);
+            return &longArray_temp;
+        }
+        static IDLFloatArray* FloatArrayNotOwned(void* dataAddress, int size) {
+            static IDLFloatArray floatArray_temp(false);
+            floatArray_temp.setData(dataAddress, size);
+            return &floatArray_temp;
+        }
+        static IDLDoubleArray* DoubleArrayNotOwned(void* dataAddress, int size) {
+            static IDLDoubleArray doubleArray_temp(false);
+            doubleArray_temp.setData(dataAddress, size);
+            return &doubleArray_temp;
+        }
+
         static IDLBool* Bool_1(bool value) {
             static IDLBool bool_temp1;
             bool_temp1.set(value);
