@@ -158,16 +158,19 @@ using IDLByteArray = IDLArray<char>;
 class IDLBool : public IDLBoolArray {
     public:
         IDLBool() : IDLBoolArray(1, false) {}
+        IDLBool(bool ownsData) : IDLBoolArray(ownsData) {}
 };
 
 class IDLByte : public IDLByteArray {
     public:
         IDLByte() : IDLByteArray(1, false) {}
+        IDLByte(bool ownsData) : IDLByteArray(ownsData) {}
 };
 
 class IDLInt : public IDLIntArray {
     public:
         IDLInt() : IDLIntArray(1, false) {}
+        IDLInt(bool ownsData) : IDLIntArray(ownsData) {}
 };
 
 class IDLInt2 : public IDLIntArray {
@@ -218,6 +221,7 @@ class IDLInt4 : public IDLIntArray {
 class IDLLong : public IDLLongArray {
     public:
         IDLLong() : IDLLongArray(1, false) {}
+        IDLLong(bool ownsData) : IDLLongArray(ownsData) {}
 };
 
 class IDLLong2 : public IDLLongArray {
@@ -268,6 +272,7 @@ class IDLLong4 : public IDLLongArray {
 class IDLFloat : public IDLFloatArray {
     public:
         IDLFloat() : IDLFloatArray(1, false) {}
+        IDLFloat(bool ownsData) : IDLFloatArray(ownsData) {}
 };
 
 class IDLFloat2 : public IDLFloatArray {
@@ -318,6 +323,7 @@ class IDLFloat4 : public IDLFloatArray {
 class IDLDouble : public IDLDoubleArray {
     public:
         IDLDouble() : IDLDoubleArray(1, false) {}
+        IDLDouble(bool ownsData) : IDLDoubleArray(ownsData) {}
 };
 
 class IDLDouble2 : public IDLDoubleArray {
@@ -367,35 +373,66 @@ class IDLDouble4 : public IDLDoubleArray {
 
 class IDLTemp {
     public:
-        static IDLByteArray* ByteArrayNotOwned(void* dataAddress, int size) {
+        static IDLByteArray* ByteArray_1(void* dataAddress, int size) {
             static IDLByteArray byteArray_temp(false);
             byteArray_temp.setData(dataAddress, size);
             return &byteArray_temp;
         }
-        static IDLBoolArray* BoolArrayNotOwned(void* dataAddress, int size) {
+        static IDLBoolArray* BoolArray_1(void* dataAddress, int size) {
             static IDLBoolArray boolArray_temp(false);
             boolArray_temp.setData(dataAddress, size);
             return &boolArray_temp;
         }
-        static IDLIntArray* IntArrayNotOwned(void* dataAddress, int size) {
+        static IDLIntArray* IntArray_1(void* dataAddress, int size) {
             static IDLIntArray intArray_temp(false);
             intArray_temp.setData(dataAddress, size);
             return &intArray_temp;
         }
-        static IDLLongArray* LongArrayNotOwned(void* dataAddress, int size) {
+        static IDLLongArray* LongArray_1(void* dataAddress, int size) {
             static IDLLongArray longArray_temp(false);
             longArray_temp.setData(dataAddress, size);
             return &longArray_temp;
         }
-        static IDLFloatArray* FloatArrayNotOwned(void* dataAddress, int size) {
+        static IDLFloatArray* FloatArray_1(void* dataAddress, int size) {
             static IDLFloatArray floatArray_temp(false);
             floatArray_temp.setData(dataAddress, size);
             return &floatArray_temp;
         }
-        static IDLDoubleArray* DoubleArrayNotOwned(void* dataAddress, int size) {
+        static IDLDoubleArray* DoubleArray_1(void* dataAddress, int size) {
             static IDLDoubleArray doubleArray_temp(false);
             doubleArray_temp.setData(dataAddress, size);
             return &doubleArray_temp;
+        }
+
+        static IDLByte* Byte_1(void* dataAddress) {
+            static IDLByte byte_temp(false);
+            byte_temp.setData(dataAddress, 1);
+            return &byte_temp;
+        }
+        static IDLBool* Bool_1(void* dataAddress) {
+            static IDLBool bool_temp(false);
+            bool_temp.setData(dataAddress, 1);
+            return &bool_temp;
+        }
+        static IDLInt* Int_1(void* dataAddress) {
+            static IDLInt int_temp(false);
+            int_temp.setData(dataAddress, 4);
+            return &int_temp;
+        }
+        static IDLLong* Long_1(void* dataAddress) {
+            static IDLLong long_temp(false);
+            long_temp.setData(dataAddress, 8);
+            return &long_temp;
+        }
+        static IDLFloat* Float_1(void* dataAddress) {
+            static IDLFloat float_temp(false);
+            float_temp.setData(dataAddress, 4);
+            return &float_temp;
+        }
+        static IDLDouble* Double_1(void* dataAddress) {
+            static IDLDouble double_temp(false);
+            double_temp.setData(dataAddress, 8);
+            return &double_temp;
         }
 
         static IDLBool* Bool_1(bool value) {
