@@ -51,12 +51,18 @@ public class IDLBase {
     public final IDLBase native_setAddress(long voidValue) {
         native_address = (int)voidValue;
         native_void_address = (int)voidValue;
+        if(voidValue != 0) {
+            onNativeAddressChanged();
+        }
         return this;
     }
 
     public final IDLBase native_setAddress(int voidValue) {
         native_address = voidValue;
         native_void_address = voidValue;
+        if(voidValue != 0) {
+            onNativeAddressChanged();
+        }
         return this;
     }
 
