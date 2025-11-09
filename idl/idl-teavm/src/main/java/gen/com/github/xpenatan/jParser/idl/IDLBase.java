@@ -112,6 +112,9 @@ public class IDLBase {
         this.native_void_address = other.native_void_address;
         this.native_disposed = false;
         this.native_cMemOwn = false;
+        if(native_address != 0) {
+            onNativeAddressChanged();
+        }
     }
 
     public final boolean isDisposed() {
