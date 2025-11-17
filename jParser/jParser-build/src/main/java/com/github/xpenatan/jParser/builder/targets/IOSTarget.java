@@ -33,7 +33,6 @@ public class IOSTarget extends DefaultBuildTarget {
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
         cppFlags.add("-stdlib=libc++");
-        cppFlags.add("-std=c++17");
     }
 
     @Override

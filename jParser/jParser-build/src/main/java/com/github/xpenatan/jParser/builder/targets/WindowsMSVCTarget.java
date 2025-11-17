@@ -26,7 +26,6 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
         cppCompiler.add("&");
         cppCompiler.add("cl");
         compilerOutputCommand = "-Fo:";
-        cppFlags.add("-std:c++17");
         cppFlags.add("-c");
         if(DEBUG_BUILD) {
             cppFlags.add("/Z7"); // add debug information in .obj to work in visual studio

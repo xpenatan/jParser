@@ -6,25 +6,24 @@ import com.github.xpenatan.jParser.idl.IDLBase;
 public class CallbackExceptionManual extends IDLBase {
 
     /*[-JNI;-NATIVE]
+        static jmethodID CallbackExceptionManualImpl_callJava_ID;
         class CallbackExceptionManualImpl : public CallbackExceptionManual {
             private:
                 JNIEnv* env;
                 jobject obj;
             public:
-                inline static jclass jClassID = 0;
-                inline static jmethodID callJava_ID = 0;
 
                 void setupCallback(JNIEnv* env, jobject obj) {
                     this->env = env;
                     this->obj = env->NewGlobalRef(obj);
-
-                    if(CallbackExceptionManualImpl::jClassID == 0) {
-                        CallbackExceptionManualImpl::jClassID = (jclass)env->NewGlobalRef(env->GetObjectClass(obj));
-                        CallbackExceptionManualImpl::callJava_ID = env->GetMethodID(jClassID, "internal_callJava", "()V");
+                    static jclass jClassID = 0;
+                    if(jClassID == 0) {
+                        jClassID = (jclass)env->NewGlobalRef(env->GetObjectClass(obj));
+                        CallbackExceptionManualImpl_callJava_ID = env->GetMethodID(jClassID, "internal_callJava", "()V");
                     }
                 }
                 virtual void callJava() const {
-                    env->CallVoidMethod(obj, CallbackExceptionManualImpl::callJava_ID);
+                    env->CallVoidMethod(obj, CallbackExceptionManualImpl_callJava_ID);
                 }
         };
     */

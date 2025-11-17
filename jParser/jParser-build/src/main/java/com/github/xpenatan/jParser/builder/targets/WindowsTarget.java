@@ -24,7 +24,6 @@ public class WindowsTarget extends DefaultBuildTarget {
         }
         cppFlags.add("-fmessage-length=0");
         cppFlags.add("-m64");
-        cppFlags.add("-std=c++17");
         cppFlags.add("-w");
         cppFlags.add("-Wno-format");
 

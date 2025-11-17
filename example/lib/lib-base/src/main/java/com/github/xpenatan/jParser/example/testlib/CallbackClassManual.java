@@ -13,46 +13,45 @@ public class CallbackClassManual extends IDLBase {
 
     /*[-JNI;-NATIVE]
 
+        static jmethodID CallbackClassManualImpl_onVoidCallback_ID;
+        static jmethodID CallbackClassManualImpl_onIntCallback_ID;
+        static jmethodID CallbackClassManualImpl_onFloatCallback_ID;
+        static jmethodID CallbackClassManualImpl_onBoolCallback_ID;
+        static jmethodID CallbackClassManualImpl_onStringCallback_ID;
         class CallbackClassManualImpl : public CallbackClassManual {
             private:
                 JNIEnv* env;
                 jobject obj;
             public:
-                inline static jclass jClassID = 0;
-                inline static jmethodID onVoidCallback_ID = 0;
-                inline static jmethodID onIntCallback_ID = 0;
-                inline static jmethodID onFloatCallback_ID = 0;
-                inline static jmethodID onBoolCallback_ID = 0;
-                inline static jmethodID onStringCallback_ID = 0;
 
                 void setupCallback(JNIEnv* env, jobject obj) {
                     this->env = env;
                     this->obj = env->NewGlobalRef(obj);
-
-                    if(CallbackClassManualImpl::jClassID == 0) {
-                        CallbackClassManualImpl::jClassID = (jclass)env->NewGlobalRef(env->GetObjectClass(obj));
-                        CallbackClassManualImpl::onVoidCallback_ID = env->GetMethodID(jClassID, "internal_onVoidCallback", "(JJ)V");
-                        CallbackClassManualImpl::onIntCallback_ID = env->GetMethodID(jClassID, "internal_onIntCallback", "(II)I");
-                        CallbackClassManualImpl::onFloatCallback_ID = env->GetMethodID(jClassID, "internal_onFloatCallback", "(FF)F");
-                        CallbackClassManualImpl::onBoolCallback_ID = env->GetMethodID(jClassID, "internal_onBoolCallback", "(Z)Z");
-                        CallbackClassManualImpl::onStringCallback_ID = env->GetMethodID(jClassID, "internal_onStringCallback", "(Ljava/lang/String;)V");
+                    static jclass jClassID = 0;
+                    if(jClassID == 0) {
+                        jClassID = (jclass)env->NewGlobalRef(env->GetObjectClass(obj));
+                        CallbackClassManualImpl_onVoidCallback_ID = env->GetMethodID(jClassID, "internal_onVoidCallback", "(JJ)V");
+                        CallbackClassManualImpl_onIntCallback_ID = env->GetMethodID(jClassID, "internal_onIntCallback", "(II)I");
+                        CallbackClassManualImpl_onFloatCallback_ID = env->GetMethodID(jClassID, "internal_onFloatCallback", "(FF)F");
+                        CallbackClassManualImpl_onBoolCallback_ID = env->GetMethodID(jClassID, "internal_onBoolCallback", "(Z)Z");
+                        CallbackClassManualImpl_onStringCallback_ID = env->GetMethodID(jClassID, "internal_onStringCallback", "(Ljava/lang/String;)V");
                     }
                 }
                 virtual void onVoidCallback(TestObjectClass& refData, TestObjectClass* pointerData) const {
-                    env->CallVoidMethod(obj, CallbackClassManualImpl::onVoidCallback_ID, (jlong)&refData, (jlong)pointerData);
+                    env->CallVoidMethod(obj, CallbackClassManualImpl_onVoidCallback_ID, (jlong)&refData, (jlong)pointerData);
                 }
                 virtual int onIntCallback(int intValue01, int intValue02) const {
-                    return env->CallIntMethod(obj, CallbackClassManualImpl::onIntCallback_ID, intValue01, intValue02);
+                    return env->CallIntMethod(obj, CallbackClassManualImpl_onIntCallback_ID, intValue01, intValue02);
                 }
                 virtual float onFloatCallback(float floatValue01, float floatValue02) const {
-                    return env->CallFloatMethod(obj, CallbackClassManualImpl::onFloatCallback_ID, floatValue01, floatValue02);
+                    return env->CallFloatMethod(obj, CallbackClassManualImpl_onFloatCallback_ID, floatValue01, floatValue02);
                 }
                 virtual bool onBoolCallback(bool boolValue01) const {
-                    return env->CallBooleanMethod(obj, CallbackClassManualImpl::onBoolCallback_ID, boolValue01);
+                    return env->CallBooleanMethod(obj, CallbackClassManualImpl_onBoolCallback_ID, boolValue01);
                 }
                 virtual void onStringCallback(const char* strValue01) const {
                     jstring jstrBuf = env->NewStringUTF(strValue01);
-                    env->CallVoidMethod(obj, CallbackClassManualImpl::onStringCallback_ID, jstrBuf);
+                    env->CallVoidMethod(obj, CallbackClassManualImpl_onStringCallback_ID, jstrBuf);
                 }
         };
     */

@@ -56,7 +56,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         }
 
         cppFlags.add("-c");
-        cppFlags.add("-std=c++17");
 
         exportedFunctions.add("_free");
         exportedFunctions.add("_malloc");

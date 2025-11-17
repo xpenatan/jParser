@@ -69,12 +69,14 @@ public class BuildLib {
         // Make a static library
         WindowsTarget compileStaticTarget = new WindowsTarget();
         compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         WindowsTarget linkTarget = new WindowsTarget();
         linkTarget.addJNIHeaders();
+        linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + op.libName + "64_.a");
@@ -92,12 +94,14 @@ public class BuildLib {
         // Make a static library
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
         compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("-std:c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
         linkTarget.addJNIHeaders();
+        linkTarget.cppFlags.add("-std:c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
@@ -116,12 +120,14 @@ public class BuildLib {
         // Make a static library
         LinuxTarget compileStaticTarget = new LinuxTarget();
         compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         LinuxTarget linkTarget = new LinuxTarget();
         linkTarget.addJNIHeaders();
+        linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
@@ -140,6 +146,7 @@ public class BuildLib {
 
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
+        compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.isStatic = true;
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
@@ -147,6 +154,7 @@ public class BuildLib {
 
         MacTarget linkTarget = new MacTarget(isArm);
         linkTarget.addJNIHeaders();
+        linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
@@ -186,11 +194,13 @@ public class BuildLib {
             compileStaticTarget.compileGlueCode = false;
             compileStaticTarget.headerDirs.add("-I" + sourceDir);
             compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+            compileStaticTarget.cppFlags.add("-std=c++11");
             multiTarget.add(compileStaticTarget);
 
             // Compile glue code and link to make js file
             EmscriptenTarget linkTarget = new EmscriptenTarget(idlReader);
             linkTarget.headerDirs.add("-I" + sourceDir);
+            linkTarget.cppFlags.add("-std=c++11");
             linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "CustomCode.h");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
             multiTarget.add(linkTarget);
@@ -260,12 +270,14 @@ public class BuildLib {
             // Make a static library
             AndroidTarget compileStaticTarget = new AndroidTarget(target, apiLevel);
             compileStaticTarget.isStatic = true;
+            compileStaticTarget.cppFlags.add("-std=c++11");
             compileStaticTarget.headerDirs.add("-I" + sourceDir);
             compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
             multiTarget.add(compileStaticTarget);
 
             AndroidTarget linkTarget = new AndroidTarget(target, apiLevel);
             linkTarget.addJNIHeaders();
+            linkTarget.cppFlags.add("-std=c++11");
             linkTarget.headerDirs.add("-I" + sourceDir);
             linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
@@ -287,12 +299,14 @@ public class BuildLib {
         // Make a static library
         IOSTarget compileStaticTarget = new IOSTarget();
         compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         IOSTarget linkTarget = new IOSTarget();
         linkTarget.addJNIHeaders();
+        linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");

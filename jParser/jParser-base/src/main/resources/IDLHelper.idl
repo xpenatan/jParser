@@ -91,14 +91,6 @@ interface IDLString {
     [Const] DOMString c_str();
 };
 
-interface IDLStringView {
-    void IDLStringView([Const] DOMString text);
-    void IDLStringView([Const] DOMString text, long size);
-    long size();
-    byte at(long index);
-    [Const] DOMString data();
-};
-
 interface IDLBoolArray {
     void IDLBoolArray(long size);
     boolean getValue(long index);

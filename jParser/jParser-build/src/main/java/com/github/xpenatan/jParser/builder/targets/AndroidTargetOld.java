@@ -23,7 +23,6 @@ public class AndroidTargetOld extends DefaultBuildTarget {
         cppFlags.add("-Wall");
         cppFlags.add("-D__ANDROID__");
         cppFlags.add("-fvisibility=hidden");
-        cppFlags.add("-std=c++17");
         linkerFlags.add("-lm");
 
         cppInclude.add("**/jniglue/JNIGlue.cpp");

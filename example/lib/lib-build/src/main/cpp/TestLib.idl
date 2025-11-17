@@ -114,7 +114,7 @@ interface TestMethodClass {
     float getFloatValue02();
     float getBoolValue01();
     any getAny();
-    [Const, Value] IDLStringView getStrValue01();
+    [Const, Value] IDLString getStrValue01();
     [Const, Ref] IDLString getRefStrValue01();
     [Const] TestObjectClass getPointerObject01();
     TestObjectClass getPointerObject02();
@@ -139,7 +139,7 @@ interface TestStaticMethodClass {
     static float getFloatValue01();
     static float getFloatValue02();
     static float getBoolValue01();
-    [Const, Value] static IDLStringView getStrValue01();
+    [Const, Value] static IDLString getStrValue01();
     [Const] static TestObjectClass getPointerObject01();
     static TestObjectClass getPointerObject02();
     [Const, Ref] static TestObjectClass getRefObject01();

@@ -147,7 +147,6 @@ class IDLArray : public IDL::IDLArray {
 };
 
 using IDLString = std::string;
-using IDLStringView = std::string_view;
 using IDLBoolArray = IDLArray<bool>;
 using IDLIntArray = IDLArray<int>;
 using IDLLongArray = IDLArray<long long>;

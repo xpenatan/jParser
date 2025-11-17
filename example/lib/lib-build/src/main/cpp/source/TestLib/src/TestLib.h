@@ -97,11 +97,11 @@ class TestStaticAttributeClass {
     private:
 
     public:
-        inline static int staticIntValue01;
-        inline static const int staticConstIntValue01 = 20;
-        inline static float staticFloatValue01;
-        inline static double staticDoubleValue01;
-        inline static bool staticBoolValue01;
+        static int staticIntValue01;
+        static const int staticConstIntValue01 = 20;
+        static float staticFloatValue01;
+        static double staticDoubleValue01;
+        static bool staticBoolValue01;
 };
 
 class TestConstructorClass {
@@ -381,16 +381,16 @@ public:
 
 class TestStaticMethodClass {
     private:
-        inline static int intValue01;
-        inline static int intValue02;
-        inline static float floatValue01;
-        inline static float floatValue02;
-        inline static bool boolValue01;
-        inline static string strValue01;
-        inline static const TestObjectClass* pointerObject01 = NULL;
-        inline static TestObjectClass* pointerObject02 = NULL;
-        inline static TestObjectClass refObject01;
-        inline static TestObjectClass refObject02;
+        static int intValue01;
+        static int intValue02;
+        static float floatValue01;
+        static float floatValue02;
+        static bool boolValue01;
+        static string strValue01;
+        static const TestObjectClass* pointerObject01;
+        static TestObjectClass* pointerObject02;
+        static TestObjectClass refObject01;
+        static TestObjectClass refObject02;
     public:
         static void setMethod01(int intValue01) {
             TestStaticMethodClass::intValue01 = intValue01;

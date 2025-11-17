@@ -56,7 +56,6 @@ public class AndroidTarget extends DefaultBuildTarget {
         cppFlags.add("-Wall");
         cppFlags.add("-D__ANDROID__");
         cppFlags.add("-fvisibility=hidden");
-        cppFlags.add("-std=c++17");
 
         cppFlags.add("-c");
         libSuffix = "64.o";

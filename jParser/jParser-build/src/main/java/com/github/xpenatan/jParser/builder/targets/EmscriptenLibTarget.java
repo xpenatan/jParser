@@ -28,7 +28,6 @@ public class EmscriptenLibTarget extends DefaultBuildTarget {
         linkerCompiler.add(cppCompilerr);
 
         linkerFlags.add("-O3");
-        linkerFlags.add("-std=c++17");
         linkerFlags.add("--llvm-lto");
         linkerFlags.add("1");
         linkerFlags.add("-s");

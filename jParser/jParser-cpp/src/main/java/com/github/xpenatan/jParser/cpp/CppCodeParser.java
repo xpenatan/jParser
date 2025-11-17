@@ -453,9 +453,11 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         IDLClass callback = idlClass.callbackImpl;
         String cppClass = "";
 
+        String staticVariables = getStaticMethodsId(idlClass, methods);
         String callbackCode = generateSetupCallbackMethod(idlClass, callbackDeclaration, methods);
         String methodsCode = generateMethodCallers(idlClass, methods);
         cppClass += "" +
+                staticVariables + "\n" +
                 "class " + callback.getCPPName() + " : public " + idlClass.getCPPName() + " {\n" +
                 "private:\n" +
                 "\tJNIEnv* env;\n" +
@@ -473,23 +475,20 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     private String generateSetupCallbackMethod(IDLClass idlClass, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
         String contentTemplate = "" +
-                "\tinline static jclass jClassID = 0;\n" +
-                "[VARIABLES]\n" +
                 "void [METHOD](JNIEnv* env, jobject obj) {\n" +
                 "\tthis->env = env;\n" +
                 "\tthis->obj = env->NewGlobalRef(obj);\n" +
-                "\tif([CLASS_NAME]::jClassID == 0) {\n" +
-                "\t\t[CLASS_NAME]::jClassID = (jclass)env->NewGlobalRef(env->GetObjectClass(obj));\n" +
+                "\tstatic jclass jClassID = 0;\n" +
+                "\tif(jClassID == 0) {\n" +
+                "\t\tjClassID = (jclass)env->NewGlobalRef(env->GetObjectClass(obj));\n" +
                 "[METHOD_IDS]" +
                 "\t}\n" +
                 "}\n";
-        String variableTemplate = "\tinline static jmethodID [METHOD]_ID = 0;\n";
-        String methodIdTemplate = "\t\t[CLASS_NAME]::[METHOD]_ID = env->GetMethodID(jClassID, \"[INTERNAL_METHOD]\", \"[PARAM_CODE]\");\n";
+        String methodIdTemplate = "\t\t[CLASS_NAME]_[METHOD]_ID = env->GetMethodID(jClassID, \"[INTERNAL_METHOD]\", \"[PARAM_CODE]\");\n";
 
         IDLClass callbackClass = idlClass.callbackImpl;
         String className = callbackClass.name;
 
-        String staticVariables = "";
         String methodIds = "";
         String callbackMethodName = callbackDeclaration.getNameAsString();
 
@@ -526,21 +525,41 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
             String methodName = idlMethod.getCPPName() + methodCode;
 
-            String variable = variableTemplate.replace("[METHOD]", methodName);
             String methodId = methodIdTemplate.replace("[METHOD]", methodName)
                     .replace("[CLASS_NAME]", className)
                     .replace("[INTERNAL_METHOD]", internalMethodName)
                     .replace("[PARAM_CODE]", paramCode);
-            staticVariables += variable;
             methodIds += methodId;
         }
 
-        String content = contentTemplate.replace("[VARIABLES]", staticVariables)
-                .replace("[METHOD]", callbackMethodName)
+        String content = contentTemplate.replace("[METHOD]", callbackMethodName)
                 .replace("[CLASS_NAME]", className)
                 .replace("[METHOD_IDS]", methodIds);
 
         return content;
+    }
+
+    private String getStaticMethodsId(IDLClass idlClass, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        String variableTemplate = "\tstatic jmethodID [CLASS_NAME]_[METHOD]_ID;\n";
+        String staticVariables = "";
+
+        IDLClass callbackClass = idlClass.callbackImpl;
+        String className = callbackClass.name;
+
+        for(int i = 0; i < methods.size(); i++) {
+            Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
+            IDLMethod idlMethod = pair.a;
+            Pair<MethodDeclaration, MethodDeclaration> methodPair = pair.b;
+            MethodDeclaration internalMethod = methodPair.a;
+
+            String methodCode = generateMethodID(internalMethod);
+
+            String methodName = idlMethod.getCPPName() + methodCode;
+            String variable = variableTemplate.replace("[METHOD]", methodName)
+                    .replace("[CLASS_NAME]", className);
+            staticVariables += variable;
+        }
+        return staticVariables;
     }
 
     private String generateMethodID(MethodDeclaration internalMethod) {
@@ -571,7 +590,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
         String methodTemplate = "" +
                 "virtual [RETURN_TYPE] [METHOD_NAME]([PARAMS])[CONST] {\n" +
-                "   [RETURN]env->[CALL_METHOD](obj, [CPP_CLASS]::[METHOD_ID]_ID[CALL_PARAMS]);\n" +
+                "   [RETURN]env->[CALL_METHOD](obj, [CPP_CLASS]_[METHOD_ID]_ID[CALL_PARAMS]);\n" +
                 "}\n";
 
         for(int i = 0; i < methods.size(); i++) {
