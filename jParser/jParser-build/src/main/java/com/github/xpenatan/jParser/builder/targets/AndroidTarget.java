@@ -16,6 +16,10 @@ public class AndroidTarget extends DefaultBuildTarget {
     private String archiver;
 
     public AndroidTarget(Target target, ApiLevel apiLevel) {
+        this(SourceLanguage.CPP, target, apiLevel);
+    }
+
+    public AndroidTarget(SourceLanguage language, Target target, ApiLevel apiLevel) {
         cppCompiler.clear();
         linkerCompiler.clear();
 
@@ -33,7 +37,17 @@ public class AndroidTarget extends DefaultBuildTarget {
             osFolder = "mac-x86_64";
         }
         String toolchain = ndkHome + "/toolchains/llvm/prebuilt/" + osFolder;
-        String compiler = toolchain + "/bin/clang++"; // C++ compiler
+        if(language == SourceLanguage.C) {
+            String compiler = toolchain + "/bin/clangcc";
+            cppCompiler.add(compiler);
+            linkerCompiler.add(compiler);
+        }
+        else if(language == SourceLanguage.CPP) {
+            String compiler = toolchain + "/bin/clang++";
+            cppCompiler.add(compiler);
+            linkerCompiler.add(compiler);
+        }
+
         archiver = toolchain + "/bin/llvm-ar"; // Archiver for static libraries
         sysroot = toolchain + "/sysroot"; // System root for Android libraries
 
@@ -45,10 +59,7 @@ public class AndroidTarget extends DefaultBuildTarget {
 
         this.libDirSuffix = "android/" + targetPath + "/";
         this.tempBuildDir = "target/" + targetPath + "/";
-        linkObjSuffix = ".o";
 
-        cppCompiler.add(compiler);
-        linkerCompiler.add(compiler);
         cppCompiler.add("--target=" + this.target + this.apiLevel);
         cppCompiler.add("--sysroot=" + sysroot);
         cppCompiler.add("-fPIC");

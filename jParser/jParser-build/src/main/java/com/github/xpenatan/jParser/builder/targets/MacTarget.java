@@ -13,15 +13,15 @@ public class MacTarget extends DefaultBuildTarget {
 
     public static String MIN_MAC_VERSION = "10.13";
 
-    public MacTarget() {
-        this(false);
-    }
-
     public MacTarget(boolean isArm) {
-        this(isArm, MIN_MAC_VERSION);
+        this(SourceLanguage.CPP, isArm, MIN_MAC_VERSION);
     }
 
-    public MacTarget(boolean isArm, String macMinTarget) {
+    public MacTarget(SourceLanguage language, boolean isArm) {
+        this(language, isArm, MIN_MAC_VERSION);
+    }
+
+    public MacTarget(SourceLanguage language, boolean isArm, String macMinTarget) {
         this.isArm = isArm;
         this.macMinTarget = macMinTarget;
 
@@ -35,11 +35,16 @@ public class MacTarget extends DefaultBuildTarget {
         }
         this.libPrefix = "lib";
 
-        cppCompiler.clear();
-        linkerCompiler.clear();
-        String cppCompilerr = "clang++";
-        cppCompiler.add(cppCompilerr);
-        linkerCompiler.add(cppCompilerr);
+        if(language == SourceLanguage.C) {
+            String cppCompilerr = "clang";
+            cppCompiler.add(cppCompilerr);
+            linkerCompiler.add(cppCompilerr);
+        }
+        else if(language == SourceLanguage.CPP) {
+            String cppCompilerr = "clang++";
+            cppCompiler.add(cppCompilerr);
+            linkerCompiler.add(cppCompilerr);
+        }
 
         cppFlags.add("-c");
         cppFlags.add("-Wall");

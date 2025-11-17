@@ -1,5 +1,4 @@
 import com.github.xpenatan.jParser.builder.BuildMultiTarget;
-import com.github.xpenatan.jParser.builder.targets.AndroidTargetOld;
 import com.github.xpenatan.jParser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jParser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jParser.builder.targets.IOSTarget;
@@ -189,7 +188,8 @@ public class BuildLib {
         }
         else if(buildType == 1) {
             // Make a static library
-            EmscriptenTarget compileStaticTarget = new EmscriptenTarget(idlReader);
+            EmscriptenTarget compileStaticTarget = new EmscriptenTarget();
+            compileStaticTarget.idlReader = idlReader;
             compileStaticTarget.isStatic = true;
             compileStaticTarget.compileGlueCode = false;
             compileStaticTarget.headerDirs.add("-I" + sourceDir);
@@ -198,7 +198,8 @@ public class BuildLib {
             multiTarget.add(compileStaticTarget);
 
             // Compile glue code and link to make js file
-            EmscriptenTarget linkTarget = new EmscriptenTarget(idlReader);
+            EmscriptenTarget linkTarget = new EmscriptenTarget();
+            linkTarget.idlReader = idlReader;
             linkTarget.headerDirs.add("-I" + sourceDir);
             linkTarget.cppFlags.add("-std=c++11");
             linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "CustomCode.h");
@@ -232,22 +233,6 @@ public class BuildLib {
 //            mainTarget.linkerFlags.add("../../libs/emscripten/TestLibside.wasm");
 //            multiTarget.add(mainTarget);
         }
-        return multiTarget;
-    }
-
-    private static BuildMultiTarget getAndroidOldTarget(BuildToolOptions op) {
-        BuildMultiTarget multiTarget = new BuildMultiTarget();
-        String sourceDir = op.getSourceDir();
-
-        AndroidTargetOld androidTarget = new AndroidTargetOld();
-        androidTarget.addJNIHeaders();
-
-        androidTarget.headerDirs.add("-I" + sourceDir);
-        androidTarget.headerDirs.add("-I" + op.getCustomSourceDir());
-        androidTarget.cppInclude.add(sourceDir + "**.cpp");
-
-        multiTarget.add(androidTarget);
-
         return multiTarget;
     }
 

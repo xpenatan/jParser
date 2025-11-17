@@ -25,8 +25,6 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     public final ArrayList<String> cppInclude = new ArrayList<>();
     public final ArrayList<String> cppExclude = new ArrayList<>();
 
-    /** Includes only files with this suffix */
-    public String filterCPPSuffix = ".cpp";
     public ArrayList<String> cppCompiler = new ArrayList<>();
     public ArrayList<String> linkerCompiler = new ArrayList<>();
     public String compilerOutputCommand = "-o";
@@ -37,7 +35,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     public String libPrefix = "";
     public String libName = "";
     public String libDirSuffix = "";
-    public String linkObjSuffix = ".o";
+    public String linkObjSuffix = "**.o";
 
     public boolean shouldCompile = true;
     public boolean shouldLink = true;
@@ -47,8 +45,6 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     protected CustomFileDescriptor idlHelperHFile;
 
     protected DefaultBuildTarget() {
-        cppCompiler.add("x86_64-w64-mingw32-g++");
-        linkerCompiler.add("x86_64-w64-mingw32-g++");
     }
 
     @Override
@@ -93,14 +89,14 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     }
 
     protected ArrayList<CustomFileDescriptor> addSources(BuildConfig config) {
-        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.buildSourceDir, cppInclude, cppExclude, filterCPPSuffix);
+        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.buildSourceDir, cppInclude, cppExclude);
         for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
-            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
+            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude);
             cppFiles.addAll(cppFiles1);
         }
         for(String dir : additionalSourceDirs) {
             CustomFileDescriptor sourceDir = new CustomFileDescriptor(dir);
-            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude, filterCPPSuffix);
+            ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude);
             cppFiles.addAll(cppFiles1);
         }
         return cppFiles;
@@ -202,7 +198,17 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         String libPath = libsDir + "/" + fullLibName;
 
         ArrayList<CustomFileDescriptor> compiledObjects = new ArrayList<>();
-        getAllFiles(childTarget, compiledObjects, linkObjSuffix);
+        ArrayList<CustomFileDescriptor> allFilesObjects = new ArrayList<>();
+        getAllFiles(childTarget, allFilesObjects);
+        for(int i = 0; i < allFilesObjects.size(); i++) {
+            CustomFileDescriptor customFileDescriptor = allFilesObjects.get(i);
+            Path path = customFileDescriptor.file().toPath();
+            PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + linkObjSuffix);
+            boolean matches = pathMatcher.matches(path);
+            if(matches) {
+                compiledObjects.add(customFileDescriptor);
+            }
+        }
 
         String compiledPaths = "";
         for(CustomFileDescriptor file : compiledObjects) {
@@ -239,9 +245,9 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         }
     }
 
-    public static ArrayList<CustomFileDescriptor> getCPPFiles(CustomFileDescriptor dir, ArrayList<String> cppIncludes, ArrayList<String> cppExcludes, String cppSuffix) {
+    public static ArrayList<CustomFileDescriptor> getCPPFiles(CustomFileDescriptor dir, ArrayList<String> cppIncludes, ArrayList<String> cppExcludes) {
         ArrayList<CustomFileDescriptor> files = new ArrayList<>();
-        getAllFiles(dir, files, cppSuffix);
+        getAllFiles(dir, files);
         for(int i = 0; i < files.size(); i++) {
             // Remove file that does not match
             CustomFileDescriptor fileDescriptor = files.get(i);
@@ -274,21 +280,14 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         return files;
     }
 
-    public static void getAllFiles(CustomFileDescriptor file, ArrayList<CustomFileDescriptor> out, String suffix) {
+    public static void getAllFiles(CustomFileDescriptor file, ArrayList<CustomFileDescriptor> out) {
         CustomFileDescriptor[] list = file.list();
         for(CustomFileDescriptor fileDescriptor : list) {
             if(fileDescriptor.isDirectory()) {
-                getAllFiles(fileDescriptor, out, suffix);
+                getAllFiles(fileDescriptor, out);
             }
             else {
-                if(!suffix.isEmpty()) {
-                    if(fileDescriptor.path().endsWith(suffix)) {
-                        out.add(fileDescriptor);
-                    }
-                }
-                else {
-                    out.add(fileDescriptor);
-                }
+                out.add(fileDescriptor);
             }
         }
     }

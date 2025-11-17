@@ -15,14 +15,23 @@ public class IOSTarget extends DefaultBuildTarget {
     public static String iphoneSimulatorSdk = "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk";
 
     public IOSTarget() {
+        this(SourceLanguage.CPP);
+    }
+
+    public IOSTarget(SourceLanguage language) {
         this.libDirSuffix = "ios/";
         this.tempBuildDir = "target/ios/";
 
-        cppCompiler.clear();
-        linkerCompiler.clear();
-        String cppCompilerr = "clang++";
-        cppCompiler.add(cppCompilerr);
-        linkerCompiler.add(cppCompilerr);
+        if(language == SourceLanguage.C) {
+            String cppCompilerr = "clang";
+            cppCompiler.add(cppCompilerr);
+            linkerCompiler.add(cppCompilerr);
+        }
+        else if(language == SourceLanguage.CPP) {
+            String cppCompilerr = "clang++";
+            cppCompiler.add(cppCompilerr);
+            linkerCompiler.add(cppCompilerr);
+        }
 
         cppFlags.add("-isysroot" + iphoneSimulatorSdk);
         cppFlags.add("-arch x86_64");

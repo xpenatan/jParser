@@ -14,7 +14,7 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
     public WindowsMSVCTarget() {
         this.libDirSuffix = "windows/vc/";
         this.tempBuildDir = "target/windows/";
-        linkObjSuffix = ".obj";
+        linkObjSuffix = "**.obj";
 
         cppCompiler.clear();
         linkerCompiler.clear();

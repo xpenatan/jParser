@@ -30,21 +30,24 @@ public class EmscriptenTarget extends DefaultBuildTarget {
     public ArrayList<String> exportedRuntimeMethods = new ArrayList<>();
 
     public EmscriptenTarget() {
-        this(null);
+        this(SourceLanguage.CPP);
     }
 
-    public EmscriptenTarget(IDLReader idlReader) {
+    public EmscriptenTarget(SourceLanguage language) {
         this.libDirSuffix = "emscripten/";
         this.tempBuildDir = "target/emscripten/";
-        this.idlReader = idlReader;
 
-        cppCompiler.clear();
-        linkerCompiler.clear();
-
-        String cppCompilerr = EMSCRIPTEN_ROOT + "em++";
+        String cppCompilerr = "";
+        if(language == SourceLanguage.C) {
+            cppCompilerr = EMSCRIPTEN_ROOT + "emcc";
+        }
+        else if(language == SourceLanguage.CPP) {
+            cppCompilerr = EMSCRIPTEN_ROOT + "em++";
+        }
         if(isWindows()) {
             cppCompilerr += ".bat";
         }
+
         cppCompiler.add(cppCompilerr);
         linkerCompiler.add(cppCompilerr);
 

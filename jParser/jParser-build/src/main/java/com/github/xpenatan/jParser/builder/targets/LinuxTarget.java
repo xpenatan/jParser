@@ -8,14 +8,24 @@ import java.util.ArrayList;
 public class LinuxTarget extends DefaultBuildTarget {
 
     public LinuxTarget() {
+        this(SourceLanguage.CPP);
+    }
+
+    public LinuxTarget(SourceLanguage language) {
         this.libDirSuffix = "linux/";
         this.tempBuildDir = "target/linux/";
         this.libPrefix = "lib";
 
-        cppCompiler.clear();
-        linkerCompiler.clear();
-        cppCompiler.add("g++");
-        linkerCompiler.add("g++");
+        if(language == SourceLanguage.C) {
+            String cppCompilerr = "gcc";
+            cppCompiler.add(cppCompilerr);
+            linkerCompiler.add(cppCompilerr);
+        }
+        else if(language == SourceLanguage.CPP) {
+            String cppCompilerr = "g++";
+            cppCompiler.add(cppCompilerr);
+            linkerCompiler.add(cppCompilerr);
+        }
 
         cppFlags.add("-c");
         cppFlags.add("-Wall");

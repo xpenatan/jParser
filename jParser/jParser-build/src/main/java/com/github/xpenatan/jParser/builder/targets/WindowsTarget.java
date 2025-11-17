@@ -10,8 +10,21 @@ public class WindowsTarget extends DefaultBuildTarget {
     public static boolean DEBUG_BUILD;
 
     public WindowsTarget() {
+        this(SourceLanguage.CPP);
+    }
+
+    public WindowsTarget(SourceLanguage language) {
         this.libDirSuffix = "windows/";
         this.tempBuildDir = "target/windows/";
+
+        if(language == SourceLanguage.C) {
+            cppCompiler.add("x86_64-w64-mingw32-gcc");
+            linkerCompiler.add("x86_64-w64-mingw32-gcc");
+        }
+        else if(language == SourceLanguage.CPP) {
+            cppCompiler.add("x86_64-w64-mingw32-g++");
+            linkerCompiler.add("x86_64-w64-mingw32-g++");
+        }
 
         cppFlags.add("-c");
         cppFlags.add("-Wall");
