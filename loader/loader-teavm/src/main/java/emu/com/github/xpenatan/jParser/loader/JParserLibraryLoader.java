@@ -19,42 +19,22 @@ public class JParserLibraryLoader {
     private JParserLibraryLoader() {}
 
     public static void load(String libraryName, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, null, null, listener);
-    }
-
-    public static void load(String libraryName, String path, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, path, null, listener);
+        loadInternal(libraryName, null, listener);
     }
 
     public static void load(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, null, options, listener);
+        loadInternal(libraryName, options, listener);
     }
 
-    public static void load(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadInternal(libraryName, path, options, listener);
-    }
-
-    public static void loadSync(String libraryName, JParserLibraryLoaderListener listener) {
-        loadSync(null, null, null, null);
-    }
-
-    public static void loadSync(String libraryName, String path, JParserLibraryLoaderListener listener) {
-        loadSync(null, null, null, null);
-    }
-
-    public static void loadSync(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadSync(null, null, null, null);
-    }
-
-    public static void loadSync(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        throw new RuntimeException("Sync loading not supported");
-    }
-
-    private static void loadInternal(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+    private static void loadInternal(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
         if(listener == null) {
             throw new RuntimeException("Should implement listener");
         }
 
+        String path = null;
+        if(options != null) {
+            path = options.path;
+        }
         if(path == null) {
             path = "";
         }

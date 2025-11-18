@@ -55,96 +55,45 @@ public class JParserLibraryLoader {
     private JParserLibraryLoader() {}
 
     /**
-     * Async loading that works for desktop, mobile and web
+     * Synchronous loading is supported only on desktop and mobile targets; the web target uses asynchronous loading.
      */
     public static void load(String libraryName, JParserLibraryLoaderListener listener) {
-        loadInternal(true, libraryName, null, null, listener);
+        loadInternal(libraryName, null, listener);
     }
 
     /**
-     * Async loading that works for desktop, mobile and web
-     */
-    public static void load(String libraryName, String path, JParserLibraryLoaderListener listener) {
-        loadInternal(true, libraryName, path, null, listener);
-    }
-
-    /**
-     * Async loading that works for desktop, mobile and web
+     * Synchronous loading is supported only on desktop and mobile targets; the web target uses asynchronous loading.
      */
     public static void load(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadInternal(true, libraryName, null, options, listener);
+        loadInternal(libraryName, options, listener);
     }
 
-    /**
-     * Async loading that works for desktop, mobile and web
-     */
-    public static void load(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadInternal(true, libraryName, path, options, listener);
-    }
-
-    /**
-     * Sync loading that only works for desktop and mobile
-     */
-    public static void loadSync(String libraryName, JParserLibraryLoaderListener listener) {
-        loadInternal(false, libraryName, null, null, listener);
-    }
-
-    /**
-     * Sync loading that only works for desktop and mobile
-     */
-    public static void loadSync(String libraryName, String path, JParserLibraryLoaderListener listener) {
-        loadInternal(false, libraryName, path, null, listener);
-    }
-
-    /**
-     * Sync loading that only works for desktop and mobile
-     */
-    public static void loadSync(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadInternal(false, libraryName, null, options, listener);
-    }
-
-    /**
-     * Sync loading that only works for desktop and mobile
-     */
-    public static void loadSync(String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
-        loadInternal(false, libraryName, path, options, listener);
-    }
-
-    private static void loadInternal(boolean async, String libraryName, String path, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+    private static void loadInternal(String libraryName, JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
         if(listener == null) {
             throw new RuntimeException("Should implement listener");
         }
-        Runnable run = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String prefix = "";
-                    String suffix = "";
-                    if (os != Os.Android) {
-                        if(options == null || options.autoAddPrefix) {
-                            prefix = os.getLibPrefix();
-                        }
-                        if(options == null || options.autoAddSuffix) {
-                            suffix = architecture.toSuffix() + bitness.toSuffix();
-                        }
-                        suffix = suffix + "." + os.getLibExtension();
-                    }
-                    load(libraryName, path, prefix, suffix);
-                    listener.onLoad(true, null);
-                }
-                catch(Exception e) {
-                    listener.onLoad(false, e);
-                }
+        try {
+            String path = null;
+            if(options != null) {
+                path = options.path;
             }
-        };
 
-        if(async) {
-            new Thread(() -> {
-                run.run();
-            }).start();
+            String prefix = "";
+            String suffix = "";
+            if (os != Os.Android) {
+                if(options == null || options.autoAddPrefix) {
+                    prefix = os.getLibPrefix();
+                }
+                if(options == null || options.autoAddSuffix) {
+                    suffix = architecture.toSuffix() + bitness.toSuffix();
+                }
+                suffix = suffix + "." + os.getLibExtension();
+            }
+            load(libraryName, path, prefix, suffix);
+            listener.onLoad(true, null);
         }
-        else {
-            run.run();
+        catch(Exception e) {
+            listener.onLoad(false, e);
         }
     }
 
@@ -161,52 +110,49 @@ public class JParserLibraryLoader {
         final String fullLibraryName = path + libraryName;
         final String sourcePath = path + prefix + libraryName + suffix;
 
-        synchronized(JParserLibraryLoader.class) {
-            if(loadedLibraries.contains(fullLibraryName)) {
-                // Already loaed. Just ignore.
-                return;
-            }
-
-            if (os == Os.Android)
-                System.loadLibrary(sourcePath);
-            else {
-                InputStream input = readFile(sourcePath);
-                String sourceCrc = crc(input);
-
-                String fileName = new File(sourcePath).getName();
-
-                // Temp directory with username in path.
-                String tmpDir = System.getProperty("java.io.tmpdir") + "/jParser" + System.getProperty("user.name") + "/" + sourceCrc;
-                File file = new File(tmpDir, fileName);
-                Throwable ex = loadFile(sourcePath, sourceCrc, file);
-                if (ex == null) return;
-
-                // System provided temp directory.
-                try {
-                    file = File.createTempFile(sourceCrc, null);
-                    if (file.delete() && loadFile(sourcePath, sourceCrc, file) == null) return;
-                } catch (Throwable ignored) {
-                }
-
-                // User home.
-                file = new File(System.getProperty("user.home") + "/.libgdx/" + sourceCrc, fileName);
-                if (loadFile(sourcePath, sourceCrc, file) == null) return;
-
-                // Relative directory.
-                file = new File(".temp/" + sourceCrc, fileName);
-                if (loadFile(sourcePath, sourceCrc, file) == null) return;
-
-                // Fallback to java.library.path location, eg for applets.
-                file = new File(System.getProperty("java.library.path"), sourcePath);
-                if (file.exists()) {
-                    System.load(file.getAbsolutePath());
-                    return;
-                }
-            }
-
-            loadedLibraries.add(fullLibraryName);
+        if(loadedLibraries.contains(fullLibraryName)) {
+            // Already loaed. Just ignore.
+            return;
         }
 
+        if (os == Os.Android)
+            System.loadLibrary(sourcePath);
+        else {
+            InputStream input = readFile(sourcePath);
+            String sourceCrc = crc(input);
+
+            String fileName = new File(sourcePath).getName();
+
+            // Temp directory with username in path.
+            String tmpDir = System.getProperty("java.io.tmpdir") + "/jParser" + System.getProperty("user.name") + "/" + sourceCrc;
+            File file = new File(tmpDir, fileName);
+            Throwable ex = loadFile(sourcePath, sourceCrc, file);
+            if (ex == null) return;
+
+            // System provided temp directory.
+            try {
+                file = File.createTempFile(sourceCrc, null);
+                if (file.delete() && loadFile(sourcePath, sourceCrc, file) == null) return;
+            } catch (Throwable ignored) {
+            }
+
+            // User home.
+            file = new File(System.getProperty("user.home") + "/.libgdx/" + sourceCrc, fileName);
+            if (loadFile(sourcePath, sourceCrc, file) == null) return;
+
+            // Relative directory.
+            file = new File(".temp/" + sourceCrc, fileName);
+            if (loadFile(sourcePath, sourceCrc, file) == null) return;
+
+            // Fallback to java.library.path location, eg for applets.
+            file = new File(System.getProperty("java.library.path"), sourcePath);
+            if (file.exists()) {
+                System.load(file.getAbsolutePath());
+                return;
+            }
+        }
+
+        loadedLibraries.add(fullLibraryName);
     }
 
     private static Throwable loadFile (String sourcePath, String sourceCrc, File extractedFile) {
