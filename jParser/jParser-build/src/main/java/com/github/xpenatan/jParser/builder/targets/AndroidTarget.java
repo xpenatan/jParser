@@ -38,7 +38,7 @@ public class AndroidTarget extends DefaultBuildTarget {
         }
         String toolchain = ndkHome + "/toolchains/llvm/prebuilt/" + osFolder;
         if(language == SourceLanguage.C) {
-            String compiler = toolchain + "/bin/clangcc";
+            String compiler = toolchain + "/bin/clang";
             cppCompiler.add(compiler);
             linkerCompiler.add(compiler);
         }
