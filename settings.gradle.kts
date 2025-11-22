@@ -45,5 +45,6 @@ include(":example:app:android")
 //        substitute(module("org.teavm:teavm-jso")).using(project(":jso:core"))
 //        substitute(module("org.teavm:teavm-jso-apis")).using(project(":jso:apis"))
 //        substitute(module("org.teavm:teavm-jso-impl")).using(project(":jso:impl"))
+//        substitute(module("org.teavm:teavm-gradle-plugin")).using(project(":tools:gradle"))
 //    }
 //}

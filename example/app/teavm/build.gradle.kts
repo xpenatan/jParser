@@ -1,16 +1,17 @@
 plugins {
     id("java")
-    id("org.gretty") version("3.1.0")
+    id("org.gretty") version("4.1.10")
+}
+
+
+project.extra["webAppDir"] = File(projectDir, "build/dist/webapp")
+gretty {
+    contextPath = "/"
 }
 
 java {
     sourceCompatibility = JavaVersion.toVersion(LibExt.java11Target)
     targetCompatibility = JavaVersion.toVersion(LibExt.java11Target)
-}
-
-gretty {
-    contextPath = "/"
-    extraResourceBase("build/dist/webapp")
 }
 
 dependencies {
