@@ -1,0 +1,5 @@
+
+interface LibBClass {
+    void LibBClass();
+    LibAInstanceClass createInstance(long value);
+};

@@ -12,6 +12,7 @@ java {
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))
     implementation(project(":examples:SharedLib:libA:lib-desktop"))
+    implementation(project(":examples:SharedLib:libB:lib-desktop"))
 
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")

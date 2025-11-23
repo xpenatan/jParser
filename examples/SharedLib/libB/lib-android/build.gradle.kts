@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.github.xpenatan.jparser.example.libA"
+    namespace = "com.github.xpenatan.jparser.example.libB"
     compileSdk = 36
 
     defaultConfig {

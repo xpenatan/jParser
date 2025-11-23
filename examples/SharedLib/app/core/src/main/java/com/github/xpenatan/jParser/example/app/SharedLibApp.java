@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import libA.LibALoader;
+import libB.LibBLoader;
 
 public class SharedLibApp extends ApplicationAdapter {
     private boolean init = false;
@@ -20,11 +21,18 @@ public class SharedLibApp extends ApplicationAdapter {
 
     @Override
     public void create() {
-        LibALoader.init((isSuccess, e) -> {
-            if(e != null) {
-                e.printStackTrace();
+        LibALoader.init((libA_isSuccess, libA_e) -> {
+            if(libA_e != null) {
+                libA_e.printStackTrace();
+                return;
             }
-            init = isSuccess;
+            LibBLoader.init((libB_isSuccess, libB_e) -> {
+                if(libB_e != null) {
+                    libB_e.printStackTrace();
+                    return;
+                }
+                init = true;
+            });
         });
 
         batch = new SpriteBatch();

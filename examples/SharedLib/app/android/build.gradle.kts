@@ -1,16 +1,13 @@
 plugins {
     id("com.android.application")
-    id("kotlin-android")
 }
 
-group = "jparser.app.android"
-
 android {
-    namespace = "com.example.myapplication"
-    compileSdk = 35
+    namespace = "com.github.xpenatan.jParser.example.sharedlib.android"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.myapplication"
+        applicationId = "com.github.xpenatan.jParser.example.sharedlib.android"
         minSdk = 24
         versionCode = 1
         versionName = "1.0"
@@ -18,7 +15,6 @@ android {
 
     sourceSets {
         named("main") {
-//            java.srcDirs("src/main/kotlin")
 //            assets.srcDirs(project.file("../assets"))
             jniLibs.srcDirs("libs")
         }
@@ -34,16 +30,13 @@ android {
         sourceCompatibility = JavaVersion.toVersion(LibExt.java8Target)
         targetCompatibility = JavaVersion.toVersion(LibExt.java8Target)
     }
-    kotlinOptions {
-        jvmTarget = LibExt.java8Target
-    }
 }
 val natives: Configuration by configurations.creating
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
     implementation("com.badlogicgames.gdx:gdx-backend-android:${LibExt.gdxVersion}")
+
     natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-armeabi-v7a")
     natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-arm64-v8a")
     natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-x86_64")
@@ -51,6 +44,7 @@ dependencies {
 
     implementation(project(":examples:SharedLib:app:core"))
     implementation(project(":examples:SharedLib:libA:lib-android"))
+    implementation(project(":examples:SharedLib:libB:lib-android"))
 }
 
 

@@ -9,6 +9,7 @@ java {
 
 dependencies {
     implementation(project(":examples:SharedLib:libA:lib-core"))
+    implementation(project(":examples:SharedLib:libB:lib-core"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
 }

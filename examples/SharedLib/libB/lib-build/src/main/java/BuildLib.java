@@ -11,19 +11,22 @@ import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jParser.builder.tool.BuilderTool;
 import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.idl.IDLReader;
+import java.io.File;
 import java.util.ArrayList;
 
 public class BuildLib {
 
     public static void main(String[] args) throws Exception {
-        String libName = "LibA";
+        String libName = "LibB";
         String modulePrefix = "lib";
-        String basePackage = "libA";
+        String basePackage = "libB";
         String sourceDir = "/src/main/cpp/source";
 
         WindowsMSVCTarget.DEBUG_BUILD = true;
         JParser.CREATE_IDL_HELPER = false;
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
+
+        String libAPath = new File("./../../libA/").getCanonicalPath().replace("\\", "/");
 
         BuildToolOptions.BuildToolParams data = new BuildToolOptions.BuildToolParams();
         data.libName = libName;
@@ -33,36 +36,45 @@ public class BuildLib {
         data.cppSourcePath = sourceDir;
         data.modulePrefix = modulePrefix;
 
-        BuilderTool.build(new BuildToolOptions(data, args), new BuildToolListener() {
+        BuildToolOptions op = new BuildToolOptions(data, args);
+
+        op.addAdditionalIDLRefPath(libAPath + "/lib-build/src/main/cpp/LibA.idl");
+
+        BuilderTool.build(op, new BuildToolListener() {
             @Override
             public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
                 if(op.containsArg("teavm")) {
-                    targets.add(getTeavmTarget(op, idlReader));
+                    targets.add(getTeavmTarget(op, idlReader, libAPath));
                 }
                 if(op.containsArg("windows64")) {
-                    targets.add(getWindowVCTarget(op));
-//                    targets.add(getWindowTarget(op));
+                    targets.add(getWindowVCTarget(op, libAPath));
+//                    targets.add(getWindowTarget(op, libAPath));
                 }
                 if(op.containsArg("linux64")) {
-                    targets.add(getLinuxTarget(op));
+                    targets.add(getLinuxTarget(op, libAPath));
                 }
                 if(op.containsArg("mac64")) {
-                    targets.add(getMacTarget(op, false));
+                    targets.add(getMacTarget(op, false, libAPath));
                 }
                 if(op.containsArg("macArm")) {
-                    targets.add(getMacTarget(op, true));
+                    targets.add(getMacTarget(op, true, libAPath));
                 }
                 if(op.containsArg("android")) {
-                    targets.add(getAndroidTarget(op));
+                    targets.add(getAndroidTarget(op, libAPath));
                 }
                 if(op.containsArg("ios")) {
-                    targets.add(getIOSTarget(op));
+                    targets.add(getIOSTarget(op, libAPath));
                 }
             }
         });
     }
 
-    private static BuildMultiTarget getWindowTarget(BuildToolOptions op) {
+    private static BuildMultiTarget getWindowTarget(BuildToolOptions op, String libAPath) {
+        String libALibPath = libAPath + "/lib-build/build/libs/windows";
+        String libACPPPath = libAPath + "/lib-build/src/main/cpp";
+        String libASourcePath = libACPPPath + "/source";
+        String libACustomPath = libACPPPath + "/custom";
+
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -87,7 +99,12 @@ public class BuildLib {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getWindowVCTarget(BuildToolOptions op) {
+    private static BuildMultiTarget getWindowVCTarget(BuildToolOptions op, String libAPath) {
+        String libALibPath = libAPath + "/lib-build/build/c++/libs/windows/vc";
+        String libACPPPath = libAPath + "/lib-build/src/main/cpp";
+        String libASourcePath = libACPPPath + "/source";
+        String libACustomPath = libACPPPath + "/custom";
+
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -98,6 +115,7 @@ public class BuildLib {
         compileStaticTarget.cppFlags.add("-std:c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.headerDirs.add("-I" + libASourcePath);
         multiTarget.add(compileStaticTarget);
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
@@ -106,14 +124,16 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.headerDirs.add("-I" + libASourcePath);
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add(libALibPath + "/LibA64.lib");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 
         return multiTarget;
     }
 
-    private static BuildMultiTarget getLinuxTarget(BuildToolOptions op) {
+    private static BuildMultiTarget getLinuxTarget(BuildToolOptions op, String libAPath) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -140,7 +160,7 @@ public class BuildLib {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm) {
+    private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm, String libAPath) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -173,7 +193,11 @@ public class BuildLib {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getTeavmTarget(BuildToolOptions op, IDLReader idlReader) {
+    private static BuildMultiTarget getTeavmTarget(BuildToolOptions op, IDLReader idlReader, String libAPath) {
+        String libACPPPath = libAPath + "/lib-build/src/main/cpp";
+        String libASourcePath = libACPPPath + "/source";
+        String libACustomPath = libACPPPath + "/custom";
+
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -193,13 +217,18 @@ public class BuildLib {
         linkTarget.idlReader = idlReader;
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.cppFlags.add("-std=c++11");
-        linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibACustomCode.h");
+        linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibBCustomCode.h");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
         multiTarget.add(linkTarget);
         return multiTarget;
     }
 
-    private static BuildMultiTarget getAndroidTarget(BuildToolOptions op) {
+    private static BuildMultiTarget getAndroidTarget(BuildToolOptions op, String libAPath) {
+        String libALibPath = libAPath + "/lib-build/build/c++/libs/android/";
+        String libACPPPath = libAPath + "/lib-build/src/main/cpp";
+        String libASourcePath = libACPPPath + "/source";
+        String libACustomPath = libACPPPath + "/custom";
+
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -220,6 +249,7 @@ public class BuildLib {
             compileStaticTarget.isStatic = true;
             compileStaticTarget.cppFlags.add("-std=c++11");
             compileStaticTarget.headerDirs.add("-I" + sourceDir);
+            compileStaticTarget.headerDirs.add("-I" + libASourcePath);
             compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
             multiTarget.add(compileStaticTarget);
 
@@ -229,7 +259,9 @@ public class BuildLib {
             linkTarget.headerDirs.add("-I" + sourceDir);
             linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+            linkTarget.headerDirs.add("-I" + libASourcePath);
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() +"/lib" + op.libName + ".a");
+            linkTarget.linkerFlags.add(libALibPath + target.getFolder() + "/libLibA.a");
             linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
             multiTarget.add(linkTarget);
         }
@@ -237,7 +269,7 @@ public class BuildLib {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getIOSTarget(BuildToolOptions op)  {
+    private static BuildMultiTarget getIOSTarget(BuildToolOptions op, String libAPath)  {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();

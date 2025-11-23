@@ -31,6 +31,13 @@ include(":examples:SharedLib:libA:lib-desktop")
 include(":examples:SharedLib:libA:lib-teavm")
 include(":examples:SharedLib:libA:lib-android")
 
+include(":examples:SharedLib:libB:lib-build")
+include(":examples:SharedLib:libB:lib-base")
+include(":examples:SharedLib:libB:lib-core")
+include(":examples:SharedLib:libB:lib-desktop")
+include(":examples:SharedLib:libB:lib-teavm")
+include(":examples:SharedLib:libB:lib-android")
+
 include(":examples:SharedLib:app:core")
 include(":examples:SharedLib:app:desktop")
 include(":examples:SharedLib:app:teavm")
