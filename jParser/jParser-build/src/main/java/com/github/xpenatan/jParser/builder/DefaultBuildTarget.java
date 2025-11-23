@@ -5,6 +5,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -25,6 +26,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     public final ArrayList<String> cppInclude = new ArrayList<>();
     public final ArrayList<String> cppExclude = new ArrayList<>();
 
+    public HashMap<String, String> environment = new HashMap<>();
     public ArrayList<String> cppCompiler = new ArrayList<>();
     public ArrayList<String> linkerCompiler = new ArrayList<>();
     public String compilerOutputCommand = "-o";
@@ -130,7 +132,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
                         threadCommands.addAll(cppFlags);
                         threadCommands.addAll(headerDirs);
                         threadCommands.add(path);
-                        boolean flag = JProcess.startProcess(config.buildDir.file(), threadCommands);
+                        boolean flag = JProcess.startProcess(config.buildDir.file(), threadCommands, environment);
                         if(!flag) {
                             multiCoreCompile = false;
                             throw new RuntimeException("Compile Error");
@@ -166,7 +168,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
             compilerCommands.addAll(headerDirs);
             compilerCommands.add("@" + cppList.path());
             System.out.println("##### COMPILE #####");
-            boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands);
+            boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands, environment);
             if(!flag) {
                 return false;
             }
@@ -222,7 +224,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         onLink(compiledObjects, objList.path(), libPath);
 
         System.out.println("##### LINK #####");
-        return JProcess.startProcess(childTarget.file(), linkerCommands);
+        return JProcess.startProcess(childTarget.file(), linkerCommands, environment);
     }
 
     protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {

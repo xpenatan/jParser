@@ -124,16 +124,12 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         }
         else {
             String postPath = createPostJS(jsglueDir, libName);
-            linkerFlags.add("--llvm-lto");
-            linkerFlags.add("1");
             linkerFlags.add("-s");
             linkerFlags.add("ALLOW_MEMORY_GROWTH=1");
             linkerFlags.add("-s");
             linkerFlags.add("ALLOW_TABLE_GROWTH=1");
             linkerFlags.add("-s");
             linkerFlags.add("MODULARIZE=1");
-            linkerFlags.add("-s");
-            linkerFlags.add("NO_FILESYSTEM=1");
             linkerFlags.add("-s");
             linkerFlags.add("INITIAL_MEMORY=" + initialMemory);
             linkerFlags.add("-s");
@@ -218,7 +214,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         generateGlueCommand.add(WEBIDL_BINDER_SCRIPT);
         generateGlueCommand.add(mergedIDLFile.toString());
         generateGlueCommand.add("glue");
-        return JProcess.startProcess(jsglueDir.file(), generateGlueCommand);
+        return JProcess.startProcess(jsglueDir.file(), generateGlueCommand, environment);
     }
 
     private CustomFileDescriptor mergeIDLFile(CustomFileDescriptor jsglueDir) {

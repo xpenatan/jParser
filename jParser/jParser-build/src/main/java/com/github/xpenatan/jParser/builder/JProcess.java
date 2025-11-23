@@ -6,30 +6,31 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class JProcess {
 
-    public static void executeNdk (String directory) {
+    public static void executeNdk (String directory, Map<String, String> environment) {
         CustomFileDescriptor build = new CustomFileDescriptor(directory);
         String command = "ndk-build";
         String [] array = new String[1];
         array[0] = command;
-        startProcess(build.file(), array);
+        startProcess(build.file(), array, environment);
     }
 
-    public static boolean startProcess (ArrayList<String> command) {
+    public static boolean startProcess (ArrayList<String> command, Map<String, String> environment) {
         String [] array = new String[command.size()];
         command.toArray(array);
-        return startProcess(new File(System.getProperty("user.home")), array);
+        return startProcess(new File(System.getProperty("user.home")), array, environment);
     }
 
-    public static boolean startProcess (File directory, ArrayList<String> command) {
+    public static boolean startProcess (File directory, ArrayList<String> command,  Map<String, String> environment) {
         String [] array = new String[command.size()];
         command.toArray(array);
-        return startProcess(directory, array);
+        return startProcess(directory, array, environment);
     }
 
-    public static boolean startProcess (File directory, String[] commands) {
+    public static boolean startProcess (File directory, String[] commands, Map<String, String> environment) {
         try {
             System.out.println("Directory: " + directory.getPath());
             System.out.println("Command: " + commands[0]);
@@ -38,7 +39,9 @@ public class JProcess {
                 System.out.println("Param: " + command);
             }
 
-            final Process process = new ProcessBuilder(commands)
+            ProcessBuilder processBuilder = new ProcessBuilder(commands);
+            processBuilder.environment().putAll(environment);
+            final Process process = processBuilder
                     .redirectErrorStream(true)
                     .directory(directory)
                     .start();

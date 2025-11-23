@@ -59,13 +59,16 @@ public class JParserLibraryLoader {
         String scriptPath = JMultiplatform.getInstance().getMap().getObject(JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH, String.class);
         if(scriptPath != null) {
             if(fullLibraryName.endsWith(".wasm.js")) {
-                loadWasm(lis, fullLibraryName, scriptPath, "", false);
+                loadWasm(lis, fullLibraryName, scriptPath, "", false, true);
+            }
+            else if(fullLibraryName.endsWith(".wasm")) {
+                loadWasm(lis, fullLibraryName, scriptPath, "", false, false);
             }
             else if(fullLibraryName.endsWith(".js")) {
                 loadJS(lis, fullLibraryName, scriptPath);
             }
             else {
-                loadWasm(lis, fullLibraryName, scriptPath, ".wasm.js",true);
+                loadWasm(lis, fullLibraryName, scriptPath, ".wasm.js",true, true);
             }
         }
         else {
@@ -75,15 +78,20 @@ public class JParserLibraryLoader {
         }
     }
 
-    private static void loadWasm(JParserLibraryLoaderListener listener, String libraryName, String prefix, String postfix, boolean fallback) {
+    private static void loadWasm(JParserLibraryLoaderListener listener, String libraryName, String prefix, String postfix, boolean fallback, boolean autoLoadWasm) {
         loadScript(libraryName, (isSuccess, e) -> {
             if(isSuccess) {
                 // Wasm requires to setup wasm first
-                String fullLibName = libraryName + "OnInit";
-                setOnLoadInit(fullLibName, () -> {
-                    loadedLibraries.add(libraryName);
+                if(autoLoadWasm) {
+                    String fullLibName = libraryName + "OnInit";
+                    setOnLoadInit(fullLibName, () -> {
+                        loadedLibraries.add(libraryName);
+                        listener.onLoad(true, null);
+                    });
+                }
+                else {
                     listener.onLoad(true, null);
-                });
+                }
             }
             else {
                 if(fallback) {
