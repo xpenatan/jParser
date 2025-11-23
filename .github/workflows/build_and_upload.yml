@@ -57,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
   build_linux:
     name: Build Linux
@@ -92,7 +92,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
   build_mac:
     name: Build Mac
@@ -124,7 +124,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mac-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
   build_teavm:
     name: Build TeaVM
@@ -164,7 +164,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: teavm-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
   build_android:
     name: Build Android
@@ -209,7 +209,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
   
   upload_natives:
     name: Upload Natives
@@ -250,31 +250,31 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: windows-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
       - name: Download linux natives
         uses: actions/download-artifact@v4
         with:
           name: linux-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
       - name: Download mac natives
         uses: actions/download-artifact@v4
         with:
           name: mac-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
       - name: Download android natives
         uses: actions/download-artifact@v4
         with:
           name: android-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
       - name: Download teavm natives
         uses: actions/download-artifact@v4
         with:
           name: teavm-natives
-          path: ./example/lib/lib-build/build/c++/libs/
+          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
       - name: Generate Java classes
         run: ./gradlew TestLib_build_project
