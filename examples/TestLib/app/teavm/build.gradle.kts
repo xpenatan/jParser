@@ -15,41 +15,41 @@ java {
 }
 
 dependencies {
-    implementation(project(":example:app:core"))
-    implementation(project(":example:lib:lib-teavm"))
+    implementation(project(":examples:TestLib:app:core"))
+    implementation(project(":examples:TestLib:lib:lib-teavm"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
     implementation("com.github.xpenatan.gdx-teavm:backend-teavm:${LibExt.gdxTeaVMVersion}")
 }
 
-tasks.register<JavaExec>("build-app-teavm") {
+tasks.register<JavaExec>("TestLib_build_app_teavm") {
     group = "example-teavm"
     description = "Build teavm app"
     mainClass.set("Build")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register("run-app-teavm") {
+tasks.register("TestLib_run_app_teavm") {
     group = "example-teavm"
     description = "Run teavm app"
-    val list = listOf("build-app-teavm", "jettyRun")
+    val list = listOf("TestLib_build_app_teavm", "jettyRun")
     dependsOn(list)
 
-    tasks.findByName("jettyRun")?.mustRunAfter("build-app-teavm")
+    tasks.findByName("jettyRun")?.mustRunAfter("TestLib_build_app_teavm")
 }
 
-tasks.register<JavaExec>("build-benchmark-teavm") {
+tasks.register<JavaExec>("TestLib_build_benchmark_teavm") {
     group = "example-teavm"
     description = "Build teavm benchmark"
     mainClass.set("BenchmarkBuild")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register("run-benchmark-teavm") {
+tasks.register("TestLib_run_benchmark_teavm") {
     group = "example-teavm"
     description = "Run teavm benchmark"
-    val list = listOf("build-benchmark-teavm", "jettyRun")
+    val list = listOf("TestLib_build_benchmark_teavm", "jettyRun")
     dependsOn(list)
 
-    tasks.findByName("jettyRun")?.mustRunAfter("build-benchmark-teavm")
+    tasks.findByName("jettyRun")?.mustRunAfter("TestLib_build_benchmark_teavm")
 }

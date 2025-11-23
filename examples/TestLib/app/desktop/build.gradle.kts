@@ -10,15 +10,15 @@ java {
 }
 
 dependencies {
-    implementation(project(":example:app:core"))
-    implementation(project(":example:lib:lib-core"))
-    implementation(project(":example:lib:lib-desktop"))
+    implementation(project(":examples:TestLib:app:core"))
+    implementation(project(":examples:TestLib:lib:lib-core"))
+    implementation(project(":examples:TestLib:lib:lib-desktop"))
 
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 }
 
-tasks.register<JavaExec>("run-app-desktop") {
+tasks.register<JavaExec>("TestLib_run_app_desktop") {
     group = "example-desktop"
     description = "Run desktop app"
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
@@ -29,7 +29,7 @@ tasks.register<JavaExec>("run-app-desktop") {
     }
 }
 
-tasks.register<JavaExec>("run-benchmark-desktop") {
+tasks.register<JavaExec>("TestLib_run_benchmark_desktop") {
     group = "example-desktop"
     description = "Run desktop app"
     mainClass.set("com.github.xpenatan.jParser.example.app.BenchmarkMain")

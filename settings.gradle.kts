@@ -12,22 +12,23 @@ include(":idl:idl-teavm")
 include(":loader:loader-core")
 include(":loader:loader-teavm")
 
-include(":example:lib:lib-build")
-include(":example:lib:lib-base")
-include(":example:lib:lib-core")
-include(":example:lib:lib-desktop")
-include(":example:lib:lib-teavm")
-include(":example:lib:lib-android")
+include(":examples:TestLib:lib:lib-build")
+include(":examples:TestLib:lib:lib-base")
+include(":examples:TestLib:lib:lib-core")
+include(":examples:TestLib:lib:lib-desktop")
+include(":examples:TestLib:lib:lib-teavm")
+include(":examples:TestLib:lib:lib-android")
+
+include(":examples:TestLib:app:core")
+include(":examples:TestLib:app:desktop")
+include(":examples:TestLib:app:teavm")
+include(":examples:TestLib:app:android")
 
 //include(":example:lib-ext:ext-base")
 //include(":example:lib-ext:ext-build")
 //include(":example:lib-ext:ext-core")
 //include(":example:lib-ext:ext-teavm")
 
-include(":example:app:core")
-include(":example:app:desktop")
-include(":example:app:teavm")
-include(":example:app:android")
 
 //includeBuild("E:\\Dev\\Projects\\java\\gdx-teavm") {
 //    dependencySubstitution {

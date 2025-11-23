@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run-benchmark-desktop" type="GradleRunConfiguration" factoryName="Gradle" folderName="lib-run">
+  <configuration default="false" name="TestLib_build_project_windows64" type="GradleRunConfiguration" factoryName="Gradle" folderName="TestLib-build">
     <ExternalSystemSettings>
       <option name="executionName" />
-      <option name="externalProjectPath" value="$PROJECT_DIR$/example/app/desktop" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$/examples/TestLib/lib/lib-build" />
       <option name="externalSystemIdString" value="GRADLE" />
       <option name="scriptParameters" value="" />
       <option name="taskDescriptions">
@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="run-benchmark-desktop" />
+          <option value="TestLib_build_project_windows64" />
         </list>
       </option>
       <option name="vmOptions" />

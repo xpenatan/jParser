@@ -51,7 +51,7 @@ jobs:
           value: $env:PATH;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build
 
       - name: Build project
-        run: ./gradlew build_project_windows64
+        run: ./gradlew TestLib_build_project_windows64
 
       - name: Upload natives
         uses: actions/upload-artifact@v4
@@ -86,7 +86,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project
-        run: ./gradlew build_project_linux64
+        run: ./gradlew TestLib_build_project_linux64
 
       - name: Upload natives
         uses: actions/upload-artifact@v4
@@ -118,7 +118,7 @@ jobs:
 
       - name: Build project
         run: |
-          ./gradlew build_project_mac64 build_project_macArm
+          ./gradlew TestLib_build_project_mac64 TestLib_build_project_macArm
 
       - name: Upload natives
         uses: actions/upload-artifact@v4
@@ -158,7 +158,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project
-        run: ./gradlew build_project_teavm
+        run: ./gradlew TestLib_build_project_teavm
 
       - name: Upload natives
         uses: actions/upload-artifact@v4
@@ -202,7 +202,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project
-        run: ./gradlew build_project_android
+        run: ./gradlew TestLib_build_project_android
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       - name: Upload natives
@@ -277,7 +277,7 @@ jobs:
           path: ./example/lib/lib-build/build/c++/libs/
 
       - name: Generate Java classes
-        run: ./gradlew build_project
+        run: ./gradlew TestLib_build_project
 
       - name: Upload Release to repository
         uses: nick-fields/retry@v3

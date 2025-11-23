@@ -28,7 +28,7 @@ dependencies {
     else {
         testImplementation(project(":loader:loader-core"))
     }
-    testImplementation(project(":example:lib:lib-core"))
+    testImplementation(project(":examples:TestLib:lib:lib-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 

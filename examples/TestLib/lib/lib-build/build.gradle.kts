@@ -10,7 +10,7 @@ java {
 val mainClassName = "BuildLib"
 
 dependencies {
-    implementation(project(":example:lib:lib-base"))
+    implementation(project(":examples:TestLib:lib:lib-base"))
 
     if(LibExt.exampleUseRepoLibs) {
         implementation("com.github.xpenatan.jParser:jParser-core:-SNAPSHOT")
@@ -30,7 +30,7 @@ dependencies {
     }
 }
 
-tasks.register<JavaExec>("build_project") {
+tasks.register<JavaExec>("TestLib_build_project") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -38,7 +38,7 @@ tasks.register<JavaExec>("build_project") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_all") {
+tasks.register<JavaExec>("TestLib_build_project_all") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -46,7 +46,7 @@ tasks.register<JavaExec>("build_project_all") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_teavm") {
+tasks.register<JavaExec>("TestLib_build_project_teavm") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -54,7 +54,7 @@ tasks.register<JavaExec>("build_project_teavm") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_windows64") {
+tasks.register<JavaExec>("TestLib_build_project_windows64") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -62,7 +62,7 @@ tasks.register<JavaExec>("build_project_windows64") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_linux64") {
+tasks.register<JavaExec>("TestLib_build_project_linux64") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -70,7 +70,7 @@ tasks.register<JavaExec>("build_project_linux64") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_mac64") {
+tasks.register<JavaExec>("TestLib_build_project_mac64") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -78,7 +78,7 @@ tasks.register<JavaExec>("build_project_mac64") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_macArm") {
+tasks.register<JavaExec>("TestLib_build_project_macArm") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -86,7 +86,7 @@ tasks.register<JavaExec>("build_project_macArm") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_android") {
+tasks.register<JavaExec>("TestLib_build_project_android") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -94,7 +94,7 @@ tasks.register<JavaExec>("build_project_android") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("build_project_ios") {
+tasks.register<JavaExec>("TestLib_build_project_ios") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
