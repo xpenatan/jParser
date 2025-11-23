@@ -114,8 +114,8 @@ public class BuildLib {
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std:c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
-        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
@@ -126,7 +126,7 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.headerDirs.add("-I" + libASourcePath);
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
-        linkTarget.linkerFlags.add(libALibPath + "/LibA64.lib");
+        linkTarget.linkerFlags.add(libALibPath + "/LibA64_.lib");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 
@@ -134,6 +134,11 @@ public class BuildLib {
     }
 
     private static BuildMultiTarget getLinuxTarget(BuildToolOptions op, String libAPath) {
+        String libALibPath = libAPath + "/lib-build/build/c++/libs/linux";
+        String libACPPPath = libAPath + "/lib-build/src/main/cpp";
+        String libASourcePath = libACPPPath + "/source";
+        String libACustomPath = libACPPPath + "/custom";
+
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -143,6 +148,7 @@ public class BuildLib {
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + libASourcePath);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
@@ -152,7 +158,9 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.headerDirs.add("-I" + libASourcePath);
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
+        linkTarget.linkerFlags.add(libALibPath + "/LibA64_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);
@@ -161,6 +169,12 @@ public class BuildLib {
     }
 
     private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm, String libAPath) {
+        String libALibPath = libAPath + "/lib-build/build/c++/libs/mac";
+        String libALibArmPath = libALibPath + "/arm";
+        String libACPPPath = libAPath + "/lib-build/src/main/cpp";
+        String libASourcePath = libACPPPath + "/source";
+        String libACustomPath = libACPPPath + "/custom";
+
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -170,6 +184,7 @@ public class BuildLib {
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.isStatic = true;
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + libASourcePath);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
@@ -179,12 +194,15 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.headerDirs.add("-I" + libASourcePath);
 
         if(isArm) {
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/lib" + op.libName + "64_.a");
+            linkTarget.linkerFlags.add(libALibArmPath + "/LibA64_.a");
         }
         else {
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64_.a");
+            linkTarget.linkerFlags.add(libALibPath + "/LibA64_.a");
         }
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
@@ -208,6 +226,7 @@ public class BuildLib {
         compileStaticTarget.isStatic = true;
         compileStaticTarget.compileGlueCode = false;
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + libASourcePath);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         compileStaticTarget.cppFlags.add("-std=c++11");
         multiTarget.add(compileStaticTarget);
@@ -216,6 +235,7 @@ public class BuildLib {
         EmscriptenTarget linkTarget = new EmscriptenTarget();
         linkTarget.idlReader = idlReader;
         linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + libASourcePath);
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibBCustomCode.h");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
