@@ -1,9 +1,9 @@
-interface LibAInstanceClass {
-    void LibAInstanceClass();
+interface LibAData {
+    void LibAData();
     attribute long intValue;
 };
 
-interface LibAClass {
-    void LibAClass();
-    long addInt(LibAInstanceClass obj1, LibAInstanceClass obj2);
+interface LibA {
+    void LibA();
+    long addInt(LibAData obj1, LibAData obj2);
 };

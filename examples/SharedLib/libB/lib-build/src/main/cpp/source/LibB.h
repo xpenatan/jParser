@@ -2,20 +2,15 @@
 
 #include "LibA.h"
 
-class LibBClass {
+class LibB {
     private:
 
     public:
+        LibB() { };
+        ~LibB() { };
 
-        LibBClass() {
-
-        };
-        ~LibBClass() {
-
-        };
-
-        LibAInstanceClass* createInstance(int value) {
-            LibAInstanceClass* instance = new LibAInstanceClass();
+        LibAData* createInstance(int value) {
+            LibAData* instance = new LibAData();
             instance->intValue = value;
             return instance;
         }

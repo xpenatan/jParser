@@ -1,25 +1,25 @@
 #pragma once
 
-class LibAInstanceClass {
+class LibAData {
     private:
 
     public:
         int intValue;
 };
 
-class LibAClass {
+class LibA {
     private:
 
     public:
 
-        LibAClass() {
+        LibA() {
 
         };
-        ~LibAClass() {
+        ~LibA() {
 
         };
 
-        int addInt(LibAInstanceClass* obj1, LibAInstanceClass* obj2) {
+        int addInt(LibAData* obj1, LibAData* obj2) {
             return obj1->intValue + obj2->intValue;
         }
 };

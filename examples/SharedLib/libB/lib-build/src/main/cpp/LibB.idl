@@ -1,5 +1,5 @@
 
-interface LibBClass {
-    void LibBClass();
-    LibAInstanceClass createInstance(long value);
+interface LibB {
+    void LibB();
+    LibAData createInstance(long value);
 };
