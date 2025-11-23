@@ -1,5 +1,6 @@
 package com.github.xpenatan.jParser.builder;
 
+import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -63,9 +64,12 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         }
 
         CustomFileDescriptor idlHelperCPP = new CustomFileDescriptor(helperName, CustomFileDescriptor.FileType.Classpath);
-        idlHelperCPP.copyTo(idlDir, false);
         idlHelperHFile = idlDir.child(idlHelperCPP.name());
         headerDirs.add("-I" + idlDir.path());
+
+        if(JParser.CREATE_IDL_HELPER) {
+            copyIDLHelperToBuildDir();
+        }
 
         setup(config);
         return build(config, childTarget);
@@ -304,5 +308,9 @@ public abstract class DefaultBuildTarget extends BuildTarget {
                 }
             }
         }
+    }
+
+    public void copyIDLHelperToBuildDir() {
+        idlHelperHFile.copyTo(idlDir, false);
     }
 }

@@ -3,6 +3,7 @@ package com.github.xpenatan.jParser.builder.targets;
 import com.github.xpenatan.jParser.builder.BuildConfig;
 import com.github.xpenatan.jParser.builder.DefaultBuildTarget;
 import com.github.xpenatan.jParser.builder.JProcess;
+import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.util.ArrayList;
@@ -95,7 +96,9 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
         if(compileGlueCode && !isStatic) {
             cppInclude.add("**/jsglue/*.cpp");
-            headerDirs.add("-include" + idlHelperHFile.path());
+            if(JParser.CREATE_IDL_HELPER) {
+                headerDirs.add("-include" + idlHelperHFile.path());
+            }
         }
 
         if(idlReader != null) {

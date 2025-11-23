@@ -24,6 +24,18 @@ include(":examples:TestLib:app:desktop")
 include(":examples:TestLib:app:teavm")
 include(":examples:TestLib:app:android")
 
+include(":examples:SharedLib:libA:lib-build")
+include(":examples:SharedLib:libA:lib-base")
+include(":examples:SharedLib:libA:lib-core")
+include(":examples:SharedLib:libA:lib-desktop")
+include(":examples:SharedLib:libA:lib-teavm")
+include(":examples:SharedLib:libA:lib-android")
+
+include(":examples:SharedLib:app:core")
+include(":examples:SharedLib:app:desktop")
+include(":examples:SharedLib:app:teavm")
+include(":examples:SharedLib:app:android")
+
 //include(":example:lib-ext:ext-base")
 //include(":example:lib-ext:ext-build")
 //include(":example:lib-ext:ext-core")

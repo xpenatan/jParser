@@ -25,8 +25,6 @@ public class NativeCPPGenerator implements CppGenerator {
     private static final Map<String, ArgumentType> otherTypes;
     private static final Map<ArgumentType, String> valueTypes;
 
-    private static String helperName = "IDLHelper.h";
-
     static {
         valueTypes = new HashMap<>();
         valueTypes.put(ArgumentType.Boolean, "Z");
@@ -118,7 +116,6 @@ public class NativeCPPGenerator implements CppGenerator {
             init = false;
             headerPrinter.append("#pragma once\n");
             headerPrinter.append("#include <jni.h>\n");
-            headerPrinter.append("#include \"" + helperName + "\"\n");
             mainPrinter.append("\n");
             mainPrinter.append("extern \"C\" {\n");
             mainPrinter.append("\n");
