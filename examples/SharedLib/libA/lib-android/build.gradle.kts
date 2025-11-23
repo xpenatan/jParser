@@ -6,8 +6,8 @@ plugins {
 group = "jparser.lib.android"
 
 android {
-    namespace = "com.github.xpenatan.jparser.example.testlib"
-    compileSdk = 35
+    namespace = "com.github.xpenatan.jparser.example.libA"
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 21
