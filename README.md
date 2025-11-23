@@ -21,7 +21,7 @@ jParser consists of two main components:
 2. **C/C++ Compilation**: It compiles the C/C++ code for various platforms, including Windows, Linux, macOS, Android, iOS, and the Web.
 
 ## WebIDL
-To further streamline the lengthy process of manually porting each method, jParser includes support for Emscripten WebIDL. By creating a WebIDL file, you can automatically generate binding code for both JNI and TeaVM. While this feature may not cover every scenario, it significantly reduces the effort required to bind large libraries. For a comprehensive example, refer to the `example:lib` module or `gdx-imgui`.
+To further streamline the lengthy process of manually porting each method, jParser includes support for Emscripten WebIDL. By creating a WebIDL file, you can automatically generate binding code for both JNI and TeaVM. While this feature may not cover every scenario, it significantly reduces the effort required to bind large libraries. For a comprehensive example, refer to the `examples:TestLib` module.
 
 The generated methods will match those defined in the WebIDL file. If the C++ code is case-sensitive, as seen in ImGui, the corresponding Java methods will also maintain case sensitivity. Additionally, C/C++ attributes are converted into methods prefixed with `set_` or `get_`.
 
