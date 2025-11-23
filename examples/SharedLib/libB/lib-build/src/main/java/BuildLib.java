@@ -292,6 +292,7 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+        linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
         multiTarget.add(linkTarget);
 
         return multiTarget;
