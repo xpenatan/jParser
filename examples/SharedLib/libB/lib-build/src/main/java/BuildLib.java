@@ -212,6 +212,7 @@ public class BuildLib {
     }
 
     private static BuildMultiTarget getTeavmTarget(BuildToolOptions op, IDLReader idlReader, String libAPath) {
+        String libALibPath = libAPath + "/lib-build/build/c++/libs/emscripten";
         String libACPPPath = libAPath + "/lib-build/src/main/cpp";
         String libASourcePath = libACPPPath + "/source";
         String libACustomPath = libACPPPath + "/custom";
@@ -239,6 +240,8 @@ public class BuildLib {
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibBCustomCode.h");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
+        linkTarget.mainModuleName = "LibA";
+        linkTarget.linkerFlags.add(libALibPath + "/LibA_.a");
         multiTarget.add(linkTarget);
         return multiTarget;
     }

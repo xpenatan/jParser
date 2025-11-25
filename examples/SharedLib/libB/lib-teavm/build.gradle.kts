@@ -7,7 +7,7 @@ java {
     targetCompatibility = JavaVersion.toVersion(LibExt.java11Target)
 }
 
-val emscriptenFile = "$projectDir/../lib-build/build/c++/libs/emscripten/LibB.wasm"
+val emscriptenFile = "$projectDir/../lib-build/build/c++/libs/emscripten/LibB.wasm.js"
 
 tasks.jar {
     from(emscriptenFile)

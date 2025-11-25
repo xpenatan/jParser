@@ -59,16 +59,13 @@ public class JParserLibraryLoader {
         String scriptPath = JMultiplatform.getInstance().getMap().getObject(JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH, String.class);
         if(scriptPath != null) {
             if(fullLibraryName.endsWith(".wasm.js")) {
-                loadWasm(lis, fullLibraryName, scriptPath, "", false, true);
-            }
-            else if(fullLibraryName.endsWith(".wasm")) {
-                loadWasm(lis, fullLibraryName, scriptPath, "", false, false);
+                loadWasm(lis, fullLibraryName, scriptPath, "", true);
             }
             else if(fullLibraryName.endsWith(".js")) {
                 loadJS(lis, fullLibraryName, scriptPath);
             }
             else {
-                loadWasm(lis, fullLibraryName, scriptPath, ".wasm.js",true, true);
+                loadWasm(lis, fullLibraryName, scriptPath, ".wasm.js",true);
             }
         }
         else {
@@ -78,29 +75,23 @@ public class JParserLibraryLoader {
         }
     }
 
-    private static void loadWasm(JParserLibraryLoaderListener listener, String libraryName, String prefix, String postfix, boolean fallback, boolean autoLoadWasm) {
+    private static void loadWasm(JParserLibraryLoaderListener listener, String libraryName, String prefix, String postfix, boolean autoLoadWasm) {
+        if(autoLoadWasm) {
+            String fullLibName = libraryName + "OnInit";
+            setOnLoadInit(fullLibName, () -> {
+                loadedLibraries.add(libraryName);
+                listener.onLoad(true, null);
+            });
+        }
         loadScript(libraryName, (isSuccess, e) -> {
             if(isSuccess) {
                 // Wasm requires to setup wasm first
-                if(autoLoadWasm) {
-                    String fullLibName = libraryName + "OnInit";
-                    setOnLoadInit(fullLibName, () -> {
-                        loadedLibraries.add(libraryName);
-                        listener.onLoad(true, null);
-                    });
-                }
-                else {
+                if(!autoLoadWasm) {
                     listener.onLoad(true, null);
                 }
             }
             else {
-                if(fallback) {
-                    // Fallback to javascript
-                    loadJS(listener, libraryName, prefix);
-                }
-                else {
-                    listener.onLoad(false, e);
-                }
+                listener.onLoad(false, e);
             }
         }, prefix, postfix);
     }
@@ -113,7 +104,7 @@ public class JParserLibraryLoader {
             else {
                 listener.onLoad(false, e);
             }
-        }, prefix, ".js");
+        }, prefix, "");
     }
 
     private static void loadScript(String libraryName, JParserLibraryLoaderListener listener, String prefix, String postfix) {

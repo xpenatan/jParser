@@ -30,6 +30,8 @@ public class EmscriptenTarget extends DefaultBuildTarget {
     public ArrayList<String> exportedFunctions = new ArrayList<>();
     public ArrayList<String> exportedRuntimeMethods = new ArrayList<>();
 
+    public String mainModuleName = null;
+
     public EmscriptenTarget() {
         this(SourceLanguage.CPP);
     }
@@ -63,6 +65,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
         exportedFunctions.add("_free");
         exportedFunctions.add("_malloc");
+        exportedFunctions.add("__Znwm");
 
         exportedRuntimeMethods.add("UTF8ToString");
         exportedRuntimeMethods.add("HEAP8");
@@ -72,6 +75,10 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         exportedRuntimeMethods.add("HEAP32");
         exportedRuntimeMethods.add("HEAPU32");
         exportedRuntimeMethods.add("HEAPF32");
+        exportedRuntimeMethods.add("loadWebAssemblyModule");
+//        exportedRuntimeMethods.add("LDSO");
+//        exportedRuntimeMethods.add("asyncLoad");
+//        exportedRuntimeMethods.add("loadDynamicLibrary");
 
         if(DEBUG_BUILD) {
             cppFlags.add("-O0");
@@ -126,6 +133,14 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             }
         }
         else {
+            if(mainModuleName != null && !mainModuleName.isEmpty()) {
+                linkerFlags.add("-sSIDE_MODULE=2");
+                libSuffix = ".wasm";
+                exportedFunctions.clear();
+            }
+            else {
+                linkerFlags.add("-sMAIN_MODULE=2");
+            }
             String postPath = createPostJS(jsglueDir, libName);
             linkerFlags.add("-s");
             linkerFlags.add("ALLOW_MEMORY_GROWTH=1");
@@ -181,7 +196,16 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("EXPORT_NAME='" + libName + "'");
         }
 
-        return super.build(config, buildTargetTemp);
+        boolean success = super.build(config, buildTargetTemp);
+
+        if(success && !isStatic) {
+            if(mainModuleName != null && !mainModuleName.isEmpty()) {
+                CustomFileDescriptor libDir = config.libDir.child(libDirSuffix);
+                createSideModule(jsglueDir, libName, libDir);
+            }
+        }
+
+        return success;
     }
 
     @Override
@@ -206,6 +230,24 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         return postJS.path();
     }
 
+    private void createSideModule(CustomFileDescriptor jsglueDir, String libName, CustomFileDescriptor libDir) {
+        CustomFileDescriptor sideModuleFile = new CustomFileDescriptor("emscripten/sidemodule.js", CustomFileDescriptor.FileType.Classpath);
+        CustomFileDescriptor glueFile = jsglueDir.child("glue.js");
+        String glueText = glueFile.readString();
+        String s = sideModuleFile.readString();
+        s = s.replace("[MAIN_MODULE_NAME]", mainModuleName);
+        s = s.replace("[SIDE_MODULE_NAME]", libName);
+        s = s.replace("[SIDE_MODULE_WASM]", libName + ".wasm");
+        s = s.replace("[GLUE_CODE]", glueText);
+        CustomFileDescriptor wasmFile = libDir.child(libName + ".wasm");
+        byte[] wasmBytes = wasmFile.readBytes();
+        String base64 = java.util.Base64.getEncoder().encodeToString(wasmBytes);
+        s = s.replace("[WASM_BIN]", base64);
+        s = minifyJS(s);
+        CustomFileDescriptor jsFile = libDir.child(libName + ".wasm.js");
+        jsFile.writeString(s, false);
+    }
+
     private boolean createGlueCode(CustomFileDescriptor mergedIDLFile, CustomFileDescriptor jsglueDir) {
         String pythonCmd = "python";
         if(isUnix()) {
@@ -225,6 +267,14 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         CustomFileDescriptor mergedIdlFile = jsglueDir.child("IDLMerged.idl");
         mergedIdlFile.writeString(idlStr, false);
         return mergedIdlFile;
+    }
+
+    private String minifyJS(String js) {
+        js = js.replaceAll("/\\*.*?\\*/", "");
+        js = js.replaceAll("//.*", "");
+        js = js.replaceAll("\\s+", " ");
+        js = js.replaceAll("\\s*([{}();,])\\s*", "$1");
+        return js.trim();
     }
 
     private String obtainList(ArrayList<String> list) {

@@ -194,7 +194,6 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibACustomCode.h");
-        linkTarget.linkerFlags.add("-sMAIN_MODULE=1");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
         multiTarget.add(linkTarget);
         return multiTarget;
