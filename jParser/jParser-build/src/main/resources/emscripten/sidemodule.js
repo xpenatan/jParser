@@ -39,6 +39,8 @@ var [SIDE_MODULE_NAME] = (() => {
         });
         eval(evalCode);
 
+        var runtimeInitialized = true;
+
 [GLUE_CODE]
 
         return Module;

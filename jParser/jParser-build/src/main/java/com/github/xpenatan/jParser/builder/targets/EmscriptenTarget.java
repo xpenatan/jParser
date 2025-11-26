@@ -76,6 +76,11 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         exportedRuntimeMethods.add("HEAPU32");
         exportedRuntimeMethods.add("HEAPF32");
         exportedRuntimeMethods.add("loadWebAssemblyModule");
+        exportedRuntimeMethods.add("loadDynamicLibrary");
+        exportedRuntimeMethods.add("LDSO");
+        exportedRuntimeMethods.add("wasmMemory");
+        exportedRuntimeMethods.add("intArrayFromString");
+        exportedRuntimeMethods.add("alignMemory");
 //        exportedRuntimeMethods.add("LDSO");
 //        exportedRuntimeMethods.add("asyncLoad");
 //        exportedRuntimeMethods.add("loadDynamicLibrary");
@@ -240,9 +245,32 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         byte[] wasmBytes = wasmFile.readBytes();
         String base64 = java.util.Base64.getEncoder().encodeToString(wasmBytes);
         s = s.replace("[WASM_BIN]", base64);
-        s = minifyJS(s);
+        s = replaceMethodInSideModule(s, "window." + mainModuleName + ".");
+//        s = minifyJS(s);
         CustomFileDescriptor jsFile = libDir.child(libName + ".wasm.js");
         jsFile.writeString(s, false);
+    }
+
+    private String replaceMethodInSideModule(String js, String prefix) {
+        js = mapMethodInSideModule(js, prefix, "intArrayFromString");
+        js = mapMethodInSideModule(js, prefix, "alignMemory");
+        js = mapMethodInSideModule(js, prefix, "HEAP8");
+        js = mapMethodInSideModule(js, prefix, "HEAP16");
+        js = mapMethodInSideModule(js, prefix, "HEAPU8");
+        js = mapMethodInSideModule(js, prefix, "HEAPU16");
+        js = mapMethodInSideModule(js, prefix, "HEAP32");
+        js = mapMethodInSideModule(js, prefix, "HEAPU32");
+        js = mapMethodInSideModule(js, prefix, "HEAPF32");
+        js = mapMethodInSideModule(js, prefix, "HEAPF64");
+        return js;
+    }
+
+    private String mapMethodInSideModule(String js, String prefix, String method) {
+        if(js == null || js.isEmpty() || prefix == null || prefix.isEmpty() || method == null || method.isEmpty()) {
+            return js;
+        }
+        js = js.replace(method, prefix + method);
+        return js;
     }
 
     private boolean createGlueCode(CustomFileDescriptor mergedIDLFile, CustomFileDescriptor jsglueDir) {

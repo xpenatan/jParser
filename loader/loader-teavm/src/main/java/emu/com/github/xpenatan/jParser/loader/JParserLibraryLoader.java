@@ -116,8 +116,7 @@ public class JParserLibraryLoader {
             listener.onLoad(true, null);
         });
         scriptElement.addEventListener("error", (error) -> {
-            String str =  prefix + libraryName;
-            listener.onLoad(false, new ScriptException("Failed to load .wasm.js or .js script: " + str));
+            listener.onLoad(false, new ScriptException("Failed to load .wasm.js or .js script: " + url));
         });
         scriptElement.setSrc(url);
         document.getBody().appendChild(scriptElement);

@@ -223,7 +223,6 @@ public class BuildLib {
 
         // Make a static library
         EmscriptenTarget compileStaticTarget = new EmscriptenTarget();
-        compileStaticTarget.idlReader = idlReader;
         compileStaticTarget.isStatic = true;
         compileStaticTarget.compileGlueCode = false;
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
