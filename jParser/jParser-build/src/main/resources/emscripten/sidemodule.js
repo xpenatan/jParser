@@ -2,6 +2,12 @@ var [SIDE_MODULE_NAME] = (() => {
     return async function(moduleArg = {}) {
         var Module = moduleArg;
 
+        function assert(condition, text) {
+          if (!condition) {
+            abort('Assertion failed' + (text ? ': ' + text : ''));
+          }
+        }
+
         function decodeBase64(base64) {
             var binary_string = atob(base64);
             var len = binary_string.length;
@@ -22,12 +28,10 @@ var [SIDE_MODULE_NAME] = (() => {
 
         const modifiedExports = {};
         for (const [key, value] of Object.entries(rawExports)) {
-          if (key.startsWith('emscripten_')) {
             modifiedExports['_' + key] = value;  // Add '_' prefix only here
-          } else {
-            modifiedExports[key] = value;  // Keep others unchanged
-          }
         }
+
+         Object.assign(Module, modifiedExports);
 
         let evalCode = '';
         Object.keys(modifiedExports).forEach(key => {

@@ -2,6 +2,7 @@ package com.github.xpenatan.jParser.example.app;
 
 import libA.LibA;
 import libA.LibAData;
+import libA.idl.helper.IDLInt;
 import libB.LibB;
 
 public class SharedLibTest {
@@ -34,6 +35,37 @@ public class SharedLibTest {
                 obj1.set_intValue(4);
                 LibAData obj2 = libBClass.createInstance(6);
                 int total = libAClass.addInt(obj1, obj2);
+                if(total != 10) {
+                    fail = true;
+                }
+            } catch(Throwable t) {
+                t.printStackTrace();
+                fail = true;
+            }
+        }
+        {
+            // Share IDLHelper.
+            try {
+                LibA libAClass = new LibA();
+                IDLInt int1 = new IDLInt();
+                int1.set(4);
+                IDLInt int2 = new IDLInt();
+                int2.set(6);
+                int total = libAClass.addIntPtr(int1, int2);
+                if(total != 10) {
+                    fail = true;
+                }
+            } catch(Throwable t) {
+                t.printStackTrace();
+                fail = true;
+            }
+            try {
+                LibB libBClass = new LibB();
+                IDLInt int1 = new IDLInt();
+                int1.set(2);
+                IDLInt int2 = new IDLInt();
+                int2.set(8);
+                int total = libBClass.addIntPtr(int1, int2);
                 if(total != 10) {
                     fail = true;
                 }

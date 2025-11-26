@@ -30,7 +30,6 @@ dependencies {
         implementation(project(":loader:loader-teavm"))
         implementation(project(":loader:loader-core"))
         api(project(":idl:idl-teavm"))
-//        api(project(":idl:idl-core"))
     }
 }
 
