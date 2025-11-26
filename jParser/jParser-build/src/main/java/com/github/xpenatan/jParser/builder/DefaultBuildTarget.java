@@ -72,10 +72,9 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         idlHelperHFile = idlDir.child(idlHelperHClasspath.name());
         idlHelperCPPFile = idlDir.child(idlHelperCPPClasspath.name());
 
-        if(JParser.CREATE_IDL_HELPER) {
-            copyIDLHelperToBuildDir();
-            headerDirs.add("-I" + idlDir.path());
-        }
+        // Always add IDLHelper, even if not used.
+        copyIDLHelperToBuildDir();
+        headerDirs.add("-I" + idlDir.path());
 
         setup(config);
         return build(config, childTarget);
