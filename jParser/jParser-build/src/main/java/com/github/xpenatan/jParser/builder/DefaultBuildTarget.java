@@ -13,7 +13,8 @@ import java.util.concurrent.Future;
 
 public abstract class DefaultBuildTarget extends BuildTarget {
 
-    private static String helperName = "IDLHelper.h";
+    private static String helperNameH = "IDLHelper.h";
+    private static String helperNameCpp = "IDLHelper.cpp";
 
     public boolean multiCoreCompile = true;
 
@@ -45,7 +46,10 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     public boolean isStatic = false;
 
     protected CustomFileDescriptor idlDir;
+    protected CustomFileDescriptor idlHelperHClasspath;
+    protected CustomFileDescriptor idlHelperCPPClasspath;
     protected CustomFileDescriptor idlHelperHFile;
+    protected CustomFileDescriptor idlHelperCPPFile;
 
     protected DefaultBuildTarget() {
     }
@@ -63,12 +67,14 @@ public abstract class DefaultBuildTarget extends BuildTarget {
             idlDir.mkdirs();
         }
 
-        CustomFileDescriptor idlHelperCPP = new CustomFileDescriptor(helperName, CustomFileDescriptor.FileType.Classpath);
-        idlHelperHFile = idlDir.child(idlHelperCPP.name());
-        headerDirs.add("-I" + idlDir.path());
+        idlHelperHClasspath = new CustomFileDescriptor(helperNameH, CustomFileDescriptor.FileType.Classpath);
+        idlHelperCPPClasspath = new CustomFileDescriptor(helperNameCpp, CustomFileDescriptor.FileType.Classpath);
+        idlHelperHFile = idlDir.child(idlHelperHClasspath.name());
+        idlHelperCPPFile = idlDir.child(idlHelperCPPClasspath.name());
 
         if(JParser.CREATE_IDL_HELPER) {
             copyIDLHelperToBuildDir();
+            headerDirs.add("-I" + idlDir.path());
         }
 
         setup(config);
@@ -311,6 +317,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     }
 
     public void copyIDLHelperToBuildDir() {
-        idlHelperHFile.copyTo(idlDir, false);
+        idlHelperHClasspath.copyTo(idlDir, false);
+        idlHelperCPPClasspath.copyTo(idlDir, false);
     }
 }

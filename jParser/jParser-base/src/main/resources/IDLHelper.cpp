@@ -1,7 +1,5 @@
 #include "IDLHelper.h"
 
-// Implementations for derived classes
-
 IDLBool::IDLBool() : IDLBoolArray(1, false) {}
 IDLBool::IDLBool(bool ownsData) : IDLBoolArray(ownsData) {}
 

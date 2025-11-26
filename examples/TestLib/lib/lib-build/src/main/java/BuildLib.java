@@ -80,6 +80,7 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + op.libName + "64_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
         multiTarget.add(linkTarget);
 
         return multiTarget;
@@ -106,6 +107,7 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
         multiTarget.add(linkTarget);
 
         return multiTarget;
@@ -132,6 +134,7 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
 
         multiTarget.add(linkTarget);
 
@@ -165,6 +168,7 @@ public class BuildLib {
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64_.a");
         }
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
 
         multiTarget.add(linkTarget);
 
@@ -176,63 +180,25 @@ public class BuildLib {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
-        int buildType = 1;
+        // Make a static library
+        EmscriptenTarget compileStaticTarget = new EmscriptenTarget();
+        compileStaticTarget.idlReader = idlReader;
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.compileGlueCode = false;
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppFlags.add("-std=c++11");
+        multiTarget.add(compileStaticTarget);
 
-        if(buildType == 0) {
-//            // Compile and create a js file
-//            EmscriptenTarget emscriptenTarget = new EmscriptenTarget(idlReader);
-//            emscriptenTarget.headerDirs.add("-Isrc/TestLib");
-//            emscriptenTarget.headerDirs.add("-includesrc/TestLib/CustomCode.h");
-//            emscriptenTarget.cppInclude.add("**/src/TestLib/**.cpp");
-//            multiTarget.add(emscriptenTarget);
-        }
-        else if(buildType == 1) {
-            // Make a static library
-            EmscriptenTarget compileStaticTarget = new EmscriptenTarget();
-            compileStaticTarget.idlReader = idlReader;
-            compileStaticTarget.isStatic = true;
-            compileStaticTarget.compileGlueCode = false;
-            compileStaticTarget.headerDirs.add("-I" + sourceDir);
-            compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
-            compileStaticTarget.cppFlags.add("-std=c++11");
-            multiTarget.add(compileStaticTarget);
-
-            // Compile glue code and link to make js file
-            EmscriptenTarget linkTarget = new EmscriptenTarget();
-            linkTarget.idlReader = idlReader;
-            linkTarget.headerDirs.add("-I" + sourceDir);
-            linkTarget.cppFlags.add("-std=c++11");
-            linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "CustomCode.h");
-            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
-            multiTarget.add(linkTarget);
-        }
-        else if(buildType == 2) {
-//            // Make lib as a side module/dynamic linking
-//            EmscriptenLibTarget sideTarget = new EmscriptenLibTarget();
-//            sideTarget.libName = "TestLibside";
-//            sideTarget.headerDirs.add("-Isrc/TestLib");
-//            sideTarget.headerDirs.add("-includesrc/TestLib/CustomCode.h");
-//            sideTarget.cppInclude.add("**/src/TestLib/**.cpp");
-//            sideTarget.cppFlags.add("-fPIC");
-//            sideTarget.cppFlags.add("-sEXPORT_ALL=1");
-//            sideTarget.linkerFlags.add("-v");
-//            sideTarget.linkerFlags.add("-fPIC");
-//            sideTarget.linkerFlags.add("-sSIDE_MODULE=1");
-//            sideTarget.linkerFlags.add("-sEXPORT_ALL=1");
-//            sideTarget.libSuffix = ".wasm";
-//            multiTarget.add(sideTarget);
-//
-//            // Make lib as a main module
-//            EmscriptenTarget mainTarget = new EmscriptenTarget(idlReader);
-//            mainTarget.headerDirs.add("-Isrc/TestLib");
-//            mainTarget.headerDirs.add("-includesrc/TestLib/CustomCode.h");
-//            mainTarget.cppFlags.add("-fPIC");
-//            mainTarget.linkerFlags.add("-sMAIN_MODULE=2");
-//            mainTarget.linkerFlags.add("-fPIC");
-//            mainTarget.linkerFlags.add("-ERROR_ON_UNDEFINED_SYMBOLS=0");
-//            mainTarget.linkerFlags.add("../../libs/emscripten/TestLibside.wasm");
-//            multiTarget.add(mainTarget);
-        }
+        // Compile glue code and link to make js file
+        EmscriptenTarget linkTarget = new EmscriptenTarget();
+        linkTarget.idlReader = idlReader;
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "CustomCode.h");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
+        multiTarget.add(linkTarget);
         return multiTarget;
     }
 
@@ -268,6 +234,7 @@ public class BuildLib {
             linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() +"/lib" + op.libName + ".a");
             linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+            linkTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
             linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
             multiTarget.add(linkTarget);
         }
@@ -298,6 +265,7 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+        linkTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
         multiTarget.add(linkTarget);
 
         return multiTarget;
