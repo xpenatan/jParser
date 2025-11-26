@@ -22,7 +22,7 @@ public class BuildLib {
         String sourceDir = "/src/main/cpp/source";
 
         WindowsMSVCTarget.DEBUG_BUILD = true;
-        JParser.CREATE_IDL_HELPER = false;
+//        JParser.CREATE_IDL_HELPER = false;
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
 
         BuildToolOptions.BuildToolParams data = new BuildToolOptions.BuildToolParams();
@@ -73,6 +73,8 @@ public class BuildLib {
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
         multiTarget.add(compileStaticTarget);
 
         WindowsTarget linkTarget = new WindowsTarget();
@@ -98,6 +100,8 @@ public class BuildLib {
         compileStaticTarget.cppFlags.add("-std:c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
         multiTarget.add(compileStaticTarget);
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
@@ -124,6 +128,8 @@ public class BuildLib {
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
         multiTarget.add(compileStaticTarget);
 
         LinuxTarget linkTarget = new LinuxTarget();
@@ -151,6 +157,8 @@ public class BuildLib {
         compileStaticTarget.isStatic = true;
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
         multiTarget.add(compileStaticTarget);
 
         MacTarget linkTarget = new MacTarget(isArm);
@@ -186,6 +194,8 @@ public class BuildLib {
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
         multiTarget.add(compileStaticTarget);
 
         // Compile glue code and link to make js file
@@ -221,6 +231,8 @@ public class BuildLib {
             compileStaticTarget.cppFlags.add("-std=c++11");
             compileStaticTarget.headerDirs.add("-I" + sourceDir);
             compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+            compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
+            compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
             multiTarget.add(compileStaticTarget);
 
             AndroidTarget linkTarget = new AndroidTarget(target, apiLevel);
@@ -251,6 +263,8 @@ public class BuildLib {
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
         multiTarget.add(compileStaticTarget);
 
         IOSTarget linkTarget = new IOSTarget();
