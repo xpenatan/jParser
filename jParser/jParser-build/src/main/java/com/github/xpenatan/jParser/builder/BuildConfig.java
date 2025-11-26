@@ -25,6 +25,11 @@ public class BuildConfig {
         if(sourcePath != null) {
             additionalSourceDirs.add(new CustomFileDescriptor(sourcePath));
         }
+        String customSourceDir = op.getCustomSourceDir();
+        if(customSourceDir != null) {
+            additionalSourceDirs.add(new CustomFileDescriptor(customSourceDir));
+        }
+
         String[] sourcePaths = op.getAdditionalSourceDirs();
         for(int i = 0; i < sourcePaths.length; i++) {
             String path = sourcePaths[i];
