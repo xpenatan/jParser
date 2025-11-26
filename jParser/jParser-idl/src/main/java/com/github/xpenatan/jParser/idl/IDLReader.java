@@ -19,7 +19,6 @@ public class IDLReader {
     public final ArrayList<IDLFile> fileArray = new ArrayList<>();
 
     public IDLReader() {
-
         if(JParser.CREATE_IDL_HELPER) {
             fileArray.add(getIDLHelperFile());
         }
