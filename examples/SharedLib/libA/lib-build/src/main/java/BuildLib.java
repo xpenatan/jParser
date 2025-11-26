@@ -207,6 +207,7 @@ public class BuildLib {
         EmscriptenTarget linkTarget = new EmscriptenTarget();
         linkTarget.idlReader = idlReader;
         linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibACustomCode.h");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
