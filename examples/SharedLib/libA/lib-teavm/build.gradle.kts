@@ -22,13 +22,11 @@ dependencies {
         implementation("com.github.xpenatan.jParser:loader-teavm:-SNAPSHOT")
         implementation("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
         implementation("com.github.xpenatan.jParser:idl-teavm:-SNAPSHOT")
-        implementation("com.github.xpenatan.jParser:idl-core:-SNAPSHOT")
     }
     else {
         implementation(project(":loader:loader-teavm"))
         implementation(project(":loader:loader-core"))
-        api(project(":idl:idl-teavm"))
-//        api(project(":idl:idl-core"))
+        implementation(project(":idl:idl-teavm"))
     }
 }
 
