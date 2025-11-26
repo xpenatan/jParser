@@ -21,12 +21,16 @@ public class IDLReader {
     public IDLReader() {
 
         if(JParser.CREATE_IDL_HELPER) {
-            String baseIDLPath = "IDLHelper.idl";
-            InputStream resourceAsStream = IDLArray.class.getClassLoader().getResourceAsStream(baseIDLPath);
-            InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
-            IDLFile baseIDLFile = IDLReader.parseFile(streamReader, baseIDLPath);
-            fileArray.add(baseIDLFile);
+            fileArray.add(getIDLHelperFile());
         }
+    }
+
+    public static IDLFile getIDLHelperFile() {
+        String baseIDLPath = "IDLHelper.idl";
+        InputStream resourceAsStream = IDLArray.class.getClassLoader().getResourceAsStream(baseIDLPath);
+        InputStreamReader streamReader = new InputStreamReader(resourceAsStream);
+        IDLFile baseIDLFile = IDLReader.parseFile(streamReader, baseIDLPath);
+        return baseIDLFile;
     }
 
     public String mergeIDLFiles() {
