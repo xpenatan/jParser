@@ -199,6 +199,7 @@ public class BuildLib {
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
         compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
         multiTarget.add(compileStaticTarget);
@@ -209,6 +210,7 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("-fPIC");
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibACustomCode.h");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
         multiTarget.add(linkTarget);
