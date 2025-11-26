@@ -103,9 +103,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
         if(compileGlueCode && !isStatic) {
             cppInclude.add("**/jsglue/*.cpp");
-            if(JParser.CREATE_IDL_HELPER) {
-                headerDirs.add("-include" + idlHelperHFile.path());
-            }
         }
 
         if(idlReader != null) {
