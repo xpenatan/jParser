@@ -105,6 +105,16 @@ public class IDLReader {
         return reader;
     }
 
+    public static IDLReader readIDL(IDLFile ...idlFiles) {
+        IDLReader reader = new IDLReader();
+        for(int i = 0; i < idlFiles.length; i++) {
+            IDLFile idlFile = idlFiles[i];
+            reader.fileArray.add(idlFile);
+        }
+
+        return reader;
+    }
+
     public static void addIDL(IDLReader reader, String idlDir) {
         try {
             idlDir = new File(idlDir).getCanonicalPath() + File.separator;
@@ -122,6 +132,11 @@ public class IDLReader {
             throw new RuntimeException("IDL file not found: " + idlDir);
         }
         IDLFile idlFile = parseFile(idlDir);
+        idlFile.skip = true;
+        reader.fileArray.add(idlFile);
+    }
+
+    public static void addIDLRef(IDLReader reader, IDLFile idlFile) {
         idlFile.skip = true;
         reader.fileArray.add(idlFile);
     }

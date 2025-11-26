@@ -1,6 +1,8 @@
 package com.github.xpenatan.jParser.builder.tool;
 
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
+import com.github.xpenatan.jParser.idl.IDLFile;
+import com.github.xpenatan.jParser.idl.IDLReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,8 +24,8 @@ public class BuildToolOptions {
     private String moduleBuildCPPPath;
     private String moduleCorePath;
     private String moduleTeavmPath;
-    private ArrayList<String> idlPath = new ArrayList<>();
-    private ArrayList<String> idlPathRef = new ArrayList<>();
+    private ArrayList<IDLFile> idlPath = new ArrayList<>();
+    private ArrayList<IDLFile> idlPathRef = new ArrayList<>();
     private ArrayList<String> additionalSourceDirs = new ArrayList<>();
     private String moduleBaseJavaDir;
     private String sourcePath;
@@ -77,7 +79,8 @@ public class BuildToolOptions {
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         cppPath = moduleBuildPath + "/src/main/cpp/";
         String idlPathItem = cppPath + idlName + ".idl";
-        idlPath.add(idlPathItem);
+        idlPath.add(IDLReader.parseFile(idlPathItem));
+
         customSourceDir = cppPath + "custom/";
 
         moduleBuildCPPPath = moduleBuildPath + "/build/c++";
@@ -95,22 +98,12 @@ public class BuildToolOptions {
         return false;
     }
 
-    public void addAdditionalIDLPath(String path) {
-        try {
-            String p = new File(path).getCanonicalPath();
-            idlPath.add(p);
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void addAdditionalIDLPath(IDLFile idlFile) {
+        idlPath.add(idlFile);
     }
 
-    public void addAdditionalIDLRefPath(String path) {
-        try {
-            String p = new File(path).getCanonicalPath();
-            idlPathRef.add(p);
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void addAdditionalIDLRefPath(IDLFile idlFile) {
+        idlPathRef.add(idlFile);
     }
 
     public String getModulePrefix() {
@@ -141,14 +134,14 @@ public class BuildToolOptions {
         return moduleTeavmPath;
     }
 
-    public String[] getIDLPath() {
-        String [] path = new String[idlPath.size()];
+    public IDLFile[] getIDL() {
+        IDLFile [] path = new IDLFile[idlPath.size()];
         idlPath.toArray(path);
         return path;
     }
 
-    public String[] getIDLRefPath() {
-        String [] path = new String[idlPathRef.size()];
+    public IDLFile[] getIDLRef() {
+        IDLFile [] path = new IDLFile[idlPathRef.size()];
         idlPathRef.toArray(path);
         return path;
     }

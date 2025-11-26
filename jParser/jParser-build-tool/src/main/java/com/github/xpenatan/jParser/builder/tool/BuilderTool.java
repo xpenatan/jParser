@@ -7,6 +7,7 @@ import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.cpp.CppCodeParser;
 import com.github.xpenatan.jParser.cpp.CppGenerator;
 import com.github.xpenatan.jParser.cpp.NativeCPPGenerator;
+import com.github.xpenatan.jParser.idl.IDLFile;
 import com.github.xpenatan.jParser.idl.IDLRenaming;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import com.github.xpenatan.jParser.teavm.TeaVMCodeParser;
@@ -27,11 +28,11 @@ public class BuilderTool {
     }
 
     private static void generateAndBuild(BuildToolOptions op, BuildToolListener listener, IDLRenaming packageRenaming) throws Exception {
-        IDLReader idlReader = IDLReader.readIDL(op.getIDLPath());
+        IDLReader idlReader = IDLReader.readIDL(op.getIDL());
 
-        String[] idlRefPath = op.getIDLRefPath();
+        IDLFile[] idlRefPath = op.getIDLRef();
         for(int i = 0; i < idlRefPath.length; i++) {
-            String idlPath = idlRefPath[i];
+            IDLFile idlPath = idlRefPath[i];
             IDLReader.addIDLRef(idlReader, idlPath);
         }
 

@@ -38,7 +38,7 @@ public class BuildLib {
 
         BuildToolOptions op = new BuildToolOptions(data, args);
 
-        op.addAdditionalIDLRefPath(libAPath + "/lib-build/src/main/cpp/LibA.idl");
+        op.addAdditionalIDLRefPath(IDLReader.parseFile(libAPath + "/lib-build/src/main/cpp/LibA.idl"));
 
         BuilderTool.build(op, new BuildToolListener() {
             @Override
