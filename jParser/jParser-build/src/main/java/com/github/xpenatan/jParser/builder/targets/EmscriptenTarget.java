@@ -124,6 +124,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
         if(isStatic) {
             linkerCompiler.clear();
+            linkerOutputCommand = "";
 
             String cppCompilerr = EMSCRIPTEN_ROOT + "emar";
             if(isWindows()) {
@@ -139,6 +140,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             }
         }
         else {
+            linkerOutputCommand = "-o";
             if(mainModuleName != null && !mainModuleName.isEmpty()) {
                 linkerFlags.add("-sSIDE_MODULE=2");
                 libSuffix = ".wasm";

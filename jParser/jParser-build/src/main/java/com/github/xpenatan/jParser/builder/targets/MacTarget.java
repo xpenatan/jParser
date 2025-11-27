@@ -78,6 +78,7 @@ public class MacTarget extends DefaultBuildTarget {
             linkerFlags.add("-static");
             linkerFlags.add("-o");
             libSuffix = "64_.a";
+            linkerOutputCommand = "";
         }
         else {
             linkerFlags.add("-shared");
@@ -93,6 +94,7 @@ public class MacTarget extends DefaultBuildTarget {
             }
             linkerFlags.add("-mmacosx-version-min=" + macMinTarget);
             linkerFlags.add("-stdlib=libc++");
+            linkerOutputCommand = "-o";
         }
     }
 }

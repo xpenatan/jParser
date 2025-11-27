@@ -84,6 +84,7 @@ public class AndroidTarget extends DefaultBuildTarget {
             String staticLib = "libmystaticlib.a";
             linkerFlags.add("rcs");
             libSuffix = ".a";
+            linkerOutputCommand = "";
         }
         else {
             linkerFlags.add("-lm");
@@ -92,6 +93,7 @@ public class AndroidTarget extends DefaultBuildTarget {
             linkerFlags.add("-shared");
             linkerFlags.add("-static-libstdc++"); // Statically link C++ runtime
             libSuffix = ".so";
+            linkerOutputCommand = "-o";
         }
     }
 

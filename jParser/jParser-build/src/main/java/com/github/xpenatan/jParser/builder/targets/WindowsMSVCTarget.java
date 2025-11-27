@@ -72,12 +72,4 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
         this.multiCoreCompile = multiCoreCompile;
         return compile;
     }
-
-    @Override
-    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
-        linkerCommands.addAll(linkerCompiler);
-        linkerCommands.addAll(linkerFlags);
-        linkerCommands.add("@" + objFilePath);
-        linkerCommands.add(linkerOutputCommand + libPath);
-    }
 }

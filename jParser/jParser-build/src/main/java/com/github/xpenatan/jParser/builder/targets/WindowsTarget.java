@@ -49,6 +49,7 @@ public class WindowsTarget extends DefaultBuildTarget {
             linkerCompiler.add("ar");
             linkerFlags.add("rcs");
             libSuffix = "64_.a";
+            linkerOutputCommand = "";
         }
         else {
 //            linkerFlags.add("-fPIC");
@@ -59,6 +60,7 @@ public class WindowsTarget extends DefaultBuildTarget {
 //            linkerFlags.add("-Wl,--kill-at");
             linkerFlags.add("-m64");
             libSuffix = "64.dll";
+            linkerOutputCommand = "-o";
         }
 
     }

@@ -66,6 +66,7 @@ public class IOSTarget extends DefaultBuildTarget {
             linkerFlags.add("-static");
             linkerFlags.add("-o");
             libSuffix = "64_.a";
+            linkerOutputCommand = "";
         }
         else {
             linkerFlags.add("-isysroot" + iphoneSimulatorSdk);
@@ -74,6 +75,7 @@ public class IOSTarget extends DefaultBuildTarget {
             linkerFlags.add("-shared");
             linkerFlags.add("-stdlib=libc++");
             libSuffix = "";
+            linkerOutputCommand = "-o";
         }
     }
 }

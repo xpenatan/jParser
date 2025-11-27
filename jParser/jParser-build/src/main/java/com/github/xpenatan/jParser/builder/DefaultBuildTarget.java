@@ -32,7 +32,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     public ArrayList<String> cppCompiler = new ArrayList<>();
     public ArrayList<String> linkerCompiler = new ArrayList<>();
     public String compilerOutputCommand = "-o";
-    public String linkerOutputCommand = "-o";
+    public String linkerOutputCommand = "";
     public final ArrayList<String> cppFlags = new ArrayList<>();
     public final ArrayList<String> linkerFlags = new ArrayList<>();
     public String libSuffix = "";
@@ -246,7 +246,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         if(isStatic) {
             linkerCommands.addAll(linkerCompiler);
             linkerCommands.addAll(linkerFlags);
-            linkerCommands.add(libPath);
+            linkerCommands.add(linkerOutputCommand + libPath);
             linkerCommands.add("@" + objFilePath);
         }
         else {

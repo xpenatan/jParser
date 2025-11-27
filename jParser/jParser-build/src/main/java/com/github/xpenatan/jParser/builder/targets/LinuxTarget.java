@@ -47,6 +47,7 @@ public class LinuxTarget extends DefaultBuildTarget {
             linkerCompiler.add("ar");
             linkerFlags.add("rcs");
             libSuffix = "64_.a";
+            linkerOutputCommand = "";
         }
         else {
             // Note:
@@ -55,6 +56,7 @@ public class LinuxTarget extends DefaultBuildTarget {
             linkerFlags.add("-shared");
             linkerFlags.add("-m64");
             libSuffix = "64.so";
+            linkerOutputCommand = "-o";
         }
     }
 }
