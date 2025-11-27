@@ -62,17 +62,4 @@ public class WindowsTarget extends DefaultBuildTarget {
         }
 
     }
-
-    @Override
-    protected void onLink(ArrayList<CustomFileDescriptor> compiledObject, String objFilePath, String libPath) {
-        if(isStatic) {
-            linkerCommands.addAll(linkerCompiler);
-            linkerCommands.addAll(linkerFlags);
-            linkerCommands.add(libPath);
-            linkerCommands.add("@" + objFilePath);
-        }
-        else {
-            super.onLink(compiledObject, objFilePath, libPath);
-        }
-    }
 }

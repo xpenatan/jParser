@@ -92,7 +92,9 @@ public class BuildLib {
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + op.libName + "64_.a");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 
@@ -125,8 +127,10 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.headerDirs.add("-I" + libASourcePath);
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
         linkTarget.linkerFlags.add(libALibPath + "/LibA64_.lib");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 
@@ -159,8 +163,10 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.headerDirs.add("-I" + libASourcePath);
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
         linkTarget.linkerFlags.add(libALibPath + "/LibA64_.a");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);
@@ -196,6 +202,7 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.headerDirs.add("-I" + libASourcePath);
 
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         if(isArm) {
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/lib" + op.libName + "64_.a");
             linkTarget.linkerFlags.add(libALibArmPath + "/LibA64_.a");
@@ -204,6 +211,7 @@ public class BuildLib {
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64_.a");
             linkTarget.linkerFlags.add(libALibPath + "/LibA64_.a");
         }
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);
@@ -238,9 +246,11 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + libASourcePath);
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibBCustomCode.h");
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
-        linkTarget.mainModuleName = "LibA";
         linkTarget.linkerFlags.add(libALibPath + "/LibA_.a");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.mainModuleName = "LibA";
         multiTarget.add(linkTarget);
         return multiTarget;
     }
@@ -282,8 +292,10 @@ public class BuildLib {
             linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
             linkTarget.headerDirs.add("-I" + libASourcePath);
+            linkTarget.linkerFlags.add("-Wl,--whole-archive");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() +"/lib" + op.libName + ".a");
             linkTarget.linkerFlags.add(libALibPath + target.getFolder() + "/libLibA.a");
+            linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
             linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
             multiTarget.add(linkTarget);
         }

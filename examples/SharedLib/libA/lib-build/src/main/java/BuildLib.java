@@ -83,7 +83,9 @@ public class BuildLib {
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + op.libName + "64_.a");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 
@@ -112,7 +114,9 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 
@@ -141,7 +145,9 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);
@@ -172,12 +178,14 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
 
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         if(isArm) {
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/lib" + op.libName + "64_.a");
         }
         else {
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64_.a");
         }
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);
@@ -211,7 +219,9 @@ public class BuildLib {
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.cppFlags.add("-fPIC");
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibACustomCode.h");
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         multiTarget.add(linkTarget);
         return multiTarget;
     }
@@ -249,7 +259,9 @@ public class BuildLib {
             linkTarget.headerDirs.add("-I" + sourceDir);
             linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+            linkTarget.linkerFlags.add("-Wl,--whole-archive");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() +"/lib" + op.libName + ".a");
+            linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
             linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
             linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
             multiTarget.add(linkTarget);
@@ -282,7 +294,9 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 

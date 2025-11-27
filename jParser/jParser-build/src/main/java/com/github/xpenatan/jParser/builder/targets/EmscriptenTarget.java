@@ -223,19 +223,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         return success;
     }
 
-    @Override
-    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
-        if(isStatic) {
-            linkerCommands.addAll(linkerCompiler);
-            linkerCommands.addAll(linkerFlags);
-            linkerCommands.add(libPath);
-            linkerCommands.add("@" + objFilePath);
-        }
-        else {
-            super.onLink(compiledObjects, objFilePath, libPath);
-        }
-    }
-
     private String createPostJS(CustomFileDescriptor jsglueDir, String libName) {
         CustomFileDescriptor postFile = new CustomFileDescriptor("emscripten/post.js", CustomFileDescriptor.FileType.Classpath);
         String s = postFile.readString();

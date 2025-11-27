@@ -243,10 +243,18 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     }
 
     protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
-        linkerCommands.addAll(linkerCompiler);
-        linkerCommands.addAll(linkerFlags);
-        linkerCommands.add("@" + objFilePath);
-        linkerCommands.add(linkerOutputCommand + libPath);
+        if(isStatic) {
+            linkerCommands.addAll(linkerCompiler);
+            linkerCommands.addAll(linkerFlags);
+            linkerCommands.add(libPath);
+            linkerCommands.add("@" + objFilePath);
+        }
+        else {
+            linkerCommands.addAll(linkerCompiler);
+            linkerCommands.addAll(linkerFlags);
+            linkerCommands.add("@" + objFilePath);
+            linkerCommands.add(linkerOutputCommand + libPath);
+        }
     }
 
     public void addJNIHeaders() {

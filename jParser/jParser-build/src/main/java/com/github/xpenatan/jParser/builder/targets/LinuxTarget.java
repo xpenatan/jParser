@@ -57,17 +57,4 @@ public class LinuxTarget extends DefaultBuildTarget {
             libSuffix = "64.so";
         }
     }
-
-    @Override
-    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
-        if(isStatic) {
-            linkerCommands.addAll(linkerCompiler);
-            linkerCommands.addAll(linkerFlags);
-            linkerCommands.add(libPath);
-            linkerCommands.add("@" + objFilePath);
-        }
-        else {
-            super.onLink(compiledObjects, objFilePath, libPath);
-        }
-    }
 }
