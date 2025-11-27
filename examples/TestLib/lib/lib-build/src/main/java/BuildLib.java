@@ -39,7 +39,7 @@ public class BuildLib {
                 }
                 if(op.containsArg("windows64")) {
                     targets.add(getWindowVCTarget(op));
-//                    targets.add(getWindowTarget(op));
+                    targets.add(getWindowTarget(op));
                 }
                 if(op.containsArg("linux64")) {
                     targets.add(getLinuxTarget(op));
