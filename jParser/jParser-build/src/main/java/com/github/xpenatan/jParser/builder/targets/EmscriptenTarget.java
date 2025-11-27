@@ -3,15 +3,19 @@ package com.github.xpenatan.jParser.builder.targets;
 import com.github.xpenatan.jParser.builder.BuildConfig;
 import com.github.xpenatan.jParser.builder.DefaultBuildTarget;
 import com.github.xpenatan.jParser.builder.JProcess;
-import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jParser.idl.IDLReader;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class EmscriptenTarget extends DefaultBuildTarget {
 
     public static boolean SKIP_GLUE_CODE = false;
-    public final static String EMSCRIPTEN_ROOT = (System.getenv("EMSDK") + "/upstream/emscripten/").replace("\\", "/").replace("//", "/");
+    public final static String UPSTREAM_ROOT = (System.getenv("EMSDK") + "/upstream/").replace("\\", "/").replace("//", "/");
+    public final static String UPSTREAM_BIN = (UPSTREAM_ROOT + "/bin/").replace("\\", "/").replace("//", "/");
+    public final static String EMSCRIPTEN_ROOT = (UPSTREAM_ROOT + "/emscripten/").replace("\\", "/").replace("//", "/");
 
     public IDLReader idlReader;
 
@@ -19,7 +23,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
     public static boolean IS_WASM = true;
     public static boolean IS_X64 = false;
 
-    public boolean isStatic = false;
     public boolean compileGlueCode = true;
 
     String WEBIDL_BINDER_SCRIPT = EMSCRIPTEN_ROOT + "tools/webidl_binder.py";
@@ -31,6 +34,8 @@ public class EmscriptenTarget extends DefaultBuildTarget {
     public ArrayList<String> exportedRuntimeMethods = new ArrayList<>();
 
     public String mainModuleName = null;
+
+    public AllowSymbolsCallback allowSymbolsCallback = null;
 
     public EmscriptenTarget() {
         this(SourceLanguage.CPP);
@@ -81,9 +86,9 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         exportedRuntimeMethods.add("wasmMemory");
         exportedRuntimeMethods.add("intArrayFromString");
         exportedRuntimeMethods.add("alignMemory");
-//        exportedRuntimeMethods.add("LDSO");
-//        exportedRuntimeMethods.add("asyncLoad");
-//        exportedRuntimeMethods.add("loadDynamicLibrary");
+        exportedRuntimeMethods.add("LDSO");
+        exportedRuntimeMethods.add("asyncLoad");
+        exportedRuntimeMethods.add("loadDynamicLibrary");
 
         if(DEBUG_BUILD) {
             cppFlags.add("-O0");
@@ -128,7 +133,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerCompiler.add(cppCompilerr);
             linkerFlags.add("rcs");
             libSuffix = "_.a";
-
             if(IS_X64) {
                 cppFlags.add("-s");
                 cppFlags.add("MEMORY64=1");
@@ -156,6 +160,10 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("STACK_SIZE=" + stackSize);
             linkerFlags.add("-s");
             linkerFlags.add("EXPORTED_FUNCTIONS=" + obtainList(exportedFunctions));
+            CustomFileDescriptor symbolsFile = config.buildDir.child("target/emscripten/static/symbols.txt");
+            if(symbolsFile.exists()) {
+                linkerFlags.add("-sEXPORTED_FUNCTIONS=@" + symbolsFile.path());
+            }
             linkerFlags.add("-s");
             linkerFlags.add("EXPORTED_RUNTIME_METHODS=" + obtainList(exportedRuntimeMethods));
             if(DEBUG_BUILD) {
@@ -200,10 +208,15 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
         boolean success = super.build(config, buildTargetTemp);
 
-        if(success && !isStatic) {
-            if(mainModuleName != null && !mainModuleName.isEmpty()) {
-                CustomFileDescriptor libDir = config.libDir.child(libDirSuffix);
-                createSideModule(jsglueDir, libName, libDir);
+        if(success) {
+            if(isStatic) {
+                generateSymbols(buildTargetTemp, config);
+            }
+            else {
+                if(mainModuleName != null && !mainModuleName.isEmpty()) {
+                    CustomFileDescriptor libDir = config.libDir.child(libDirSuffix);
+                    createSideModule(jsglueDir, libName, libDir);
+                }
             }
         }
 
@@ -314,5 +327,67 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         }
         items += "]";
         return items;
+    }
+
+    private void generateSymbols(CustomFileDescriptor buildTargetTemp, BuildConfig config) {
+        CustomFileDescriptor objList = buildTargetTemp.child("objs.txt");
+        if(!objList.exists()) return;
+        String content = objList.readString();
+        String[] objs = content.split("\n");
+        HashSet<String> allSymbols = new HashSet<>();
+        for(String obj : objs) {
+            obj = obj.trim();
+            if(obj.isEmpty()) continue;
+            ArrayList<String> symbols = getSymbols(obj, config);
+            allSymbols.addAll(symbols);
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        boolean first = true;
+        for(String symbol : allSymbols) {
+            if(!first) sb.append(", ");
+            sb.append("\"").append(symbol).append("\"");
+            first = false;
+        }
+        sb.append("]");
+        CustomFileDescriptor symbolsFile = buildTargetTemp.child("symbols.txt");
+        symbolsFile.writeString(sb.toString(), false);
+    }
+
+    private ArrayList<String> getSymbols(String objPath, BuildConfig config) {
+        ArrayList<String> symbols = new ArrayList<>();
+        try {
+            String llvmNm = UPSTREAM_BIN + "llvm-nm";
+            if(isWindows()) llvmNm += ".exe";
+            ProcessBuilder pb = new ProcessBuilder(llvmNm, objPath);
+            pb.environment().putAll(environment);
+            pb.directory(config.buildDir.file());
+            Process p = pb.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line;
+            while((line = reader.readLine()) != null) {
+                String[] parts = line.trim().split("\\s+");
+                if(parts.length >= 3) {
+                    String symbol = parts[parts.length - 1];
+                    if(allowSymbolsCallback != null) {
+                        if(allowSymbolsCallback.allowSymbol(symbol)) {
+                            symbols.add(symbol);
+                        }
+                    }
+                }
+            }
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            while((errorReader.readLine()) != null) {
+                // consume error stream
+            }
+            p.waitFor();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return symbols;
+    }
+
+    public static interface AllowSymbolsCallback {
+        public boolean allowSymbol(String symbol);
     }
 }

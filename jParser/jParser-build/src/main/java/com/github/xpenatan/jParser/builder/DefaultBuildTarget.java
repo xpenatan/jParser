@@ -56,6 +56,12 @@ public abstract class DefaultBuildTarget extends BuildTarget {
 
     @Override
     protected boolean buildInternal(BuildConfig config) {
+        if(isStatic) {
+            tempBuildDir += "static/";
+        }
+        else {
+            tempBuildDir += "linking/";
+        }
         CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
         if(childTarget.exists()) {
             childTarget.deleteDirectory();
@@ -238,8 +244,8 @@ public abstract class DefaultBuildTarget extends BuildTarget {
 
     protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
         linkerCommands.addAll(linkerCompiler);
-        linkerCommands.add("@" + objFilePath);
         linkerCommands.addAll(linkerFlags);
+        linkerCommands.add("@" + objFilePath);
         linkerCommands.add(linkerOutputCommand + libPath);
     }
 
