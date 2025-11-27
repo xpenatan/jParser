@@ -39,7 +39,7 @@ public class BuildLib {
                 }
                 if(op.containsArg("windows64")) {
                     targets.add(getWindowVCTarget(op));
-                    targets.add(getWindowTarget(op));
+//                    targets.add(getWindowTarget(op));
                 }
                 if(op.containsArg("linux64")) {
                     targets.add(getLinuxTarget(op));
@@ -257,9 +257,9 @@ public class BuildLib {
             linkTarget.headerDirs.add("-I" + sourceDir);
             linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-            linkTarget.linkerFlags.add("-Wl,--whole-archive");
+            linkTarget.linkerFlags.add("-Wl,-all_load");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() +"/lib" + op.libName + ".a");
-            linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+            linkTarget.linkerFlags.add("-Wl,-noall_load");
             linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
             linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
             multiTarget.add(linkTarget);
@@ -292,9 +292,9 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add("-Wl,--whole-archive");
+        linkTarget.linkerFlags.add("-Wl,-all_load");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
-        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.linkerFlags.add("-Wl,-noall_load");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 

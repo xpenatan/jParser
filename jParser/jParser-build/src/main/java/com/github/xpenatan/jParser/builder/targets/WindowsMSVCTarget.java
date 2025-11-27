@@ -13,7 +13,7 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
 
     public WindowsMSVCTarget() {
         this.libDirSuffix = "windows/vc/";
-        this.tempBuildDir = "target/windows/";
+        this.tempBuildDir = "target/windows/vc/";
         linkObjSuffix = "**.obj";
 
         cppCompiler.clear();
@@ -71,5 +71,13 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
         boolean compile = super.compile(config, buildTargetTemp, cppFiles);
         this.multiCoreCompile = multiCoreCompile;
         return compile;
+    }
+
+    @Override
+    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
+        linkerCommands.addAll(linkerCompiler);
+        linkerCommands.addAll(linkerFlags);
+        linkerCommands.add("@" + objFilePath);
+        linkerCommands.add(linkerOutputCommand + libPath);
     }
 }
