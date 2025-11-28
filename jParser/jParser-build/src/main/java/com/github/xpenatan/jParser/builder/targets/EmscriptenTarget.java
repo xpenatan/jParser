@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class EmscriptenTarget extends DefaultBuildTarget {
 
@@ -35,7 +36,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
     public String mainModuleName = null;
 
-    public AllowSymbolsCallback allowSymbolsCallback = null;
+    public SymbolsCallback allowSymbolsCallback = null;
 
     public EmscriptenTarget() {
         this(SourceLanguage.CPP);
@@ -135,8 +136,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("rcs");
             libSuffix = "_.a";
             if(IS_X64) {
-                cppFlags.add("-s");
-                cppFlags.add("MEMORY64=1");
+                cppFlags.add("-sMEMORY64=1");
             }
         }
         else {
@@ -150,62 +150,43 @@ public class EmscriptenTarget extends DefaultBuildTarget {
                 linkerFlags.add("-sMAIN_MODULE=2");
             }
             String postPath = createPostJS(jsglueDir, libName);
-            linkerFlags.add("-s");
-            linkerFlags.add("ALLOW_MEMORY_GROWTH=1");
-            linkerFlags.add("-s");
-            linkerFlags.add("ALLOW_TABLE_GROWTH=1");
-            linkerFlags.add("-s");
-            linkerFlags.add("MODULARIZE=1");
-            linkerFlags.add("-s");
-            linkerFlags.add("INITIAL_MEMORY=" + initialMemory);
-            linkerFlags.add("-s");
-            linkerFlags.add("STACK_SIZE=" + stackSize);
-            linkerFlags.add("-s");
-            linkerFlags.add("EXPORTED_FUNCTIONS=" + obtainList(exportedFunctions));
+            linkerFlags.add("-sALLOW_MEMORY_GROWTH=1");
+            linkerFlags.add("-sALLOW_TABLE_GROWTH=1");
+            linkerFlags.add("-sMODULARIZE=1");
+            linkerFlags.add("-sINITIAL_MEMORY=" + initialMemory);
+            linkerFlags.add("-sSTACK_SIZE=" + stackSize);
             CustomFileDescriptor symbolsFile = config.buildDir.child("target/emscripten/static/symbols.txt");
-            if(symbolsFile.exists()) {
-                linkerFlags.add("-sEXPORTED_FUNCTIONS=@" + symbolsFile.path());
-            }
-            linkerFlags.add("-s");
-            linkerFlags.add("EXPORTED_RUNTIME_METHODS=" + obtainList(exportedRuntimeMethods));
+            mergeExportedFunctionsToSymbols(symbolsFile, exportedFunctions);
+            linkerFlags.add("-sEXPORTED_FUNCTIONS=@" + symbolsFile.path());
+            linkerFlags.add("-sEXPORTED_RUNTIME_METHODS=" + obtainList(exportedRuntimeMethods));
             if(DEBUG_BUILD) {
-                linkerFlags.add("-s");
-                linkerFlags.add("ASSERTIONS=1");
-                linkerFlags.add("-s");
-                linkerFlags.add("SAFE_HEAP=1");
+                linkerFlags.add("-sASSERTIONS=1");
+                linkerFlags.add("-sSAFE_HEAP=1");
             }
             if(IS_WASM) {
-                linkerFlags.add("-s");
-                linkerFlags.add("WASM=1");
+                linkerFlags.add("-sWASM=1");
 
                 if(IS_X64) {
-                    linkerFlags.add("-s");
-                    linkerFlags.add("WASM_BIGINT=1");
+                    linkerFlags.add("-sWASM_BIGINT=1");
                 }
                 else {
-                    linkerFlags.add("-s");
-                    linkerFlags.add("WASM_BIGINT=0");
+                    linkerFlags.add("-sWASM_BIGINT=0");
                 }
             }
             else {
-                linkerFlags.add("-s");
-                linkerFlags.add("WASM=0");
+                linkerFlags.add("-sWASM=0");
             }
             if(IS_X64) {
-                linkerFlags.add("-s");
-                linkerFlags.add("MEMORY64=1");
-                cppFlags.add("-s");
-                cppFlags.add("MEMORY64=1");
+                linkerFlags.add("-sMEMORY64=1");
+                cppFlags.add("-sMEMORY64=1");
             }
-            linkerFlags.add("-s");
-            linkerFlags.add("SINGLE_FILE=1");
+            linkerFlags.add("-sSINGLE_FILE=1");
 
             linkerFlags.add("--post-js");
             linkerFlags.add(jsglueDir.path() + "/glue.js");
             linkerFlags.add("--extern-post-js");
             linkerFlags.add(postPath);
-            linkerFlags.add("-s");
-            linkerFlags.add("EXPORT_NAME='" + libName + "'");
+            linkerFlags.add("-sEXPORT_NAME='" + libName + "'");
         }
 
         boolean success = super.build(config, buildTargetTemp);
@@ -376,7 +357,40 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         return symbols;
     }
 
-    public static interface AllowSymbolsCallback {
-        public boolean allowSymbol(String symbol);
+    private void mergeExportedFunctionsToSymbols(CustomFileDescriptor symbolsFile, ArrayList<String> exportedFunctions) {
+        String existing = "[]";
+        if(symbolsFile.exists()) {
+            existing = symbolsFile.readString().trim();
+        }
+        LinkedHashSet<String> allSymbols = new LinkedHashSet<>();
+        for(String func : exportedFunctions) {
+            allSymbols.add(func);
+        }
+        if(existing.length() > 2) {
+            String content = existing.substring(1, existing.length() - 1);
+            String[] parts = content.split(", ");
+            for(String part : parts) {
+                if(part.startsWith("\"") && part.endsWith("\"")) {
+                    String symbol = part.substring(1, part.length() - 1);
+                    if(!allSymbols.contains(symbol)) {
+                        allSymbols.add(symbol);
+                    }
+                }
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        boolean first = true;
+        for(String symbol : allSymbols) {
+            if(!first) sb.append(", ");
+            sb.append("\"").append(symbol).append("\"");
+            first = false;
+        }
+        sb.append("]");
+        symbolsFile.writeString(sb.toString(), false);
+    }
+
+    public interface SymbolsCallback {
+        boolean allowSymbol(String symbol);
     }
 }
