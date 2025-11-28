@@ -58,14 +58,11 @@ public class JParserLibraryLoader {
 
         String scriptPath = JMultiplatform.getInstance().getMap().getObject(JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH, String.class);
         if(scriptPath != null) {
-            if(fullLibraryName.endsWith(".wasm.js")) {
-                loadWasm(lis, fullLibraryName, scriptPath, "", true);
-            }
-            else if(fullLibraryName.endsWith(".js")) {
+            if(fullLibraryName.endsWith(".js")) {
                 loadJS(lis, fullLibraryName, scriptPath);
             }
             else {
-                loadWasm(lis, fullLibraryName, scriptPath, ".wasm.js",true);
+                loadWasm(lis, fullLibraryName, scriptPath, ".js",true);
             }
         }
         else {
@@ -85,6 +82,7 @@ public class JParserLibraryLoader {
         }
         loadScript(libraryName, (isSuccess, e) -> {
             if(isSuccess) {
+                initializeModule(libraryName);
                 // Wasm requires to setup wasm first
                 if(!autoLoadWasm) {
                     listener.onLoad(true, null);
@@ -127,6 +125,16 @@ public class JParserLibraryLoader {
         void onInit();
     }
 
-    @JSBody(params = { "libraryName", "onInitFunction" }, script = "window[libraryName] = onInitFunction;")
+    @JSBody(params = { "libraryName", "onInitFunction" }, script = "" +
+            "window[libraryName] = onInitFunction;"
+    )
     private static native void setOnLoadInit(String libraryName, OnInitFunction onInitFunction);
+
+    @JSBody(params = { "libraryName" }, script = "" +
+            "window[libraryName]().then(function(r) {" +
+            "    window[libraryName] = r;" +
+            "    window[libraryName + 'OnInit']();" +
+            "});"
+    )
+    private static native void initializeModule(String libraryName);
 }

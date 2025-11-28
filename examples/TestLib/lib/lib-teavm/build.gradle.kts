@@ -7,13 +7,12 @@ java {
     targetCompatibility = JavaVersion.toVersion(LibExt.java11Target)
 }
 
-val emscriptenFile = "$projectDir/../lib-build/build/c++/libs/emscripten/TestLib.wasm.js"
-val emscriptenSideFile = "$projectDir/../lib-build/build/c++/libs/emscripten/TestLibside.wasm"
+val emscriptenJS = "$projectDir/../lib-build/build/c++/libs/emscripten/TestLib.js"
+val emscriptenWASM = "$projectDir/../lib-build/build/c++/libs/emscripten/TestLib.wasm"
 
 tasks.jar {
-    from(emscriptenFile, emscriptenSideFile)
+    from(emscriptenJS, emscriptenWASM)
 }
-
 
 dependencies {
     implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")

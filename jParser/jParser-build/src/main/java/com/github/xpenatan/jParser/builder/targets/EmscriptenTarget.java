@@ -59,13 +59,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
         cppCompiler.add(cppCompilerr);
         linkerCompiler.add(cppCompilerr);
-
-        if(IS_WASM) {
-            libSuffix = ".wasm.js";
-        }
-        else {
-            libSuffix = ".js";
-        }
+        libSuffix = ".js";
 
         cppFlags.add("-c");
 
@@ -149,7 +143,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             else {
                 linkerFlags.add("-sMAIN_MODULE=2");
             }
-            String postPath = createPostJS(jsglueDir, libName);
             linkerFlags.add("-sALLOW_MEMORY_GROWTH=1");
             linkerFlags.add("-sALLOW_TABLE_GROWTH=1");
             linkerFlags.add("-sMODULARIZE=1");
@@ -180,12 +173,9 @@ public class EmscriptenTarget extends DefaultBuildTarget {
                 linkerFlags.add("-sMEMORY64=1");
                 cppFlags.add("-sMEMORY64=1");
             }
-            linkerFlags.add("-sSINGLE_FILE=1");
 
             linkerFlags.add("--post-js");
             linkerFlags.add(jsglueDir.path() + "/glue.js");
-            linkerFlags.add("--extern-post-js");
-            linkerFlags.add(postPath);
             linkerFlags.add("-sEXPORT_NAME='" + libName + "'");
         }
 
@@ -204,15 +194,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         }
 
         return success;
-    }
-
-    private String createPostJS(CustomFileDescriptor jsglueDir, String libName) {
-        CustomFileDescriptor postFile = new CustomFileDescriptor("emscripten/post.js", CustomFileDescriptor.FileType.Classpath);
-        String s = postFile.readString();
-        s = s.replace("[MODULE_NAME]", libName);
-        CustomFileDescriptor postJS = new CustomFileDescriptor(jsglueDir + "/post.js");
-        postJS.writeString(s, false);
-        return postJS.path();
     }
 
     private void createSideModule(CustomFileDescriptor jsglueDir, String libName, CustomFileDescriptor libDir) {
