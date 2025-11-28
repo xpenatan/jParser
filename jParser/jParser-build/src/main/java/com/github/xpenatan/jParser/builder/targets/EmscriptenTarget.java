@@ -155,9 +155,9 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("-sMODULARIZE=1");
             linkerFlags.add("-sINITIAL_MEMORY=" + initialMemory);
             linkerFlags.add("-sSTACK_SIZE=" + stackSize);
-            CustomFileDescriptor symbolsFile = config.buildDir.child("target/emscripten/static/symbols.txt");
-            mergeExportedFunctionsToSymbols(symbolsFile, exportedFunctions);
-            linkerFlags.add("-sEXPORTED_FUNCTIONS=@" + symbolsFile.path());
+            CustomFileDescriptor exportedFunctionsFile = config.buildDir.child("target/emscripten/static/exported_functions.txt");
+            mergeExportedFunctionsToSymbols(exportedFunctionsFile, exportedFunctions);
+            linkerFlags.add("-sEXPORTED_FUNCTIONS=@" + exportedFunctionsFile.path());
             linkerFlags.add("-sEXPORTED_RUNTIME_METHODS=" + obtainList(exportedRuntimeMethods));
             if(DEBUG_BUILD) {
                 linkerFlags.add("-sASSERTIONS=1");
@@ -311,17 +311,43 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             ArrayList<String> symbols = getSymbols(obj, config);
             allSymbols.addAll(symbols);
         }
+
+        HashSet<String> allowedSymbols = new HashSet<>();
+        for(String symbol : allSymbols) {
+            if(allowSymbolsCallback != null) {
+                if(allowSymbolsCallback.allowSymbol(symbol)) {
+                    allowedSymbols.add(symbol);
+                }
+            }
+        }
+
+        writeAllSymbols(buildTargetTemp, allSymbols);
+        writeAllowedSymbols1(buildTargetTemp, allowedSymbols);
+    }
+
+    private void writeAllSymbols(CustomFileDescriptor buildTargetTemp, HashSet<String> allowedSymbols) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for(String symbol : allowedSymbols) {
+            sb.append(symbol);
+            sb.append("\n");
+        }
+        CustomFileDescriptor symbolsFile = buildTargetTemp.child("symbols.txt");
+        symbolsFile.writeString(sb.toString(), false);
+    }
+
+    private void writeAllowedSymbols1(CustomFileDescriptor buildTargetTemp, HashSet<String> allowedSymbols) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         boolean first = true;
-        for(String symbol : allSymbols) {
+        for(String symbol : allowedSymbols) {
             if(!first) sb.append(", ");
             sb.append("\"").append(symbol).append("\"");
             first = false;
         }
         sb.append("]");
-        CustomFileDescriptor symbolsFile = buildTargetTemp.child("symbols.txt");
-        symbolsFile.writeString(sb.toString(), false);
+        CustomFileDescriptor exportedFunctionsFile = buildTargetTemp.child("exported_functions.txt");
+        exportedFunctionsFile.writeString(sb.toString(), false);
     }
 
     private ArrayList<String> getSymbols(String objPath, BuildConfig config) {
@@ -339,11 +365,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
                 String[] parts = line.trim().split("\\s+");
                 if(parts.length >= 3) {
                     String symbol = parts[parts.length - 1];
-                    if(allowSymbolsCallback != null) {
-                        if(allowSymbolsCallback.allowSymbol(symbol)) {
-                            symbols.add(symbol);
-                        }
-                    }
+                    symbols.add(symbol);
                 }
             }
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
