@@ -62,6 +62,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         libSuffix = ".js";
 
         cppFlags.add("-c");
+        cppFlags.add("-flto");
 
         exportedFunctions.add("_free");
         exportedFunctions.add("_malloc");
@@ -75,15 +76,14 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         exportedRuntimeMethods.add("HEAP32");
         exportedRuntimeMethods.add("HEAPU32");
         exportedRuntimeMethods.add("HEAPF32");
-        exportedRuntimeMethods.add("loadWebAssemblyModule");
         exportedRuntimeMethods.add("loadDynamicLibrary");
+        exportedRuntimeMethods.add("loadWebAssemblyModule");
         exportedRuntimeMethods.add("LDSO");
         exportedRuntimeMethods.add("wasmMemory");
         exportedRuntimeMethods.add("intArrayFromString");
         exportedRuntimeMethods.add("alignMemory");
         exportedRuntimeMethods.add("LDSO");
         exportedRuntimeMethods.add("asyncLoad");
-        exportedRuntimeMethods.add("loadDynamicLibrary");
 
         if(DEBUG_BUILD) {
             cppFlags.add("-O0");
@@ -205,13 +205,9 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         s = s.replace("[SIDE_MODULE_NAME]", libName);
         s = s.replace("[SIDE_MODULE_WASM]", libName + ".wasm");
         s = s.replace("[GLUE_CODE]", glueText);
-        CustomFileDescriptor wasmFile = libDir.child(libName + ".wasm");
-        byte[] wasmBytes = wasmFile.readBytes();
-        String base64 = java.util.Base64.getEncoder().encodeToString(wasmBytes);
-        s = s.replace("[WASM_BIN]", base64);
         s = replaceMethodInSideModule(s, "window." + mainModuleName + ".");
 //        s = minifyJS(s);
-        CustomFileDescriptor jsFile = libDir.child(libName + ".wasm.js");
+        CustomFileDescriptor jsFile = libDir.child(libName + ".js");
         jsFile.writeString(s, false);
     }
 
