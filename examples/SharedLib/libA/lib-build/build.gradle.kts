@@ -28,6 +28,8 @@ dependencies {
         implementation(project(":jParser:jParser-build"))
         implementation(project(":jParser:jParser-build-tool"))
     }
+
+    implementation(project(":idl-helper:idl-helper-core"))
 }
 
 tasks.register<JavaExec>("LibA_build_project") {

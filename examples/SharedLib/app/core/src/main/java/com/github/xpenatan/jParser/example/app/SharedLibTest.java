@@ -1,8 +1,8 @@
 package com.github.xpenatan.jParser.example.app;
 
+import com.github.xpenatan.jparser.idl.helper.IDLInt;
 import libA.LibA;
 import libA.LibAData;
-import libA.idl.helper.IDLInt;
 import libB.LibB;
 
 public class SharedLibTest {

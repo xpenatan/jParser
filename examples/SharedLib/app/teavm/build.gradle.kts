@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":examples:SharedLib:app:core"))
     implementation(project(":examples:SharedLib:libA:lib-teavm"))
     implementation(project(":examples:SharedLib:libB:lib-teavm"))
+    implementation(project(":idl-helper:idl-helper-teavm"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
     implementation("com.github.xpenatan.gdx-teavm:backend-teavm:${LibExt.gdxTeaVMVersion}")

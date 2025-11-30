@@ -21,8 +21,8 @@ public class BuildLib {
         String basePackage = "libA";
         String sourceDir = "/src/main/cpp/source";
 
-        WindowsMSVCTarget.DEBUG_BUILD = true;
-//        JParser.CREATE_IDL_HELPER = false;
+        WindowsMSVCTarget.DEBUG_BUILD = false;
+        JParser.CREATE_IDL_HELPER = false;
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
 
         BuildToolOptions.BuildToolParams data = new BuildToolOptions.BuildToolParams();
@@ -221,6 +221,7 @@ public class BuildLib {
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.mainModuleName = "idl";
         multiTarget.add(linkTarget);
         return multiTarget;
     }

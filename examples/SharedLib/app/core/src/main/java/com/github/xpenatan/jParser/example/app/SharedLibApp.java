@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
+import com.github.xpenatan.jparser.idl.IDLLoader;
 import libA.LibALoader;
 import libB.LibBLoader;
 
@@ -21,18 +23,27 @@ public class SharedLibApp extends ApplicationAdapter {
 
     @Override
     public void create() {
-        LibALoader.init((libA_isSuccess, libA_e) -> {
-            if(libA_e != null) {
-                libA_e.printStackTrace();
-                return;
-            }
-            LibBLoader.init((libB_isSuccess, libB_e) -> {
-                if(libB_e != null) {
-                    libB_e.printStackTrace();
+        IDLLoader.init(new JParserLibraryLoaderListener() {
+            @Override
+            public void onLoad(boolean idl_isSuccess, Exception idl_e) {
+                if(idl_e != null) {
+                    idl_e.printStackTrace();
                     return;
                 }
-                init = true;
-            });
+                LibALoader.init((libA_isSuccess, libA_e) -> {
+                    if(libA_e != null) {
+                        libA_e.printStackTrace();
+                        return;
+                    }
+                    LibBLoader.init((libB_isSuccess, libB_e) -> {
+                        if(libB_e != null) {
+                            libB_e.printStackTrace();
+                            return;
+                        }
+                        init = true;
+                    });
+                });
+            }
         });
 
         batch = new SpriteBatch();

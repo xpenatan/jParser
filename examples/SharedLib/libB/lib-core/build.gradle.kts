@@ -20,6 +20,8 @@ dependencies {
         api(project(":loader:loader-core"))
         api(project(":idl:idl-core"))
     }
+
+    implementation(project(":idl-helper:idl-helper-core"))
 }
 
 tasks.named("clean") {

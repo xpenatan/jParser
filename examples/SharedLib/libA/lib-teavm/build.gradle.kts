@@ -28,6 +28,8 @@ dependencies {
         implementation(project(":loader:loader-core"))
         implementation(project(":idl:idl-teavm"))
     }
+
+    implementation(project(":idl-helper:idl-helper-teavm"))
 }
 
 tasks.named("clean") {
