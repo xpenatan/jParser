@@ -77,9 +77,7 @@ public class BuildIDLHelper {
         linkTarget.cppFlags.add("-std:c++11");
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
-        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 
@@ -156,6 +154,7 @@ public class BuildIDLHelper {
         compileStaticTarget.isStatic = true;
         compileStaticTarget.compileGlueCode = false;
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/idl/");
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
@@ -166,12 +165,16 @@ public class BuildIDLHelper {
         EmscriptenTarget linkTarget = new EmscriptenTarget();
         linkTarget.idlReader = idlReader;
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/idl/");
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.cppFlags.add("-fPIC");
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "IDLCustomCode.h");
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.linkerFlags.add("-Wl,--export-all");
+//        linkTarget.environment.put("EMCC_FORCE_STDLIBS", "libc++abi");
+//        linkTarget.environment.put("EMCC_FORCE_STDLIBS", "1");
         multiTarget.add(linkTarget);
         return multiTarget;
     }

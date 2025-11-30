@@ -23,12 +23,14 @@ dependencies {
         implementation("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
         implementation("com.github.xpenatan.jParser:idl-teavm:-SNAPSHOT")
         implementation("com.github.xpenatan.jParser:idl-core:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:idl--helper-teavm:-SNAPSHOT")
     }
     else {
         implementation(project(":loader:loader-teavm"))
         implementation(project(":loader:loader-core"))
         implementation(project(":idl:idl-teavm"))
         implementation(project(":idl:idl-core"))
+        implementation(project(":idl-helper:idl-helper-teavm"))
     }
 //    testImplementation(project(":example:lib:lib-core"))
 //    testImplementation("junit:junit:${LibExt.jUnitVersion}")

@@ -19,6 +19,7 @@ dependencies {
         implementation("com.github.xpenatan.jParser:jParser-cpp:-SNAPSHOT")
         implementation("com.github.xpenatan.jParser:jParser-build:-SNAPSHOT")
         implementation("com.github.xpenatan.jParser:jParser-build-tool:-SNAPSHOT")
+        implementation("com.github.xpenatan.jParser:idl-helper-core:-SNAPSHOT")
     }
     else {
         implementation(project(":jParser:jParser-core"))
@@ -27,6 +28,7 @@ dependencies {
         implementation(project(":jParser:jParser-cpp"))
         implementation(project(":jParser:jParser-build"))
         implementation(project(":jParser:jParser-build-tool"))
+        implementation(project(":idl-helper:idl-helper-core"))
     }
 }
 

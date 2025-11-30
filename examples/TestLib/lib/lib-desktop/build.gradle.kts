@@ -23,9 +23,11 @@ tasks.jar {
 
 dependencies {
     if(LibExt.exampleUseRepoLibs) {
+        implementation("com.github.xpenatan.jParser:idl-helper-desktop:-SNAPSHOT")
         testImplementation("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
     }
     else {
+        implementation(project(":idl-helper:idl-helper-desktop"))
         testImplementation(project(":loader:loader-core"))
     }
     testImplementation(project(":examples:TestLib:lib:lib-core"))

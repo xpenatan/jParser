@@ -33,7 +33,9 @@ public class BuildLib {
         data.cppSourcePath = sourceDir;
         data.modulePrefix = modulePrefix;
 
-        BuilderTool.build(new BuildToolOptions(data, args), new BuildToolListener() {
+        BuildToolOptions op = new BuildToolOptions(data, args);
+        op.addAdditionalIDLRefPath(IDLReader.getIDLHelperFile());
+        BuilderTool.build(op, new BuildToolListener() {
             @Override
             public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
                 if(op.containsArg("teavm")) {
@@ -100,7 +102,7 @@ public class BuildLib {
         // Make a static library
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
         compileStaticTarget.isStatic = true;
-        compileStaticTarget.cppFlags.add("-std:c++11");
+        compileStaticTarget.cppFlags.add("/std:c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
@@ -110,13 +112,11 @@ public class BuildLib {
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
         linkTarget.addJNIHeaders();
-        linkTarget.cppFlags.add("-std:c++11");
+        linkTarget.cppFlags.add("/std:c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
-        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 

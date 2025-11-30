@@ -28,4 +28,10 @@ android {
 }
 
 dependencies {
+    if(LibExt.exampleUseRepoLibs) {
+        api("com.github.xpenatan.jParser:idl--helper-android:-SNAPSHOT")
+    }
+    else {
+        api(project(":idl-helper:idl-helper-android"))
+    }
 }

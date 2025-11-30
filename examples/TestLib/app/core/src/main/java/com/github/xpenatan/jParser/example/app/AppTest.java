@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jParser.example.testlib.TestLibLoader;
+import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
+import com.github.xpenatan.jparser.idl.IDLLoader;
 
 public class AppTest extends ApplicationAdapter {
     private boolean init = false;
@@ -20,11 +22,20 @@ public class AppTest extends ApplicationAdapter {
 
     @Override
     public void create() {
-        TestLibLoader.init((isSuccess, e) -> {
-            if(e != null) {
-                e.printStackTrace();
+        IDLLoader.init(new JParserLibraryLoaderListener() {
+            @Override
+            public void onLoad(boolean idl_isSuccess, Exception idl_e) {
+                if(idl_e != null) {
+                    idl_e.printStackTrace();
+                    return;
+                }
+                TestLibLoader.init((isSuccess, e) -> {
+                    if(e != null) {
+                        e.printStackTrace();
+                    }
+                    init = isSuccess;
+                });
             }
-            init = isSuccess;
         });
 
         batch = new SpriteBatch();

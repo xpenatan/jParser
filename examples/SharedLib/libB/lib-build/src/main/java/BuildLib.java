@@ -39,6 +39,7 @@ public class BuildLib {
         BuildToolOptions op = new BuildToolOptions(data, args);
 
         op.addAdditionalIDLRefPath(IDLReader.parseFile(libAPath + "/lib-build/src/main/cpp/LibA.idl"));
+        op.addAdditionalIDLRefPath(IDLReader.getIDLHelperFile());
 
         BuilderTool.build(op, new BuildToolListener() {
             @Override
@@ -238,7 +239,7 @@ public class BuildLib {
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
-        compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add("/std=c++11");
         multiTarget.add(compileStaticTarget);
 
         // Compile glue code and link to make js file
@@ -246,11 +247,11 @@ public class BuildLib {
         linkTarget.idlReader = idlReader;
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + libASourcePath);
-        linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("/std=c++11");
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibBCustomCode.h");
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
-        linkTarget.linkerFlags.add(libALibPath + "/LibA_.a");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libALibPath + "/LibA_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.mainModuleName = "idl";
         multiTarget.add(linkTarget);

@@ -9,6 +9,7 @@ import com.github.xpenatan.jParser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jParser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jParser.builder.tool.BuilderTool;
+import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.util.ArrayList;
 
@@ -20,7 +21,8 @@ public class BuildLib {
         String basePackage = "com.github.xpenatan.jParser.example.testlib";
         String sourceDir = "/src/main/cpp/source/TestLib/src";
 
-        WindowsMSVCTarget.DEBUG_BUILD = true;
+        WindowsMSVCTarget.DEBUG_BUILD = false;
+        JParser.CREATE_IDL_HELPER = false;
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
 
         BuildToolOptions.BuildToolParams data = new BuildToolOptions.BuildToolParams();
@@ -31,7 +33,10 @@ public class BuildLib {
         data.cppSourcePath = sourceDir;
         data.modulePrefix = modulePrefix;
 
-        BuilderTool.build(new BuildToolOptions(data, args), new BuildToolListener() {
+        BuildToolOptions op = new BuildToolOptions(data, args);
+        op.addAdditionalIDLRefPath(IDLReader.getIDLHelperFile());
+
+        BuilderTool.build(op, new BuildToolListener() {
             @Override
             public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
                 if(op.containsArg("teavm")) {
@@ -98,7 +103,7 @@ public class BuildLib {
         // Make a static library
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
         compileStaticTarget.isStatic = true;
-        compileStaticTarget.cppFlags.add("-std:c++11");
+        compileStaticTarget.cppFlags.add("/std:c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
@@ -108,13 +113,11 @@ public class BuildLib {
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
         linkTarget.addJNIHeaders();
-        linkTarget.cppFlags.add("-std:c++11");
+        linkTarget.cppFlags.add("/std:c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
-        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 
@@ -219,6 +222,8 @@ public class BuildLib {
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.linkerFlags.add("-Wl,--export-all");
+        linkTarget.mainModuleName = "idl";
         multiTarget.add(linkTarget);
         return multiTarget;
     }
