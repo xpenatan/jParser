@@ -13,7 +13,6 @@ dependencies {
         implementation("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
     }
     else {
-        implementation(project(":jParser:jParser-base"))
         implementation(project(":loader:loader-core"))
         implementation(project(":idl:idl-core"))
     }

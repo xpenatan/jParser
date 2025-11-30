@@ -2,17 +2,20 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "idl-teavm"
+val moduleName = "idl-helper-teavm"
 
-val emscriptenJS = "$projectDir/../jolt-build/build/c++/libs/emscripten/idl.js"
-val emscriptenWASM = "$projectDir/../jolt-build/build/c++/libs/emscripten/idl.wasm"
+val emscriptenJS = "$projectDir/../idl-helper-build/build/c++/libs/emscripten/idl.js"
+val emscriptenWASM = "$projectDir/../idl-helper-build/build/c++/libs/emscripten/idl.wasm"
 
 tasks.jar {
     from(emscriptenJS, emscriptenWASM)
 }
 
 dependencies {
-    implementation(project(":idl:idl-core"))
+    implementation(project(":idl:idl-teavm"))
+    implementation(project(":loader:loader-core"))
+    implementation(project(":loader:loader-teavm"))
+
     api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
     api("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
     api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")

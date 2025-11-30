@@ -12,6 +12,11 @@ var libProjects = mutableSetOf(
     project(":jParser:jParser-teavm"),
     project(":idl:idl-core"),
     project(":idl:idl-teavm"),
+    project(":idl-helper:idl-helper-base"),
+    project(":idl-helper:idl-helper-core"),
+    project(":idl-helper:idl-helper-teavm"),
+    project(":idl-helper:idl-helper-desktop"),
+    project(":idl-helper:idl-helper-android"),
     project(":loader:loader-core"),
     project(":loader:loader-teavm"),
 )

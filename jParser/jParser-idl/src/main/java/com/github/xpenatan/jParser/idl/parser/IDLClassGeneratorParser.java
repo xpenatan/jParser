@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -48,7 +49,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
     public boolean generateClass = false;
 
     protected final IDLReader idlReader;
-    private String basePackage;
+    protected String basePackage;
 
     protected HashMap<String, String> classCppPath;
 
@@ -91,24 +92,52 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         generateIDLJavaClasses(jParser, jParser.genDir);
     }
 
+    protected String getUpdatePackage(CompilationUnit compilationUnit) {
+        String originalPackage = "";
+        if(basePackage != null && !basePackage.isEmpty() && compilationUnit.getPackageDeclaration().isPresent()) {
+            originalPackage = compilationUnit.getPackageDeclaration().get().getNameAsString();
+        }
+        if(originalPackage.isEmpty()) {
+            return basePackage;
+        }
+        if(originalPackage.startsWith(basePackage)) {
+            return originalPackage;
+        }
+        String lastPart = basePackage.substring(basePackage.lastIndexOf('.') + 1);
+        if(originalPackage.equals(lastPart)) {
+            return basePackage;
+        }
+        if(originalPackage.startsWith(lastPart + ".")) {
+            return basePackage + originalPackage.substring(lastPart.length());
+        }
+        return basePackage + "." + originalPackage;
+    }
+
     private void createBaseUnitFromResources(JParser jParser) {
         Collection<String> resources = ResourceList.getResources(Pattern.compile("/*.*/*.java"));
         for(String resource : resources) {
             try {
                 CompilationUnit compilationUnit = StaticJavaParser.parseResource(resource);
-                compilationUnit.printer(new CustomPrettyPrinter());
-                String originalPackage = compilationUnit.getPackageDeclaration().get().getNameAsString();
-                if(basePackage != null && !basePackage.isEmpty()) {
-                    originalPackage = "." + originalPackage;
+
+                Optional<ClassOrInterfaceDeclaration> classOrInterfaceDeclaration = compilationUnit.findFirst(ClassOrInterfaceDeclaration.class);
+                if(classOrInterfaceDeclaration.isPresent()) {
+                    String nameAsString = classOrInterfaceDeclaration.get().getNameAsString();
+                    JParserItem jParserItem = jParser.getParserUnitItem(nameAsString);
+                    if(jParserItem != null) {
+                        compilationUnit =jParserItem.unit;
+                    }
+                    else {
+                        compilationUnit.printer(new CustomPrettyPrinter());
+                        jParserItem = new JParserItem(compilationUnit, jParser.genDir);
+                        jParser.unitArray.add(jParserItem);
+                    }
+                    String newPackage = getUpdatePackage(compilationUnit);
+                    compilationUnit.setPackageDeclaration(newPackage);
+                    if(!JParser.CREATE_IDL_HELPER) {
+                        jParserItem.notAllowed = true;
+                    }
+                    jParserItem.isIDL = true;
                 }
-                String newPackage = basePackage + originalPackage;
-                compilationUnit.setPackageDeclaration(newPackage);
-                JParserItem jParserItem = new JParserItem(compilationUnit, jParser.genDir);
-                if(!JParser.CREATE_IDL_HELPER) {
-                    jParserItem.notAllowed = true;
-                }
-                jParserItem.isIDL = true;
-                jParser.unitArray.add(jParserItem);
             } catch(IOException e) {
                 throw new RuntimeException(e);
             }
@@ -435,3 +464,4 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
         return classes;
     }
 }
+

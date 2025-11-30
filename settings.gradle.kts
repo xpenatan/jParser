@@ -9,6 +9,13 @@ include(":jParser:jParser-teavm")
 include(":idl:idl-core")
 include(":idl:idl-teavm")
 
+include(":idl-helper:idl-helper-base")
+include(":idl-helper:idl-helper-build")
+include(":idl-helper:idl-helper-core")
+include(":idl-helper:idl-helper-teavm")
+include(":idl-helper:idl-helper-desktop")
+include(":idl-helper:idl-helper-android")
+
 include(":loader:loader-core")
 include(":loader:loader-teavm")
 

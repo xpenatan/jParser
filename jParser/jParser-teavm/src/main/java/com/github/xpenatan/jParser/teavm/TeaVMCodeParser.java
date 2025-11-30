@@ -801,9 +801,8 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 }
             }
 
-            PackageDeclaration packageDeclaration = unit.getPackageDeclaration().get();
-            String nameAsString1 = packageDeclaration.getNameAsString();
-            packageDeclaration.setName(PACKAGE_PREFIX + nameAsString1);
+            String newPackage = getUpdatePackage(unit);
+            unit.setPackageDeclaration(PACKAGE_PREFIX + newPackage);
 
             for(ConstructorDeclaration constructorDeclaration : unit.findAll(ConstructorDeclaration.class)) {
                 String nameAsString = constructorDeclaration.getNameAsString();

@@ -30,13 +30,9 @@ public class JParserItem {
 
             if(all.size() > 0) {
                 className = all.get(0).getNameAsString();
-                String packageName = unit.getPackageDeclaration().get().getNameAsString();
-                this.packagePathName = packageName.replace(".", "/");
             }
             else if(allEnum.size() > 0) {
                 className = allEnum.get(0).getNameAsString();
-                String packageName = unit.getPackageDeclaration().get().getNameAsString();
-                this.packagePathName = packageName.replace(".", "/");
             }
             else {
                 notAllowed = true;
@@ -53,7 +49,16 @@ public class JParserItem {
     }
 
     public String getFullDestinationPath() {
-        String path = destinationBaseDir + File.separator + packagePathName + File.separator + className + ".java";
+        String packagePathName = "";
+        Optional<PackageDeclaration> packageDeclaration = unit.getPackageDeclaration();
+        if(packageDeclaration.isPresent()) {
+            PackageDeclaration pkg = packageDeclaration.get();
+            String pkgPath = pkg.getNameAsString().replace(".", File.separator);
+            packagePathName = File.separator + pkgPath + File.separator + className + ".java";
+        } else {
+            packagePathName = "";
+        }
+        String path = destinationBaseDir + packagePathName;
         return path;
     }
 

@@ -78,8 +78,11 @@ public class BuildToolOptions {
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         cppPath = moduleBuildPath + "/src/main/cpp/";
-        String idlPathItem = cppPath + idlName + ".idl";
-        idlPath.add(IDLReader.parseFile(idlPathItem));
+
+        if(idlName != null) {
+            String idlPathItem = cppPath + idlName + ".idl";
+            idlPath.add(IDLReader.parseFile(idlPathItem));
+        }
 
         customSourceDir = cppPath + "custom/";
 

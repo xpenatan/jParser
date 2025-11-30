@@ -29,6 +29,9 @@ out/
 .temp/
 *.log
 
+**/idl-helper/idl-helper-teavm/src/main/java/**
+**/idl-helper/idl-helper-core/src/main/java/**
+
 **/webapp/**
 **/lib/core/src/**
 **/lib/desktop/src/main/**

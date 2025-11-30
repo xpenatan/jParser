@@ -2,9 +2,11 @@ plugins {
     id("java")
 }
 
-val moduleName = "idl-core"
+val moduleName = "idl-helper-core"
 
 dependencies {
+    implementation(project(":idl:idl-core"))
+    implementation(project(":loader:loader-core"))
 }
 
 java {

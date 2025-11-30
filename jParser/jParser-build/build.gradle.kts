@@ -6,7 +6,6 @@ val moduleName = "${LibExt.libName}-build"
 
 dependencies {
     implementation(project(":jParser:jParser-core"))
-    implementation(project(":jParser:jParser-base"))
     implementation(project(":jParser:jParser-idl"))
 }
 
