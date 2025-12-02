@@ -67,6 +67,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         exportedFunctions.add("_free");
         exportedFunctions.add("_malloc");
         exportedFunctions.add("__Znwm");
+//        exportedFunctions.add("__ZNSt3__24coutE");
 
         exportedRuntimeMethods.add("UTF8ToString");
         exportedRuntimeMethods.add("HEAP8");
@@ -146,6 +147,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("-sALLOW_MEMORY_GROWTH=1");
             linkerFlags.add("-sALLOW_TABLE_GROWTH=1");
             linkerFlags.add("-sMODULARIZE=1");
+            linkerFlags.add("-sNO_FILESYSTEM=1");
             linkerFlags.add("-sINITIAL_MEMORY=" + initialMemory);
             linkerFlags.add("-sSTACK_SIZE=" + stackSize);
             CustomFileDescriptor exportedFunctionsFile = config.buildDir.child("target/emscripten/static/exported_functions.txt");
