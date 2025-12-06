@@ -271,7 +271,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         if(js == null || js.isEmpty() || prefix == null || prefix.isEmpty() || method == null || method.isEmpty()) {
             return js;
         }
-        String[] avoidPrefixes = {"_", "'", ".", "function(", " = ", "typeof ", "if (", "self, "};
+        String[] avoidPrefixes = {"_", "'", ".", "function(", " = ", "typeof ", "if (", "self, ", ") "};
         Pattern pattern = Pattern.compile(Pattern.quote(method));
         Matcher matcher = pattern.matcher(js);
         StringBuilder sb = new StringBuilder();
