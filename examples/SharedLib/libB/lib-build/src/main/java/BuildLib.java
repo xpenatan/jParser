@@ -128,10 +128,8 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.headerDirs.add("-I" + libASourcePath);
-        linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
-        linkTarget.linkerFlags.add(libALibPath + "/LibA64_.lib");
-        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libALibPath + "/LibA64_.lib");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 
@@ -250,8 +248,8 @@ public class BuildLib {
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibBCustomCode.h");
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
-        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libALibPath + "/LibA_.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
+        linkTarget.linkerFlags.add(libALibPath + "/LibA_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.mainModuleName = "idl";
         multiTarget.add(linkTarget);

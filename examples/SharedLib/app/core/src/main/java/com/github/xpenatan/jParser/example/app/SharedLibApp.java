@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
 import com.github.xpenatan.jparser.idl.IDLLoader;
 import libA.LibALoader;
+import libB.LibBLoader;
 
 public class SharedLibApp extends ApplicationAdapter {
     private boolean init = false;
@@ -34,14 +35,13 @@ public class SharedLibApp extends ApplicationAdapter {
                         libA_e.printStackTrace();
                         return;
                     }
-                    init = true;
-//                    LibBLoader.init((libB_isSuccess, libB_e) -> {
-//                        if(libB_e != null) {
-//                            libB_e.printStackTrace();
-//                            return;
-//                        }
-//                        init = true;
-//                    });
+                    LibBLoader.init((libB_isSuccess, libB_e) -> {
+                        if(libB_e != null) {
+                            libB_e.printStackTrace();
+                            return;
+                        }
+                        init = true;
+                    });
                 });
             }
         });
