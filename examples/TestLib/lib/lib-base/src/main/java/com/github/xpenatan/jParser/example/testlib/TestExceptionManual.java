@@ -6,7 +6,7 @@ import com.github.xpenatan.jParser.idl.IDLBase;
 public class TestExceptionManual extends IDLBase {
 
     public TestExceptionManual() {
-        long addr = internal_native_create();
+        long addr = internal_native_create_addr();
         internal_reset(addr, true);
     }
 
@@ -17,7 +17,7 @@ public class TestExceptionManual extends IDLBase {
         var testException = new [MODULE].TestExceptionManual();
         return [MODULE].getPointer(testException);
     */
-    private static native long internal_native_create();
+    private static native long internal_native_create_addr();
 
     public int setDataToNullPointer() {
         return internal_native_setDataToNullPointer(native_address);

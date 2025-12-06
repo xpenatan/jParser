@@ -70,19 +70,19 @@ public class IDLMethodParser {
 
     static final String GET_OBJECT_TEMPLATE =
             "{\n" +
-            "    long pointer = [METHOD];\n" +
-            "    if(pointer == 0) " + NULL_POINTER + "\n" +
+            "    long addr = [METHOD];\n" +
+            "    if(addr == 0) " + NULL_POINTER + "\n" +
             "    if([TYPE]_TEMP_GEN_[NUM] == null) [TYPE]_TEMP_GEN_[NUM] = [TYPE]." + IDLConstructorParser.EMPTY_INSTANCE_METHOD + "();\n" +
-            "    [TYPE]_TEMP_GEN_[NUM].internal_reset(pointer, false);\n" +
+            "    [TYPE]_TEMP_GEN_[NUM].internal_reset(addr, false);\n" +
             "    return [TYPE]_TEMP_GEN_[NUM];\n" +
             "}";
 
     static final String GET_NEW_OBJECT_TEMPLATE =
             "{\n" +
-            "    long pointer = [METHOD];\n" +
-            "    if(pointer == 0) " + NULL_POINTER + "\n" +
+            "    long addr = [METHOD];\n" +
+            "    if(addr == 0) " + NULL_POINTER + "\n" +
             "    [TYPE] [TYPE]_NEW = [TYPE]." + IDLConstructorParser.EMPTY_INSTANCE_METHOD + "();\n" +
-            "    [TYPE]_NEW.internal_reset(pointer, [MEM_OWNED]);\n" +
+            "    [TYPE]_NEW.internal_reset(addr, [MEM_OWNED]);\n" +
             "    return [TYPE]_NEW;\n" +
             "}";
 
@@ -499,6 +499,8 @@ public class IDLMethodParser {
         else if(isClassOrInterfaceType) {
             // If the return type is an object we need to return a pointer.
             Type type = StaticJavaParser.parseType(long.class.getSimpleName());
+            String name = nativeMethod.getNameAsString();
+            nativeMethod.setName(name + "_addr");
             nativeMethod.setType(type);
         }
         else {

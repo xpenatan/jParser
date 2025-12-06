@@ -23,7 +23,7 @@ public class IDLUtils {
             internal_native_copyToByteBuffer((int)source.native_void_address, destinationArray, offset, sizeInBytes);
         }
     */
-    public static void copyToByteBuffer(IDLBase source, ByteBuffer destination, long offset, long sizeInBytes) {
+    public static void copyToByteBuffer(IDLBase source, ByteBuffer destination, int offset, int sizeInBytes) {
         internal_native_copyToByteBuffer(source.native_void_address, destination, offset, sizeInBytes);
     }
 
@@ -32,12 +32,12 @@ public class IDLUtils {
             "var dataOut = [MODULE].HEAPU8.subarray(data_addr, data_addr + sizeInBytes);" +
             "destination_addr.set(dataOut, offset);"
         )
-        private static native void internal_native_copyToByteBuffer(int data_addr, org.teavm.jso.JSObject destination_addr, long offset, long sizeInBytes);
+        private static native void internal_native_copyToByteBuffer(int data_addr, org.teavm.jso.JSObject destination_addr, int offset, int sizeInBytes);
     */
     /*[-JNI;-NATIVE]
         void* data = (void*)data_addr;
         char* bufferAddress = (char*)env->GetDirectBufferAddress(destination);
         memcpy(bufferAddress + offset, data, sizeInBytes);
     */
-    public static native void internal_native_copyToByteBuffer(long data_addr, ByteBuffer destination, long offset, long sizeInBytes);
+    public static native void internal_native_copyToByteBuffer(long data_addr, ByteBuffer destination, int offset, int sizeInBytes);
 }

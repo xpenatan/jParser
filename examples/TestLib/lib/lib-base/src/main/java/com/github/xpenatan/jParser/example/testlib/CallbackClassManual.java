@@ -88,7 +88,7 @@ public class CallbackClassManual extends IDLBase {
     */
 
     public CallbackClassManual() {
-        long addr = internal_native_create();
+        long addr = internal_native_create_addr();
         internal_reset(addr, true);
         setupCallbacks();
     }
@@ -118,7 +118,7 @@ public class CallbackClassManual extends IDLBase {
         var CallbackClassManualImpl = new [MODULE].CallbackClassManualImpl();
         return [MODULE].getPointer(CallbackClassManualImpl);
     */
-    private static native long internal_native_create();
+    private static native long internal_native_create_addr();
 
     /*[-TEAVM;-REPLACE_BLOCK]
         {

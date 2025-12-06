@@ -36,7 +36,7 @@ public class CallbackExceptionManual extends IDLBase {
     */
 
     public CallbackExceptionManual() {
-        long addr = internal_native_create();
+        long addr = internal_native_create_addr();
         internal_reset(addr, true);
         setupCallbacks();
     }
@@ -48,7 +48,7 @@ public class CallbackExceptionManual extends IDLBase {
         var nativeObject = new [MODULE].CallbackExceptionManualImpl();
         return [MODULE].getPointer(nativeObject);
     */
-    private static native long internal_native_create();
+    private static native long internal_native_create_addr();
 
     /*[-TEAVM;-REPLACE_BLOCK]
         {

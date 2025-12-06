@@ -8,6 +8,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -21,6 +22,11 @@ import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.BooleanLiteralExpr;
+import com.github.javaparser.ast.expr.CharLiteralExpr;
+import com.github.javaparser.ast.expr.DoubleLiteralExpr;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
+import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -827,7 +833,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             //cast native_address to int
 
             if(CAST_LONG_TO_INT) {
-                castLongToIntIfNeeded(unit);
+                castLongToIntIfNeeded(unit, jParser.unitArray);
             }
         }
     }
@@ -839,9 +845,10 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         return super.parseCodeBlock(node, headerCommands, newContent);
     }
 
-    private void castLongToIntIfNeeded(CompilationUnit unit) {
+    private void castLongToIntIfNeeded(CompilationUnit unit, ArrayList<JParserItem> parserItems) {
         List<MethodDeclaration> allMethods = unit.findAll(MethodDeclaration.class);
         for(MethodDeclaration method : allMethods) {
+            String methodName = method.getNameAsString();
             if(method.getBody().isPresent()) {
                 NodeList<Parameter> parameters = method.getParameters();
                 for(Parameter parameter : parameters) {
@@ -857,70 +864,11 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                         }
                     }
                 }
-
                 BlockStmt body = method.getBody().get();
-                Type returnType = method.getType();
-                boolean classOrInterfaceType = returnType.isClassOrInterfaceType() && !returnType.asString().equals("String");
-                // Find all method calls in the body
-                List<MethodCallExpr> methodCalls = body.findAll(MethodCallExpr.class);
-                for(MethodCallExpr call : methodCalls) {
-                    SimpleName methodName = call.getName();
-                    // Find the corresponding method declaration
-                    ClassOrInterfaceDeclaration classDecl = unit.findFirst(ClassOrInterfaceDeclaration.class).get();
-                    List<MethodDeclaration> candidates = classDecl.getMethodsByName(methodName.getIdentifier());
-                    for(MethodDeclaration candidate : candidates) {
-                        if(candidate.isNative()) {
-                            NodeList<Parameter> nativeParameters = candidate.getParameters();
-                            for(Parameter parameter : nativeParameters) {
-                                Type type = parameter.getType();
-                                String paramName = parameter.getNameAsString();
-                                if(type.isPrimitiveType()) {
-                                    PrimitiveType primitiveType = type.asPrimitiveType();
-                                    if(primitiveType.getType() != PrimitiveType.Primitive.LONG) {
-                                        continue;
-                                    }
-                                    if(paramName.endsWith("_addr")) {
-                                        parameter.setType(PrimitiveType.intType());
-                                    }
-                                }
-                            }
-                            if(classOrInterfaceType) {
-                                candidate.setType(PrimitiveType.intType());
-                                Optional<Node> parent = call.getParentNode();
-                                while(parent.isPresent()) {
-                                    Node p = parent.get();
-                                    if(p instanceof VariableDeclarationExpr) {
-                                        VariableDeclarationExpr varDecl = (VariableDeclarationExpr) p;
-                                        List<VariableDeclarator> vars = varDecl.getVariables();
-                                        for(VariableDeclarator var : vars) {
-                                            if(var.getInitializer().isPresent() && var.getInitializer().get() == call) {
-                                                var.setType(PrimitiveType.intType());
-                                            }
-                                        }
-                                        break;
-                                    }
-                                    else if(p instanceof AssignExpr) {
-                                        AssignExpr assign = (AssignExpr) p;
-                                        if(assign.getValue() == call && assign.getTarget() instanceof NameExpr) {
-                                            NameExpr nameExpr = (NameExpr) assign.getTarget();
-                                            List<VariableDeclarationExpr> varDecls = body.findAll(VariableDeclarationExpr.class);
-                                            for(VariableDeclarationExpr varDecl : varDecls) {
-                                                for(VariableDeclarator var : varDecl.getVariables()) {
-                                                    if(var.getNameAsString().equals(nameExpr.getNameAsString())) {
-                                                        var.setType(PrimitiveType.intType());
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        break;
-                                    }
-                                    parent = p.getParentNode();
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
+                castBodyLongToInt(body);
+            }
+            else if(method.isNative()) {
+                castNativeMethodLongToInt(method);
             }
         }
 
@@ -928,33 +876,53 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         List<ConstructorDeclaration> constructors = unit.findAll(ConstructorDeclaration.class);
         for(ConstructorDeclaration constructor : constructors) {
             BlockStmt body = constructor.getBody();
-            // Find all method calls in the constructor body
-            List<MethodCallExpr> methodCalls = body.findAll(MethodCallExpr.class);
-            for(MethodCallExpr call : methodCalls) {
-                SimpleName methodName = call.getName();
-                // Find the corresponding method declaration
-                ClassOrInterfaceDeclaration classDecl = unit.findFirst(ClassOrInterfaceDeclaration.class).get();
-                List<MethodDeclaration> candidates = classDecl.getMethodsByName(methodName.getIdentifier());
-                for(MethodDeclaration candidate : candidates) {
-                    if(candidate.isNative()) {
-                        candidate.setType(PrimitiveType.intType());
-                        // Check if the call is assigned to a variable and change the variable type to int
-                        Optional<Node> parent = call.getParentNode();
-                        while(parent.isPresent()) {
-                            Node p = parent.get();
-                            if(p instanceof VariableDeclarationExpr) {
-                                VariableDeclarationExpr varDecl = (VariableDeclarationExpr) p;
-                                List<VariableDeclarator> vars = varDecl.getVariables();
-                                for(VariableDeclarator var : vars) {
-                                    if(var.getInitializer().isPresent() && var.getInitializer().get() == call) {
-                                        var.setType(PrimitiveType.intType());
-                                    }
-                                }
-                                break;
-                            }
-                            parent = p.getParentNode();
+            castBodyLongToInt(body);
+        }
+    }
+
+
+    private void castBodyLongToInt(BlockStmt body) {
+        List<VariableDeclarationExpr> varDecls = body.findAll(VariableDeclarationExpr.class);
+        for (VariableDeclarationExpr varDecl : varDecls) {
+            List<VariableDeclarator> variables = varDecl.getVariables();
+            for (VariableDeclarator var : variables) {
+                Type type = var.getType();
+                if (type.isPrimitiveType()) {
+                    PrimitiveType primitiveType = type.asPrimitiveType();
+                    if (primitiveType.getType() == PrimitiveType.Primitive.LONG) {
+                        String varName = var.getNameAsString();
+                        if (varName.contains("addr") || varName.endsWith("_addr")) {
+                            var.setType(PrimitiveType.intType());
                         }
-                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void castNativeMethodLongToInt(MethodDeclaration nativeMethod) {
+        // Change return type if method name ends with _addr
+        String methodName = nativeMethod.getNameAsString();
+        if (methodName.endsWith("_addr")) {
+            Type returnType = nativeMethod.getType();
+            if (returnType.isPrimitiveType()) {
+                PrimitiveType primitiveType = returnType.asPrimitiveType();
+                if (primitiveType.getType() == PrimitiveType.Primitive.LONG) {
+                    nativeMethod.setType(PrimitiveType.intType());
+                }
+            }
+        }
+
+        // Change parameters that end with _addr
+        NodeList<Parameter> parameters = nativeMethod.getParameters();
+        for (Parameter parameter : parameters) {
+            String paramName = parameter.getNameAsString();
+            if (paramName.endsWith("_addr")) {
+                Type paramType = parameter.getType();
+                if (paramType.isPrimitiveType()) {
+                    PrimitiveType primitiveType = paramType.asPrimitiveType();
+                    if (primitiveType.getType() == PrimitiveType.Primitive.LONG) {
+                        parameter.setType(PrimitiveType.intType());
                     }
                 }
             }
