@@ -46,6 +46,7 @@ public class JParserLibraryLoader {
         final String fullLibraryName = path + libraryName;
 
         if(loadedLibraries.contains(fullLibraryName)) {
+            listener.onLoad(true, null);
             return;
         }
 
