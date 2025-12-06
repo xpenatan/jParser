@@ -234,7 +234,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         js = mapMethodInSideModule(js, prefix, "WrapperObject");
         js = mapMethodInSideModule(js, prefix, "getCache");
         js = mapMethodInSideModule(js, prefix, "castObject");
-        js = mapMethodInSideModule(js, prefix, "compare");
         js = mapMethodInSideModule(js, prefix, "getClass");
 //        js = mapMethodInSideModule(js, prefix, "destroy");
 //        js = mapMethodInSideModule(js, prefix, "getPointer");
@@ -246,24 +245,16 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         js = js.replaceAll("function WrapperObject\\(\\) \\{\\s*\\}\\s*WrapperObject\\.prototype = Object\\.create\\(WrapperObject\\.prototype\\);\\s*WrapperObject\\.prototype\\.constructor = WrapperObject;\\s*WrapperObject\\.prototype\\.__class__ = WrapperObject;\\s*", "");
         js = js.replaceAll("function getCache\\(__class__\\) \\{\\s*return \\(__class__ \\|\\| WrapperObject\\)\\.__cache__;\\s*\\}", "");
         js = js.replaceAll("function castObject\\(obj, __class__\\) \\{\\s*return wrapPointer\\(obj\\.ptr, __class__\\);\\s*\\}", "");
-        js = js.replaceAll("function compare\\(obj1, obj2\\) \\{\\s*return obj1\\.ptr === obj2\\.ptr;\\s*\\}", "");
         js = js.replaceAll("function getClass\\(obj\\) \\{\\s*return obj\\.__class__;\\s*\\}", "");
-//        js = js.replaceAll("function destroy\\(obj\\) \\{\\s*if \\(!obj\\['__destroy__'\\]\\) throw 'Error: Cannot destroy object\\. \\(Did you create it yourself\\?\\)';\\s*obj\\['__destroy__'\\]\\(\\);\\s*// Remove from cache, so the object can be GC'd and refs added onto it released\\s*delete getCache\\(obj\\.__class__\\)\\[obj\\.ptr\\];\\s*\\}", "");
-//        js = js.replaceAll("function wrapPointer\\(ptr, __class__\\) \\{\\s*var cache = getCache\\(__class__\\);\\s*var ret = cache\\[ptr\\];\\s*if \\(ret\\) return ret;\\s*ret = Object\\.create\\(\\(__class__ \\|\\| WrapperObject\\)\\.prototype\\);\\s*ret\\.ptr = ptr;\\s*return cache\\[ptr\\] = ret;\\s*\\}", "");
-//        js = js.replaceAll("function getPointer\\(obj\\) \\{\\s*return obj\\.ptr;\\s*\\}", "");
         js = js.replace("WrapperObject.__cache__ = {};", "");
         js = js.replace("Module['WrapperObject'] = WrapperObject;", "");
         js = js.replace("Module['getCache'] = getCache;", "");
         js = js.replace("Module['castObject'] = castObject;", "");
-        js = js.replace("Module['compare'] = compare;", "");
         js = js.replace("Module['getClass'] = getClass;", "");
         js = js.replace("Module['NULL'] = wrapPointer(0);", "");
         js = js.replaceAll("(?s)/\\*.*?\\*/", "");
         js = js.replaceAll("//.*", "");
         js = js.replaceAll("(\\r?\\n){3,}", "\n\n");
-//        js = js.replace("Module['wrapPointer'] = wrapPointer;", "");
-//        js = js.replace("Module['destroy'] = destroy;", "");
-//        js = js.replace("Module['getPointer'] = getPointer;", "");
         return js;
     }
 
@@ -271,7 +262,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         if(js == null || js.isEmpty() || prefix == null || prefix.isEmpty() || method == null || method.isEmpty()) {
             return js;
         }
-        String[] avoidPrefixes = {"_", "'", ".", "function(", " = ", "typeof ", "if (", "self, ", ") "};
+        String[] avoidPrefixes = {"_", "'", "."};
         Pattern pattern = Pattern.compile(Pattern.quote(method));
         Matcher matcher = pattern.matcher(js);
         StringBuilder sb = new StringBuilder();
