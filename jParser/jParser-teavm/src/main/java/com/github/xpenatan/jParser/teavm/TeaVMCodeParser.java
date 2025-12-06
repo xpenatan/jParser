@@ -1,12 +1,10 @@
 package com.github.xpenatan.jParser.teavm;
 
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -14,9 +12,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
-import com.github.javaparser.ast.expr.CastExpr;
-import com.github.javaparser.ast.expr.ConditionalExpr;
-import com.github.javaparser.ast.expr.EnclosedExpr;
+import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.Name;
@@ -30,11 +26,8 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.resolution.types.ResolvedArrayType;
-import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
-import com.github.javaparser.resolution.types.ResolvedReferenceType;
-import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.utils.Pair;
 import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.core.JParserHelper;
@@ -834,12 +827,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             //cast native_address to int
 
             if(CAST_LONG_TO_INT) {
-                List<ClassOrInterfaceDeclaration> classDeclarations = unit.findAll(ClassOrInterfaceDeclaration.class);
-
-                for(int i1 = 0; i1 < classDeclarations.size(); i1++) {
-                    ClassOrInterfaceDeclaration classDeclaration = classDeclarations.get(i1);
-                    convertNativeMethodLongType(classDeclaration);
-                }
+                castLongToIntIfNeeded(unit);
             }
         }
     }
@@ -851,201 +839,124 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
         return super.parseCodeBlock(node, headerCommands, newContent);
     }
 
-    private void convertNativeMethodLongType(ClassOrInterfaceDeclaration classDeclaration) {
-        String className = classDeclaration.getNameAsString();
-
-        List<ConstructorDeclaration> constructorDeclarations = classDeclaration.findAll(ConstructorDeclaration.class);
-        for(int i = 0; i < constructorDeclarations.size(); i++) {
-            ConstructorDeclaration constructorDeclaration = constructorDeclarations.get(i);
-            List<MethodCallExpr> methodCallerExprList = constructorDeclaration.findAll(MethodCallExpr.class);
-            NodeList<Parameter> constructorParameters = constructorDeclaration.getParameters();
-            updateLongToInt(classDeclaration, methodCallerExprList);
-        }
-
-        List<MethodDeclaration> methodDeclarations = classDeclaration.findAll(MethodDeclaration.class);
-        for(int i = 0; i < methodDeclarations.size(); i++) {
-            MethodDeclaration methodDeclaration = methodDeclarations.get(i);
-            if(!methodDeclaration.isNative()) {
-                String methodName = methodDeclaration.getNameAsString();
-//                if(methodName.equals("getVoidData")) { // TODO improve solution
-//                    methodDeclaration.setType(StaticJavaParser.parseType("int"));
-//                }
-                List<MethodCallExpr> methodCallerExprList = methodDeclaration.findAll(MethodCallExpr.class);
-                updateLongToInt(classDeclaration, methodCallerExprList);
-                updateMethodAddrParamsToInt(methodDeclaration);
-            }
-        }
-    }
-
-    private void updateMethodAddrParamsToInt(MethodDeclaration methodDeclaration) {
-        NodeList<Parameter> parameters = methodDeclaration.getParameters();
-        for(int argI = 0; argI < parameters.size(); argI++) {
-            Parameter parameter = parameters.get(argI);
-            Type type = parameter.getType();
-            String paramName = parameter.getNameAsString();
-            if(JParserHelper.isLong(type) && paramName.endsWith(IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS)) {
-                parameter.setType(int.class);
-            }
-        }
-    }
-
-    private void updateLongToInt(ClassOrInterfaceDeclaration classDeclaration, List<MethodCallExpr> methodCallerExprList) {
-        for(int i1 = 0; i1 < methodCallerExprList.size(); i1++) {
-            MethodCallExpr methodCallExpr = methodCallerExprList.get(i1);
-            NodeList<Expression> arguments = methodCallExpr.getArguments();
-            MethodDeclaration nativeMethod = getNativeMethod(classDeclaration, methodCallExpr);
-            if(nativeMethod != null) {
-                NodeList<Parameter> parameters = nativeMethod.getParameters();
-                int paramSize = parameters.size();
-                if(paramSize > 0) {
-                    if(arguments.size() != paramSize) {
-                        throw new RuntimeException("Arguments are not the same");
+    private void castLongToIntIfNeeded(CompilationUnit unit) {
+        List<MethodDeclaration> allMethods = unit.findAll(MethodDeclaration.class);
+        for(MethodDeclaration method : allMethods) {
+            if(method.getBody().isPresent()) {
+                NodeList<Parameter> parameters = method.getParameters();
+                for(Parameter parameter : parameters) {
+                    Type type = parameter.getType();
+                    if(type.isPrimitiveType()) {
+                        PrimitiveType primitiveType = type.asPrimitiveType();
+                        if(primitiveType.getType() != PrimitiveType.Primitive.LONG) {
+                            continue;
+                        }
+                        String paramName = parameter.getNameAsString();
+                        if(paramName.endsWith("_addr")) {
+                            parameter.setType(PrimitiveType.intType());
+                        }
                     }
-                    for(int argI = 0; argI < arguments.size(); argI++) {
-                        Expression arg = arguments.get(argI);
-                        boolean isLong = false; // used in public native methods
-                        try {
-                            ResolvedType resolvedType = arg.calculateResolvedType();
-                            if(resolvedType.isPrimitive()) {
-                                ResolvedPrimitiveType primitive = resolvedType.asPrimitive();
-                                isLong = primitive.describe().equals("long");
-                            }
-                        }
-                        catch(Throwable t) {
-                        }
-                        Parameter param = parameters.get(argI);
-                        Type type = param.getType();
-                        if(JParserHelper.isLong(type) || isLong) {
-                            String paramName = param.getNameAsString();
-                            if(paramName.endsWith(IDLDefaultCodeParser.NATIVE_PARAM_ADDRESS)) {
-                                // don't cast addr value because type is changed already.
-                                continue;
-                            }
-                            Optional<Node> parentNode = arg.getParentNode();
-                            if(parentNode.isPresent()) {
-                                Node node = parentNode.get();
-                                Type intType = StaticJavaParser.parseType(int.class.getSimpleName());
-                                CastExpr intCast;
-                                if(arg instanceof ConditionalExpr) {
-                                    intCast = new CastExpr(intType, new EnclosedExpr(arg));
+                }
+
+                BlockStmt body = method.getBody().get();
+                Type returnType = method.getType();
+                boolean classOrInterfaceType = returnType.isClassOrInterfaceType();
+                // Find all method calls in the body
+                List<MethodCallExpr> methodCalls = body.findAll(MethodCallExpr.class);
+                for(MethodCallExpr call : methodCalls) {
+                    SimpleName methodName = call.getName();
+                    // Find the corresponding method declaration
+                    ClassOrInterfaceDeclaration classDecl = unit.findFirst(ClassOrInterfaceDeclaration.class).get();
+                    List<MethodDeclaration> candidates = classDecl.getMethodsByName(methodName.getIdentifier());
+                    for(MethodDeclaration candidate : candidates) {
+                        if(candidate.isNative()) {
+                            NodeList<Parameter> nativeParameters = candidate.getParameters();
+                            for(Parameter parameter : nativeParameters) {
+                                Type type = parameter.getType();
+                                String paramName = parameter.getNameAsString();
+                                if(type.isPrimitiveType()) {
+                                    PrimitiveType primitiveType = type.asPrimitiveType();
+                                    if(primitiveType.getType() != PrimitiveType.Primitive.LONG) {
+                                        continue;
+                                    }
+                                    if(paramName.endsWith("_addr")) {
+                                        parameter.setType(PrimitiveType.intType());
+                                    }
                                 }
-                                else {
-                                    intCast = new CastExpr(intType, arg);
+                            }
+                            if(classOrInterfaceType) {
+                                candidate.setType(PrimitiveType.intType());
+                                Optional<Node> parent = call.getParentNode();
+                                while(parent.isPresent()) {
+                                    Node p = parent.get();
+                                    if(p instanceof VariableDeclarationExpr) {
+                                        VariableDeclarationExpr varDecl = (VariableDeclarationExpr) p;
+                                        List<VariableDeclarator> vars = varDecl.getVariables();
+                                        for(VariableDeclarator var : vars) {
+                                            if(var.getInitializer().isPresent() && var.getInitializer().get() == call) {
+                                                var.setType(PrimitiveType.intType());
+                                            }
+                                        }
+                                        break;
+                                    }
+                                    else if(p instanceof AssignExpr) {
+                                        AssignExpr assign = (AssignExpr) p;
+                                        if(assign.getValue() == call && assign.getTarget() instanceof NameExpr) {
+                                            NameExpr nameExpr = (NameExpr) assign.getTarget();
+                                            List<VariableDeclarationExpr> varDecls = body.findAll(VariableDeclarationExpr.class);
+                                            for(VariableDeclarationExpr varDecl : varDecls) {
+                                                for(VariableDeclarator var : varDecl.getVariables()) {
+                                                    if(var.getNameAsString().equals(nameExpr.getNameAsString())) {
+                                                        var.setType(PrimitiveType.intType());
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        break;
+                                    }
+                                    parent = p.getParentNode();
                                 }
-                                node.replace(arg, intCast);
+                                break;
                             }
                         }
                     }
                 }
+            }
+        }
 
-                Node node = methodCallExpr.getParentNode().get();
-                if(node instanceof VariableDeclarator) {
-                    VariableDeclarator parentNode = (VariableDeclarator)node;
-                    if(JParserHelper.isLong(parentNode.getType())) {
-                        parentNode.setType(int.class);
+        // For constructors, change long addr to int when assigned from native methods
+        List<ConstructorDeclaration> constructors = unit.findAll(ConstructorDeclaration.class);
+        for(ConstructorDeclaration constructor : constructors) {
+            BlockStmt body = constructor.getBody();
+            // Find all method calls in the constructor body
+            List<MethodCallExpr> methodCalls = body.findAll(MethodCallExpr.class);
+            for(MethodCallExpr call : methodCalls) {
+                SimpleName methodName = call.getName();
+                // Find the corresponding method declaration
+                ClassOrInterfaceDeclaration classDecl = unit.findFirst(ClassOrInterfaceDeclaration.class).get();
+                List<MethodDeclaration> candidates = classDecl.getMethodsByName(methodName.getIdentifier());
+                for(MethodDeclaration candidate : candidates) {
+                    if(candidate.isNative()) {
+                        candidate.setType(PrimitiveType.intType());
+                        // Check if the call is assigned to a variable and change the variable type to int
+                        Optional<Node> parent = call.getParentNode();
+                        while(parent.isPresent()) {
+                            Node p = parent.get();
+                            if(p instanceof VariableDeclarationExpr) {
+                                VariableDeclarationExpr varDecl = (VariableDeclarationExpr) p;
+                                List<VariableDeclarator> vars = varDecl.getVariables();
+                                for(VariableDeclarator var : vars) {
+                                    if(var.getInitializer().isPresent() && var.getInitializer().get() == call) {
+                                        var.setType(PrimitiveType.intType());
+                                    }
+                                }
+                                break;
+                            }
+                            parent = p.getParentNode();
+                        }
+                        break;
                     }
                 }
-                convertNativeMethodLongToInt(nativeMethod);
-            }
-        }
-    }
-
-    private MethodDeclaration getNativeMethod(ClassOrInterfaceDeclaration classDeclaration, MethodCallExpr methodCallExpr) {
-        String nativeMethodName = methodCallExpr.getNameAsString();
-        NodeList<Expression> arguments = methodCallExpr.getArguments();
-        ArrayList<String> paramTypes = new ArrayList<>();
-        if(arguments.size() > 0) {
-            for(int i = 0; i < arguments.size(); i++) {
-                Expression expression = arguments.get(i);
-                if(expression.isMethodCallExpr() || expression.isEnclosedExpr()) {
-                    paramTypes.add("long");
-                    continue;
-                }
-                else if(expression.isLambdaExpr()) {
-                    continue;
-                }
-                ResolvedType resolvedType = null;
-                try {
-                    resolvedType = expression.calculateResolvedType();
-                }
-                catch(Throwable t) {
-//                    t.printStackTrace();
-                    continue;
-                }
-                String type = null;
-                if(resolvedType.isPrimitive()) {
-                    type = resolvedType.asPrimitive().describe();
-                }
-                else if(resolvedType.isReferenceType()) {
-                    ResolvedReferenceType referenceType1 = resolvedType.asReferenceType();
-                    String[] split = referenceType1.describe().split("\\.");
-                    type = split[split.length-1];
-                }
-                else if(resolvedType.isArray()) {
-                    ResolvedArrayType arrayType = resolvedType.asArrayType();
-                    type = arrayType.describe();
-                }
-                paramTypes.add(type);
-            }
-        }
-        String[] paramT = new String[paramTypes.size()];
-        paramTypes.toArray(paramT);
-        List<MethodDeclaration> methodsByName = getNativeMethodsByName(classDeclaration, nativeMethodName, arguments.size(), paramT);
-        int size = methodsByName.size();
-        if(size == 0) {
-            // The current state is not possible to get all paramT correctly.
-            // If method list is 0 and without passing type is 1 then use this method.
-            methodsByName = getNativeMethodsByName(classDeclaration, nativeMethodName, arguments.size(), null);
-            if(methodsByName.size() != 1) {
-                return null;
-            }
-        }
-        if(methodsByName.size() == 1) {
-            MethodDeclaration methodDeclaration = methodsByName.get(0);
-
-            if(methodDeclaration.isNative()) {
-                return methodDeclaration;
-            }
-            else {
-                return null;
-            }
-        }
-        else {
-            throw new RuntimeException("NEED TO IMPLEMENT");
-        }
-    }
-
-    private List<MethodDeclaration> getNativeMethodsByName(ClassOrInterfaceDeclaration classDeclaration, String name, int paramSize, String... paramTypes) {
-        List<MethodDeclaration> list = new ArrayList<>();
-        List<MethodDeclaration> methodsByName = classDeclaration.getMethodsByName(name);
-        for(int i = 0; i < methodsByName.size(); i++) {
-            MethodDeclaration methodDeclaration = methodsByName.get(i);
-            if(!methodDeclaration.isNative()) {
-                continue;
-            }
-
-            boolean add = false;
-            NodeList<Parameter> parameters = methodDeclaration.getParameters();
-            add = parameters.size() == paramSize;
-
-            if(add && paramTypes != null && paramTypes.length > 0 && paramTypes.length == paramSize) {
-                add = methodDeclaration.hasParametersOfType(paramTypes);
-            }
-
-            if(add) {
-                list.add(methodDeclaration);
-            }
-        }
-        return list;
-    }
-
-    private static void convertNativeMethodLongToInt(MethodDeclaration nativeMethod) {
-        if(JParserHelper.isLong(nativeMethod.getType())) {
-            nativeMethod.setType(int.class);
-        }
-        for(Parameter parameter : nativeMethod.getParameters()) {
-            if(JParserHelper.isLong(parameter.getType())) {
-                parameter.setType(int.class);
             }
         }
     }

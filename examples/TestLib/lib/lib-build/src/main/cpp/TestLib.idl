@@ -84,7 +84,6 @@ interface TestAttributeArrayClass {
 };
 
 interface TestBufferManualClass { //[-SKIP]
-
     void updateByteBuffer(octet[] data, long size, octet value);
     void updateIntBuffer(long[] data, long size, long value);
     void updateShortBuffer(short[] data, long size, short value);
@@ -102,7 +101,7 @@ interface TestMethodClass {
     void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
     void setPtrToPtrArray(TestObjectClass[] array);
     void setPtrObjectArray([Ref] TestObjectClass[] array);
-//    void setMethod09(long long longLongValue01);
+    void setMethod09(long long longLongValue01);
     void setMethod10(TestEnumLib enumValue);
     void setSkipMethod(); //[-SKIP]
     void setAny(TestObjectClass pointerObject02);
@@ -121,7 +120,7 @@ interface TestMethodClass {
     [Const, Ref] TestObjectClass getRefObject01();
     [Ref] TestObjectClass getRefObject02();
     [Value] TestObjectClass getValueObject();
-//    long long getLongLongValue01();
+    long long getLongLongValue01();
     TestEnumLib getEnumValue();
 };
 
@@ -225,7 +224,6 @@ interface TestCallbackClass {
     boolean callManualBoolCallback(CallbackClassManual callback);
     void callManualStringCallback(CallbackClassManual callback);
 };
-
 
 interface TestOperatorClass { //[-SUB_PACKAGE=core.op]
     void TestOperatorClass();

@@ -105,22 +105,22 @@ public class MethodTest implements CodeTest {
             }
             test.dispose();
         }
-//        {
-//            TestMethodClass test = new TestMethodClass();
-//            try {
-//                long longLongValue01 = 4;
-//                test.setMethod09(longLongValue01);
-//                long retLongLongValue01 = test.getLongLongValue01();
-//                if(!(longLongValue01 == retLongLongValue01)) {
-//                    throw new RuntimeException("longLongValue01 == retLongLongValue01");
-//                }
-//            } catch(Throwable e) {
-//                e.printStackTrace();
-//                test.dispose();
-//                return false;
-//            }
-//            test.dispose();
-//        }
+        {
+            TestMethodClass test = new TestMethodClass();
+            try {
+                long longLongValue01 = 4;
+                test.setMethod09(longLongValue01);
+                long retLongLongValue01 = test.getLongLongValue01();
+                if(!(longLongValue01 == retLongLongValue01)) {
+                    throw new RuntimeException("longLongValue01 == retLongLongValue01");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
         {
             TestMethodClass test = new TestMethodClass();
             try {

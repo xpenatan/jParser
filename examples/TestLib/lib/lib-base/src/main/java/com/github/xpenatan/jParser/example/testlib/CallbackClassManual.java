@@ -98,7 +98,7 @@ public class CallbackClassManual extends IDLBase {
     }
 
     /*[-TEAVM;-NATIVE]
-        return -1;
+        return BigInt(-1);
     */
     /*[-JNI;-NATIVE]
         long long myCode = 0;
