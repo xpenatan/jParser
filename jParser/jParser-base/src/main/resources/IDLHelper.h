@@ -1,9 +1,9 @@
 #pragma once
 
 #include <string>
-#include <vector>
-#include <stddef.h>     // NULL
-#include <stdint.h>     // intptr_t
+//#include <vector>
+//#include <stddef.h>     // NULL
+//#include <stdint.h>     // intptr_t
 #include <algorithm>
 #include <assert.h>
 

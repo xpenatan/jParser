@@ -2,7 +2,6 @@ package com.github.xpenatan.jParser.example.app;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
-import com.github.xpenatan.jParser.example.testlib.TestEnumLib;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -93,47 +92,47 @@ public class EnumBenchmark {
     }
 
     static void benchmarkTestEnumLib() {
-        System.gc();
-        long beg = System.nanoTime();
-        int value = TestEnumLib.TEST_DEFAULT.or(TestEnumLib.TEST_FIRST).or(TestEnumLib.TEST_SECOND).getValue();
-        for (long i = 0; i < size; i++) {
-            int val = TestEnumLib.TEST_DEFAULT.or(TestEnumLib.TEST_FIRST).or(TestEnumLib.TEST_SECOND).getValue();
-            assert val == value;
-        }
-        long end = System.nanoTime();
-        System.out.println((end - beg)/1e9 + "\t\tTestEnumLib");
+//        System.gc();
+//        long beg = System.nanoTime();
+//        int value = TestEnumLib.TEST_DEFAULT.or(TestEnumLib.TEST_FIRST).or(TestEnumLib.TEST_SECOND).getValue();
+//        for (long i = 0; i < size; i++) {
+//            int val = TestEnumLib.TEST_DEFAULT.or(TestEnumLib.TEST_FIRST).or(TestEnumLib.TEST_SECOND).getValue();
+//            assert val == value;
+//        }
+//        long end = System.nanoTime();
+//        System.out.println((end - beg)/1e9 + "\t\tTestEnumLib");
     }
 
     static void benchmarkTestEnumLibCustom_1() {
-        System.gc();
-        long beg = System.nanoTime();
-        int value11 = TestEnumLib.TEST_DEFAULT.getValue();
-        int value22 = TestEnumLib.TEST_FIRST.getValue();
-        int value33 = TestEnumLib.TEST_SECOND.getValue();
-        int value = value11 | value22 | value33;
-        for (long i = 0; i < size; i++) {
-            int value1 = TestEnumLib.TEST_DEFAULT.getValue();
-            int value2 = TestEnumLib.TEST_FIRST.getValue();
-            int value3 = TestEnumLib.TEST_SECOND.getValue();
-            int val = value1 | value2 | value3;
-            assert val == value;
-        }
-        long end = System.nanoTime();
-        System.out.println((end - beg)/1e9 + "\t\tTestEnumLibCustom1");
+//        System.gc();
+//        long beg = System.nanoTime();
+//        int value11 = TestEnumLib.TEST_DEFAULT.getValue();
+//        int value22 = TestEnumLib.TEST_FIRST.getValue();
+//        int value33 = TestEnumLib.TEST_SECOND.getValue();
+//        int value = value11 | value22 | value33;
+//        for (long i = 0; i < size; i++) {
+//            int value1 = TestEnumLib.TEST_DEFAULT.getValue();
+//            int value2 = TestEnumLib.TEST_FIRST.getValue();
+//            int value3 = TestEnumLib.TEST_SECOND.getValue();
+//            int val = value1 | value2 | value3;
+//            assert val == value;
+//        }
+//        long end = System.nanoTime();
+//        System.out.println((end - beg)/1e9 + "\t\tTestEnumLibCustom1");
     }
 
     static void benchmarkTestEnumLibCustom_2() {
-        System.gc();
-        long beg = System.nanoTime();
-        int value1 = TestEnumLib.TEST_DEFAULT.getValue();
-        int value2 = TestEnumLib.TEST_FIRST.getValue();
-        int value3 = TestEnumLib.TEST_SECOND.getValue();
-        int value = value1 | value2 | value3;
-        for (long i = 0; i < size; i++) {
-            int val = value1 | value2 | value3;
-            assert val == value;
-        }
-        long end = System.nanoTime();
-        System.out.println((end - beg)/1e9 + "\t\tTestEnumLibCustom2");
+//        System.gc();
+//        long beg = System.nanoTime();
+//        int value1 = TestEnumLib.TEST_DEFAULT.getValue();
+//        int value2 = TestEnumLib.TEST_FIRST.getValue();
+//        int value3 = TestEnumLib.TEST_SECOND.getValue();
+//        int value = value1 | value2 | value3;
+//        for (long i = 0; i < size; i++) {
+//            int val = value1 | value2 | value3;
+//            assert val == value;
+//        }
+//        long end = System.nanoTime();
+//        System.out.println((end - beg)/1e9 + "\t\tTestEnumLibCustom2");
     }
 }

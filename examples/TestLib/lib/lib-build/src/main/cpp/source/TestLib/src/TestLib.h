@@ -1,12 +1,12 @@
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
 #include <string>
 #include <iostream>
-#include <stdint.h>
+//#include <stdint.h>
 
-using namespace std;
+//using namespace std;
 
 namespace TestNamespace {
     class TestNamespaceClass {
@@ -77,7 +77,7 @@ class TestAttributeClass {
         float floatValue01;
         double doubleValue01;
         bool boolValue01;
-        string strValue01;
+        std::string strValue01;
         void* voidPointer01;
         TestObjectClass valueObject;
         TestObjectClass* pointerObject;
@@ -86,7 +86,7 @@ class TestAttributeClass {
 
         TestAttributeClass(): readOnlyIntValue01(7) {
             pointerObject = new TestObjectClass();
-            nullPointerObject = NULL;
+            nullPointerObject = 0;
         };
         ~TestAttributeClass() {
             delete pointerObject;
@@ -145,7 +145,7 @@ class TestStringConstructorClass {
     public:
         int intValue01;
         int floatValue01;
-        string strValue01;
+        std::string strValue01;
 
         TestStringConstructorClass(const char* strValue01) {
             this->strValue01 = strValue01;
@@ -164,7 +164,7 @@ class TestStringConstructorClass {
 class TestBufferManualClass {
     public:
 
-        void updateByteBuffer(uint8_t* data, int size, uint8_t value) {
+        void updateByteBuffer(unsigned char* data, int size, unsigned char value) {
             for(int i = 0; i < size; i++) {
                 std::cout << "[" << i << "]: " <<  static_cast<int>(data[i]) << std::endl;
             }
@@ -209,7 +209,7 @@ class TestMethodClass {
         float floatValue02;
         bool boolValue01;
         long long longLongValue01;
-        string strValue01;
+        std::string strValue01;
         const TestObjectClass* pointerObject01;
         TestObjectClass* pointerObject02;
         TestObjectClass* anyObject;
@@ -220,11 +220,11 @@ class TestMethodClass {
         TestEnumLib enumValue;
     public:
         TestMethodClass() {
-            pointerObject01 = NULL;
-            pointerObject02 = NULL;
+            pointerObject01 = 0;
+            pointerObject02 = 0;
         };
         TestMethodClass(const char* strValue01) {
-            cout << "strValue01 before: " << strValue01 << endl;
+            std::cout << "strValue01 before: " << strValue01 << std::endl;
             this->strValue01 = strValue01;
         };
         void setMethod01(int intValue01) {
@@ -298,7 +298,7 @@ class TestMethodClass {
         float getFloatValue02() { return floatValue02; };
         bool getBoolValue01() { return boolValue01; };
         const char* getStrValue01() { return strValue01.c_str(); };
-        const string& getRefStrValue01() { return strValue01; };
+        const std::string& getRefStrValue01() { return strValue01; };
         const TestObjectClass* getPointerObject01() { return pointerObject01; };
         TestObjectClass* getPointerObject02() { return pointerObject02; };
         const TestObjectClass& getRefObject01() { return refObject01; };
@@ -325,7 +325,7 @@ public:
     TestOperatorClass operator*(const TestOperatorClass& other) const { return TestOperatorClass(value * other.value); }
     TestOperatorClass operator/(const TestOperatorClass& other) const {
         if (other.value != 0) return TestOperatorClass(value / other.value);
-        cout << "Error: Division by zero!" << endl;
+        std::cout << "Error: Division by zero!" << std::endl;
         return *this;
     }
     TestOperatorClass operator-() const { return TestOperatorClass(-value); } // Unary minus
@@ -336,7 +336,9 @@ public:
     TestOperatorClass& operator*=(const TestOperatorClass& other) { value *= other.value; return *this; }
     TestOperatorClass& operator/=(const TestOperatorClass& other) {
         if (other.value != 0) value /= other.value;
-        else cout << "Error: Division by zero!" << endl;
+        else {
+            std::cout << "Error: Division by zero!" << std::endl;
+        }
         return *this;
     }
 
@@ -349,7 +351,7 @@ public:
     bool operator>=(const TestOperatorClass& other) const { return value >= other.value; }
     TestOperatorClass* operator[](int index) {
         if (index == 0) return this;
-        cout << "Error: Invalid index " << index << ". Only index 0 is supported." << endl;
+        std::cout << "Error: Invalid index " << index << ". Only index 0 is supported." << std::endl;
         return nullptr;
     }
 
@@ -386,7 +388,7 @@ class TestStaticMethodClass {
         static float floatValue01;
         static float floatValue02;
         static bool boolValue01;
-        static string strValue01;
+        static std::string strValue01;
         static const TestObjectClass* pointerObject01;
         static TestObjectClass* pointerObject02;
         static TestObjectClass refObject01;
@@ -451,7 +453,7 @@ public:
     virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const = 0;
     virtual void onAnyCallback_1(void * anyPtr) const = 0;
     virtual void onAnyCallback_2(void * anyPtr, int value) const = 0;
-    virtual void onLongLongValue(unsigned long long longLongValue) const = 0;
+//    virtual void onLongLongValue(unsigned long long longLongValue) const = 0;
 
     int addInt(int a, int b)
     {
@@ -523,7 +525,7 @@ class TestCallbackClass {
         float floatValue01;
         float floatValue02;
         bool boolValue01;
-        string strValue01;
+        std::string strValue01;
         TestObjectClass valueObject;
         TestObjectClass* pointerObject;
 
@@ -585,7 +587,7 @@ class TestExceptionManual {
     public:
 
         int setDataToNullPointer() {
-            TestObjectClass* objectClass = NULL;
+            TestObjectClass* objectClass = 0;
             objectClass->intValue01 = 10;
             return 10;
         };

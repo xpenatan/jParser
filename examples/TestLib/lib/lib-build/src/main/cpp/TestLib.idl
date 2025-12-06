@@ -75,7 +75,7 @@ interface TestStaticAttributeClass {
 
 interface TestAttributeArrayClass {
     void TestAttributeArrayClass();
-    [BoundsChecked] attribute long[] intArray;
+//    [BoundsChecked] attribute long[] intArray;
     attribute float[] floatArray;
     attribute byte[] byteArray;
     attribute boolean[] boolArray;
@@ -102,7 +102,7 @@ interface TestMethodClass {
     void setMethod06([Const] TestObjectClass pointerObject01, TestObjectClass pointerObject02, [Const, Ref] TestObjectClass refObject01, [Ref] TestObjectClass refObject02);
     void setPtrToPtrArray(TestObjectClass[] array);
     void setPtrObjectArray([Ref] TestObjectClass[] array);
-    void setMethod09(long long longLongValue01);
+//    void setMethod09(long long longLongValue01);
     void setMethod10(TestEnumLib enumValue);
     void setSkipMethod(); //[-SKIP]
     void setAny(TestObjectClass pointerObject02);
@@ -121,7 +121,7 @@ interface TestMethodClass {
     [Const, Ref] TestObjectClass getRefObject01();
     [Ref] TestObjectClass getRefObject02();
     [Value] TestObjectClass getValueObject();
-    long long getLongLongValue01();
+//    long long getLongLongValue01();
     TestEnumLib getEnumValue();
 };
 
@@ -151,10 +151,6 @@ interface CallbackClass {
     long addInt(long a, long b);
 };
 
-interface CallbackClassManual {
-    long addInt(long a, long b);
-};
-
 [JSImplementation="CallbackClass"]
 interface CallbackClassImpl {
     void CallbackClassImpl();
@@ -169,9 +165,26 @@ interface CallbackClassImpl {
     [Const] unsigned short onUnsignedShortCallback(unsigned short unsignedShort);
     [Const] void onAnyCallback_1(any anyPtr);
     [Const] void onAnyCallback_2(any anyPtr, long value);
-    [Const] void onLongLongValue(unsigned long long longLongValue);
+//    [Const] void onLongLongValue(unsigned long long longLongValue);
 };
 CallbackClassImpl implements CallbackClass;
+
+interface DefaultCallbackClass : CallbackClass {
+    void DefaultCallbackClass();
+};
+
+// Uncomment when want to override default callback implementation
+//[JSImplementation="DefaultCallbackClass"]
+//interface DefaultCallbackClassImpl {
+//    void DefaultCallbackClassImpl();
+//
+//    [Const] long onIntCallback(long intValue01, long intValue02);
+//};
+//DefaultCallbackClassImpl implements DefaultCallbackClass;
+
+interface CallbackClassManual {
+    long addInt(long a, long b);
+};
 
 [JSImplementation="CallbackClassManual"]
 interface CallbackClassManualImpl {
@@ -184,18 +197,6 @@ interface CallbackClassManualImpl {
     [Const] void onStringCallback([Const] DOMString strValue01);
 };
 CallbackClassManualImpl implements CallbackClassManual;
-
-interface DefaultCallbackClass : CallbackClass {
-    void DefaultCallbackClass();
-};
-
-//[JSImplementation="DefaultCallbackClass"]
-//interface DefaultCallbackClassImpl {
-//    void DefaultCallbackClassImpl();
-//
-//    [Const] long onIntCallback(long intValue01, long intValue02);
-//};
-//DefaultCallbackClassImpl implements DefaultCallbackClass;
 
 interface TestCallbackClass {
     void TestCallbackClass();
@@ -225,13 +226,6 @@ interface TestCallbackClass {
     void callManualStringCallback(CallbackClassManual callback);
 };
 
-[Prefix="TestNamespace::"]
-interface TestNamespaceClass { //[-SUB_PACKAGE=core.sub]
-    attribute long intValue01;
-    void TestNamespaceClass();
-    void setMethod01Value(long intValue01);
-    long getMethod01Value();
-};
 
 interface TestOperatorClass { //[-SUB_PACKAGE=core.op]
     void TestOperatorClass();
@@ -262,6 +256,14 @@ interface CallbackExceptionManual {
 interface CallbackExceptionManualImpl {
     void CallbackExceptionManualImpl();
     [Const] void callJava();
+};
+
+[Prefix="TestNamespace::"]
+interface TestNamespaceClass { //[-SUB_PACKAGE=core.sub]
+    attribute long intValue01;
+    void TestNamespaceClass();
+    void setMethod01Value(long intValue01);
+    long getMethod01Value();
 };
 
 enum TestEnumWithinClass { //[-SUB_PACKAGE=core.enums]

@@ -6,10 +6,14 @@ import com.github.xpenatan.jParser.builder.JProcess;
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class EmscriptenTarget extends DefaultBuildTarget {
 
@@ -66,9 +70,11 @@ public class EmscriptenTarget extends DefaultBuildTarget {
 
         exportedFunctions.add("_free");
         exportedFunctions.add("_malloc");
-        exportedFunctions.add("__Znwm");
+//        exportedFunctions.add("__Znwm");
 //        exportedFunctions.add("__ZNSt3__24coutE");
+//        exportedFunctions.add("array_bounds_check_error");
 
+//        exportedRuntimeMethods.add("array_bounds_check_error");
         exportedRuntimeMethods.add("UTF8ToString");
         exportedRuntimeMethods.add("HEAP8");
         exportedRuntimeMethods.add("HEAPU8");
@@ -137,17 +143,16 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         else {
             linkerOutputCommand = "-o";
             if(mainModuleName != null && !mainModuleName.isEmpty()) {
-                linkerFlags.add("-sSIDE_MODULE=2");
+                linkerFlags.add("-sSIDE_MODULE=1");
                 libSuffix = ".wasm";
                 exportedFunctions.clear();
             }
             else {
-                linkerFlags.add("-sMAIN_MODULE=2");
+                linkerFlags.add("-sMAIN_MODULE=1");
             }
             linkerFlags.add("-sALLOW_MEMORY_GROWTH=1");
             linkerFlags.add("-sALLOW_TABLE_GROWTH=1");
             linkerFlags.add("-sMODULARIZE=1");
-            linkerFlags.add("-sNO_FILESYSTEM=1");
             linkerFlags.add("-sINITIAL_MEMORY=" + initialMemory);
             linkerFlags.add("-sSTACK_SIZE=" + stackSize);
             CustomFileDescriptor exportedFunctionsFile = config.buildDir.child("target/emscripten/static/exported_functions.txt");
@@ -161,12 +166,12 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             if(IS_WASM) {
                 linkerFlags.add("-sWASM=1");
 
-                if(IS_X64) {
+//                if(IS_X64) {
                     linkerFlags.add("-sWASM_BIGINT=1");
-                }
-                else {
-                    linkerFlags.add("-sWASM_BIGINT=0");
-                }
+//                }
+//                else {
+//                    linkerFlags.add("-sWASM_BIGINT=0");
+//                }
             }
             else {
                 linkerFlags.add("-sWASM=0");
@@ -203,10 +208,11 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         CustomFileDescriptor glueFile = jsglueDir.child("glue.js");
         String glueText = glueFile.readString();
         String s = sideModuleFile.readString();
-        s = s.replace("[MAIN_MODULE_NAME]", mainModuleName);
+        s = s.replace("[MAIN_MODULE_NAME]", "window." + mainModuleName);
         s = s.replace("[SIDE_MODULE_NAME]", libName);
         s = s.replace("[SIDE_MODULE_WASM]", libName + ".wasm");
         s = s.replace("[GLUE_CODE]", glueText);
+        s = removeJSCode(s);
         s = replaceMethodInSideModule(s, "window." + mainModuleName + ".");
 //        s = minifyJS(s);
         CustomFileDescriptor jsFile = libDir.child(libName + ".js");
@@ -224,6 +230,40 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         js = mapMethodInSideModule(js, prefix, "HEAPU32");
         js = mapMethodInSideModule(js, prefix, "HEAPF32");
         js = mapMethodInSideModule(js, prefix, "HEAPF64");
+        js = mapMethodInSideModule(js, prefix, "UTF8ToString");
+        js = mapMethodInSideModule(js, prefix, "WrapperObject");
+        js = mapMethodInSideModule(js, prefix, "getCache");
+        js = mapMethodInSideModule(js, prefix, "castObject");
+        js = mapMethodInSideModule(js, prefix, "compare");
+        js = mapMethodInSideModule(js, prefix, "getClass");
+//        js = mapMethodInSideModule(js, prefix, "destroy");
+//        js = mapMethodInSideModule(js, prefix, "getPointer");
+//        js = mapMethodInSideModule(js, prefix, "wrapPointer");
+        return js;
+    }
+
+    private String removeJSCode(String js) {
+        js = js.replaceAll("function WrapperObject\\(\\) \\{\\s*\\}\\s*WrapperObject\\.prototype = Object\\.create\\(WrapperObject\\.prototype\\);\\s*WrapperObject\\.prototype\\.constructor = WrapperObject;\\s*WrapperObject\\.prototype\\.__class__ = WrapperObject;\\s*", "");
+        js = js.replaceAll("function getCache\\(__class__\\) \\{\\s*return \\(__class__ \\|\\| WrapperObject\\)\\.__cache__;\\s*\\}", "");
+        js = js.replaceAll("function castObject\\(obj, __class__\\) \\{\\s*return wrapPointer\\(obj\\.ptr, __class__\\);\\s*\\}", "");
+        js = js.replaceAll("function compare\\(obj1, obj2\\) \\{\\s*return obj1\\.ptr === obj2\\.ptr;\\s*\\}", "");
+        js = js.replaceAll("function getClass\\(obj\\) \\{\\s*return obj\\.__class__;\\s*\\}", "");
+//        js = js.replaceAll("function destroy\\(obj\\) \\{\\s*if \\(!obj\\['__destroy__'\\]\\) throw 'Error: Cannot destroy object\\. \\(Did you create it yourself\\?\\)';\\s*obj\\['__destroy__'\\]\\(\\);\\s*// Remove from cache, so the object can be GC'd and refs added onto it released\\s*delete getCache\\(obj\\.__class__\\)\\[obj\\.ptr\\];\\s*\\}", "");
+//        js = js.replaceAll("function wrapPointer\\(ptr, __class__\\) \\{\\s*var cache = getCache\\(__class__\\);\\s*var ret = cache\\[ptr\\];\\s*if \\(ret\\) return ret;\\s*ret = Object\\.create\\(\\(__class__ \\|\\| WrapperObject\\)\\.prototype\\);\\s*ret\\.ptr = ptr;\\s*return cache\\[ptr\\] = ret;\\s*\\}", "");
+//        js = js.replaceAll("function getPointer\\(obj\\) \\{\\s*return obj\\.ptr;\\s*\\}", "");
+        js = js.replace("WrapperObject.__cache__ = {};", "");
+        js = js.replace("Module['WrapperObject'] = WrapperObject;", "");
+        js = js.replace("Module['getCache'] = getCache;", "");
+        js = js.replace("Module['castObject'] = castObject;", "");
+        js = js.replace("Module['compare'] = compare;", "");
+        js = js.replace("Module['getClass'] = getClass;", "");
+        js = js.replace("Module['NULL'] = wrapPointer(0);", "");
+        js = js.replaceAll("(?s)/\\*.*?\\*/", "");
+        js = js.replaceAll("//.*", "");
+        js = js.replaceAll("(\\r?\\n){3,}", "\n\n");
+//        js = js.replace("Module['wrapPointer'] = wrapPointer;", "");
+//        js = js.replace("Module['destroy'] = destroy;", "");
+//        js = js.replace("Module['getPointer'] = getPointer;", "");
         return js;
     }
 
@@ -231,8 +271,29 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         if(js == null || js.isEmpty() || prefix == null || prefix.isEmpty() || method == null || method.isEmpty()) {
             return js;
         }
-        js = js.replace(method, prefix + method);
-        return js;
+        String[] avoidPrefixes = {"_", "'", "."};
+        Pattern pattern = Pattern.compile(Pattern.quote(method));
+        Matcher matcher = pattern.matcher(js);
+        StringBuilder sb = new StringBuilder();
+        int lastEnd = 0;
+        while (matcher.find()) {
+            boolean avoid = false;
+            int start = matcher.start();
+            for (String avoidPrefix : avoidPrefixes) {
+                if (start >= avoidPrefix.length() && js.substring(start - avoidPrefix.length(), start).equals(avoidPrefix)) {
+                    avoid = true;
+                    break;
+                }
+            }
+            if (!avoid) {
+                sb.append(js.substring(lastEnd, start)).append(prefix).append(method);
+            } else {
+                sb.append(js.substring(lastEnd, matcher.end()));
+            }
+            lastEnd = matcher.end();
+        }
+        sb.append(js.substring(lastEnd));
+        return sb.toString();
     }
 
     private boolean createGlueCode(CustomFileDescriptor mergedIDLFile, CustomFileDescriptor jsglueDir) {
@@ -241,11 +302,26 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             pythonCmd = "python3";
         }
 
+        CustomFileDescriptor WEBIDL_BINDER_FILE = new CustomFileDescriptor(WEBIDL_BINDER_SCRIPT, CustomFileDescriptor.FileType.Absolute);
+        String webIDLBinder = WEBIDL_BINDER_FILE.readString();
+
+        CustomFileDescriptor updatedWEBIDLBinder = jsglueDir.child("webidl_binder.py");
+        updatedWEBIDLBinder.writeString(webIDLBinder, false);
+
         ArrayList<String> generateGlueCommand = new ArrayList<>();
         generateGlueCommand.add(pythonCmd);
-        generateGlueCommand.add(WEBIDL_BINDER_SCRIPT);
+        generateGlueCommand.add(updatedWEBIDLBinder.name());
         generateGlueCommand.add(mergedIDLFile.toString());
         generateGlueCommand.add("glue");
+
+        HashMap<String, String> environment = new HashMap<>();
+        String pathSep = isWindows() ? ";" : ":";
+        String currentPythonPath = environment.get("PYTHONPATH");
+        if (currentPythonPath == null) currentPythonPath = "";
+        if (!currentPythonPath.isEmpty()) currentPythonPath += pathSep;
+        currentPythonPath += EMSCRIPTEN_ROOT;
+        environment.put("PYTHONPATH", currentPythonPath);
+
         return JProcess.startProcess(jsglueDir.file(), generateGlueCommand, environment);
     }
 

@@ -21,7 +21,7 @@ public class BuildLib {
         String basePackage = "com.github.xpenatan.jParser.example.testlib";
         String sourceDir = "/src/main/cpp/source/TestLib/src";
 
-        WindowsMSVCTarget.DEBUG_BUILD = false;
+        WindowsMSVCTarget.DEBUG_BUILD = true;
         JParser.CREATE_IDL_HELPER = false;
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
 
@@ -223,6 +223,9 @@ public class BuildLib {
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.linkerFlags.add("-Wl,--export-all");
+        linkTarget.linkerFlags.add("-lc++abi"); // C++ ABI (exceptions, thread_atexit, etc.)
+        linkTarget.linkerFlags.add("-lc++"); // C++ STL (std::cout, std::string, etc.)
+        linkTarget.linkerFlags.add("-lc"); // C standard library (fopen, fclose, printf, etc.)
         linkTarget.mainModuleName = "idl";
         multiTarget.add(linkTarget);
         return multiTarget;

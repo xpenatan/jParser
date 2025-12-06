@@ -8,26 +8,14 @@ var [SIDE_MODULE_NAME] = (() => {
           }
         }
 
-        function decodeBase64(base64) {
-            var binary_string = atob(base64);
-            var len = binary_string.length;
-            var bytes = new Uint8Array(len);
-            for (var i = 0; i < len; i++) {
-                bytes[i] = binary_string.charCodeAt(i);
-            }
-            return bytes;
-        }
-
         var libName = "[SIDE_MODULE_WASM]";
-        var isSuccess = await window.[MAIN_MODULE_NAME].loadDynamicLibrary(libName, { loadAsync: true, global: true, nodelete: true});
-        var rawExports = window.[MAIN_MODULE_NAME].LDSO.loadedLibsByName[libName].exports;
+        var isSuccess = await [MAIN_MODULE_NAME].loadDynamicLibrary(libName, { loadAsync: true, global: true, nodelete: true});
+        var rawExports = [MAIN_MODULE_NAME].LDSO.loadedLibsByName[libName].exports;
 
         const modifiedExports = {};
         for (const [key, value] of Object.entries(rawExports)) {
             modifiedExports['_' + key] = value;  // Add '_' prefix only here
         }
-
-         Object.assign(Module, modifiedExports);
 
         let evalCode = '';
         Object.keys(modifiedExports).forEach(key => {
@@ -38,6 +26,9 @@ var [SIDE_MODULE_NAME] = (() => {
         var runtimeInitialized = true;
 
 [GLUE_CODE]
+
+        Object.assign([MAIN_MODULE_NAME], Module);
+        Object.assign(Module, modifiedExports);
 
         return Module;
     };
