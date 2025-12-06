@@ -860,7 +860,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
                 BlockStmt body = method.getBody().get();
                 Type returnType = method.getType();
-                boolean classOrInterfaceType = returnType.isClassOrInterfaceType();
+                boolean classOrInterfaceType = returnType.isClassOrInterfaceType() && !returnType.asString().equals("String");
                 // Find all method calls in the body
                 List<MethodCallExpr> methodCalls = body.findAll(MethodCallExpr.class);
                 for(MethodCallExpr call : methodCalls) {
