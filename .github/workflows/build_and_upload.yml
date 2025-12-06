@@ -50,6 +50,9 @@ jobs:
           name: PATH
           value: $env:PATH;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build
 
+      - name: Build project idl-helper
+        run: ./gradlew idl_helper_build_project_windows64
+
       - name: Build project
         run: ./gradlew TestLib_build_project_windows64
 
@@ -57,7 +60,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-natives
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
+          path: |
+            ./idl-helper/idl-helper-build/build/c++/libs/
+            ./examples/TestLib/lib/lib-build/build/c++/libs/
 
   build_linux:
     name: Build Linux
@@ -85,6 +90,9 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Build project idl-helper
+        run: ./gradlew idl_helper_build_project_linux64
+
       - name: Build project
         run: ./gradlew TestLib_build_project_linux64
 
@@ -92,7 +100,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-natives
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
+          path: |
+            ./idl-helper/idl-helper-build/build/c++/libs/
+            ./examples/TestLib/lib/lib-build/build/c++/libs/
 
   build_mac:
     name: Build Mac
@@ -116,6 +126,9 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Build project idl-helper
+        run: ./gradlew idl_helper_build_project_mac64 idl_helper_build_project_macArm
+
       - name: Build project
         run: |
           ./gradlew TestLib_build_project_mac64 TestLib_build_project_macArm
@@ -124,7 +137,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mac-natives
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
+          path: |
+            ./idl-helper/idl-helper-build/build/c++/libs/
+            ./examples/TestLib/lib/lib-build/build/c++/libs/
 
   build_teavm:
     name: Build TeaVM
@@ -157,6 +172,9 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Build project idl-helper
+        run: ./gradlew idl_helper_build_project_teavm
+
       - name: Build project
         run: ./gradlew TestLib_build_project_teavm
 
@@ -164,7 +182,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: teavm-natives
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
+          path: |
+            ./idl-helper/idl-helper-build/build/c++/libs/
+            ./examples/TestLib/lib/lib-build/build/c++/libs/
 
   build_android:
     name: Build Android
@@ -201,15 +221,23 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Build project idl-helper
+        run: ./gradlew idl_helper_build_project_android
+        env:
+          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
       - name: Build project
         run: ./gradlew TestLib_build_project_android
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
       - name: Upload natives
         uses: actions/upload-artifact@v4
         with:
           name: android-natives
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
+          path: |
+            ./idl-helper/idl-helper-build/build/c++/libs/
+            ./examples/TestLib/lib/lib-build/build/c++/libs/
   
   upload_natives:
     name: Upload Natives
