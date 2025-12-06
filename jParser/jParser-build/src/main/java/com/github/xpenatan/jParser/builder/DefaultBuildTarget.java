@@ -1,6 +1,5 @@
 package com.github.xpenatan.jParser.builder;
 
-import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -116,7 +115,18 @@ public abstract class DefaultBuildTarget extends BuildTarget {
             ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude);
             cppFiles.addAll(cppFiles1);
         }
-        return cppFiles;
+        HashMap<String, CustomFileDescriptor> hashMap = new HashMap<>();
+        for(int i = 0; i < cppFiles.size(); i++) {
+            CustomFileDescriptor file = cppFiles.get(i);
+            if(!hashMap.containsKey(file.path())) {
+                hashMap.put(file.path(), file);
+            }
+        }
+        ArrayList<CustomFileDescriptor> uniqueFiles = new ArrayList<>();
+        for(String key : hashMap.keySet()) {
+            uniqueFiles.add(hashMap.get(key));
+        }
+        return uniqueFiles;
     }
 
     protected boolean compile(BuildConfig config, CustomFileDescriptor buildTargetTemp, ArrayList<CustomFileDescriptor> cppFiles) {
