@@ -217,6 +217,7 @@ public class BuildLib {
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.mainModuleName = "idl";
+        linkTarget.linkerFlags.add("-sSIDE_MODULE=2");
         multiTarget.add(linkTarget);
         return multiTarget;
     }

@@ -68,13 +68,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         cppFlags.add("-c");
         cppFlags.add("-flto");
 
-        exportedFunctions.add("_free");
-        exportedFunctions.add("_malloc");
-//        exportedFunctions.add("__Znwm");
-//        exportedFunctions.add("__ZNSt3__24coutE");
-//        exportedFunctions.add("array_bounds_check_error");
-
-//        exportedRuntimeMethods.add("array_bounds_check_error");
         exportedRuntimeMethods.add("UTF8ToString");
         exportedRuntimeMethods.add("HEAP8");
         exportedRuntimeMethods.add("HEAPU8");
@@ -143,12 +136,22 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         else {
             linkerOutputCommand = "-o";
             if(mainModuleName != null && !mainModuleName.isEmpty()) {
-                linkerFlags.add("-sSIDE_MODULE=1");
+                boolean fail = true;
+                for(String flag : linkerFlags) {
+                    if(flag.contains("SIDE_MODULE=")) {
+                        fail = false;
+                        break;
+                    }
+                }
+                if(fail) {
+                    throw new RuntimeException("EmscriptenTarget: When using mainModuleName you have to set SIDE_MODULE 1 or 2 in linkerFlags");
+                }
                 libSuffix = ".wasm";
-                exportedFunctions.clear();
             }
             else {
                 linkerFlags.add("-sMAIN_MODULE=1");
+                exportedFunctions.add("_free");
+                exportedFunctions.add("_malloc");
             }
             linkerFlags.add("-sALLOW_MEMORY_GROWTH=1");
             linkerFlags.add("-sALLOW_TABLE_GROWTH=1");

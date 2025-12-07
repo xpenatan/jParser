@@ -222,6 +222,7 @@ public class BuildLib {
         linkTarget.linkerFlags.add("-lc++"); // C++ STL (std::cout, std::string, etc.)
         linkTarget.linkerFlags.add("-lc"); // C standard library (fopen, fclose, printf, etc.)
         linkTarget.mainModuleName = "idl";
+        linkTarget.linkerFlags.add("-sSIDE_MODULE=2");
         multiTarget.add(linkTarget);
         return multiTarget;
     }
