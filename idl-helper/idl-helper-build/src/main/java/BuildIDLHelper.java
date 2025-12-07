@@ -175,15 +175,11 @@ public class BuildIDLHelper {
 //        linkTarget.linkerFlags.add("-Wl,--export-all");
         linkTarget.linkerFlags.add("--use-port=emdawnwebgpu");
         linkTarget.exportedRuntimeMethods.add("WebGPU");
+        linkTarget.linkerFlags.add("-sMAIN_MODULE=1");
+        linkTarget.exportedFunctions.add("_free");
+        linkTarget.exportedFunctions.add("_malloc");
         linkTarget.exportedFunctions.add("___stack_low");
         linkTarget.exportedFunctions.add("___stack_high");
-
-//        linkTarget.linkerFlags.add("-lc++abi"); // C++ ABI (exceptions, thread_atexit, etc.)
-//        linkTarget.linkerFlags.add("-lc++"); // C++ STL (std::cout, std::string, etc.)
-//        linkTarget.linkerFlags.add("-lc"); // C standard library (fopen, fclose, printf, etc.)
-//        linkTarget.environment.put("EMCC_FORCE_STDLIBS", "libc++abi");
-//        linkTarget.environment.put("EMCC_FORCE_STDLIBS", "libcxx,libcxxabi");
-//        linkTarget.environment.put("EMCC_FORCE_STDLIBS", "1");
         multiTarget.add(linkTarget);
         return multiTarget;
     }

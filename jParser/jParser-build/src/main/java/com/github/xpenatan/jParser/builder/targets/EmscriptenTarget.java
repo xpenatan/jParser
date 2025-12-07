@@ -148,11 +148,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
                 }
                 libSuffix = ".wasm";
             }
-            else {
-                linkerFlags.add("-sMAIN_MODULE=1");
-                exportedFunctions.add("_free");
-                exportedFunctions.add("_malloc");
-            }
             linkerFlags.add("-sALLOW_MEMORY_GROWTH=1");
             linkerFlags.add("-sALLOW_TABLE_GROWTH=1");
             linkerFlags.add("-sMODULARIZE=1");
