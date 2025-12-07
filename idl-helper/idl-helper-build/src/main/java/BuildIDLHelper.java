@@ -172,6 +172,7 @@ public class BuildIDLHelper {
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.linkerFlags.add("--use-port=emdawnwebgpu");
 //        linkTarget.linkerFlags.add("-Wl,--export-all");
         linkTarget.exportedFunctions.add("___stack_low");
         linkTarget.exportedFunctions.add("___stack_high");
