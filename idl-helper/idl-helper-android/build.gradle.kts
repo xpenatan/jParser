@@ -44,12 +44,15 @@ tasks.named("preBuild").configure {
 dependencies {
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            artifactId = moduleName
-            group = LibExt.groupId
-            version = LibExt.libVersion
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                artifactId = moduleName
+                group = LibExt.groupId
+                version = LibExt.libVersion
+                artifact(tasks.named("bundleReleaseAar"))
+            }
         }
     }
 }

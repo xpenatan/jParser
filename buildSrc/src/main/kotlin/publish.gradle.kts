@@ -21,7 +21,8 @@ var libProjects = mutableSetOf(
     project(":loader:loader-teavm"),
 )
 
-LibExt.isRelease = gradle.startParameter.taskNames.any { it == "publishRelease" }
+val isTestRelease = gradle.startParameter.taskNames.any { it == "testRelease" }
+LibExt.isRelease = gradle.startParameter.taskNames.any { it == "publishRelease" } || isTestRelease
 
 configure(libProjects) {
     apply(plugin = "signing")
@@ -93,7 +94,7 @@ configure(libProjects) {
     }
 }
 
-if(!LibExt.libVersion.endsWith("-SNAPSHOT")) {
+if(!LibExt.libVersion.endsWith("-SNAPSHOT") && !isTestRelease) {
     tasks.register<Zip>("zipStagingDeploy") {
         dependsOn(libProjects.map { it.tasks.named("publish") })
         from(rootProject.layout.buildDirectory.dir("staging-deploy"))
@@ -152,6 +153,11 @@ if(!LibExt.libVersion.endsWith("-SNAPSHOT")) {
 }
 
 tasks.register("publishRelease") {
+    group = "publishing"
+    dependsOn(libProjects.map { it.tasks.withType<PublishToMavenRepository>() })
+}
+
+tasks.register("testRelease") {
     group = "publishing"
     dependsOn(libProjects.map { it.tasks.withType<PublishToMavenRepository>() })
 }
