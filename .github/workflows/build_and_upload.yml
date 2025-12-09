@@ -242,9 +242,6 @@ jobs:
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
-      - name: Build project idl-helper
-        run: ./gradlew idl_helper_build_project_android
-
       - name: Build project
         run: ./gradlew TestLib_build_project_android
         env:
