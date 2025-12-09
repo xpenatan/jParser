@@ -132,6 +132,7 @@ public class JParser {
             }
             String destinationPath = parserItem.getFullDestinationPath();
             String codeParsed = parserItem.unit.toString();
+            codeParsed = "/*" + gen + "*/\n\n" + codeParsed;
             if(codeParsed != null) {
                 generateFile(destinationPath, codeParsed);
             }
@@ -211,11 +212,6 @@ public class JParser {
         PositionUtils.sortByBeginPosition(array, false);
         for(int i = 0; i < array.size(); i++) {
             Node node = array.get(i);
-            if(node instanceof PackageDeclaration) {
-                PackageDeclaration packageD = (PackageDeclaration)node;
-                packageD.setComment(new BlockComment(gen));
-            }
-
             CodeParserItem codeParserItem = createParserItem(unit, node);
             wrapper.parseCode(codeParserItem);
             if(node instanceof ClassOrInterfaceDeclaration || node instanceof EnumDeclaration) {

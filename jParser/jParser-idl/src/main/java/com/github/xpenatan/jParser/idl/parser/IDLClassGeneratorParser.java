@@ -124,7 +124,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                     String nameAsString = classOrInterfaceDeclaration.get().getNameAsString();
                     JParserItem jParserItem = jParser.getParserUnitItem(nameAsString);
                     if(jParserItem != null) {
-                        compilationUnit =jParserItem.unit;
+                        compilationUnit = jParserItem.unit;
                     }
                     else {
                         compilationUnit.printer(new CustomPrettyPrinter());
