@@ -21,7 +21,7 @@ var libProjects = mutableSetOf(
     project(":loader:loader-teavm"),
 )
 
-val isTestRelease = gradle.startParameter.taskNames.any { it == "testRelease" }
+val isTestRelease = gradle.startParameter.taskNames.any { it == "publishTestRelease" }
 LibExt.isRelease = gradle.startParameter.taskNames.any { it == "publishRelease" } || isTestRelease
 
 configure(libProjects) {
@@ -157,7 +157,7 @@ tasks.register("publishRelease") {
     dependsOn(libProjects.map { it.tasks.withType<PublishToMavenRepository>() })
 }
 
-tasks.register("testRelease") {
+tasks.register("publishTestRelease") {
     group = "publishing"
     dependsOn(libProjects.map { it.tasks.withType<PublishToMavenRepository>() })
 }
