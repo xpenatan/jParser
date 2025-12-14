@@ -64,4 +64,4 @@ The **native** method keyword is primarily used to avoid conflicts with C/C++ me
 ## Requirements:
 #### [Mingw64](https://github.com/niXman/mingw-builds-binaries/releases) or [Visual Studio C++](https://visualstudio.microsoft.com/vs/community/)
 #### [Emscripten](https://emscripten.org/)
-
+For Windows builds using WindowsMSVCTarget, ensure `vcvarsall.bat` is accessible via the system PATH. It is typically located in `C:\Program Files\Microsoft Visual Studio\[Year]\[Edition]\VC\Auxiliary\Build\`.
