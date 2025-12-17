@@ -90,6 +90,7 @@ public class AndroidTarget extends DefaultBuildTarget {
             linkerFlags.add("--sysroot=" + sysroot);
             linkerFlags.add("-shared");
             linkerFlags.add("-static-libstdc++"); // Statically link C++ runtime
+            linkerFlags.add("-Wl,--strip-all");
             libSuffix = ".so";
             linkerOutputCommand = "-o";
         }
