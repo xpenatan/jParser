@@ -62,7 +62,6 @@ public class AndroidTarget extends DefaultBuildTarget {
 
         cppCompiler.add("--target=" + this.target + this.apiLevel);
         cppCompiler.add("--sysroot=" + sysroot);
-        cppCompiler.add("-fPIC");
         cppFlags.add("-O2");
         cppFlags.add("-Wall");
         cppFlags.add("-D__ANDROID__");
@@ -81,7 +80,6 @@ public class AndroidTarget extends DefaultBuildTarget {
         if(isStatic) {
             linkerCompiler.clear();
             linkerCompiler.add(archiver);
-            String staticLib = "libmystaticlib.a";
             linkerFlags.add("rcs");
             libSuffix = ".a";
             linkerOutputCommand = "";
