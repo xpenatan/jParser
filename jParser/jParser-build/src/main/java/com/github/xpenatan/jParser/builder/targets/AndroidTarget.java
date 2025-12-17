@@ -58,7 +58,7 @@ public class AndroidTarget extends DefaultBuildTarget {
         String targetPath = target.folder;
 
         this.libDirSuffix = "android/" + targetPath + "/";
-        this.tempBuildDir = "target/" + targetPath + "/";
+        this.tempBuildDir = "target/android/" + targetPath + "/";
 
         cppCompiler.add("--target=" + this.target + this.apiLevel);
         cppCompiler.add("--sysroot=" + sysroot);
