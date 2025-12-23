@@ -1,11 +1,17 @@
 #pragma once
 
-class LibAData {
-    private:
+#ifdef LIBA_EXPORTS
+#define LIBA_API __declspec(dllexport)
+#else
+#define LIBA_API __declspec(dllimport)
+#endif
 
-    public:
-        int intValue;
+class LibAData {
+public:
+    int intValue;
 };
+
+extern LIBA_API LibAData* GData;
 
 class LibA {
     private:
@@ -26,4 +32,7 @@ class LibA {
         int addIntPtr(int* value1, int* value2) {
             return *value1 + *value2;
         }
+
+        static void setGlobalData(LibAData* data);
+        static LibAData* getGlobalData();
 };

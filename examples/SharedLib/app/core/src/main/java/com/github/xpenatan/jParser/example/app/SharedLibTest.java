@@ -16,6 +16,7 @@ public class SharedLibTest {
                 LibAData obj1 = new LibAData();
                 obj1.set_intValue(4);
                 LibAData obj2 = new LibAData();
+                LibA.setGlobalData(obj1);
                 obj2.set_intValue(6);
                 int total = libAClass.addInt(obj1, obj2);
                 if(total != 10) {
@@ -69,6 +70,17 @@ public class SharedLibTest {
                 if(total != 10) {
                     fail = true;
                 }
+            } catch(Throwable t) {
+                t.printStackTrace();
+                fail = true;
+            }
+        }
+        {
+            try {
+                LibAData globalData1 = LibA.getGlobalData();
+                LibAData globalData2 = LibB.getGlobalData();
+                System.out.println("LibA GData: " + globalData1.native_isNULL());
+                System.out.println("LibB GData: " + globalData2.native_isNULL());
             } catch(Throwable t) {
                 t.printStackTrace();
                 fail = true;

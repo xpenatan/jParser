@@ -7,7 +7,7 @@ java {
     targetCompatibility = JavaVersion.toVersion(LibExt.java11Target)
 }
 
-val mainClassName = "BuildLib"
+val mainClassName = "BuildLibA"
 
 dependencies {
     implementation(project(":examples:SharedLib:libA:lib-base"))

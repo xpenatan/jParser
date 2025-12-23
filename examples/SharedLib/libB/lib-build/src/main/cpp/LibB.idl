@@ -3,4 +3,5 @@ interface LibB {
     void LibB();
     LibAData createInstance(long value);
     long addIntPtr(long[] intPtr1, long[] intPtr2);
+    static LibAData getGlobalData();
 };

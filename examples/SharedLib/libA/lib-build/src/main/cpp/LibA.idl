@@ -7,4 +7,6 @@ interface LibA {
     void LibA();
     long addInt(LibAData obj1, LibAData obj2);
     long addIntPtr(long[] intPtr1, long[] intPtr2);
+    static void setGlobalData(LibAData data);
+    static LibAData getGlobalData();
 };
