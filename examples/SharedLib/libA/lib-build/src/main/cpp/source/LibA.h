@@ -1,9 +1,11 @@
 #pragma once
 
-#ifdef LIBA_EXPORTS
-#define LIBA_API __declspec(dllexport)
-#else
-#define LIBA_API __declspec(dllimport)
+#ifdef LIB_USER_CONFIG
+#include LIB_USER_CONFIG
+#endif
+
+#ifndef LIBA_API
+#define LIBA_API
 #endif
 
 class LibAData {

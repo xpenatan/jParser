@@ -3,10 +3,6 @@
 #include "LibA.h"
 #include <iostream>
 
-#define LIBB_API __declspec(dllimport)
-
-extern LIBB_API LibAData* GData;
-
 class LibB {
     private:
 
@@ -25,8 +21,8 @@ class LibB {
         }
 
         static LibAData* getGlobalData() {
-            // Access the shared GData pointer
             LibAData* data = GData;
+//            LibAData* data = LibA::getGlobalData();
             std::cout << "GData pointer: " << data << std::endl;
             return data;
         }

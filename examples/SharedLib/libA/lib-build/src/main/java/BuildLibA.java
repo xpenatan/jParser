@@ -102,6 +102,8 @@ public class BuildLibA {
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("/std:c++11");
+        compileStaticTarget.cppFlags.add("/DLIBA_EXPORTS");
+        compileStaticTarget.cppFlags.add("/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
@@ -111,6 +113,8 @@ public class BuildLibA {
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("/std:c++11");
+        linkTarget.cppFlags.add("/DLIBA_EXPORTS");
+        linkTarget.cppFlags.add("/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");

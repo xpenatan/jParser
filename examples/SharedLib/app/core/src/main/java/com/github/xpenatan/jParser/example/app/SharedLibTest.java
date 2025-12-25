@@ -79,8 +79,8 @@ public class SharedLibTest {
             try {
                 LibAData globalData1 = LibA.getGlobalData();
                 LibAData globalData2 = LibB.getGlobalData();
-                System.out.println("LibA GData: " + globalData1.native_isNULL());
-                System.out.println("LibB GData: " + globalData2.native_isNULL());
+                System.out.println("LibA GData isNull: " + globalData1.native_isNULL());
+                System.out.println("LibB GData isNull: " + globalData2.native_isNULL());
             } catch(Throwable t) {
                 t.printStackTrace();
                 fail = true;

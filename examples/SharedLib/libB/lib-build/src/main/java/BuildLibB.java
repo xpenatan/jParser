@@ -115,19 +115,23 @@ public class BuildLibB {
         // Make a static library
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
         compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"");
         compileStaticTarget.cppFlags.add("/std:c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
+        compileStaticTarget.headerDirs.add("-I" + libACustomPath);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("/std:c++11");
+        linkTarget.cppFlags.add("/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.headerDirs.add("-I" + libASourcePath);
+        linkTarget.headerDirs.add("-I" + libACustomPath);
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libALibPath + "/LibA64.lib");
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
