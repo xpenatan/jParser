@@ -157,8 +157,10 @@ public class BuildLibB {
         LinuxTarget compileStaticTarget = new LinuxTarget();
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add(config);
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
+        compileStaticTarget.headerDirs.add("-I" + libACustomPath);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
@@ -196,12 +198,16 @@ public class BuildLibB {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
+        String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
         compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add(config);
         compileStaticTarget.isStatic = true;
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
+        compileStaticTarget.headerDirs.add("-I" + libACustomPath);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
@@ -289,6 +295,8 @@ public class BuildLibB {
         targets.add(AndroidTarget.Target.armeabi_v7a);
         targets.add(AndroidTarget.Target.arm64_v8a);
 
+        String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+
         for(int i = 0; i < targets.size(); i++) {
             AndroidTarget.Target target = targets.get(i);
 
@@ -296,8 +304,10 @@ public class BuildLibB {
             AndroidTarget compileStaticTarget = new AndroidTarget(target, apiLevel);
             compileStaticTarget.isStatic = true;
             compileStaticTarget.cppFlags.add("-std=c++11");
+            compileStaticTarget.cppFlags.add(config);
             compileStaticTarget.headerDirs.add("-I" + sourceDir);
             compileStaticTarget.headerDirs.add("-I" + libASourcePath);
+            compileStaticTarget.headerDirs.add("-I" + libACustomPath);
             compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
             multiTarget.add(compileStaticTarget);
 
