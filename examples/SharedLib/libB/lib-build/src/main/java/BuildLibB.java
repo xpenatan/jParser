@@ -112,10 +112,11 @@ public class BuildLibB {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
+        String config = "/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"";
+
         // Make a static library
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
         compileStaticTarget.isStatic = true;
-        compileStaticTarget.cppFlags.add("/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"");
         compileStaticTarget.cppFlags.add("/std:c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
@@ -126,7 +127,7 @@ public class BuildLibB {
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("/std:c++11");
-        linkTarget.cppFlags.add("/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"");
+        linkTarget.cppFlags.add(config);
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
@@ -150,6 +151,8 @@ public class BuildLibB {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
+        String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+
         // Make a static library
         LinuxTarget compileStaticTarget = new LinuxTarget();
         compileStaticTarget.isStatic = true;
@@ -162,15 +165,19 @@ public class BuildLibB {
         LinuxTarget linkTarget = new LinuxTarget();
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add(config);
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.headerDirs.add("-I" + libASourcePath);
+        linkTarget.headerDirs.add("-I" + libACustomPath);
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
-//        linkTarget.linkerFlags.add(libALibPath + "/LibA64_.a");
+//        linkTarget.linkerFlags.add(libALibPath + "/libLibA64.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.linkerFlags.add("-Wl,--allow-shlib-undefined");
+        linkTarget.linkerFlags.add("-L" + libALibPath);
+        linkTarget.linkerFlags.add("-lLibA64");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);

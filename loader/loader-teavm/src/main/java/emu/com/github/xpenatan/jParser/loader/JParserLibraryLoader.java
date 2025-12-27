@@ -52,8 +52,8 @@ public class JParserLibraryLoader {
 
         JParserLibraryLoaderListener lis = new JParserLibraryLoaderListener() {
             @Override
-            public void onLoad(boolean isSuccess, Exception e) {
-                listener.onLoad(isSuccess, e);
+            public void onLoad(boolean isSuccess, Throwable t) {
+                listener.onLoad(isSuccess, t);
             }
         };
 
