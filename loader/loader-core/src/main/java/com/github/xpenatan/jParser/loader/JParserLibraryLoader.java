@@ -97,7 +97,7 @@ public class JParserLibraryLoader {
         }
     }
 
-    private static void load(String libraryName, String path, String prefix, String suffix) {
+    private static void load(String libraryName, String path, String prefix, String suffix) throws IOException {
         if (os == Os.IOS) return;
         if(path == null || os == Os.Android) {
             path = "";
@@ -126,42 +126,15 @@ public class JParserLibraryLoader {
             // Temp directory with username in path.
             String tmpDir = System.getProperty("java.io.tmpdir") + "/jParser" + System.getProperty("user.name") + "/" + sourceCrc;
             File file = new File(tmpDir, fileName);
-            Throwable ex = loadFile(sourcePath, sourceCrc, file);
-            if (ex == null) return;
-
-            // System provided temp directory.
-            try {
-                file = File.createTempFile(sourceCrc, null);
-                if (file.delete() && loadFile(sourcePath, sourceCrc, file) == null) return;
-            } catch (Throwable ignored) {
-            }
-
-            // User home.
-            file = new File(System.getProperty("user.home") + "/.libgdx/" + sourceCrc, fileName);
-            if (loadFile(sourcePath, sourceCrc, file) == null) return;
-
-            // Relative directory.
-            file = new File(".temp/" + sourceCrc, fileName);
-            if (loadFile(sourcePath, sourceCrc, file) == null) return;
-
-            // Fallback to java.library.path location, eg for applets.
-            file = new File(System.getProperty("java.library.path"), sourcePath);
-            if (file.exists()) {
-                System.load(file.getAbsolutePath());
-                return;
-            }
+            loadFile(sourcePath, sourceCrc, file);
         }
 
         loadedLibraries.add(fullLibraryName);
     }
 
-    private static Throwable loadFile (String sourcePath, String sourceCrc, File extractedFile) {
-        try {
-            System.load(extractFile(sourcePath, sourceCrc, extractedFile).getAbsolutePath());
-            return null;
-        } catch (Throwable ex) {
-            return ex;
-        }
+    private static void loadFile (String sourcePath, String sourceCrc, File extractedFile) throws IOException {
+        String absolutePath = extractFile(sourcePath, sourceCrc, extractedFile).getAbsolutePath();
+        System.load(absolutePath);
     }
 
     private static InputStream readFile (String path) {
