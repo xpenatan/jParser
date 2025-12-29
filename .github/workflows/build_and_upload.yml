@@ -53,8 +53,17 @@ jobs:
       - name: Build project idl-helper
         run: ./gradlew idl_helper_build_project_windows64
 
-      - name: Build project
+      - name: Build TestLib project
         run: ./gradlew TestLib_build_project_windows64
+
+      - name: Build Shared LibA project
+        run: ./gradlew LibA_build_project_windows64
+
+      - name: Build Shared LibB project
+        run: ./gradlew LibB_build_project_windows64
+
+      - name: Test Shared Lib
+        run: ./gradlew :examples:SharedLib:app:core:test
 
       - name: Upload natives
         uses: actions/upload-artifact@v4
@@ -97,10 +106,7 @@ jobs:
       - name: Build project idl-helper
         run: ./gradlew idl_helper_build_project_linux64
 
-      - name: Build project
-        run: ./gradlew TestLib_build_project_linux64
-
-      - name: Build project
+      - name: Build TestLib project
         run: ./gradlew TestLib_build_project_linux64
 
       - name: Build Shared LibA project
