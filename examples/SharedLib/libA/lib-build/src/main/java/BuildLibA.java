@@ -138,7 +138,6 @@ public class BuildLibA {
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.cppFlags.add(config);
         compileStaticTarget.cppFlags.add("-fPIC");
-        compileStaticTarget.cppFlags.add("-fvisibility=hidden");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
@@ -149,14 +148,11 @@ public class BuildLibA {
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.cppFlags.add("-fPIC");
-        linkTarget.cppFlags.add("-fvisibility=hidden");
         linkTarget.cppFlags.add(config);
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
-        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);

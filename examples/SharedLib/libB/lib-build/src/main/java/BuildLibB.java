@@ -173,11 +173,8 @@ public class BuildLibB {
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.headerDirs.add("-I" + libASourcePath);
         linkTarget.headerDirs.add("-I" + libACustomPath);
-        linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
         linkTarget.linkerFlags.add(libALibPath + "/libLibA64.so");
-        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
-        linkTarget.linkerFlags.add("-Wl,--allow-shlib-undefined");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
         multiTarget.add(linkTarget);

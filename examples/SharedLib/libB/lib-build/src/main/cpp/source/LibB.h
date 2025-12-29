@@ -21,8 +21,7 @@ class LibB {
         }
 
         static LibAData* getGlobalData() {
-            LibAData* data = GData;
-//            LibAData* data = LibA::getGlobalData();
+            LibAData* data = LibA::getGlobalData();
             std::cout << "GData pointer: " << data << std::endl;
             return data;
         }

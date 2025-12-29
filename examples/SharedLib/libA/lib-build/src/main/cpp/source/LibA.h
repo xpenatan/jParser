@@ -36,5 +36,5 @@ class LibA {
         }
 
         static void setGlobalData(LibAData* data);
-        static LibAData* getGlobalData();
+        LIBA_API static LibAData* getGlobalData();
 };
