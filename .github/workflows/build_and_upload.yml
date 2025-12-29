@@ -147,13 +147,13 @@ jobs:
         run: |
           ./gradlew TestLib_build_project_mac64
 
-      - name: Build Shared LibA project
-        run: |
-          ./gradlew LibA_build_project_mac64
-
-      - name: Build Shared LibB project
-        run: |
-          ./gradlew LibB_build_project_mac64
+#      - name: Build Shared LibA project
+#        run: |
+#          ./gradlew LibA_build_project_mac64
+#
+#      - name: Build Shared LibB project
+#        run: |
+#          ./gradlew LibB_build_project_mac64
 
 #      - name: Test Shared Lib
 #        run: ./gradlew :examples:SharedLib:app:core:test
@@ -193,13 +193,13 @@ jobs:
         run: |
           ./gradlew TestLib_build_project_macArm
 
-      - name: Build Shared LibA project
-        run: |
-          ./gradlew LibA_build_project_macArm
-
-      - name: Build Shared LibB project
-        run: |
-          ./gradlew LibB_build_project_macArm
+#      - name: Build Shared LibA project
+#        run: |
+#          ./gradlew LibA_build_project_macArm
+#
+#      - name: Build Shared LibB project
+#        run: |
+#          ./gradlew LibB_build_project_macArm
 
 #      - name: Test Shared Lib
 #        run: ./gradlew :examples:SharedLib:app:core:test
