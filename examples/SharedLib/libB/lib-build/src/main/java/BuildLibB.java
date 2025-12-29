@@ -1,4 +1,5 @@
 import com.github.xpenatan.jParser.builder.BuildMultiTarget;
+import com.github.xpenatan.jParser.builder.BuildTarget;
 import com.github.xpenatan.jParser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jParser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jParser.builder.targets.IOSTarget;
@@ -159,6 +160,7 @@ public class BuildLibB {
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.cppFlags.add(config);
         compileStaticTarget.cppFlags.add("-fPIC");
+        compileStaticTarget.cppFlags.add("-fvisibility=hidden");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
         compileStaticTarget.headerDirs.add("-I" + libACustomPath);
@@ -170,6 +172,7 @@ public class BuildLibB {
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.cppFlags.add(config);
         linkTarget.cppFlags.add("-fPIC");
+        linkTarget.cppFlags.add("-fvisibility=hidden");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
@@ -220,11 +223,11 @@ public class BuildLibB {
         linkTarget.headerDirs.add("-I" + libASourcePath);
 
         if(isArm) {
-            linkTarget.linkerFlags.add(libALibArmPath + "/LibA64_.a");
+            linkTarget.linkerFlags.add(libALibArmPath + "/LibA64.dylib");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/lib" + op.libName + "64_.a");
         }
         else {
-            linkTarget.linkerFlags.add(libALibPath + "/LibA64_.a");
+            linkTarget.linkerFlags.add(libALibPath + "/LibA64.dylib");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64_.a");
         }
 
@@ -245,14 +248,25 @@ public class BuildLibB {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
+        String config;
+        if(BuildTarget.isWindows()) {
+            config = "-DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"";
+        }
+        else {
+            config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+        }
+
         // Make a static library
         EmscriptenTarget compileStaticTarget = new EmscriptenTarget();
         compileStaticTarget.isStatic = true;
         compileStaticTarget.compileGlueCode = false;
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
+        compileStaticTarget.headerDirs.add("-I" + libACustomPath);
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add("-fPIC");
+        compileStaticTarget.cppFlags.add(config);
         multiTarget.add(compileStaticTarget);
 
         // Compile glue code and link to make js file
@@ -260,11 +274,14 @@ public class BuildLibB {
         linkTarget.idlReader = idlReader;
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + libASourcePath);
+        linkTarget.headerDirs.add("-I" + libACustomPath);
         linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("-fPIC");
+        linkTarget.cppFlags.add(config);
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibBCustomCode.h");
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
-//        linkTarget.linkerFlags.add(libALibPath + "/LibA_.a");
+        linkTarget.linkerFlags.add(libALibPath + "/LibA_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.mainModuleName = "idl";
         linkTarget.linkerFlags.add("-sSIDE_MODULE=2");
@@ -290,7 +307,13 @@ public class BuildLibB {
         targets.add(AndroidTarget.Target.armeabi_v7a);
         targets.add(AndroidTarget.Target.arm64_v8a);
 
-        String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+        String config;
+        if(BuildTarget.isWindows()) {
+            config = "-DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"";
+        }
+        else {
+            config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+        }
 
         for(int i = 0; i < targets.size(); i++) {
             AndroidTarget.Target target = targets.get(i);
@@ -300,6 +323,7 @@ public class BuildLibB {
             compileStaticTarget.isStatic = true;
             compileStaticTarget.cppFlags.add("-std=c++11");
             compileStaticTarget.cppFlags.add(config);
+            compileStaticTarget.cppFlags.add("-fPIC");
             compileStaticTarget.headerDirs.add("-I" + sourceDir);
             compileStaticTarget.headerDirs.add("-I" + libASourcePath);
             compileStaticTarget.headerDirs.add("-I" + libACustomPath);
@@ -309,13 +333,18 @@ public class BuildLibB {
             AndroidTarget linkTarget = new AndroidTarget(target, apiLevel);
             linkTarget.addJNIHeaders();
             linkTarget.cppFlags.add("-std=c++11");
+            linkTarget.cppFlags.add(config);
+            linkTarget.cppFlags.add("-fPIC");
             linkTarget.headerDirs.add("-I" + sourceDir);
             linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
             linkTarget.headerDirs.add("-I" + libASourcePath);
+            linkTarget.headerDirs.add("-I" + libACustomPath);
             linkTarget.linkerFlags.add("-Wl,--whole-archive");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() +"/lib" + op.libName + ".a");
-//            linkTarget.linkerFlags.add(libALibPath + target.getFolder() + "/libLibA.a");
+            linkTarget.linkerFlags.add(libALibPath + target.getFolder() + "/libLibA.so");
+//            linkTarget.linkerFlags.add("-L" + libALibPath + target.getFolder());
+//            linkTarget.linkerFlags.add("-llibLibA");
             linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
             linkTarget.linkerFlags.add("-Wl,--allow-shlib-undefined");
             linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");

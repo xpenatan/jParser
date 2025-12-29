@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "com.github.xpenatan.jParser.example.sharedlib.android"
-        minSdk = 24
+        minSdk = 29
         versionCode = 1
         versionName = "1.0"
     }
@@ -43,8 +43,9 @@ dependencies {
     natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-x86")
 
     implementation(project(":examples:SharedLib:app:core"))
-    implementation(project(":examples:SharedLib:libA:lib-android"))
-    implementation(project(":examples:SharedLib:libB:lib-android"))
+    api(project(":examples:SharedLib:libA:lib-android"))
+    api(project(":examples:SharedLib:libB:lib-android"))
+    api(project(":idl-helper:idl-helper-android"))
 }
 
 

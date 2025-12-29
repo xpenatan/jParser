@@ -3,15 +3,13 @@ plugins {
     id("kotlin-android")
 }
 
-group = "jparser.app.android"
-
 android {
     namespace = "com.example.myapplication"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.myapplication"
-        minSdk = 24
+        minSdk = 29
         versionCode = 1
         versionName = "1.0"
     }

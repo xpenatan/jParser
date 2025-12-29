@@ -2,12 +2,23 @@ plugins {
     id("com.android.library")
 }
 
+val filterJniLibs by tasks.registering(Copy::class) {
+    from("$projectDir/../lib-build/build/c++/libs/android")
+    into(layout.buildDirectory.dir("tmp/jniLibs"))
+    include("**/*.so")
+    exclude("**/*.a")
+}
+
+tasks.named("preBuild").configure {
+    dependsOn(filterJniLibs)
+}
+
 android {
     namespace = "com.github.xpenatan.jparser.example.libA"
     compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 29
     }
 
     sourceSets {

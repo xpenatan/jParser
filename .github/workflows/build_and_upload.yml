@@ -50,7 +50,7 @@ jobs:
           name: PATH
           value: $env:PATH;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build
 
-      - name: Build project idl-helper
+      - name: Build idl-helper project
         run: ./gradlew idl_helper_build_project_windows64
 
       - name: Build TestLib project
@@ -70,12 +70,6 @@ jobs:
         with:
           name: windows-natives
           path: ./idl-helper/idl-helper-build/build/c++/libs/
-
-      - name: Upload natives
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-natives-test
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
   build_linux:
     name: Build Linux
@@ -103,7 +97,7 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build project idl-helper
+      - name: Build idl-helper project
         run: ./gradlew idl_helper_build_project_linux64
 
       - name: Build TestLib project
@@ -124,14 +118,8 @@ jobs:
           name: linux-natives
           path: ./idl-helper/idl-helper-build/build/c++/libs/
 
-      - name: Upload natives
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-natives-test
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
-
-  build_mac:
-    name: Build Mac
+  build_mac_intel:
+    name: Build Mac Intel
     runs-on: macos-latest
 
     steps:
@@ -153,23 +141,74 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project idl-helper
-        run: ./gradlew idl_helper_build_project_mac64 idl_helper_build_project_macArm
+        run: ./gradlew idl_helper_build_project_mac64
 
-      - name: Build project
+      - name: Build TestLib project
         run: |
-          ./gradlew TestLib_build_project_mac64 TestLib_build_project_macArm
+          ./gradlew TestLib_build_project_mac64
+
+      - name: Build Shared LibA project
+        run: |
+          ./gradlew LibA_build_project_mac64
+
+      - name: Build Shared LibB project
+        run: |
+          ./gradlew LibB_build_project_mac64
+
+      - name: Test Shared Lib
+        run: ./gradlew :examples:SharedLib:app:core:test
 
       - name: Upload natives idl-helper
         uses: actions/upload-artifact@v4
         with:
-          name: mac-natives
+          name: mac-natives-intel
           path: ./idl-helper/idl-helper-build/build/c++/libs/
 
-      - name: Upload natives
+  build_mac_arm:
+    name: Build Mac Arm
+    runs-on: macos-latest
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "corretto"
+          java-version: 17
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Build project idl-helper
+        run: ./gradlew idl_helper_build_project_macArm
+
+      - name: Build TestLib project
+        run: |
+          ./gradlew TestLib_build_project_macArm
+
+      - name: Build Shared LibA project
+        run: |
+          ./gradlew LibA_build_project_macArm
+
+      - name: Build Shared LibB project
+        run: |
+          ./gradlew LibB_build_project_macArm
+
+      - name: Test Shared Lib
+        run: ./gradlew :examples:SharedLib:app:core:test
+
+      - name: Upload natives idl-helper
         uses: actions/upload-artifact@v4
         with:
-          name: mac-natives-test
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
+          name: mac-natives-arm
+          path: ./idl-helper/idl-helper-build/build/c++/libs/
 
   build_teavm:
     name: Build TeaVM
@@ -213,12 +252,6 @@ jobs:
         with:
           name: teavm-natives
           path: ./idl-helper/idl-helper-build/build/c++/libs/
-
-      - name: Upload natives
-        uses: actions/upload-artifact@v4
-        with:
-          name: teavm-natives-test
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
   build_android:
     name: Build Android
@@ -271,12 +304,6 @@ jobs:
           name: android-natives
           path: ./idl-helper/idl-helper-build/build/c++/libs/
 
-      - name: Upload natives
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-natives-test
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
-  
   upload_natives:
     name: Upload Natives
     needs: [build_windows, build_linux, build_mac, build_android, build_teavm]
@@ -318,35 +345,23 @@ jobs:
           name: windows-natives
           path: ./idl-helper/idl-helper-build/build/c++/libs/
 
-      - name: Download windows natives
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-natives-test
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
-
       - name: Download linux natives idl-helper
         uses: actions/download-artifact@v4
         with:
           name: linux-natives
           path: ./idl-helper/idl-helper-build/build/c++/libs/
 
-      - name: Download linux natives
+      - name: Download mac intel natives idl-helper
         uses: actions/download-artifact@v4
         with:
-          name: linux-natives-test
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
-
-      - name: Download mac natives idl-helper
-        uses: actions/download-artifact@v4
-        with:
-          name: mac-natives
+          name: mac-natives-intel
           path: ./idl-helper/idl-helper-build/build/c++/libs/
 
-      - name: Download mac natives
+      - name: Download mac arm natives idl-helper
         uses: actions/download-artifact@v4
         with:
-          name: mac-natives-test
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
+          name: mac-natives-arm
+          path: ./idl-helper/idl-helper-build/build/c++/libs/
 
       - name: Download android natives idl-helper
         uses: actions/download-artifact@v4
@@ -354,23 +369,11 @@ jobs:
           name: android-natives
           path: ./idl-helper/idl-helper-build/build/c++/libs/
 
-      - name: Download android natives
-        uses: actions/download-artifact@v4
-        with:
-          name: android-natives-test
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
-
       - name: Download teavm natives idl-helper
         uses: actions/download-artifact@v4
         with:
           name: teavm-natives
           path: ./idl-helper/idl-helper-build/build/c++/libs/
-
-      - name: Download teavm natives
-        uses: actions/download-artifact@v4
-        with:
-          name: teavm-natives-test
-          path: ./examples/TestLib/lib/lib-build/build/c++/libs/
 
       - name: Generate Java classes
         run: ./gradlew TestLib_build_project

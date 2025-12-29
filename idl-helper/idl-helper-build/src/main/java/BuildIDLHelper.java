@@ -178,6 +178,7 @@ public class BuildIDLHelper {
         linkTarget.linkerFlags.add("-sMAIN_MODULE=1");
         linkTarget.exportedFunctions.add("_free");
         linkTarget.exportedFunctions.add("_malloc");
+        linkTarget.exportedFunctions.add("__ZNSt3__24coutE");
         linkTarget.exportedFunctions.add("___stack_low");
         linkTarget.exportedFunctions.add("___stack_high");
         multiTarget.add(linkTarget);
