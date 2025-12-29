@@ -158,6 +158,7 @@ public class BuildLibB {
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.cppFlags.add(config);
+        compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
         compileStaticTarget.headerDirs.add("-I" + libACustomPath);
@@ -168,6 +169,7 @@ public class BuildLibB {
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.cppFlags.add(config);
+        linkTarget.cppFlags.add("-fPIC");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
@@ -197,9 +199,10 @@ public class BuildLibB {
 
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
+        compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.cppFlags.add(config);
-        compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
         compileStaticTarget.headerDirs.add("-I" + libACustomPath);
@@ -209,24 +212,21 @@ public class BuildLibB {
         MacTarget linkTarget = new MacTarget(isArm);
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add(config);
+        linkTarget.cppFlags.add("-fPIC");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.headerDirs.add("-I" + libASourcePath);
 
         if(isArm) {
-            linkTarget.linkerFlags.add("-Wl,-force_load");
+            linkTarget.linkerFlags.add(libALibArmPath + "/LibA64_.a");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/lib" + op.libName + "64_.a");
-//            linkTarget.linkerFlags.add("-Wl,-force_load");
-//            linkTarget.linkerFlags.add(libALibArmPath + "/LibA64_.a");
         }
         else {
-            linkTarget.linkerFlags.add("-Wl,-force_load");
+            linkTarget.linkerFlags.add(libALibPath + "/LibA64_.a");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64_.a");
-//            linkTarget.linkerFlags.add("-Wl,-force_load");
-//            linkTarget.linkerFlags.add(libALibPath + "/LibA64_.a");
         }
-        linkTarget.linkerFlags.add("-Wl,-undefined,dynamic_lookup");
 
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 

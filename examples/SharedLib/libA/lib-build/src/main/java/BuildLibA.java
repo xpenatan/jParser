@@ -165,10 +165,14 @@ public class BuildLibA {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
+        String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
-        compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add(config);
+        compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
@@ -178,6 +182,8 @@ public class BuildLibA {
         MacTarget linkTarget = new MacTarget(isArm);
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add(config);
+        linkTarget.cppFlags.add("-fPIC");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
