@@ -18,3 +18,7 @@ dependencies {
     testImplementation(project(":idl-helper:idl-helper-desktop"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
+
+tasks.named<Test>("test") {
+    testLogging.showStandardStreams = true
+}
