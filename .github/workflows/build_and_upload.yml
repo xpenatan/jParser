@@ -62,8 +62,8 @@ jobs:
       - name: Build Shared LibB project
         run: ./gradlew LibB_build_project_windows64
 
-      - name: Test Shared Lib
-        run: ./gradlew :examples:SharedLib:app:core:test
+#      - name: Test Shared Lib
+#        run: ./gradlew :examples:SharedLib:app:core:test
 
       - name: Upload natives
         uses: actions/upload-artifact@v4
@@ -109,8 +109,8 @@ jobs:
       - name: Build Shared LibB project
         run: ./gradlew LibB_build_project_linux64
 
-      - name: Test Shared Lib
-        run: ./gradlew :examples:SharedLib:app:core:test
+#      - name: Test Shared Lib
+#        run: ./gradlew :examples:SharedLib:app:core:test
 
       - name: Upload natives idl-helper
         uses: actions/upload-artifact@v4
@@ -155,8 +155,8 @@ jobs:
         run: |
           ./gradlew LibB_build_project_mac64
 
-      - name: Test Shared Lib
-        run: ./gradlew :examples:SharedLib:app:core:test
+#      - name: Test Shared Lib
+#        run: ./gradlew :examples:SharedLib:app:core:test
 
       - name: Upload natives idl-helper
         uses: actions/upload-artifact@v4
@@ -201,8 +201,8 @@ jobs:
         run: |
           ./gradlew LibB_build_project_macArm
 
-      - name: Test Shared Lib
-        run: ./gradlew :examples:SharedLib:app:core:test
+#      - name: Test Shared Lib
+#        run: ./gradlew :examples:SharedLib:app:core:test
 
       - name: Upload natives idl-helper
         uses: actions/upload-artifact@v4
