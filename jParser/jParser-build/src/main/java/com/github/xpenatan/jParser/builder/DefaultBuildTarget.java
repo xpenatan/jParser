@@ -261,8 +261,8 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         }
         else {
             linkerCommands.addAll(linkerCompiler);
+            linkerCommands.add("@" + objFilePath); // Objects must be before flags and linking flags
             linkerCommands.addAll(linkerFlags);
-            linkerCommands.add("@" + objFilePath);
             linkerCommands.add(linkerOutputCommand + libPath);
         }
     }
