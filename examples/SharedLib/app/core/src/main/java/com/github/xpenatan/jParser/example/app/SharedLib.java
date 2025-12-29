@@ -5,7 +5,7 @@ import libA.LibA;
 import libA.LibAData;
 import libB.LibB;
 
-public class SharedLibTest {
+public class SharedLib {
 
     public static boolean test() {
         boolean fail = false;

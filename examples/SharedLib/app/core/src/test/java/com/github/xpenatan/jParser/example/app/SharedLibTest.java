@@ -1,28 +1,19 @@
 package com.github.xpenatan.jParser.example.app;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
 import com.github.xpenatan.jparser.idl.IDLLoader;
 import libA.LibALoader;
 import libB.LibBLoader;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-public class SharedLibApp extends ApplicationAdapter {
-    private boolean init = false;
+public class SharedLibTest {
 
-    private SpriteBatch batch;
-    private BitmapFont font;
+    private static boolean libLoaded = false;
 
-    boolean testPass = false;
-
-    Color color = Color.GRAY;
-
-    @Override
-    public void create() {
+    @BeforeClass
+    public static void setUp() {
         IDLLoader.init(new JParserLibraryLoaderListener() {
             @Override
             public void onLoad(boolean idl_isSuccess, Throwable idl_t) {
@@ -40,29 +31,19 @@ public class SharedLibApp extends ApplicationAdapter {
                             libB_t.printStackTrace();
                             return;
                         }
-                        init = true;
+                        libLoaded = true;
                     });
                 });
             }
         });
-
-        batch = new SpriteBatch();
-        font = new BitmapFont();
     }
 
-    @Override
-    public void render() {
-        ScreenUtils.clear(color);
-
-        if(init) {
-            init = false;
-            testPass = SharedLib.test();
-            color = testPass ? Color.LIME : Color.RED;
-            return;
+    @Test
+    public void test_shared_lib() {
+        if(!libLoaded) {
+            Assert.fail("Libraries not loaded");
         }
-
-        batch.begin();
-        font.draw(batch, "Test Pass " + testPass, 100, Gdx.graphics.getHeight()/2f);
-        batch.end();
+        boolean test = SharedLib.test();
+        Assert.assertTrue("SharedLib must return true", test);
     }
 }
