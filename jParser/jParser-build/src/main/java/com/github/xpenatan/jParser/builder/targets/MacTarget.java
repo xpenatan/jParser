@@ -2,8 +2,6 @@ package com.github.xpenatan.jParser.builder.targets;
 
 import com.github.xpenatan.jParser.builder.BuildConfig;
 import com.github.xpenatan.jParser.builder.DefaultBuildTarget;
-import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
-import java.util.ArrayList;
 
 public class MacTarget extends DefaultBuildTarget {
 
