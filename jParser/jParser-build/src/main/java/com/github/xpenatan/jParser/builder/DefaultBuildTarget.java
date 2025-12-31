@@ -61,13 +61,13 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         else {
             tempBuildDir += "linking/";
         }
-        CustomFileDescriptor childTarget = config.buildDir.child(tempBuildDir);
+        CustomFileDescriptor childTarget = config.buildRootPath.child(tempBuildDir);
         if(childTarget.exists()) {
             childTarget.deleteDirectory();
         }
         childTarget.mkdirs();
 
-        idlDir = config.buildSourceDir.child("idl");
+        idlDir = config.buildRootGenSourcePath.child("idl");
         if(!idlDir.exists()) {
             idlDir.mkdirs();
         }
@@ -105,7 +105,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     }
 
     protected ArrayList<CustomFileDescriptor> addSources(BuildConfig config) {
-        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.buildSourceDir, cppInclude, cppExclude);
+        ArrayList<CustomFileDescriptor> cppFiles = getCPPFiles(config.buildRootGenSourcePath, cppInclude, cppExclude);
         for(CustomFileDescriptor sourceDir : config.additionalSourceDirs) {
             ArrayList<CustomFileDescriptor> cppFiles1 = getCPPFiles(sourceDir, cppInclude, cppExclude);
             cppFiles.addAll(cppFiles1);
@@ -157,7 +157,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
                         threadCommands.addAll(cppFlags);
                         threadCommands.addAll(headerDirs);
                         threadCommands.add(path);
-                        boolean flag = JProcess.startProcess(config.buildDir.file(), threadCommands, environment);
+                        boolean flag = JProcess.startProcess(config.buildRootPath.file(), threadCommands, environment);
                         if(!flag) {
                             multiCoreCompile = false;
                             throw new RuntimeException("Compile Error");
@@ -193,7 +193,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
             compilerCommands.addAll(headerDirs);
             compilerCommands.add("@" + cppList.path());
             System.out.println("##### COMPILE #####");
-            boolean flag = JProcess.startProcess(config.buildDir.file(), compilerCommands, environment);
+            boolean flag = JProcess.startProcess(config.buildRootPath.file(), compilerCommands, environment);
             if(!flag) {
                 return false;
             }
@@ -202,7 +202,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
 
         // Manually Move object files to target
         ArrayList<CustomFileDescriptor> files = new ArrayList<>();
-        getObjectFiles(config.buildDir, files);
+        getObjectFiles(config.buildRootPath, files);
         for(CustomFileDescriptor file : files) {
             file.moveTo(buildTargetTemp);
         }
@@ -210,7 +210,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     }
 
     private boolean link(BuildConfig config, CustomFileDescriptor childTarget) {
-        CustomFileDescriptor libDir = config.libDir.child(libDirSuffix);
+        CustomFileDescriptor libDir = config.compiledLibsPath.child(libDirSuffix);
         if(!libDir.exists()) {
             libDir.mkdirs();
         }

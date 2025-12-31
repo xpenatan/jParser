@@ -45,7 +45,7 @@ public class IOSTarget extends DefaultBuildTarget {
 
     @Override
     protected void setup(BuildConfig config) {
-        CustomFileDescriptor iosDir = config.buildDir;
+        CustomFileDescriptor iosDir = config.buildRootPath;
         if(!iosDir.exists()) {
             iosDir.mkdirs();
         }

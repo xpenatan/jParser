@@ -68,7 +68,7 @@ public class CustomFileDescriptor {
     }
 
     public String path() {
-        return file.getPath().replace('\\', '/');
+        return file.getAbsolutePath().replace('\\', '/');
     }
 
     public String name() {

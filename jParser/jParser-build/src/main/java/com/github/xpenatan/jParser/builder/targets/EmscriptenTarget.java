@@ -6,7 +6,6 @@ import com.github.xpenatan.jParser.builder.JProcess;
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,7 +100,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             libName = config.libName;
         }
 
-        CustomFileDescriptor jsglueDir = config.buildSourceDir.child("jsglue");
+        CustomFileDescriptor jsglueDir = config.buildRootGenSourcePath.child("jsglue");
         if(!jsglueDir.exists()) {
             jsglueDir.mkdirs();
         }
@@ -153,7 +152,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerFlags.add("-sMODULARIZE=1");
             linkerFlags.add("-sINITIAL_MEMORY=" + initialMemory);
             linkerFlags.add("-sSTACK_SIZE=" + stackSize);
-            CustomFileDescriptor exportedFunctionsFile = config.buildDir.child("target/emscripten/static/exported_functions.txt");
+            CustomFileDescriptor exportedFunctionsFile = config.buildRootPath.child("target/emscripten/static/exported_functions.txt");
             mergeExportedFunctionsToSymbols(exportedFunctionsFile, exportedFunctions);
             linkerFlags.add("-sEXPORTED_FUNCTIONS=@" + exportedFunctionsFile.path());
             linkerFlags.add("-sEXPORTED_RUNTIME_METHODS=" + obtainList(exportedRuntimeMethods));
@@ -192,7 +191,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             }
             else {
                 if(mainModuleName != null && !mainModuleName.isEmpty()) {
-                    CustomFileDescriptor libDir = config.libDir.child(libDirSuffix);
+                    CustomFileDescriptor libDir = config.compiledLibsPath.child(libDirSuffix);
                     createSideModule(jsglueDir, libName, libDir);
                 }
             }
@@ -401,7 +400,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             if(isWindows()) llvmNm += ".exe";
             ProcessBuilder pb = new ProcessBuilder(llvmNm, objPath);
             pb.environment().putAll(environment);
-            pb.directory(config.buildDir.file());
+            pb.directory(config.buildRootPath.file());
             Process p = pb.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line;

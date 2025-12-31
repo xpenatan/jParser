@@ -5,23 +5,28 @@ import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import java.util.ArrayList;
 
 public class BuildConfig {
-    public final CustomFileDescriptor buildDir;
-    public final CustomFileDescriptor buildSourceDir;
+    public final CustomFileDescriptor buildRootPath;
+    public final CustomFileDescriptor buildRootGenSourcePath;
     public final ArrayList<CustomFileDescriptor> additionalSourceDirs = new ArrayList<>();
-    public final CustomFileDescriptor libDir;
+    public final CustomFileDescriptor compiledLibsPath;
     public final String libName;
-    private final BuildToolOptions op;
+
+    public BuildConfig(String libName, String buildRootPath, String buildRootGenSourcePath, String compiledLibsPath) {
+        this.buildRootPath = new CustomFileDescriptor(buildRootPath);
+        this.buildRootGenSourcePath = new CustomFileDescriptor(buildRootGenSourcePath);
+        this.compiledLibsPath = new CustomFileDescriptor(compiledLibsPath);
+        this.libName = libName;
+    }
 
     public BuildConfig(BuildToolOptions op) {
-        this.op = op;
-        String buildSourceDir = op.getCPPDestinationPath();
-        String buildDir = op.getModuleBuildCPPPath();
-        String libsDir = op.getLibsDir();
+        String buildRootDir = op.getModuleBuildCPPPath();
+        String buildRootGenSourcePath = op.getCPPDestinationPath();
+        String compiledLibsPath = op.getLibsDir();
         String libName = op.libName;
         String sourcePath = op.getSourceDir();
 
-        this.buildDir = new CustomFileDescriptor(buildDir);
-        this.buildSourceDir = new CustomFileDescriptor(buildSourceDir);
+        this.buildRootPath = new CustomFileDescriptor(buildRootDir);
+        this.buildRootGenSourcePath = new CustomFileDescriptor(buildRootGenSourcePath);
         if(sourcePath != null) {
             additionalSourceDirs.add(new CustomFileDescriptor(sourcePath));
         }
@@ -36,20 +41,20 @@ public class BuildConfig {
             additionalSourceDirs.add(new CustomFileDescriptor(path));
         }
 
-        this.libDir = new CustomFileDescriptor(libsDir);
+        this.compiledLibsPath = new CustomFileDescriptor(compiledLibsPath);
 
         this.libName = libName;
 
-        copyJniHeaders(this.buildDir);
+        copyJniHeaders();
     }
 
-    protected void copyJniHeaders (CustomFileDescriptor buildDir) {
+    public void copyJniHeaders() {
         final String pack = "headers";
         String files[] = {"classfile_constants.h", "jawt.h", "jdwpTransport.h", "jni.h", "linux/jawt_md.h", "linux/jni_md.h",
                 "mac/jni_md.h", "win32/jawt_md.h", "win32/jni_md.h"};
 
         for (String file : files) {
-            CustomFileDescriptor child = buildDir.child("jni-headers").child(file);
+            CustomFileDescriptor child = buildRootPath.child("jni-headers").child(file);
             new CustomFileDescriptor(pack, CustomFileDescriptor.FileType.Classpath).child(file).copyTo(child, true);
         }
     }
