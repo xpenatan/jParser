@@ -52,12 +52,10 @@ public class WindowsTarget extends DefaultBuildTarget {
             linkerOutputCommand = "";
         }
         else {
-//            linkerFlags.add("-fPIC");
             linkerFlags.add("-shared");
             linkerFlags.add("-static");
             linkerFlags.add("-static-libgcc");
             linkerFlags.add("-static-libstdc++");
-//            linkerFlags.add("-Wl,--kill-at");
             linkerFlags.add("-m64");
             libSuffix = "64.dll";
             linkerOutputCommand = "-o";

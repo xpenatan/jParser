@@ -136,6 +136,7 @@ public class BuildLibB {
         linkTarget.headerDirs.add("-I" + libACustomPath);
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libALibPath + "/LibA64.lib");
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("-DLL");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 

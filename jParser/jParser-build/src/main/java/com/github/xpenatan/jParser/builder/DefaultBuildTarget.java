@@ -16,6 +16,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     private static String helperNameCpp = "IDLHelper.cpp";
 
     public boolean multiCoreCompile = true;
+    public boolean addIDLHelper = true;
 
     public String tempBuildDir;
 
@@ -67,19 +68,9 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         }
         childTarget.mkdirs();
 
-        idlDir = config.buildRootGenSourcePath.child("idl");
-        if(!idlDir.exists()) {
-            idlDir.mkdirs();
+        if(addIDLHelper) {
+            addIDLHelper(config);
         }
-
-        idlHelperHClasspath = new CustomFileDescriptor(helperNameH, CustomFileDescriptor.FileType.Classpath);
-        idlHelperCPPClasspath = new CustomFileDescriptor(helperNameCpp, CustomFileDescriptor.FileType.Classpath);
-        idlHelperHFile = idlDir.child(idlHelperHClasspath.name());
-        idlHelperCPPFile = idlDir.child(idlHelperCPPClasspath.name());
-
-        // Always add IDLHelper, even if not used.
-        copyIDLHelperToBuildDir();
-        headerDirs.add("-I" + idlDir.path());
 
         setup(config);
         return build(config, childTarget);
@@ -261,7 +252,9 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         }
         else {
             linkerCommands.addAll(linkerCompiler);
-            linkerCommands.add("@" + objFilePath); // Objects must be before flags and linking flags
+            if(!compiledObjects.isEmpty()) {
+                linkerCommands.add("@" + objFilePath); // Objects must be before flags and linking flags
+            }
             linkerCommands.addAll(linkerFlags);
             linkerCommands.add(linkerOutputCommand + libPath);
         }
@@ -339,7 +332,23 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         }
     }
 
-    public void copyIDLHelperToBuildDir() {
+    private void addIDLHelper(BuildConfig config) {
+        idlDir = config.buildRootGenSourcePath.child("idl");
+        if(!idlDir.exists()) {
+            idlDir.mkdirs();
+        }
+
+        idlHelperHClasspath = new CustomFileDescriptor(helperNameH, CustomFileDescriptor.FileType.Classpath);
+        idlHelperCPPClasspath = new CustomFileDescriptor(helperNameCpp, CustomFileDescriptor.FileType.Classpath);
+        idlHelperHFile = idlDir.child(idlHelperHClasspath.name());
+        idlHelperCPPFile = idlDir.child(idlHelperCPPClasspath.name());
+
+        // Always add IDLHelper, even if not used.
+        copyIDLHelperToBuildDir();
+        headerDirs.add("-I" + idlDir.path());
+    }
+
+    private void copyIDLHelperToBuildDir() {
         idlHelperHClasspath.copyTo(idlDir, false);
         idlHelperCPPClasspath.copyTo(idlDir, false);
     }

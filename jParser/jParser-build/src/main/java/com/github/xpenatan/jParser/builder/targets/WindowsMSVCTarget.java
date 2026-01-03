@@ -25,6 +25,13 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
         cppCompiler.add("x64");
         cppCompiler.add("&");
         cppCompiler.add("cl");
+
+        linkerCompiler.add("cmd");
+        linkerCompiler.add("/c");
+        linkerCompiler.add("vcvarsall");
+        linkerCompiler.add("x64");
+        linkerCompiler.add("&");
+
         compilerOutputCommand = "-Fo:";
         cppFlags.add("-c");
         if(DEBUG_BUILD) {
@@ -40,11 +47,6 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
 
     @Override
     protected void setup(BuildConfig config) {
-        linkerCompiler.add("cmd");
-        linkerCompiler.add("/c");
-        linkerCompiler.add("vcvarsall");
-        linkerCompiler.add("x64");
-        linkerCompiler.add("&");
         if(isStatic) {
             linkerCompiler.add("lib");
             libSuffix = "64_.lib";
@@ -54,7 +56,6 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
             if(DEBUG_BUILD) {
                 linkerCompiler.add("/DEBUG"); // Generates .pbd file
             }
-            linkerFlags.add("-DLL");
         }
         linkerCompiler.add("/NOLOGO");
         linkerCompiler.add("/MACHINE:X64");

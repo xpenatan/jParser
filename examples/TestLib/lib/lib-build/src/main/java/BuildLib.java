@@ -88,6 +88,7 @@ public class BuildLib {
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + op.libName + "64_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        linkTarget.linkerFlags.add("-DLL");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
 
