@@ -8,13 +8,13 @@ public class BuildConfig {
     public final CustomFileDescriptor buildRootPath;
     public final CustomFileDescriptor buildRootGenSourcePath;
     public final ArrayList<CustomFileDescriptor> additionalSourceDirs = new ArrayList<>();
-    public final CustomFileDescriptor compiledLibsPath;
+    public final CustomFileDescriptor outputPath;
     public final String libName;
 
-    public BuildConfig(String libName, String buildRootPath, String buildRootGenSourcePath, String compiledLibsPath) {
+    public BuildConfig(String libName, String buildRootPath, String buildRootGenSourcePath, String outputPath) {
         this.buildRootPath = new CustomFileDescriptor(buildRootPath);
         this.buildRootGenSourcePath = new CustomFileDescriptor(buildRootGenSourcePath);
-        this.compiledLibsPath = new CustomFileDescriptor(compiledLibsPath);
+        this.outputPath = new CustomFileDescriptor(outputPath);
         this.libName = libName;
     }
 
@@ -41,7 +41,7 @@ public class BuildConfig {
             additionalSourceDirs.add(new CustomFileDescriptor(path));
         }
 
-        this.compiledLibsPath = new CustomFileDescriptor(compiledLibsPath);
+        this.outputPath = new CustomFileDescriptor(compiledLibsPath);
 
         this.libName = libName;
 

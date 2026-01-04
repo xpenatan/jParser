@@ -191,7 +191,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             }
             else {
                 if(mainModuleName != null && !mainModuleName.isEmpty()) {
-                    CustomFileDescriptor libDir = config.compiledLibsPath.child(libDirSuffix);
+                    CustomFileDescriptor libDir = config.outputPath.child(libDirSuffix);
                     createSideModule(jsglueDir, libName, libDir);
                 }
             }

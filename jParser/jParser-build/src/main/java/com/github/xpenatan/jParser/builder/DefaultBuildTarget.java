@@ -201,7 +201,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     }
 
     private boolean link(BuildConfig config, CustomFileDescriptor childTarget) {
-        CustomFileDescriptor libDir = config.compiledLibsPath.child(libDirSuffix);
+        CustomFileDescriptor libDir = config.outputPath.child(libDirSuffix);
         if(!libDir.exists()) {
             libDir.mkdirs();
         }
@@ -243,11 +243,11 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         return JProcess.startProcess(childTarget.file(), linkerCommands, environment);
     }
 
-    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String libPath) {
+    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String outputPath) {
         if(isStatic) {
             linkerCommands.addAll(linkerCompiler);
             linkerCommands.addAll(linkerFlags);
-            linkerCommands.add(linkerOutputCommand + libPath);
+            linkerCommands.add(linkerOutputCommand + outputPath);
             linkerCommands.add("@" + objFilePath);
         }
         else {
@@ -256,7 +256,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
                 linkerCommands.add("@" + objFilePath); // Objects must be before flags and linking flags
             }
             linkerCommands.addAll(linkerFlags);
-            linkerCommands.add(linkerOutputCommand + libPath);
+            linkerCommands.add(linkerOutputCommand + outputPath);
         }
     }
 
