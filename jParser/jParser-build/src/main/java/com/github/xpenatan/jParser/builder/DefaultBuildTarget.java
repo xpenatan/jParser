@@ -16,7 +16,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     private static String helperNameCpp = "IDLHelper.cpp";
 
     public boolean multiCoreCompile = true;
-    public boolean addIDLHelper = true;
+    public boolean shouldUseHelper = false;
 
     public String tempBuildDir;
 
@@ -68,7 +68,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         }
         childTarget.mkdirs();
 
-        if(addIDLHelper) {
+        if(shouldUseHelper) {
             addIDLHelper(config);
         }
 
