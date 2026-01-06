@@ -16,7 +16,7 @@ public abstract class DefaultBuildTarget extends BuildTarget {
     private static String helperNameCpp = "IDLHelper.cpp";
 
     public boolean multiCoreCompile = true;
-    public boolean shouldUseHelper = false;
+    public boolean shouldUseHelper = true;
 
     public String tempBuildDir;
 
