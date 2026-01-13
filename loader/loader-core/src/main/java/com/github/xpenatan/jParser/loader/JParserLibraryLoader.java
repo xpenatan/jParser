@@ -92,7 +92,7 @@ public class JParserLibraryLoader {
             load(libraryName, path, prefix, suffix);
             listener.onLoad(true, null);
         }
-        catch(Exception e) {
+        catch(Throwable e) {
             listener.onLoad(false, e);
         }
     }
@@ -153,7 +153,7 @@ public class JParserLibraryLoader {
                 if (length == -1) break;
                 crc.update(buffer, 0, length);
             }
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
         } finally {
             closeQuietly(input);
         }
