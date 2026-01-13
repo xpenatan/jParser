@@ -222,13 +222,14 @@ public class BuildLibB {
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.headerDirs.add("-I" + libASourcePath);
+        linkTarget.headerDirs.add("-I" + libACustomPath);
 
         if(isArm) {
-            linkTarget.linkerFlags.add(libALibArmPath + "/LibA64.dylib");
+            linkTarget.linkerFlags.add(libALibArmPath + "/libLibA64.dylib");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/lib" + op.libName + "64_.a");
         }
         else {
-            linkTarget.linkerFlags.add(libALibPath + "/LibA64.dylib");
+            linkTarget.linkerFlags.add(libALibPath + "/libLibA64.dylib");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64_.a");
         }
 
