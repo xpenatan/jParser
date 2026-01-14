@@ -58,7 +58,6 @@ public class MacTarget extends DefaultBuildTarget {
         cppFlags.add("-DFIXED_POINT");
 
         cppFlags.add("-fmessage-length=0");
-        cppFlags.add("-fPIC");
         cppFlags.add("-Wno-unused-variable");
         cppFlags.add("-Wno-unused-but-set-variable");
         cppFlags.add("-w");

@@ -30,7 +30,6 @@ public class LinuxTarget extends DefaultBuildTarget {
         cppFlags.add("-O2");
         cppFlags.add("-fmessage-length=0");
         cppFlags.add("-m64");
-        cppFlags.add("-fPIC");
         cppFlags.add("-Wno-unused-variable");
         cppFlags.add("-Wno-unused-but-set-variable");
         cppFlags.add("-w");

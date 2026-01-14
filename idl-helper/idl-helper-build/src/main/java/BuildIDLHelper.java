@@ -93,6 +93,7 @@ public class BuildIDLHelper {
         LinuxTarget compileStaticTarget = new LinuxTarget();
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
         compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
@@ -101,6 +102,7 @@ public class BuildIDLHelper {
         LinuxTarget linkTarget = new LinuxTarget();
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("-fPIC");
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
@@ -120,6 +122,7 @@ public class BuildIDLHelper {
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
         compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.isStatic = true;
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/idl/IDLHelper.cpp");
@@ -129,6 +132,7 @@ public class BuildIDLHelper {
         MacTarget linkTarget = new MacTarget(isArm);
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("-fPIC");
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
 

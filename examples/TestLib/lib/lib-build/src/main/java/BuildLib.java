@@ -132,6 +132,7 @@ public class BuildLib {
         LinuxTarget compileStaticTarget = new LinuxTarget();
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
@@ -141,6 +142,7 @@ public class BuildLib {
         LinuxTarget linkTarget = new LinuxTarget();
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("-fPIC");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
@@ -162,6 +164,7 @@ public class BuildLib {
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
         compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.isStatic = true;
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
@@ -172,6 +175,7 @@ public class BuildLib {
         MacTarget linkTarget = new MacTarget(isArm);
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("-fPIC");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
