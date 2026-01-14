@@ -124,7 +124,7 @@ public class JParserLibraryLoader {
             String fileName = new File(sourcePath).getName();
 
             // Temp directory with username in path.
-            String tmpDir = System.getProperty("java.io.tmpdir") + "/jParser" + System.getProperty("user.name") + "/" + sourceCrc;
+            String tmpDir = System.getProperty("java.io.tmpdir") + "/jParser" + System.getProperty("user.name");
             File file = new File(tmpDir, fileName);
             loadFile(sourcePath, sourceCrc, file);
         }
