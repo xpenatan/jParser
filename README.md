@@ -11,7 +11,7 @@ Inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen), jParser allows y
 
 For web applications, jParser requires Emscripten to produce JS/WASM files and utilizes [TeaVM](https://github.com/konsoletyper/teavm). The classes generated in the TeaVM module use `JSBody` annotation solution to interact with JavaScript.
 
-Currently, jParser supports only `JNI` and `TEAVM` code targets. There are plans to support the Java Foreign Function and Memory API (FFM).
+Currently, jParser supports only `JNI`, `FFM` and `TEAVM` code targets.
 
 ## How it Works
 jParser consists of two main components:

@@ -8,8 +8,13 @@ java {
 }
 
 dependencies {
-    implementation(project(":examples:SharedLib:libA:lib-core"))
-    implementation(project(":examples:SharedLib:libB:lib-core"))
+    // compileOnly: app/core compiles against lib-core's API, but does NOT
+    // propagate it transitively. Each platform module (desktop, android, teavm)
+    // provides the actual native bridge implementation:
+    //   - lib-core for JNI (desktop/android)
+    //   - lib-ffm  for FFM (desktop with Java 22+)
+    compileOnly(project(":examples:SharedLib:libA:lib-core"))
+    compileOnly(project(":examples:SharedLib:libB:lib-core"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
 

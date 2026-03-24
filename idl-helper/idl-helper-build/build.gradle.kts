@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":jParser:jParser-idl"))
     implementation(project(":jParser:jParser-teavm"))
     implementation(project(":jParser:jParser-cpp"))
+    implementation(project(":jParser:jParser-ffm"))
     implementation(project(":jParser:jParser-build"))
     implementation(project(":jParser:jParser-build-tool"))
 }
@@ -88,5 +89,46 @@ tasks.register<JavaExec>("idl_helper_build_project_ios") {
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("ios")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+// FFM tasks — generate FFM Java code and optionally compile FFM native libs
+tasks.register<JavaExec>("idl_helper_build_project_ffm") {
+    group = "idl-helper"
+    description = "Generate FFM code for idl-helper"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ffm")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("idl_helper_build_project_ffm_windows64") {
+    group = "idl-helper"
+    description = "Generate FFM code + compile FFM native for Windows"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ffm", "ffm_windows64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("idl_helper_build_project_ffm_linux64") {
+    group = "idl-helper"
+    description = "Generate FFM code + compile FFM native for Linux"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ffm", "ffm_linux64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("idl_helper_build_project_ffm_mac64") {
+    group = "idl-helper"
+    description = "Generate FFM code + compile FFM native for macOS"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ffm", "ffm_mac64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("idl_helper_build_project_ffm_macArm") {
+    group = "idl-helper"
+    description = "Generate FFM code + compile FFM native for macOS ARM"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ffm", "ffm_macArm")
     classpath = sourceSets["main"].runtimeClasspath
 }

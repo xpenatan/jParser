@@ -11,6 +11,10 @@ public class LibALoader {
         #include "LibACustomCode.h"
     */
 
+    /*[-FFM;-NATIVE]
+        #include "LibACustomCode.h"
+    */
+
     public static void init(JParserLibraryLoaderListener listener) {
         JParserLibraryLoader.load(LIB_NAME, listener);
     }

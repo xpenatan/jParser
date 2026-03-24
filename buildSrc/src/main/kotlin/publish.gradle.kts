@@ -17,6 +17,7 @@ var libProjects = mutableSetOf(
     project(":idl-helper:idl-helper-core"),
     project(":idl-helper:idl-helper-teavm"),
     project(":idl-helper:idl-helper-desktop"),
+    project(":idl-helper:idl-helper-ffm"),
     project(":idl-helper:idl-helper-android"),
     project(":loader:loader-core"),
     project(":loader:loader-teavm"),

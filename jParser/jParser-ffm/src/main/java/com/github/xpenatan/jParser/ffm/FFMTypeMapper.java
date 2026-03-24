@@ -23,6 +23,7 @@ public class FFMTypeMapper {
         javaToValueLayout.put("byte", "ValueLayout.JAVA_BYTE");
         javaToValueLayout.put("char", "ValueLayout.JAVA_CHAR");
         javaToValueLayout.put("String", "ValueLayout.ADDRESS");
+        javaToValueLayout.put("java.lang.foreign.MemorySegment", "ValueLayout.ADDRESS");
 
         // Array types → ADDRESS layout (passed as MemorySegment pointers)
         javaToValueLayout.put("int[]", "ValueLayout.ADDRESS");

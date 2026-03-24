@@ -12,6 +12,7 @@ object LibExt {
 
     const val java8Target = "1.8"
     const val java11Target = "11"
+    const val java24Target = "24"
 
     // Lib Dependencies
     const val jniGenVersion = "2.5.1"

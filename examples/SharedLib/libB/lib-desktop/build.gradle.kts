@@ -9,7 +9,8 @@ java {
 
 val libDir = "${projectDir}/../lib-build/build/c++/libs"
 //val windowsFile = "$libDir/windows/LibB64.dll"
-val windowsFile = "$libDir/windows/vc/LibB64.dll"
+//val windowsFile = "$libDir/windows/vc/LibB64.dll"
+val windowsFile = "$libDir/windows/vc/ffm/LibB64.dll"
 val linuxFile = "$libDir/linux/libLibB64.so"
 val macFile = "$libDir/mac/libLibB64.dylib"
 val macArmFile = "$libDir/mac/arm/libLibBarm64.dylib"

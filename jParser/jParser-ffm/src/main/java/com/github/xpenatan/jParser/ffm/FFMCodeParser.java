@@ -463,19 +463,25 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                 String methodName = idlMethod.getCPPName();
                 String internalMethodName = internalMethod.getNameAsString();
 
+                // FFM upcall stubs require MethodHandle types to exactly match the FunctionDescriptor.
+                // For String (const char*) parameters, the native side passes a pointer (ADDRESS layout),
+                // so the internal method must accept MemorySegment instead of String and convert it.
+                fixupCallbackStringParams(internalMethod);
+
                 String methodTypeStr = buildMethodTypeStr(internalMethod);
                 String funcDescriptor = buildCallbackFunctionDescriptor(internalMethod);
 
                 body.append("        java.lang.invoke.MethodHandle mh_").append(methodName)
-                    .append(" = java.lang.invoke.MethodHandles.lookup().findVirtual(this.getClass(), \"")
+                    .append(" = java.lang.invoke.MethodHandles.lookup().findVirtual(")
+                    .append(classDeclaration.getNameAsString()).append(".class, \"")
                     .append(internalMethodName).append("\", ").append(methodTypeStr).append(").bindTo(this);\n");
                 body.append("        java.lang.foreign.MemorySegment stub_").append(methodName)
                     .append(" = java.lang.foreign.Linker.nativeLinker().upcallStub(mh_").append(methodName)
                     .append(", ").append(funcDescriptor).append(", java.lang.foreign.Arena.ofAuto());\n");
             }
 
-            // Call native setupCallback with cPointer + stub addresses
-            body.append("        ").append(nativeMethodDeclaration.getNameAsString()).append("(cPointer");
+            // Call native setupCallback with native_address + stub addresses
+            body.append("        ").append(nativeMethodDeclaration.getNameAsString()).append("(native_address");
             for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
                 IDLMethod idlMethod = pair.a;
                 body.append(", stub_").append(idlMethod.getCPPName()).append(".address()");
@@ -519,10 +525,10 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         cppGenerator.addNativeCode(methodDeclaration, content);
 
         // Register the MethodHandle entry for this native method
-        registerNativeMethod(methodDeclaration);
+        String handleName = registerNativeMethod(methodDeclaration);
 
         // Transform the native method into an FFM bridge method
-        convertToFFMBridgeMethod(methodDeclaration);
+        convertToFFMBridgeMethod(methodDeclaration, handleName);
     }
 
     // ==================== Lifecycle Hooks ====================
@@ -553,12 +559,22 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             if(parserItem.notAllowed) continue;
 
             ClassOrInterfaceDeclaration classDeclaration = parserItem.getClassDeclaration();
-            if(classDeclaration == null) continue;
+            if(classDeclaration != null) {
+                String className = classDeclaration.getNameAsString();
+                if(registry.hasEntries(className)) {
+                    injectFFMHandlesClass(parserItem.unit, classDeclaration, className);
+                }
+                continue;
+            }
 
-            String className = classDeclaration.getNameAsString();
-            if(!registry.hasEntries(className)) continue;
-
-            injectFFMHandlesClass(parserItem.unit, classDeclaration, className);
+            // Also handle enum declarations (they can have native methods too)
+            EnumDeclaration enumDeclaration = parserItem.getEnumDeclaration();
+            if(enumDeclaration != null) {
+                String className = enumDeclaration.getNameAsString();
+                if(registry.hasEntries(className)) {
+                    injectFFMHandlesClassForEnum(parserItem.unit, enumDeclaration, className);
+                }
+            }
         }
     }
 
@@ -566,8 +582,9 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
     /**
      * Register a native method in the MethodHandle registry.
+     * Returns the unique handle name (method name + overload suffix) for use in bridge method body.
      */
-    private void registerNativeMethod(MethodDeclaration methodDeclaration) {
+    private String registerNativeMethod(MethodDeclaration methodDeclaration) {
         TypeDeclaration classOrEnum = (TypeDeclaration) methodDeclaration.getParentNode().get();
         CompilationUnit compilationUnit = classOrEnum.findCompilationUnit().get();
         String packageName = compilationUnit.getPackageDeclaration().get().getNameAsString();
@@ -591,17 +608,27 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             }
         }
 
+        // Build overload suffix for unique handle name
+        StringBuilder overloadSuffix = new StringBuilder();
+        for(FFMCppGenerator.FFMArgument arg : ffmArgs) {
+            overloadSuffix.append(arg.overloadSuffix);
+        }
+        String handleName = methodName + "__" + overloadSuffix;
+
         String returnType = methodDeclaration.getType().toString();
         String symbolName = FFMCppGenerator.buildSymbolName(packageName, className, methodName, ffmArgs);
 
-        registry.register(className, symbolName, methodName, returnType, paramInfos);
+        registry.register(className, symbolName, methodName, handleName, returnType, paramInfos);
+        return handleName;
     }
 
     /**
      * Transform a JNI-style native method declaration into an FFM bridge method.
      * Removes the 'native' modifier and adds a body that invokes the MethodHandle.
+     *
+     * @param handleName the unique field name in FFMHandles (includes overload suffix)
      */
-    private void convertToFFMBridgeMethod(MethodDeclaration methodDeclaration) {
+    private void convertToFFMBridgeMethod(MethodDeclaration methodDeclaration, String handleName) {
         // Remove native modifier
         methodDeclaration.removeModifier(Modifier.Keyword.NATIVE);
 
@@ -635,12 +662,19 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         bodyCode.append("    try {\n");
 
         if(isVoid) {
-            bodyCode.append("        FFMHandles.").append(methodName)
+            bodyCode.append("        FFMHandles.").append(handleName)
                     .append(".invokeExact(").append(invokeArgs).append(");\n");
+        }
+        else if(FFMTypeMapper.isString(returnTypeStr)) {
+            // String returns: native function returns const char* (ADDRESS).
+            // invokeExact returns MemorySegment — convert to Java String.
+            bodyCode.append("        java.lang.foreign.MemorySegment _retSeg = (java.lang.foreign.MemorySegment) FFMHandles.").append(handleName)
+                    .append(".invokeExact(").append(invokeArgs).append(");\n");
+            bodyCode.append("        return _retSeg.reinterpret(Long.MAX_VALUE).getString(0);\n");
         }
         else {
             String castType = FFMTypeMapper.getFFMCast(returnTypeStr);
-            bodyCode.append("        return (").append(castType).append(") FFMHandles.").append(methodName)
+            bodyCode.append("        return (").append(castType).append(") FFMHandles.").append(handleName)
                     .append(".invokeExact(").append(invokeArgs).append(");\n");
         }
 
@@ -662,10 +696,37 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
      * Inject the FFMHandles inner class into a Java class with all MethodHandle field declarations.
      */
     private void injectFFMHandlesClass(CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, String className) {
-        List<FFMMethodHandleRegistry.FFMEntry> entries = registry.getEntries(className);
-        if(entries.isEmpty()) return;
+        String innerClassSource = buildFFMHandlesSource(className);
+        if(innerClassSource == null) return;
 
-        // Build the inner class source
+        ClassOrInterfaceDeclaration innerClass = StaticJavaParser.parseBodyDeclaration(innerClassSource)
+                .asClassOrInterfaceDeclaration();
+        classDeclaration.addMember(innerClass);
+
+        addFFMImports(unit);
+    }
+
+    /**
+     * Inject the FFMHandles inner class into an enum declaration.
+     */
+    private void injectFFMHandlesClassForEnum(CompilationUnit unit, EnumDeclaration enumDeclaration, String className) {
+        String innerClassSource = buildFFMHandlesSource(className);
+        if(innerClassSource == null) return;
+
+        ClassOrInterfaceDeclaration innerClass = StaticJavaParser.parseBodyDeclaration(innerClassSource)
+                .asClassOrInterfaceDeclaration();
+        enumDeclaration.addMember(innerClass);
+
+        addFFMImports(unit);
+    }
+
+    /**
+     * Build the FFMHandles inner class source code for a given class name.
+     */
+    private String buildFFMHandlesSource(String className) {
+        List<FFMMethodHandleRegistry.FFMEntry> entries = registry.getEntries(className);
+        if(entries.isEmpty()) return null;
+
         StringBuilder sb = new StringBuilder();
         sb.append("private static final class FFMHandles {\n");
         sb.append("    private static final java.lang.foreign.SymbolLookup LOOKUP;\n");
@@ -676,20 +737,17 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         for(FFMMethodHandleRegistry.FFMEntry entry : entries) {
             String descriptor = FFMMethodHandleRegistry.buildFunctionDescriptor(entry);
-            sb.append("    static final java.lang.invoke.MethodHandle ").append(entry.javaMethodName)
+            sb.append("    static final java.lang.invoke.MethodHandle ").append(entry.handleName)
               .append(" = LINKER.downcallHandle(\n");
             sb.append("        LOOKUP.find(\"").append(entry.symbolName).append("\").orElseThrow(),\n");
             sb.append("        ").append(descriptor).append(");\n\n");
         }
 
         sb.append("}");
+        return sb.toString();
+    }
 
-        // Parse and add to the class
-        ClassOrInterfaceDeclaration innerClass = StaticJavaParser.parseBodyDeclaration(sb.toString())
-                .asClassOrInterfaceDeclaration();
-        classDeclaration.addMember(innerClass);
-
-        // Add FFM imports
+    private void addFFMImports(CompilationUnit unit) {
         unit.addImport("java.lang.foreign.FunctionDescriptor");
         unit.addImport("java.lang.foreign.ValueLayout");
         unit.addImport("java.lang.foreign.Linker");
@@ -755,10 +813,8 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         cppClass.append("};\n");
 
-        // Emit the C++ class via the generator (before extern "C")
-        cppGenerator.addCallbackClassCode(cppClass.toString());
-
-        // Also attach to constructor block comment (same pattern as CppCodeParser)
+        // Attach to constructor block comment (same pattern as CppCodeParser).
+        // parseCodeBlock will emit the code via cppGenerator.addNativeCode().
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]\n";
         String code = header + cppClass.toString();
         classDeclaration.getConstructors().get(0).setBlockComment(code);
@@ -823,6 +879,11 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                         tag = "& ";
                         callParamCast = "(int64_t)&";
                     }
+                    else if(idlParameter.isAny) {
+                        // any type = void* in C++ virtual method; needs (int64_t) cast for function pointer
+                        // Don't change tag — getCPPType() already returns "void*"
+                        callParamCast = "(int64_t)";
+                    }
                     else if(!idlParameter.isEnum() && !isPrimitive && !idlParameter.isValue) {
                         tag = "* ";
                         callParamCast = "(int64_t)";
@@ -868,8 +929,14 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         NodeList<Parameter> params = internalMethod.getParameters();
         for(int i = 0; i < params.size(); i++) {
             if(i > 0) sb.append(", ");
-            String paramType = params.get(i).getType().asString();
-            sb.append(FFMTypeMapper.getCType(paramType));
+            // Use IDL parameter info to detect string (DOMString) types, since
+            // fixupCallbackStringParams may have changed the Java type to MemorySegment.
+            if(i < idlMethod.parameters.size() && idlMethod.parameters.get(i).idlType.equals("DOMString")) {
+                sb.append("const char*");
+            } else {
+                String paramType = params.get(i).getType().asString();
+                sb.append(FFMTypeMapper.getCType(paramType));
+            }
         }
         sb.append(");");
         return sb.toString();
@@ -886,6 +953,29 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             suffix.append(FFMTypeMapper.getOverloadSuffix(param.getType().asString()));
         }
         return "fp_" + className + "_" + idlMethod.getCPPName() + "_" + suffix;
+    }
+
+    /**
+     * Fix up String parameters on a callback internal method for FFM upcall compatibility.
+     * Changes the parameter type from String to MemorySegment and inserts conversion code
+     * at the start of the method body (MemorySegment → String via getString(0)).
+     */
+    private void fixupCallbackStringParams(MethodDeclaration internalMethod) {
+        NodeList<Parameter> params = internalMethod.getParameters();
+        for(int i = 0; i < params.size(); i++) {
+            Parameter param = params.get(i);
+            if(param.getType().asString().equals("String")) {
+                String originalName = param.getNameAsString();
+                String segmentName = originalName + "_seg";
+                param.setName(segmentName);
+                param.setType(StaticJavaParser.parseType("java.lang.foreign.MemorySegment"));
+                // Insert conversion statement at the top of the method body
+                String convStmt = "String " + originalName + " = " + segmentName
+                        + ".reinterpret(Long.MAX_VALUE).getString(0);";
+                internalMethod.getBody().ifPresent(body ->
+                        body.getStatements().add(0, StaticJavaParser.parseStatement(convStmt)));
+            }
+        }
     }
 
     /**

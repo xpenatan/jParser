@@ -10,7 +10,7 @@ java {
 }
 
 val libDir = "${projectDir}/../idl-helper-build/build/c++/libs"
-val windowsFile = "$libDir/windows/vc/idl64.dll"
+val windowsFile = "$libDir/windows/vc/ffm/idl64.dll"
 val linuxFile = "$libDir/linux/libidl64.so"
 val macFile = "$libDir/mac/libidl64.dylib"
 val macArmFile = "$libDir/mac/arm/libidlarm64.dylib"
