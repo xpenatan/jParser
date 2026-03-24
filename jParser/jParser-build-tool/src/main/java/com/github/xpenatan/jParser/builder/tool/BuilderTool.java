@@ -7,6 +7,8 @@ import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.cpp.CppCodeParser;
 import com.github.xpenatan.jParser.cpp.CppGenerator;
 import com.github.xpenatan.jParser.cpp.NativeCPPGenerator;
+import com.github.xpenatan.jParser.ffm.FFMCodeParser;
+import com.github.xpenatan.jParser.ffm.FFMCppGenerator;
 import com.github.xpenatan.jParser.idl.IDLFile;
 import com.github.xpenatan.jParser.idl.IDLRenaming;
 import com.github.xpenatan.jParser.idl.IDLReader;
@@ -54,6 +56,14 @@ public class BuilderTool {
             TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.webModuleName, op.packageName, op.getSourceDir());
             teavmParser.idlRenaming = packageRenaming;
             JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getModuleTeaVMPath() + "/src/main/java/");
+        }
+
+        if(op.generateFFM) {
+            FFMCppGenerator ffmGenerator = new FFMCppGenerator(op.getCPPDestinationPath());
+            FFMCodeParser ffmParser = new FFMCodeParser(ffmGenerator, idlReader, op.packageName, op.getSourceDir());
+            ffmParser.generateClass = true;
+            ffmParser.idlRenaming = packageRenaming;
+            JParser.generate(ffmParser, op.getModuleBaseJavaDir(), op.getModuleFFMPath() + "/src/main/java");
         }
 
         BuildConfig buildConfig = new BuildConfig(op);

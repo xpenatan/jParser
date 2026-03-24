@@ -14,6 +14,7 @@ public class BuildToolOptions {
     public final String packageName;
     public boolean generateTeaVM = true;
     public boolean generateCPP = true;
+    public boolean generateFFM = false;
 
     /** Name of the idl file located in [Module Build Path] + src/main/cpp/myidl.idl. The default is libName but can be changed. */
     public String idlName;
@@ -24,6 +25,7 @@ public class BuildToolOptions {
     private String moduleBuildCPPPath;
     private String moduleCorePath;
     private String moduleTeavmPath;
+    private String moduleFFMPath;
     private ArrayList<IDLFile> idlPath = new ArrayList<>();
     private ArrayList<IDLFile> idlPathRef = new ArrayList<>();
     private ArrayList<String> additionalSourceDirs = new ArrayList<>();
@@ -75,6 +77,7 @@ public class BuildToolOptions {
         moduleBuildPath = modulePath + "/" + modulePrefix + "-build";
         moduleCorePath = modulePath + "/" + modulePrefix + "-core";
         moduleTeavmPath = modulePath + "/" + modulePrefix + "-teavm";
+        moduleFFMPath = modulePath + "/" + modulePrefix + "-ffm";
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         cppPath = moduleBuildPath + "/src/main/cpp/";
@@ -135,6 +138,10 @@ public class BuildToolOptions {
 
     public String getModuleTeaVMPath() {
         return moduleTeavmPath;
+    }
+
+    public String getModuleFFMPath() {
+        return moduleFFMPath;
     }
 
     public IDLFile[] getIDL() {
