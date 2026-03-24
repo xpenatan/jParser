@@ -1,16 +1,16 @@
 plugins {
-    id("java")
+    id("java-library")
 }
 
-val moduleName = "${LibExt.libName}-build-tool"
+val moduleName = "jParser-ffm"
 
 dependencies {
-    implementation(project(":jParser:jParser-core"))
     implementation(project(":jParser:jParser-idl"))
-    implementation(project(":jParser:jParser-teavm"))
-    implementation(project(":jParser:jParser-cpp"))
-    implementation(project(":jParser:jParser-ffm"))
-    implementation(project(":jParser:jParser-build"))
+    implementation(project(":jParser:jParser-core"))
+    implementation(project(":idl:idl-core"))
+
+    testImplementation(project(":loader:loader-core"))
+    testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 
 java {
@@ -33,3 +33,5 @@ publishing {
         }
     }
 }
+
+

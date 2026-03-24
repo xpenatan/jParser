@@ -5,6 +5,7 @@ include(":jParser:jParser-base")
 include(":jParser:jParser-idl")
 include(":jParser:jParser-cpp")
 include(":jParser:jParser-teavm")
+include(":jParser:jParser-ffm")
 
 include(":idl:idl-core")
 include(":idl:idl-teavm")
