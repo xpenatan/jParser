@@ -103,3 +103,45 @@ tasks.register<JavaExec>("TestLib_build_project_ios") {
     args = mutableListOf("ios")
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+// FFM tasks — generate FFM Java code and/or compile native libs with FFMGlue
+
+tasks.register<JavaExec>("TestLib_build_project_ffm") {
+    group = "lib"
+    description = "Generate FFM Java code only (no native compilation)"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ffm")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_ffm_windows64") {
+    group = "lib"
+    description = "Generate FFM Java code and compile for Windows with FFMGlue"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ffm", "ffm_windows64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_ffm_linux64") {
+    group = "lib"
+    description = "Generate FFM Java code and compile for Linux with FFMGlue"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ffm", "ffm_linux64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_ffm_mac64") {
+    group = "lib"
+    description = "Generate FFM Java code and compile for Mac with FFMGlue"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ffm", "ffm_mac64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_ffm_macArm") {
+    group = "lib"
+    description = "Generate FFM Java code and compile for Mac ARM with FFMGlue"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ffm", "ffm_macArm")
+    classpath = sourceSets["main"].runtimeClasspath
+}
