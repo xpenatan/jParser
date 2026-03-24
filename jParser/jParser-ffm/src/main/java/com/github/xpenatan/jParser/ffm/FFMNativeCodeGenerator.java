@@ -14,6 +14,12 @@ public interface FFMNativeCodeGenerator {
 
     void addNativeCode(MethodDeclaration nativeMethod, String content);
 
+    /**
+     * Add raw C++ code for a callback class definition.
+     * This code is placed before the extern "C" block in the generated glue file.
+     */
+    void addCallbackClassCode(String cppClassCode);
+
     void addParseFile(JParser jParser, JParserItem parserItem);
 
     void generate(JParser jParser);

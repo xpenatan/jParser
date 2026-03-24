@@ -82,6 +82,12 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
     }
 
     @Override
+    public void addCallbackClassCode(String cppClassCode) {
+        // Callback class code goes into the CODE section (before extern "C")
+        print(PrintType.CODE, cppClassCode);
+    }
+
+    @Override
     public void addNativeCode(MethodDeclaration nativeMethod, String content) {
         String methodName = nativeMethod.getNameAsString();
         boolean isStatic = nativeMethod.isStatic();

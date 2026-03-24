@@ -426,6 +426,80 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         nativeMethodDeclaration.setBlockComment(blockComment);
     }
 
+    @Override
+    public void onIDLCallbackGenerated(JParser jParser, IDLClass idlClass,
+                                       ClassOrInterfaceDeclaration classDeclaration,
+                                       MethodDeclaration callbackDeclaration,
+                                       ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        IDLClass idlCallbackClass = idlClass.callbackImpl;
+
+        // 1. Build parameter list for native setupCallback: this_addr + one long per callback method (function pointer)
+        ArrayList<IDLParameterData> parameterArray = new ArrayList<>();
+        for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
+            IDLMethod idlMethod = pair.a;
+            String fpParamName = idlMethod.getCPPName() + "_fp";
+            Parameter fpParam = new Parameter(com.github.javaparser.ast.type.PrimitiveType.longType(), fpParamName);
+            IDLParameterData data = new IDLParameterData();
+            data.parameter = fpParam;
+            parameterArray.add(data);
+        }
+
+        Type methodReturnType = callbackDeclaration.getType();
+        MethodDeclaration nativeMethodDeclaration = IDLMethodParser.generateNativeMethod(
+                idlReader, callbackDeclaration.getNameAsString(), parameterArray, methodReturnType, false);
+
+        if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
+            // Keep the method static (FFM uses explicit this_addr, no implicit JNI params)
+            classDeclaration.getMembers().add(nativeMethodDeclaration);
+
+            // 2. Build setupCallback Java body with upcall stub creation
+            StringBuilder body = new StringBuilder();
+            body.append("{\n");
+            body.append("    try {\n");
+
+            for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
+                IDLMethod idlMethod = pair.a;
+                MethodDeclaration internalMethod = pair.b.a;
+                String methodName = idlMethod.getCPPName();
+                String internalMethodName = internalMethod.getNameAsString();
+
+                String methodTypeStr = buildMethodTypeStr(internalMethod);
+                String funcDescriptor = buildCallbackFunctionDescriptor(internalMethod);
+
+                body.append("        java.lang.invoke.MethodHandle mh_").append(methodName)
+                    .append(" = java.lang.invoke.MethodHandles.lookup().findVirtual(this.getClass(), \"")
+                    .append(internalMethodName).append("\", ").append(methodTypeStr).append(").bindTo(this);\n");
+                body.append("        java.lang.foreign.MemorySegment stub_").append(methodName)
+                    .append(" = java.lang.foreign.Linker.nativeLinker().upcallStub(mh_").append(methodName)
+                    .append(", ").append(funcDescriptor).append(", java.lang.foreign.Arena.ofAuto());\n");
+            }
+
+            // Call native setupCallback with cPointer + stub addresses
+            body.append("        ").append(nativeMethodDeclaration.getNameAsString()).append("(cPointer");
+            for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
+                IDLMethod idlMethod = pair.a;
+                body.append(", stub_").append(idlMethod.getCPPName()).append(".address()");
+            }
+            body.append(");\n");
+
+            body.append("    } catch(Throwable e) {\n");
+            body.append("        throw new RuntimeException(e);\n");
+            body.append("    }\n");
+            body.append("}");
+
+            BlockStmt blockStmt = StaticJavaParser.parseBlock(body.toString());
+            callbackDeclaration.setBody(blockStmt);
+
+            // 3. Set C++ code for the native setupCallback method
+            String cppSetupBody = generateFFMSetupCallbackCPPBody(idlCallbackClass, methods);
+            String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+            nativeMethodDeclaration.setBlockComment(header + cppSetupBody);
+
+            // 4. Generate C++ callback class and emit it via the generator
+            generateFFMCPPClass(idlClass, classDeclaration, callbackDeclaration, methods);
+        }
+    }
+
     // ==================== Code Block Parsing ====================
 
     @Override
@@ -623,6 +697,256 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         unit.addImport("java.lang.foreign.Arena");
         unit.addImport("java.lang.foreign.MemorySegment");
         unit.addImport("java.lang.invoke.MethodHandle");
+    }
+
+    // ==================== FFM Callback C++ Generation ====================
+
+    /**
+     * Generate the full C++ callback class with function pointers and emit it.
+     * Attaches the class definition as a block comment on the constructor (same pattern as CppCodeParser).
+     */
+    private void generateFFMCPPClass(IDLClass idlClass, ClassOrInterfaceDeclaration classDeclaration,
+                                     MethodDeclaration callbackDeclaration,
+                                     ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        IDLClass callback = idlClass.callbackImpl;
+        StringBuilder cppClass = new StringBuilder();
+
+        // Generate function pointer typedefs
+        for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
+            IDLMethod idlMethod = pair.a;
+            MethodDeclaration internalMethod = pair.b.a;
+            cppClass.append(buildFPTypedef(callback.name, idlMethod, internalMethod)).append("\n");
+        }
+        cppClass.append("\n");
+
+        // Class definition
+        cppClass.append("class ").append(callback.getCPPName()).append(" : public ").append(idlClass.getCPPName()).append(" {\n");
+        cppClass.append("private:\n");
+
+        // Function pointer fields
+        for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
+            IDLMethod idlMethod = pair.a;
+            MethodDeclaration internalMethod = pair.b.a;
+            String fpTypeName = buildFPTypeName(callback.name, idlMethod, internalMethod);
+            cppClass.append("\t").append(fpTypeName).append(" ").append(idlMethod.getCPPName()).append("_ptr;\n");
+        }
+
+        cppClass.append("public:\n");
+
+        // setupCallback method — receives function pointers
+        cppClass.append("\tvoid ").append(callbackDeclaration.getNameAsString()).append("(");
+        for(int i = 0; i < methods.size(); i++) {
+            Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
+            IDLMethod idlMethod = pair.a;
+            MethodDeclaration internalMethod = pair.b.a;
+            String fpTypeName = buildFPTypeName(callback.name, idlMethod, internalMethod);
+            if(i > 0) cppClass.append(", ");
+            cppClass.append(fpTypeName).append(" ").append(idlMethod.getCPPName());
+        }
+        cppClass.append(") {\n");
+        for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
+            IDLMethod idlMethod = pair.a;
+            cppClass.append("\t\tthis->").append(idlMethod.getCPPName()).append("_ptr = ").append(idlMethod.getCPPName()).append(";\n");
+        }
+        cppClass.append("\t}\n");
+
+        // Virtual methods — call function pointers
+        cppClass.append(generateFFMMethodCallers(idlClass, methods));
+
+        cppClass.append("};\n");
+
+        // Emit the C++ class via the generator (before extern "C")
+        cppGenerator.addCallbackClassCode(cppClass.toString());
+
+        // Also attach to constructor block comment (same pattern as CppCodeParser)
+        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]\n";
+        String code = header + cppClass.toString();
+        classDeclaration.getConstructors().get(0).setBlockComment(code);
+    }
+
+    /**
+     * Generate the C++ body for the native setupCallback method.
+     * Example: nativeObject->setupCallback((fp_type)fp1, (fp_type)fp2);
+     */
+    private String generateFFMSetupCallbackCPPBody(IDLClass idlCallbackClass,
+                                                   ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n").append(idlCallbackClass.name).append("* nativeObject = (").append(idlCallbackClass.name).append("*)this_addr;\n");
+        sb.append("nativeObject->setupCallback(");
+        for(int i = 0; i < methods.size(); i++) {
+            Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
+            IDLMethod idlMethod = pair.a;
+            MethodDeclaration internalMethod = pair.b.a;
+            String fpTypeName = buildFPTypeName(idlCallbackClass.name, idlMethod, internalMethod);
+            if(i > 0) sb.append(", ");
+            sb.append("(").append(fpTypeName).append(")").append(idlMethod.getCPPName()).append("_fp");
+        }
+        sb.append(");\n");
+        return sb.toString();
+    }
+
+    /**
+     * Generate virtual method implementations that call function pointers.
+     */
+    private String generateFFMMethodCallers(IDLClass idlClass,
+                                            ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        IDLClass callback = idlClass.callbackImpl;
+        StringBuilder cppMethods = new StringBuilder();
+
+        for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
+            IDLMethod idlMethod = pair.a;
+            MethodDeclaration publicMethod = pair.b.b;
+
+            Type type = publicMethod.getType();
+            boolean isVoidType = type.isVoidType();
+            String returnTypeStr = getFFMCPPType(idlMethod.getCPPReturnType());
+            String constStr = idlMethod.isReturnConst ? " const" : "";
+            String methodName = idlMethod.getCPPName();
+
+            // Build virtual method params and call params
+            StringBuilder methodParams = new StringBuilder();
+            StringBuilder callParams = new StringBuilder();
+            NodeList<Parameter> publicMethodParameters = publicMethod.getParameters();
+
+            for(int i = 0; i < idlMethod.parameters.size(); i++) {
+                IDLParameter idlParameter = idlMethod.parameters.get(i);
+                Parameter parameter = publicMethodParameters.get(i);
+                boolean isPrimitive = parameter.getType().isPrimitiveType() || idlParameter.isAny;
+                String paramName = idlParameter.name;
+                String paramType = idlParameter.getCPPType();
+                boolean isString = idlParameter.idlType.equals("DOMString");
+                String tag = " ";
+                String callParamCast = "";
+
+                if(!isString) {
+                    if(idlParameter.isRef) {
+                        tag = "& ";
+                        callParamCast = "(int64_t)&";
+                    }
+                    else if(!idlParameter.isEnum() && !isPrimitive && !idlParameter.isValue) {
+                        tag = "* ";
+                        callParamCast = "(int64_t)";
+                    }
+                }
+
+                paramType = getFFMCPPType(paramType);
+                if(idlParameter.isConst) {
+                    paramType = "const " + paramType;
+                }
+
+                if(i > 0) {
+                    callParams.append(", ");
+                    methodParams.append(", ");
+                }
+                callParams.append(callParamCast).append(paramName);
+                methodParams.append(paramType).append(tag).append(paramName);
+            }
+
+            String returnStr = isVoidType ? "" : "return (" + returnTypeStr + ")";
+            if(returnTypeStr.contains("unsigned")) {
+                returnStr = "return (" + returnTypeStr + ")";
+            }
+
+            cppMethods.append("\tvirtual ").append(returnTypeStr).append(" ").append(methodName)
+                       .append("(").append(methodParams).append(")").append(constStr).append(" {\n");
+            cppMethods.append("\t\t").append(returnStr).append(methodName).append("_ptr(").append(callParams).append(");\n");
+            cppMethods.append("\t}\n");
+        }
+        return cppMethods.toString();
+    }
+
+    /**
+     * Build a function pointer typedef for a callback method.
+     * Example: typedef void (*fp_MyCallbackImpl_onEvent_JJ)(int64_t, int64_t);
+     */
+    private String buildFPTypedef(String className, IDLMethod idlMethod, MethodDeclaration internalMethod) {
+        String fpTypeName = buildFPTypeName(className, idlMethod, internalMethod);
+        String returnCType = FFMTypeMapper.getCType(internalMethod.getType().asString());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("typedef ").append(returnCType).append(" (*").append(fpTypeName).append(")(");
+        NodeList<Parameter> params = internalMethod.getParameters();
+        for(int i = 0; i < params.size(); i++) {
+            if(i > 0) sb.append(", ");
+            String paramType = params.get(i).getType().asString();
+            sb.append(FFMTypeMapper.getCType(paramType));
+        }
+        sb.append(");");
+        return sb.toString();
+    }
+
+    /**
+     * Build a unique function pointer type name for a callback method.
+     * Example: fp_MyCallbackImpl_onEvent_JJ
+     */
+    private String buildFPTypeName(String className, IDLMethod idlMethod, MethodDeclaration internalMethod) {
+        StringBuilder suffix = new StringBuilder();
+        NodeList<Parameter> params = internalMethod.getParameters();
+        for(Parameter param : params) {
+            suffix.append(FFMTypeMapper.getOverloadSuffix(param.getType().asString()));
+        }
+        return "fp_" + className + "_" + idlMethod.getCPPName() + "_" + suffix;
+    }
+
+    /**
+     * Build MethodType string for MethodHandles.lookup().findVirtual().
+     * Example: java.lang.invoke.MethodType.methodType(void.class, long.class, long.class)
+     */
+    private String buildMethodTypeStr(MethodDeclaration internalMethod) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("java.lang.invoke.MethodType.methodType(");
+        Type returnType = internalMethod.getType();
+        if(returnType.isVoidType()) {
+            sb.append("void.class");
+        } else {
+            sb.append(returnType.asString()).append(".class");
+        }
+        for(Parameter param : internalMethod.getParameters()) {
+            sb.append(", ").append(param.getType().asString()).append(".class");
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
+    /**
+     * Build FunctionDescriptor for upcall stubs.
+     * Example: java.lang.foreign.FunctionDescriptor.ofVoid(java.lang.foreign.ValueLayout.JAVA_LONG)
+     */
+    private String buildCallbackFunctionDescriptor(MethodDeclaration internalMethod) {
+        StringBuilder sb = new StringBuilder();
+        Type returnType = internalMethod.getType();
+        boolean isVoid = returnType.isVoidType();
+
+        if(isVoid) {
+            sb.append("java.lang.foreign.FunctionDescriptor.ofVoid(");
+        } else {
+            String retLayout = FFMTypeMapper.getValueLayout(returnType.asString());
+            if(retLayout == null) retLayout = "java.lang.foreign.ValueLayout.JAVA_LONG";
+            else retLayout = "java.lang.foreign." + retLayout;
+            sb.append("java.lang.foreign.FunctionDescriptor.of(").append(retLayout);
+            if(internalMethod.getParameters().size() > 0) sb.append(", ");
+        }
+
+        NodeList<Parameter> params = internalMethod.getParameters();
+        for(int i = 0; i < params.size(); i++) {
+            if(i > 0) sb.append(", ");
+            String paramType = params.get(i).getType().asString();
+            String layout = FFMTypeMapper.getValueLayout(paramType);
+            if(layout == null) layout = "java.lang.foreign.ValueLayout.JAVA_LONG";
+            else layout = "java.lang.foreign." + layout;
+            sb.append(layout);
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
+    /**
+     * Map Java/IDL type to FFM-compatible C++ type.
+     */
+    private String getFFMCPPType(String typeString) {
+        if(typeString.equals("boolean")) return "bool";
+        if(typeString.equals("String")) return "char*";
+        return typeString;
     }
 
     // ==================== C++ Parameter Helpers (reused from CppCodeParser) ====================

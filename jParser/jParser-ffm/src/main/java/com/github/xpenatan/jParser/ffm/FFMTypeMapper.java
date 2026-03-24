@@ -24,6 +24,16 @@ public class FFMTypeMapper {
         javaToValueLayout.put("char", "ValueLayout.JAVA_CHAR");
         javaToValueLayout.put("String", "ValueLayout.ADDRESS");
 
+        // Array types → ADDRESS layout (passed as MemorySegment pointers)
+        javaToValueLayout.put("int[]", "ValueLayout.ADDRESS");
+        javaToValueLayout.put("long[]", "ValueLayout.ADDRESS");
+        javaToValueLayout.put("float[]", "ValueLayout.ADDRESS");
+        javaToValueLayout.put("double[]", "ValueLayout.ADDRESS");
+        javaToValueLayout.put("byte[]", "ValueLayout.ADDRESS");
+        javaToValueLayout.put("short[]", "ValueLayout.ADDRESS");
+        javaToValueLayout.put("boolean[]", "ValueLayout.ADDRESS");
+        javaToValueLayout.put("char[]", "ValueLayout.ADDRESS");
+
         // Java primitive → C type for FFMGlue.cpp
         javaToCType.put("long", "int64_t");
         javaToCType.put("int", "int32_t");
@@ -35,6 +45,16 @@ public class FFMTypeMapper {
         javaToCType.put("char", "uint16_t");
         javaToCType.put("void", "void");
         javaToCType.put("String", "const char*");
+
+        // Array types → C pointer types
+        javaToCType.put("int[]", "int32_t*");
+        javaToCType.put("long[]", "int64_t*");
+        javaToCType.put("float[]", "float*");
+        javaToCType.put("double[]", "double*");
+        javaToCType.put("byte[]", "int8_t*");
+        javaToCType.put("short[]", "int16_t*");
+        javaToCType.put("boolean[]", "int32_t*");
+        javaToCType.put("char[]", "uint16_t*");
 
         // Java primitive → cast needed in invokeExact return
         javaToFFMCast.put("long", "long");
@@ -102,6 +122,54 @@ public class FFMTypeMapper {
             case "String": return "Ljava_lang_String_2";
             default: return "Ljava_lang_Object_2";
         }
+    }
+
+    // ==================== Array/Buffer Optimization Helpers ====================
+
+    /**
+     * Returns true if the type is a Java array type.
+     */
+    public static boolean isArrayType(String javaType) {
+        return javaType.endsWith("[]");
+    }
+
+    /**
+     * Returns FFM code to create a MemorySegment from a Java primitive array.
+     * Example: "java.lang.foreign.MemorySegment.ofArray(myArray)"
+     *
+     * @param paramName the Java variable name of the array
+     * @param javaType  the Java array type (e.g., "int[]", "float[]")
+     * @return the FFM MemorySegment creation code
+     */
+    public static String getArraySegmentCode(String paramName, String javaType) {
+        if(!isArrayType(javaType)) {
+            throw new IllegalArgumentException("Not an array type: " + javaType);
+        }
+        return "java.lang.foreign.MemorySegment.ofArray(" + paramName + ")";
+    }
+
+    /**
+     * Returns FFM code to create a MemorySegment from a direct ByteBuffer.
+     * Example: "java.lang.foreign.MemorySegment.ofBuffer(myBuffer)"
+     *
+     * @param paramName the Java variable name of the ByteBuffer
+     * @return the FFM MemorySegment creation code
+     */
+    public static String getBufferSegmentCode(String paramName) {
+        return "java.lang.foreign.MemorySegment.ofBuffer(" + paramName + ")";
+    }
+
+    /**
+     * Returns the element ValueLayout for an array type.
+     * Example: "int[]" → "ValueLayout.JAVA_INT"
+     *
+     * @param arrayType the Java array type
+     * @return the element ValueLayout, or null if not a known array type
+     */
+    public static String getArrayElementLayout(String arrayType) {
+        if(!isArrayType(arrayType)) return null;
+        String elementType = arrayType.replace("[]", "");
+        return javaToValueLayout.get(elementType);
     }
 }
 
