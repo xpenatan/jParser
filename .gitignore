@@ -31,20 +31,24 @@ out/
 
 **/idl-helper/idl-helper-teavm/src/main/java/**
 **/idl-helper/idl-helper-core/src/main/java/**
-**/idl-helper/idl-helper-ffm/src/main/java/**
+**/idl-helper/idl-helper-desktop-ffm/src/main/java/**
+**/idl-helper/idl-helper-desktop-jni/src/main/java/**
 
 **/webapp/**
 **/lib/core/src/**
 **/lib/desktop/src/main/**
 **/lib/lib-teavm/src/main/java/**
 **/lib/lib-core/src/main/java/**
-**/lib/lib-ffm/src/main/java/**
+**/lib/lib-desktop-ffm/src/main/java/**
+**/lib/lib-desktop-jni/src/main/java/**
 **/libA/lib-teavm/src/main/java/**
 **/libA/lib-core/src/main/java/**
-**/libA/lib-ffm/src/main/java/**
+**/libA/lib-desktop-ffm/src/main/java/**
+**/libA/lib-desktop-jni/src/main/java/**
 **/libB/lib-teavm/src/main/java/**
 **/libB/lib-core/src/main/java/**
-**/libB/lib-ffm/src/main/java/**
+**/libB/lib-desktop-ffm/src/main/java/**
+**/libB/lib-desktop-jni/src/main/java/**
 **/app/android/libs/
 .codiumai
 .kotlin/

@@ -77,7 +77,7 @@ public class BuildToolOptions {
         moduleBuildPath = modulePath + "/" + modulePrefix + "-build";
         moduleCorePath = modulePath + "/" + modulePrefix + "-core";
         moduleTeavmPath = modulePath + "/" + modulePrefix + "-teavm";
-        moduleFFMPath = modulePath + "/" + modulePrefix + "-ffm";
+        moduleFFMPath = modulePath + "/" + modulePrefix + "-desktop-ffm";
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         cppPath = moduleBuildPath + "/src/main/cpp/";

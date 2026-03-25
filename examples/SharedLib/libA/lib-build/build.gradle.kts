@@ -57,7 +57,7 @@ tasks.register<JavaExec>("LibA_build_project_teavm") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("LibA_build_project_windows64") {
+tasks.register<JavaExec>("LibA_build_project_jni_windows64") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -65,7 +65,7 @@ tasks.register<JavaExec>("LibA_build_project_windows64") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("LibA_build_project_linux64") {
+tasks.register<JavaExec>("LibA_build_project_jni_linux64") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -73,7 +73,7 @@ tasks.register<JavaExec>("LibA_build_project_linux64") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("LibA_build_project_mac64") {
+tasks.register<JavaExec>("LibA_build_project_jni_mac64") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -81,7 +81,7 @@ tasks.register<JavaExec>("LibA_build_project_mac64") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("LibA_build_project_macArm") {
+tasks.register<JavaExec>("LibA_build_project_jni_macArm") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -89,7 +89,7 @@ tasks.register<JavaExec>("LibA_build_project_macArm") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("LibA_build_project_android") {
+tasks.register<JavaExec>("LibA_build_project_jni_android") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -97,7 +97,7 @@ tasks.register<JavaExec>("LibA_build_project_android") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("LibA_build_project_ios") {
+tasks.register<JavaExec>("LibA_build_project_jni_ios") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)

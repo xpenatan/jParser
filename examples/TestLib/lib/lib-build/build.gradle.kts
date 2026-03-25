@@ -56,54 +56,6 @@ tasks.register<JavaExec>("TestLib_build_project_teavm") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("TestLib_build_project_windows64") {
-    group = "lib"
-    description = "Generate native project"
-    mainClass.set(mainClassName)
-    args = mutableListOf("windows64")
-    classpath = sourceSets["main"].runtimeClasspath
-}
-
-tasks.register<JavaExec>("TestLib_build_project_linux64") {
-    group = "lib"
-    description = "Generate native project"
-    mainClass.set(mainClassName)
-    args = mutableListOf("linux64")
-    classpath = sourceSets["main"].runtimeClasspath
-}
-
-tasks.register<JavaExec>("TestLib_build_project_mac64") {
-    group = "lib"
-    description = "Generate native project"
-    mainClass.set(mainClassName)
-    args = mutableListOf("mac64")
-    classpath = sourceSets["main"].runtimeClasspath
-}
-
-tasks.register<JavaExec>("TestLib_build_project_macArm") {
-    group = "lib"
-    description = "Generate native project"
-    mainClass.set(mainClassName)
-    args = mutableListOf("macArm")
-    classpath = sourceSets["main"].runtimeClasspath
-}
-
-tasks.register<JavaExec>("TestLib_build_project_android") {
-    group = "lib"
-    description = "Generate native project"
-    mainClass.set(mainClassName)
-    args = mutableListOf("android")
-    classpath = sourceSets["main"].runtimeClasspath
-}
-
-tasks.register<JavaExec>("TestLib_build_project_ios") {
-    group = "lib"
-    description = "Generate native project"
-    mainClass.set(mainClassName)
-    args = mutableListOf("ios")
-    classpath = sourceSets["main"].runtimeClasspath
-}
-
 // FFM tasks — generate FFM Java code and/or compile native libs with FFMGlue
 
 tasks.register<JavaExec>("TestLib_build_project_ffm") {
@@ -145,3 +97,52 @@ tasks.register<JavaExec>("TestLib_build_project_ffm_macArm") {
     args = mutableListOf("ffm", "ffm_macArm")
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+tasks.register<JavaExec>("TestLib_build_project_jni_windows64") {
+    group = "lib"
+    description = "Generate native project"
+    mainClass.set(mainClassName)
+    args = mutableListOf("windows64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_jni_linux64") {
+    group = "lib"
+    description = "Generate native project"
+    mainClass.set(mainClassName)
+    args = mutableListOf("linux64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_jni_mac64") {
+    group = "lib"
+    description = "Generate native project"
+    mainClass.set(mainClassName)
+    args = mutableListOf("mac64")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_jni_macArm") {
+    group = "lib"
+    description = "Generate native project"
+    mainClass.set(mainClassName)
+    args = mutableListOf("macArm")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_jni_android") {
+    group = "lib"
+    description = "Generate native project"
+    mainClass.set(mainClassName)
+    args = mutableListOf("android")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_jni_ios") {
+    group = "lib"
+    description = "Generate native project"
+    mainClass.set(mainClassName)
+    args = mutableListOf("ios")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+

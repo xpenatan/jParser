@@ -16,14 +16,14 @@ object LibExt {
 
     // Lib Dependencies
     const val jniGenVersion = "2.5.1"
-    const val teaVMVersion = "0.13.0"
+    const val teaVMVersion = "0.13.1"
     const val javaparserVersion = "3.26.1"
     const val jMultiplatform = "0.1.3"
 
     // Example Dependencies
     const val exampleUseRepoLibs = false
     const val gdxVersion = "1.14.0"
-    const val gdxTeaVMVersion = "1.4.0"
+    const val gdxTeaVMVersion = "1.5.4"
 
     const val jUnitVersion = "4.13.2"
 }

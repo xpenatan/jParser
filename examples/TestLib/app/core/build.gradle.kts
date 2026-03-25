@@ -9,11 +9,8 @@ java {
 
 dependencies {
     // compileOnly: app/core compiles against lib-core's API, but does NOT
-    // propagate it transitively. Each platform module (desktop, android, teavm)
-    // provides the actual native bridge implementation:
-    //   - lib-core for JNI (desktop/android)
-    //   - lib-ffm  for FFM (desktop with Java 22+)
-    //   - lib-teavm for TeaVM (web)
+    // propagate it transitively. Each platform module (desktop-jni, desktop-ffm,
+    // android, teavm) provides the actual native bridge implementation.
     compileOnly(project(":examples:TestLib:lib:lib-core"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")

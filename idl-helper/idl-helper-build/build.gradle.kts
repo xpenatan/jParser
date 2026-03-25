@@ -44,7 +44,7 @@ tasks.register<JavaExec>("idl_helper_build_project_teavm") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("idl_helper_build_project_windows64") {
+tasks.register<JavaExec>("idl_helper_build_project_jni_windows64") {
     group = "idl-helper"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -52,7 +52,7 @@ tasks.register<JavaExec>("idl_helper_build_project_windows64") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("idl_helper_build_project_linux64") {
+tasks.register<JavaExec>("idl_helper_build_project_jni_linux64") {
     group = "idl-helper"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -60,7 +60,7 @@ tasks.register<JavaExec>("idl_helper_build_project_linux64") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("idl_helper_build_project_mac64") {
+tasks.register<JavaExec>("idl_helper_build_project_jni_mac64") {
     group = "idl-helper"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -68,7 +68,7 @@ tasks.register<JavaExec>("idl_helper_build_project_mac64") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("idl_helper_build_project_macArm") {
+tasks.register<JavaExec>("idl_helper_build_project_jni_macArm") {
     group = "idl-helper"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -76,7 +76,7 @@ tasks.register<JavaExec>("idl_helper_build_project_macArm") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("idl_helper_build_project_android") {
+tasks.register<JavaExec>("idl_helper_build_project_jni_android") {
     group = "idl-helper"
     description = "Generate native project"
     mainClass.set(mainClassName)
@@ -84,7 +84,7 @@ tasks.register<JavaExec>("idl_helper_build_project_android") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("idl_helper_build_project_ios") {
+tasks.register<JavaExec>("idl_helper_build_project_jni_ios") {
     group = "idl-helper"
     description = "Generate native project"
     mainClass.set(mainClassName)
