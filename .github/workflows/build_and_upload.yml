@@ -53,6 +53,9 @@ jobs:
       - name: Build idl-helper project
         run: ./gradlew idl_helper_build_project_windows64
 
+      - name: Build idl-helper FFM project
+        run: ./gradlew idl_helper_build_project_ffm_windows64
+
       - name: Build TestLib project
         run: ./gradlew TestLib_build_project_windows64
 
@@ -100,6 +103,9 @@ jobs:
       - name: Build idl-helper project
         run: ./gradlew idl_helper_build_project_linux64
 
+      - name: Build idl-helper FFM project
+        run: ./gradlew idl_helper_build_project_ffm_linux64
+
       - name: Build TestLib project
         run: ./gradlew TestLib_build_project_linux64
 
@@ -142,6 +148,9 @@ jobs:
 
       - name: Build project idl-helper
         run: ./gradlew idl_helper_build_project_mac64
+
+      - name: Build idl-helper FFM project
+        run: ./gradlew idl_helper_build_project_ffm_mac64
 
       - name: Build TestLib project
         run: |
@@ -188,6 +197,9 @@ jobs:
 
       - name: Build project idl-helper
         run: ./gradlew idl_helper_build_project_macArm
+
+      - name: Build idl-helper FFM project
+        run: ./gradlew idl_helper_build_project_ffm_macArm
 
       - name: Build TestLib project
         run: |
