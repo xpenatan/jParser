@@ -302,7 +302,6 @@ public class BuildLibB {
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibBCustomCode.h");
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
-        linkTarget.linkerFlags.add(libALibPath + "/LibA_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.mainModuleName = "idl";
         linkTarget.linkerFlags.add("-sSIDE_MODULE=2");
