@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-jParser is a Java code-generation and C/C++ compilation library that bridges native code to JVM platforms (desktop, mobile, web). It reads Java source files containing embedded native code blocks, then generates platform-specific Java source for **JNI** (desktop/mobile) and **TeaVM** (web/WASM) targets. It also supports **WebIDL**-driven automatic binding generation.
+jParser is a Java code-generation and C/C++ compilation library that bridges native code to JVM platforms (desktop, mobile, web). It reads Java source files containing embedded native code blocks, then generates platform-specific Java source for **JNI** (desktop/mobile), **FFM** (desktop, Java 22+), and **TeaVM** (web/WASM) targets. It also supports **WebIDL**-driven automatic binding generation.
 
 ### Context Resumption & State Persistence
 
@@ -25,15 +25,16 @@ This ensures that if the session is interrupted, the next agent has a perfect "s
 
 ### Core Pipeline (`BuilderTool.build()` in `jParser/jParser-build-tool`)
 1. **IDL Parsing** — `IDLReader` reads `.idl` files from `lib-build/src/main/cpp/`
-2. **Code Generation (JNI)** — `CppCodeParser` (extends `IDLDefaultCodeParser`) reads `lib-base/src/main/java` source, generates JNI Java into `lib-core/src/main/java`
-3. **Code Generation (TeaVM)** — `TeaVMCodeParser` generates TeaVM/JS Java into `lib-teavm/src/main/java`
-4. **Native Compilation** — `JBuilder.build()` compiles C/C++ for each platform target via `BuildMultiTarget`
+2. **Code Generation (JNI)** — `CppCodeParser` (extends `IDLDefaultCodeParser`) reads `lib-base/src/main/java` source, generates JNI Java into `lib-core/src/main/java`. Controlled by `BuildToolOptions.generateCPP` (default: `true`).
+3. **Code Generation (TeaVM)** — `TeaVMCodeParser` generates TeaVM/JS Java into `lib-teavm/src/main/java`. Controlled by `BuildToolOptions.generateTeaVM` (default: `true`).
+4. **Code Generation (FFM)** — `FFMCodeParser` generates FFM Java (using `java.lang.foreign` MethodHandle downcalls) into `lib-desktop-ffm/src/main/java`. Controlled by `BuildToolOptions.generateFFM` (default: `false`).
+5. **Native Compilation** — `JBuilder.build()` compiles C/C++ for each platform target via `BuildMultiTarget`
 
 ### Module Layout (follows a strict `-base/-build/-core/-teavm` convention)
 
 | Suffix | Purpose | Java target |
 |---|---|---|
-| `lib-base` | Hand-written Java source with embedded `/*[-JNI;-NATIVE]*/` and `/*[-TEAVM;-REPLACE]*/` code blocks | Java 8 |
+| `lib-base` | Hand-written Java source with embedded `/*[-JNI;-NATIVE]*/`, `/*[-FFM;-NATIVE]*/`, and `/*[-TEAVM;-REPLACE]*/` code blocks | Java 8 |
 | `lib-build` | `BuildLib.main()` entry point — configures IDL, targets, runs generation + compilation | Java 11 |
 | `lib-core` | **Generated** JNI Java output (do not hand-edit) | Java 11 |
 | `lib-teavm` | **Generated** TeaVM Java output (do not hand-edit) | Java 11 |
@@ -46,17 +47,29 @@ This pattern repeats across `jParser/`, `idl-helper/`, `loader/`, and `examples/
 ### Key Modules
 
 - **`jParser/jParser-core`** — `JParser.generate()` entry point; uses JavaParser to parse/transform Java ASTs. `CodeParser` interface → `DefaultCodeParser` → `IDLDefaultCodeParser`.
-- **`jParser/jParser-cpp`** — `CppCodeParser` (header `"JNI"`) generates JNI glue code + `NativeCPPGenerator` emits C++ `.cpp` files.
+- **`jParser/jParser-cpp`** — `CppCodeParser` (header `"JNI"`) generates JNI glue code + `NativeCPPGenerator` emits C++ `.cpp` files with JNI calling convention (`jlong`, `jint`, etc.).
+- **`jParser/jParser-ffm`** — `FFMCodeParser` (header `"FFM"`) generates Java classes using `java.lang.foreign` MethodHandle downcalls instead of JNI native methods. `FFMCppGenerator` emits C++ `.cpp` files with `extern "C"` and standard C types (`int64_t`, `int32_t`, etc.). Also includes `FFMMethodHandleRegistry`, `FFMNativeCodeGenerator`, and `FFMTypeMapper`.
 - **`jParser/jParser-teavm`** — `TeaVMCodeParser` (header `"TEAVM"`) generates `@JSBody`-annotated methods for TeaVM.
 - **`jParser/jParser-idl`** — IDL file parser, class model (`IDLClass`, `IDLMethod`, `IDLAttribute`), and code generation parsers.
-- **`jParser/jParser-build`** — `JBuilder`, `BuildConfig`, platform targets (`EmscriptenTarget`, `WindowsMSVCTarget`, `LinuxTarget`, etc.).
+- **`jParser/jParser-build`** — `JBuilder`, `BuildConfig`, `BuildToolOptions`, platform targets (`EmscriptenTarget`, `WindowsMSVCTarget`, `WindowsTarget`, `LinuxTarget`, `MacTarget`, `AndroidTarget`, `IOSTarget`).
+- **`jParser/jParser-build-tool`** — `BuilderTool.build()` orchestrates the full pipeline: IDL parsing → JNI/TeaVM/FFM code generation → native compilation.
+- **`jParser/jParser-base`** — Shared base classes used by all targets (e.g., `IDLUtils`, `IDLString`, `IDLArray`).
 - **`idl/idl-core`** — `IDLBase` parent class for all native objects (memory management, ownership, dispose).
+- **`idl/idl-teavm`** — TeaVM-specific IDL runtime support.
+- **`loader/loader-core`** — `JParserLibraryLoader` handles native library loading for desktop and mobile platforms.
+- **`loader/loader-teavm`** — TeaVM-specific library loader (asynchronous JS/WASM script loading).
 
 ## Code Block Convention
 
-In `lib-base` Java source, native code is embedded via block comments with headers:
+In `lib-base` Java source, native code is embedded via block comments with headers. Each target uses its own header prefix. A single source file can contain blocks for all three targets:
+
 ```java
 /*[-JNI;-NATIVE]
+    MyType* obj = (MyType*)this_addr;
+    obj->doSomething();
+*/
+
+/*[-FFM;-NATIVE]
     MyType* obj = (MyType*)this_addr;
     obj->doSomething();
 */
@@ -67,7 +80,12 @@ private static native void internal_native_doSomething(long this_addr);
     private static native void internal_native_doSomething(int this_addr);
 */
 ```
-Commands: `-ADD`, `-ADD_RAW`, `-REMOVE`, `-REPLACE`, `-REPLACE_BLOCK`, `-NATIVE`. Use `-IDL_SKIP` on a class comment to prevent IDL generation for that class.
+
+**Headers**: `JNI`, `FFM`, `TEAVM`.
+
+**Commands**: `-ADD`, `-ADD_RAW`, `-REMOVE`, `-REPLACE`, `-REPLACE_BLOCK`, `-NATIVE`. Use `-IDL_SKIP` on a class comment to prevent IDL generation for that class.
+
+**How it works**: `DefaultCodeParser` matches the header prefix (e.g., `JNI`, `FFM`, `TEAVM`) in each block comment. Blocks whose header does not match the active parser are automatically removed from the generated output. The `-NATIVE` command associates C/C++ code with the following `native` method declaration.
 
 ## Requirements
 
@@ -214,6 +232,6 @@ Measures how native bridge overhead affects frame rate. Each frame executes a fi
 - **Generated code is not hand-edited**: `lib-core/`, `lib-teavm/`, and `lib-desktop-ffm/` directories contain generated output with a "Do not make changes" header.
 - **IDL files** live at `lib-build/src/main/cpp/<LibName>.idl`. Custom C++ glue code goes in `lib-build/src/main/cpp/custom/`.
 - **IDLBase** is the parent of all native-bound classes. Memory must be manually managed via `dispose()`. Use `ClassName.NULL` instead of Java `null` for native parameters.
-- **Dependencies**: JavaParser (`3.26.1`) for AST manipulation, TeaVM (`0.13.0`) for web target, JUnit 4 for tests.
+- **Dependencies**: JavaParser (`3.26.1`) for AST manipulation, TeaVM (`0.13.1`) for web target, JUnit 4 for tests.
 - **Native bridge selection**: Each example has separate `app/desktop-jni` and `app/desktop-ffm` modules. JNI uses `lib-core` + `lib-desktop-jni`, FFM uses `lib-desktop-ffm`.
-
+- **JNI vs FFM C++ differences**: JNI glue uses JNI types (`jlong`, `jint`, `JNIEnv*`). FFM glue uses `extern "C"` with standard C types (`int64_t`, `int32_t`) and no JNI environment — calls go through `java.lang.foreign` MethodHandle downcalls.
