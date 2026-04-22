@@ -21,6 +21,10 @@ public class IDLDeConstructorParser {
     private static final String DELETE_NATIVE = "deleteNative";
 
     public static void generateDeConstructor(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass) {
+        if(!idlParser.generateNativeBindings) {
+            return;
+        }
+
         if(!idlClass.classHeader.isNoDelete) {
             List<MethodDeclaration> methodsBySignature = classOrInterfaceDeclaration.getMethodsBySignature(DELETE_NATIVE);
             int size = methodsBySignature.size();

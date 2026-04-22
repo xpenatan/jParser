@@ -42,6 +42,8 @@ tasks.named("preBuild").configure {
 }
 
 dependencies {
+    implementation(project(":idl:idl-core"))
+    implementation(project(":loader:loader-core"))
 }
 
 afterEvaluate {
@@ -54,5 +56,12 @@ afterEvaluate {
                 artifact(tasks.named("bundleReleaseAar"))
             }
         }
+    }
+}
+
+tasks.named("clean") {
+    doFirst {
+        val srcPath = "$projectDir/src/main/"
+        project.delete(files(srcPath))
     }
 }

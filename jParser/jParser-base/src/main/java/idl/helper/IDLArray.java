@@ -39,5 +39,9 @@ public class IDLArray extends IDLBase {
       IDL::IDLArray* nativeObject = (IDL::IDLArray*)this_addr;
       nativeObject->resize(size);
     */
+    /*[-FFM;-NATIVE]
+      IDL::IDLArray* nativeObject = (IDL::IDLArray*)this_addr;
+      nativeObject->resize(size);
+    */
     public static native void internal_native_resize(long this_addr, int size);
 }

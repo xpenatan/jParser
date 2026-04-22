@@ -8,12 +8,6 @@ java {
 }
 
 dependencies {
-    if(LibExt.exampleUseRepoLibs) {
-        implementation("com.github.xpenatan.jParser:jParser-base:-SNAPSHOT")
-        implementation("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
-    }
-    else {
-        implementation(project(":loader:loader-core"))
-        implementation(project(":idl:idl-core"))
-    }
+    implementation(project(":loader:loader-core"))
+    implementation(project(":idl:idl-core"))
 }

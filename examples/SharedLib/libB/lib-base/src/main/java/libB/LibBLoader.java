@@ -9,6 +9,10 @@ public class LibBLoader {
         #include "LibBCustomCode.h"
     */
 
+    /*[-FFM;-NATIVE]
+        #include "LibBCustomCode.h"
+    */
+
     public static final String LIB_NAME = "LibB";
 
     public static void init(JParserLibraryLoaderListener listener) {

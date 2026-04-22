@@ -33,10 +33,14 @@ android {
 }
 
 dependencies {
-    if(LibExt.exampleUseRepoLibs) {
-        api("com.github.xpenatan.jParser:idl--helper-android:-SNAPSHOT")
-    }
-    else {
-        api(project(":idl-helper:idl-helper-android"))
+    api(project(":loader:loader-core"))
+    api(project(":idl:idl-core"))
+    api(project(":idl-helper:idl-helper-android"))
+}
+
+tasks.named("clean") {
+    doFirst {
+        val srcPath = "$projectDir/src/main/"
+        project.delete(files(srcPath))
     }
 }

@@ -1,0 +1,163 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
+plugins {
+    id("java")
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(24)
+    targetCompatibility = JavaVersion.toVersion(24)
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(24))
+    }
+}
+
+val benchmarkDir = rootProject.layout.buildDirectory.dir("testlib-benchmark")
+val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
+
+dependencies {
+    implementation(project(":examples:TestLib:app:core"))
+
+    implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
+    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
+
+    implementation(project(":examples:TestLib:lib:lib-desktop-ffm"))
+}
+
+tasks.register<JavaExec>("TestLib_run_app_ffm_desktop") {
+    group = "example-desktop"
+    description = "Run desktop app with FFM bridge"
+    mainClass.set("com.github.xpenatan.jParser.example.app.Main")
+    classpath = sourceSets["main"].runtimeClasspath
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(24))
+    })
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    if(isMacOs) {
+        jvmArgs("-XstartOnFirstThread")
+    }
+}
+
+tasks.register<JavaExec>("TestLib_enum_benchmark_ffm_desktop") {
+    group = "example-benchmark"
+    description = "Run enum benchmark app with FFM bridge"
+    mainClass.set("com.github.xpenatan.jParser.example.app.BenchmarkMain")
+    classpath = sourceSets["main"].runtimeClasspath
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(24))
+    })
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    if(isMacOs) {
+        jvmArgs("-XstartOnFirstThread")
+    }
+}
+
+tasks.register<JavaExec>("TestLib_throughput_benchmark_ffm") {
+    group = "example-benchmark"
+    description = "Run native bridge throughput benchmark with FFM bridge"
+    mainClass.set("com.github.xpenatan.jParser.example.app.NativeBridgeBenchmarkMain")
+    systemProperty("benchmark.output", benchmarkDir.get().file("benchmark_ffm.csv").asFile.absolutePath)
+    classpath = sourceSets["main"].runtimeClasspath
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(24))
+    })
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    if(isMacOs) {
+        jvmArgs("-XstartOnFirstThread")
+    }
+
+    doFirst {
+        benchmarkDir.get().asFile.mkdirs()
+    }
+}
+
+tasks.register<JavaExec>("TestLib_fps_benchmark_ffm") {
+    group = "example-benchmark"
+    description = "Run FPS benchmark with FFM bridge"
+    mainClass.set("com.github.xpenatan.jParser.example.app.NativeBridgeFpsBenchmarkMain")
+    systemProperty("benchmark.fps.output", benchmarkDir.get().file("fps_benchmark_ffm.csv").asFile.absolutePath)
+    classpath = sourceSets["main"].runtimeClasspath
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(24))
+    })
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    if(isMacOs) {
+        jvmArgs("-XstartOnFirstThread")
+    }
+
+    doFirst {
+        benchmarkDir.get().asFile.mkdirs()
+    }
+}
+
+tasks.register<JavaExec>("TestLib_fps_benchmark_ffm_interactive") {
+    group = "example-benchmark"
+    description = "Run FPS benchmark with FFM bridge in interactive mode"
+    mainClass.set("com.github.xpenatan.jParser.example.app.NativeBridgeFpsBenchmarkMain")
+    systemProperty("benchmark.fps.mode", "interactive")
+    classpath = sourceSets["main"].runtimeClasspath
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(24))
+    })
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    if(isMacOs) {
+        jvmArgs("-XstartOnFirstThread")
+    }
+}
+
+tasks.register<JavaExec>("TestLib_throughput_benchmark_compare") {
+    group = "example-benchmark"
+    description = "Run JNI & FFM benchmarks then print a comparison table"
+    dependsOn(":examples:TestLib:app:desktop-jni:TestLib_throughput_benchmark_jni", "TestLib_throughput_benchmark_ffm")
+
+    mainClass.set("com.github.xpenatan.jParser.example.app.NativeBridgeBenchmarkCompare")
+    classpath = sourceSets["main"].runtimeClasspath
+    args(
+        benchmarkDir.get().file("benchmark_jni.csv").asFile.absolutePath,
+        benchmarkDir.get().file("benchmark_ffm.csv").asFile.absolutePath,
+        benchmarkDir.get().file("benchmark_compare.txt").asFile.absolutePath
+    )
+}
+
+tasks.register<JavaExec>("TestLib_fps_benchmark_compare") {
+    group = "example-benchmark"
+    description = "Run JNI & FFM FPS benchmarks then print a comparison table"
+    dependsOn(":examples:TestLib:app:desktop-jni:TestLib_fps_benchmark_jni", "TestLib_fps_benchmark_ffm")
+
+    mainClass.set("com.github.xpenatan.jParser.example.app.NativeBridgeFpsBenchmarkCompare")
+    classpath = sourceSets["main"].runtimeClasspath
+    args(
+        benchmarkDir.get().file("fps_benchmark_jni.csv").asFile.absolutePath,
+        benchmarkDir.get().file("fps_benchmark_ffm.csv").asFile.absolutePath,
+        benchmarkDir.get().file("fps_benchmark_compare.txt").asFile.absolutePath
+    )
+}
+
+tasks.named("TestLib_throughput_benchmark_ffm") {
+    mustRunAfter(":examples:TestLib:app:desktop-jni:TestLib_throughput_benchmark_jni")
+}
+
+tasks.named("TestLib_fps_benchmark_ffm") {
+    mustRunAfter(":examples:TestLib:app:desktop-jni:TestLib_fps_benchmark_jni")
+}
+
+tasks.register("TestLib_run_benchmark_ffm_desktop") {
+    group = "example-benchmark"
+    description = "Compatibility alias for enum benchmark app with FFM bridge"
+    dependsOn("TestLib_enum_benchmark_ffm_desktop")
+}
+
+tasks.register("TestLib_benchmark_ffm") {
+    group = "example-benchmark"
+    description = "Compatibility alias for FFM throughput benchmark"
+    dependsOn("TestLib_throughput_benchmark_ffm")
+}
+
+tasks.register("TestLib_benchmark_compare") {
+    group = "example-benchmark"
+    description = "Compatibility alias for JNI/FFM throughput comparison benchmark"
+    dependsOn("TestLib_throughput_benchmark_compare")
+}
+
+

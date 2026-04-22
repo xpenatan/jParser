@@ -33,4 +33,15 @@ android {
 }
 
 dependencies {
+    implementation(project(":loader:loader-core"))
+    implementation(project(":idl:idl-core"))
+    implementation(project(":idl-helper:idl-helper-android"))
+    implementation(project(":examples:SharedLib:libA:lib-android"))
+}
+
+tasks.named("clean") {
+    doFirst {
+        val srcPath = "$projectDir/src/main/"
+        project.delete(files(srcPath))
+    }
 }

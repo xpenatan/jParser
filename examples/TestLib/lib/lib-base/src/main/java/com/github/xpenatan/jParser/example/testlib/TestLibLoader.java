@@ -11,6 +11,10 @@ public class TestLibLoader {
         #include "CustomCode.h"
     */
 
+    /*[-FFM;-NATIVE]
+        #include "CustomCode.h"
+    */
+
     public static void init(JParserLibraryLoaderListener listener) {
         JParserLibraryLoader.load(LIB_NAME, listener);
     }

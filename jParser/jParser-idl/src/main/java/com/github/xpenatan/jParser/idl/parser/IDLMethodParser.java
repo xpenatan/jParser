@@ -117,7 +117,7 @@ public class IDLMethodParser {
 
     public static void generateMethod(IDLDefaultCodeParser idlParser, JParser jParser, CompilationUnit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration, IDLClass idlClass, IDLMethod idlMethod) {
         MethodDeclaration methodDeclaration = generateAndAddMethodOnly(idlParser, jParser, unit, classOrInterfaceDeclaration, idlMethod);
-        if(methodDeclaration != null && idlParser.generateClass) {
+        if(methodDeclaration != null && idlParser.generateNativeBindings) {
             setupMethod(idlParser, jParser, idlMethod, classOrInterfaceDeclaration, methodDeclaration);
         }
     }

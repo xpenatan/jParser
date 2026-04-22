@@ -166,17 +166,11 @@ class TestBufferManualClass {
 
         void updateByteBuffer(unsigned char* data, int size, unsigned char value) {
             for(int i = 0; i < size; i++) {
-                std::cout << "[" << i << "]: " <<  static_cast<int>(data[i]) << std::endl;
-            }
-            for(int i = 0; i < size; i++) {
                 data[i] = value;
             }
         }
 
         void updateIntBuffer(int* data, int size, int value) {
-            for(int i = 0; i < size; i++) {
-                std::cout << "[" << i << "]: " <<  data[i] << std::endl;
-            }
             for(int i = 0; i < size; i++) {
                 data[i] = value;
             }
@@ -184,17 +178,11 @@ class TestBufferManualClass {
 
         void updateShortBuffer(short* data, int size, short value) {
             for(int i = 0; i < size; i++) {
-                std::cout << "[" << i << "]: " <<  data[i] << std::endl;
-            }
-            for(int i = 0; i < size; i++) {
                 data[i] = value;
             }
         }
 
         void updateFloatBuffer(float* data, int size, float value) {
-            for(int i = 0; i < size; i++) {
-                std::cout << "[" << i << "]: " <<  data[i] << std::endl;
-            }
             for(int i = 0; i < size; i++) {
                 data[i] = value;
             }

@@ -9,7 +9,6 @@ import com.github.xpenatan.jParser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jParser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jParser.builder.tool.BuilderTool;
-import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.util.ArrayList;
 
@@ -22,7 +21,6 @@ public class BuildLib {
         String sourceDir = "/src/main/cpp/source/TestLib/src";
 
         WindowsMSVCTarget.DEBUG_BUILD = true;
-        JParser.CREATE_IDL_HELPER = false;
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
 
         BuildToolOptions.BuildToolParams data = new BuildToolOptions.BuildToolParams();
@@ -42,36 +40,52 @@ public class BuildLib {
                 if(op.containsArg("teavm")) {
                     targets.add(getTeavmTarget(op, idlReader));
                 }
-                if(op.containsArg("windows64")) {
-                    targets.add(getWindowVCTarget(op));
-                    targets.add(getWindowTarget(op));
+                if(op.containsArg("jni_windows64")) {
+                    targets.add(getJNIWindowVCTarget(op));
+                    targets.add(getJNIWindowMinGWTarget(op));
                 }
-                if(op.containsArg("linux64")) {
-                    targets.add(getLinuxTarget(op));
+                if(op.containsArg("jni_linux64")) {
+                    targets.add(getJNILinuxTarget(op));
                 }
-                if(op.containsArg("mac64")) {
-                    targets.add(getMacTarget(op, false));
+                if(op.containsArg("jni_mac64")) {
+                    targets.add(getJNIMacTarget(op, false));
                 }
-                if(op.containsArg("macArm")) {
-                    targets.add(getMacTarget(op, true));
+                if(op.containsArg("jni_macArm")) {
+                    targets.add(getJNIMacTarget(op, true));
                 }
-                if(op.containsArg("android")) {
-                    targets.add(getAndroidTarget(op));
+                if(op.containsArg("jni_android")) {
+                    targets.add(getJNIAndroidTarget(op));
                 }
-                if(op.containsArg("ios")) {
-                    targets.add(getIOSTarget(op));
+                if(op.containsArg("jni_ios")) {
+                    targets.add(getJNIIOSTarget(op));
+                }
+
+                if(op.containsArg("ffm_windows64")) {
+                    targets.add(getFFMWindowVCTarget(op));
+                    targets.add(getFFMWindowMingwTarget(op));
+                }
+                if(op.containsArg("ffm_linux64")) {
+                    targets.add(getFFMLinuxTarget(op));
+                }
+                if(op.containsArg("ffm_mac64")) {
+                    targets.add(getFFMMacTarget(op, false));
+                }
+                if(op.containsArg("ffm_macArm")) {
+                    targets.add(getFFMMacTarget(op, true));
                 }
             }
         });
     }
 
-    private static BuildMultiTarget getWindowTarget(BuildToolOptions op) {
+
+    private static BuildMultiTarget getJNIWindowMinGWTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         WindowsTarget compileStaticTarget = new WindowsTarget();
+        compileStaticTarget.libDirSuffix = "windows/mingw/jni";
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
@@ -81,12 +95,13 @@ public class BuildLib {
         multiTarget.add(compileStaticTarget);
 
         WindowsTarget linkTarget = new WindowsTarget();
+        linkTarget.libDirSuffix = "windows/mingw/jni";
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + op.libName + "64_.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/mingw/jni/" + op.libName + "64_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
@@ -94,13 +109,14 @@ public class BuildLib {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getWindowVCTarget(BuildToolOptions op) {
+    private static BuildMultiTarget getJNIWindowVCTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
+        compileStaticTarget.libDirSuffix = "windows/vc/jni";
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("/std:c++11");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
@@ -110,12 +126,13 @@ public class BuildLib {
         multiTarget.add(compileStaticTarget);
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
+        linkTarget.libDirSuffix = "windows/vc/jni";
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("/std:c++11");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
-        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/jni/" + op.libName + "64_.lib");
         linkTarget.linkerFlags.add("-DLL");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
         multiTarget.add(linkTarget);
@@ -123,13 +140,14 @@ public class BuildLib {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getLinuxTarget(BuildToolOptions op) {
+    private static BuildMultiTarget getJNILinuxTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         LinuxTarget compileStaticTarget = new LinuxTarget();
+        compileStaticTarget.libDirSuffix = "linux/jni";
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.cppFlags.add("-fPIC");
@@ -140,6 +158,7 @@ public class BuildLib {
         multiTarget.add(compileStaticTarget);
 
         LinuxTarget linkTarget = new LinuxTarget();
+        linkTarget.libDirSuffix = "linux/jni";
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.cppFlags.add("-fPIC");
@@ -147,7 +166,7 @@ public class BuildLib {
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libBuildCPPPath + "/src/jniglue");
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/lib" + op.libName + "64_.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/jni/lib" + op.libName + "64_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
@@ -156,13 +175,14 @@ public class BuildLib {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm) {
+    private static BuildMultiTarget getJNIMacTarget(BuildToolOptions op, boolean isArm) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
+        compileStaticTarget.libDirSuffix = "mac/jni";
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.isStatic = true;
@@ -173,6 +193,7 @@ public class BuildLib {
         multiTarget.add(compileStaticTarget);
 
         MacTarget linkTarget = new MacTarget(isArm);
+        linkTarget.libDirSuffix = "mac/jni";
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.cppFlags.add("-fPIC");
@@ -182,10 +203,10 @@ public class BuildLib {
 
         linkTarget.linkerFlags.add("-Wl,-force_load");
         if(isArm) {
-            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/lib" + op.libName + "64_.a");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/jni/lib" + op.libName + "64_.a");
         }
         else {
-            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/lib" + op.libName + "64_.a");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/jni/lib" + op.libName + "64_.a");
         }
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
 
@@ -232,7 +253,7 @@ public class BuildLib {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getAndroidTarget(BuildToolOptions op) {
+    private static BuildMultiTarget getJNIAndroidTarget(BuildToolOptions op) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -275,7 +296,7 @@ public class BuildLib {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getIOSTarget(BuildToolOptions op)  {
+    private static BuildMultiTarget getJNIIOSTarget(BuildToolOptions op)  {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -301,6 +322,143 @@ public class BuildLib {
         linkTarget.linkerFlags.add("-Wl,-force_load");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
         linkTarget.cppInclude.add(libBuildCPPPath + "/src/jniglue/JNIGlue.cpp");
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    // ==================== FFM Build Targets ====================
+    // These compile the same native C++ source but link with FFMGlue.cpp instead of JNIGlue.cpp.
+    // No JNI headers are needed. Output goes to <platform>/ffm/ to avoid conflicts with JNI libs.
+
+    private static BuildMultiTarget getFFMWindowMingwTarget(BuildToolOptions op) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        // Make a static library (same as JNI — shared C++ source)
+        WindowsTarget compileStaticTarget = new WindowsTarget();
+        compileStaticTarget.libDirSuffix = "windows/mingw/ffm";
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        // Link with FFMGlue instead of JNIGlue — no JNI headers
+        WindowsTarget linkTarget = new WindowsTarget();
+        linkTarget.libDirSuffix = "windows/mingw/ffm";
+        linkTarget.addFFMGlueCode(libBuildCPPPath);
+        linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/mingw/ffm/" + op.libName + "64_.a");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getFFMWindowVCTarget(BuildToolOptions op) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        // Make a static library
+        WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
+        compileStaticTarget.libDirSuffix = "windows/vc/ffm";
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("/std:c++11");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        // Link with FFMGlue instead of JNIGlue — no JNI headers
+        WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
+        linkTarget.libDirSuffix = "windows/vc/ffm";
+        linkTarget.addFFMGlueCode(libBuildCPPPath);
+        linkTarget.cppFlags.add("/std:c++11");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/ffm/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("-DLL");
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getFFMLinuxTarget(BuildToolOptions op) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        // Make a static library
+        LinuxTarget compileStaticTarget = new LinuxTarget();
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.libDirSuffix = "linux/ffm";
+        compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add("-fPIC");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        // Link with FFMGlue instead of JNIGlue — no JNI headers
+        LinuxTarget linkTarget = new LinuxTarget();
+        linkTarget.libDirSuffix = "linux/ffm";
+        linkTarget.addFFMGlueCode(libBuildCPPPath);
+        linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("-fPIC");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/ffm/lib" + op.libName + "64_.a");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getFFMMacTarget(BuildToolOptions op, boolean isArm) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        String macSubDir = isArm ? "mac/arm/ffm" : "mac/ffm";
+
+        // Make a static library
+        MacTarget compileStaticTarget = new MacTarget(isArm);
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.libDirSuffix = macSubDir;
+        compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add("-fPIC");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        // Link with FFMGlue instead of JNIGlue — no JNI headers
+        MacTarget linkTarget = new MacTarget(isArm);
+        linkTarget.libDirSuffix = macSubDir;
+        linkTarget.addFFMGlueCode(libBuildCPPPath);
+        linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("-fPIC");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("-Wl,-force_load");
+        if(isArm) {
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/ffm/lib" + op.libName + "64_.a");
+        }
+        else {
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/ffm/lib" + op.libName + "64_.a");
+        }
         multiTarget.add(linkTarget);
 
         return multiTarget;
