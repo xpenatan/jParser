@@ -269,10 +269,6 @@ public class BuildLibB {
         linkTarget.cppFlags.add(config);
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibBCustomCode.h");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
-<<<<<<< HEAD
-=======
-        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
->>>>>>> dev
         linkTarget.mainModuleName = "idl";
         linkTarget.linkerFlags.add("-sSIDE_MODULE=2");
         multiTarget.add(linkTarget);
