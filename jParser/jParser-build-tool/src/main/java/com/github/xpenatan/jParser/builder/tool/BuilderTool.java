@@ -86,7 +86,7 @@ public class BuilderTool {
     }
 
     private static void applyAutoGenerateFlags(BuildToolOptions op) {
-        if(op.containsArg("ffm") ||
+        if(op.containsArg("gen_ffm_desktop") ||
                 op.containsArg("ffm_windows64") ||
                 op.containsArg("ffm_linux64") ||
                 op.containsArg("ffm_mac64") ||
@@ -94,7 +94,8 @@ public class BuilderTool {
             op.generateDesktopFFM = true;
         }
 
-        if(op.containsArg("jni_windows64") ||
+        if(op.containsArg("gen_jni_desktop") ||
+                op.containsArg("jni_windows64") ||
                 op.containsArg("jni_linux64") ||
                 op.containsArg("jni_mac64") ||
                 op.containsArg("jni_macArm") ||
@@ -102,15 +103,15 @@ public class BuilderTool {
             op.generateDesktopJNI = true;
         }
 
-        if(op.containsArg("jni_android")) {
+        if(op.containsArg("gen_jni_android") || op.containsArg("jni_android")) {
             op.generateAndroid = true;
         }
 
-        if(op.containsArg("jni_ios")) {
+        if(op.containsArg("gen_jni_ios") || op.containsArg("jni_ios")) {
             op.generateIOS = true;
         }
 
-        if(op.containsArg("teavm")) {
+        if(op.containsArg("gen_teavm") || op.containsArg("teavm")) {
             op.generateTeaVMWeb = true;
         }
     }

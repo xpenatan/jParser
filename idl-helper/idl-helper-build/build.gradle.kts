@@ -24,7 +24,7 @@ tasks.register<JavaExec>("idl_helper_build_project") {
     group = "idl-helper"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf()
+    args = mutableListOf("gen_ffm_desktop", "gen_jni_desktop", "gen_jni_android", "gen_jni_ios", "gen_teavm")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
