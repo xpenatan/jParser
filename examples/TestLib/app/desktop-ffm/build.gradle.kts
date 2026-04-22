@@ -142,18 +142,6 @@ tasks.named("TestLib_fps_benchmark_ffm") {
     mustRunAfter(":examples:TestLib:app:desktop-jni:TestLib_fps_benchmark_jni")
 }
 
-tasks.register("TestLib_run_benchmark_ffm_desktop") {
-    group = "example-benchmark"
-    description = "Compatibility alias for enum benchmark app with FFM bridge"
-    dependsOn("TestLib_enum_benchmark_ffm_desktop")
-}
-
-tasks.register("TestLib_benchmark_ffm") {
-    group = "example-benchmark"
-    description = "Compatibility alias for FFM throughput benchmark"
-    dependsOn("TestLib_throughput_benchmark_ffm")
-}
-
 tasks.register("TestLib_benchmark_compare") {
     group = "example-benchmark"
     description = "Compatibility alias for JNI/FFM throughput comparison benchmark"

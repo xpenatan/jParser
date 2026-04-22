@@ -81,16 +81,3 @@ tasks.register<JavaExec>("TestLib_fps_benchmark_jni_interactive") {
         jvmArgs("-XstartOnFirstThread")
     }
 }
-
-tasks.register("TestLib_run_benchmark_jni_desktop") {
-    group = "example-benchmark"
-    description = "Compatibility alias for enum benchmark app with JNI bridge"
-    dependsOn("TestLib_enum_benchmark_jni_desktop")
-}
-
-tasks.register("TestLib_benchmark_jni") {
-    group = "example-benchmark"
-    description = "Compatibility alias for JNI throughput benchmark"
-    dependsOn("TestLib_throughput_benchmark_jni")
-}
-
