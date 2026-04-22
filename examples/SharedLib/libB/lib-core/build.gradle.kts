@@ -12,14 +12,8 @@ dependencies {
 
     implementation(project(":examples:SharedLib:libA:lib-core"))
 
-    if(LibExt.exampleUseRepoLibs) {
-        api("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
-        api("com.github.xpenatan.jParser:idl-core:-SNAPSHOT")
-    }
-    else {
-        api(project(":loader:loader-core"))
-        api(project(":idl:idl-core"))
-    }
+    api(project(":loader:loader-core"))
+    api(project(":idl:idl-core"))
 
     implementation(project(":idl-helper:idl-helper-core"))
 }

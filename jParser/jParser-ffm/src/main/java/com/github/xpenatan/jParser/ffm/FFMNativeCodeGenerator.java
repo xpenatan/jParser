@@ -1,0 +1,27 @@
+package com.github.xpenatan.jParser.ffm;
+
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.xpenatan.jParser.core.JParser;
+import com.github.xpenatan.jParser.core.JParserItem;
+
+/**
+ * Interface for generating native C/C++ glue code for FFM.
+ * Parallel to CppGenerator but decoupled from JNI dependencies.
+ */
+public interface FFMNativeCodeGenerator {
+    void addNativeCode(Node node, String content);
+
+    void addNativeCode(MethodDeclaration nativeMethod, String content);
+
+    /**
+     * Add raw C++ code for a callback class definition.
+     * This code is placed before the extern "C" block in the generated glue file.
+     */
+    void addCallbackClassCode(String cppClassCode);
+
+    void addParseFile(JParser jParser, JParserItem parserItem);
+
+    void generate(JParser jParser);
+}
+

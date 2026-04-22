@@ -42,7 +42,7 @@ public class IDLConstructorParser {
                 IDLConstructor idlConstructor = constructors.get(i);
                 ConstructorDeclaration constructorDeclaration = IDLConstructorParser.getOrCreateConstructorDeclaration(idlParser, jParser, unit, classOrInterfaceDeclaration, idlConstructor);
 
-                if(constructorDeclaration.getBody().isEmpty()) {
+                if(constructorDeclaration.getBody().isEmpty() && idlParser.generateNativeBindings) {
                     MethodDeclaration nativeMethod = IDLConstructorParser.setupConstructor(idlParser.idlReader, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration);
                     idlParser.onIDLConstructorGenerated(jParser, idlConstructor, classOrInterfaceDeclaration, constructorDeclaration, nativeMethod);
                 }

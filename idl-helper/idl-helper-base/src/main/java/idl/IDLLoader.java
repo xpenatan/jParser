@@ -11,6 +11,10 @@ public class IDLLoader {
         #include "IDLCustomCode.h"
     */
 
+    /*[-FFM;-NATIVE]
+        #include "IDLCustomCode.h"
+    */
+
     public static void init(JParserLibraryLoaderListener listener) {
         JParserLibraryLoader.load(LIB_NAME, listener);
     }

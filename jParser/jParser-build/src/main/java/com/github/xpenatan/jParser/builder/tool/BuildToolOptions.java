@@ -12,8 +12,12 @@ public class BuildToolOptions {
     public final String libName;
     public final String webModuleName;
     public final String packageName;
-    public boolean generateTeaVM = true;
-    public boolean generateCPP = true;
+    public boolean generateTeaVMWeb = false;
+    public boolean generateDesktopJNI = false;
+    public boolean generateDesktopFFM = false;
+    public boolean generateAndroid = false;
+    public boolean generateIOS = false; // TODO
+    public boolean generateCore = true;
 
     /** Name of the idl file located in [Module Build Path] + src/main/cpp/myidl.idl. The default is libName but can be changed. */
     public String idlName;
@@ -23,7 +27,10 @@ public class BuildToolOptions {
     private String moduleBuildPath;
     private String moduleBuildCPPPath;
     private String moduleCorePath;
+    private String moduleDesktopJNIPath;
+    private String moduleAndroidPath;
     private String moduleTeavmPath;
+    private String moduleFFMPath;
     private ArrayList<IDLFile> idlPath = new ArrayList<>();
     private ArrayList<IDLFile> idlPathRef = new ArrayList<>();
     private ArrayList<String> additionalSourceDirs = new ArrayList<>();
@@ -74,7 +81,10 @@ public class BuildToolOptions {
         moduleBasePath = modulePath + "/" + modulePrefix + "-base";
         moduleBuildPath = modulePath + "/" + modulePrefix + "-build";
         moduleCorePath = modulePath + "/" + modulePrefix + "-core";
+        moduleDesktopJNIPath = modulePath + "/" + modulePrefix + "-desktop-jni";
+        moduleAndroidPath = modulePath + "/" + modulePrefix + "-android";
         moduleTeavmPath = modulePath + "/" + modulePrefix + "-teavm";
+        moduleFFMPath = modulePath + "/" + modulePrefix + "-desktop-ffm";
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         cppPath = moduleBuildPath + "/src/main/cpp/";
@@ -133,8 +143,36 @@ public class BuildToolOptions {
         return cppPath;
     }
 
+    public String getModuleDesktopJNIPath() {
+        return moduleDesktopJNIPath;
+    }
+
+    public String getModuleAndroidPath() {
+        return moduleAndroidPath;
+    }
+
+    public String[] getJNIJavaOutputPaths() {
+        ArrayList<String> outputPaths = new ArrayList<>();
+        if(generateAndroid) {
+            outputPaths.add(moduleAndroidPath + "/src/main/java");
+        }
+
+        if(generateDesktopJNI) {
+            outputPaths.add(moduleDesktopJNIPath + "/src/main/java");
+        }
+
+        String[] paths = new String[outputPaths.size()];
+        outputPaths.toArray(paths);
+        return paths;
+    }
+
+
     public String getModuleTeaVMPath() {
         return moduleTeavmPath;
+    }
+
+    public String getModuleFFMPath() {
+        return moduleFFMPath;
     }
 
     public IDLFile[] getIDL() {

@@ -20,18 +20,11 @@ dependencies {
 
     implementation(project(":examples:SharedLib:libA:lib-teavm"))
 
-    if(LibExt.exampleUseRepoLibs) {
-        implementation("com.github.xpenatan.jParser:loader-teavm:-SNAPSHOT")
-        implementation("com.github.xpenatan.jParser:loader-core:-SNAPSHOT")
-        implementation("com.github.xpenatan.jParser:idl-teavm:-SNAPSHOT")
-    }
-    else {
-        implementation(project(":loader:loader-teavm"))
-        implementation(project(":loader:loader-core"))
-        implementation(project(":idl:idl-teavm"))
-    }
+    implementation(project(":loader:loader-teavm"))
+    implementation(project(":loader:loader-core"))
+    implementation(project(":idl:idl-teavm"))
 
-    implementation(project(":idl-helper:idl-helper-teavm"))
+    api(project(":idl-helper:idl-helper-teavm"))
 }
 
 tasks.named("clean") {

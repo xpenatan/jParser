@@ -34,6 +34,10 @@ public class IDLString extends IDLBase {
         var returnedJSObj = jsObj.c_str();
         return returnedJSObj;
     */
+    /*[-FFM;-NATIVE]
+        IDLString* nativeObject = (IDLString*)this_addr;
+        return nativeObject->c_str();
+    */
     private static native String internal_native_c_str(long this_addr);
 
     public String data() {
@@ -51,6 +55,10 @@ public class IDLString extends IDLBase {
         var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].IDLString);
         var returnedJSObj = jsObj.data();
         return returnedJSObj;
+    */
+    /*[-FFM;-NATIVE]
+        IDLString* nativeObject = (IDLString*)this_addr;
+        return nativeObject->data();
     */
     private static native String internal_native_data(long this_addr);
 }

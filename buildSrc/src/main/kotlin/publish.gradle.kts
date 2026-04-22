@@ -8,14 +8,16 @@ var libProjects = mutableSetOf(
     project(":jParser:jParser-build-tool"),
     project(":jParser:jParser-base"),
     project(":jParser:jParser-idl"),
-    project(":jParser:jParser-cpp"),
+    project(":jParser:jParser-jni"),
+    project(":jParser:jParser-ffm"),
     project(":jParser:jParser-teavm"),
     project(":idl:idl-core"),
     project(":idl:idl-teavm"),
     project(":idl-helper:idl-helper-base"),
     project(":idl-helper:idl-helper-core"),
     project(":idl-helper:idl-helper-teavm"),
-    project(":idl-helper:idl-helper-desktop"),
+    project(":idl-helper:idl-helper-desktop-jni"),
+    project(":idl-helper:idl-helper-desktop-ffm"),
     project(":idl-helper:idl-helper-android"),
     project(":loader:loader-core"),
     project(":loader:loader-teavm"),
@@ -64,9 +66,9 @@ configure(libProjects) {
                         }
                     }
                     scm {
-                        connection.set("scm:git:git://github.com/xpenatan/jParser.git")
-                        developerConnection.set("scm:git:ssh://github.com/xpenatan/jParser.git")
-                        url.set("http://github.com/xpenatan/jParser/tree/master")
+                        connection.set("scm:git@github.com:xpenatan/jParser.git")
+                        developerConnection.set("scm:git@github.com:xpenatan/jParser.git")
+                        url.set("http://github.com/xpenatan/jParser")
                     }
                     licenses {
                         license {

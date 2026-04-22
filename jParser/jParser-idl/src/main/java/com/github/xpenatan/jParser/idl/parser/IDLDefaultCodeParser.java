@@ -38,6 +38,7 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
     public static final String CMD_IDL_SKIP = "-IDL_SKIP";
 
     protected boolean enableAttributeParsing = true;
+    public boolean generateNativeBindings = true;
 
     protected static final String NATIVE_ADDRESS = "native_address";
     protected static final String NATIVE_VOID_ADDRESS = "native_void_address";
@@ -138,14 +139,14 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
             BlockStmt blockStmt = idlMethodDeclaration.getBody().get();
             ReturnStmt returnStmt = new ReturnStmt();
             if(returnType.isPrimitiveType()) {
-                if(JParserHelper.isLong(returnType) || JParserHelper.isInt(returnType) || JParserHelper.isFloat(returnType) || JParserHelper.isDouble(returnType) || JParserHelper.isShort(returnType)) {
-                    NameExpr returnNameExpr = new NameExpr();
-                    returnNameExpr.setName("0");
-                    returnStmt.setExpression(returnNameExpr);
-                }
-                else if(JParserHelper.isBoolean(returnType)) {
+                if(JParserHelper.isBoolean(returnType)) {
                     NameExpr returnNameExpr = new NameExpr();
                     returnNameExpr.setName("false");
+                    returnStmt.setExpression(returnNameExpr);
+                }
+                else {
+                    NameExpr returnNameExpr = new NameExpr();
+                    returnNameExpr.setName("0");
                     returnStmt.setExpression(returnNameExpr);
                 }
             }

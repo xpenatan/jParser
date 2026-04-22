@@ -22,8 +22,14 @@ public class TestLib {
         ArrayList<String> logs = new ArrayList<>();
         boolean allTestsPassed = true;
         for(CodeTest setupTest : setupTests()) {
-            boolean result = setupTest.test();
             String testName = setupTest.getClass().getSimpleName();
+            boolean result;
+            try {
+                result = setupTest.test();
+            } catch(Throwable e) {
+                e.printStackTrace();
+                result = false;
+            }
             logs.add(testName + ": " + result);
             allTestsPassed = allTestsPassed && result;
         }

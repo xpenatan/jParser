@@ -117,7 +117,7 @@ public class IDLAttributeParser {
             JParserHelper.addMissingImportType(jParser, unit, type);
             IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, type, getMethodDeclaration);
 
-            if(idlParser.generateClass) {
+            if(idlParser.generateNativeBindings) {
                 setupAttributeMethod(idlParser, jParser, idlAttribute, false, classOrInterfaceDeclaration, getMethodDeclaration, getMethodName);
             }
         }
@@ -136,7 +136,7 @@ public class IDLAttributeParser {
             Type paramType = parameter.getType();
             JParserHelper.addMissingImportType(jParser, unit, paramType);
 
-            if(idlParser.generateClass) {
+            if(idlParser.generateNativeBindings) {
                 setupAttributeMethod(idlParser, jParser, idlAttribute, true, classOrInterfaceDeclaration, setMethodDeclaration, setMethodName);
             }
         }
