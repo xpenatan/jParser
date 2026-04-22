@@ -1,6 +1,7 @@
 package com.github.xpenatan.jParser.example.app;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jParser.example.testlib.TestLibLoader;
@@ -23,6 +24,7 @@ public class EnunBenchmarkAppTest extends ApplicationAdapter {
         if(init) {
             init = false;
             EnumBenchmark.test();
+            Gdx.app.exit();
         }
         ScreenUtils.clear(Color.GREEN);
     }

@@ -31,13 +31,18 @@ tasks.register<JavaExec>("TestLib_run_app_jni_desktop") {
     }
 }
 
-tasks.register<JavaExec>("TestLib_enum_benchmark_jni_desktop") {
+tasks.register<JavaExec>("TestLib_enum_benchmark_jni") {
     group = "example-benchmark"
-    description = "Run enum benchmark app with JNI bridge"
+    description = "Run enum benchmark with JNI bridge and write CSV output"
     mainClass.set("com.github.xpenatan.jParser.example.app.BenchmarkMain")
+    systemProperty("benchmark.enum.output", benchmarkDir.get().file("enum_benchmark_jni.csv").asFile.absolutePath)
     classpath = sourceSets["main"].runtimeClasspath
     if(isMacOs) {
         jvmArgs("-XstartOnFirstThread")
+    }
+
+    doFirst {
+        benchmarkDir.get().asFile.mkdirs()
     }
 }
 

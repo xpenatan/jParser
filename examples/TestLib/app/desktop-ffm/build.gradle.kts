@@ -39,10 +39,11 @@ tasks.register<JavaExec>("TestLib_run_app_ffm_desktop") {
     }
 }
 
-tasks.register<JavaExec>("TestLib_enum_benchmark_ffm_desktop") {
+tasks.register<JavaExec>("TestLib_enum_benchmark_ffm") {
     group = "example-benchmark"
-    description = "Run enum benchmark app with FFM bridge"
+    description = "Run enum benchmark with FFM bridge and write CSV output"
     mainClass.set("com.github.xpenatan.jParser.example.app.BenchmarkMain")
+    systemProperty("benchmark.enum.output", benchmarkDir.get().file("enum_benchmark_ffm.csv").asFile.absolutePath)
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(24))
@@ -50,6 +51,10 @@ tasks.register<JavaExec>("TestLib_enum_benchmark_ffm_desktop") {
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {
         jvmArgs("-XstartOnFirstThread")
+    }
+
+    doFirst {
+        benchmarkDir.get().asFile.mkdirs()
     }
 }
 
@@ -134,11 +139,29 @@ tasks.register<JavaExec>("TestLib_fps_benchmark_compare") {
     )
 }
 
+tasks.register<JavaExec>("TestLib_enum_benchmark_compare") {
+    group = "example-benchmark"
+    description = "Run JNI & FFM enum benchmarks then print a comparison table"
+    dependsOn(":examples:TestLib:app:desktop-jni:TestLib_enum_benchmark_jni", "TestLib_enum_benchmark_ffm")
+
+    mainClass.set("com.github.xpenatan.jParser.example.app.EnumBenchmarkCompare")
+    classpath = sourceSets["main"].runtimeClasspath
+    args(
+        benchmarkDir.get().file("enum_benchmark_jni.csv").asFile.absolutePath,
+        benchmarkDir.get().file("enum_benchmark_ffm.csv").asFile.absolutePath,
+        benchmarkDir.get().file("enum_benchmark_compare.txt").asFile.absolutePath
+    )
+}
+
 tasks.named("TestLib_throughput_benchmark_ffm") {
     mustRunAfter(":examples:TestLib:app:desktop-jni:TestLib_throughput_benchmark_jni")
 }
 
 tasks.named("TestLib_fps_benchmark_ffm") {
     mustRunAfter(":examples:TestLib:app:desktop-jni:TestLib_fps_benchmark_jni")
+}
+
+tasks.named("TestLib_enum_benchmark_ffm") {
+    mustRunAfter(":examples:TestLib:app:desktop-jni:TestLib_enum_benchmark_jni")
 }
 
