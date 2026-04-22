@@ -43,7 +43,6 @@ public class BuildLibA {
                 }
                 if(op.containsArg("jni_windows64")) {
                     targets.add(getJNIWindowVCTarget(op));
-//                    targets.add(getWindowTarget(op));
                 }
                 if(op.containsArg("jni_linux64")) {
                     targets.add(getJNILinuxTarget(op));
