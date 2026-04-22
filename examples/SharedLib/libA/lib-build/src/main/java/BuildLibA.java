@@ -159,7 +159,7 @@ public class BuildLibA {
 
         String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
 
-        String macSubDir = isArm ? "mac/arm/ffm" : "mac/ffm";
+        String macSubDir = isArm ? "mac/arm/jni" : "mac/jni";
 
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
@@ -202,14 +202,6 @@ public class BuildLibA {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
-
-        String config;
-        if(BuildTarget.isWindows()) {
-            config = "-DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"";
-        }
-        else {
-            config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
-        }
 
         // Make a static library
         EmscriptenTarget compileStaticTarget = new EmscriptenTarget();

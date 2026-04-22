@@ -180,9 +180,11 @@ public class BuildLib {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
+        String macSubDir = isArm ? "mac/arm/jni" : "mac/jni";
+
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
-        compileStaticTarget.libDirSuffix = "mac/jni";
+        compileStaticTarget.libDirSuffix = macSubDir;
         compileStaticTarget.cppFlags.add("-std=c++11");
         compileStaticTarget.cppFlags.add("-fPIC");
         compileStaticTarget.isStatic = true;
@@ -193,7 +195,7 @@ public class BuildLib {
         multiTarget.add(compileStaticTarget);
 
         MacTarget linkTarget = new MacTarget(isArm);
-        linkTarget.libDirSuffix = "mac/jni";
+        linkTarget.libDirSuffix = macSubDir;
         linkTarget.addJNIHeaders();
         linkTarget.cppFlags.add("-std=c++11");
         linkTarget.cppFlags.add("-fPIC");

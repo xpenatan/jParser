@@ -184,7 +184,7 @@ public class BuildLibB {
 
         String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
 
-        String macSubDir = isArm ? "mac/arm/ffm" : "mac/ffm";
+        String macSubDir = isArm ? "mac/arm/jni" : "mac/jni";
 
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
