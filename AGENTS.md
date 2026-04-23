@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-jParser is a Java code-generation and C/C++ compilation library that bridges native code to JVM platforms (desktop, mobile, web). It reads Java source files containing embedded native code blocks, then generates platform-specific Java source for **JNI** (desktop/mobile), **FFM** (desktop, Java 22+), and **TeaVM** (web/WASM) targets. It also supports **WebIDL**-driven automatic binding generation.
+jParser is a Java code-generation and C/C++ compilation library that bridges native code to JVM platforms (desktop, mobile, web). It reads Java source files containing embedded native code blocks, then generates platform-specific Java source for **JNI** (desktop/mobile), **FFM** (desktop, Java 25+), and **TeaVM** (web/WASM) targets. It also supports **WebIDL**-driven automatic binding generation.
 
 ### Context Resumption & State Persistence
 
@@ -34,14 +34,14 @@ This ensures that if the session is interrupted, the next agent has a perfect "s
 ### Module Layout (follows a strict `-base/-build/-core/-teavm` convention)
 
 | Suffix | Purpose | Java target |
-|---|---|---|
-| `lib-base` | Hand-written Java source with embedded `/*[-JNI;-NATIVE]*/`, `/*[-FFM;-NATIVE]*/`, and `/*[-TEAVM;-REPLACE]*/` code blocks | Java 8 |
-| `lib-build` | `BuildLib.main()` entry point — configures IDL, targets, runs generation + compilation | Java 11 |
-| `lib-core` | **Generated** bridge-agnostic API classes (do not hand-edit) | Java 11 |
-| `lib-teavm` | **Generated** TeaVM Java output (do not hand-edit) | Java 11 |
-| `lib-desktop-jni` | **Generated** desktop JNI Java output + desktop JNI native DLLs/shared-libs (do not hand-edit) | Java 11 |
-| `lib-desktop-ffm` | **Generated** FFM Java output + FFM-compiled native DLLs/shared-libs (do not hand-edit) | Java 22+ |
-| `lib-android` | **Generated** Android JNI Java output + Android JNI packaging/native libs (do not hand-edit) | Java 8 |
+|---|---|-------------|
+| `lib-base` | Hand-written Java source with embedded `/*[-JNI;-NATIVE]*/`, `/*[-FFM;-NATIVE]*/`, and `/*[-TEAVM;-REPLACE]*/` code blocks | Java 8      |
+| `lib-build` | `BuildLib.main()` entry point — configures IDL, targets, runs generation + compilation | Java 11     |
+| `lib-core` | **Generated** bridge-agnostic API classes (do not hand-edit) | Java 11     |
+| `lib-teavm` | **Generated** TeaVM Java output (do not hand-edit) | Java 11     |
+| `lib-desktop-jni` | **Generated** desktop JNI Java output + desktop JNI native DLLs/shared-libs (do not hand-edit) | Java 11     |
+| `lib-desktop-ffm` | **Generated** FFM Java output + FFM-compiled native DLLs/shared-libs (do not hand-edit) | Java 25+    |
+| `lib-android` | **Generated** Android JNI Java output + Android JNI packaging/native libs (do not hand-edit) | Java 8      |
 
 This pattern repeats across `jParser/`, `idl-helper/`, `loader/`, and `examples/`.
 

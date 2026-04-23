@@ -31,7 +31,7 @@
 
 ## Overview
 
-Inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen), jParser lets you embed native C/C++ code directly inside Java source files using annotated comment blocks. Each block is translated into target-specific Java source code, enabling a single `lib-base` module to produce a bridge-agnostic `lib-core` API plus platform bridge outputs for **JNI** (desktop/mobile), **FFM** (desktop, Java 22+), and **TeaVM** (web via JS/WASM).
+Inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen), jParser lets you embed native C/C++ code directly inside Java source files using annotated comment blocks. Each block is translated into target-specific Java source code, enabling a single `lib-base` module to produce a bridge-agnostic `lib-core` API plus platform bridge outputs for **JNI** (desktop/mobile), **FFM** (desktop, Java 25+), and **TeaVM** (web via JS/WASM).
 
 For web targets, jParser uses [Emscripten](https://emscripten.org/) to compile C/C++ into JS/WASM and [TeaVM](https://github.com/konsoletyper/teavm) to generate the corresponding Java-to-JavaScript bridge via `@JSBody` annotations.
 
@@ -43,13 +43,13 @@ jParser consists of two main stages:
 
 Reads the hand-written Java source in the `lib-base` module — which contains embedded native code blocks — and generates platform-specific Java source for each target:
 
-| Output Module | Target | Description |
-|---|---|---|
-| `lib-core` | Core API | Generated bridge-agnostic API classes |
-| `lib-desktop-jni` | JNI (Desktop) | Generated desktop JNI Java + native jars |
+| Output Module | Target | Description                                    |
+|---|---|------------------------------------------------|
+| `lib-core` | Core API | Generated bridge-agnostic API classes          |
+| `lib-desktop-jni` | JNI (Desktop) | Generated desktop JNI Java + native jars       |
 | `lib-android` | JNI (Android) | Generated Android JNI Java + Android packaging |
-| `lib-teavm` | TeaVM | Generated `@JSBody`-annotated Java for web |
-| `lib-desktop-ffm` | FFM | Generated FFM Java for desktop (Java 22+) |
+| `lib-teavm` | TeaVM | Generated `@JSBody`-annotated Java for web     |
+| `lib-desktop-ffm` | FFM | Generated FFM Java for desktop (Java 25+)      |
 
 ### 2. Native Compilation
 
@@ -210,6 +210,10 @@ jParser projects follow a strict `-base / -build / -core / -teavm` convention:
 | [xBullet](https://github.com/xpenatan/xBullet) | Bullet Physics bindings for Java | Active |
 | [gdx-box2d](https://github.com/xpenatan/gdx-box2d) | Box2D bindings for libGDX | Inactive |
 | [gdx-physx](https://github.com/xpenatan/gdx-physx) | PhysX bindings for libGDX | Inactive |
+
+## Support
+
+If you find this project valuable and want to fuel its continued growth, please consider [sponsoring](https://github.com/sponsors/xpenatan) it. Your support keeps the momentum going!
 
 ## License
 

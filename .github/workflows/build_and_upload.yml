@@ -30,11 +30,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 24
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: "corretto"
-          java-version: 24
+          java-version: 25
 
       - name: Set up MinGW
         uses: msys2/setup-msys2@v2
@@ -96,11 +96,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 24
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: "corretto"
-          java-version: 24
+          java-version: 25
 
       - name: Set up MinGW
         run: |
@@ -155,11 +155,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 24
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: "corretto"
-          java-version: 24
+          java-version: 25
 
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
@@ -216,11 +216,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 24
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: "corretto"
-          java-version: 24
+          java-version: 25
 
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
@@ -277,11 +277,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 24
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: "corretto"
-          java-version: 24
+          java-version: 25
 
       - name: Set up MinGW
         run: |
@@ -320,11 +320,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 24
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: "corretto"
-          java-version: 24
+          java-version: 25
 
       - name: Set up MinGW
         run: |
@@ -380,11 +380,11 @@ jobs:
           property: version
           default: 0.0.1
 
-      - name: Set up JDK 24
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: "corretto"
-          java-version: 24
+          java-version: 25
 
       - name: Set up MinGW
         run: |

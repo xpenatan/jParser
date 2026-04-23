@@ -10,8 +10,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.java24Target)
-    targetCompatibility = JavaVersion.toVersion(LibExt.java24Target)
+    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
 }
 
 // Bundle FFM-compiled native libraries into the JAR.
