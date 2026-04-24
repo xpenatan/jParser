@@ -101,7 +101,7 @@ tasks.register<JavaExec>("LibA_build_project_linux64_ffm") {
     group = "lib"
     description = "Generate FFM Java code and compile for Linux with FFMGlue"
     mainClass.set(mainClassName)
-    args = mutableListOf("inux64_ffm")
+    args = mutableListOf("linux64_ffm")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
