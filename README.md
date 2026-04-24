@@ -186,18 +186,18 @@ jParser projects follow a strict `-base / -build / -core / -teavm` convention:
 
 ```bash
 # 1. Build idl-helper (required once)
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_jni_windows64
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_windows64_jni
 
 # 2. Generate code + compile native library
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_jni_windows64
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_jni
 
 # 3. Run the desktop app
-./gradlew :examples:TestLib:app:desktop-jni:TestLib_run_app_jni_desktop
-./gradlew :examples:TestLib:app:desktop-ffm:TestLib_run_app_ffm_desktop
+./gradlew :examples:TestLib:app:desktop-jni:TestLib_run_app_desktop_jni
+./gradlew :examples:TestLib:app:desktop-ffm:TestLib_run_app_desktop_ffm
 ```
 
 > Replace `windows64` with `linux64`, `mac64`, or `macArm` for other platforms.
-> Current desktop FFM app tasks configure Java toolchain `24`; ensure a Java 24 toolchain is available when running `..._run_app_ffm_desktop` tasks.
+> Current desktop FFM app tasks configure Java toolchain `24`; ensure a Java 24 toolchain is available when running `..._run_app_desktop_ffm` tasks.
 
 ## Libraries Using jParser
 

@@ -25,7 +25,7 @@ dependencies {
     implementation(project(":examples:TestLib:lib:lib-desktop-ffm"))
 }
 
-tasks.register<JavaExec>("TestLib_run_app_ffm_desktop") {
+tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {
     group = "example-desktop"
     description = "Run desktop app with FFM bridge"
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
@@ -96,7 +96,7 @@ tasks.register<JavaExec>("TestLib_fps_benchmark_ffm") {
     }
 }
 
-tasks.register<JavaExec>("TestLib_fps_benchmark_ffm_interactive") {
+tasks.register<JavaExec>("TestLib_fps_benchmark_interactive_ffm") {
     group = "example-benchmark"
     description = "Run FPS benchmark with FFM bridge in interactive mode"
     mainClass.set("com.github.xpenatan.jParser.example.app.NativeBridgeFpsBenchmarkMain")

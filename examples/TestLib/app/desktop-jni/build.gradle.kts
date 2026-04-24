@@ -21,7 +21,7 @@ dependencies {
     implementation(project(":examples:TestLib:lib:lib-desktop-jni"))
 }
 
-tasks.register<JavaExec>("TestLib_run_app_jni_desktop") {
+tasks.register<JavaExec>("TestLib_run_app_desktop_jni") {
     group = "example-desktop"
     description = "Run desktop app with JNI bridge"
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
@@ -76,7 +76,7 @@ tasks.register<JavaExec>("TestLib_fps_benchmark_jni") {
     }
 }
 
-tasks.register<JavaExec>("TestLib_fps_benchmark_jni_interactive") {
+tasks.register<JavaExec>("TestLib_fps_benchmark_interactive_jni") {
     group = "example-benchmark"
     description = "Run FPS benchmark with JNI bridge in interactive mode"
     mainClass.set("com.github.xpenatan.jParser.example.app.NativeBridgeFpsBenchmarkMain")

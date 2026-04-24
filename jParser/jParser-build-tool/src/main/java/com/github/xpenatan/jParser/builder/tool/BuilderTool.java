@@ -86,28 +86,28 @@ public class BuilderTool {
     }
 
     private static void applyAutoGenerateFlags(BuildToolOptions op) {
-        if(op.containsArg("gen_ffm_desktop") ||
-                op.containsArg("ffm_windows64") ||
-                op.containsArg("ffm_linux64") ||
-                op.containsArg("ffm_mac64") ||
-                op.containsArg("ffm_macArm")) {
+        if(op.containsArg("gen_desktop_ffm") ||
+                op.containsArg("windows64_ffm") ||
+                op.containsArg("linux64_ffm") ||
+                op.containsArg("mac64_ffm") ||
+                op.containsArg("macArm_ffm")) {
             op.generateDesktopFFM = true;
         }
 
-        if(op.containsArg("gen_jni_desktop") ||
-                op.containsArg("jni_windows64") ||
-                op.containsArg("jni_linux64") ||
-                op.containsArg("jni_mac64") ||
-                op.containsArg("jni_macArm") ||
-                op.containsArg("jni_ios")) {
+        if(op.containsArg("gen_desktop_jni") ||
+                op.containsArg("windows64_jni") ||
+                op.containsArg("linux64_jni") ||
+                op.containsArg("mac64_jni") ||
+                op.containsArg("macArm_jni") ||
+                op.containsArg("ios_jni")) {
             op.generateDesktopJNI = true;
         }
 
-        if(op.containsArg("gen_jni_android") || op.containsArg("jni_android")) {
+        if(op.containsArg("gen_android_jni") || op.containsArg("android_jni")) {
             op.generateAndroid = true;
         }
 
-        if(op.containsArg("gen_jni_ios") || op.containsArg("jni_ios")) {
+        if(op.containsArg("gen_ios_jni") || op.containsArg("ios_jni")) {
             op.generateIOS = true;
         }
 

@@ -21,7 +21,7 @@ dependencies {
     implementation(project(":examples:SharedLib:libB:lib-desktop-jni"))
 }
 
-tasks.register<JavaExec>("SharedLib_run_app_jni_desktop") {
+tasks.register<JavaExec>("SharedLib_run_app_desktop_jni") {
     group = "example-desktop"
     description = "Run desktop app with JNI bridge"
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")

@@ -25,7 +25,7 @@ dependencies {
     implementation(project(":examples:SharedLib:libB:lib-desktop-ffm"))
 }
 
-tasks.register<JavaExec>("SharedLib_run_app_ffm_desktop") {
+tasks.register<JavaExec>("SharedLib_run_app_desktop_ffm") {
     group = "example-desktop"
     description = "Run desktop app with FFM bridge"
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")

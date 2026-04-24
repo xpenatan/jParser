@@ -51,28 +51,28 @@ jobs:
           value: $env:PATH;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build
 
       - name: Build idl-helper project
-        run: ./gradlew idl_helper_build_project_jni_windows64
+        run: ./gradlew idl_helper_build_project_windows64_jni
 
       - name: Build idl-helper FFM project
-        run: ./gradlew idl_helper_build_project_ffm_windows64
+        run: ./gradlew idl_helper_build_project_windows64_ffm
 
       - name: Build TestLib project
-        run: ./gradlew TestLib_build_project_jni_windows64
+        run: ./gradlew TestLib_build_project_windows64_jni
 
       - name: Build TestLib FFM project
-        run: ./gradlew TestLib_build_project_ffm_windows64
+        run: ./gradlew TestLib_build_project_windows64_ffm
 
       - name: Build Shared LibA project
-        run: ./gradlew LibA_build_project_jni_windows64
+        run: ./gradlew LibA_build_project_windows64_jni
 
       - name: Build Shared LibA FFM project
-        run: ./gradlew LibA_build_project_ffm_windows64
+        run: ./gradlew LibA_build_project_windows64_ffm
 
       - name: Build Shared LibB project
-        run: ./gradlew LibB_build_project_jni_windows64
+        run: ./gradlew LibB_build_project_windows64_jni
 
       - name: Build Shared LibB FFM project
-        run: ./gradlew LibB_build_project_ffm_windows64
+        run: ./gradlew LibB_build_project_windows64_ffm
 
 #      - name: Test Shared Lib
 #        run: ./gradlew :examples:SharedLib:app:core:test
@@ -110,28 +110,28 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build idl-helper project
-        run: ./gradlew idl_helper_build_project_jni_linux64
+        run: ./gradlew idl_helper_build_project_linux64_jni
 
       - name: Build idl-helper FFM project
-        run: ./gradlew idl_helper_build_project_ffm_linux64
+        run: ./gradlew idl_helper_build_project_linux64_ffm
 
       - name: Build TestLib project
-        run: ./gradlew TestLib_build_project_jni_linux64
+        run: ./gradlew TestLib_build_project_linux64_jni
 
       - name: Build TestLib FFM project
-        run: ./gradlew TestLib_build_project_ffm_linux64
+        run: ./gradlew TestLib_build_project_linux64_ffm
 
       - name: Build Shared LibA project
-        run: ./gradlew LibA_build_project_jni_linux64
+        run: ./gradlew LibA_build_project_linux64_jni
 
       - name: Build Shared LibA FFM project
-        run: ./gradlew LibA_build_project_ffm_linux64
+        run: ./gradlew LibA_build_project_linux64_ffm
 
       - name: Build Shared LibB project
-        run: ./gradlew LibB_build_project_jni_linux64
+        run: ./gradlew LibB_build_project_linux64_jni
 
       - name: Build Shared LibB FFM project
-        run: ./gradlew LibB_build_project_ffm_linux64
+        run: ./gradlew LibB_build_project_linux64_ffm
 
 #      - name: Test Shared Lib
 #        run: ./gradlew :examples:SharedLib:app:core:test
@@ -165,34 +165,34 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project idl-helper
-        run: ./gradlew idl_helper_build_project_jni_mac64
+        run: ./gradlew idl_helper_build_project_mac64_jni
 
       - name: Build idl-helper FFM project
-        run: ./gradlew idl_helper_build_project_ffm_mac64
+        run: ./gradlew idl_helper_build_project_mac64_ffm
 
       - name: Build TestLib project
         run: |
-          ./gradlew TestLib_build_project_jni_mac64
+          ./gradlew TestLib_build_project_mac64_jni
 
       - name: Build TestLib FFM project
         run: |
-          ./gradlew TestLib_build_project_ffm_mac64
+          ./gradlew TestLib_build_project_mac64_ffm
 
 #      - name: Build Shared LibA project
 #        run: |
-#          ./gradlew LibA_build_project_jni_mac64
+#          ./gradlew LibA_build_project_mac64_jni
 #
 #      - name: Build Shared LibA FFM project
 #        run: |
-#          ./gradlew LibA_build_project_ffm_mac64
+#          ./gradlew LibA_build_project_mac64_ffm
 #
 #      - name: Build Shared LibB project
 #        run: |
-#          ./gradlew LibB_build_project_jni_mac64
+#          ./gradlew LibB_build_project_mac64_jni
 #
 #      - name: Build Shared LibB FFM project
 #        run: |
-#          ./gradlew LibB_build_project_ffm_mac64
+#          ./gradlew LibB_build_project_mac64_ffm
 
 #      - name: Test Shared Lib
 #        run: ./gradlew :examples:SharedLib:app:core:test
@@ -226,34 +226,34 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project idl-helper
-        run: ./gradlew idl_helper_build_project_jni_macArm
+        run: ./gradlew idl_helper_build_project_macArm_jni
 
       - name: Build idl-helper FFM project
-        run: ./gradlew idl_helper_build_project_ffm_macArm
+        run: ./gradlew idl_helper_build_project_macArm_ffm
 
       - name: Build TestLib project
         run: |
-          ./gradlew TestLib_build_project_jni_macArm
+          ./gradlew TestLib_build_project_macArm_jni
 
       - name: Build TestLib FFM project
         run: |
-          ./gradlew TestLib_build_project_ffm_macArm
+          ./gradlew TestLib_build_project_macArm_ffm
 
 #      - name: Build Shared LibA project
 #        run: |
-#          ./gradlew LibA_build_project_jni_macArm
+#          ./gradlew LibA_build_project_macArm_jni
 #
 #      - name: Build Shared LibA FFM project
 #        run: |
-#          ./gradlew LibA_build_project_ffm_macArm
+#          ./gradlew LibA_build_project_macArm_ffm
 #
 #      - name: Build Shared LibB project
 #        run: |
-#          ./gradlew LibB_build_project_jni_macArm
+#          ./gradlew LibB_build_project_macArm_jni
 #
 #      - name: Build Shared LibB FFM project
 #        run: |
-#          ./gradlew LibB_build_project_ffm_macArm
+#          ./gradlew LibB_build_project_macArm_ffm
 
 #      - name: Test Shared Lib
 #        run: ./gradlew :examples:SharedLib:app:core:test
@@ -343,12 +343,12 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project idl-helper
-        run: ./gradlew idl_helper_build_project_jni_android
+        run: ./gradlew idl_helper_build_project_android_jni
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Build project
-        run: ./gradlew TestLib_build_project_jni_android
+        run: ./gradlew TestLib_build_project_android_jni
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 

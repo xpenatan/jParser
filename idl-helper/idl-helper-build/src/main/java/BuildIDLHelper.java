@@ -38,35 +38,35 @@ public class BuildIDLHelper {
                 if(op.containsArg("teavm")) {
                     targets.add(getTeavmTarget(op, idlReader));
                 }
-                if(op.containsArg("jni_windows64")) {
+                if(op.containsArg("windows64_jni")) {
                     targets.add(getJNIWindowVCTarget(op));
                 }
-                if(op.containsArg("jni_linux64")) {
+                if(op.containsArg("linux64_jni")) {
                     targets.add(getJNILinuxTarget(op));
                 }
-                if(op.containsArg("jni_mac64")) {
+                if(op.containsArg("mac64_jni")) {
                     targets.add(getJNIMacTarget(op, false));
                 }
-                if(op.containsArg("jni_macArm")) {
+                if(op.containsArg("macArm_jni")) {
                     targets.add(getJNIMacTarget(op, true));
                 }
-                if(op.containsArg("jni_android")) {
+                if(op.containsArg("android_jni")) {
                     targets.add(getJNIAndroidTarget(op));
                 }
-                if(op.containsArg("jni_ios")) {
+                if(op.containsArg("ios_jni")) {
                     targets.add(getJNIIOSTarget(op));
                 }
 
-                if(op.containsArg("ffm_windows64")) {
+                if(op.containsArg("windows64_ffm")) {
                     targets.add(getFFMWindowVCTarget(op));
                 }
-                if(op.containsArg("ffm_linux64")) {
+                if(op.containsArg("linux64_ffm")) {
                     targets.add(getFFMLinuxTarget(op));
                 }
-                if(op.containsArg("ffm_mac64")) {
+                if(op.containsArg("mac64_ffm")) {
                     targets.add(getFFMMacTarget(op, false));
                 }
-                if(op.containsArg("ffm_macArm")) {
+                if(op.containsArg("macArm_ffm")) {
                     targets.add(getFFMMacTarget(op, true));
                 }
             }

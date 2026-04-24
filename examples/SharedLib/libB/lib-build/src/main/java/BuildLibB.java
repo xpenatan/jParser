@@ -6,7 +6,6 @@ import com.github.xpenatan.jParser.builder.targets.IOSTarget;
 import com.github.xpenatan.jParser.builder.targets.LinuxTarget;
 import com.github.xpenatan.jParser.builder.targets.MacTarget;
 import com.github.xpenatan.jParser.builder.targets.WindowsMSVCTarget;
-import com.github.xpenatan.jParser.builder.targets.WindowsTarget;
 import com.github.xpenatan.jParser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jParser.builder.tool.BuilderTool;
@@ -46,35 +45,35 @@ public class BuildLibB {
                 if(op.containsArg("teavm")) {
                     targets.add(getTeavmTarget(op, idlReader, libAPath));
                 }
-                if(op.containsArg("jni_windows64")) {
+                if(op.containsArg("windows64_jni")) {
                     targets.add(getJNIWindowVCTarget(op, libAPath));
                 }
-                if(op.containsArg("jni_linux64")) {
+                if(op.containsArg("linux64_jni")) {
                     targets.add(getJNILinuxTarget(op, libAPath));
                 }
-                if(op.containsArg("jni_mac64")) {
+                if(op.containsArg("mac64_jni")) {
                     targets.add(getJNIMacTarget(op, false, libAPath));
                 }
-                if(op.containsArg("jni_macArm")) {
+                if(op.containsArg("macArm_jni")) {
                     targets.add(getJNIMacTarget(op, true, libAPath));
                 }
-                if(op.containsArg("jni_android")) {
+                if(op.containsArg("android_jni")) {
                     targets.add(getJNIAndroidTarget(op, libAPath));
                 }
-                if(op.containsArg("jni_ios")) {
+                if(op.containsArg("ios_jni")) {
                     targets.add(getJNIIOSTarget(op, libAPath));
                 }
 
-                if(op.containsArg("ffm_windows64")) {
+                if(op.containsArg("windows64_ffm")) {
                     targets.add(getFFMWindowVCTarget(op, libAPath));
                 }
-                if(op.containsArg("ffm_linux64")) {
+                if(op.containsArg("linux64_ffm")) {
                     targets.add(getFFMLinuxTarget(op, libAPath));
                 }
-                if(op.containsArg("ffm_mac64")) {
+                if(op.containsArg("mac64_ffm")) {
                     targets.add(getFFMMacTarget(op, false, libAPath));
                 }
-                if(op.containsArg("ffm_macArm")) {
+                if(op.containsArg("macArm_ffm")) {
                     targets.add(getFFMMacTarget(op, true, libAPath));
                 }
             }

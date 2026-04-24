@@ -108,16 +108,16 @@ The idl-helper provides the `IDLBase` runtime for all native-bound objects. It m
 ```sh
 # Step 1 — Generate JNI/TeaVM/FFM Java code + compile native library for your platform
 # JNI (pick your platform):
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_jni_windows64
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_jni_linux64
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_jni_mac64
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_jni_macArm
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_windows64_jni
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_linux64_jni
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_mac64_jni
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_macArm_jni
 
 # FFM (pick your platform):
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_ffm_windows64
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_ffm_linux64
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_ffm_mac64
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_ffm_macArm
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_windows64_ffm
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_linux64_ffm
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_mac64_ffm
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_macArm_ffm
 
 # All JNI platforms at once:
 ./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_all
@@ -129,26 +129,26 @@ TestLib is the primary test/example library. Building it generates Java source c
 
 ```sh
 # Step 1 — Generate Java code + compile native for your platform (JNI):
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_jni_windows64
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_jni_linux64
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_jni_mac64
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_jni_macArm
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_linux64_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_mac64_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_macArm_jni
 
 # All JNI platforms:
 ./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_all
 
 # FFM (generates lib-desktop-ffm Java code + compiles FFM native):
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_ffm_windows64
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_ffm_linux64
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_ffm_mac64
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_ffm_macArm
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_ffm
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_linux64_ffm
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_mac64_ffm
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_macArm_ffm
 
 # Generate FFM Java code only (no native compilation):
 ./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_ffm
 
 # Step 2 — Run the desktop app (JNI or FFM):
-./gradlew :examples:TestLib:app:desktop-jni:TestLib_run_app_jni_desktop
-./gradlew :examples:TestLib:app:desktop-ffm:TestLib_run_app_ffm_desktop
+./gradlew :examples:TestLib:app:desktop-jni:TestLib_run_app_desktop_jni
+./gradlew :examples:TestLib:app:desktop-ffm:TestLib_run_app_desktop_ffm
 
 ```
 
@@ -158,18 +158,18 @@ SharedLib demonstrates two libraries (libA + libB) where libB depends on libA. *
 
 ```sh
 # libA — JNI:
-./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_jni_windows64
+./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_windows64_jni
 # libA — FFM:
-./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_ffm_windows64
+./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_windows64_ffm
 
 # libB — JNI (after libA):
-./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_jni_windows64
+./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_windows64_jni
 # libB — FFM (after libA):
-./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_ffm_windows64
+./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_windows64_ffm
 
 # Run SharedLib desktop app (JNI or FFM):
-./gradlew :examples:SharedLib:app:desktop-jni:SharedLib_run_app_jni_desktop
-./gradlew :examples:SharedLib:app:desktop-ffm:SharedLib_run_app_ffm_desktop
+./gradlew :examples:SharedLib:app:desktop-jni:SharedLib_run_app_desktop_jni
+./gradlew :examples:SharedLib:app:desktop-ffm:SharedLib_run_app_desktop_ffm
 ```
 
 Replace `windows64` with `linux64`, `mac64`, or `macArm` for other platforms.
@@ -208,16 +208,16 @@ Measures how native bridge overhead affects frame rate. Each frame executes a fi
 
 ```sh
 # 1. Build idl-helper native (both JNI + FFM)
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_jni_windows64
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_ffm_windows64
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_windows64_jni
+./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_windows64_ffm
 
 # 2. Build TestLib native (both JNI + FFM)
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_jni_windows64
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_ffm_windows64
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_ffm
 
 # 3. Run the desktop app (JNI or FFM)
-./gradlew :examples:TestLib:app:desktop-jni:TestLib_run_app_jni_desktop
-./gradlew :examples:TestLib:app:desktop-ffm:TestLib_run_app_ffm_desktop
+./gradlew :examples:TestLib:app:desktop-jni:TestLib_run_app_desktop_jni
+./gradlew :examples:TestLib:app:desktop-ffm:TestLib_run_app_desktop_ffm
 
 # 4. Run throughput benchmarks
 ./gradlew :examples:TestLib:app:desktop-ffm:TestLib_throughput_benchmark_compare
@@ -235,5 +235,5 @@ Measures how native bridge overhead affects frame rate. Each frame executes a fi
 - **IDLBase** is the parent of all native-bound classes. Memory must be manually managed via `dispose()`. Use `ClassName.NULL` instead of Java `null` for native parameters.
 - **Dependencies**: JavaParser (`3.26.1`) for AST manipulation, TeaVM (`0.13.1`) for web target, JUnit 4 for tests.
 - **Native bridge selection**: TestLib and SharedLib desktop tasks are split into `app/desktop-jni` and `app/desktop-ffm` modules.
-- **FFM desktop launcher toolchain**: Desktop `..._run_app_ffm_desktop` tasks currently configure Java toolchain 24 in app desktop-ffm Gradle scripts.
+- **FFM desktop launcher toolchain**: Desktop `..._run_app_desktop_ffm` tasks currently configure Java toolchain 24 in app desktop-ffm Gradle scripts.
 - **JNI vs FFM C++ differences**: JNI glue uses JNI types (`jlong`, `jint`, `JNIEnv*`). FFM glue uses `extern "C"` with standard C types (`int64_t`, `int32_t`) and no JNI environment — calls go through `java.lang.foreign` MethodHandle downcalls.
