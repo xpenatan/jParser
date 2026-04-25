@@ -157,9 +157,7 @@ jobs:
   build_mac_intel:
     name: Build Mac Intel
     runs-on: macos-latest
-    env:
-      # Force the test to select the intel native via env var; DesktopHeadlessTest will set os.arch accordingly
-      JPARSE_FORCE_ARCH: "intel"
+    if: runner.arch == 'X64'
 
     steps:
       - name: Cancel Previous Runs
@@ -229,9 +227,7 @@ jobs:
   build_mac_arm:
     name: Build Mac Arm
     runs-on: macos-latest
-    env:
-      # Force the test to select the arm native via env var; DesktopHeadlessTest will set os.arch accordingly
-      JPARSE_FORCE_ARCH: "arm"
+    if: runner.arch == 'ARM64'
 
     steps:
       - name: Cancel Previous Runs
