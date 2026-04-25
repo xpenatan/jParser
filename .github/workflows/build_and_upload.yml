@@ -156,7 +156,7 @@ jobs:
 
   build_mac_intel:
     name: Build Mac Intel
-    runs-on: macos-latest
+    runs-on: macos-26-intel
 
     steps:
       - name: Cancel Previous Runs
@@ -189,6 +189,14 @@ jobs:
       - name: Build TestLib FFM project
         run: |
           ./gradlew TestLib_build_project_mac64_ffm
+
+      - name: Run TestLib desktop JNI tests
+        run: |
+          ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
+
+      - name: Run TestLib desktop FFM tests
+        run: |
+          ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
 #      - name: Build Shared LibA project
 #        run: |
