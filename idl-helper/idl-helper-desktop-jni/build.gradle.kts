@@ -18,16 +18,16 @@ dependencies {
 // create per-platform native jars (classifier-based) similar to jWebGPU
 val platforms: MutableMap<String, Jar.() -> Unit> = mutableMapOf()
 if(file(windowsFile).exists()) {
-    platforms["windows_64"] = { from(windowsFile) { into("native") } }
+    platforms["windows_64"] = { from(windowsFile) }
 }
 if(file(linuxFile).exists()) {
-    platforms["linux_x64"] = { from(linuxFile) { into("native") } }
+    platforms["linux_x64"] = { from(linuxFile) }
 }
 if(file(macFile).exists()) {
-    platforms["mac_x64"] = { from(macFile) { into("native") } }
+    platforms["mac_x64"] = { from(macFile) }
 }
 if(file(macArmFile).exists()) {
-    platforms["mac_arm64"] = { from(macArmFile) { into("native") } }
+    platforms["mac_arm64"] = { from(macArmFile) }
 }
 
 val nativeJars = platforms.map { (classifier, config) ->

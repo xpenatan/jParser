@@ -38,10 +38,11 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
     implementation(project(":examples:TestLib:lib:lib-desktop-ffm"))
-    runtimeOnly(project(":examples:TestLib:lib:lib-desktop-ffm"))
+    // Pull platform native jar (classifier jars) produced by the idl-helper's `nativeRuntime` configuration
+    runtimeOnly(project(mapOf("path" to ":idl-helper:idl-helper-desktop-ffm", "configuration" to "nativeRuntime")))
 
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
-    testRuntimeOnly(project(":examples:TestLib:lib:lib-desktop-ffm"))
+    testRuntimeOnly(project(mapOf("path" to ":idl-helper:idl-helper-desktop-ffm", "configuration" to "nativeRuntime")))
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {
@@ -50,7 +51,7 @@ tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(24))
+        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {

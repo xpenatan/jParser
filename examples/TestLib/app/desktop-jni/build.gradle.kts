@@ -38,11 +38,12 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
     implementation(project(":examples:TestLib:lib:lib-desktop-jni"))
-    runtimeOnly(project(":examples:TestLib:lib:lib-desktop-jni"))
+    // Pull platform native jar (classifier jars) produced by the idl-helper's `nativeRuntime` configuration
+    runtimeOnly(project(mapOf("path" to ":idl-helper:idl-helper-desktop-jni", "configuration" to "nativeRuntime")))
 
     // test-time dependencies required to initialize native loaders
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
-    testRuntimeOnly(project(":examples:TestLib:lib:lib-desktop-jni"))
+    testRuntimeOnly(project(mapOf("path" to ":idl-helper:idl-helper-desktop-jni", "configuration" to "nativeRuntime")))
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_jni") {
