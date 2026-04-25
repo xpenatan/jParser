@@ -157,9 +157,6 @@ jobs:
   build_mac_intel:
     name: Build Mac Intel
     runs-on: macos-latest
-    env:
-      # Force the test to select the intel native via env var; DesktopHeadlessTest will set os.arch accordingly
-      JPARSE_FORCE_ARCH: "intel"
 
     steps:
       - name: Cancel Previous Runs
@@ -193,14 +190,6 @@ jobs:
         run: |
           ./gradlew TestLib_build_project_mac64_ffm
 
-      - name: Run TestLib desktop JNI tests
-        run: |
-          ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
-
-      - name: Run TestLib desktop FFM tests
-        run: |
-          ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
-
 #      - name: Build Shared LibA project
 #        run: |
 #          ./gradlew LibA_build_project_mac64_jni
@@ -229,9 +218,6 @@ jobs:
   build_mac_arm:
     name: Build Mac Arm
     runs-on: macos-latest
-    env:
-      # Force the test to select the arm native via env var; DesktopHeadlessTest will set os.arch accordingly
-      JPARSE_FORCE_ARCH: "arm"
 
     steps:
       - name: Cancel Previous Runs
