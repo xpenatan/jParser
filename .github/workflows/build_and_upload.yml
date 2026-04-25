@@ -157,6 +157,9 @@ jobs:
   build_mac_intel:
     name: Build Mac Intel
     runs-on: macos-latest
+    env:
+      # Force the JVM to report x86_64 so the native loader picks the intel dylib
+      _JAVA_OPTIONS: "-Dos.arch=x86_64"
 
     steps:
       - name: Cancel Previous Runs
@@ -226,6 +229,9 @@ jobs:
   build_mac_arm:
     name: Build Mac Arm
     runs-on: macos-latest
+    env:
+      # Force the JVM to report aarch64 so the native loader picks the arm dylib
+      _JAVA_OPTIONS: "-Dos.arch=aarch64"
 
     steps:
       - name: Cancel Previous Runs
