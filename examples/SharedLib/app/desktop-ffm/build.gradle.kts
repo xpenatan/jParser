@@ -23,6 +23,9 @@ dependencies {
 
     implementation(project(":examples:SharedLib:libA:lib-desktop-ffm"))
     implementation(project(":examples:SharedLib:libB:lib-desktop-ffm"))
+    // bring in platform native jars produced by idl-helper
+    runtimeOnly(project(mapOf("path" to ":idl-helper:idl-helper-desktop-ffm", "configuration" to "nativeRuntime")))
+    testRuntimeOnly(project(mapOf("path" to ":idl-helper:idl-helper-desktop-ffm", "configuration" to "nativeRuntime")))
 }
 
 tasks.register<JavaExec>("SharedLib_run_app_desktop_ffm") {
