@@ -50,10 +50,10 @@ jobs:
           name: PATH
           value: $env:PATH;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build
 
-      - name: Build idl-helper project
+      - name: Build runtime project
         run: ./gradlew idl_helper_build_project_windows64_jni
 
-      - name: Build idl-helper FFM project
+      - name: Build runtime FFM project
         run: ./gradlew idl_helper_build_project_windows64_ffm
 
       - name: Build TestLib project
@@ -87,7 +87,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-natives
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
   build_linux:
     name: Build Linux
@@ -115,10 +115,10 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build idl-helper project
+      - name: Build runtime project
         run: ./gradlew idl_helper_build_project_linux64_jni
 
-      - name: Build idl-helper FFM project
+      - name: Build runtime FFM project
         run: ./gradlew idl_helper_build_project_linux64_ffm
 
       - name: Build TestLib project
@@ -148,11 +148,11 @@ jobs:
 #      - name: Test Shared Lib
 #        run: ./gradlew :examples:SharedLib:app:core:test
 
-      - name: Upload natives idl-helper
+      - name: Upload natives runtime
         uses: actions/upload-artifact@v4
         with:
           name: linux-natives
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
   build_mac_intel:
     name: Build Mac Intel
@@ -176,10 +176,10 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build project idl-helper
+      - name: Build project runtime
         run: ./gradlew idl_helper_build_project_mac64_jni
 
-      - name: Build idl-helper FFM project
+      - name: Build runtime FFM project
         run: ./gradlew idl_helper_build_project_mac64_ffm
 
       - name: Build TestLib project
@@ -217,11 +217,11 @@ jobs:
 #      - name: Test Shared Lib
 #        run: ./gradlew :examples:SharedLib:app:core:test
 
-      - name: Upload natives idl-helper
+      - name: Upload natives runtime
         uses: actions/upload-artifact@v4
         with:
           name: mac-natives-intel
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
   build_mac_arm:
     name: Build Mac Arm
@@ -245,10 +245,10 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build project idl-helper
+      - name: Build project runtime
         run: ./gradlew idl_helper_build_project_macArm_jni
 
-      - name: Build idl-helper FFM project
+      - name: Build runtime FFM project
         run: ./gradlew idl_helper_build_project_macArm_ffm
 
       - name: Build TestLib project
@@ -286,11 +286,11 @@ jobs:
 #      - name: Test Shared Lib
 #        run: ./gradlew :examples:SharedLib:app:core:test
 
-      - name: Upload natives idl-helper
+      - name: Upload natives runtime
         uses: actions/upload-artifact@v4
         with:
           name: mac-natives-arm
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
   build_teavm:
     name: Build TeaVM
@@ -323,17 +323,17 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build project idl-helper
+      - name: Build project runtime
         run: ./gradlew idl_helper_build_project_teavm
 
       - name: Build project
         run: ./gradlew TestLib_build_project_teavm
 
-      - name: Upload natives idl-helper
+      - name: Upload natives runtime
         uses: actions/upload-artifact@v4
         with:
           name: teavm-natives
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
   build_android:
     name: Build Android
@@ -370,7 +370,7 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build project idl-helper
+      - name: Build project runtime
         run: ./gradlew idl_helper_build_project_android_jni
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
@@ -384,7 +384,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android-natives
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
   upload_natives:
     name: Upload Natives
@@ -421,46 +421,46 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Download windows natives idl-helper
+      - name: Download windows natives runtime
         uses: actions/download-artifact@v4
         with:
           name: windows-natives
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
-      - name: Download linux natives idl-helper
+      - name: Download linux natives runtime
         uses: actions/download-artifact@v4
         with:
           name: linux-natives
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
-      - name: Download mac intel natives idl-helper
+      - name: Download mac intel natives runtime
         uses: actions/download-artifact@v4
         with:
           name: mac-natives-intel
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
-      - name: Download mac arm natives idl-helper
+      - name: Download mac arm natives runtime
         uses: actions/download-artifact@v4
         with:
           name: mac-natives-arm
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
-      - name: Download android natives idl-helper
+      - name: Download android natives runtime
         uses: actions/download-artifact@v4
         with:
           name: android-natives
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
-      - name: Download teavm natives idl-helper
+      - name: Download teavm natives runtime
         uses: actions/download-artifact@v4
         with:
           name: teavm-natives
-          path: ./idl-helper/idl-helper-build/build/c++/libs/
+          path: ./idl/runtime/runtime-build/build/c++/libs/
 
       - name: Generate Java classes
         run: ./gradlew TestLib_build_project
 
-      - name: Generate IDL-Helper project
+      - name: Generate runtime project
         run: ./gradlew :idl:runtime:runtime-build:idl_helper_build_project
 
       - name: Upload Release to repository
