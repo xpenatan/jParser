@@ -15,6 +15,20 @@ public class DesktopHeadlessTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
+        // Allow CI to force which native architecture to load via environment variable.
+        // Set `JPARSE_FORCE_ARCH=intel` or `JPARSE_FORCE_ARCH=arm` in the job to force loader selection.
+        String forced = System.getenv("JPARSE_FORCE_ARCH");
+        if(forced != null) {
+            if(forced.equalsIgnoreCase("intel") || forced.equalsIgnoreCase("x86_64")) {
+                // Force the os.arch system property for the test JVM so the loader picks the intel dylib
+                System.setProperty("os.arch", "x86_64");
+            }
+            else if(forced.equalsIgnoreCase("arm") || forced.equalsIgnoreCase("aarch64") || forced.equalsIgnoreCase("arm64")) {
+                // Force the os.arch system property for the test JVM so the loader picks the arm dylib
+                System.setProperty("os.arch", "aarch64");
+            }
+        }
+
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Throwable> err = new AtomicReference<>();
 

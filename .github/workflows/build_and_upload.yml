@@ -158,8 +158,8 @@ jobs:
     name: Build Mac Intel
     runs-on: macos-latest
     env:
-      # Force the JVM to report x86_64 so the native loader picks the intel dylib
-      _JAVA_OPTIONS: "-Dos.arch=x86_64"
+      # Force the test to select the intel native via env var; DesktopHeadlessTest will set os.arch accordingly
+      JPARSE_FORCE_ARCH: "intel"
 
     steps:
       - name: Cancel Previous Runs
@@ -230,8 +230,8 @@ jobs:
     name: Build Mac Arm
     runs-on: macos-latest
     env:
-      # Force the JVM to report aarch64 so the native loader picks the arm dylib
-      _JAVA_OPTIONS: "-Dos.arch=aarch64"
+      # Force the test to select the arm native via env var; DesktopHeadlessTest will set os.arch accordingly
+      JPARSE_FORCE_ARCH: "arm"
 
     steps:
       - name: Cancel Previous Runs
