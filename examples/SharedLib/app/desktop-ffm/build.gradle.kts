@@ -6,10 +6,10 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(24)
-    targetCompatibility = JavaVersion.toVersion(24)
+    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(24))
+        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
     }
 }
 
@@ -31,7 +31,7 @@ tasks.register<JavaExec>("SharedLib_run_app_desktop_ffm") {
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(24))
+        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {

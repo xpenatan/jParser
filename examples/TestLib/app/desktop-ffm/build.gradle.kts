@@ -5,12 +5,22 @@ plugins {
     id("java")
 }
 
-java {
-    sourceCompatibility = JavaVersion.toVersion(24)
-    targetCompatibility = JavaVersion.toVersion(24)
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(24))
+sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
+
+// Configure headless tests for JNI module
+tasks.test {
+    useJUnit()
+    systemProperty("java.awt.headless", "true")
+    // Ensure JNI native artifacts are built before running tests
+    dependsOn(":examples:TestLib:lib:lib-desktop-jni:assemble")
+    if(isMacOs) {
+        jvmArgs("-XstartOnFirstThread")
     }
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
 }
 
 val benchmarkDir = rootProject.layout.buildDirectory.dir("testlib-benchmark")
@@ -23,6 +33,10 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
     implementation(project(":examples:TestLib:lib:lib-desktop-ffm"))
+    runtimeOnly(project(":examples:TestLib:lib:lib-desktop-ffm"))
+
+    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testRuntimeOnly(project(":examples:TestLib:lib:lib-desktop-ffm"))
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {
@@ -46,7 +60,7 @@ tasks.register<JavaExec>("TestLib_enum_benchmark_ffm") {
     systemProperty("benchmark.enum.output", benchmarkDir.get().file("enum_benchmark_ffm.csv").asFile.absolutePath)
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(24))
+        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {
@@ -65,7 +79,7 @@ tasks.register<JavaExec>("TestLib_throughput_benchmark_ffm") {
     systemProperty("benchmark.output", benchmarkDir.get().file("benchmark_ffm.csv").asFile.absolutePath)
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(24))
+        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {
@@ -84,7 +98,7 @@ tasks.register<JavaExec>("TestLib_fps_benchmark_ffm") {
     systemProperty("benchmark.fps.output", benchmarkDir.get().file("fps_benchmark_ffm.csv").asFile.absolutePath)
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(24))
+        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {
@@ -103,7 +117,7 @@ tasks.register<JavaExec>("TestLib_fps_benchmark_interactive_ffm") {
     systemProperty("benchmark.fps.mode", "interactive")
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(24))
+        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {

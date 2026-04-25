@@ -8,6 +8,11 @@ import com.github.xpenatan.jParser.example.testlib.TestExceptionManual;
 
 public class ExceptionTest implements CodeTest {
     private static boolean testExceptionManual() {
+        // Guard against headless test environment where Gdx.app may be null
+        if(Gdx.app == null) {
+            // In headless mode assume non-WebGL (desktop) environment and skip WebGL-specific tests
+            return true;
+        }
         if(Gdx.app.getType() != Application.ApplicationType.WebGL) {
             // TODO add JNI support
             return true;

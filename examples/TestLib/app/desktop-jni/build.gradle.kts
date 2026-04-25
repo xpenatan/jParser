@@ -4,6 +4,20 @@ plugins {
     id("java")
 }
 
+// Expose the shared core test sources so the same headless test can be executed for both
+// JNI and FFM app modules without duplicating test code.
+sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
+
+// Configure headless tests for JNI module
+tasks.test {
+    useJUnit()
+    systemProperty("java.awt.headless", "true")
+    // Ensure JNI native artifacts are built before running tests
+    dependsOn(":examples:TestLib:lib:lib-desktop-jni:assemble")
+    if(isMacOs) {
+        jvmArgs("-XstartOnFirstThread")
+    }
+}
 java {
     sourceCompatibility = JavaVersion.toVersion(LibExt.java8Target)
     targetCompatibility = JavaVersion.toVersion(LibExt.java8Target)
@@ -19,6 +33,11 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
     implementation(project(":examples:TestLib:lib:lib-desktop-jni"))
+    runtimeOnly(project(":examples:TestLib:lib:lib-desktop-jni"))
+
+    // test-time dependencies required to initialize native loaders
+    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testRuntimeOnly(project(":examples:TestLib:lib:lib-desktop-jni"))
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_jni") {
