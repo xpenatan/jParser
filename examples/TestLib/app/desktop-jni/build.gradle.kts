@@ -14,6 +14,11 @@ tasks.test {
     systemProperty("java.awt.headless", "true")
     // Ensure JNI native artifacts are built before running tests
     dependsOn(":examples:TestLib:lib:lib-desktop-jni:assemble")
+    // Print test standard output (System.out.println) to the console for CI logs
+    testLogging {
+        showStandardStreams = true
+        events("passed", "skipped", "failed")
+    }
     if(isMacOs) {
         jvmArgs("-XstartOnFirstThread")
     }
