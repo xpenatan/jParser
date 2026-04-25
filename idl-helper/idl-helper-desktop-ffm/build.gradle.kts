@@ -4,33 +4,46 @@ plugins {
 
 val moduleName = "idl-helper-desktop-ffm"
 
-dependencies {
-    implementation(project(":idl:idl-core"))
-    implementation(project(":loader:loader-core"))
-}
-
-java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
-}
-
-// Bundle FFM-compiled native libraries into the JAR.
 val libDir = "${projectDir}/../idl-helper-build/build/c++/libs"
 val windowsFile = "$libDir/windows/vc/ffm/idl64.dll"
 val linuxFile = "$libDir/linux/ffm/libidl64.so"
 val macFile = "$libDir/mac/ffm/libidl64.dylib"
 val macArmFile = "$libDir/mac/arm/ffm/libidlarm64.dylib"
 
-tasks.jar {
-    from(windowsFile)
-    from(linuxFile)
-    from(macFile)
-    from(macArmFile)
+dependencies {
+    implementation(project(":idl:idl-core"))
+    implementation(project(":loader:loader-core"))
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
+// create per-platform native jars (classifier-based) similar to jWebGPU
+val platforms: MutableMap<String, Jar.() -> Unit> = mutableMapOf()
+if(file(windowsFile).exists()) {
+    platforms["windows_64"] = { from(windowsFile) { into("native") } }
+}
+if(file(linuxFile).exists()) {
+    platforms["linux_x64"] = { from(linuxFile) { into("native") } }
+}
+if(file(macFile).exists()) {
+    platforms["mac_x64"] = { from(macFile) { into("native") } }
+}
+if(file(macArmFile).exists()) {
+    platforms["mac_arm64"] = { from(macArmFile) { into("native") } }
+}
+
+val nativeJars = platforms.map { (classifier, config) ->
+    tasks.register<Jar>("nativeJar${classifier}") {
+        config()
+        archiveClassifier.set(classifier)
+    }
+}
+
+val nativeRuntime by configurations.creating {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+}
+
+artifacts {
+    nativeJars.forEach { add(nativeRuntime.name, it) }
 }
 
 tasks.named("clean") {
@@ -40,13 +53,25 @@ tasks.named("clean") {
     }
 }
 
+java {
+    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
             group = LibExt.groupId
             version = LibExt.libVersion
-            from(components["java"])
+                            from(components["java"])
+                            // attach native jars created at top-level
+                            nativeJars.forEach { artifact(it) }
         }
     }
 }
