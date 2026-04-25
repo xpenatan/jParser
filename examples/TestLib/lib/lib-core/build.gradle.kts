@@ -10,8 +10,8 @@ java {
 
 dependencies {
     api(project(":loader:loader-core"))
-    api(project(":idl:idl-core"))
-    api(project(":idl-helper:idl-helper-core"))
+    api(project(":idl:api:api-core"))
+    api(project(":idl:runtime:runtime-core"))
 }
 
 tasks.named("clean") {

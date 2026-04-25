@@ -20,8 +20,8 @@ dependencies {
 
     implementation(project(":loader:loader-teavm"))
     implementation(project(":loader:loader-core"))
-    implementation(project(":idl:idl-teavm"))
-    api(project(":idl-helper:idl-helper-teavm"))
+    implementation(project(":idl:api:api-teavm"))
+    api(project(":idl:runtime:runtime-teavm"))
 }
 
 tasks.named("clean") {

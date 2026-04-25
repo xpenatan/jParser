@@ -9,6 +9,6 @@ java {
 
 dependencies {
     implementation(project(":loader:loader-core"))
-    implementation(project(":idl:idl-core"))
-    implementation(project(":idl-helper:idl-helper-core"))
+    implementation(project(":idl:api:api-core"))
+    implementation(project(":idl:runtime:runtime-core"))
 }

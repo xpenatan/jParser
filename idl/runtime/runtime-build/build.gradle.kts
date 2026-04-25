@@ -10,7 +10,6 @@ java {
 val mainClassName = "BuildIDLHelper"
 
 dependencies {
-    implementation(project(":idl-helper:idl-helper-base"))
     implementation(project(":jParser:jParser-core"))
     implementation(project(":jParser:jParser-idl"))
     implementation(project(":jParser:jParser-teavm"))
@@ -18,10 +17,12 @@ dependencies {
     implementation(project(":jParser:jParser-ffm"))
     implementation(project(":jParser:jParser-build"))
     implementation(project(":jParser:jParser-build-tool"))
+
+    implementation(project(":idl:runtime:runtime-base"))
 }
 
 tasks.register<JavaExec>("idl_helper_build_project") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("gen_desktop_ffm", "gen_desktop_jni", "gen_android_jni", "gen_ios_jni", "gen_teavm")
@@ -29,7 +30,7 @@ tasks.register<JavaExec>("idl_helper_build_project") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_teavm") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("teavm")
@@ -37,7 +38,7 @@ tasks.register<JavaExec>("idl_helper_build_project_teavm") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_windows64_jni") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("windows64_jni")
@@ -45,7 +46,7 @@ tasks.register<JavaExec>("idl_helper_build_project_windows64_jni") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_linux64_jni") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("linux64_jni")
@@ -53,7 +54,7 @@ tasks.register<JavaExec>("idl_helper_build_project_linux64_jni") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_mac64_jni") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("mac64_jni")
@@ -61,7 +62,7 @@ tasks.register<JavaExec>("idl_helper_build_project_mac64_jni") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_macArm_jni") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("macArm_jni")
@@ -69,7 +70,7 @@ tasks.register<JavaExec>("idl_helper_build_project_macArm_jni") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_android_jni") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("android_jni")
@@ -77,7 +78,7 @@ tasks.register<JavaExec>("idl_helper_build_project_android_jni") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_ios_jni") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("ios_jni")
@@ -85,7 +86,7 @@ tasks.register<JavaExec>("idl_helper_build_project_ios_jni") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_windows64_ffm") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate FFM code + compile FFM native for Windows"
     mainClass.set(mainClassName)
     args = mutableListOf("windows64_ffm")
@@ -93,7 +94,7 @@ tasks.register<JavaExec>("idl_helper_build_project_windows64_ffm") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_linux64_ffm") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate FFM code + compile FFM native for Linux"
     mainClass.set(mainClassName)
     args = mutableListOf("linux64_ffm")
@@ -101,7 +102,7 @@ tasks.register<JavaExec>("idl_helper_build_project_linux64_ffm") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_mac64_ffm") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate FFM code + compile FFM native for macOS"
     mainClass.set(mainClassName)
     args = mutableListOf("mac64_ffm")
@@ -109,7 +110,7 @@ tasks.register<JavaExec>("idl_helper_build_project_mac64_ffm") {
 }
 
 tasks.register<JavaExec>("idl_helper_build_project_macArm_ffm") {
-    group = "idl-helper"
+    group = "jParser"
     description = "Generate FFM code + compile FFM native for macOS ARM"
     mainClass.set(mainClassName)
     args = mutableListOf("macArm_ffm")

@@ -38,11 +38,11 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
     implementation(project(":examples:TestLib:lib:lib-desktop-ffm"))
-    // Pull platform native jar (classifier jars) produced by the idl-helper's `nativeRuntime` configuration
-    runtimeOnly(project(mapOf("path" to ":idl-helper:idl-helper-desktop-ffm", "configuration" to "nativeRuntime")))
+
+    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-desktop-ffm", "configuration" to "nativeRuntime")))
 
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
-    testRuntimeOnly(project(mapOf("path" to ":idl-helper:idl-helper-desktop-ffm", "configuration" to "nativeRuntime")))
+    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-desktop-ffm", "configuration" to "nativeRuntime")))
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {

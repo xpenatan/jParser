@@ -34,8 +34,8 @@ android {
 
 dependencies {
     api(project(":loader:loader-core"))
-    api(project(":idl:idl-core"))
-    api(project(":idl-helper:idl-helper-android"))
+    api(project(":idl:api:api-core"))
+    api(project(":idl:runtime:runtime-android"))
 }
 
 tasks.named("clean") {

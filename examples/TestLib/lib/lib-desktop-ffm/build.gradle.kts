@@ -10,8 +10,8 @@ java {
 
 dependencies {
     api(project(":loader:loader-core"))
-    api(project(":idl:idl-core"))
-    api(project(":idl-helper:idl-helper-desktop-ffm"))
+    api(project(":idl:api:api-core"))
+    api(project(":idl:runtime:runtime-desktop-ffm"))
 }
 
 // Bundle FFM-compiled native libraries into the JAR.

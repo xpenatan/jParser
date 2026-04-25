@@ -17,7 +17,7 @@ dependencies {
     implementation(project(":jParser:jParser-jni"))
     implementation(project(":jParser:jParser-build"))
     implementation(project(":jParser:jParser-build-tool"))
-    implementation(project(":idl-helper:idl-helper-core"))
+    implementation(project(":idl:runtime:runtime-core"))
 }
 
 tasks.register<JavaExec>("TestLib_build_project") {

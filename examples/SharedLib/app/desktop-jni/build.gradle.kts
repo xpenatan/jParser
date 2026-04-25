@@ -19,10 +19,10 @@ dependencies {
 
     implementation(project(":examples:SharedLib:libA:lib-desktop-jni"))
     implementation(project(":examples:SharedLib:libB:lib-desktop-jni"))
-    // bring in platform native jars produced by idl-helper
-    runtimeOnly(project(mapOf("path" to ":idl-helper:idl-helper-desktop-jni", "configuration" to "nativeRuntime")))
+
+    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-desktop-jni", "configuration" to "nativeRuntime")))
     // for tests as well
-    testRuntimeOnly(project(mapOf("path" to ":idl-helper:idl-helper-desktop-jni", "configuration" to "nativeRuntime")))
+    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-desktop-jni", "configuration" to "nativeRuntime")))
 }
 
 tasks.register<JavaExec>("SharedLib_run_app_desktop_jni") {

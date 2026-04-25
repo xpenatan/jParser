@@ -18,7 +18,7 @@ dependencies {
 
     testImplementation(project(":examples:SharedLib:libA:lib-desktop-jni"))
     testImplementation(project(":examples:SharedLib:libB:lib-desktop-jni"))
-    testImplementation(project(":idl-helper:idl-helper-desktop-jni"))
+    testImplementation(project(":idl:runtime:runtime-desktop-jni"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 

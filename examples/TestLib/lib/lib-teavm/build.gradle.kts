@@ -20,15 +20,9 @@ dependencies {
 
     implementation(project(":loader:loader-teavm"))
     implementation(project(":loader:loader-core"))
-    implementation(project(":idl:idl-teavm"))
-    implementation(project(":idl:idl-core"))
-    implementation(project(":idl-helper:idl-helper-teavm"))
-//    testImplementation(project(":example:lib:lib-core"))
-//    testImplementation("junit:junit:${LibExt.jUnitVersion}")
-//    testImplementation("org.teavm:teavm-core:${LibExt.teaVMVersion}")
-//    testImplementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
-//    testImplementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
-//    testImplementation("org.teavm:teavm-junit:${LibExt.teaVMVersion}")
+    implementation(project(":idl:api:api-teavm"))
+    implementation(project(":idl:api:api-core"))
+    implementation(project(":idl:runtime:runtime-teavm"))
 }
 
 tasks.named("clean") {

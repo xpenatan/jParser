@@ -29,11 +29,11 @@ out/
 .temp/
 *.log
 
-**/idl-helper/idl-helper-teavm/src/main/java/**
-**/idl-helper/idl-helper-core/src/main/java/**
-**/idl-helper/idl-helper-desktop-ffm/src/main/java/**
-**/idl-helper/idl-helper-desktop-jni/src/main/java/**
-**/idl-helper/idl-helper-android/src/main/java/**
+**/idl/runtime/runtime-core/src/main/java/**
+**/idl/runtime/runtime-teavm/src/main/java/**
+**/idl/runtime/runtime-desktop-ffm/src/main/java/**
+**/idl/runtime/runtime-desktop-jni/src/main/java/**
+**/idl/runtime/runtime-android/src/main/java/**
 
 **/webapp/**
 **/lib/core/src/**

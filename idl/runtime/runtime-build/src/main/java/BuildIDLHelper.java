@@ -16,7 +16,7 @@ public class BuildIDLHelper {
 
     public static void main(String[] args) throws Exception {
         String libName = "idl";
-        String modulePrefix = "idl-helper";
+        String modulePrefix = "runtime";
         String basePackage = "com.github.xpenatan.jparser.idl";
 
         WindowsMSVCTarget.DEBUG_BUILD = false;

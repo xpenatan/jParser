@@ -34,8 +34,8 @@ android {
 
 dependencies {
     implementation(project(":loader:loader-core"))
-    implementation(project(":idl:idl-core"))
-    implementation(project(":idl-helper:idl-helper-android"))
+    implementation(project(":idl:api:api-core"))
+    implementation(project(":idl:runtime:runtime-android"))
     implementation(project(":examples:SharedLib:libA:lib-android"))
 }
 

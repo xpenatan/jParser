@@ -2,16 +2,16 @@ plugins {
     id("java")
 }
 
-val moduleName = "idl-helper-desktop-jni"
+val moduleName = "runtime-desktop-ffm"
 
-val libDir = "${projectDir}/../idl-helper-build/build/c++/libs"
-val windowsFile = "$libDir/windows/vc/jni/idl64.dll"
-val linuxFile = "$libDir/linux/jni/libidl64.so"
-val macFile = "$libDir/mac/jni/libidl64.dylib"
-val macArmFile = "$libDir/mac/arm/jni/libidlarm64.dylib"
+val libDir = "${projectDir}/../runtime-build/build/c++/libs"
+val windowsFile = "$libDir/windows/vc/ffm/idl64.dll"
+val linuxFile = "$libDir/linux/ffm/libidl64.so"
+val macFile = "$libDir/mac/ffm/libidl64.dylib"
+val macArmFile = "$libDir/mac/arm/ffm/libidlarm64.dylib"
 
 dependencies {
-    implementation(project(":idl:idl-core"))
+    implementation(project(":idl:api:api-core"))
     implementation(project(":loader:loader-core"))
 }
 
@@ -48,14 +48,14 @@ artifacts {
 
 tasks.named("clean") {
     doFirst {
-        val srcPath = "$projectDir/src/main/"
+        val srcPath = "$projectDir/src/main/java"
         project.delete(files(srcPath))
     }
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.java8Target)
-    targetCompatibility = JavaVersion.toVersion(LibExt.java8Target)
+    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
 }
 
 java {
@@ -69,9 +69,9 @@ publishing {
             artifactId = moduleName
             group = LibExt.groupId
             version = LibExt.libVersion
-            from(components["java"])
-            // publishing will attach the native jars created earlier
-            nativeJars.forEach { artifact(it) }
+                            from(components["java"])
+                            // attach native jars created at top-level
+                            nativeJars.forEach { artifact(it) }
         }
     }
 }

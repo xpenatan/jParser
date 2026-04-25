@@ -461,7 +461,7 @@ jobs:
         run: ./gradlew TestLib_build_project
 
       - name: Generate IDL-Helper project
-        run: ./gradlew :idl-helper:idl-helper-build:idl_helper_build_project
+        run: ./gradlew :idl:runtime:runtime-build:idl_helper_build_project
 
       - name: Upload Release to repository
         uses: nick-fields/retry@v3

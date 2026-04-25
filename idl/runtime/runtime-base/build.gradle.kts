@@ -2,11 +2,11 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "idl-helper-base"
+val moduleName = "runtime-base"
 
 dependencies {
     implementation(project(":loader:loader-core"))
-    implementation(project(":idl:idl-core"))
+    implementation(project(":idl:api:api-core"))
 }
 
 java {

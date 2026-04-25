@@ -185,8 +185,8 @@ jParser projects follow a strict `-base / -build / -core / -teavm` convention:
 ### Build Example: TestLib
 
 ```bash
-# 1. Build idl-helper (required once)
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_windows64_jni
+# 1. Build runtime (required once)
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_jni
 
 # 2. Generate code + compile native library
 ./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_jni

@@ -7,7 +7,7 @@ val moduleName = "${LibExt.libName}-idl"
 dependencies {
     implementation(project(":jParser:jParser-base"))
     implementation(project(":jParser:jParser-core"))
-    implementation(project(":idl:idl-core"))
+    implementation(project(":idl:api:api-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 

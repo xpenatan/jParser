@@ -2,17 +2,20 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "idl-teavm"
+val moduleName = "runtime-teavm"
 
-val emscriptenJS = "$projectDir/../jolt-build/build/c++/libs/emscripten/idl.js"
-val emscriptenWASM = "$projectDir/../jolt-build/build/c++/libs/emscripten/idl.wasm"
+val emscriptenJS = "$projectDir/../runtime-build/build/c++/libs/emscripten/idl.js"
+val emscriptenWASM = "$projectDir/../runtime-build/build/c++/libs/emscripten/idl.wasm"
 
 tasks.jar {
     from(emscriptenJS, emscriptenWASM)
 }
 
 dependencies {
-    implementation(project(":idl:idl-core"))
+    implementation(project(":idl:api:api-teavm"))
+    implementation(project(":loader:loader-core"))
+    implementation(project(":loader:loader-teavm"))
+
     api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
     api("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
     api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
@@ -28,6 +31,13 @@ java {
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+tasks.named("clean") {
+    doFirst {
+        val srcPath = "$projectDir/src/main/java"
+        project.delete(files(srcPath))
+    }
 }
 
 publishing {

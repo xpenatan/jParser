@@ -21,7 +21,7 @@ dependencies {
     implementation(project(":jParser:jParser-build-tool"))
     implementation(project(":jParser:jParser-ffm"))
 
-    implementation(project(":idl-helper:idl-helper-core"))
+    implementation(project(":idl:runtime:runtime-core"))
 }
 
 tasks.register<JavaExec>("LibB_build_project") {

@@ -5,7 +5,7 @@ plugins {
 val moduleName = "${LibExt.libName}-base"
 
 dependencies {
-    implementation(project(":idl:idl-core"))
+    implementation(project(":idl:api:api-core"))
 }
 
 java {

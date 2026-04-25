@@ -23,8 +23,8 @@ tasks.jar {
 
 dependencies {
     api(project(":loader:loader-core"))
-    api(project(":idl:idl-core"))
-    api(project(":idl-helper:idl-helper-desktop-jni"))
+    api(project(":idl:api:api-core"))
+    api(project(":idl:runtime:runtime-desktop-jni"))
 }
 
 tasks.named("clean") {

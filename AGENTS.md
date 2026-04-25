@@ -108,19 +108,17 @@ The idl-helper provides the `IDLBase` runtime for all native-bound objects. It m
 ```sh
 # Step 1 — Generate JNI/TeaVM/FFM Java code + compile native library for your platform
 # JNI (pick your platform):
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_windows64_jni
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_linux64_jni
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_mac64_jni
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_macArm_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_linux64_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_mac64_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_macArm_jni
 
 # FFM (pick your platform):
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_windows64_ffm
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_linux64_ffm
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_mac64_ffm
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_macArm_ffm
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_ffm
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_linux64_ffm
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_mac64_ffm
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_macArm_ffm
 
-# All JNI platforms at once:
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_all
 ```
 
 ### 2. Build example: TestLib
@@ -207,9 +205,9 @@ Measures how native bridge overhead affects frame rate. Each frame executes a fi
 ### Build order summary (from scratch on Windows)
 
 ```sh
-# 1. Build idl-helper native (both JNI + FFM)
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_windows64_jni
-./gradlew :idl-helper:idl-helper-build:idl_helper_build_project_windows64_ffm
+# 1. Build runtime native (both JNI + FFM)
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_ffm
 
 # 2. Build TestLib native (both JNI + FFM)
 ./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_jni

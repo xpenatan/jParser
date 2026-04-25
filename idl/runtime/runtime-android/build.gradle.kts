@@ -2,10 +2,10 @@ plugins {
     id("com.android.library")
 }
 
-val moduleName = "idl-helper-android"
+val moduleName = "runtime-android"
 
 val filterJniLibs by tasks.registering(Copy::class) {
-    from("$projectDir/../idl-helper-build/build/c++/libs/android")
+    from("$projectDir/../runtime-build/build/c++/libs/android")
     into(layout.buildDirectory.dir("tmp/jniLibs"))
     include("**/*.so")
     exclude("**/*.a")
@@ -42,7 +42,7 @@ tasks.named("preBuild").configure {
 }
 
 dependencies {
-    implementation(project(":idl:idl-core"))
+    implementation(project(":idl:api:api-core"))
     implementation(project(":loader:loader-core"))
 }
 

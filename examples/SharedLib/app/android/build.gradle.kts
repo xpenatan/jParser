@@ -45,7 +45,7 @@ dependencies {
     implementation(project(":examples:SharedLib:app:core"))
     api(project(":examples:SharedLib:libA:lib-android"))
     api(project(":examples:SharedLib:libB:lib-android"))
-    api(project(":idl-helper:idl-helper-android"))
+    api(project(":idl:runtime:runtime-android"))
 }
 
 
