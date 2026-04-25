@@ -63,10 +63,10 @@ jobs:
         run: ./gradlew TestLib_build_project_windows64_ffm
 
       - name: Run TestLib desktop JNI tests
-        run: ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --stacktrace
+        run: ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
 
       - name: Run TestLib desktop FFM tests
-        run: ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --stacktrace
+        run: ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
       - name: Build Shared LibA project
         run: ./gradlew LibA_build_project_windows64_jni
@@ -128,10 +128,10 @@ jobs:
         run: ./gradlew TestLib_build_project_linux64_ffm
 
       - name: Run TestLib desktop JNI tests
-        run: ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --stacktrace
+        run: ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
 
       - name: Run TestLib desktop FFM tests
-        run: ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --stacktrace
+        run: ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
       - name: Build Shared LibA project
         run: ./gradlew LibA_build_project_linux64_jni
@@ -192,11 +192,11 @@ jobs:
 
       - name: Run TestLib desktop JNI tests
         run: |
-          ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --stacktrace
+          ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
 
       - name: Run TestLib desktop FFM tests
         run: |
-          ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --stacktrace
+          ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
 #      - name: Build Shared LibA project
 #        run: |
@@ -261,11 +261,11 @@ jobs:
 
       - name: Run TestLib desktop JNI tests
         run: |
-          ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --stacktrace
+          ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
 
       - name: Run TestLib desktop FFM tests
         run: |
-          ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --stacktrace
+          ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
 #      - name: Build Shared LibA project
 #        run: |
