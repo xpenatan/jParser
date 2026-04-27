@@ -223,7 +223,7 @@ public class IDLMethodParser {
         }
     }
 
-    public static MethodDeclaration prepareNativeMethod(IDLReader idlReader, NativeMethodData paramData, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator, ArrayList<IDLParameter> idlParameters) {
+        public static MethodDeclaration prepareNativeMethod(IDLReader idlReader, NativeMethodData paramData, ClassOrInterfaceDeclaration classDeclaration, MethodDeclaration methodDeclaration, String methodName, String operator, ArrayList<IDLParameter> idlParameters) {
         NodeList<Parameter> methodParameters = methodDeclaration.getParameters();
         Type methodReturnType = methodDeclaration.getType();
 
@@ -253,18 +253,88 @@ public class IDLMethodParser {
                 // void types just call the method.
                 IDLMethodParser.setupCallerParam(idlReader, paramData, caller, methodDeclaration.getParameters(), idlParameters);
                 BlockStmt blockStmt = methodDeclaration.getBody().get();
+                // Insert debug listener call before the native/bridge invocation when enabled
+                if(IDLDefaultCodeParser.GLOBAL_GEN_DEBUG_LISTENER) {
+                    String className = classDeclaration.getNameAsString();
+                    String methodNameStr = methodDeclaration.getNameAsString();
+                    StringBuilder paramsSb = new StringBuilder();
+                    for(int i = 0; i < methodParameters.size(); i++) {
+                        if(i > 0) paramsSb.append(", ");
+                        paramsSb.append(methodParameters.get(i).getNameAsString());
+                    }
+                    String notifyCode;
+                    if(paramsSb.length() > 0) {
+                        notifyCode = "idl.helper.GenerationDebugListener.notify(\"" + className + "\", \"" + methodNameStr + "\", " + paramsSb.toString() + ");";
+                    }
+                    else {
+                        notifyCode = "idl.helper.GenerationDebugListener.notify(\"" + className + "\", \"" + methodNameStr + "\");";
+                    }
+                    try {
+                        Statement notifyStmt = StaticJavaParser.parseStatement(notifyCode);
+                        blockStmt.addStatement(notifyStmt);
+                    } catch(Throwable t) {
+                        // ignore parse errors to avoid breaking generation
+                    }
+                }
                 blockStmt.addStatement(caller);
             }
             else if(methodReturnType.isClassOrInterfaceType()) {
                 // Class object needs to generate some additional code.
                 // Needs to obtain the pointer and return a temp object.
-                BlockStmt blockStmt = IDLMethodParser.generateReturnObject(idlReader, paramData, classDeclaration, methodDeclaration, caller, operator, idlParameters);
-                methodDeclaration.setBody(blockStmt);
+                BlockStmt body = IDLMethodParser.generateReturnObject(idlReader, paramData, classDeclaration, methodDeclaration, caller, operator, idlParameters);
+                // Insert debug listener call at the top of the generated body when enabled
+                if(IDLDefaultCodeParser.GLOBAL_GEN_DEBUG_LISTENER) {
+                    String className = classDeclaration.getNameAsString();
+                    String methodNameStr = methodDeclaration.getNameAsString();
+                    StringBuilder paramsSb = new StringBuilder();
+                    for(int i = 0; i < methodParameters.size(); i++) {
+                        if(i > 0) paramsSb.append(", ");
+                        paramsSb.append(methodParameters.get(i).getNameAsString());
+                    }
+                    String notifyCode;
+                    if(paramsSb.length() > 0) {
+                        notifyCode = "idl.helper.GenerationDebugListener.notify(\"" + className + "\", \"" + methodNameStr + "\", " + paramsSb.toString() + ");";
+                    }
+                    else {
+                        notifyCode = "idl.helper.GenerationDebugListener.notify(\"" + className + "\", \"" + methodNameStr + "\");";
+                    }
+                    try {
+                        Statement notifyStmt = StaticJavaParser.parseStatement(notifyCode);
+                        body.getStatements().add(0, notifyStmt);
+                    } catch(Throwable t) {
+                        // ignore parse errors to avoid breaking generation
+                    }
+                }
+                methodDeclaration.setBody(body);
             }
             else {
                 // Should be a primitive return type.
                 ReturnStmt returnStmt = IDLMethodParser.getReturnStmt(methodDeclaration);
                 IDLMethodParser.setupCallerParam(idlReader, paramData, caller, methodDeclaration.getParameters(), idlParameters);
+                // Insert debug listener call before the return statement when enabled
+                BlockStmt blockStmt = methodDeclaration.getBody().get();
+                if(IDLDefaultCodeParser.GLOBAL_GEN_DEBUG_LISTENER) {
+                    String className = classDeclaration.getNameAsString();
+                    String methodNameStr = methodDeclaration.getNameAsString();
+                    StringBuilder paramsSb = new StringBuilder();
+                    for(int i = 0; i < methodParameters.size(); i++) {
+                        if(i > 0) paramsSb.append(", ");
+                        paramsSb.append(methodParameters.get(i).getNameAsString());
+                    }
+                    String notifyCode;
+                    if(paramsSb.length() > 0) {
+                        notifyCode = "idl.helper.GenerationDebugListener.notify(\"" + className + "\", \"" + methodNameStr + "\", " + paramsSb.toString() + ");";
+                    }
+                    else {
+                        notifyCode = "idl.helper.GenerationDebugListener.notify(\"" + className + "\", \"" + methodNameStr + "\");";
+                    }
+                    try {
+                        Statement notifyStmt = StaticJavaParser.parseStatement(notifyCode);
+                        blockStmt.addStatement(0, notifyStmt);
+                    } catch(Throwable t) {
+                        // ignore parse errors to avoid breaking generation
+                    }
+                }
                 returnStmt.setExpression(caller);
             }
             return nativeMethodDeclaration;

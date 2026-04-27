@@ -39,6 +39,8 @@ public class IDLDefaultCodeParser extends IDLClassGeneratorParser {
 
     protected boolean enableAttributeParsing = true;
     public boolean generateNativeBindings = true;
+    /** When true, the generator should insert debug listener calls at the start of generated methods. */
+    public static boolean GLOBAL_GEN_DEBUG_LISTENER = false;
 
     protected static final String NATIVE_ADDRESS = "native_address";
     protected static final String NATIVE_VOID_ADDRESS = "native_void_address";

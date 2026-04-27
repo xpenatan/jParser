@@ -52,6 +52,8 @@ import java.util.List;
 public class FFMCodeParser extends IDLDefaultCodeParser {
 
     private static final String HEADER_CMD = "FFM";
+    private static final String CALLBACK_UPCALL_ARENA_FIELD = "upcallArena";
+    private static final String CALLBACK_RELEASE_METHOD = "releaseUpcallResources";
 
     // Same template tags as CppCodeParser (the C++ code is largely the same)
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
@@ -433,6 +435,9 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                                        ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
         IDLClass idlCallbackClass = idlClass.callbackImpl;
 
+        ensureCallbackUpcallMembers(classDeclaration, methods);
+        ensureDeleteNativeReleasesUpcalls(classDeclaration);
+
         // 1. Build parameter list for native setupCallback: this_addr + one long per callback method (function pointer)
         ArrayList<IDLParameterData> parameterArray = new ArrayList<>();
         for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
@@ -456,12 +461,15 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             StringBuilder body = new StringBuilder();
             body.append("{\n");
             body.append("    try {\n");
+            body.append("        ").append(CALLBACK_RELEASE_METHOD).append("();\n");
+            body.append("        ").append(CALLBACK_UPCALL_ARENA_FIELD).append(" = java.lang.foreign.Arena.ofShared();\n");
 
             for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
                 IDLMethod idlMethod = pair.a;
                 MethodDeclaration internalMethod = pair.b.a;
                 String methodName = idlMethod.getCPPName();
                 String internalMethodName = internalMethod.getNameAsString();
+                String stubFieldName = getCallbackStubFieldName(methodName);
 
                 // FFM upcall stubs require MethodHandle types to exactly match the FunctionDescriptor.
                 // For String (const char*) parameters, the native side passes a pointer (ADDRESS layout),
@@ -475,16 +483,16 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                     .append(" = java.lang.invoke.MethodHandles.lookup().findVirtual(")
                     .append(classDeclaration.getNameAsString()).append(".class, \"")
                     .append(internalMethodName).append("\", ").append(methodTypeStr).append(").bindTo(this);\n");
-                body.append("        java.lang.foreign.MemorySegment stub_").append(methodName)
+                body.append("        ").append(stubFieldName)
                     .append(" = java.lang.foreign.Linker.nativeLinker().upcallStub(mh_").append(methodName)
-                    .append(", ").append(funcDescriptor).append(", java.lang.foreign.Arena.ofAuto());\n");
+                    .append(", ").append(funcDescriptor).append(", ").append(CALLBACK_UPCALL_ARENA_FIELD).append(");\n");
             }
 
             // Call native setupCallback with native_address + stub addresses
             body.append("        ").append(nativeMethodDeclaration.getNameAsString()).append("(native_address");
             for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
                 IDLMethod idlMethod = pair.a;
-                body.append(", stub_").append(idlMethod.getCPPName()).append(".address()");
+                body.append(", ").append(getCallbackStubFieldName(idlMethod.getCPPName())).append(".address()");
             }
             body.append(");\n");
 
@@ -1238,7 +1246,52 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         }
         return paramName;
     }
-}
 
+    private void ensureCallbackUpcallMembers(ClassOrInterfaceDeclaration classDeclaration,
+                                             ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        if(classDeclaration.getFieldByName(CALLBACK_UPCALL_ARENA_FIELD).isEmpty()) {
+            classDeclaration.addField("Arena", CALLBACK_UPCALL_ARENA_FIELD, Modifier.Keyword.PRIVATE);
+        }
+        for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
+            String stubFieldName = getCallbackStubFieldName(pair.a.getCPPName());
+            if(classDeclaration.getFieldByName(stubFieldName).isEmpty()) {
+                classDeclaration.addField("MemorySegment", stubFieldName, Modifier.Keyword.PRIVATE);
+            }
+        }
+
+        if(classDeclaration.getMethodsByName(CALLBACK_RELEASE_METHOD).isEmpty()) {
+            MethodDeclaration releaseMethod = classDeclaration.addMethod(CALLBACK_RELEASE_METHOD, Modifier.Keyword.PRIVATE);
+            StringBuilder methodBody = new StringBuilder();
+            methodBody.append("{\n");
+            methodBody.append("    Arena arena = ").append(CALLBACK_UPCALL_ARENA_FIELD).append(";\n");
+            for(Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair : methods) {
+                methodBody.append("    ").append(getCallbackStubFieldName(pair.a.getCPPName())).append(" = null;\n");
+            }
+            methodBody.append("    ").append(CALLBACK_UPCALL_ARENA_FIELD).append(" = null;\n");
+            methodBody.append("    if(arena != null) {\n");
+            methodBody.append("        try {\n");
+            methodBody.append("            arena.close();\n");
+            methodBody.append("        } catch(Exception ignored) {\n");
+            methodBody.append("        }\n");
+            methodBody.append("    }\n");
+            methodBody.append("}\n");
+            releaseMethod.setBody(StaticJavaParser.parseBlock(methodBody.toString()));
+        }
+    }
+
+    private void ensureDeleteNativeReleasesUpcalls(ClassOrInterfaceDeclaration classDeclaration) {
+        List<MethodDeclaration> deleteMethods = classDeclaration.getMethodsBySignature("deleteNative");
+        if(deleteMethods.size() != 1) return;
+        MethodDeclaration deleteMethod = deleteMethods.get(0);
+        if(deleteMethod.getBody().isEmpty()) return;
+        BlockStmt body = deleteMethod.getBody().get();
+        if(body.toString().contains(CALLBACK_RELEASE_METHOD + "()")) return;
+        body.addStatement(CALLBACK_RELEASE_METHOD + "();");
+    }
+
+    private String getCallbackStubFieldName(String callbackMethodName) {
+        return "upcallStub_" + callbackMethodName;
+    }
+}
 
 
