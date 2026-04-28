@@ -22,6 +22,12 @@ tasks.jar {
     from(macArmFile)
 }
 
+tasks.named("test") {
+    dependsOn(
+        ":examples:TestLib:app:desktop-jni:test"
+    )
+}
+
 dependencies {
     api(project(":loader:loader-core"))
     api(project(":idl:api:api-core"))
