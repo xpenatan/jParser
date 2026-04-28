@@ -15,6 +15,12 @@ val linuxFile = "$libDir/linux/jni/libTestLib64.so"
 val macFile = "$libDir/mac/jni/libTestLib64.dylib"
 val macArmFile = "$libDir/mac/arm/jni/libTestLibarm64.dylib"
 
+dependencies {
+    api(project(":loader:loader-core"))
+    api(project(":idl:api:api-core"))
+    api(project(":idl:runtime:runtime-desktop-jni"))
+}
+
 tasks.jar {
     from(windowsFile)
     from(linuxFile)
@@ -28,15 +34,14 @@ tasks.named("test") {
     )
 }
 
-dependencies {
-    api(project(":loader:loader-core"))
-    api(project(":idl:api:api-core"))
-    api(project(":idl:runtime:runtime-desktop-jni"))
-
-    testImplementation(project(":loader:loader-core"))
-    testImplementation(project(":examples:TestLib:lib:lib-core"))
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+project(":examples:TestLib:app:desktop-jni").tasks.named("test") {
+    outputs.upToDateWhen { false }
 }
+
+tasks.named("test") {
+    outputs.upToDateWhen { false }
+}
+
 
 tasks.named("clean") {
     doFirst {

@@ -28,14 +28,18 @@ tasks.jar {
     from(macArmFile)
 }
 
-// Make the library's test task trigger the platform app tests that run the
-// shared headless integration test. The lib project itself has no test
-// sources, so running its `test` task should still execute the app tests
-// to provide a single entry-point for CI scripts that invoke the lib test.
 tasks.named("test") {
     dependsOn(
         ":examples:TestLib:app:desktop-ffm:test"
     )
+}
+
+project(":examples:TestLib:app:desktop-ffm").tasks.named("test") {
+    outputs.upToDateWhen { false }
+}
+
+tasks.named("test") {
+    outputs.upToDateWhen { false }
 }
 
 tasks.named("clean") {
