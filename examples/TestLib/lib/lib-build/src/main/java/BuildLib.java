@@ -61,7 +61,7 @@ public class BuildLib {
                 }
 
                 if(op.containsArg("windows64_ffm")) {
-//                    targets.add(getWindowVCTarget(op, true));
+                    targets.add(getWindowVCTarget(op, true));
                     targets.add(getWindowMinGWTarget(op, true));
                 }
                 if(op.containsArg("linux64_ffm")) {
