@@ -2,18 +2,16 @@ package com.github.xpenatan.jParser.builder.targets;
 
 import com.github.xpenatan.jParser.builder.BuildConfig;
 import com.github.xpenatan.jParser.builder.DefaultBuildTarget;
-import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
-import java.util.ArrayList;
 
-public class WindowsTarget extends DefaultBuildTarget {
+public class WindowsMingwTarget extends DefaultBuildTarget {
 
     public static boolean DEBUG_BUILD;
 
-    public WindowsTarget() {
+    public WindowsMingwTarget() {
         this(SourceLanguage.CPP);
     }
 
-    public WindowsTarget(SourceLanguage language) {
+    public WindowsMingwTarget(SourceLanguage language) {
         this.libDirSuffix = "windows/";
         this.tempBuildDir = "target/windows/";
 

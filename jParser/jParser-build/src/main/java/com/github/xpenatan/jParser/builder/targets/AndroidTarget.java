@@ -96,11 +96,14 @@ public class AndroidTarget extends DefaultBuildTarget {
         }
     }
 
-    public void addJNIHeaders() {
+    @Override
+    public void setupJNIGlueCode(String libBuildCPPPath) {
         headerDirs.add("-Ijni-headers/");
         headerDirs.add("-Ijni-headers/linux");
-        headerDirs.add("-Ijni-headers/win32");
-        headerDirs.add("-Ijni-headers/mac");
+
+        String jniGlueDir = libBuildCPPPath + "/src/jniglue";
+        headerDirs.add("-I" + jniGlueDir);
+        cppInclude.add(jniGlueDir + "/JNIGlue.cpp");
     }
 
     public enum Target {
