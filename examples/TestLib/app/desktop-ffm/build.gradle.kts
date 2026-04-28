@@ -11,9 +11,7 @@ sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/t
 tasks.test {
     useJUnit()
     systemProperty("java.awt.headless", "true")
-    // Ensure native artifacts are built before running tests
-    dependsOn(":examples:TestLib:lib:lib-desktop-jni:assemble")
-    // Print test standard output (System.out.println) to the console for CI logs
+    dependsOn(":examples:TestLib:lib:lib-desktop-ffm:assemble")
     testLogging {
         showStandardStreams = true
         events("passed", "skipped", "failed")
@@ -21,6 +19,10 @@ tasks.test {
     if(isMacOs) {
         jvmArgs("-XstartOnFirstThread")
     }
+}
+
+tasks.named("test") {
+    outputs.upToDateWhen { false }
 }
 
 java {

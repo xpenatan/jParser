@@ -23,6 +23,11 @@ tasks.test {
         jvmArgs("-XstartOnFirstThread")
     }
 }
+
+tasks.named("test") {
+    outputs.upToDateWhen { false }
+}
+
 java {
     sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
     targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)

@@ -28,21 +28,6 @@ tasks.jar {
     from(macArmFile)
 }
 
-tasks.named("test") {
-    dependsOn(
-        ":examples:TestLib:app:desktop-jni:test"
-    )
-}
-
-project(":examples:TestLib:app:desktop-jni").tasks.named("test") {
-    outputs.upToDateWhen { false }
-}
-
-tasks.named("test") {
-    outputs.upToDateWhen { false }
-}
-
-
 tasks.named("clean") {
     doFirst {
         val srcPath = "$projectDir/src/main/"
