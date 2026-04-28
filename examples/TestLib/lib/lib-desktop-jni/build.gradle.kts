@@ -38,18 +38,3 @@ tasks.named("clean") {
         project.delete(files(srcPath))
     }
 }
-
-val testTasks = listOf(
-    ":example:lib:core:build",
-    "jar",
-    "compileTestJava"
-)
-
-val tasksOrder = tasks.register<GradleBuild>("prepareTest") {
-    tasks = testTasks
-}
-
-tasks.named("test") {
-    dependsOn(tasksOrder)
-    mustRunAfter(tasksOrder)
-}
