@@ -2,11 +2,6 @@ plugins {
     id("java")
 }
 
-java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.java11Target)
-    targetCompatibility = JavaVersion.toVersion(LibExt.java11Target)
-}
-
 val mainClassName = "BuildIDLHelper"
 
 dependencies {
