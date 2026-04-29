@@ -162,6 +162,8 @@ interface CallbackClassImpl {
     [Const] void onStdStringCallback(IDLString data);
     unsigned long onUnsignedIntCallback(unsigned long unsignedInt);
     [Const] unsigned short onUnsignedShortCallback(unsigned short unsignedShort);
+    [Const] void onEnumParamCallback(TestEnumLib enumValue);
+    [Const] TestEnumLib onEnumReturnCallback(TestEnumLib enumValue);
     [Const] void onAnyCallback_1(any anyPtr);
     [Const] void onAnyCallback_2(any anyPtr, long value);
 //    [Const] void onLongLongValue(unsigned long long longLongValue);
@@ -217,6 +219,8 @@ interface TestCallbackClass {
     void callIDLStringCallback(CallbackClass callback);
     unsigned long callUnsignedIntCallback(CallbackClass callback);
     unsigned short callUnsignedShortCallback(CallbackClass callback);
+    void callEnumParamCallback(CallbackClass callback);
+    TestEnumLib callEnumReturnCallback(CallbackClass callback);
 
     void callManualVoidCallback(CallbackClassManual callback);
     long callManualIntCallback(CallbackClassManual callback);

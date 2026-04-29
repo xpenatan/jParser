@@ -503,6 +503,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
             Type returnType = internalMethod.getType();
             String returnTypeStr = returnType.asString();
+            boolean isEnumReturnType = idlMethod.idlFile.getEnum(idlMethod.getJavaReturnType()) != null;
 
             NodeList<Parameter> parameters = internalMethod.getParameters();
             for(int i1 = 0; i1 < parameters.size(); i1++) {
@@ -521,7 +522,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             }
             String methodCode = generateMethodID(internalMethod);
 
-            paramCode = "(" + paramCode + ")" + JNITypeSignature.getJNIType(returnTypeStr);
+            String jniReturnType = isEnumReturnType ? JNITypeSignature.Int.getJNIType() : JNITypeSignature.getJNIType(returnTypeStr);
+            paramCode = "(" + paramCode + ")" + jniReturnType;
 
             String methodName = idlMethod.getCPPName() + methodCode;
 
@@ -657,7 +659,11 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             if(typeStr.contains("unsigned")) {
                 returnStr += "(" + typeStr + ")";
             }
-            String callMethod = getCPPCallMethod(type);
+            boolean isEnumReturnType = idlMethod.idlFile.getEnum(idlMethod.getJavaReturnType()) != null;
+            String callMethod = getCPPCallMethod(type, isEnumReturnType);
+            if(isEnumReturnType) {
+                returnStr += "(" + typeStr + ")";
+            }
             String methodStr = methodTemplate.replace("[CALL_METHOD]", callMethod).replace("[CPP_CLASS]", cppClassName)
                     .replace("[METHOD_NAME]", methodName).replace("[CALL_PARAMS]", callParams).replace("[RETURN]", returnStr).replace("[METHOD_ID]", methodName + methodCode);
             methodStr = methodStr.replace("[RETURN_TYPE]", typeStr).replace("[METHOD_NAME]", methodName).replace("[PARAMS]", methodParams).replace("[CONST]", constStr);
@@ -667,7 +673,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         return cppMethods;
     }
 
-    private String getCPPCallMethod(Type type) {
+    private String getCPPCallMethod(Type type, boolean isEnumReturnType) {
+        if(isEnumReturnType) {
+            return "CallIntMethod";
+        }
         String typeString = type.asString();
         typeString = typeString.substring(0, 1).toUpperCase() + typeString.substring(1);
         return "Call" + typeString + "Method";

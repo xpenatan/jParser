@@ -439,6 +439,8 @@ public:
     virtual void onStdStringCallback(std::string* data) const = 0;
     virtual unsigned int onUnsignedIntCallback(unsigned int unsignedInt) = 0;
     virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const = 0;
+    virtual void onEnumParamCallback(TestEnumLib enumValue) const = 0;
+    virtual TestEnumLib onEnumReturnCallback(TestEnumLib enumValue) const = 0;
     virtual void onAnyCallback_1(void * anyPtr) const = 0;
     virtual void onAnyCallback_2(void * anyPtr, int value) const = 0;
 //    virtual void onLongLongValue(unsigned long long longLongValue) const = 0;
@@ -479,6 +481,13 @@ public:
     }
     virtual unsigned short onUnsignedShortCallback(unsigned short unsignedShort) const {
         return 20;
+    }
+    virtual void onEnumParamCallback(TestEnumLib enumValue) const {
+    }
+    virtual TestEnumLib onEnumReturnCallback(TestEnumLib enumValue) const {
+        if(enumValue == TEST_FIRST)
+            return TEST_SECOND;
+        return TEST_FIRST;
     }
     virtual void onAnyCallback_1(void * anyPtr) const {
     }
@@ -543,6 +552,12 @@ class TestCallbackClass {
         unsigned short callUnsignedShortCallback(CallbackClass* callback) {
             unsigned short value = 12;
             return callback->onUnsignedShortCallback(value);
+        };
+        void callEnumParamCallback(CallbackClass* callback) {
+            callback->onEnumParamCallback(TEST_SECOND);
+        };
+        TestEnumLib callEnumReturnCallback(CallbackClass* callback) {
+            return callback->onEnumReturnCallback(TEST_FIRST);
         };
 
         void callManualVoidCallback(CallbackClassManual* callback) {

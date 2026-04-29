@@ -5,6 +5,7 @@ import com.github.xpenatan.jParser.example.testlib.CallbackClass;
 import com.github.xpenatan.jParser.example.testlib.CallbackClassManual;
 import com.github.xpenatan.jParser.example.testlib.DefaultCallbackClass;
 import com.github.xpenatan.jParser.example.testlib.TestCallbackClass;
+import com.github.xpenatan.jParser.example.testlib.TestEnumLib;
 import com.github.xpenatan.jParser.example.testlib.TestObjectClass;
 
 public class CallbackTest implements CodeTest {
@@ -175,6 +176,50 @@ public class CallbackTest implements CodeTest {
                 short i = test.callUnsignedShortCallback(callback);
                 if(!(onUnsignedShortCallback[0] == 12 && i == 3)) {
                     throw new RuntimeException("onUnsignedShortCallback[0] == 12 && i == 3");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
+        {
+            TestCallbackClass test = new TestCallbackClass();
+            try {
+                final TestEnumLib[] onEnumParamCallback = { null };
+                CallbackClass callback = new CallbackClass() {
+                    @Override
+                    public void onEnumParamCallback(TestEnumLib enumValue) {
+                        onEnumParamCallback[0] = enumValue;
+                    }
+                };
+                test.callEnumParamCallback(callback);
+                if(!(onEnumParamCallback[0] == TestEnumLib.TEST_SECOND)) {
+                    throw new RuntimeException("onEnumParamCallback[0] == TestEnumLib.TEST_SECOND");
+                }
+            } catch(Throwable e) {
+                e.printStackTrace();
+                test.dispose();
+                return false;
+            }
+            test.dispose();
+        }
+        {
+            TestCallbackClass test = new TestCallbackClass();
+            try {
+                CallbackClass callback = new CallbackClass() {
+                    @Override
+                    public TestEnumLib onEnumReturnCallback(TestEnumLib enumValue) {
+                        if(enumValue != TestEnumLib.TEST_FIRST) {
+                            throw new RuntimeException("enumValue != TestEnumLib.TEST_FIRST");
+                        }
+                        return TestEnumLib.TEST_SECOND;
+                    }
+                };
+                TestEnumLib result = test.callEnumReturnCallback(callback);
+                if(!(result == TestEnumLib.TEST_SECOND)) {
+                    throw new RuntimeException("result == TestEnumLib.TEST_SECOND");
                 }
             } catch(Throwable e) {
                 e.printStackTrace();

@@ -62,11 +62,16 @@ public class IDLCallbackParser {
         for(IDLMethod method : callbackClass.methods) {
             MethodDeclaration methodDeclaration = IDLMethodParser.generateAndAddMethodOnly(idlParser, jParser, unit, classDeclaration, method);
             MethodDeclaration internalMethod = methodDeclaration.clone();
+            boolean isEnumReturn = method.idlFile.getEnum(method.getJavaReturnType()) != null;
             methodDeclaration.removeModifier(Modifier.Keyword.PUBLIC);
             methodDeclaration.addModifier(Modifier.Keyword.PROTECTED);
 
             internalMethod.removeModifier(Modifier.Keyword.PUBLIC);
             internalMethod.addModifier(Modifier.Keyword.PRIVATE);
+            if(isEnumReturn) {
+                // Internal callback bridge uses primitive int for enum returns so backend bridges (JNI/FFM) can marshal consistently.
+                internalMethod.setType(PrimitiveType.intType());
+            }
 
             NodeList<Parameter> internalParameters = internalMethod.getParameters();
 
@@ -132,7 +137,14 @@ public class IDLCallbackParser {
             }
             else {
                 ReturnStmt returnStmt = new ReturnStmt();
-                returnStmt.setExpression(caller);
+                if(isEnumReturn) {
+                    // Protected callback returns enum; convert to int value for native bridge and tolerate null callback returns.
+                    String enumReturnExpr = "(" + caller + " != null ? " + caller + ".getValue() : 0)";
+                    returnStmt.setExpression(StaticJavaParser.parseExpression(enumReturnExpr));
+                }
+                else {
+                    returnStmt.setExpression(caller);
+                }
                 blockStmt.addStatement(returnStmt);
             }
             String internName = internalMethod.getNameAsString();
