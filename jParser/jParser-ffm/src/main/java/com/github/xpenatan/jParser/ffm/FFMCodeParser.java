@@ -903,11 +903,16 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                     paramType = "const " + paramType;
                 }
 
+                String callParamExpr = callParamCast + paramName;
+                if(idlParameter.isEnum()) {
+                    callParamExpr = "static_cast<int32_t>(" + paramName + ")";
+                }
+
                 if(i > 0) {
                     callParams.append(", ");
                     methodParams.append(", ");
                 }
-                callParams.append(callParamCast).append(paramName);
+                callParams.append(callParamExpr);
                 methodParams.append(paramType).append(tag).append(paramName);
             }
 
