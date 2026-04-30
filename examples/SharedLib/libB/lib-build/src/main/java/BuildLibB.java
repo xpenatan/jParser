@@ -181,7 +181,7 @@ public class BuildLibB {
     private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm, String libAPath, boolean isFFM) {
         String api = isFFM ? "ffm" : "jni";
         String libALibPath = libAPath + "/lib-build/build/c++/libs/mac/" + api;
-        String libALibArmPath = libALibPath + "/arm";
+        String libALibArmPath = libAPath + "/lib-build/build/c++/libs/mac/arm/" + api;
         String libACPPPath = libAPath + "/lib-build/src/main/cpp";
         String libASourcePath = libACPPPath + "/source";
         String libACustomPath = libACPPPath + "/custom";
