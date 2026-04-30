@@ -50,13 +50,13 @@ jobs:
           name: PATH
           value: $env:PATH;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build
 
-      - name: Build runtime project
+      - name: Build runtime JNI project
         run: ./gradlew idl_helper_build_project_windows64_jni
 
       - name: Build runtime FFM project
         run: ./gradlew idl_helper_build_project_windows64_ffm
 
-      - name: Build TestLib project
+      - name: Build TestLib JNI project
         run: ./gradlew TestLib_build_project_windows64_jni
 
       - name: Build TestLib FFM project
@@ -68,13 +68,13 @@ jobs:
       - name: Run TestLib desktop FFM tests
         run: ./gradlew :examples:TestLib:lib:lib-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
-      - name: Build Shared LibA project
+      - name: Build Shared LibA JNI project
         run: ./gradlew LibA_build_project_windows64_jni
 
       - name: Build Shared LibA FFM project
         run: ./gradlew LibA_build_project_windows64_ffm
 
-      - name: Build Shared LibB project
+      - name: Build Shared LibB JNI project
         run: ./gradlew LibB_build_project_windows64_jni
 
       - name: Build Shared LibB FFM project
@@ -112,13 +112,13 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build runtime project
+      - name: Build runtime JNI project
         run: ./gradlew idl_helper_build_project_linux64_jni
 
       - name: Build runtime FFM project
         run: ./gradlew idl_helper_build_project_linux64_ffm
 
-      - name: Build TestLib project
+      - name: Build TestLib JNI project
         run: ./gradlew TestLib_build_project_linux64_jni
 
       - name: Build TestLib FFM project
@@ -130,13 +130,13 @@ jobs:
       - name: Run TestLib desktop FFM tests
         run: ./gradlew :examples:TestLib:lib:lib-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
-      - name: Build Shared LibA project
+      - name: Build Shared LibA JNI project
         run: ./gradlew LibA_build_project_linux64_jni
 
       - name: Build Shared LibA FFM project
         run: ./gradlew LibA_build_project_linux64_ffm
 
-      - name: Build Shared LibB project
+      - name: Build Shared LibB JNI project
         run: ./gradlew LibB_build_project_linux64_jni
 
       - name: Build Shared LibB FFM project
@@ -170,13 +170,13 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build project runtime
+      - name: Build project JNI runtime
         run: ./gradlew idl_helper_build_project_mac64_jni
 
       - name: Build runtime FFM project
         run: ./gradlew idl_helper_build_project_mac64_ffm
 
-      - name: Build TestLib project
+      - name: Build TestLib JNI project
         run: |
           ./gradlew TestLib_build_project_mac64_jni
 
@@ -192,7 +192,7 @@ jobs:
         run: |
           ./gradlew :examples:TestLib:lib:lib-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
-      - name: Build Shared LibA project
+      - name: Build Shared LibA JNI project
         run: |
           ./gradlew LibA_build_project_mac64_jni
 
@@ -200,7 +200,7 @@ jobs:
         run: |
           ./gradlew LibA_build_project_mac64_ffm
 
-      - name: Build Shared LibB project
+      - name: Build Shared LibB JNI project
         run: |
           ./gradlew LibB_build_project_mac64_jni
 
@@ -236,13 +236,13 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build project runtime
+      - name: Build project JNI runtime
         run: ./gradlew idl_helper_build_project_macArm_jni
 
       - name: Build runtime FFM project
         run: ./gradlew idl_helper_build_project_macArm_ffm
 
-      - name: Build TestLib project
+      - name: Build TestLib JNI project
         run: |
           ./gradlew TestLib_build_project_macArm_jni
 
@@ -258,7 +258,7 @@ jobs:
         run: |
           ./gradlew :examples:TestLib:lib:lib-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
-      - name: Build Shared LibA project
+      - name: Build Shared LibA JNI project
         run: |
           ./gradlew LibA_build_project_macArm_jni
 
@@ -266,7 +266,7 @@ jobs:
         run: |
           ./gradlew LibA_build_project_macArm_ffm
 
-      - name: Build Shared LibB project
+      - name: Build Shared LibB JNI project
         run: |
           ./gradlew LibB_build_project_macArm_jni
 

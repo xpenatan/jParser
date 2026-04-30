@@ -183,7 +183,7 @@ public class BuildLibA {
         multiTarget.add(compileStaticTarget);
 
         MacTarget linkTarget = new MacTarget(isArm);
-        compileStaticTarget.libDirSuffix += api;
+        linkTarget.libDirSuffix += api;
         if(isFFM) {
             linkTarget.setupFFMGlueCode(libBuildCPPPath);
         }
