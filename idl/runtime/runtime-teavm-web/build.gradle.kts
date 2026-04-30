@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "runtime-web"
+val moduleName = "runtime-teavm-web"
 
 val emscriptenJS = "$projectDir/../runtime-build/build/c++/libs/emscripten/idl.js"
 val emscriptenWASM = "$projectDir/../runtime-build/build/c++/libs/emscripten/idl.wasm"
