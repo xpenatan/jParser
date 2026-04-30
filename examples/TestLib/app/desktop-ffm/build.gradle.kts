@@ -11,7 +11,7 @@ sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/t
 tasks.test {
     useJUnit()
     systemProperty("java.awt.headless", "true")
-    dependsOn(":examples:TestLib:lib:lib-desktop-ffm:assemble")
+    dependsOn(":examples:TestLib:lib:lib-ffm:assemble")
     testLogging {
         showStandardStreams = true
         events("passed", "skipped", "failed")
@@ -39,12 +39,12 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:TestLib:lib:lib-desktop-ffm"))
+    implementation(project(":examples:TestLib:lib:lib-ffm"))
 
-    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-desktop-ffm", "configuration" to "nativeRuntime")))
+    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-ffm", "configuration" to "nativeRuntime")))
 
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
-    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-desktop-ffm", "configuration" to "nativeRuntime")))
+    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-ffm", "configuration" to "nativeRuntime")))
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {

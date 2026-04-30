@@ -8,7 +8,7 @@ dependencies {
     implementation(project(":examples:TestLib:lib:lib-base"))
     implementation(project(":jParser:jParser-core"))
     implementation(project(":jParser:jParser-idl"))
-    implementation(project(":jParser:jParser-teavm"))
+    implementation(project(":jParser:jParser-teavm-web"))
     implementation(project(":jParser:jParser-jni"))
     implementation(project(":jParser:jParser-build"))
     implementation(project(":jParser:jParser-build-tool"))
@@ -19,15 +19,15 @@ tasks.register<JavaExec>("TestLib_build_project") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf()
+    args = mutableListOf("gen_jni", "gen_ffm", "gen_teavm_web")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("TestLib_build_project_teavm") {
+tasks.register<JavaExec>("TestLib_build_project_teavm_web") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("teavm")
+    args = mutableListOf("gen_teavm_web")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -35,7 +35,7 @@ tasks.register<JavaExec>("TestLib_build_project_windows64_ffm") {
     group = "lib"
     description = "Generate FFM Java code and compile for Windows with FFMGlue"
     mainClass.set(mainClassName)
-    args = mutableListOf("windows64_ffm")
+    args = mutableListOf("gen_ffm", "windows64_ffm")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -43,7 +43,7 @@ tasks.register<JavaExec>("TestLib_build_project_linux64_ffm") {
     group = "lib"
     description = "Generate FFM Java code and compile for Linux with FFMGlue"
     mainClass.set(mainClassName)
-    args = mutableListOf("linux64_ffm")
+    args = mutableListOf("gen_ffm", "linux64_ffm")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -51,7 +51,7 @@ tasks.register<JavaExec>("TestLib_build_project_mac64_ffm") {
     group = "lib"
     description = "Generate FFM Java code and compile for Mac with FFMGlue"
     mainClass.set(mainClassName)
-    args = mutableListOf("mac64_ffm")
+    args = mutableListOf("gen_ffm", "mac64_ffm")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -59,7 +59,7 @@ tasks.register<JavaExec>("TestLib_build_project_macArm_ffm") {
     group = "lib"
     description = "Generate FFM Java code and compile for Mac ARM with FFMGlue"
     mainClass.set(mainClassName)
-    args = mutableListOf("macArm_ffm")
+    args = mutableListOf("gen_ffm", "macArm_ffm")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -67,7 +67,7 @@ tasks.register<JavaExec>("TestLib_build_project_windows64_jni") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("windows64_jni")
+    args = mutableListOf("gen_jni", "windows64_jni")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -75,7 +75,7 @@ tasks.register<JavaExec>("TestLib_build_project_linux64_jni") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("linux64_jni")
+    args = mutableListOf("gen_jni", "linux64_jni")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -83,7 +83,7 @@ tasks.register<JavaExec>("TestLib_build_project_mac64_jni") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("mac64_jni")
+    args = mutableListOf("gen_jni", "mac64_jni")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -91,7 +91,7 @@ tasks.register<JavaExec>("TestLib_build_project_macArm_jni") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("macArm_jni")
+    args = mutableListOf("gen_jni", "macArm_jni")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -99,7 +99,7 @@ tasks.register<JavaExec>("TestLib_build_project_android_jni") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("android_jni")
+    args = mutableListOf("gen_jni", "android_jni")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -107,7 +107,7 @@ tasks.register<JavaExec>("TestLib_build_project_ios_jni") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("ios_jni")
+    args = mutableListOf("gen_jni", "ios_jni")
     classpath = sourceSets["main"].runtimeClasspath
 }
 

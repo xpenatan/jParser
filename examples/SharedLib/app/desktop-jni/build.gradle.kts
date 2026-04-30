@@ -17,12 +17,12 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:SharedLib:libA:lib-desktop-jni"))
-    implementation(project(":examples:SharedLib:libB:lib-desktop-jni"))
+    implementation(project(":examples:SharedLib:libA:lib-jni"))
+    implementation(project(":examples:SharedLib:libB:lib-jni"))
 
-    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-desktop-jni", "configuration" to "nativeRuntime")))
+    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-jni", "configuration" to "nativeRuntime")))
     // for tests as well
-    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-desktop-jni", "configuration" to "nativeRuntime")))
+    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-jni", "configuration" to "nativeRuntime")))
 }
 
 tasks.register<JavaExec>("SharedLib_run_app_desktop_jni") {

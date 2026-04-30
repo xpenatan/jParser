@@ -7,7 +7,7 @@ val moduleName = "${LibExt.libName}-build-tool"
 dependencies {
     implementation(project(":jParser:jParser-core"))
     implementation(project(":jParser:jParser-idl"))
-    implementation(project(":jParser:jParser-teavm"))
+    implementation(project(":jParser:jParser-teavm-web"))
     implementation(project(":jParser:jParser-jni"))
     implementation(project(":jParser:jParser-ffm"))
     implementation(project(":jParser:jParser-build"))

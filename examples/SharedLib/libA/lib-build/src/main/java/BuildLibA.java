@@ -37,7 +37,7 @@ public class BuildLibA {
         BuilderTool.build(op, new BuildToolListener() {
             @Override
             public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
-                if(op.containsArg("teavm")) {
+                if(op.containsArg("web") || op.containsArg("gen_teavm_web")) {
                     targets.add(getTeavmTarget(op, idlReader));
                 }
                 if(op.containsArg("windows64_jni")) {

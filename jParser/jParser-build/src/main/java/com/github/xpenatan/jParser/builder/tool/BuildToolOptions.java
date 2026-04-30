@@ -13,10 +13,8 @@ public class BuildToolOptions {
     public final String webModuleName;
     public final String packageName;
     public boolean generateTeaVMWeb = false;
-    public boolean generateDesktopJNI = false;
-    public boolean generateDesktopFFM = false;
-    public boolean generateAndroid = false;
-    public boolean generateIOS = false; // TODO
+    public boolean generateJNI = false;
+    public boolean generateFFM = false;
     public boolean generateCore = true;
 
     /** Name of the idl file located in [Module Build Path] + src/main/cpp/myidl.idl. The default is libName but can be changed. */
@@ -27,8 +25,7 @@ public class BuildToolOptions {
     private String moduleBuildPath;
     private String moduleBuildCPPPath;
     private String moduleCorePath;
-    private String moduleDesktopJNIPath;
-    private String moduleAndroidPath;
+    private String moduleJNIPath;
     private String moduleTeavmPath;
     private String moduleFFMPath;
     private ArrayList<IDLFile> idlPath = new ArrayList<>();
@@ -81,10 +78,9 @@ public class BuildToolOptions {
         moduleBasePath = modulePath + "/" + modulePrefix + "-base";
         moduleBuildPath = modulePath + "/" + modulePrefix + "-build";
         moduleCorePath = modulePath + "/" + modulePrefix + "-core";
-        moduleDesktopJNIPath = modulePath + "/" + modulePrefix + "-desktop-jni";
-        moduleAndroidPath = modulePath + "/" + modulePrefix + "-android";
-        moduleTeavmPath = modulePath + "/" + modulePrefix + "-teavm";
-        moduleFFMPath = modulePath + "/" + modulePrefix + "-desktop-ffm";
+        moduleJNIPath = modulePath + "/" + modulePrefix + "-jni";
+        moduleTeavmPath = modulePath + "/" + modulePrefix + "-teavm-web";
+        moduleFFMPath = modulePath + "/" + modulePrefix + "-ffm";
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         cppPath = moduleBuildPath + "/src/main/cpp/";
@@ -143,27 +139,20 @@ public class BuildToolOptions {
         return cppPath;
     }
 
-    public String getModuleDesktopJNIPath() {
-        return moduleDesktopJNIPath;
+    public String getModuleJNIPath() {
+        return moduleJNIPath;
     }
 
-    public String getModuleAndroidPath() {
-        return moduleAndroidPath;
+    public String getJNIJavaOutputPath() {
+        return moduleJNIPath + "/src/main/java";
     }
 
-    public String[] getJNIJavaOutputPaths() {
-        ArrayList<String> outputPaths = new ArrayList<>();
-        if(generateAndroid) {
-            outputPaths.add(moduleAndroidPath + "/src/main/java");
-        }
+    public String getFFMJavaOutputPath() {
+        return moduleFFMPath + "/src/main/java";
+    }
 
-        if(generateDesktopJNI) {
-            outputPaths.add(moduleDesktopJNIPath + "/src/main/java");
-        }
-
-        String[] paths = new String[outputPaths.size()];
-        outputPaths.toArray(paths);
-        return paths;
+    public String getTeaVMJavaOutputPath() {
+        return moduleTeavmPath + "/src/main/java";
     }
 
 
@@ -246,7 +235,7 @@ public class BuildToolOptions {
         public String packageName;
 
         /**
-         * Module prefix name. ex: imgui. So it will be imgui-core, imgui-teavm, etc.
+         * Module prefix name. ex: imgui. So it will be imgui-core, imgui-teavm-web, etc.
          */
         public String modulePrefix;
 
@@ -256,7 +245,7 @@ public class BuildToolOptions {
         public String cppSourcePath;
 
         /**
-         * The full parent path that contains all the required modules. (Lib-core, Lib-teavm, Lib-desktop, etc.)<br>
+         * The full parent path that contains all the required modules. (Lib-core, Lib-teavm-web, Lib-desktop, etc.)<br>
          * If not specified, it will be the current parent directory of the build instance.
          */
         public String modulePath;

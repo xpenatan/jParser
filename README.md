@@ -23,6 +23,7 @@
 - [WebIDL Bindings](#webidl-bindings)
 - [IDLBase API](#idlbase-api)
 - [Requirements](#requirements)
+- [Documentation](#documentation)
 - [Getting Started](#getting-started)
 - [Libraries Using jParser](#libraries-using-jparser)
 - [License](#license)
@@ -163,6 +164,13 @@ Every native class extends `IDLBase`, which provides common memory-management fu
 
 > **Windows (MSVC):** Ensure `vcvarsall.bat` is on your system `PATH`. It is typically located at:
 > `C:\Program Files\Microsoft Visual Studio\[Year]\[Edition]\VC\Auxiliary\Build\`
+
+## Documentation
+
+- Runtime publishing/classifier strategy guide: [`docs/runtime-maven-artifacts.md`](docs/runtime-maven-artifacts.md)
+- Architecture details: [`docs/architecture.md`](docs/architecture.md)
+- Workflow/checklists: [`docs/workflows.md`](docs/workflows.md)
+- Command matrix: [`docs/commands.md`](docs/commands.md)
 
 ## Getting Started
 

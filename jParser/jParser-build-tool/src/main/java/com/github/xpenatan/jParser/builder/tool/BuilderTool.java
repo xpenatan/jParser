@@ -53,32 +53,28 @@ public class BuilderTool {
             JParser.generate(coreParser, op.getModuleBaseJavaDir(), op.getModuleCorePath() + "/src/main/java");
         }
 
-        if(op.generateDesktopJNI || op.generateAndroid) {
+        if(op.generateJNI) {
 //            NativeCPPGenerator.SKIP_GLUE_CODE = true;
             CppGenerator cppGenerator = new NativeCPPGenerator(op.getCPPDestinationPath());
-            String[] outputPaths = op.getJNIJavaOutputPaths();
-            for(int i = 0; i < outputPaths.length; i++) {
-                String outputPath = outputPaths[i];
-                CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.packageName, op.getSourceDir());
-                cppParser.generateClass = true;
-                cppParser.idlRenaming = packageRenaming;
-                JParser.generate(cppParser, op.getModuleBaseJavaDir(), outputPath);
-            }
+            CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.packageName, op.getSourceDir());
+            cppParser.generateClass = true;
+            cppParser.idlRenaming = packageRenaming;
+            JParser.generate(cppParser, op.getModuleBaseJavaDir(), op.getJNIJavaOutputPath());
         }
 
         if(op.generateTeaVMWeb) {
 //            EmscriptenTarget.SKIP_GLUE_CODE = true;
             TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.webModuleName, op.packageName, op.getSourceDir());
             teavmParser.idlRenaming = packageRenaming;
-            JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getModuleTeaVMPath() + "/src/main/java/");
+            JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getTeaVMJavaOutputPath());
         }
 
-        if(op.generateDesktopFFM) {
+        if(op.generateFFM) {
             FFMCppGenerator ffmGenerator = new FFMCppGenerator(op.getCPPDestinationPath());
             FFMCodeParser ffmParser = new FFMCodeParser(ffmGenerator, idlReader, op.packageName, op.getSourceDir());
             ffmParser.generateClass = true;
             ffmParser.idlRenaming = packageRenaming;
-            JParser.generate(ffmParser, op.getModuleBaseJavaDir(), op.getModuleFFMPath() + "/src/main/java");
+            JParser.generate(ffmParser, op.getModuleBaseJavaDir(), op.getFFMJavaOutputPath());
         }
 
         BuildConfig buildConfig = new BuildConfig(op);
@@ -86,32 +82,15 @@ public class BuilderTool {
     }
 
     private static void applyAutoGenerateFlags(BuildToolOptions op) {
-        if(op.containsArg("gen_desktop_ffm") ||
-                op.containsArg("windows64_ffm") ||
-                op.containsArg("linux64_ffm") ||
-                op.containsArg("mac64_ffm") ||
-                op.containsArg("macArm_ffm")) {
-            op.generateDesktopFFM = true;
+        if(op.containsArg("gen_ffm")) {
+            op.generateFFM = true;
         }
 
-        if(op.containsArg("gen_desktop_jni") ||
-                op.containsArg("windows64_jni") ||
-                op.containsArg("linux64_jni") ||
-                op.containsArg("mac64_jni") ||
-                op.containsArg("macArm_jni") ||
-                op.containsArg("ios_jni")) {
-            op.generateDesktopJNI = true;
+        if(op.containsArg("gen_jni")) {
+            op.generateJNI = true;
         }
 
-        if(op.containsArg("gen_android_jni") || op.containsArg("android_jni")) {
-            op.generateAndroid = true;
-        }
-
-        if(op.containsArg("gen_ios_jni") || op.containsArg("ios_jni")) {
-            op.generateIOS = true;
-        }
-
-        if(op.containsArg("gen_teavm") || op.containsArg("teavm")) {
+        if(op.containsArg("gen_teavm_web")) {
             op.generateTeaVMWeb = true;
         }
     }

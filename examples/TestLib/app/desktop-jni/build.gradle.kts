@@ -13,7 +13,7 @@ tasks.test {
     useJUnit()
     systemProperty("java.awt.headless", "true")
     // Ensure JNI native artifacts are built before running tests
-    dependsOn(":examples:TestLib:lib:lib-desktop-jni:assemble")
+    dependsOn(":examples:TestLib:lib:lib-jni:assemble")
     // Print test standard output (System.out.println) to the console for CI logs
     testLogging {
         showStandardStreams = true
@@ -42,12 +42,12 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:TestLib:lib:lib-desktop-jni"))
-    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-desktop-jni", "configuration" to "nativeRuntime")))
+    implementation(project(":examples:TestLib:lib:lib-jni"))
+    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-jni", "configuration" to "nativeRuntime")))
 
     // test-time dependencies required to initialize native loaders
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
-    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-desktop-jni", "configuration" to "nativeRuntime")))
+    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-jni", "configuration" to "nativeRuntime")))
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_jni") {

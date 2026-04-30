@@ -30,30 +30,31 @@ out/
 *.log
 
 **/idl/runtime/runtime-core/src/main/java/**
-**/idl/runtime/runtime-teavm/src/main/java/**
-**/idl/runtime/runtime-desktop-ffm/src/main/java/**
-**/idl/runtime/runtime-desktop-jni/src/main/java/**
+**/idl/runtime/runtime-teavm-web/src/main/java/**
+**/idl/runtime/runtime-ffm/src/main/java/**
+**/idl/runtime/runtime-jni/src/main/java/**
 **/idl/runtime/runtime-android/src/main/java/**
 
 **/webapp/**
 **/lib/core/src/**
 **/lib/desktop/src/main/**
 
-**/lib/lib-teavm/src/main/java/**
+**/lib/lib-teavm-web/src/main/java/**
 **/lib/lib-core/src/main/java/**
-**/lib/lib-desktop-ffm/src/main/java/**
-**/lib/lib-desktop-jni/src/main/java/**
+**/lib/lib-ffm/src/main/java/**
+**/lib/lib-jni/src/main/java/**
 **/lib/lib-android/src/main/java/**
 
-**/libA/lib-teavm/src/main/java/**
+**/libA/lib-teavm-web/src/main/java/**
 **/libA/lib-core/src/main/java/**
-**/libA/lib-desktop-ffm/src/main/java/**
-**/libA/lib-desktop-jni/src/main/java/**
+**/libA/lib-ffm/src/main/java/**
+**/libA/lib-jni/src/main/java/**
 **/libA/lib-android/src/main/java/**
-**/libB/lib-teavm/src/main/java/**
+
+**/libB/lib-teavm-web/src/main/java/**
 **/libB/lib-core/src/main/java/**
-**/libB/lib-desktop-ffm/src/main/java/**
-**/libB/lib-desktop-jni/src/main/java/**
+**/libB/lib-ffm/src/main/java/**
+**/libB/lib-jni/src/main/java/**
 **/libB/lib-android/src/main/java/**
 
 **/app/android/libs/

@@ -1,0 +1,56 @@
+plugins {
+    id("java")
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
+    targetCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
+}
+
+val emscriptenJS = "$projectDir/../lib-build/build/c++/libs/emscripten/TestLib.js"
+val emscriptenWASM = "$projectDir/../lib-build/build/c++/libs/emscripten/TestLib.wasm"
+
+tasks.jar {
+    from(emscriptenJS, emscriptenWASM)
+}
+
+dependencies {
+    implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
+    implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
+
+    implementation(project(":loader:loader-teavm-web"))
+    implementation(project(":loader:loader-core"))
+    implementation(project(":idl:api:api-teavm-web"))
+    implementation(project(":idl:api:api-core"))
+    implementation(project(":idl:runtime:runtime-teavm-web"))
+}
+
+tasks.named("clean") {
+    doFirst {
+        val srcPath = "$projectDir/src/main/java"
+        project.delete(files(srcPath))
+    }
+}
+
+val tasksOrder = tasks.register<GradleBuild>("prepareTest") {
+    tasks = listOf(
+            ":example:lib:desktop:prepareTest",
+            "compileTestJava"
+    )
+}
+
+tasks.named("test") {
+    dependsOn(tasksOrder)
+    mustRunAfter(tasksOrder)
+}
+
+tasks.test {
+    systemProperty("teavm.junit.target", "${project.buildDir.absolutePath }/js-tests")
+    systemProperty("teavm.junit.js.runner", "browser-firefox")
+//    systemProperty("teavm.junit.js.runner", "browser")
+    systemProperty("teavm.junit.threads", "1")
+    systemProperty("teavm.junit.minified", false)
+    systemProperty("teavm.junit.optimized", false)
+    systemProperty("teavm.junit.js.decodeStack", false)
+    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+}

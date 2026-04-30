@@ -37,6 +37,7 @@ dependencies {
     implementation(project(":idl:api:api-core"))
     implementation(project(":idl:runtime:runtime-android"))
     implementation(project(":examples:SharedLib:libA:lib-android"))
+    implementation(project(":examples:SharedLib:libB:lib-jni"))
 }
 
 tasks.named("clean") {

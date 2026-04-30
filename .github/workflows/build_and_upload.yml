@@ -63,10 +63,10 @@ jobs:
         run: ./gradlew TestLib_build_project_windows64_ffm
 
       - name: Run TestLib desktop JNI tests
-        run: ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
+        run: ./gradlew :examples:TestLib:lib:lib-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
 
       - name: Run TestLib desktop FFM tests
-        run: ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
+        run: ./gradlew :examples:TestLib:lib:lib-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
       - name: Build Shared LibA project
         run: ./gradlew LibA_build_project_windows64_jni
@@ -79,9 +79,6 @@ jobs:
 
       - name: Build Shared LibB FFM project
         run: ./gradlew LibB_build_project_windows64_ffm
-
-#      - name: Test Shared Lib
-#        run: ./gradlew :examples:SharedLib:app:core:test
 
       - name: Upload natives
         uses: actions/upload-artifact@v4
@@ -128,10 +125,10 @@ jobs:
         run: ./gradlew TestLib_build_project_linux64_ffm
 
       - name: Run TestLib desktop JNI tests
-        run: ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
+        run: ./gradlew :examples:TestLib:lib:lib-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
 
       - name: Run TestLib desktop FFM tests
-        run: ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
+        run: ./gradlew :examples:TestLib:lib:lib-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
       - name: Build Shared LibA project
         run: ./gradlew LibA_build_project_linux64_jni
@@ -144,9 +141,6 @@ jobs:
 
       - name: Build Shared LibB FFM project
         run: ./gradlew LibB_build_project_linux64_ffm
-
-#      - name: Test Shared Lib
-#        run: ./gradlew :examples:SharedLib:app:core:test
 
       - name: Upload natives runtime
         uses: actions/upload-artifact@v4
@@ -192,30 +186,27 @@ jobs:
 
       - name: Run TestLib desktop JNI tests
         run: |
-          ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
+          ./gradlew :examples:TestLib:lib:lib-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
 
       - name: Run TestLib desktop FFM tests
         run: |
-          ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
+          ./gradlew :examples:TestLib:lib:lib-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
-#      - name: Build Shared LibA project
-#        run: |
-#          ./gradlew LibA_build_project_mac64_jni
-#
-#      - name: Build Shared LibA FFM project
-#        run: |
-#          ./gradlew LibA_build_project_mac64_ffm
-#
-#      - name: Build Shared LibB project
-#        run: |
-#          ./gradlew LibB_build_project_mac64_jni
-#
-#      - name: Build Shared LibB FFM project
-#        run: |
-#          ./gradlew LibB_build_project_mac64_ffm
+      - name: Build Shared LibA project
+        run: |
+          ./gradlew LibA_build_project_mac64_jni
 
-#      - name: Test Shared Lib
-#        run: ./gradlew :examples:SharedLib:app:core:test
+      - name: Build Shared LibA FFM project
+        run: |
+          ./gradlew LibA_build_project_mac64_ffm
+
+      - name: Build Shared LibB project
+        run: |
+          ./gradlew LibB_build_project_mac64_jni
+
+      - name: Build Shared LibB FFM project
+        run: |
+          ./gradlew LibB_build_project_mac64_ffm
 
       - name: Upload natives runtime
         uses: actions/upload-artifact@v4
@@ -261,30 +252,27 @@ jobs:
 
       - name: Run TestLib desktop JNI tests
         run: |
-          ./gradlew :examples:TestLib:lib:lib-desktop-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
+          ./gradlew :examples:TestLib:lib:lib-jni:assemble :examples:TestLib:app:desktop-jni:test --no-daemon --info --console=plain
 
       - name: Run TestLib desktop FFM tests
         run: |
-          ./gradlew :examples:TestLib:lib:lib-desktop-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
+          ./gradlew :examples:TestLib:lib:lib-ffm:assemble :examples:TestLib:app:desktop-ffm:test --no-daemon --info --console=plain
 
-#      - name: Build Shared LibA project
-#        run: |
-#          ./gradlew LibA_build_project_macArm_jni
-#
-#      - name: Build Shared LibA FFM project
-#        run: |
-#          ./gradlew LibA_build_project_macArm_ffm
-#
-#      - name: Build Shared LibB project
-#        run: |
-#          ./gradlew LibB_build_project_macArm_jni
-#
-#      - name: Build Shared LibB FFM project
-#        run: |
-#          ./gradlew LibB_build_project_macArm_ffm
+      - name: Build Shared LibA project
+        run: |
+          ./gradlew LibA_build_project_macArm_jni
 
-#      - name: Test Shared Lib
-#        run: ./gradlew :examples:SharedLib:app:core:test
+      - name: Build Shared LibA FFM project
+        run: |
+          ./gradlew LibA_build_project_macArm_ffm
+
+      - name: Build Shared LibB project
+        run: |
+          ./gradlew LibB_build_project_macArm_jni
+
+      - name: Build Shared LibB FFM project
+        run: |
+          ./gradlew LibB_build_project_macArm_ffm
 
       - name: Upload natives runtime
         uses: actions/upload-artifact@v4
@@ -292,8 +280,8 @@ jobs:
           name: mac-natives-arm
           path: ./idl/runtime/runtime-build/build/c++/libs/
 
-  build_teavm:
-    name: Build TeaVM
+  build_web:
+    name: Build Web
     runs-on: ubuntu-latest
 
     steps:
@@ -324,15 +312,21 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project runtime
-        run: ./gradlew idl_helper_build_project_teavm
+        run: ./gradlew idl_helper_build_project_teavm_web
 
       - name: Build project
-        run: ./gradlew TestLib_build_project_teavm
+        run: ./gradlew TestLib_build_project_teavm_web
+
+      - name: Build Shared LibA project
+        run: ./gradlew LibA_build_project_teavm_web
+
+      - name: Build Shared LibB project
+        run: ./gradlew LibB_build_project_teavm_web
 
       - name: Upload natives runtime
         uses: actions/upload-artifact@v4
         with:
-          name: teavm-natives
+          name: web-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
 
   build_android:
@@ -380,6 +374,16 @@ jobs:
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
+      - name: Build Shared LibA project
+        run: ./gradlew LibA_build_project_android_jni
+        env:
+          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Build Shared LibB project
+        run: ./gradlew LibB_build_project_android_jni
+        env:
+          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
       - name: Upload natives
         uses: actions/upload-artifact@v4
         with:
@@ -388,7 +392,7 @@ jobs:
 
   upload_natives:
     name: Upload Natives
-    needs: [build_windows, build_linux, build_mac_intel, build_mac_arm, build_android, build_teavm]
+    needs: [build_windows, build_linux, build_mac_intel, build_mac_arm, build_android, build_web]
     runs-on: ubuntu-latest
 
     steps:
@@ -451,10 +455,10 @@ jobs:
           name: android-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
 
-      - name: Download teavm natives runtime
+      - name: Download web natives runtime
         uses: actions/download-artifact@v4
         with:
-          name: teavm-natives
+          name: web-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
 
       - name: Generate Java classes
