@@ -222,11 +222,11 @@ public class BuildLibB {
         linkTarget.headerDirs.add("-I" + libACustomPath);
 
         if(isArm) {
-            linkTarget.linkerFlags.add(libALibArmPath + "/libLibA64.dylib");
+            linkTarget.linkerFlags.add(libALibArmPath + "/libLibAarm64.dylib");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/" + api + "/lib" + op.libName + "64_.a");
         }
         else {
-            linkTarget.linkerFlags.add(libALibPath + "/libLibA64.dylib");
+            linkTarget.linkerFlags.add(libALibPath + "/libLibAarm64.dylib");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/" + api + "/lib" + op.libName + "64_.a");
         }
 
