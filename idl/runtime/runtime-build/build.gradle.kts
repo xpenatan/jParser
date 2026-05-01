@@ -28,7 +28,7 @@ tasks.register<JavaExec>("idl_helper_build_project_web_wasm") {
     group = "jParser"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("gen_web")
+    args = mutableListOf("gen_web", "web_wasm")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
