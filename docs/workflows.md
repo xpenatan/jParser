@@ -4,7 +4,7 @@ Startup/session protocol is defined in `AGENTS.md` (`Start Here (Mandatory)`). T
 
 ## Editing Rules
 
-- Do not hand-edit generated outputs in `lib-core`, `lib-desktop-jni`, `lib-desktop-ffm`, `lib-android`, `lib-teavm-web`.
+- Do not hand-edit generated outputs in `lib-core`, `lib-jni`, `lib-ffm`, `lib-android`, `lib-web`.
 - Prefer edits in source modules (`lib-base`, parser modules, build modules).
 - If generator logic changes, regenerate artifacts before app/test validation.
 - Keep code comments short and only where needed for non-obvious logic.

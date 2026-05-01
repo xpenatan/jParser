@@ -6,7 +6,7 @@ Modules covered:
 - `idl/runtime/runtime-jni`
 - `idl/runtime/runtime-ffm`
 - `idl/runtime/runtime-android`
-- `idl/runtime/runtime-teavm-web`
+- `idl/runtime/runtime-web`
 
 ## Why this setup exists
 
@@ -22,7 +22,7 @@ The runtime modules support two different use cases:
 
 ## Local vs publish behavior
 
-Desktop (`runtime-jni`, `runtime-ffm`) and web (`runtime-teavm-web`) use this gate:
+Desktop (`runtime-jni`, `runtime-ffm`) and web (`runtime-web`) use this gate:
 
 ```kotlin
 val isPublishingTask = gradle.startParameter.taskNames.any { it.contains("publish", ignoreCase = true) }
@@ -47,7 +47,7 @@ Android (`runtime-android`) uses the same publish gate for JNI copy staging so p
   - bundled: `android`
   - per-ABI: `android_arm64_v8a`, `android_armeabi_v7a`, `android_x86`, `android_x86_64`
 
-- `runtime-teavm-web` (artifactId `runtime-web`)
+- `runtime-web` (artifactId `runtime-web`)
   - bundled web payload: `wasm` (contains both `idl.js` and `idl.wasm`)
 
 ## Reference pattern for desktop modules

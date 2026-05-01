@@ -17,12 +17,12 @@ tasks.jar {
 dependencies {
     implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
     implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
+    implementation(project(":loader:loader-web"))
 
-    implementation(project(":loader:loader-teavm-web"))
     implementation(project(":loader:loader-core"))
-    implementation(project(":idl:api:api-teavm-web"))
+    implementation(project(":idl:api:api-web"))
     implementation(project(":idl:api:api-core"))
-    implementation(project(":idl:runtime:runtime-teavm-web"))
+    implementation(project(":idl:runtime:runtime-web"))
 }
 
 tasks.named("clean") {

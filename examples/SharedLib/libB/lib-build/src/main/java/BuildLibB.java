@@ -42,7 +42,7 @@ public class BuildLibB {
         BuilderTool.build(op, new BuildToolListener() {
             @Override
             public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
-                if(op.containsArg("web") || op.containsArg("gen_teavm_web")) {
+                if(op.containsArg("web_wasm")) {
                     targets.add(getTeavmTarget(op, idlReader, libAPath));
                 }
                 if(op.containsArg("windows64_jni")) {

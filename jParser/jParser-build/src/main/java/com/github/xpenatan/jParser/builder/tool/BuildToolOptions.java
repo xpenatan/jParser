@@ -12,7 +12,7 @@ public class BuildToolOptions {
     public final String libName;
     public final String webModuleName;
     public final String packageName;
-    public boolean generateTeaVMWeb = false;
+    public boolean generateWeb = false;
     public boolean generateJNI = false;
     public boolean generateFFM = false;
     public boolean generateCore = true;
@@ -245,7 +245,7 @@ public class BuildToolOptions {
         public String cppSourcePath;
 
         /**
-         * The full parent path that contains all the required modules. (Lib-core, Lib-teavm-web, Lib-desktop, etc.)<br>
+         * The full parent path that contains all the required modules. (Lib-core, Lib-web, Lib-jni, Lib-ffm, etc.)<br>
          * If not specified, it will be the current parent directory of the build instance.
          */
         public String modulePath;

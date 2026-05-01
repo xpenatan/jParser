@@ -7,7 +7,7 @@ Primary orchestration is in `jParser/jParser-build-tool` via `BuilderTool.build(
 1. IDL parsing (`IDLReader`) from `lib-build/src/main/cpp/*.idl`
 2. Core API generation (`IDLDefaultCodeParser`) into `lib-core`
 3. JNI generation (`CppCodeParser`) into `lib-desktop-jni` and `lib-android`
-4. TeaVM generation (`TeaVMCodeParser`) into `lib-teavm-web`
+4. TeaVM generation (`TeaVMCodeParser`) into `lib-web`
 5. FFM generation (`FFMCodeParser`) into `lib-desktop-ffm`
 6. Native compile (`JBuilder.build()`) via platform targets
 
@@ -74,7 +74,7 @@ Primary orchestration is in `jParser/jParser-build-tool` via `BuilderTool.build(
 1. IDL parsing (`IDLReader`) from `lib-build/src/main/cpp/*.idl`
 2. Core API generation (`IDLDefaultCodeParser`) into `lib-core`
 3. JNI generation (`CppCodeParser`) into `lib-desktop-jni` and `lib-android`
-4. TeaVM generation (`TeaVMCodeParser`) into `lib-teavm-web`
+4. TeaVM generation (`TeaVMCodeParser`) into `lib-web`
 5. FFM generation (`FFMCodeParser`) into `lib-desktop-ffm`
 6. Native compile (`JBuilder.build()`) via platform targets
 

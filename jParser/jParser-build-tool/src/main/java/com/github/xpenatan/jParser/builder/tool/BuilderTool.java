@@ -62,7 +62,7 @@ public class BuilderTool {
             JParser.generate(cppParser, op.getModuleBaseJavaDir(), op.getJNIJavaOutputPath());
         }
 
-        if(op.generateTeaVMWeb) {
+        if(op.generateWeb) {
 //            EmscriptenTarget.SKIP_GLUE_CODE = true;
             TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.webModuleName, op.packageName, op.getSourceDir());
             teavmParser.idlRenaming = packageRenaming;
@@ -90,8 +90,8 @@ public class BuilderTool {
             op.generateJNI = true;
         }
 
-        if(op.containsArg("gen_teavm_web")) {
-            op.generateTeaVMWeb = true;
+        if(op.containsArg("gen_web")) {
+            op.generateWeb = true;
         }
     }
 }

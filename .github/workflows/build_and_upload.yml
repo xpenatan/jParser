@@ -312,16 +312,16 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project runtime
-        run: ./gradlew idl_helper_build_project_teavm_web
+        run: ./gradlew idl_helper_build_project_web_wasm
 
       - name: Build project
-        run: ./gradlew TestLib_build_project_teavm_web
+        run: ./gradlew TestLib_build_project_web_wasm
 
       - name: Build Shared LibA project
-        run: ./gradlew LibA_build_project_teavm_web
+        run: ./gradlew LibA_build_project_web_wasm
 
       - name: Build Shared LibB project
-        run: ./gradlew LibB_build_project_teavm_web
+        run: ./gradlew LibB_build_project_web_wasm
 
       - name: Upload natives runtime
         uses: actions/upload-artifact@v4

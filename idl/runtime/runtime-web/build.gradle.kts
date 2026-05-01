@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "runtime-teavm-web"
+val moduleName = "runtime-web"
 
 val emscriptenJS = "$projectDir/../runtime-build/build/c++/libs/emscripten/idl.js"
 val emscriptenWASM = "$projectDir/../runtime-build/build/c++/libs/emscripten/idl.wasm"
@@ -24,9 +24,9 @@ tasks.named<Jar>("jar") {
 }
 
 dependencies {
-    implementation(project(":idl:api:api-teavm-web"))
+    implementation(project(":idl:api:api-web"))
     implementation(project(":loader:loader-core"))
-    implementation(project(":loader:loader-teavm-web"))
+    implementation(project(":loader:loader-web"))
 
     api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
     api("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")

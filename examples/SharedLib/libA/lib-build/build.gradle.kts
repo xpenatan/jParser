@@ -9,7 +9,7 @@ dependencies {
 
     implementation(project(":jParser:jParser-core"))
     implementation(project(":jParser:jParser-idl"))
-    implementation(project(":jParser:jParser-teavm-web"))
+    implementation(project(":jParser:jParser-web"))
     implementation(project(":jParser:jParser-jni"))
     implementation(project(":jParser:jParser-build"))
     implementation(project(":jParser:jParser-build-tool"))
@@ -22,15 +22,15 @@ tasks.register<JavaExec>("LibA_build_project") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("gen_jni", "gen_ffm", "gen_teavm_web")
+    args = mutableListOf("gen_jni", "gen_ffm", "gen_web")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("LibA_build_project_teavm_web") {
+tasks.register<JavaExec>("LibA_build_project_web_wasm") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("gen_teavm_web")
+    args = mutableListOf("gen_web", "web_wasm")
     classpath = sourceSets["main"].runtimeClasspath
 }
 

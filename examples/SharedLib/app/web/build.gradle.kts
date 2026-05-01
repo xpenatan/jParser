@@ -8,23 +8,17 @@ java {
 }
 
 dependencies {
-    implementation(project(":examples:TestLib:app:core"))
-    implementation(project(":examples:TestLib:lib:lib-teavm-web"))
+    implementation(project(":examples:SharedLib:app:core"))
+    implementation(project(":examples:SharedLib:libA:lib-web"))
+    implementation(project(":examples:SharedLib:libB:lib-web"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
     implementation("com.github.xpenatan.gdx-teavm:backend-web:${LibExt.gdxTeaVMVersion}")
 }
 
-tasks.register<JavaExec>("TestLib_run_app_teavm") {
+tasks.register<JavaExec>("SharedLib_run_app_teavm") {
     group = "example-teavm"
     description = "Build teavm app"
     mainClass.set("Build")
-    classpath = sourceSets["main"].runtimeClasspath
-}
-
-tasks.register<JavaExec>("TestLib_run_benchmark_teavm") {
-    group = "example-teavm"
-    description = "Build teavm benchmark"
-    mainClass.set("BenchmarkBuild")
     classpath = sourceSets["main"].runtimeClasspath
 }

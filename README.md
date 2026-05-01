@@ -45,12 +45,12 @@ jParser consists of two main stages:
 Reads the hand-written Java source in the `lib-base` module — which contains embedded native code blocks — and generates platform-specific Java source for each target:
 
 | Output Module | Target | Description                                    |
-|---|---|------------------------------------------------|
-| `lib-core` | Core API | Generated bridge-agnostic API classes          |
-| `lib-desktop-jni` | JNI (Desktop) | Generated desktop JNI Java + native jars       |
+|---------------|---|------------------------------------------------|
+| `lib-core`    | Core API | Generated bridge-agnostic API classes          |
+| `lib-jni`     | JNI (Desktop) | Generated desktop JNI Java + native jars       |
 | `lib-android` | JNI (Android) | Generated Android JNI Java + Android packaging |
-| `lib-teavm` | TeaVM | Generated `@JSBody`-annotated Java for web     |
-| `lib-desktop-ffm` | FFM | Generated FFM Java for desktop (Java 25+)      |
+| `lib-web`     | TeaVM | Generated `@JSBody`-annotated Java for web     |
+| `lib-ffm`     | FFM | Generated FFM Java for desktop (Java 25+)      |
 
 ### 2. Native Compilation
 
@@ -181,14 +181,14 @@ For a complete working example, refer to the [`examples/TestLib`](examples/TestL
 jParser projects follow a strict `-base / -build / -core / -teavm` convention:
 
 | Module Suffix | Purpose |
-|---|---|
-| `lib-base` | Hand-written Java source with embedded native code blocks |
-| `lib-build` | Build entry point — configures IDL, targets, runs generation + compilation |
-| `lib-core` | **Generated** bridge-agnostic API output _(do not hand-edit)_ |
-| `lib-desktop-jni` | **Generated** desktop JNI Java output + JNI native libs _(do not hand-edit)_ |
+|---------------|---|
+| `lib-base`    | Hand-written Java source with embedded native code blocks |
+| `lib-build`   | Build entry point — configures IDL, targets, runs generation + compilation |
+| `lib-core`    | **Generated** bridge-agnostic API output _(do not hand-edit)_ |
+| `lib-jni`     | **Generated** desktop JNI Java output + JNI native libs _(do not hand-edit)_ |
 | `lib-android` | **Generated** Android JNI Java output + Android JNI packaging _(do not hand-edit)_ |
-| `lib-teavm` | **Generated** TeaVM Java output _(do not hand-edit)_ |
-| `lib-desktop-ffm` | **Generated** FFM Java output _(do not hand-edit)_ |
+| `lib-web`     | **Generated** TeaVM Java output _(do not hand-edit)_ |
+| `lib-ffm`     | **Generated** FFM Java output _(do not hand-edit)_ |
 
 ### Build Example: TestLib
 

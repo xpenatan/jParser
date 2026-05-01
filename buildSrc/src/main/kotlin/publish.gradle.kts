@@ -10,17 +10,17 @@ var libProjects = mutableSetOf(
     project(":jParser:jParser-idl"),
     project(":jParser:jParser-jni"),
     project(":jParser:jParser-ffm"),
-    project(":jParser:jParser-teavm-web"),
+    project(":jParser:jParser-web"),
     project(":idl:api:api-core"),
-    project(":idl:api:api-teavm-web"),
+    project(":idl:api:api-web"),
     project(":idl:runtime:runtime-base"),
     project(":idl:runtime:runtime-core"),
-    project(":idl:runtime:runtime-teavm-web"),
+    project(":idl:runtime:runtime-web"),
     project(":idl:runtime:runtime-jni"),
     project(":idl:runtime:runtime-ffm"),
     project(":idl:runtime:runtime-android"),
     project(":loader:loader-core"),
-    project(":loader:loader-teavm-web"),
+    project(":loader:loader-web"),
 )
 
 val isTestRelease = gradle.startParameter.taskNames.any { it == "publishTestRelease" }
