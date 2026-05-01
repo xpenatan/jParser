@@ -358,31 +358,48 @@ jobs:
         with:
           ndk-version: r29
           add-to-path: false
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Debug Android NDK setup
+        run: |
+          echo "setup-ndk output: ${{ steps.setup-ndk.outputs.ndk-path }}"
+          echo "ANDROID_NDK_HOME env: ${ANDROID_NDK_HOME}"
+          if [ -d "${ANDROID_NDK_HOME}" ]; then
+            echo "ANDROID_NDK_HOME exists"
+            ls -la "${ANDROID_NDK_HOME}" | head -n 20
+          else
+            echo "ANDROID_NDK_HOME is missing"
+          fi
+          if [ -f "${ANDROID_NDK_HOME}/source.properties" ]; then
+            echo "source.properties found"
+            grep "^Pkg.Revision" "${ANDROID_NDK_HOME}/source.properties" || true
+          else
+            echo "source.properties not found"
+          fi
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
       - name: Build project runtime
         run: ./gradlew idl_helper_build_project_android_jni
         env:
-          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Build project
         run: ./gradlew TestLib_build_project_android_jni
         env:
-          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Build Shared LibA project
         run: ./gradlew LibA_build_project_android_jni
         env:
-          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Build Shared LibB project
         run: ./gradlew LibB_build_project_android_jni
         env:
-          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Upload natives
         uses: actions/upload-artifact@v4
