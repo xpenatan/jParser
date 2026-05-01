@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "loader-teavm-web"
+val moduleName = "loader-web"
 
 dependencies {
     implementation(project(":loader:loader-core"))

@@ -79,7 +79,7 @@ public class BuildToolOptions {
         moduleBuildPath = modulePath + "/" + modulePrefix + "-build";
         moduleCorePath = modulePath + "/" + modulePrefix + "-core";
         moduleJNIPath = modulePath + "/" + modulePrefix + "-jni";
-        moduleTeavmPath = modulePath + "/" + modulePrefix + "-teavm-web";
+        moduleTeavmPath = modulePath + "/" + modulePrefix + "-web";
         moduleFFMPath = modulePath + "/" + modulePrefix + "-ffm";
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";

@@ -16,7 +16,7 @@ dependencies {
     implementation("com.github.xpenatan.gdx-teavm:backend-web:${LibExt.gdxTeaVMVersion}")
 }
 
-tasks.register<JavaExec>("SharedLib_run_app_teavm") {
+tasks.register<JavaExec>("SharedLib_run_app_web") {
     group = "example-teavm"
     description = "Build teavm app"
     mainClass.set("Build")
