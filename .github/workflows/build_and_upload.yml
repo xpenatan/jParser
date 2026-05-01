@@ -28,10 +28,10 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "corretto"
           java-version: 25
@@ -81,7 +81,7 @@ jobs:
         run: ./gradlew LibB_build_project_windows64_ffm
 
       - name: Upload natives
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
@@ -97,10 +97,10 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "corretto"
           java-version: 25
@@ -143,7 +143,7 @@ jobs:
         run: ./gradlew LibB_build_project_linux64_ffm
 
       - name: Upload natives runtime
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linux-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
@@ -159,10 +159,10 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "corretto"
           java-version: 25
@@ -209,7 +209,7 @@ jobs:
           ./gradlew LibB_build_project_mac64_ffm
 
       - name: Upload natives runtime
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mac-natives-intel
           path: ./idl/runtime/runtime-build/build/c++/libs/
@@ -225,10 +225,10 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "corretto"
           java-version: 25
@@ -275,7 +275,7 @@ jobs:
           ./gradlew LibB_build_project_macArm_ffm
 
       - name: Upload natives runtime
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mac-natives-arm
           path: ./idl/runtime/runtime-build/build/c++/libs/
@@ -291,10 +291,10 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "corretto"
           java-version: 25
@@ -324,7 +324,7 @@ jobs:
         run: ./gradlew LibB_build_project_web_wasm
 
       - name: Upload natives runtime
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
@@ -340,10 +340,10 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "corretto"
           java-version: 25
@@ -402,7 +402,7 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Upload natives
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
@@ -419,7 +419,7 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get version
         uses: madhead/read-java-properties@latest
@@ -430,7 +430,7 @@ jobs:
           default: 0.0.1
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "corretto"
           java-version: 25
@@ -443,37 +443,37 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Download windows natives runtime
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: windows-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
 
       - name: Download linux natives runtime
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: linux-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
 
       - name: Download mac intel natives runtime
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: mac-natives-intel
           path: ./idl/runtime/runtime-build/build/c++/libs/
 
       - name: Download mac arm natives runtime
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: mac-natives-arm
           path: ./idl/runtime/runtime-build/build/c++/libs/
 
       - name: Download android natives runtime
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: android-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
 
       - name: Download web natives runtime
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: web-natives
           path: ./idl/runtime/runtime-build/build/c++/libs/
@@ -489,7 +489,7 @@ jobs:
         run: ./gradlew prepareReleaseDeploy
 
       - name: Upload Release deploy files artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ inputs.shouldUpload && inputs.isRelease }}
         with:
           name: release-staging-deploy-${{ steps.version.outputs.value }}
@@ -509,7 +509,7 @@ jobs:
         run: ./gradlew prepareSnapshotDeploy
 
       - name: Upload Snapshot deploy files artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ inputs.shouldUpload && !inputs.isRelease }}
         with:
           name: snapshot-deploy-${{ steps.version.outputs.value }}-${{ github.run_number }}

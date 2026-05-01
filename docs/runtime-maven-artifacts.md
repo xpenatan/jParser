@@ -43,9 +43,8 @@ Android (`runtime-android`) uses the same publish gate for JNI copy staging so p
   - bundled: `desktop`
   - per-platform: `windows_64`, `linux_x64`, `mac_x64`, `mac_arm64`
 
-- `runtime-android` (artifactId currently set to `runtime-jni`)
-  - bundled: `android`
-  - per-ABI: `android_arm64_v8a`, `android_armeabi_v7a`, `android_x86`, `android_x86_64`
+- `runtime-android` (artifactId `runtime-android`)
+  - per-ABI only: `arm64_v8a`, `armeabi_v7a`, `x86`, `x86_64`
 
 - `runtime-web` (artifactId `runtime-web`)
   - bundled web payload: `wasm` (contains both `idl.js` and `idl.wasm`)
@@ -99,20 +98,10 @@ val androidAbiJars = androidAbiFiles.mapNotNull { (classifier, filePath) ->
     else null
 }
 
-val androidAllAbiJar = tasks.register<Jar>("nativeJarAndroid") {
-    archiveClassifier.set("android")
-    androidAbiFiles.values.forEach { filePath ->
-        val nativeFile = file(filePath)
-        if(nativeFile.exists()) {
-            from(nativeFile) { into(nativeFile.parentFile.name) }
-        }
-    }
-}
-
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            artifact(androidAllAbiJar)
+            artifactId = "runtime-android"
             androidAbiJars.forEach { artifact(it) }
         }
     }
@@ -147,7 +136,7 @@ publishing {
 
 1. Define platform/ABI native file paths.
 2. Create per-platform/per-ABI classifier jar tasks.
-3. Create one bundled classifier artifact (`desktop`, `android`, `wasm`) if needed.
+3. Create one bundled classifier artifact (`desktop`, `wasm`) if needed.
 4. Use publish-task detection for local vs publish behavior.
 5. Publish main classes artifact with `from(components["java"])` when applicable.
 6. Attach classifier artifacts in `publishing`.
@@ -155,4 +144,3 @@ publishing {
    - local build task (non-publish)
    - `publishMavenPublicationToMavenLocal`
    - jar/aar content inspection for expected payload.
-

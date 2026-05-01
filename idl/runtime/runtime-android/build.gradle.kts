@@ -2,17 +2,17 @@ plugins {
     id("com.android.library")
 }
 
-val moduleName = "runtime-jni"
+val moduleName = "runtime-android"
 
 val isPublishingTask = gradle.startParameter.taskNames.any { it.contains("publish", ignoreCase = true) }
 
 val androidLibDir = "$projectDir/../runtime-build/build/c++/libs/android"
 
 val androidAbiFiles = mapOf(
-    "android_arm64_v8a" to "$androidLibDir/arm64-v8a/libidl.so",
-    "android_armeabi_v7a" to "$androidLibDir/armeabi-v7a/libidl.so",
-    "android_x86" to "$androidLibDir/x86/libidl.so",
-    "android_x86_64" to "$androidLibDir/x86_64/libidl.so",
+    "arm64_v8a" to "$androidLibDir/arm64-v8a/libidl.so",
+    "armeabi_v7a" to "$androidLibDir/armeabi-v7a/libidl.so",
+    "x86" to "$androidLibDir/x86/libidl.so",
+    "x86_64" to "$androidLibDir/x86_64/libidl.so",
 )
 
 val androidAbiJars = androidAbiFiles.mapNotNull { (classifier, filePath) ->
@@ -24,19 +24,6 @@ val androidAbiJars = androidAbiFiles.mapNotNull { (classifier, filePath) ->
     }
     else {
         null
-    }
-}
-
-val androidAllAbiJar = tasks.register<Jar>("nativeJarAndroid") {
-    archiveClassifier.set("android")
-    androidAbiFiles.values.forEach { filePath ->
-        val nativeFile = file(filePath)
-        if(nativeFile.exists()) {
-            // Keep ABI folders so same lib filename from each ABI can coexist in the jar.
-            from(nativeFile) {
-                into(nativeFile.parentFile.name)
-            }
-        }
     }
 }
 
@@ -97,7 +84,6 @@ afterEvaluate {
                 artifactId = moduleName
                 group = LibExt.groupId
                 version = LibExt.libVersion
-                artifact(androidAllAbiJar)
                 androidAbiJars.forEach { artifact(it) }
             }
         }
