@@ -2,86 +2,102 @@
 
 All commands run from repository root.
 
-## Windows (PowerShell)
+## Shell-Agnostic Usage
 
-Use `gradlew.bat`.
+Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 
 ### Runtime (IDL helper)
 
-```powershell
-gradlew.bat :idl:runtime:runtime-build:idl_helper_build_project_windows64_jni
-gradlew.bat :idl:runtime:runtime-build:idl_helper_build_project_windows64_ffm
-gradlew.bat :idl:runtime:runtime-build:idl_helper_build_project_web_wasm
-gradlew.bat :idl:runtime:runtime-build:idl_helper_build_project_android_jni
+```text
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_linux64_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_mac64_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_macArm_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_android_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_ios_jni
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_ffm
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_linux64_ffm
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_mac64_ffm
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_macArm_ffm
+./gradlew :idl:runtime:runtime-build:idl_helper_build_project_web_wasm
 ```
 
 ### TestLib native generation
 
-```powershell
-gradlew.bat :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_jni
-gradlew.bat :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_ffm
-gradlew.bat :examples:TestLib:lib:lib-build:TestLib_build_project_web_wasm
-gradlew.bat :examples:TestLib:lib:lib-build:TestLib_build_project_android_jni
+```text
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_linux64_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_mac64_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_macArm_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_android_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_ios_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_ffm
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_linux64_ffm
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_mac64_ffm
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_macArm_ffm
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_web_wasm
 ```
 
 ### TestLib app run/build
 
-```powershell
-gradlew.bat :examples:TestLib:app:desktop-jni:TestLib_run_app_desktop_jni
-gradlew.bat :examples:TestLib:app:desktop-ffm:TestLib_run_app_desktop_ffm
-gradlew.bat :examples:TestLib:app:web:TestLib_run_app_web
-gradlew.bat :examples:TestLib:app:android:assembleDebug
+```text
+./gradlew :examples:TestLib:app:desktop-jni:TestLib_run_app_desktop_jni
+./gradlew :examples:TestLib:app:desktop-ffm:TestLib_run_app_desktop_ffm
+./gradlew :examples:TestLib:app:web:TestLib_run_app_web
+./gradlew :examples:TestLib:app:android:assembleDebug
 ```
 
 ### TestLib app tests
 
-```powershell
-gradlew.bat :examples:TestLib:app:desktop-jni:test
-gradlew.bat :examples:TestLib:app:desktop-ffm:test
+```text
+./gradlew :examples:TestLib:app:desktop-jni:test
+./gradlew :examples:TestLib:app:desktop-ffm:test
 ```
 
 ### Benchmarks
 
-```powershell
-gradlew.bat :examples:TestLib:app:desktop-ffm:TestLib_throughput_benchmark_compare
-gradlew.bat :examples:TestLib:app:desktop-jni:TestLib_throughput_benchmark_jni
-gradlew.bat :examples:TestLib:app:desktop-ffm:TestLib_throughput_benchmark_ffm
+```text
+./gradlew :examples:TestLib:app:desktop-jni:TestLib_throughput_benchmark_jni
+./gradlew :examples:TestLib:app:desktop-ffm:TestLib_throughput_benchmark_ffm
+./gradlew :examples:TestLib:app:desktop-ffm:TestLib_throughput_benchmark_compare
 
-gradlew.bat :examples:TestLib:app:desktop-ffm:TestLib_fps_benchmark_compare
-gradlew.bat :examples:TestLib:app:desktop-jni:TestLib_fps_benchmark_jni
-gradlew.bat :examples:TestLib:app:desktop-ffm:TestLib_fps_benchmark_ffm
+./gradlew :examples:TestLib:app:desktop-jni:TestLib_fps_benchmark_jni
+./gradlew :examples:TestLib:app:desktop-ffm:TestLib_fps_benchmark_ffm
+./gradlew :examples:TestLib:app:desktop-ffm:TestLib_fps_benchmark_compare
 
-gradlew.bat :examples:TestLib:app:web:TestLib_run_benchmark_web
+./gradlew :examples:TestLib:app:desktop-jni:TestLib_enum_benchmark_jni
+./gradlew :examples:TestLib:app:desktop-ffm:TestLib_enum_benchmark_ffm
+./gradlew :examples:TestLib:app:desktop-ffm:TestLib_enum_benchmark_compare
+
+./gradlew :examples:TestLib:app:web:TestLib_run_benchmark_web
 ```
 
 ## SharedLib
 
 Build libA before libB.
 
-```powershell
-gradlew.bat :examples:SharedLib:libA:lib-build:LibA_build_project_windows64_jni
-gradlew.bat :examples:SharedLib:libA:lib-build:LibA_build_project_windows64_ffm
-gradlew.bat :examples:SharedLib:libA:lib-build:LibA_build_project_web_wasm
-gradlew.bat :examples:SharedLib:libA:lib-build:LibA_build_project_android_jni
+```text
+./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_windows64_jni
+./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_windows64_ffm
+./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_web_wasm
 
-gradlew.bat :examples:SharedLib:libB:lib-build:LibB_build_project_windows64_jni
-gradlew.bat :examples:SharedLib:libB:lib-build:LibB_build_project_windows64_ffm
-gradlew.bat :examples:SharedLib:libB:lib-build:LibB_build_project_web_wasm
-gradlew.bat :examples:SharedLib:libB:lib-build:LibB_build_project_android_jni
+./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_windows64_jni
+./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_windows64_ffm
+./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_web_wasm
 
-gradlew.bat :examples:SharedLib:app:desktop-jni:SharedLib_run_app_desktop_jni
-gradlew.bat :examples:SharedLib:app:desktop-ffm:SharedLib_run_app_desktop_ffm
-gradlew.bat :examples:SharedLib:app:web:SharedLib_run_app_web
-gradlew.bat :examples:SharedLib:app:android:assembleDebug
+./gradlew :examples:SharedLib:app:desktop-jni:SharedLib_run_app_desktop_jni
+./gradlew :examples:SharedLib:app:desktop-ffm:SharedLib_run_app_desktop_ffm
+./gradlew :examples:SharedLib:app:web:SharedLib_run_app_web
+./gradlew :examples:SharedLib:app:android:assembleDebug
 ```
 
 ## Cross-platform variants
 
-Replace `windows64` with `linux64`, `mac64`, or `macArm` where available.
+Where applicable, replace `windows64` with `linux64`, `mac64`, or `macArm`.
 
 ## Quick compile sanity checks
 
-```powershell
-gradlew.bat :jParser:jParser-core:compileJava
-gradlew.bat :jParser:jParser-build-tool:compileJava
+```text
+./gradlew :jParser:jParser-core:compileJava
+./gradlew :jParser:jParser-build-tool:compileJava
 ```

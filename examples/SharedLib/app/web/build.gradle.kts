@@ -17,8 +17,8 @@ dependencies {
 }
 
 tasks.register<JavaExec>("SharedLib_run_app_web") {
-    group = "example-teavm"
-    description = "Build teavm app"
+    group = "example-web"
+    description = "Build web app"
     mainClass.set("Build")
     classpath = sourceSets["main"].runtimeClasspath
 }

@@ -235,7 +235,7 @@ public class BuildToolOptions {
         public String packageName;
 
         /**
-         * Module prefix name. ex: imgui. So it will be imgui-core, imgui-teavm-web, etc.
+         * Module prefix name. ex: imgui. So it will be imgui-core, imgui-web, etc.
          */
         public String modulePrefix;
 

@@ -16,15 +16,15 @@ dependencies {
 }
 
 tasks.register<JavaExec>("TestLib_run_app_web") {
-    group = "example-teavm"
-    description = "Build teavm app"
+    group = "example-web"
+    description = "Build web app"
     mainClass.set("Build")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
 tasks.register<JavaExec>("TestLib_run_benchmark_web") {
-    group = "example-teavm"
-    description = "Build teavm benchmark"
+    group = "example-web"
+    description = "Build web benchmark"
     mainClass.set("BenchmarkBuild")
     classpath = sourceSets["main"].runtimeClasspath
 }

@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "jParser-web"
+val moduleName = "${LibExt.libName}-web"
 
 dependencies {
     api(project(":jParser:jParser-idl"))

@@ -23,29 +23,36 @@ Execution details and checklists: `docs/workflows.md`.
 - jParser generates Java/native bindings for `JNI`, `FFM`, and TeaVM web from `lib-base` + IDL.
 - Pipeline entry point: `jParser/jParser-build-tool` (`BuilderTool.build()`).
 - Do not hand-edit generated outputs; edit source modules and generators.
+- Root module source of truth: `settings.gradle.kts`.
 - Key examples: `examples/TestLib`, `examples/SharedLib`.
 
-Maintenance rule: when module/task names change, update `AGENTS.md` and related docs in the same change to keep names aligned with the source of truth (`settings.gradle.kts` and Gradle task definitions).
+Maintenance rule: when module/task names change, update `AGENTS.md` and related docs in the same change to keep names aligned with `settings.gradle.kts` and Gradle task definitions.
 
-## 3) JNI / FFM Essentials
+## 3) Current Module Naming (Examples)
+
+- Library pipeline modules: `lib-base`, `lib-build`, `lib-core`, `lib-jni`, `lib-ffm`, `lib-web`, `lib-android`.
+- App modules in examples: `app:desktop-jni`, `app:desktop-ffm`, `app:web`, `app:android`.
+- Runtime generator module: `idl:runtime:runtime-build` (tasks like `idl_helper_build_project_<target>`).
+
+## 4) JNI / FFM Essentials
 
 - `JNI` generation: `CppCodeParser` + JNI C++ glue (`jlong`, `jint`, `JNIEnv*`).
 - `FFM` generation: `FFMCodeParser` + C ABI glue (`extern "C"`, `int64_t`, `int32_t`) with Java MethodHandle downcalls.
 - `BuildToolOptions.generateCPP` default `true`; `generateFFM` default `false`.
 - Detailed toolchain/platform notes live in `docs/architecture.md` and `docs/commands.md`.
 
-## 4) Native Block Convention (`lib-base`)
+## 5) Native Block Convention (`lib-base`)
 
 - Headers: `JNI`, `FFM`, `TEAVM`.
 - Commands: `-ADD`, `-ADD_RAW`, `-REMOVE`, `-REPLACE`, `-REPLACE_BLOCK`, `-NATIVE`.
 - Use `-IDL_SKIP` on class comment to skip IDL generation.
 - `-NATIVE` block binds to the following Java `native` method.
 
-## 5) Quick Build/Test Path (Windows)
+## 6) Quick Build/Test Path (Windows)
 
 Canonical command matrices live in `docs/commands.md`.
 
-## 6) Where Detailed Reference Lives
+## 7) Where Detailed Reference Lives
 
 - `docs/workflows.md` - editing rules, verification minimum, handoff checklist.
 - `docs/architecture.md` - pipeline, module map, JNI/FFM/TeaVM internals.

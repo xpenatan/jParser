@@ -178,7 +178,7 @@ For a complete working example, refer to the [`examples/TestLib`](examples/TestL
 
 ### Module Layout
 
-jParser projects follow a strict `-base / -build / -core / -teavm` convention:
+jParser projects follow a module pattern centered on source (`-base`), generator entry (`-build`), and generated outputs (`-core`, `-jni`, `-ffm`, `-web`, `-android`):
 
 | Module Suffix | Purpose |
 |---------------|---|
@@ -192,7 +192,7 @@ jParser projects follow a strict `-base / -build / -core / -teavm` convention:
 
 ### Build Example: TestLib
 
-```bash
+```text
 # 1. Build runtime (required once)
 ./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_jni
 
@@ -205,7 +205,8 @@ jParser projects follow a strict `-base / -build / -core / -teavm` convention:
 ```
 
 > Replace `windows64` with `linux64`, `mac64`, or `macArm` for other platforms.
-> Current desktop FFM app tasks configure Java toolchain `24`; ensure a Java 24 toolchain is available when running `..._run_app_desktop_ffm` tasks.
+> On Windows, use `gradlew.bat` instead of `./gradlew`.
+> Desktop FFM app tasks use `LibExt.javaFFMTarget`; ensure that Java toolchain is available when running `..._run_app_desktop_ffm` tasks.
 
 ## Libraries Using jParser
 
