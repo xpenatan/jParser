@@ -1,8 +1,6 @@
+<h1 align="center">jParser</h1>
 <p align="center">
-  <h1 align="center">jParser</h1>
-  <p align="center">
-    A Java code-generation library that bridges C/C++ native code to JVM platforms — desktop, mobile, and web.
-  </p>
+  A Java code-generation library that bridges C/C++ native code to JVM platforms -- desktop, mobile, and web.
 </p>
 
 <p align="center">
@@ -58,7 +56,7 @@ Compiles the C/C++ source into platform-specific native libraries:
 
 | Platform | Toolchain |
 |---|---|
-| Windows | MinGW64 or MSVC |
+| Windows | MSVC |
 | Linux | GCC / G++ |
 | macOS | Xcode CLI tools |
 | Android | Android NDK |
@@ -157,7 +155,7 @@ Every native class extends `IDLBase`, which provides common memory-management fu
 |---|---|
 | **JDK 11+** | Building jParser tool modules |
 | **JDK 22+** (25 recommended) | FFM modules and FFM-based apps |
-| [MinGW64](https://github.com/niXman/mingw-builds-binaries/releases) or [Visual Studio C++](https://visualstudio.microsoft.com/vs/community/) | Windows native builds |
+| [Visual Studio C++](https://visualstudio.microsoft.com/vs/community/) | Windows native builds |
 | GCC / G++ | Linux native builds |
 | Xcode CLI tools | macOS native builds |
 | [Emscripten SDK](https://emscripten.org/) | Web builds (JS/WASM) |

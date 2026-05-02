@@ -5,7 +5,6 @@ import com.github.xpenatan.jParser.builder.targets.IOSTarget;
 import com.github.xpenatan.jParser.builder.targets.LinuxTarget;
 import com.github.xpenatan.jParser.builder.targets.MacTarget;
 import com.github.xpenatan.jParser.builder.targets.WindowsMSVCTarget;
-import com.github.xpenatan.jParser.builder.targets.WindowsMingwTarget;
 import com.github.xpenatan.jParser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jParser.builder.tool.BuilderTool;
@@ -42,7 +41,6 @@ public class BuildLib {
                 }
                 if(op.containsArg("windows64_jni")) {
                     targets.add(getWindowVCTarget(op, false));
-                    targets.add(getWindowMinGWTarget(op, false));
                 }
                 if(op.containsArg("linux64_jni")) {
                     targets.add(getLinuxTarget(op, false));
@@ -62,7 +60,6 @@ public class BuildLib {
 
                 if(op.containsArg("windows64_ffm")) {
                     targets.add(getWindowVCTarget(op, true));
-                    targets.add(getWindowMinGWTarget(op, true));
                 }
                 if(op.containsArg("linux64_ffm")) {
                     targets.add(getLinuxTarget(op, true));
@@ -75,44 +72,6 @@ public class BuildLib {
                 }
             }
         });
-    }
-
-
-    private static BuildMultiTarget getWindowMinGWTarget(BuildToolOptions op, boolean isFFM) {
-        BuildMultiTarget multiTarget = new BuildMultiTarget();
-        String sourceDir = op.getSourceDir();
-        String libBuildCPPPath = op.getModuleBuildCPPPath();
-
-        String api = isFFM ? "mingw/ffm" : "mingw/jni";
-
-        // Make a static library
-        WindowsMingwTarget compileStaticTarget = new WindowsMingwTarget();
-        compileStaticTarget.libDirSuffix += api;
-        compileStaticTarget.isStatic = true;
-        compileStaticTarget.cppFlags.add("-std=c++11");
-        compileStaticTarget.headerDirs.add("-I" + sourceDir);
-        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
-        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
-        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
-        multiTarget.add(compileStaticTarget);
-
-        WindowsMingwTarget linkTarget = new WindowsMingwTarget();
-        linkTarget.libDirSuffix += api;
-        if(isFFM) {
-            linkTarget.setupFFMGlueCode(libBuildCPPPath);
-        }
-        else {
-            linkTarget.setupJNIGlueCode(libBuildCPPPath);
-        }
-        linkTarget.cppFlags.add("-std=c++11");
-        linkTarget.headerDirs.add("-I" + sourceDir);
-        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
-        linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/windows/" + api + "/" + op.libName + "64_.a");
-        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
-        multiTarget.add(linkTarget);
-
-        return multiTarget;
     }
 
     private static BuildMultiTarget getWindowVCTarget(BuildToolOptions op, boolean isFFM) {

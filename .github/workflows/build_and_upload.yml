@@ -36,9 +36,6 @@ jobs:
           distribution: "corretto"
           java-version: 25
 
-      - name: Set up MinGW
-        uses: msys2/setup-msys2@v2
-
       - name: Set up Developer Command Prompt
         uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
@@ -104,10 +101,6 @@ jobs:
         with:
           distribution: "corretto"
           java-version: 25
-
-      - name: Set up MinGW
-        run: |
-          sudo apt install -y --force-yes mingw-w64 lib32z1
 
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
@@ -299,10 +292,6 @@ jobs:
           distribution: "corretto"
           java-version: 25
 
-      - name: Set up MinGW
-        run: |
-          sudo apt install -y --force-yes mingw-w64 lib32z1
-
       - name: Install emscripten
         uses: mymindstorm/setup-emsdk@v14
         with:
@@ -347,10 +336,6 @@ jobs:
         with:
           distribution: "corretto"
           java-version: 25
-
-      - name: Set up MinGW
-        run: |
-          sudo apt install -y --force-yes mingw-w64 lib32z1
 
       - name: Install NDK
         id: setup-ndk
@@ -434,10 +419,6 @@ jobs:
         with:
           distribution: "corretto"
           java-version: 25
-
-      - name: Set up MinGW
-        run: |
-          sudo apt install -y --force-yes mingw-w64 lib32z1
 
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
@@ -542,3 +523,4 @@ jobs:
               ref: ref,
               sha: context.sha
             });
+
