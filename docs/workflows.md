@@ -21,10 +21,10 @@ Use at least one compile or test task relevant to changed modules. Examples:
 
 ## Handoff Checklist
 
-- `LOCAL_AGENT.md` includes:
+- `CURRENT_CHAT_CONTEXT` includes:
   - what changed
   - why it changed
   - validation result
   - next recommended task
-- Keep `LOCAL_AGENT.md` as rolling current state: replace/update prior entries instead of appending history.
+- Keep `CURRENT_CHAT_CONTEXT` as rolling current state: replace/update prior entries instead of appending history.
 - Mention any environment blockers explicitly (toolchain, missing native artifacts, classifier jars).

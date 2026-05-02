@@ -61,4 +61,4 @@ out/
 .codiumai
 .kotlin/
 
-LOCAL_AGENT.MD
+CURRENT_CHAT_CONTEXT.MD
