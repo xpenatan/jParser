@@ -1,11 +1,11 @@
 package com.github.xpenatan.jParser.example.app.tests;
 
 import com.github.xpenatan.jParser.example.app.CodeTest;
-import com.github.xpenatan.jParser.example.testlib.IDLArrayTestObjectClass;
+import com.github.xpenatan.jParser.example.testlib.NativeArrayTestObjectClass;
 import com.github.xpenatan.jParser.example.testlib.TestEnumLib;
 import com.github.xpenatan.jParser.example.testlib.TestMethodClass;
 import com.github.xpenatan.jParser.example.testlib.TestObjectClass;
-import com.github.xpenatan.jparser.idl.helper.IDLString;
+import com.github.xpenatan.jparser.runtime.helper.NativeString;
 
 public class MethodTest implements CodeTest {
 
@@ -28,7 +28,7 @@ public class MethodTest implements CodeTest {
         }
         {
             TestMethodClass test = new TestMethodClass();
-            IDLArrayTestObjectClass array = new IDLArrayTestObjectClass(2);
+            NativeArrayTestObjectClass array = new NativeArrayTestObjectClass(2);
             TestObjectClass obj1 = new TestObjectClass();
             TestObjectClass obj2 = new TestObjectClass();
             obj1.set_floatValue01(20.5f);
@@ -93,7 +93,7 @@ public class MethodTest implements CodeTest {
             try {
                 String strValue01 = "RefHello";
                 test.setMethod05(strValue01);
-                IDLString refStrValue01 = test.getRefStrValue01();
+                NativeString refStrValue01 = test.getRefStrValue01();
                 String stringValue = refStrValue01.data();
                 if(!(strValue01.equals(stringValue))) {
                     throw new RuntimeException("strValue01.equals(stringValue)");

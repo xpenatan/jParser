@@ -8,7 +8,7 @@ java {
 }
 
 dependencies {
-    implementation(project(":loader:loader-core"))
-    implementation(project(":idl:api:api-core"))
-    implementation(project(":idl:runtime:runtime-core"))
+    implementation(project(":jParser:loader:loader-core"))
+    implementation(project(":jParser:api:api-core"))
+    implementation(project(":jParser:runtime:runtime-core"))
 }

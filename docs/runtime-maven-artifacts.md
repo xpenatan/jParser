@@ -31,7 +31,7 @@ val isPublishingTask = gradle.startParameter.taskNames.any { it.contains("publis
 When `isPublishingTask` is `false`, main jar includes native/web files.
 When `isPublishingTask` is `true`, main jar is classes-only and payload is published in classifier artifacts.
 
-Android (`runtime-android`) uses the same publish gate for JNI copy staging so publish tasks do not include `.so` files in a main AAR publication path.
+Android (`runtime-android`) stages JNI libs and publishes a single AAR that contains all supported ABI `.so` files.
 
 ## Classifier artifacts by module
 
@@ -44,7 +44,7 @@ Android (`runtime-android`) uses the same publish gate for JNI copy staging so p
   - per-platform: `windows_64`, `linux_x64`, `mac_x64`, `mac_arm64`
 
 - `runtime-android` (artifactId `runtime-android`)
-  - per-ABI only: `arm64_v8a`, `armeabi_v7a`, `x86`, `x86_64` (`.aar` classifiers)
+  - single AAR containing: `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`
 
 - `runtime-web` (artifactId `runtime-web`)
   - bundled web payload: `wasm` (contains both `idl.js` and `idl.wasm`)
@@ -88,31 +88,26 @@ publishing {
 ## Reference pattern for Android module
 
 ```kotlin
-val androidAbiAars = androidAbiFiles.mapNotNull { (classifier, filePath) ->
-    if(file(filePath).exists()) {
-        tasks.register<Zip>("nativeAar${classifier}") {
-            archiveClassifier.set(classifier)
-            archiveExtension.set("aar")
-            // include AndroidManifest.xml, classes.jar, and jni/<abi>/lib*.so
-        }
-    }
-    else null
+val filterJniLibs by tasks.registering(Copy::class) {
+    into(layout.buildDirectory.dir("tmp/jniLibs"))
+    from("$projectDir/../runtime-build/build/c++/libs/android")
+    include("**/*.so")
 }
 
 publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = "runtime-android"
-            androidAbiAars.forEach { artifact(it) }
+            from(components["release"])
         }
     }
 }
 ```
 
-Consumer dependency format for Android classifiers:
+Consumer dependency format for Android:
 
 ```kotlin
-implementation("com.github.xpenatan.jParser:runtime-android:<version>:arm64_v8a@aar")
+implementation("com.github.xpenatan.jParser:runtime-android:<version>")
 ```
 
 ## Reference pattern for TeaVM web module
@@ -142,11 +137,11 @@ publishing {
 ## Copy checklist for external libraries
 
 1. Define platform/ABI native file paths.
-2. Create per-platform/per-ABI classifier jar/aar tasks.
+2. Create per-platform classifier jar tasks (desktop/web), or a single AAR for Android.
 3. Create one bundled classifier artifact (`desktop`, `wasm`) if needed.
 4. Use publish-task detection for local vs publish behavior.
 5. Publish main classes artifact with `from(components["java"])` when applicable.
-6. Attach classifier artifacts in `publishing`.
+6. Attach classifier artifacts (or the single Android AAR) in `publishing`.
 7. Verify with:
    - local build task (non-publish)
    - `publishMavenPublicationToMavenLocal`

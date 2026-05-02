@@ -6,20 +6,20 @@ All commands run from repository root.
 
 Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 
-### Runtime (IDL helper)
+### Runtime (helper)
 
 ```text
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_jni
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_linux64_jni
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_mac64_jni
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_macArm_jni
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_android_jni
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_ios_jni
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_ffm
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_linux64_ffm
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_mac64_ffm
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_macArm_ffm
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_web_wasm
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_windows64_jni
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_linux64_jni
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_mac64_jni
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_macArm_jni
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_android_jni
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_ios_jni
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_windows64_ffm
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_linux64_ffm
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_mac64_ffm
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_macArm_ffm
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_web_wasm
 ```
 
 ### TestLib native generation
@@ -98,6 +98,6 @@ Where applicable, replace `windows64` with `linux64`, `mac64`, or `macArm`.
 ## Quick compile sanity checks
 
 ```text
-./gradlew :jParser:jParser-core:compileJava
-./gradlew :jParser:jParser-build-tool:compileJava
+./gradlew :jParser:gen:gen-core:compileJava
+./gradlew :jParser:gen:gen-build-tool:compileJava
 ```

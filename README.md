@@ -192,10 +192,12 @@ jParser projects follow a module pattern centered on source (`-base`), generator
 
 ```text
 # 1. Build runtime (required once)
-./gradlew :idl:runtime:runtime-build:idl_helper_build_project_windows64_jni
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_windows64_jni
+./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_windows64_ffm
 
 # 2. Generate code + compile native library
 ./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_jni
+./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_ffm
 
 # 3. Run the desktop app
 ./gradlew :examples:TestLib:app:desktop-jni:TestLib_run_app_desktop_jni

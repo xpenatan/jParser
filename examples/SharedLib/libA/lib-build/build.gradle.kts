@@ -7,15 +7,15 @@ val mainClassName = "BuildLibA"
 dependencies {
     implementation(project(":examples:SharedLib:libA:lib-base"))
 
-    implementation(project(":jParser:jParser-core"))
-    implementation(project(":jParser:jParser-idl"))
-    implementation(project(":jParser:jParser-web"))
-    implementation(project(":jParser:jParser-jni"))
-    implementation(project(":jParser:jParser-build"))
-    implementation(project(":jParser:jParser-build-tool"))
-    implementation(project(":jParser:jParser-ffm"))
+    implementation(project(":jParser:gen:gen-core"))
+    implementation(project(":jParser:gen:gen-idl"))
+    implementation(project(":jParser:gen:gen-web"))
+    implementation(project(":jParser:gen:gen-jni"))
+    implementation(project(":jParser:gen:gen-build"))
+    implementation(project(":jParser:gen:gen-build-tool"))
+    implementation(project(":jParser:gen:gen-ffm"))
 
-    implementation(project(":idl:runtime:runtime-core"))
+    implementation(project(":jParser:runtime:runtime-core"))
 }
 
 tasks.register<JavaExec>("LibA_build_project") {

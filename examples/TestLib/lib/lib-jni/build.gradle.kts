@@ -16,9 +16,9 @@ val macFile = "$libDir/mac/jni/libTestLib64.dylib"
 val macArmFile = "$libDir/mac/arm/jni/libTestLibarm64.dylib"
 
 dependencies {
-    api(project(":loader:loader-core"))
-    api(project(":idl:api:api-core"))
-    api(project(":idl:runtime:runtime-jni"))
+    api(project(":jParser:loader:loader-core"))
+    api(project(":jParser:api:api-core"))
+    api(project(":jParser:runtime:runtime-jni"))
 }
 
 tasks.jar {

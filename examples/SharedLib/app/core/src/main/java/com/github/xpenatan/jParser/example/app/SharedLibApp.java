@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
-import com.github.xpenatan.jparser.idl.IDLLoader;
+import com.github.xpenatan.jparser.runtime.RuntimeLoader;
 import libA.LibALoader;
 import libB.LibBLoader;
 
@@ -23,7 +23,7 @@ public class SharedLibApp extends ApplicationAdapter {
 
     @Override
     public void create() {
-        IDLLoader.init(new JParserLibraryLoaderListener() {
+        RuntimeLoader.init(new JParserLibraryLoaderListener() {
             @Override
             public void onLoad(boolean idl_isSuccess, Throwable idl_t) {
                 if(idl_t != null) {
@@ -62,7 +62,7 @@ public class SharedLibApp extends ApplicationAdapter {
         }
 
         batch.begin();
-        font.draw(batch, "Test Pass " + testPass, 100, Gdx.graphics.getHeight()/2f);
+        font.draw(batch, "SharedLib Test Pass " + testPass, 100, Gdx.graphics.getHeight()/2f);
         batch.end();
     }
 }

@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jParser.example.testlib.TestLibLoader;
-import com.github.xpenatan.jparser.idl.IDLLoader;
+import com.github.xpenatan.jparser.runtime.RuntimeLoader;
 
 public class AppTest extends ApplicationAdapter {
 
@@ -20,7 +20,7 @@ public class AppTest extends ApplicationAdapter {
 
     @Override
     public void create() {
-        IDLLoader.init((idl_isSuccess, idl_e) -> {
+        RuntimeLoader.init((idl_isSuccess, idl_e) -> {
             if(idl_e != null) {
                 idl_e.printStackTrace();
                 return;
@@ -46,7 +46,7 @@ public class AppTest extends ApplicationAdapter {
             return;
         }
         batch.begin();
-        font.draw(batch, "Test Pass " + testPass, 100, Gdx.graphics.getHeight()/2f);
+        font.draw(batch, "TestLib Test Pass " + testPass, 100, Gdx.graphics.getHeight()/2f);
         batch.end();
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             runTests();

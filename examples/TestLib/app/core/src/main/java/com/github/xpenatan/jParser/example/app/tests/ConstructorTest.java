@@ -1,10 +1,10 @@
 package com.github.xpenatan.jParser.example.app.tests;
 
+import com.github.xpenatan.jParser.api.NativeObject;
 import com.github.xpenatan.jParser.example.app.CodeTest;
 import com.github.xpenatan.jParser.example.testlib.TestAttributeClass;
 import com.github.xpenatan.jParser.example.testlib.TestConstructorClass;
 import com.github.xpenatan.jParser.example.testlib.TestEnumLib;
-import com.github.xpenatan.jParser.idl.IDLBase;
 
 public class ConstructorTest implements CodeTest {
     private static boolean testConstructorClass() {
@@ -122,10 +122,10 @@ public class ConstructorTest implements CodeTest {
         {
             TestAttributeClass test = new TestAttributeClass();
             try {
-                IDLBase voidTest = new IDLBase();
+                NativeObject voidTest = new NativeObject();
                 voidTest.native_setAddress(1000);
                 test.set_voidPointer01(voidTest);
-                IDLBase voidPointer01 = test.get_voidPointer01();
+                NativeObject voidPointer01 = test.get_voidPointer01();
                 if(!(voidPointer01.equals(voidTest))) {
                     throw new RuntimeException("voidPointer01.equals(voidTest)");
                 }

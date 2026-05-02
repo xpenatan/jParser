@@ -32,7 +32,7 @@ public class BuildLibA {
         data.modulePrefix = modulePrefix;
 
         BuildToolOptions op = new BuildToolOptions(data, args);
-        op.addAdditionalIDLRefPath(IDLReader.getIDLHelperFile());
+        op.addAdditionalIDLRefPath(IDLReader.getRuntimeHelperFile());
 
         BuilderTool.build(op, new BuildToolListener() {
             @Override
@@ -237,7 +237,7 @@ public class BuildLibA {
 //        linkTarget.cppFlags.add(config);
         linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibACustomCode.h");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
-        linkTarget.mainModuleName = "idl";
+        linkTarget.mainModuleName = "runtime";
         linkTarget.linkerFlags.add("-sSIDE_MODULE=1");
         multiTarget.add(linkTarget);
         return multiTarget;

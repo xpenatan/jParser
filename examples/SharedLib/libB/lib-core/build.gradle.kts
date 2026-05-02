@@ -12,10 +12,10 @@ dependencies {
 
     implementation(project(":examples:SharedLib:libA:lib-core"))
 
-    api(project(":loader:loader-core"))
+    api(project(":jParser:loader:loader-core"))
 
-    api(project(":idl:api:api-core"))
-    implementation(project(":idl:runtime:runtime-core"))
+    api(project(":jParser:api:api-core"))
+    implementation(project(":jParser:runtime:runtime-core"))
 }
 
 tasks.named("clean") {

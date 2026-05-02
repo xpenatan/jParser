@@ -6,7 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jParser.example.testlib.TestLibLoader;
-import com.github.xpenatan.jparser.idl.IDLLoader;
+import com.github.xpenatan.jparser.runtime.RuntimeLoader;
 
 public class NativeBridgeFpsBenchmarkApp extends ApplicationAdapter {
 
@@ -16,7 +16,7 @@ public class NativeBridgeFpsBenchmarkApp extends ApplicationAdapter {
 
     @Override
     public void create() {
-        IDLLoader.init((idl_isSuccess, idl_e) -> {
+        RuntimeLoader.init((idl_isSuccess, idl_e) -> {
             if(idl_e != null) {
                 idl_e.printStackTrace();
                 return;

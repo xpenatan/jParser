@@ -1,9 +1,9 @@
 package com.github.xpenatan.jParser.example.testlib;
 
-import com.github.xpenatan.jParser.idl.IDLBase;
+import com.github.xpenatan.jParser.api.NativeObject;
 
 /*[-IDL_SKIP]*/
-public class CallbackClassManual extends IDLBase {
+public class CallbackClassManual extends NativeObject {
     /*[-JNI;-NATIVE]
         #ifdef __ANDROID__
             #include <android/native_window_jni.h>
@@ -254,7 +254,7 @@ public class CallbackClassManual extends IDLBase {
             onStringCallback onStringCallback = new onStringCallback() {
                 @Override
                 public void onStringCallback(int strValue01) {
-                    internal_onStringCallback(gen.com.github.xpenatan.jparser.idl.helper.IDLUtils.getJSString(strValue01));
+                    internal_onStringCallback(gen.com.github.xpenatan.jparser.runtime.helper.NativeUtils.getJSString(strValue01));
                 }
             };
             internal_native_setupCallbacks((int)native_address, onVoidCallback, onIntCallback, onFloatCallback, onBoolCallback, onStringCallback);

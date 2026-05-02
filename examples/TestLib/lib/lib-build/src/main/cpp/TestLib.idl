@@ -19,12 +19,12 @@ interface TestObjectClass {
     attribute float floatValue01;
 };
 
-interface IDLArrayTestObjectClass {
-    void IDLArrayTestObjectClass(long size);
+interface NativeArrayTestObjectClass {
+    void NativeArrayTestObjectClass(long size);
     TestObjectClass getValue(long index);
     void setValue(long index, TestObjectClass value);
 };
-IDLArrayTestObjectClass implements IDLArray;
+NativeArrayTestObjectClass implements NativeArray;
 
 interface TestConstructorClass {
     readonly attribute long intValue01;
@@ -42,7 +42,7 @@ interface TestConstructorClass {
 
 interface TestStringConstructorClass {
     readonly attribute long intValue01;
-    [Value] readonly attribute IDLString strValue01;
+    [Value] readonly attribute NativeString strValue01;
 
     void TestStringConstructorClass([Const] DOMString strValue01);
     void TestStringConstructorClass([Const] DOMString strValue01, long intValue01);
@@ -56,7 +56,7 @@ interface TestAttributeClass {
     attribute float floatValue01;
     attribute double doubleValue01;
     attribute boolean boolValue01;
-    [Value] attribute IDLString strValue01;
+    [Value] attribute NativeString strValue01;
     attribute any voidPointer01;
     [Value] attribute TestObjectClass valueObject;
     attribute TestObjectClass pointerObject;
@@ -113,8 +113,8 @@ interface TestMethodClass {
     float getFloatValue02();
     float getBoolValue01();
     any getAny();
-    [Const, Value] IDLString getStrValue01();
-    [Const, Ref] IDLString getRefStrValue01();
+    [Const, Value] NativeString getStrValue01();
+    [Const, Ref] NativeString getRefStrValue01();
     [Const] TestObjectClass getPointerObject01();
     TestObjectClass getPointerObject02();
     [Const, Ref] TestObjectClass getRefObject01();
@@ -138,7 +138,7 @@ interface TestStaticMethodClass {
     static float getFloatValue01();
     static float getFloatValue02();
     static float getBoolValue01();
-    [Const, Value] static IDLString getStrValue01();
+    [Const, Value] static NativeString getStrValue01();
     [Const] static TestObjectClass getPointerObject01();
     static TestObjectClass getPointerObject02();
     [Const, Ref] static TestObjectClass getRefObject01();
@@ -159,7 +159,7 @@ interface CallbackClassImpl {
     [Const] float onFloatCallback(float floatValue01, float floatValue02);
     [Const] boolean onBoolCallback(boolean boolValue01);
     [Const] void onStringCallback([Const] DOMString strValue01);
-    [Const] void onStdStringCallback(IDLString data);
+    [Const] void onStdStringCallback(NativeString data);
     unsigned long onUnsignedIntCallback(unsigned long unsignedInt);
     [Const] unsigned short onUnsignedShortCallback(unsigned short unsignedShort);
     [Const] void onEnumParamCallback(TestEnumLib enumValue);
@@ -207,7 +207,7 @@ interface TestCallbackClass {
     attribute float floatValue01;
     attribute float floatValue02;
     attribute boolean boolValue01;
-    [Value] attribute IDLString strValue01;
+    [Value] attribute NativeString strValue01;
     [Value] attribute TestObjectClass valueObject;
     attribute TestObjectClass pointerObject;
 
@@ -216,7 +216,7 @@ interface TestCallbackClass {
     float callFloatCallback(CallbackClass callback);
     boolean callBoolCallback(CallbackClass callback);
     void callStringCallback(CallbackClass callback);
-    void callIDLStringCallback(CallbackClass callback);
+    void callNativeStringCallback(CallbackClass callback);
     unsigned long callUnsignedIntCallback(CallbackClass callback);
     unsigned short callUnsignedShortCallback(CallbackClass callback);
     void callEnumParamCallback(CallbackClass callback);

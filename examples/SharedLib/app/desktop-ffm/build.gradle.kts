@@ -24,8 +24,7 @@ dependencies {
     implementation(project(":examples:SharedLib:libA:lib-ffm"))
     implementation(project(":examples:SharedLib:libB:lib-ffm"))
 
-    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-ffm", "configuration" to "nativeRuntime")))
-    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-ffm", "configuration" to "nativeRuntime")))
+    implementation(project(":jParser:runtime:runtime-ffm"))
 }
 
 tasks.register<JavaExec>("SharedLib_run_app_desktop_ffm") {

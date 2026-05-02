@@ -1,0 +1,31 @@
+plugins {
+    id("java-library")
+}
+
+val moduleName = "gen-core"
+
+dependencies {
+    api("com.github.javaparser:javaparser-symbol-solver-core:${LibExt.javaparserVersion}")
+    api("com.github.javaparser:javaparser-core:${LibExt.javaparserVersion}")
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+    targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = moduleName
+            group = LibExt.groupId
+            version = LibExt.libVersion
+            from(components["java"])
+        }
+    }
+}

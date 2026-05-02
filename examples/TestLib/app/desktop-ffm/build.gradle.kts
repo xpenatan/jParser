@@ -41,10 +41,8 @@ dependencies {
 
     implementation(project(":examples:TestLib:lib:lib-ffm"))
 
-    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-ffm", "configuration" to "nativeRuntime")))
-
+    implementation(project(":jParser:runtime:runtime-ffm"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
-    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-ffm", "configuration" to "nativeRuntime")))
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {

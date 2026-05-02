@@ -1,16 +1,16 @@
 package com.github.xpenatan.jParser.example.app.tests;
 
 import com.github.xpenatan.jParser.example.app.CodeTest;
-import com.github.xpenatan.jparser.idl.helper.IDLInt;
-import com.github.xpenatan.jparser.idl.helper.IDLInt4;
-import com.github.xpenatan.jparser.idl.helper.IDLIntArray;
+import com.github.xpenatan.jparser.runtime.helper.NativeInt;
+import com.github.xpenatan.jparser.runtime.helper.NativeInt4;
+import com.github.xpenatan.jparser.runtime.helper.NativeIntArray;
 
 public class PrimitiveTest implements CodeTest {
     private static boolean testPrimitivePointers() {
         {
-            IDLInt test = null;
+            NativeInt test = null;
             try {
-                test = new IDLInt();
+                test = new NativeInt();
                 test.set(10);
                 int value = test.getValue();
                 if(!(value == 10)) {
@@ -30,9 +30,9 @@ public class PrimitiveTest implements CodeTest {
 
     private static boolean testPrimitiveArray() {
         {
-            IDLIntArray test = null;
+            NativeIntArray test = null;
             try {
-                test = new IDLIntArray(2);
+                test = new NativeIntArray(2);
                 {
                     test.setValue(0, 10);
                     test.setValue(1, 20);
@@ -62,9 +62,9 @@ public class PrimitiveTest implements CodeTest {
             }
         }
         {
-            IDLInt4 test = null;
+            NativeInt4 test = null;
             try {
-                test = new IDLInt4();
+                test = new NativeInt4();
 
                 test.set(1,2,3, 4);
                 int x = test.getX();
@@ -101,3 +101,4 @@ public class PrimitiveTest implements CodeTest {
         return testPrimitivePointers() && testPrimitiveArray();
     }
 }
+

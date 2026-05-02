@@ -48,10 +48,10 @@ jobs:
           value: $env:PATH;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build
 
       - name: Build runtime JNI project
-        run: ./gradlew idl_helper_build_project_windows64_jni
+        run: ./gradlew runtime_helper_build_project_windows64_jni
 
       - name: Build runtime FFM project
-        run: ./gradlew idl_helper_build_project_windows64_ffm
+        run: ./gradlew runtime_helper_build_project_windows64_ffm
 
       - name: Build TestLib JNI project
         run: ./gradlew TestLib_build_project_windows64_jni
@@ -106,10 +106,10 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build runtime JNI project
-        run: ./gradlew idl_helper_build_project_linux64_jni
+        run: ./gradlew runtime_helper_build_project_linux64_jni
 
       - name: Build runtime FFM project
-        run: ./gradlew idl_helper_build_project_linux64_ffm
+        run: ./gradlew runtime_helper_build_project_linux64_ffm
 
       - name: Build TestLib JNI project
         run: ./gradlew TestLib_build_project_linux64_jni
@@ -164,10 +164,10 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project JNI runtime
-        run: ./gradlew idl_helper_build_project_mac64_jni
+        run: ./gradlew runtime_helper_build_project_mac64_jni
 
       - name: Build runtime FFM project
-        run: ./gradlew idl_helper_build_project_mac64_ffm
+        run: ./gradlew runtime_helper_build_project_mac64_ffm
 
       - name: Build TestLib JNI project
         run: |
@@ -230,10 +230,10 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project JNI runtime
-        run: ./gradlew idl_helper_build_project_macArm_jni
+        run: ./gradlew runtime_helper_build_project_macArm_jni
 
       - name: Build runtime FFM project
-        run: ./gradlew idl_helper_build_project_macArm_ffm
+        run: ./gradlew runtime_helper_build_project_macArm_ffm
 
       - name: Build TestLib JNI project
         run: |
@@ -301,7 +301,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project runtime
-        run: ./gradlew idl_helper_build_project_web_wasm
+        run: ./gradlew runtime_helper_build_project_web_wasm
 
       - name: Build project
         run: ./gradlew TestLib_build_project_web_wasm
@@ -367,7 +367,7 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Build project runtime
-        run: ./gradlew idl_helper_build_project_android_jni
+        run: ./gradlew runtime_helper_build_project_android_jni
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
@@ -463,7 +463,7 @@ jobs:
         run: ./gradlew TestLib_build_project
 
       - name: Generate runtime project
-        run: ./gradlew :idl:runtime:runtime-build:idl_helper_build_project
+        run: ./gradlew runtime_helper_build_project
 
       - name: Prepare Release deploy files
         if: ${{ inputs.shouldUpload && inputs.isRelease }}

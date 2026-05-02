@@ -5,10 +5,10 @@ import com.github.xpenatan.jParser.example.testlib.TestBufferManualClass;
 import com.github.xpenatan.jParser.example.testlib.TestEnumLib;
 import com.github.xpenatan.jParser.example.testlib.TestMethodClass;
 import com.github.xpenatan.jParser.example.testlib.TestObjectClass;
-import com.github.xpenatan.jparser.idl.helper.IDLFloat;
-import com.github.xpenatan.jparser.idl.helper.IDLFloatArray;
-import com.github.xpenatan.jparser.idl.helper.IDLInt;
-import com.github.xpenatan.jparser.idl.helper.IDLIntArray;
+import com.github.xpenatan.jparser.runtime.helper.NativeFloat;
+import com.github.xpenatan.jparser.runtime.helper.NativeFloatArray;
+import com.github.xpenatan.jparser.runtime.helper.NativeInt;
+import com.github.xpenatan.jparser.runtime.helper.NativeIntArray;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -41,10 +41,10 @@ public class NativeBridgeWorkloads {
     private final TestObjectClass objectB;
     private final TestAttributeClass attrObj;
     private final TestBufferManualClass bufferObj;
-    private final IDLIntArray intArray;
-    private final IDLFloatArray floatArray;
-    private final IDLInt idlInt;
-    private final IDLFloat idlFloat;
+    private final NativeIntArray intArray;
+    private final NativeFloatArray floatArray;
+    private final NativeInt idlInt;
+    private final NativeFloat idlFloat;
     private final ByteBuffer byteBuffer;
 
     private final Scenario[] scenarios;
@@ -58,10 +58,10 @@ public class NativeBridgeWorkloads {
         objectB = new TestObjectClass();
         attrObj = new TestAttributeClass();
         bufferObj = new TestBufferManualClass();
-        intArray = new IDLIntArray(64);
-        floatArray = new IDLFloatArray(64);
-        idlInt = new IDLInt();
-        idlFloat = new IDLFloat();
+        intArray = new NativeIntArray(64);
+        floatArray = new NativeFloatArray(64);
+        idlInt = new NativeInt();
+        idlFloat = new NativeFloat();
 
         byteBuffer = ByteBuffer.allocateDirect(256);
         byteBuffer.order(ByteOrder.nativeOrder());
@@ -254,3 +254,4 @@ public class NativeBridgeWorkloads {
         }
     }
 }
+

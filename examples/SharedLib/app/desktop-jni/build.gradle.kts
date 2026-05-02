@@ -20,9 +20,7 @@ dependencies {
     implementation(project(":examples:SharedLib:libA:lib-jni"))
     implementation(project(":examples:SharedLib:libB:lib-jni"))
 
-    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-jni", "configuration" to "nativeRuntime")))
-    // for tests as well
-    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-jni", "configuration" to "nativeRuntime")))
+    implementation(project(":jParser:runtime:runtime-jni"))
 }
 
 tasks.register<JavaExec>("SharedLib_run_app_desktop_jni") {

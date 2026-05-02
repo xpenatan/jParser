@@ -542,7 +542,7 @@ class TestCallbackClass {
             const char* text = strValue01.c_str();
             callback->onStringCallback(text);
         };
-        void callIDLStringCallback(CallbackClass* callback) {
+        void callNativeStringCallback(CallbackClass* callback) {
             callback->onStdStringCallback(&strValue01);
         };
         unsigned int callUnsignedIntCallback(CallbackClass* callback) {

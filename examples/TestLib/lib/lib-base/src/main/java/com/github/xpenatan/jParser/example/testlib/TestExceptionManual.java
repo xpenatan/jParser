@@ -1,9 +1,9 @@
 package com.github.xpenatan.jParser.example.testlib;
 
-import com.github.xpenatan.jParser.idl.IDLBase;
+import com.github.xpenatan.jParser.api.NativeObject;
 
 /*[-IDL_SKIP]*/
-public class TestExceptionManual extends IDLBase {
+public class TestExceptionManual extends NativeObject {
 
     public TestExceptionManual() {
         long addr = internal_native_create_addr();

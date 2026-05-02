@@ -1,9 +1,9 @@
 package com.github.xpenatan.jParser.example.testlib;
 
-import com.github.xpenatan.jParser.idl.IDLBase;
+import com.github.xpenatan.jParser.api.NativeObject;
 import java.nio.ByteBuffer;
 
-public class TestBufferManualClass extends IDLBase {
+public class TestBufferManualClass extends NativeObject {
 
     /*[-FFM;-NATIVE]
         extern "C" {
@@ -40,7 +40,7 @@ public class TestBufferManualClass extends IDLBase {
     }
 
     /*[-TEAVM;-REPLACE]
-        @org.teavm.jso.JSBody(params = {"this_addr", "data", "size", "value"}, script = "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].TestBufferManualClass);var ptr = idl._malloc(data.length); idl.HEAPU8.set(data, ptr); jsObj.updateByteBuffer(ptr, size, value); data.set(idl.HEAPU8.subarray(ptr, ptr + data.length)); idl._free(ptr);")
+        @org.teavm.jso.JSBody(params = {"this_addr", "data", "size", "value"}, script = "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].TestBufferManualClass);var ptr = runtime._malloc(data.length); runtime.HEAPU8.set(data, ptr); jsObj.updateByteBuffer(ptr, size, value); data.set(runtime.HEAPU8.subarray(ptr, ptr + data.length)); runtime._free(ptr);")
         private static native void internal_native_updateByteBuffer(int this_addr, org.teavm.jso.JSObject data, int size, byte value);
      */
     /*[-JNI;-NATIVE]

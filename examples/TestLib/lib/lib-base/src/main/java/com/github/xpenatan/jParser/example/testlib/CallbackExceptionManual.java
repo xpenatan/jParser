@@ -1,9 +1,9 @@
 package com.github.xpenatan.jParser.example.testlib;
 
-import com.github.xpenatan.jParser.idl.IDLBase;
+import com.github.xpenatan.jParser.api.NativeObject;
 
 /*[-IDL_SKIP]*/
-public class CallbackExceptionManual extends IDLBase {
+public class CallbackExceptionManual extends NativeObject {
 
     /*[-JNI;-NATIVE]
         static jmethodID CallbackExceptionManualImpl_callJava_ID;

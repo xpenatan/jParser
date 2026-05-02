@@ -32,7 +32,7 @@ Maintenance rule: when module/task names change, update `AGENTS.md` and related 
 
 - Library pipeline modules: `lib-base`, `lib-build`, `lib-core`, `lib-jni`, `lib-ffm`, `lib-web`, `lib-android`.
 - App modules in examples: `app:desktop-jni`, `app:desktop-ffm`, `app:web`, `app:android`.
-- Runtime generator module: `idl:runtime:runtime-build` (tasks like `idl_helper_build_project_<target>`).
+- Runtime generator module: `idl:runtime:runtime-build` (tasks like `runtime_helper_build_project_<target>`).
 
 ## 4) JNI / FFM Essentials
 

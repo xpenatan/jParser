@@ -15,5 +15,5 @@ dependencies {
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
     testImplementation(project(":examples:TestLib:lib:lib-base"))
     testImplementation(project(":examples:TestLib:lib:lib-core"))
-    testCompileOnly(project(":idl:runtime:runtime-core"))
+    testCompileOnly(project(":jParser:runtime:runtime-core"))
 }

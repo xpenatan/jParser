@@ -29,11 +29,11 @@ out/
 .temp/
 *.log
 
-**/idl/runtime/runtime-core/src/main/java/**
-**/idl/runtime/runtime-web/src/main/java/**
-**/idl/runtime/runtime-ffm/src/main/java/**
-**/idl/runtime/runtime-jni/src/main/java/**
-**/idl/runtime/runtime-android/src/main/java/**
+**/runtime/runtime-core/src/main/java/**
+**/runtime/runtime-web/src/main/java/**
+**/runtime/runtime-ffm/src/main/java/**
+**/runtime/runtime-jni/src/main/java/**
+**/runtime/runtime-android/src/main/java/**
 
 **/webapp/**
 **/lib/core/src/**

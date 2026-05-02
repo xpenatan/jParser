@@ -33,9 +33,9 @@ android {
 }
 
 dependencies {
-    api(project(":loader:loader-core"))
-    api(project(":idl:api:api-core"))
-    api(project(":idl:runtime:runtime-android"))
+    api(project(":jParser:loader:loader-core"))
+    api(project(":jParser:api:api-core"))
+    api(project(":jParser:runtime:runtime-android"))
     api(project(":examples:TestLib:lib:lib-jni"))
 }
 

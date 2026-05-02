@@ -2,8 +2,8 @@ package com.github.xpenatan.jParser.example.app.tests;
 
 import com.github.xpenatan.jParser.example.app.CodeTest;
 import com.github.xpenatan.jParser.example.testlib.TestBufferManualClass;
-import com.github.xpenatan.jparser.idl.helper.IDLIntArray;
-import com.github.xpenatan.jparser.idl.helper.IDLUtils;
+import com.github.xpenatan.jparser.runtime.helper.NativeIntArray;
+import com.github.xpenatan.jparser.runtime.helper.NativeUtils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -38,9 +38,9 @@ public class BufferTest implements CodeTest {
 
     private static boolean testArrayToByteBuffer() {
         {
-            IDLIntArray test = null;
+            NativeIntArray test = null;
             try {
-                test = new IDLIntArray(3);
+                test = new NativeIntArray(3);
                 {
                     test.setValue(0, 10);
                     test.setValue(1, 20);
@@ -49,7 +49,7 @@ public class BufferTest implements CodeTest {
                     ByteBuffer byteBuffer = ByteBuffer.allocateDirect(sizeInBytes);
                     byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
                     IntBuffer intBuffer = byteBuffer.asIntBuffer();
-                    IDLUtils.copyToByteBuffer(test, byteBuffer, 0, sizeInBytes);
+                    NativeUtils.copyToByteBuffer(test, byteBuffer, 0, sizeInBytes);
                     int x = intBuffer.get(0);
                     int y = intBuffer.get(1);
                     int z = intBuffer.get(2);

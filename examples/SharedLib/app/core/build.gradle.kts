@@ -18,7 +18,7 @@ dependencies {
 
     testImplementation(project(":examples:SharedLib:libA:lib-jni"))
     testImplementation(project(":examples:SharedLib:libB:lib-jni"))
-    testImplementation(project(":idl:runtime:runtime-jni"))
+    testImplementation(project(":jParser:runtime:runtime-jni"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 

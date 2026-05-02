@@ -43,11 +43,10 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
     implementation(project(":examples:TestLib:lib:lib-jni"))
-    runtimeOnly(project(mapOf("path" to ":idl:runtime:runtime-jni", "configuration" to "nativeRuntime")))
 
-    // test-time dependencies required to initialize native loaders
+    implementation(project(":jParser:runtime:runtime-jni"))
+
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
-    testRuntimeOnly(project(mapOf("path" to ":idl:runtime:runtime-jni", "configuration" to "nativeRuntime")))
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_jni") {

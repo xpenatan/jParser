@@ -1,6 +1,6 @@
 package com.github.xpenatan.jParser.example.app;
 
-import com.github.xpenatan.jparser.idl.helper.IDLInt;
+import com.github.xpenatan.jparser.runtime.helper.NativeInt;
 import libA.LibA;
 import libA.LibAData;
 import libB.LibB;
@@ -45,12 +45,12 @@ public class SharedLib {
             }
         }
         {
-            // Share IDLHelper.
+            // Share RuntimeHelper.
             try {
                 LibA libAClass = new LibA();
-                IDLInt int1 = new IDLInt();
+                NativeInt int1 = new NativeInt();
                 int1.set(4);
-                IDLInt int2 = new IDLInt();
+                NativeInt int2 = new NativeInt();
                 int2.set(6);
                 int total = libAClass.addIntPtr(int1, int2);
                 if(total != 10) {
@@ -62,9 +62,9 @@ public class SharedLib {
             }
             try {
                 LibB libBClass = new LibB();
-                IDLInt int1 = new IDLInt();
+                NativeInt int1 = new NativeInt();
                 int1.set(2);
-                IDLInt int2 = new IDLInt();
+                NativeInt int2 = new NativeInt();
                 int2.set(8);
                 int total = libBClass.addIntPtr(int1, int2);
                 if(total != 10) {

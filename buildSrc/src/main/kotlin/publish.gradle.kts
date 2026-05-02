@@ -3,24 +3,23 @@ import java.nio.file.Paths
 import java.net.URLEncoder
 
 var libProjects = mutableSetOf(
-    project(":jParser:jParser-core"),
-    project(":jParser:jParser-build"),
-    project(":jParser:jParser-build-tool"),
-    project(":jParser:jParser-base"),
-    project(":jParser:jParser-idl"),
-    project(":jParser:jParser-jni"),
-    project(":jParser:jParser-ffm"),
-    project(":jParser:jParser-web"),
-    project(":idl:api:api-core"),
-    project(":idl:api:api-web"),
-    project(":idl:runtime:runtime-base"),
-    project(":idl:runtime:runtime-core"),
-    project(":idl:runtime:runtime-web"),
-    project(":idl:runtime:runtime-jni"),
-    project(":idl:runtime:runtime-ffm"),
-    project(":idl:runtime:runtime-android"),
-    project(":loader:loader-core"),
-    project(":loader:loader-web"),
+    project(":jParser:gen:gen-core"),
+    project(":jParser:gen:gen-build"),
+    project(":jParser:gen:gen-build-tool"),
+    project(":jParser:gen:gen-idl"),
+    project(":jParser:gen:gen-jni"),
+    project(":jParser:gen:gen-ffm"),
+    project(":jParser:gen:gen-web"),
+    project(":jParser:api:api-core"),
+    project(":jParser:api:api-web"),
+    project(":jParser:runtime:runtime-base"),
+    project(":jParser:runtime:runtime-core"),
+    project(":jParser:runtime:runtime-web"),
+    project(":jParser:runtime:runtime-jni"),
+    project(":jParser:runtime:runtime-ffm"),
+    project(":jParser:runtime:runtime-android"),
+    project(":jParser:loader:loader-core"),
+    project(":jParser:loader:loader-web")
 )
 
 val taskNames = gradle.startParameter.taskNames

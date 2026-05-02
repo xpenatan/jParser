@@ -11,8 +11,6 @@ import com.github.xpenatan.jParser.example.app.tests.MethodTest;
 import com.github.xpenatan.jParser.example.app.tests.NamespaceTest;
 import com.github.xpenatan.jParser.example.app.tests.OperatorTest;
 import com.github.xpenatan.jParser.example.app.tests.PrimitiveTest;
-import com.github.xpenatan.jParser.example.testlib.CallbackClassManual;
-import com.github.xpenatan.jParser.idl.IDLBase;
 import java.util.ArrayList;
 
 public class TestLib {
