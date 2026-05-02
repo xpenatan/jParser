@@ -81,7 +81,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: windows-natives
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
   build_linux:
     name: Build Linux
@@ -139,7 +139,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: linux-natives
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
   build_mac_intel:
     name: Build Mac Intel
@@ -205,7 +205,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: mac-natives-intel
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
   build_mac_arm:
     name: Build Mac Arm
@@ -271,7 +271,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: mac-natives-arm
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
   build_web:
     name: Build Web
@@ -316,7 +316,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: web-natives
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
   build_android:
     name: Build Android
@@ -390,7 +390,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: android-natives
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
   upload_natives:
     name: Upload Natives
@@ -427,37 +427,37 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: windows-natives
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
       - name: Download linux natives runtime
         uses: actions/download-artifact@v8
         with:
           name: linux-natives
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
       - name: Download mac intel natives runtime
         uses: actions/download-artifact@v8
         with:
           name: mac-natives-intel
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
       - name: Download mac arm natives runtime
         uses: actions/download-artifact@v8
         with:
           name: mac-natives-arm
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
       - name: Download android natives runtime
         uses: actions/download-artifact@v8
         with:
           name: android-natives
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
       - name: Download web natives runtime
         uses: actions/download-artifact@v8
         with:
           name: web-natives
-          path: ./idl/runtime/runtime-build/build/c++/libs/
+          path: ./jParser/runtime/runtime-build/build/c++/libs/
 
       - name: Generate Java classes
         run: ./gradlew TestLib_build_project
