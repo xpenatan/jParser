@@ -1,3 +1,6 @@
+import java.io.FileOutputStream
+import java.util.jar.JarOutputStream
+
 plugins {
     id("com.android.library")
 }
@@ -15,11 +18,34 @@ val androidAbiFiles = mapOf(
     "x86_64" to "$androidLibDir/x86_64/libidl.so",
 )
 
-val androidAbiJars = androidAbiFiles.mapNotNull { (classifier, filePath) ->
+val androidAbiAars = androidAbiFiles.mapNotNull { (classifier, filePath) ->
     if(file(filePath).exists()) {
-        tasks.register<Jar>("nativeJar${classifier}") {
-            from(filePath)
+        tasks.register<Zip>("nativeAar${classifier}") {
+            val abiFolder = file(filePath).parentFile.name
+            val tempAarDir = layout.buildDirectory.dir("tmp/runtime-android-aar/$classifier")
+
             archiveClassifier.set(classifier)
+            archiveExtension.set("aar")
+
+            // Build a minimal AAR structure with ABI native library.
+            doFirst {
+                val tempDir = tempAarDir.get().asFile
+                delete(tempDir)
+                tempDir.mkdirs()
+
+                val manifest = File(tempDir, "AndroidManifest.xml")
+                manifest.writeText("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"com.github.xpenatan.jparser.idl.helper\"/>")
+
+                val classesJar = File(tempDir, "classes.jar")
+                JarOutputStream(FileOutputStream(classesJar)).use { }
+            }
+
+            from(tempAarDir) {
+                include("AndroidManifest.xml", "classes.jar")
+            }
+            from(file(filePath)) {
+                into("jni/$abiFolder")
+            }
         }
     }
     else {
@@ -84,7 +110,7 @@ afterEvaluate {
                 artifactId = moduleName
                 group = LibExt.groupId
                 version = LibExt.libVersion
-                androidAbiJars.forEach { artifact(it) }
+                androidAbiAars.forEach { artifact(it) }
             }
         }
     }
