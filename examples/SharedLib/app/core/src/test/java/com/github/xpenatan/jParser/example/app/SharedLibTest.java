@@ -1,7 +1,7 @@
 package com.github.xpenatan.jParser.example.app;
 
 import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
-import com.github.xpenatan.jparser.idl.IDLLoader;
+import com.github.xpenatan.jparser.runtime.RuntimeLoader;
 import libA.LibALoader;
 import libB.LibBLoader;
 import org.junit.Assert;
@@ -14,7 +14,7 @@ public class SharedLibTest {
 
     @BeforeClass
     public static void setUp() {
-        IDLLoader.init(new JParserLibraryLoaderListener() {
+        RuntimeLoader.init(new JParserLibraryLoaderListener() {
             @Override
             public void onLoad(boolean idl_isSuccess, Throwable idl_t) {
                 if(idl_t != null) {

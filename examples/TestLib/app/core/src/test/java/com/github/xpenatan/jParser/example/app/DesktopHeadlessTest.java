@@ -1,7 +1,7 @@
 package com.github.xpenatan.jParser.example.app;
 
 import com.github.xpenatan.jParser.example.testlib.TestLibLoader;
-import com.github.xpenatan.jparser.idl.IDLLoader;
+import com.github.xpenatan.jparser.runtime.RuntimeLoader;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class DesktopHeadlessTest {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Throwable> err = new AtomicReference<>();
 
-        IDLLoader.init((idl_isSuccess, idl_e) -> {
+        RuntimeLoader.init((idl_isSuccess, idl_e) -> {
             if(idl_e != null) {
                 err.set(idl_e);
                 latch.countDown();
