@@ -21,6 +21,12 @@ public class BuildToolOptions {
     public String idlName;
 
     private String modulePrefix;
+    private String moduleBaseSuffix;
+    private String moduleBuildSuffix;
+    private String moduleCoreSuffix;
+    private String moduleJNISuffix;
+    private String moduleWebSuffix;
+    private String moduleFFMSuffix;
     private String moduleBasePath;
     private String moduleBuildPath;
     private String moduleBuildCPPPath;
@@ -45,6 +51,12 @@ public class BuildToolOptions {
         this.webModuleName = params.webModuleName;
         this.packageName = params.packageName;
         this.modulePrefix = params.modulePrefix;
+        this.moduleBaseSuffix = params.moduleBaseSuffix;
+        this.moduleBuildSuffix = params.moduleBuildSuffix;
+        this.moduleCoreSuffix = params.moduleCoreSuffix;
+        this.moduleJNISuffix = params.moduleJNISuffix;
+        this.moduleWebSuffix = params.moduleWebSuffix;
+        this.moduleFFMSuffix = params.moduleFFMSuffix;
         this.modulePath = params.modulePath;
         this.args = args;
 
@@ -75,12 +87,12 @@ public class BuildToolOptions {
                 throw new RuntimeException(e);
             }
         }
-        moduleBasePath = modulePath + "/" + modulePrefix + "-base";
-        moduleBuildPath = modulePath + "/" + modulePrefix + "-build";
-        moduleCorePath = modulePath + "/" + modulePrefix + "-core";
-        moduleJNIPath = modulePath + "/" + modulePrefix + "-jni";
-        moduleTeavmPath = modulePath + "/" + modulePrefix + "-web";
-        moduleFFMPath = modulePath + "/" + modulePrefix + "-ffm";
+        moduleBasePath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleBaseSuffix, "-base");
+        moduleBuildPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleBuildSuffix, "-build");
+        moduleCorePath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleCoreSuffix, "-core");
+        moduleJNIPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleJNISuffix, "-jni");
+        moduleTeavmPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleWebSuffix, "-web");
+        moduleFFMPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleFFMSuffix, "-ffm");
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         cppPath = moduleBuildPath + "/src/main/cpp/";
@@ -95,6 +107,20 @@ public class BuildToolOptions {
         moduleBuildCPPPath = moduleBuildPath + "/build/c++";
         libsDir = moduleBuildCPPPath + "/libs";
         cppDestinationPath = moduleBuildCPPPath + "/src";
+    }
+
+    private static String resolveModuleSuffix(String moduleSuffix, String defaultSuffix) {
+        if(moduleSuffix == null) {
+            return defaultSuffix;
+        }
+        String normalized = moduleSuffix.trim();
+        if(normalized.isEmpty()) {
+            return defaultSuffix;
+        }
+        if(normalized.startsWith("-")) {
+            return normalized;
+        }
+        return "-" + normalized;
     }
 
     public boolean containsArg(String arg) {
@@ -238,6 +264,36 @@ public class BuildToolOptions {
          * Module prefix name. ex: imgui. So it will be imgui-core, imgui-web, etc.
          */
         public String modulePrefix;
+
+        /**
+         * Optional module suffix used for the base module. Defaults to "-base".
+         */
+        public String moduleBaseSuffix;
+
+        /**
+         * Optional module suffix used for the build module. Defaults to "-build".
+         */
+        public String moduleBuildSuffix;
+
+        /**
+         * Optional module suffix used for the core module. Defaults to "-core".
+         */
+        public String moduleCoreSuffix;
+
+        /**
+         * Optional module suffix used for the JNI module. Defaults to "-jni".
+         */
+        public String moduleJNISuffix;
+
+        /**
+         * Optional module suffix used for the web module. Defaults to "-web".
+         */
+        public String moduleWebSuffix;
+
+        /**
+         * Optional module suffix used for the FFM module. Defaults to "-ffm".
+         */
+        public String moduleFFMSuffix;
 
         /**
          * The C++ source path or relative path specifies the location where the build is executed, such as "/build/MyCPlusPlusLib".
