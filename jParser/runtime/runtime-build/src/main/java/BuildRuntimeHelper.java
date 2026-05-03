@@ -14,6 +14,12 @@ import java.util.ArrayList;
 
 public class BuildRuntimeHelper {
 
+    private static final boolean FFM_NATIVE_OPTIMIZE = Boolean.getBoolean("jparser.ffm.nativeOptimize");
+    private static final boolean FFM_NATIVE_LTO = Boolean.getBoolean("jparser.ffm.nativeLto");
+    private static final boolean FFM_NATIVE_HIDDEN_VISIBILITY = Boolean.getBoolean("jparser.ffm.nativeHiddenVisibility");
+    private static final boolean FFM_NATIVE_PGO_GENERATE = Boolean.getBoolean("jparser.ffm.nativePgoGenerate");
+    private static final boolean FFM_NATIVE_PGO_USE = Boolean.getBoolean("jparser.ffm.nativePgoUse");
+
     public static void main(String[] args) throws Exception {
         String libName = "runtime";
         String modulePrefix = "runtime";
@@ -85,6 +91,7 @@ public class BuildRuntimeHelper {
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std:c++17");
+        applyFFMWindowsCompileFlags(compileStaticTarget, isFFM);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/runtime/RuntimeHelper.cpp");
         compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
@@ -99,9 +106,11 @@ public class BuildRuntimeHelper {
             linkTarget.setupJNIGlueCode(libBuildCPPPath);
         }
         linkTarget.cppFlags.add("-std:c++17");
+        applyFFMWindowsCompileFlags(linkTarget, isFFM);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib");
         linkTarget.linkerFlags.add("-DLL");
+        applyFFMWindowsLinkFlags(linkTarget, isFFM);
         multiTarget.add(linkTarget);
 
         return multiTarget;
@@ -119,6 +128,7 @@ public class BuildRuntimeHelper {
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++17");
         compileStaticTarget.cppFlags.add("-fPIC");
+        applyFFMUnixCompileFlags(compileStaticTarget.cppFlags, isFFM);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/runtime/RuntimeHelper.cpp");
         compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
@@ -134,10 +144,12 @@ public class BuildRuntimeHelper {
         }
         linkTarget.cppFlags.add("-std=c++17");
         linkTarget.cppFlags.add("-fPIC");
+        applyFFMUnixCompileFlags(linkTarget.cppFlags, isFFM);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/"+ api + "/lib" + op.libName + "64_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+        applyFFMUnixLinkFlags(linkTarget.linkerFlags, isFFM);
 
         multiTarget.add(linkTarget);
 
@@ -155,6 +167,7 @@ public class BuildRuntimeHelper {
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.cppFlags.add("-std=c++17");
         compileStaticTarget.cppFlags.add("-fPIC");
+        applyFFMUnixCompileFlags(compileStaticTarget.cppFlags, isFFM);
         compileStaticTarget.isStatic = true;
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/runtime/RuntimeHelper.cpp");
@@ -171,6 +184,7 @@ public class BuildRuntimeHelper {
         }
         linkTarget.cppFlags.add("-std=c++17");
         linkTarget.cppFlags.add("-fPIC");
+        applyFFMUnixCompileFlags(linkTarget.cppFlags, isFFM);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
 
         linkTarget.linkerFlags.add("-Wl,-force_load");
@@ -180,6 +194,8 @@ public class BuildRuntimeHelper {
         else {
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/" + api + "/lib" + op.libName + "64_.a");
         }
+
+        applyFFMUnixLinkFlags(linkTarget.linkerFlags, isFFM);
 
         multiTarget.add(linkTarget);
 
@@ -292,5 +308,77 @@ public class BuildRuntimeHelper {
         multiTarget.add(linkTarget);
 
         return multiTarget;
+    }
+
+    private static void applyFFMWindowsCompileFlags(WindowsMSVCTarget target, boolean isFFM) {
+        if(!isFFM) {
+            return;
+        }
+        if(FFM_NATIVE_OPTIMIZE) {
+            addFlagIfMissing(target.cppFlags, "/O2");
+        }
+        if(FFM_NATIVE_LTO) {
+            addFlagIfMissing(target.cppFlags, "/GL");
+        }
+        if(FFM_NATIVE_PGO_GENERATE || FFM_NATIVE_PGO_USE) {
+            addFlagIfMissing(target.cppFlags, "/GL");
+        }
+    }
+
+    private static void applyFFMWindowsLinkFlags(WindowsMSVCTarget target, boolean isFFM) {
+        if(!isFFM) {
+            return;
+        }
+        if(FFM_NATIVE_LTO) {
+            addFlagIfMissing(target.linkerFlags, "/LTCG");
+        }
+        if(FFM_NATIVE_PGO_GENERATE) {
+            addFlagIfMissing(target.linkerFlags, "/LTCG:PGINSTRUMENT");
+        }
+        else if(FFM_NATIVE_PGO_USE) {
+            addFlagIfMissing(target.linkerFlags, "/LTCG:PGOPTIMIZE");
+        }
+    }
+
+    private static void applyFFMUnixCompileFlags(ArrayList<String> flags, boolean isFFM) {
+        if(!isFFM) {
+            return;
+        }
+        if(FFM_NATIVE_OPTIMIZE) {
+            addFlagIfMissing(flags, "-O3");
+        }
+        if(FFM_NATIVE_LTO) {
+            addFlagIfMissing(flags, "-flto");
+        }
+        if(FFM_NATIVE_HIDDEN_VISIBILITY) {
+            addFlagIfMissing(flags, "-fvisibility=hidden");
+        }
+        if(FFM_NATIVE_PGO_GENERATE) {
+            addFlagIfMissing(flags, "-fprofile-generate");
+        }
+        else if(FFM_NATIVE_PGO_USE) {
+            addFlagIfMissing(flags, "-fprofile-use");
+        }
+    }
+
+    private static void applyFFMUnixLinkFlags(ArrayList<String> flags, boolean isFFM) {
+        if(!isFFM) {
+            return;
+        }
+        if(FFM_NATIVE_LTO) {
+            addFlagIfMissing(flags, "-flto");
+        }
+        if(FFM_NATIVE_PGO_GENERATE) {
+            addFlagIfMissing(flags, "-fprofile-generate");
+        }
+        else if(FFM_NATIVE_PGO_USE) {
+            addFlagIfMissing(flags, "-fprofile-use");
+        }
+    }
+
+    private static void addFlagIfMissing(ArrayList<String> flags, String flag) {
+        if(!flags.contains(flag)) {
+            flags.add(flag);
+        }
     }
 }

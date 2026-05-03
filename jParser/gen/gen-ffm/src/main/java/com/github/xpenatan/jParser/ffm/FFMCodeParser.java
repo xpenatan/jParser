@@ -50,6 +50,12 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     private static final String HEADER_CMD = "FFM";
     private static final String CALLBACK_UPCALL_ARENA_FIELD = "upcallArena";
     private static final String CALLBACK_RELEASE_METHOD = "releaseUpcallResources";
+    private static final String[] CRITICAL_SAFE_TYPES = new String[] {
+            "void", "int", "long", "float", "double"
+    };
+    private static final String[] CRITICAL_ALL_PRIMITIVE_TYPES = new String[] {
+            "void", "boolean", "byte", "char", "short", "int", "long", "float", "double"
+    };
 
     // Same template tags as CppCodeParser (the C++ code is largely the same)
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
@@ -452,6 +458,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         if(!JParserHelper.containsMethod(classDeclaration, nativeMethodDeclaration)) {
             // Keep the method static (FFM uses explicit this_addr, no implicit JNI params)
             classDeclaration.getMembers().add(nativeMethodDeclaration);
+            ensureCallbackLookupMembers(classDeclaration);
 
             // 2. Build setupCallback Java body with upcall stub creation
             StringBuilder body = new StringBuilder();
@@ -474,14 +481,18 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
                 String methodTypeStr = buildMethodTypeStr(internalMethod);
                 String funcDescriptor = buildCallbackFunctionDescriptor(internalMethod);
+                String methodTypeField = getCallbackMethodTypeFieldName(methodName);
+                String descriptorField = getCallbackDescriptorFieldName(methodName);
+                ensureCallbackMethodTypeMember(classDeclaration, methodTypeField, methodTypeStr);
+                ensureCallbackDescriptorMember(classDeclaration, descriptorField, funcDescriptor);
 
                 body.append("        java.lang.invoke.MethodHandle mh_").append(methodName)
-                    .append(" = java.lang.invoke.MethodHandles.lookup().findVirtual(")
+                    .append(" = ").append(getCallbackLookupFieldName()).append(".findVirtual(")
                     .append(classDeclaration.getNameAsString()).append(".class, \"")
-                    .append(internalMethodName).append("\", ").append(methodTypeStr).append(").bindTo(this);\n");
+                    .append(internalMethodName).append("\", ").append(methodTypeField).append(").bindTo(this);\n");
                 body.append("        ").append(stubFieldName)
-                    .append(" = java.lang.foreign.Linker.nativeLinker().upcallStub(mh_").append(methodName)
-                    .append(", ").append(funcDescriptor).append(", ").append(CALLBACK_UPCALL_ARENA_FIELD).append(");\n");
+                    .append(" = ").append(getCallbackLinkerFieldName()).append(".upcallStub(mh_").append(methodName)
+                    .append(", ").append(descriptorField).append(", ").append(CALLBACK_UPCALL_ARENA_FIELD).append(");\n");
             }
 
             // Call native setupCallback with native_address + stub addresses
@@ -636,7 +647,6 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         // Remove native modifier
         methodDeclaration.removeModifier(Modifier.Keyword.NATIVE);
 
-        String methodName = methodDeclaration.getNameAsString();
         Type returnType = methodDeclaration.getType();
         String returnTypeStr = returnType.asString();
         boolean isVoid = returnType.isVoidType();
@@ -651,9 +661,8 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             String paramType = parameter.getType().asString();
             // For String parameters, we need to convert to MemorySegment
             if(paramType.equals("String")) {
-                invokeArgs.append("(java.lang.foreign.MemorySegment)(").append(parameter.getNameAsString())
-                          .append(" != null ? java.lang.foreign.Arena.global().allocateFrom(")
-                          .append(parameter.getNameAsString()).append(") : java.lang.foreign.MemorySegment.NULL)");
+                invokeArgs.append("com.github.xpenatan.jparser.runtime.helper.NativeUtils.toCString(")
+                          .append(parameter.getNameAsString()).append(")");
             }
             else {
                 invokeArgs.append(parameter.getNameAsString());
@@ -683,7 +692,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         }
 
         bodyCode.append("    } catch(Throwable e) {\n");
-        bodyCode.append("        throw new RuntimeException(e);\n");
+        bodyCode.append("        throw FFMHandles.rethrow(e);\n");
         bodyCode.append("    }\n");
 
         if(!isVoid) {
@@ -733,18 +742,35 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         StringBuilder sb = new StringBuilder();
         sb.append("private static final class FFMHandles {\n");
-        sb.append("    private static final java.lang.foreign.SymbolLookup LOOKUP;\n");
+        sb.append("    private static final java.lang.foreign.SymbolLookup LOOKUP = java.lang.foreign.SymbolLookup.loaderLookup();\n");
+        sb.append("    private static final String CRITICAL_MODE = java.lang.System.getProperty(\"jparser.ffm.criticalMode\", \"auto\").trim().toLowerCase(java.util.Locale.ROOT);\n");
+        sb.append("    private static final boolean CRITICAL_ENABLED = !\"off\".equals(CRITICAL_MODE);\n");
+        sb.append("    private static final java.lang.foreign.Linker.Option[] LINKER_OPTIONS_CRITICAL = new java.lang.foreign.Linker.Option[] { java.lang.foreign.Linker.Option.critical(true) };\n");
+        sb.append("    private static final java.lang.foreign.Linker.Option[] LINKER_OPTIONS_DEFAULT = new java.lang.foreign.Linker.Option[0];\n");
         sb.append("    private static final java.lang.foreign.Linker LINKER = java.lang.foreign.Linker.nativeLinker();\n");
-        sb.append("    static {\n");
-        sb.append("        LOOKUP = java.lang.foreign.SymbolLookup.loaderLookup();\n");
+        sb.append("\n");
+        sb.append("    static RuntimeException rethrow(Throwable e) {\n");
+        sb.append("        if(e instanceof RuntimeException) return (RuntimeException)e;\n");
+        sb.append("        if(e instanceof Error) throw (Error)e;\n");
+        sb.append("        return new RuntimeException(e);\n");
+        sb.append("    }\n\n");
+        sb.append("    static java.lang.invoke.MethodHandle downcall(String symbolName, java.lang.foreign.FunctionDescriptor descriptor, boolean criticalEligible) {\n");
+        sb.append("        java.lang.foreign.MemorySegment symbol = LOOKUP.find(symbolName).orElseThrow();\n");
+        sb.append("        if(criticalEligible && CRITICAL_ENABLED) {\n");
+        sb.append("            try {\n");
+        sb.append("                return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_CRITICAL);\n");
+        sb.append("            } catch(Throwable ignored) {\n");
+        sb.append("            }\n");
+        sb.append("        }\n");
+        sb.append("        return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_DEFAULT);\n");
         sb.append("    }\n\n");
 
         for(FFMMethodHandleRegistry.FFMEntry entry : entries) {
             String descriptor = FFMMethodHandleRegistry.buildFunctionDescriptor(entry);
+            boolean criticalEligible = isCriticalEligible(entry);
             sb.append("    static final java.lang.invoke.MethodHandle ").append(entry.handleName)
-              .append(" = LINKER.downcallHandle(\n");
-            sb.append("        LOOKUP.find(\"").append(entry.symbolName).append("\").orElseThrow(),\n");
-            sb.append("        ").append(descriptor).append(");\n\n");
+              .append(" = downcall(\"").append(entry.symbolName).append("\", ")
+              .append(descriptor).append(", ").append(criticalEligible).append(");\n\n");
         }
 
         sb.append("}");
@@ -1278,6 +1304,103 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             methodBody.append("}\n");
             releaseMethod.setBody(StaticJavaParser.parseBlock(methodBody.toString()));
         }
+    }
+
+    private void ensureCallbackLookupMembers(ClassOrInterfaceDeclaration classDeclaration) {
+        if(classDeclaration.getFieldByName(getCallbackLookupFieldName()).isEmpty()) {
+            classDeclaration.addMember(StaticJavaParser.parseBodyDeclaration(
+                    "private static final java.lang.invoke.MethodHandles.Lookup " + getCallbackLookupFieldName() +
+                            " = java.lang.invoke.MethodHandles.lookup();"));
+        }
+        if(classDeclaration.getFieldByName(getCallbackLinkerFieldName()).isEmpty()) {
+            classDeclaration.addMember(StaticJavaParser.parseBodyDeclaration(
+                    "private static final java.lang.foreign.Linker " + getCallbackLinkerFieldName() +
+                            " = java.lang.foreign.Linker.nativeLinker();"));
+        }
+    }
+
+    private void ensureCallbackMethodTypeMember(ClassOrInterfaceDeclaration classDeclaration, String fieldName, String methodTypeExpression) {
+        if(classDeclaration.getFieldByName(fieldName).isEmpty()) {
+            classDeclaration.addMember(StaticJavaParser.parseBodyDeclaration(
+                    "private static final java.lang.invoke.MethodType " + fieldName + " = " + methodTypeExpression + ";"));
+        }
+    }
+
+    private void ensureCallbackDescriptorMember(ClassOrInterfaceDeclaration classDeclaration, String fieldName, String descriptorExpression) {
+        if(classDeclaration.getFieldByName(fieldName).isEmpty()) {
+            classDeclaration.addMember(StaticJavaParser.parseBodyDeclaration(
+                    "private static final java.lang.foreign.FunctionDescriptor " + fieldName + " = " + descriptorExpression + ";"));
+        }
+    }
+
+    private String getCallbackLookupFieldName() {
+        return "callbackLookup";
+    }
+
+    private String getCallbackLinkerFieldName() {
+        return "callbackLinker";
+    }
+
+    private String getCallbackMethodTypeFieldName(String callbackMethodName) {
+        return "callbackMethodType_" + sanitizeIdentifier(callbackMethodName);
+    }
+
+    private String getCallbackDescriptorFieldName(String callbackMethodName) {
+        return "callbackDescriptor_" + sanitizeIdentifier(callbackMethodName);
+    }
+
+    private String sanitizeIdentifier(String value) {
+        StringBuilder out = new StringBuilder(value.length());
+        for(int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+                out.append(c);
+            }
+            else {
+                out.append('_');
+            }
+        }
+        return out.toString();
+    }
+
+    private boolean isCriticalEligible(FFMMethodHandleRegistry.FFMEntry entry) {
+        if(isCallbackRelatedEntry(entry)) {
+            return false;
+        }
+        if(!isCriticalAllowedType(entry.returnType)) {
+            return false;
+        }
+        for(FFMMethodHandleRegistry.ParamInfo parameter : entry.parameters) {
+            if(!isCriticalAllowedType(parameter.javaType)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isCallbackRelatedEntry(FFMMethodHandleRegistry.FFMEntry entry) {
+        String symbolName = entry.symbolName == null ? "" : entry.symbolName.toLowerCase(java.util.Locale.ROOT);
+        String handleName = entry.handleName == null ? "" : entry.handleName.toLowerCase(java.util.Locale.ROOT);
+        return symbolName.contains("callback") || symbolName.contains("upcall")
+                || handleName.contains("callback") || handleName.contains("upcall");
+    }
+
+    private boolean isCriticalAllowedType(String javaType) {
+        for(String primitiveType : CRITICAL_SAFE_TYPES) {
+            if(primitiveType.equals(javaType)) {
+                return true;
+            }
+        }
+        // Wider primitive mode remains opt-in for advanced users.
+        if(!java.lang.Boolean.getBoolean("jparser.ffm.criticalAllPrimitives")) {
+            return false;
+        }
+        for(String primitiveType : CRITICAL_ALL_PRIMITIVE_TYPES) {
+            if(primitiveType.equals(javaType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void ensureDeleteNativeReleasesUpcalls(ClassOrInterfaceDeclaration classDeclaration) {

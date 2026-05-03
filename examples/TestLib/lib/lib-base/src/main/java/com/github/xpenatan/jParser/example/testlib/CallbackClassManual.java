@@ -114,6 +114,41 @@ public class CallbackClassManual extends NativeObject {
     */
 
     /*[-FFM;-ADD]
+        private java.lang.foreign.Arena ffm_upcallArena;
+    */
+    /*[-FFM;-ADD]
+        private java.lang.foreign.MemorySegment ffm_stub_void;
+    */
+    /*[-FFM;-ADD]
+        private java.lang.foreign.MemorySegment ffm_stub_int;
+    */
+    /*[-FFM;-ADD]
+        private java.lang.foreign.MemorySegment ffm_stub_float;
+    */
+    /*[-FFM;-ADD]
+        private java.lang.foreign.MemorySegment ffm_stub_bool;
+    */
+    /*[-FFM;-ADD]
+        private java.lang.foreign.MemorySegment ffm_stub_string;
+    */
+    /*[-FFM;-ADD]
+        private void ffm_releaseCallbacks() {
+            java.lang.foreign.Arena arena = ffm_upcallArena;
+            ffm_stub_void = null;
+            ffm_stub_int = null;
+            ffm_stub_float = null;
+            ffm_stub_bool = null;
+            ffm_stub_string = null;
+            ffm_upcallArena = null;
+            if(arena != null) {
+                try {
+                    arena.close();
+                } catch(Exception ignored) {
+                }
+            }
+        }
+    */
+    /*[-FFM;-ADD]
         private void internal_ffm_onStringCallback(java.lang.foreign.MemorySegment seg) {
             String str = seg.reinterpret(Long.MAX_VALUE).getString(0);
             internal_onStringCallback(str);
@@ -122,11 +157,25 @@ public class CallbackClassManual extends NativeObject {
 
     /*[-FFM;-ADD]
         private static final class FFMHandles {
+            private static final boolean USE_CRITICAL = java.lang.Boolean.getBoolean("jparser.ffm.critical");
+            private static final java.lang.foreign.Linker.Option[] LINKER_OPTIONS = USE_CRITICAL ? new java.lang.foreign.Linker.Option[] { java.lang.foreign.Linker.Option.critical(true) } : new java.lang.foreign.Linker.Option[0];
             private static final java.lang.foreign.SymbolLookup LOOKUP = java.lang.foreign.SymbolLookup.loaderLookup();
             private static final java.lang.foreign.Linker LINKER = java.lang.foreign.Linker.nativeLinker();
-            static final java.lang.invoke.MethodHandle create_addr = LINKER.downcallHandle(LOOKUP.find("jparser_com_github_xpenatan_jParser_example_testlib_CallbackClassManual_internal_1native_1create_1addr__").orElseThrow(), java.lang.foreign.FunctionDescriptor.of(java.lang.foreign.ValueLayout.JAVA_LONG));
-            static final java.lang.invoke.MethodHandle getAndroidCode = LINKER.downcallHandle(LOOKUP.find("jparser_com_github_xpenatan_jParser_example_testlib_CallbackClassManual_internal_1getAndroidCode__").orElseThrow(), java.lang.foreign.FunctionDescriptor.of(java.lang.foreign.ValueLayout.JAVA_LONG));
-            static final java.lang.invoke.MethodHandle setupCallbacks = LINKER.downcallHandle(LOOKUP.find("jparser_com_github_xpenatan_jParser_example_testlib_CallbackClassManual_internal_1native_1setupCallbacks__JJJJJJ").orElseThrow(), java.lang.foreign.FunctionDescriptor.ofVoid(java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG));
+            static final java.lang.invoke.MethodHandle create_addr = LINKER.downcallHandle(LOOKUP.find("jparser_com_github_xpenatan_jParser_example_testlib_CallbackClassManual_internal_1native_1create_1addr__").orElseThrow(), java.lang.foreign.FunctionDescriptor.of(java.lang.foreign.ValueLayout.JAVA_LONG), LINKER_OPTIONS);
+            static final java.lang.invoke.MethodHandle getAndroidCode = LINKER.downcallHandle(LOOKUP.find("jparser_com_github_xpenatan_jParser_example_testlib_CallbackClassManual_internal_1getAndroidCode__").orElseThrow(), java.lang.foreign.FunctionDescriptor.of(java.lang.foreign.ValueLayout.JAVA_LONG), LINKER_OPTIONS);
+            static final java.lang.invoke.MethodHandle setupCallbacks = LINKER.downcallHandle(LOOKUP.find("jparser_com_github_xpenatan_jParser_example_testlib_CallbackClassManual_internal_1native_1setupCallbacks__JJJJJJ").orElseThrow(), java.lang.foreign.FunctionDescriptor.ofVoid(java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG), LINKER_OPTIONS);
+
+            static final java.lang.invoke.MethodType MT_VOID = java.lang.invoke.MethodType.methodType(void.class, long.class, long.class);
+            static final java.lang.invoke.MethodType MT_INT = java.lang.invoke.MethodType.methodType(int.class, int.class, int.class);
+            static final java.lang.invoke.MethodType MT_FLOAT = java.lang.invoke.MethodType.methodType(float.class, float.class, float.class);
+            static final java.lang.invoke.MethodType MT_BOOL = java.lang.invoke.MethodType.methodType(boolean.class, boolean.class);
+            static final java.lang.invoke.MethodType MT_STRING = java.lang.invoke.MethodType.methodType(void.class, java.lang.foreign.MemorySegment.class);
+
+            static final java.lang.foreign.FunctionDescriptor FD_VOID = java.lang.foreign.FunctionDescriptor.ofVoid(java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG);
+            static final java.lang.foreign.FunctionDescriptor FD_INT = java.lang.foreign.FunctionDescriptor.of(java.lang.foreign.ValueLayout.JAVA_INT, java.lang.foreign.ValueLayout.JAVA_INT, java.lang.foreign.ValueLayout.JAVA_INT);
+            static final java.lang.foreign.FunctionDescriptor FD_FLOAT = java.lang.foreign.FunctionDescriptor.of(java.lang.foreign.ValueLayout.JAVA_FLOAT, java.lang.foreign.ValueLayout.JAVA_FLOAT, java.lang.foreign.ValueLayout.JAVA_FLOAT);
+            static final java.lang.foreign.FunctionDescriptor FD_BOOL = java.lang.foreign.FunctionDescriptor.of(java.lang.foreign.ValueLayout.JAVA_BOOLEAN, java.lang.foreign.ValueLayout.JAVA_BOOLEAN);
+            static final java.lang.foreign.FunctionDescriptor FD_STRING = java.lang.foreign.FunctionDescriptor.ofVoid(java.lang.foreign.ValueLayout.ADDRESS);
         }
     */
 
@@ -209,17 +258,28 @@ public class CallbackClassManual extends NativeObject {
     /*[-FFM;-REPLACE_BLOCK]
         {
             try {
-                java.lang.invoke.MethodHandle mh_void = java.lang.invoke.MethodHandles.lookup().findVirtual(CallbackClassManual.class, "internal_onVoidCallback", java.lang.invoke.MethodType.methodType(void.class, long.class, long.class)).bindTo(this);
-                java.lang.foreign.MemorySegment stub_void = java.lang.foreign.Linker.nativeLinker().upcallStub(mh_void, java.lang.foreign.FunctionDescriptor.ofVoid(java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG), java.lang.foreign.Arena.ofAuto());
-                java.lang.invoke.MethodHandle mh_int = java.lang.invoke.MethodHandles.lookup().findVirtual(CallbackClassManual.class, "internal_onIntCallback", java.lang.invoke.MethodType.methodType(int.class, int.class, int.class)).bindTo(this);
-                java.lang.foreign.MemorySegment stub_int = java.lang.foreign.Linker.nativeLinker().upcallStub(mh_int, java.lang.foreign.FunctionDescriptor.of(java.lang.foreign.ValueLayout.JAVA_INT, java.lang.foreign.ValueLayout.JAVA_INT, java.lang.foreign.ValueLayout.JAVA_INT), java.lang.foreign.Arena.ofAuto());
-                java.lang.invoke.MethodHandle mh_float = java.lang.invoke.MethodHandles.lookup().findVirtual(CallbackClassManual.class, "internal_onFloatCallback", java.lang.invoke.MethodType.methodType(float.class, float.class, float.class)).bindTo(this);
-                java.lang.foreign.MemorySegment stub_float = java.lang.foreign.Linker.nativeLinker().upcallStub(mh_float, java.lang.foreign.FunctionDescriptor.of(java.lang.foreign.ValueLayout.JAVA_FLOAT, java.lang.foreign.ValueLayout.JAVA_FLOAT, java.lang.foreign.ValueLayout.JAVA_FLOAT), java.lang.foreign.Arena.ofAuto());
-                java.lang.invoke.MethodHandle mh_bool = java.lang.invoke.MethodHandles.lookup().findVirtual(CallbackClassManual.class, "internal_onBoolCallback", java.lang.invoke.MethodType.methodType(boolean.class, boolean.class)).bindTo(this);
-                java.lang.foreign.MemorySegment stub_bool = java.lang.foreign.Linker.nativeLinker().upcallStub(mh_bool, java.lang.foreign.FunctionDescriptor.of(java.lang.foreign.ValueLayout.JAVA_BOOLEAN, java.lang.foreign.ValueLayout.JAVA_BOOLEAN), java.lang.foreign.Arena.ofAuto());
-                java.lang.invoke.MethodHandle mh_string = java.lang.invoke.MethodHandles.lookup().findVirtual(CallbackClassManual.class, "internal_ffm_onStringCallback", java.lang.invoke.MethodType.methodType(void.class, java.lang.foreign.MemorySegment.class)).bindTo(this);
-                java.lang.foreign.MemorySegment stub_string = java.lang.foreign.Linker.nativeLinker().upcallStub(mh_string, java.lang.foreign.FunctionDescriptor.ofVoid(java.lang.foreign.ValueLayout.ADDRESS), java.lang.foreign.Arena.ofAuto());
-                internal_native_setupCallbacks(native_address, stub_void.address(), stub_int.address(), stub_float.address(), stub_bool.address(), stub_string.address());
+                ffm_releaseCallbacks();
+                ffm_upcallArena = java.lang.foreign.Arena.ofShared();
+
+                java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.lookup();
+                java.lang.foreign.Linker linker = FFMHandles.LINKER;
+
+                java.lang.invoke.MethodHandle mh_void = lookup.findVirtual(CallbackClassManual.class, "internal_onVoidCallback", FFMHandles.MT_VOID).bindTo(this);
+                ffm_stub_void = linker.upcallStub(mh_void, FFMHandles.FD_VOID, ffm_upcallArena);
+
+                java.lang.invoke.MethodHandle mh_int = lookup.findVirtual(CallbackClassManual.class, "internal_onIntCallback", FFMHandles.MT_INT).bindTo(this);
+                ffm_stub_int = linker.upcallStub(mh_int, FFMHandles.FD_INT, ffm_upcallArena);
+
+                java.lang.invoke.MethodHandle mh_float = lookup.findVirtual(CallbackClassManual.class, "internal_onFloatCallback", FFMHandles.MT_FLOAT).bindTo(this);
+                ffm_stub_float = linker.upcallStub(mh_float, FFMHandles.FD_FLOAT, ffm_upcallArena);
+
+                java.lang.invoke.MethodHandle mh_bool = lookup.findVirtual(CallbackClassManual.class, "internal_onBoolCallback", FFMHandles.MT_BOOL).bindTo(this);
+                ffm_stub_bool = linker.upcallStub(mh_bool, FFMHandles.FD_BOOL, ffm_upcallArena);
+
+                java.lang.invoke.MethodHandle mh_string = lookup.findVirtual(CallbackClassManual.class, "internal_ffm_onStringCallback", FFMHandles.MT_STRING).bindTo(this);
+                ffm_stub_string = linker.upcallStub(mh_string, FFMHandles.FD_STRING, ffm_upcallArena);
+
+                internal_native_setupCallbacks(native_address, ffm_stub_void.address(), ffm_stub_int.address(), ffm_stub_float.address(), ffm_stub_bool.address(), ffm_stub_string.address());
             } catch(Throwable e) {
                 throw new RuntimeException(e);
             }
