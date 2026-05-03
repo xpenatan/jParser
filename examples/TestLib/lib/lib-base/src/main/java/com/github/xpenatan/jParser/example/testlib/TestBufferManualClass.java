@@ -31,8 +31,8 @@ public class TestBufferManualClass extends NativeObject {
     */
     /*[-FFM;-REPLACE_BLOCK]
         {
-            java.lang.foreign.MemorySegment seg = java.lang.foreign.MemorySegment.ofBuffer(data);
-            internal_native_updateByteBuffer(native_address, seg.address(), size, value);
+            long dataPtr = com.github.xpenatan.jparser.runtime.helper.NativeUtils.address(data);
+            internal_native_updateByteBuffer(native_address, dataPtr, size, value);
         }
     */
     public void updateByteBuffer(ByteBuffer data, int size, byte value) {

@@ -150,14 +150,14 @@ public class FFMTypeMapper {
     }
 
     /**
-     * Returns FFM code to create a MemorySegment from a direct ByteBuffer.
-     * Example: "java.lang.foreign.MemorySegment.ofBuffer(myBuffer)"
+     * Returns FFM code to get a normalized native address from a direct ByteBuffer.
+     * Example: "com.github.xpenatan.jparser.runtime.helper.NativeUtils.address(myBuffer)"
      *
      * @param paramName the Java variable name of the ByteBuffer
-     * @return the FFM MemorySegment creation code
+     * @return the FFM native address code
      */
     public static String getBufferSegmentCode(String paramName) {
-        return "java.lang.foreign.MemorySegment.ofBuffer(" + paramName + ")";
+        return "com.github.xpenatan.jparser.runtime.helper.NativeUtils.address(" + paramName + ")";
     }
 
     /**

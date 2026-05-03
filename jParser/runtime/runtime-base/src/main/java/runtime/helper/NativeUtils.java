@@ -17,6 +17,36 @@ public class NativeUtils {
         return null;
     }
 
+    /**
+     * Returns the base native address for a direct ByteBuffer.
+     * FFM implementation normalizes the buffer view to start at zero and restores state.
+     */
+    /*[-FFM;-REPLACE]
+        public static long address(ByteBuffer byteBuffer) {
+            if(byteBuffer == null) {
+                return 0L;
+            }
+            if(!byteBuffer.isDirect()) {
+                throw new IllegalArgumentException("Direct ByteBuffer required");
+            }
+
+            int oldPos = byteBuffer.position();
+            int oldLimit = byteBuffer.limit();
+            try {
+                byteBuffer.position(0);
+                byteBuffer.limit(byteBuffer.capacity());
+                return java.lang.foreign.MemorySegment.ofBuffer(byteBuffer).address();
+            }
+            finally {
+                byteBuffer.position(oldPos);
+                byteBuffer.limit(oldLimit);
+            }
+        }
+    */
+    public static long address(ByteBuffer byteBuffer) {
+        return 0L;
+    }
+
     /*[-TEAVM;-REPLACE_BLOCK]
         {
             org.teavm.jso.typedarrays.Int8Array destinationArray = org.teavm.jso.typedarrays.Int8Array.fromJavaBuffer(destination);
@@ -25,8 +55,8 @@ public class NativeUtils {
     */
     /*[-FFM;-REPLACE_BLOCK]
         {
-            java.lang.foreign.MemorySegment seg = java.lang.foreign.MemorySegment.ofBuffer(destination);
-            internal_native_copyToByteBuffer(source.native_void_address, seg.address(), offset, sizeInBytes);
+            long destinationAddress = NativeUtils.address(destination);
+            internal_native_copyToByteBuffer(source.native_void_address, destinationAddress, offset, sizeInBytes);
         }
     */
     public static void copyToByteBuffer(NativeObject source, ByteBuffer destination, int offset, int sizeInBytes) {
