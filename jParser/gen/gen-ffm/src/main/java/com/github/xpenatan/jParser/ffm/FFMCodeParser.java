@@ -1381,8 +1381,23 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     private boolean isCallbackRelatedEntry(FFMMethodHandleRegistry.FFMEntry entry) {
         String symbolName = entry.symbolName == null ? "" : entry.symbolName.toLowerCase(java.util.Locale.ROOT);
         String handleName = entry.handleName == null ? "" : entry.handleName.toLowerCase(java.util.Locale.ROOT);
-        return symbolName.contains("callback") || symbolName.contains("upcall")
-                || handleName.contains("callback") || handleName.contains("upcall");
+        String methodName = entry.javaMethodName == null ? "" : entry.javaMethodName.toLowerCase(java.util.Locale.ROOT);
+        if(containsCallbackSignal(symbolName) || containsCallbackSignal(handleName) || containsCallbackSignal(methodName)) {
+            return true;
+        }
+        for(FFMMethodHandleRegistry.ParamInfo parameter : entry.parameters) {
+            String parameterName = parameter.name == null ? "" : parameter.name.toLowerCase(java.util.Locale.ROOT);
+            if(containsCallbackSignal(parameterName) || parameterName.contains("userdata")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsCallbackSignal(String value) {
+        return value.contains("callback") || value.contains("upcall")
+                || value.contains("processevents") || value.contains("waitany")
+                || value.contains("poll");
     }
 
     private boolean isCriticalAllowedType(String javaType) {
