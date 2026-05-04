@@ -105,7 +105,7 @@ public class FFMMethodHandleRegistry {
         public final String handleName;
         public final String returnType;
         public final List<ParamInfo> parameters;
-        /** True when IDL marks the owning class as callback-related. */
+        /** True when IDL marks either the owning class or method parameters as callback-related. */
         public final boolean callbackRelatedByIDL;
 
         public FFMEntry(String symbolName, String javaMethodName, String handleName, String returnType,

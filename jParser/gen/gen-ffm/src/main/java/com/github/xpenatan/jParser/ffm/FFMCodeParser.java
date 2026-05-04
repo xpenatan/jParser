@@ -633,7 +633,9 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         String returnType = methodDeclaration.getType().toString();
         String symbolName = FFMCppGenerator.buildSymbolName(packageName, className, methodName, ffmArgs);
 
-        boolean callbackRelatedByIDL = isIDLCallbackRelatedClass(className);
+        boolean callbackRelatedByIDL = isIDLCallbackRelatedClass(className)
+                || hasCallbackRelatedIDLParameter(methodDeclaration)
+                || hasCallbackRelatedWrapperParameter(classOrEnum, methodDeclaration);
         registry.register(className, symbolName, methodName, handleName, returnType, paramInfos, callbackRelatedByIDL);
         return handleName;
     }
@@ -1389,6 +1391,89 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         }
         // IDL callback classes and classes that define callback implementations should avoid critical downcalls.
         return idlClass.isCallback || idlClass.callbackImpl != null;
+    }
+
+    private boolean hasCallbackRelatedIDLParameter(MethodDeclaration methodDeclaration) {
+        if(methodDeclaration == null || idlReader == null) {
+            return false;
+        }
+        for(Parameter parameter : methodDeclaration.getParameters()) {
+            if(isIDLCallbackRelatedType(parameter.getType().asString())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasCallbackRelatedWrapperParameter(TypeDeclaration classOrEnum, MethodDeclaration nativeMethodDeclaration) {
+        if(classOrEnum == null || nativeMethodDeclaration == null) {
+            return false;
+        }
+        String nativeMethodName = nativeMethodDeclaration.getNameAsString();
+        String nativePrefix = "internal_native_";
+        if(!nativeMethodName.startsWith(nativePrefix)) {
+            return false;
+        }
+
+        String wrapperMethodName = nativeMethodName.substring(nativePrefix.length());
+        List<MethodDeclaration> wrapperCandidates = getMethodsByName(classOrEnum, wrapperMethodName);
+        if(wrapperCandidates.isEmpty()) {
+            return false;
+        }
+
+        int nativeParamCount = nativeMethodDeclaration.getParameters().size();
+        for(MethodDeclaration wrapperMethod : wrapperCandidates) {
+            if(wrapperMethod.getNameAsString().equals(nativeMethodName)) {
+                continue;
+            }
+            int expectedWrapperParamCount = wrapperMethod.isStatic() ? nativeParamCount : nativeParamCount - 1;
+            if(expectedWrapperParamCount < 0 || wrapperMethod.getParameters().size() != expectedWrapperParamCount) {
+                continue;
+            }
+            if(hasCallbackRelatedIDLParameter(wrapperMethod)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<MethodDeclaration> getMethodsByName(TypeDeclaration classOrEnum, String methodName) {
+        if(classOrEnum.isClassOrInterfaceDeclaration()) {
+            return classOrEnum.asClassOrInterfaceDeclaration().getMethodsByName(methodName);
+        }
+        if(classOrEnum.isEnumDeclaration()) {
+            return classOrEnum.asEnumDeclaration().getMethodsByName(methodName);
+        }
+        return new ArrayList<>();
+    }
+
+    private boolean isIDLCallbackRelatedType(String javaType) {
+        if(javaType == null || javaType.isEmpty()) {
+            return false;
+        }
+        String normalizedType = normalizeTypeName(javaType);
+        IDLClass idlClass = idlReader.getClass(normalizedType);
+        if(idlClass == null) {
+            return false;
+        }
+        return idlClass.isCallback || idlClass.callbackImpl != null;
+    }
+
+    private String normalizeTypeName(String typeName) {
+        String normalized = typeName.trim();
+        int genericStart = normalized.indexOf('<');
+        if(genericStart >= 0) {
+            normalized = normalized.substring(0, genericStart);
+        }
+        int arrayStart = normalized.indexOf('[');
+        if(arrayStart >= 0) {
+            normalized = normalized.substring(0, arrayStart);
+        }
+        int packageSeparator = normalized.lastIndexOf('.');
+        if(packageSeparator >= 0) {
+            normalized = normalized.substring(packageSeparator + 1);
+        }
+        return normalized;
     }
 
     private boolean isCriticalAllowedType(String javaType) {
