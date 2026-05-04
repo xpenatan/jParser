@@ -1,6 +1,7 @@
 package com.github.xpenatan.jParser.builder.tool;
 
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
+import com.github.xpenatan.jParser.ffm.FFMClassData;
 import com.github.xpenatan.jParser.idl.IDLFile;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.io.File;
@@ -16,6 +17,9 @@ public class BuildToolOptions {
     public boolean generateJNI = false;
     public boolean generateFFM = false;
     public boolean generateCore = true;
+
+    /** Optional build-time FFM critical policy used by FFMCodeParser generation. */
+    public FFMClassData ffmClassData;
 
     /** Name of the idl file located in [Module Build Path] + src/main/cpp/myidl.idl. The default is libName but can be changed. */
     public String idlName;

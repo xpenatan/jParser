@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":jParser:gen:gen-idl"))
     implementation(project(":jParser:gen:gen-web"))
     implementation(project(":jParser:gen:gen-jni"))
+    implementation(project(":jParser:gen:gen-ffm"))
     implementation(project(":jParser:gen:gen-build"))
     implementation(project(":jParser:gen:gen-build-tool"))
     implementation(project(":jParser:runtime:runtime-core"))

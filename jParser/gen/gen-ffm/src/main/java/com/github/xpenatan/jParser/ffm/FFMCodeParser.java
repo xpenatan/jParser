@@ -233,6 +233,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
     private final FFMNativeCodeGenerator cppGenerator;
     private final FFMMethodHandleRegistry registry = new FFMMethodHandleRegistry();
+    private FFMClassData ffmClassData;
 
     public FFMCodeParser(FFMNativeCodeGenerator cppGenerator, String cppDir) {
         this(cppGenerator, null, "", cppDir);
@@ -241,6 +242,10 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     public FFMCodeParser(FFMNativeCodeGenerator cppGenerator, IDLReader idlReader, String basePackage, String cppDir) {
         super(basePackage, HEADER_CMD, idlReader, cppDir);
         this.cppGenerator = cppGenerator;
+    }
+
+    public void setFFMClassData(FFMClassData ffmClassData) {
+        this.ffmClassData = ffmClassData;
     }
 
     // ==================== IDL Generation Hooks ====================
@@ -746,8 +751,6 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         StringBuilder sb = new StringBuilder();
         sb.append("private static final class FFMHandles {\n");
         sb.append("    private static final java.lang.foreign.SymbolLookup LOOKUP = java.lang.foreign.SymbolLookup.loaderLookup();\n");
-        sb.append("    private static final String CRITICAL_MODE = java.lang.System.getProperty(\"jparser.ffm.criticalMode\", \"auto\").trim().toLowerCase(java.util.Locale.ROOT);\n");
-        sb.append("    private static final boolean CRITICAL_ENABLED = !\"off\".equals(CRITICAL_MODE);\n");
         sb.append("    private static final java.lang.foreign.Linker.Option[] LINKER_OPTIONS_CRITICAL = new java.lang.foreign.Linker.Option[] { java.lang.foreign.Linker.Option.critical(true) };\n");
         sb.append("    private static final java.lang.foreign.Linker.Option[] LINKER_OPTIONS_DEFAULT = new java.lang.foreign.Linker.Option[0];\n");
         sb.append("    private static final java.lang.foreign.Linker LINKER = java.lang.foreign.Linker.nativeLinker();\n");
@@ -757,23 +760,26 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         sb.append("        if(e instanceof Error) throw (Error)e;\n");
         sb.append("        return new RuntimeException(e);\n");
         sb.append("    }\n\n");
-        sb.append("    static java.lang.invoke.MethodHandle downcall(String symbolName, java.lang.foreign.FunctionDescriptor descriptor, boolean criticalEligible) {\n");
+        sb.append("    static java.lang.invoke.MethodHandle downcallDefault(String symbolName, java.lang.foreign.FunctionDescriptor descriptor) {\n");
         sb.append("        java.lang.foreign.MemorySegment symbol = LOOKUP.find(symbolName).orElseThrow();\n");
-        sb.append("        if(criticalEligible && CRITICAL_ENABLED) {\n");
-        sb.append("            try {\n");
-        sb.append("                return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_CRITICAL);\n");
-        sb.append("            } catch(Throwable ignored) {\n");
-        sb.append("            }\n");
-        sb.append("        }\n");
         sb.append("        return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_DEFAULT);\n");
+        sb.append("    }\n\n");
+        sb.append("    static java.lang.invoke.MethodHandle downcallCritical(String symbolName, java.lang.foreign.FunctionDescriptor descriptor) {\n");
+        sb.append("        java.lang.foreign.MemorySegment symbol = LOOKUP.find(symbolName).orElseThrow();\n");
+        sb.append("        try {\n");
+        sb.append("            return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_CRITICAL);\n");
+        sb.append("        } catch(Throwable ignored) {\n");
+        sb.append("            return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_DEFAULT);\n");
+        sb.append("        }\n");
         sb.append("    }\n\n");
 
         for(FFMMethodHandleRegistry.FFMEntry entry : entries) {
             String descriptor = FFMMethodHandleRegistry.buildFunctionDescriptor(entry);
-            boolean criticalEligible = isCriticalEligible(entry);
+            boolean useCritical = resolveGeneratedCriticalMode(className, entry);
+            String downcallMethod = useCritical ? "downcallCritical" : "downcallDefault";
             sb.append("    static final java.lang.invoke.MethodHandle ").append(entry.handleName)
-              .append(" = downcall(\"").append(entry.symbolName).append("\", ")
-              .append(descriptor).append(", ").append(criticalEligible).append(");\n\n");
+              .append(" = ").append(downcallMethod).append("(\"").append(entry.symbolName).append("\", ")
+              .append(descriptor).append(");\n\n");
         }
 
         sb.append("}");
@@ -1381,6 +1387,34 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         return true;
     }
 
+    private boolean resolveGeneratedCriticalMode(String className, FFMMethodHandleRegistry.FFMEntry entry) {
+        boolean criticalEligible = isCriticalEligible(entry);
+        boolean defaultCritical = false;
+        if(ffmClassData != null) {
+            defaultCritical = ffmClassData.defaultCritical;
+            FFMCriticalMethodListener methodListener = ffmClassData.methodListener;
+            if(methodListener != null) {
+                FFMCriticalMethodData methodData = new FFMCriticalMethodData(
+                        className,
+                        entry.symbolName,
+                        entry.javaMethodName,
+                        entry.handleName,
+                        entry.returnType,
+                        entry.parameters,
+                        entry.callbackRelatedByIDL,
+                        criticalEligible);
+                FFMCriticalMode decision = methodListener.onCriticalMode(methodData);
+                if(decision == FFMCriticalMode.ENABLE) {
+                    defaultCritical = true;
+                }
+                else if(decision == FFMCriticalMode.DISABLE) {
+                    defaultCritical = false;
+                }
+            }
+        }
+        return defaultCritical && criticalEligible;
+    }
+
     private boolean isIDLCallbackRelatedClass(String className) {
         if(idlReader == null || className == null || className.isEmpty()) {
             return false;
@@ -1507,5 +1541,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     private String getCallbackStubFieldName(String callbackMethodName) {
         return "upcallStub_" + callbackMethodName;
     }
+
 }
+
 

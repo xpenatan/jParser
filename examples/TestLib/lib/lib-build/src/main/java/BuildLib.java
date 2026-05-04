@@ -8,6 +8,10 @@ import com.github.xpenatan.jParser.builder.targets.WindowsMSVCTarget;
 import com.github.xpenatan.jParser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jParser.builder.tool.BuilderTool;
+import com.github.xpenatan.jParser.ffm.FFMClassData;
+import com.github.xpenatan.jParser.ffm.FFMCriticalMethodData;
+import com.github.xpenatan.jParser.ffm.FFMCriticalMethodListener;
+import com.github.xpenatan.jParser.ffm.FFMCriticalMode;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.util.ArrayList;
 
@@ -37,6 +41,21 @@ public class BuildLib {
         data.modulePrefix = modulePrefix;
 
         BuildToolOptions op = new BuildToolOptions(data, args);
+        FFMClassData ffmClassData = new FFMClassData(false);
+        ffmClassData.methodListener = new FFMCriticalMethodListener() {
+            @Override
+            public FFMCriticalMode onCriticalMode(FFMCriticalMethodData methodData) {
+                if(!methodData.criticalEligibleByType) {
+                    return FFMCriticalMode.DISABLE;
+                }
+                // Example override: keep simple primitive getter-style native methods critical.
+                if(methodData.javaMethodName.startsWith("internal_native_get_")) {
+                    return FFMCriticalMode.ENABLE;
+                }
+                return null;
+            }
+        };
+        op.ffmClassData = ffmClassData;
         op.addAdditionalIDLRefPath(IDLReader.getRuntimeHelperFile());
 
         BuilderTool.build(op, new BuildToolListener() {

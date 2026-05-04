@@ -141,7 +141,7 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
         String escapedMethodName = methodName.replace("_", "_1");
         String escapedClassName = className.replace("_", "_1");
 
-        boolean haveReturn = content.lines().anyMatch(s -> s.trim().startsWith("return "));
+        boolean haveReturn = containsReturnStatement(content);
         if(haveReturn) {
             String wrappedLambda = "" +
                     returnType + " wrappedReturn = [&]() -> " + returnType + " {\n" +
@@ -161,6 +161,21 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
         print(PrintType.MAIN, content);
         print(PrintType.MAIN, "}");
         print(PrintType.MAIN, "");
+    }
+
+    private boolean containsReturnStatement(String content) {
+        Scanner scanner = new Scanner(content);
+        try {
+            while(scanner.hasNextLine()) {
+                if(scanner.nextLine().trim().startsWith("return ")) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        finally {
+            scanner.close();
+        }
     }
 
     /**

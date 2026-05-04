@@ -9,6 +9,7 @@ import com.github.xpenatan.jParser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jParser.builder.tool.BuilderTool;
 import com.github.xpenatan.jParser.core.JParser;
+import com.github.xpenatan.jParser.ffm.FFMClassData;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.util.ArrayList;
 
@@ -37,6 +38,9 @@ public class BuildRuntimeHelper {
         data.cppSourcePath = null;
         data.modulePrefix = modulePrefix;
         BuildToolOptions op = new BuildToolOptions(data, args);
+        // Runtime helper methods are predominantly simple set/get operations.
+        // Keep critical mode enabled by default, while FFMCodeParser still enforces type eligibility safety.
+        op.ffmClassData = new FFMClassData(true);
 
         BuilderTool.build(op, new BuildToolListener() {
             @Override

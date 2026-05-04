@@ -72,6 +72,7 @@ public class BuilderTool {
         if(op.generateFFM) {
             FFMCppGenerator ffmGenerator = new FFMCppGenerator(op.getCPPDestinationPath());
             FFMCodeParser ffmParser = new FFMCodeParser(ffmGenerator, idlReader, op.packageName, op.getSourceDir());
+            ffmParser.setFFMClassData(op.ffmClassData);
             ffmParser.generateClass = true;
             ffmParser.idlRenaming = packageRenaming;
             JParser.generate(ffmParser, op.getModuleBaseJavaDir(), op.getFFMJavaOutputPath());
@@ -94,4 +95,5 @@ public class BuilderTool {
             op.generateWeb = true;
         }
     }
+
 }

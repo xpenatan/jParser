@@ -7,6 +7,7 @@ val moduleName = "gen-build"
 dependencies {
     implementation(project(":jParser:gen:gen-core"))
     implementation(project(":jParser:gen:gen-idl"))
+    implementation(project(":jParser:gen:gen-ffm"))
 }
 
 java {
