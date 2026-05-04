@@ -8,16 +8,17 @@ val emscriptenJS = "$projectDir/../runtime-build/build/c++/libs/emscripten/runti
 val emscriptenWASM = "$projectDir/../runtime-build/build/c++/libs/emscripten/runtime.wasm"
 
 val wasmJar = tasks.register<Jar>("wasmJar") {
-    // Publish web runtime payload as a dedicated classifier artifact.
+    // Publish web runtime payload as a standalone wasm artifact.
     from(emscriptenJS, emscriptenWASM)
-    archiveClassifier.set("wasm")
+    archiveBaseName.set("${moduleName}_wasm")
+    archiveClassifier.set("")
 }
 
 val isPublishingTask = gradle.startParameter.taskNames.any { it.contains("publish", ignoreCase = true) }
 
 tasks.named<Jar>("jar") {
     // For in-repo project dependencies, keep classes and web payload in the same jar.
-    // During publishing, keep main runtime-web artifact classes-only.
+    // During publishing, keep main runtime_web artifact classes-only.
     if(!isPublishingTask) {
         from(emscriptenJS, emscriptenWASM)
     }
@@ -59,6 +60,12 @@ publishing {
             group = LibExt.groupId
             version = LibExt.libVersion
             from(components["java"])
+        }
+
+        create<MavenPublication>("mavenWasm") {
+            artifactId = "${moduleName}_wasm"
+            group = LibExt.groupId
+            version = LibExt.libVersion
             artifact(wasmJar)
         }
     }
