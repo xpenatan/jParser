@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "gen_idl"
+val moduleName = "gen-idl"
 
 dependencies {
     implementation(project(":jParser:runtime:runtime-base"))

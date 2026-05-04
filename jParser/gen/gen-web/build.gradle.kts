@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "gen_web"
+val moduleName = "gen-web"
 
 dependencies {
     api(project(":jParser:gen:gen-idl"))

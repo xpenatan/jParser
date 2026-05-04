@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-val moduleName = "runtime_jni"
+val moduleName = "runtime-jni"
 
 val libDir = "${projectDir}/../runtime-build/build/c++/libs"
 val windowsFile = "$libDir/windows/vc/jni/runtime64.dll"
@@ -33,13 +33,13 @@ if(file(macArmFile).exists()) {
 val nativeJars = platforms.map { (platform, config) ->
     platform to tasks.register<Jar>("nativeJar_${platform}") {
         config()
-        archiveBaseName.set("${moduleName}_${platform}")
+        archiveBaseName.set("${moduleName}-${platform.replace('_', '-')}")
         archiveClassifier.set("")
     }
 }
 
 val nativeDesktopJar = tasks.register<Jar>("nativeJarDesktop") {
-    archiveBaseName.set("${moduleName}_desktop")
+    archiveBaseName.set("${moduleName}-desktop")
     archiveClassifier.set("")
     listOf(
         "windows_64" to windowsFile,
@@ -61,7 +61,7 @@ val nativeFiles = listOf(windowsFile, linuxFile, macFile, macArmFile).map(::file
 
 tasks.named<Jar>("jar") {
     // For in-repo project dependencies, keep classes and native payload in the same jar.
-    // During publishing, keep main runtime_jni artifact classes-only.
+    // During publishing, keep main runtime-jni artifact classes-only.
     if(!isPublishingTask) {
         from(nativeFiles)
     }
@@ -104,7 +104,7 @@ publishing {
         }
 
         create<MavenPublication>("mavenDesktopNative") {
-            artifactId = "${moduleName}_desktop"
+            artifactId = "${moduleName}-desktop"
             group = LibExt.groupId
             version = LibExt.libVersion
             artifact(nativeDesktopJar)
@@ -112,7 +112,7 @@ publishing {
 
         nativeJars.forEach { (platform, nativeJar) ->
             create<MavenPublication>("mavenNative_${platform}") {
-                artifactId = "${moduleName}_${platform}"
+                artifactId = "${moduleName}-${platform.replace('_', '-')}"
                 group = LibExt.groupId
                 version = LibExt.libVersion
                 artifact(nativeJar)

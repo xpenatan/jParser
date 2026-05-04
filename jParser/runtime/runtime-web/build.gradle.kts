@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "runtime_web"
+val moduleName = "runtime-web"
 
 val emscriptenJS = "$projectDir/../runtime-build/build/c++/libs/emscripten/runtime.js"
 val emscriptenWASM = "$projectDir/../runtime-build/build/c++/libs/emscripten/runtime.wasm"
@@ -10,7 +10,7 @@ val emscriptenWASM = "$projectDir/../runtime-build/build/c++/libs/emscripten/run
 val wasmJar = tasks.register<Jar>("wasmJar") {
     // Publish web runtime payload as a standalone wasm artifact.
     from(emscriptenJS, emscriptenWASM)
-    archiveBaseName.set("${moduleName}_wasm")
+    archiveBaseName.set("${moduleName}-wasm")
     archiveClassifier.set("")
 }
 
@@ -18,7 +18,7 @@ val isPublishingTask = gradle.startParameter.taskNames.any { it.contains("publis
 
 tasks.named<Jar>("jar") {
     // For in-repo project dependencies, keep classes and web payload in the same jar.
-    // During publishing, keep main runtime_web artifact classes-only.
+    // During publishing, keep main runtime-web artifact classes-only.
     if(!isPublishingTask) {
         from(emscriptenJS, emscriptenWASM)
     }
@@ -63,7 +63,7 @@ publishing {
         }
 
         create<MavenPublication>("mavenWasm") {
-            artifactId = "${moduleName}_wasm"
+            artifactId = "${moduleName}-wasm"
             group = LibExt.groupId
             version = LibExt.libVersion
             artifact(wasmJar)

@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "runtime_base"
+val moduleName = "runtime-base"
 
 dependencies {
     implementation(project(":jParser:loader:loader-core"))

@@ -2,7 +2,7 @@ plugins {
     id("com.android.library")
 }
 
-val moduleName = "runtime_android"
+val moduleName = "runtime-android"
 
 android {
     namespace = "com.github.xpenatan.jparser.runtime"

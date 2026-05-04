@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "loader_core"
+val moduleName = "loader-core"
 
 dependencies {
 }

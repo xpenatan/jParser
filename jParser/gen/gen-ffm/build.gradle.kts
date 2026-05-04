@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "gen_ffm"
+val moduleName = "gen-ffm"
 
 dependencies {
     implementation(project(":jParser:gen:gen-idl"))

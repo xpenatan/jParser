@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "api_web"
+val moduleName = "api-web"
 
 val emscriptenJS = "$projectDir/../jolt-build/build/c++/libs/emscripten/idl.js"
 val emscriptenWASM = "$projectDir/../jolt-build/build/c++/libs/emscripten/idl.wasm"
