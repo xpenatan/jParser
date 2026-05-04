@@ -2,7 +2,7 @@ plugins {
     id("java-library")
 }
 
-val moduleName = "loader-web"
+val moduleName = "loader_web"
 
 dependencies {
     implementation(project(":jParser:loader:loader-core"))

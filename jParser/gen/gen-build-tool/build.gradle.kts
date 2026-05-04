@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-val moduleName = "gen-build-tool"
+val moduleName = "gen_build_tool"
 
 dependencies {
     implementation(project(":jParser:gen:gen-core"))

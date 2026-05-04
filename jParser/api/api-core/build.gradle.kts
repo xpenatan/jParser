@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-val moduleName = "api-core"
+val moduleName = "api_core"
 
 dependencies {
 }

@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-val moduleName = "runtime-core"
+val moduleName = "runtime_core"
 
 dependencies {
     implementation(project(":jParser:api:api-core"))
