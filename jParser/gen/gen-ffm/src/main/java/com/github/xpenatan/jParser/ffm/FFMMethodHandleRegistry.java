@@ -19,9 +19,10 @@ public class FFMMethodHandleRegistry {
      * Register a native method for a given class.
      */
     public void register(String className, String symbolName, String javaMethodName,
-                         String handleName, String returnType, List<ParamInfo> parameters) {
+                         String handleName, String returnType, List<ParamInfo> parameters,
+                         boolean callbackRelatedByIDL) {
         List<FFMEntry> entries = classEntries.computeIfAbsent(className, k -> new ArrayList<>());
-        entries.add(new FFMEntry(symbolName, javaMethodName, handleName, returnType, parameters));
+        entries.add(new FFMEntry(symbolName, javaMethodName, handleName, returnType, parameters, callbackRelatedByIDL));
     }
 
     /**
@@ -104,13 +105,17 @@ public class FFMMethodHandleRegistry {
         public final String handleName;
         public final String returnType;
         public final List<ParamInfo> parameters;
+        /** True when IDL marks the owning class as callback-related. */
+        public final boolean callbackRelatedByIDL;
 
-        public FFMEntry(String symbolName, String javaMethodName, String handleName, String returnType, List<ParamInfo> parameters) {
+        public FFMEntry(String symbolName, String javaMethodName, String handleName, String returnType,
+                        List<ParamInfo> parameters, boolean callbackRelatedByIDL) {
             this.symbolName = symbolName;
             this.javaMethodName = javaMethodName;
             this.handleName = handleName;
             this.returnType = returnType;
             this.parameters = parameters;
+            this.callbackRelatedByIDL = callbackRelatedByIDL;
         }
     }
 

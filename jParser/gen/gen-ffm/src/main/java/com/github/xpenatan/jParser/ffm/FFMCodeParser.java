@@ -633,7 +633,8 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         String returnType = methodDeclaration.getType().toString();
         String symbolName = FFMCppGenerator.buildSymbolName(packageName, className, methodName, ffmArgs);
 
-        registry.register(className, symbolName, methodName, handleName, returnType, paramInfos);
+        boolean callbackRelatedByIDL = isIDLCallbackRelatedClass(className);
+        registry.register(className, symbolName, methodName, handleName, returnType, paramInfos, callbackRelatedByIDL);
         return handleName;
     }
 
@@ -1364,7 +1365,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     }
 
     private boolean isCriticalEligible(FFMMethodHandleRegistry.FFMEntry entry) {
-        if(isCallbackRelatedEntry(entry)) {
+        if(entry.callbackRelatedByIDL) {
             return false;
         }
         if(!isCriticalAllowedType(entry.returnType)) {
@@ -1378,26 +1379,16 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         return true;
     }
 
-    private boolean isCallbackRelatedEntry(FFMMethodHandleRegistry.FFMEntry entry) {
-        String symbolName = entry.symbolName == null ? "" : entry.symbolName.toLowerCase(java.util.Locale.ROOT);
-        String handleName = entry.handleName == null ? "" : entry.handleName.toLowerCase(java.util.Locale.ROOT);
-        String methodName = entry.javaMethodName == null ? "" : entry.javaMethodName.toLowerCase(java.util.Locale.ROOT);
-        if(containsCallbackSignal(symbolName) || containsCallbackSignal(handleName) || containsCallbackSignal(methodName)) {
-            return true;
+    private boolean isIDLCallbackRelatedClass(String className) {
+        if(idlReader == null || className == null || className.isEmpty()) {
+            return false;
         }
-        for(FFMMethodHandleRegistry.ParamInfo parameter : entry.parameters) {
-            String parameterName = parameter.name == null ? "" : parameter.name.toLowerCase(java.util.Locale.ROOT);
-            if(containsCallbackSignal(parameterName) || parameterName.contains("userdata")) {
-                return true;
-            }
+        IDLClass idlClass = idlReader.getClass(className);
+        if(idlClass == null) {
+            return false;
         }
-        return false;
-    }
-
-    private boolean containsCallbackSignal(String value) {
-        return value.contains("callback") || value.contains("upcall")
-                || value.contains("processevents") || value.contains("waitany")
-                || value.contains("poll");
+        // IDL callback classes and classes that define callback implementations should avoid critical downcalls.
+        return idlClass.isCallback || idlClass.callbackImpl != null;
     }
 
     private boolean isCriticalAllowedType(String javaType) {
@@ -1432,5 +1423,4 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         return "upcallStub_" + callbackMethodName;
     }
 }
-
 
