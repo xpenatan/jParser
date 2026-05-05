@@ -18,16 +18,16 @@ dependencies {
 // Build per-platform native jars as standalone artifacts (no Maven classifier usage).
 val platforms: MutableMap<String, Jar.() -> Unit> = mutableMapOf()
 if(file(windowsFile).exists()) {
-    platforms["windows_64"] = { from(windowsFile) }
+    platforms["windows-64"] = { from(windowsFile) }
 }
 if(file(linuxFile).exists()) {
-    platforms["linux_x64"] = { from(linuxFile) }
+    platforms["linux-x64"] = { from(linuxFile) }
 }
 if(file(macFile).exists()) {
-    platforms["mac_x64"] = { from(macFile) }
+    platforms["mac-x64"] = { from(macFile) }
 }
 if(file(macArmFile).exists()) {
-    platforms["mac_arm64"] = { from(macArmFile) }
+    platforms["mac-arm64"] = { from(macArmFile) }
 }
 
 val nativeJars = platforms.map { (platform, config) ->
@@ -112,7 +112,7 @@ publishing {
 
         nativeJars.forEach { (platform, nativeJar) ->
             create<MavenPublication>("mavenNative_${platform}") {
-                artifactId = "${moduleName}-${platform.replace('_', '-')}"
+                artifactId = "${moduleName}-${platform}"
                 group = LibExt.groupId
                 version = LibExt.libVersion
                 artifact(nativeJar)
