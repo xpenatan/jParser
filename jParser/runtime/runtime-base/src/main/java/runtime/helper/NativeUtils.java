@@ -24,15 +24,6 @@ public class NativeUtils {
      * FFM path selects the encoder once at class init to avoid per-call strategy branching.
      */
     /*[-FFM;-ADD]
-        private static final boolean FFM_STRING_CACHE = java.lang.Boolean.getBoolean("jparser.ffm.stringCache");
-    */
-    /*[-FFM;-ADD]
-        private static final String FFM_STRING_STRATEGY = java.lang.System.getProperty("jparser.ffm.stringStrategy", "").trim().toLowerCase(java.util.Locale.ROOT);
-    */
-    /*[-FFM;-ADD]
-        private static final int FFM_STRING_RING_RESET_EVERY = java.lang.Integer.getInteger("jparser.ffm.stringRingResetEvery", 512);
-    */
-    /*[-FFM;-ADD]
         private static final int FFM_STRING_CACHE_SIZE = java.lang.Integer.getInteger("jparser.ffm.stringCacheSize", 256);
     */
     /*[-FFM;-ADD]
@@ -42,48 +33,6 @@ public class NativeUtils {
                 return size() > FFM_STRING_CACHE_SIZE;
             }
         });
-    */
-    /*[-FFM;-ADD]
-        private static final ThreadLocal<CStringRingState> FFM_STRING_RING = ThreadLocal.withInitial(() -> new CStringRingState(FFM_STRING_RING_RESET_EVERY));
-    */
-    /*[-FFM;-ADD]
-        private interface CStringEncoder {
-            java.lang.foreign.MemorySegment encode(String value);
-        }
-    */
-    /*[-FFM;-ADD]
-        private static final CStringEncoder FFM_CSTRING_ENCODER = initCStringEncoder();
-    */
-    /*[-FFM;-ADD]
-        private static CStringEncoder initCStringEncoder() {
-            if(FFM_STRING_STRATEGY.isEmpty()) {
-                if(FFM_STRING_CACHE) {
-                    return NativeUtils::toCStringCache;
-                }
-                // Default to ring mode for max throughput without runtime flag tuning.
-                return NativeUtils::toCStringRing;
-            }
-            if("ring".equals(FFM_STRING_STRATEGY)) {
-                return NativeUtils::toCStringRing;
-            }
-            if("cache".equals(FFM_STRING_STRATEGY)) {
-                return NativeUtils::toCStringCache;
-            }
-            if("global".equals(FFM_STRING_STRATEGY)) {
-                return NativeUtils::toCStringGlobal;
-            }
-            return NativeUtils::toCStringGlobal;
-        }
-    */
-    /*[-FFM;-ADD]
-        private static java.lang.foreign.MemorySegment toCStringGlobal(String value) {
-            return java.lang.foreign.Arena.global().allocateFrom(value);
-        }
-    */
-    /*[-FFM;-ADD]
-        private static java.lang.foreign.MemorySegment toCStringRing(String value) {
-            return FFM_STRING_RING.get().allocate(value);
-        }
     */
     /*[-FFM;-ADD]
         private static java.lang.foreign.MemorySegment toCStringCache(String value) {
@@ -96,35 +45,12 @@ public class NativeUtils {
             return segment;
         }
     */
-    /*[-FFM;-ADD]
-        private static final class CStringRingState {
-            private final int resetEvery;
-            private java.lang.foreign.Arena arena;
-            private int usageCount;
-
-            private CStringRingState(int resetEvery) {
-                this.resetEvery = java.lang.Math.max(1, resetEvery);
-            }
-
-            private java.lang.foreign.MemorySegment allocate(String value) {
-                if(arena == null || usageCount >= resetEvery) {
-                    if(arena != null) {
-                        arena.close();
-                    }
-                    arena = java.lang.foreign.Arena.ofConfined();
-                    usageCount = 0;
-                }
-                usageCount++;
-                return arena.allocateFrom(value);
-            }
-        }
-    */
     /*[-FFM;-REPLACE]
         public static java.lang.foreign.MemorySegment toCString(String value) {
             if(value == null) {
                 return java.lang.foreign.MemorySegment.NULL;
             }
-            return FFM_CSTRING_ENCODER.encode(value);
+            return toCStringCache(value);
         }
     */
     public static Object toCString(String value) {
@@ -135,17 +61,6 @@ public class NativeUtils {
      * Returns the base native address for a direct ByteBuffer.
      * FFM implementation normalizes the buffer view to start at zero and restores state.
      */
-    /*[-FFM;-ADD]
-        private static final int DIRECT_BUFFER_CACHE_SIZE = java.lang.Integer.getInteger("jparser.ffm.bufferCacheSize", 4);
-    */
-    /*[-FFM;-ADD]
-        private static final ThreadLocal<java.util.LinkedHashMap<ByteBuffer, Long>> DIRECT_BUFFER_CACHE = ThreadLocal.withInitial(() -> new java.util.LinkedHashMap<ByteBuffer, Long>(DIRECT_BUFFER_CACHE_SIZE, 0.75f, true) {
-            @Override
-            protected boolean removeEldestEntry(java.util.Map.Entry<ByteBuffer, Long> eldest) {
-                return size() > DIRECT_BUFFER_CACHE_SIZE;
-            }
-        });
-    */
     /*[-FFM;-REPLACE]
         public static long address(ByteBuffer byteBuffer) {
             if(byteBuffer == null) {
@@ -155,27 +70,17 @@ public class NativeUtils {
                 throw new IllegalArgumentException("Direct ByteBuffer required");
             }
 
-            java.util.LinkedHashMap<ByteBuffer, Long> cache = DIRECT_BUFFER_CACHE.get();
-            Long cachedAddress = cache.get(byteBuffer);
-            if(cachedAddress != null) {
-                return cachedAddress.longValue();
-            }
-
             int oldPos = byteBuffer.position();
             int oldLimit = byteBuffer.limit();
-            long address;
             try {
                 byteBuffer.position(0);
                 byteBuffer.limit(byteBuffer.capacity());
-                address = java.lang.foreign.MemorySegment.ofBuffer(byteBuffer).address();
+                return java.lang.foreign.MemorySegment.ofBuffer(byteBuffer).address();
             }
             finally {
                 byteBuffer.position(oldPos);
                 byteBuffer.limit(oldLimit);
             }
-
-            cache.put(byteBuffer, address);
-            return address;
         }
     */
     public static long address(ByteBuffer byteBuffer) {
