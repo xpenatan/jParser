@@ -18,16 +18,16 @@ dependencies {
 // Build per-platform native jars as standalone artifacts (no Maven classifier usage).
 val platforms: MutableMap<String, Jar.() -> Unit> = mutableMapOf()
 if(file(windowsFile).exists()) {
-    platforms["windows-64"] = { from(windowsFile) }
+    platforms["windows_64"] = { from(windowsFile) }
 }
 if(file(linuxFile).exists()) {
-    platforms["linux-x64"] = { from(linuxFile) }
+    platforms["linux_x64"] = { from(linuxFile) }
 }
 if(file(macFile).exists()) {
-    platforms["mac-x64"] = { from(macFile) }
+    platforms["mac_x64"] = { from(macFile) }
 }
 if(file(macArmFile).exists()) {
-    platforms["mac-arm64"] = { from(macArmFile) }
+    platforms["mac_arm64"] = { from(macArmFile) }
 }
 
 val nativeJars = platforms.map { (platform, config) ->
@@ -55,13 +55,20 @@ val nativeDesktopJar = tasks.register<Jar>("nativeJarDesktop") {
     }
 }
 
-val isPublishingTask = gradle.startParameter.taskNames.any { it.contains("publish", ignoreCase = true) }
 val nativeFiles = listOf(windowsFile, linuxFile, macFile, macArmFile).map(::file).filter { it.exists() }
+
+val taskNames = gradle.startParameter.taskNames
+fun isTaskRequested(taskName: String): Boolean {
+    return taskNames.any { it == taskName || it.endsWith(":$taskName") }
+}
+val isPrepareDeployTask = isTaskRequested("prepareReleaseDeploy") || isTaskRequested("prepareSnapshotDeploy")
+val isPublishTask = taskNames.any { it.contains("publish", ignoreCase = true) }
+val includeNativesInMainJar = !(isPrepareDeployTask || isPublishTask)
 
 tasks.named<Jar>("jar") {
     // For in-repo project dependencies, keep classes and native payload in the same jar.
     // During publishing, keep main runtime-ffm artifact classes-only.
-    if(!isPublishingTask) {
+    if(includeNativesInMainJar) {
         from(nativeFiles)
     }
 }
@@ -111,7 +118,7 @@ publishing {
 
         nativeJars.forEach { (platform, nativeJar) ->
             create<MavenPublication>("mavenNative_${platform}") {
-                artifactId = "${moduleName}-${platform.replace('_', '-')}"
+                artifactId = "${moduleName}_${platform}"
                 group = LibExt.groupId
                 version = LibExt.libVersion
                 artifact(nativeJar)

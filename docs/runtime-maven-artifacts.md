@@ -28,8 +28,8 @@ Desktop (`runtime-jni`, `runtime-ffm`) and web (`runtime-web`) use this gate:
 val isPublishingTask = gradle.startParameter.taskNames.any { it.contains("publish", ignoreCase = true) }
 ```
 
-When `isPublishingTask` is `false`, main jar includes native/web files.
-When `isPublishingTask` is `true`, main jar is classes-only and payload is published in classifier artifacts.
+When `includeNativesInMainJar` is `false`, main jar includes native/web files.
+When `includeNativesInMainJar` is `true`, main jar is classes-only and payload is published in classifier artifacts.
 
 Android (`runtime-android`) stages JNI libs and publishes a single AAR that contains all supported ABI `.so` files.
 

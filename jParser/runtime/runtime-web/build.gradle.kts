@@ -14,12 +14,19 @@ val wasmJar = tasks.register<Jar>("wasmJar") {
     archiveClassifier.set("")
 }
 
-val isPublishingTask = gradle.startParameter.taskNames.any { it.contains("publish", ignoreCase = true) }
+
+val taskNames = gradle.startParameter.taskNames
+fun isTaskRequested(taskName: String): Boolean {
+    return taskNames.any { it == taskName || it.endsWith(":$taskName") }
+}
+val isPrepareDeployTask = isTaskRequested("prepareReleaseDeploy") || isTaskRequested("prepareSnapshotDeploy")
+val isPublishTask = taskNames.any { it.contains("publish", ignoreCase = true) }
+val includeNativesInMainJar = !(isPrepareDeployTask || isPublishTask)
 
 tasks.named<Jar>("jar") {
     // For in-repo project dependencies, keep classes and web payload in the same jar.
     // During publishing, keep main runtime-web artifact classes-only.
-    if(!isPublishingTask) {
+    if(includeNativesInMainJar) {
         from(emscriptenJS, emscriptenWASM)
     }
 }
