@@ -18,7 +18,7 @@ dependencies {
 // Build per-platform native jars as standalone artifacts (no Maven classifier usage).
 val platforms: MutableMap<String, Jar.() -> Unit> = mutableMapOf()
 if(file(windowsFile).exists()) {
-    platforms["windows_64"] = { from(windowsFile) }
+    platforms["windows_x64"] = { from(windowsFile) }
 }
 if(file(linuxFile).exists()) {
     platforms["linux_x64"] = { from(linuxFile) }
@@ -41,7 +41,7 @@ val nativeDesktopJar = tasks.register<Jar>("nativeJarDesktop") {
     archiveBaseName.set("${moduleName}-desktop")
     archiveClassifier.set("")
     listOf(
-        "windows_64" to windowsFile,
+        "windows_x64" to windowsFile,
         "linux_x64" to linuxFile,
         "mac_x64" to macFile,
         "mac_arm64" to macArmFile,

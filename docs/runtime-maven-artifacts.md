@@ -24,10 +24,6 @@ The runtime modules support two different use cases:
 
 Desktop (`runtime-jni`, `runtime-ffm`) and web (`runtime-web`) use this gate:
 
-```kotlin
-val isPublishingTask = gradle.startParameter.taskNames.any { it.contains("publish", ignoreCase = true) }
-```
-
 When `includeNativesInMainJar` is `false`, main jar includes native/web files.
 When `includeNativesInMainJar` is `true`, main jar is classes-only and payload is published in classifier artifacts.
 
@@ -37,11 +33,11 @@ Android (`runtime-android`) stages JNI libs and publishes a single AAR that cont
 
 - `runtime-jni`
   - bundled: `desktop`
-  - per-platform: `windows_64`, `linux_x64`, `mac_x64`, `mac_arm64`
+  - per-platform: `windows_x64`, `linux_x64`, `mac_x64`, `mac_arm64`
 
 - `runtime-ffm`
   - bundled: `desktop`
-  - per-platform: `windows_64`, `linux_x64`, `mac_x64`, `mac_arm64`
+  - per-platform: `windows_x64`, `linux_x64`, `mac_x64`, `mac_arm64`
 
 - `runtime-android` (artifactId `runtime-android`)
   - single AAR containing: `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`
@@ -62,7 +58,7 @@ val nativeJars = platforms.map { (classifier, config) ->
 val nativeDesktopJar = tasks.register<Jar>("nativeJarDesktop") {
     archiveClassifier.set("desktop")
     listOf(
-        "windows_64" to windowsFile,
+        "windows_x64" to windowsFile,
         "linux_x64" to linuxFile,
         "mac_x64" to macFile,
         "mac_arm64" to macArmFile,
