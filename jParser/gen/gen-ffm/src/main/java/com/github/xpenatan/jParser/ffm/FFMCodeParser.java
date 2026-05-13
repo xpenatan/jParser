@@ -171,7 +171,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
     protected static final String METHOD_GET_OBJ_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
-            "static [COPY_TYPE] [COPY_PARAM];\n" +
+            "thread_local static [COPY_TYPE] [COPY_PARAM];\n" +
             "[COPY_PARAM] = nativeObject->[METHOD];\n" +
             "return (int64_t)&[COPY_PARAM];";
 
@@ -182,7 +182,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             "return (int64_t)&[COPY_PARAM];";
 
     protected static final String METHOD_GET_OBJ_VALUE_STATIC_TEMPLATE =
-            "\nstatic [COPY_TYPE] [COPY_PARAM];\n" +
+            "\nthread_local static [COPY_TYPE] [COPY_PARAM];\n" +
             "[COPY_PARAM] = [TYPE]::[METHOD];\n" +
             "return (int64_t)&[COPY_PARAM];";
 
