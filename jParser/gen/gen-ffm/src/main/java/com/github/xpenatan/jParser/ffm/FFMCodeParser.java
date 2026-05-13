@@ -637,11 +637,12 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         String returnType = methodDeclaration.getType().toString();
         String symbolName = FFMCppGenerator.buildSymbolName(packageName, className, methodName, ffmArgs);
+        boolean attributeAccessorByGenerator = isGeneratedAttributeAccessor(methodName, symbolName);
 
         boolean callbackRelatedByIDL = isIDLCallbackRelatedClass(className)
                 || hasCallbackRelatedIDLParameter(methodDeclaration)
                 || hasCallbackRelatedWrapperParameter(classOrEnum, methodDeclaration);
-        registry.register(className, symbolName, methodName, handleName, returnType, paramInfos, callbackRelatedByIDL);
+        registry.register(className, symbolName, methodName, handleName, returnType, paramInfos, callbackRelatedByIDL, attributeAccessorByGenerator);
         return handleName;
     }
 
@@ -766,11 +767,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         sb.append("    }\n\n");
         sb.append("    static java.lang.invoke.MethodHandle downcallCritical(String symbolName, java.lang.foreign.FunctionDescriptor descriptor) {\n");
         sb.append("        java.lang.foreign.MemorySegment symbol = LOOKUP.find(symbolName).orElseThrow();\n");
-        sb.append("        try {\n");
-        sb.append("            return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_CRITICAL);\n");
-        sb.append("        } catch(Throwable ignored) {\n");
-        sb.append("            return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_DEFAULT);\n");
-        sb.append("        }\n");
+        sb.append("        return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_CRITICAL);\n");
         sb.append("    }\n\n");
 
         for(FFMMethodHandleRegistry.FFMEntry entry : entries) {
@@ -1390,8 +1387,14 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     private boolean resolveGeneratedCriticalMode(String className, FFMMethodHandleRegistry.FFMEntry entry) {
         boolean criticalEligible = isCriticalEligible(entry);
         boolean defaultCritical = false;
+
+        // Generator policy: attribute get/set bridges are hot and safe candidates for critical mode.
+        if(criticalEligible && entry.attributeAccessorByGenerator) {
+            defaultCritical = true;
+        }
+
         if(ffmClassData != null) {
-            defaultCritical = ffmClassData.defaultCritical;
+            defaultCritical = defaultCritical || ffmClassData.defaultCritical;
             FFMCriticalMethodListener methodListener = ffmClassData.methodListener;
             if(methodListener != null) {
                 FFMCriticalMethodData methodData = new FFMCriticalMethodData(
@@ -1402,6 +1405,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                         entry.returnType,
                         entry.parameters,
                         entry.callbackRelatedByIDL,
+                        entry.attributeAccessorByGenerator,
                         criticalEligible);
                 FFMCriticalMode decision = methodListener.onCriticalMode(methodData);
                 if(decision == FFMCriticalMode.ENABLE) {
@@ -1413,6 +1417,15 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             }
         }
         return defaultCritical && criticalEligible;
+    }
+
+    private boolean isGeneratedAttributeAccessor(String methodName, String symbolName) {
+        if(methodName.startsWith("internal_native_get_") || methodName.startsWith("internal_native_set_")) {
+            return true;
+        }
+        // Symbol names escape "_" as "_1". Attribute accessors therefore contain
+        // ..._internal_1native_1get_1... / ..._internal_1native_1set_1...
+        return symbolName.contains("_internal_1native_1get_1") || symbolName.contains("_internal_1native_1set_1");
     }
 
     private boolean isIDLCallbackRelatedClass(String className) {

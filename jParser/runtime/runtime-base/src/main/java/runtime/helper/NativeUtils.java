@@ -70,6 +70,11 @@ public class NativeUtils {
                 throw new IllegalArgumentException("Direct ByteBuffer required");
             }
 
+            // Fast path for callers that already pass a normalized full-capacity view.
+            if(byteBuffer.position() == 0 && byteBuffer.limit() == byteBuffer.capacity()) {
+                return java.lang.foreign.MemorySegment.ofBuffer(byteBuffer).address();
+            }
+
             int oldPos = byteBuffer.position();
             int oldLimit = byteBuffer.limit();
             try {

@@ -8,7 +8,7 @@ Must do in this order:
 
 1. Read `CURRENT_CHAT_CONTEXT` first.
 2. Validate the request against real source/APIs/types (no guessing).
-3. Record plan + target files in `CURRENT_CHAT_CONTEXT`.
+3. Record plan + target files in `CURRENT_CHAT_CONTEXT` and Explain what your going to do, answer questions or recommendation.
 4. Get user approval before execution.
 5. Execute edits/commands.
 6. Update `CURRENT_CHAT_CONTEXT` to current state only.

@@ -13,6 +13,7 @@ public class FFMCriticalMethodData {
     public final String returnType;
     public final List<FFMMethodHandleRegistry.ParamInfo> parameters;
     public final boolean callbackRelatedByIDL;
+    public final boolean attributeAccessorByGenerator;
     public final boolean criticalEligibleByType;
 
     public FFMCriticalMethodData(String className,
@@ -22,6 +23,7 @@ public class FFMCriticalMethodData {
                                  String returnType,
                                  List<FFMMethodHandleRegistry.ParamInfo> parameters,
                                  boolean callbackRelatedByIDL,
+                                 boolean attributeAccessorByGenerator,
                                  boolean criticalEligibleByType) {
         this.className = className;
         this.symbolName = symbolName;
@@ -30,6 +32,7 @@ public class FFMCriticalMethodData {
         this.returnType = returnType;
         this.parameters = parameters;
         this.callbackRelatedByIDL = callbackRelatedByIDL;
+        this.attributeAccessorByGenerator = attributeAccessorByGenerator;
         this.criticalEligibleByType = criticalEligibleByType;
     }
 }

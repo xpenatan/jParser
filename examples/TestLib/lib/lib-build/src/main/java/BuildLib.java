@@ -45,12 +45,8 @@ public class BuildLib {
         ffmClassData.methodListener = new FFMCriticalMethodListener() {
             @Override
             public FFMCriticalMode onCriticalMode(FFMCriticalMethodData methodData) {
-                if(!methodData.criticalEligibleByType) {
+                if(!methodData.criticalEligibleByType || methodData.callbackRelatedByIDL) {
                     return FFMCriticalMode.DISABLE;
-                }
-                // Example override: keep simple primitive getter-style native methods critical.
-                if(methodData.javaMethodName.startsWith("internal_native_get_")) {
-                    return FFMCriticalMode.ENABLE;
                 }
                 return null;
             }

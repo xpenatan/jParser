@@ -20,9 +20,9 @@ public class FFMMethodHandleRegistry {
      */
     public void register(String className, String symbolName, String javaMethodName,
                          String handleName, String returnType, List<ParamInfo> parameters,
-                         boolean callbackRelatedByIDL) {
+                         boolean callbackRelatedByIDL, boolean attributeAccessorByGenerator) {
         List<FFMEntry> entries = classEntries.computeIfAbsent(className, k -> new ArrayList<>());
-        entries.add(new FFMEntry(symbolName, javaMethodName, handleName, returnType, parameters, callbackRelatedByIDL));
+        entries.add(new FFMEntry(symbolName, javaMethodName, handleName, returnType, parameters, callbackRelatedByIDL, attributeAccessorByGenerator));
     }
 
     /**
@@ -107,15 +107,18 @@ public class FFMMethodHandleRegistry {
         public final List<ParamInfo> parameters;
         /** True when IDL marks either the owning class or method parameters as callback-related. */
         public final boolean callbackRelatedByIDL;
+        /** True when the generator recognizes this native bridge as an IDL attribute getter/setter. */
+        public final boolean attributeAccessorByGenerator;
 
         public FFMEntry(String symbolName, String javaMethodName, String handleName, String returnType,
-                        List<ParamInfo> parameters, boolean callbackRelatedByIDL) {
+                        List<ParamInfo> parameters, boolean callbackRelatedByIDL, boolean attributeAccessorByGenerator) {
             this.symbolName = symbolName;
             this.javaMethodName = javaMethodName;
             this.handleName = handleName;
             this.returnType = returnType;
             this.parameters = parameters;
             this.callbackRelatedByIDL = callbackRelatedByIDL;
+            this.attributeAccessorByGenerator = attributeAccessorByGenerator;
         }
     }
 

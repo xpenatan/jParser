@@ -138,8 +138,11 @@ public class IDLCallbackParser {
             else {
                 ReturnStmt returnStmt = new ReturnStmt();
                 if(isEnumReturn) {
-                    // Protected callback returns enum; convert to int value for native bridge and tolerate null callback returns.
-                    String enumReturnExpr = "(" + caller + " != null ? " + caller + ".getValue() : 0)";
+                    // Call callback once, then safely convert enum return to primitive for native bridge.
+                    String enumResultType = method.getJavaReturnType();
+                    String enumResultVar = "__enumReturn";
+                    blockStmt.addStatement(StaticJavaParser.parseStatement(enumResultType + " " + enumResultVar + " = " + caller + ";"));
+                    String enumReturnExpr = "(" + enumResultVar + " != null ? " + enumResultVar + ".getValue() : 0)";
                     returnStmt.setExpression(StaticJavaParser.parseExpression(enumReturnExpr));
                 }
                 else {

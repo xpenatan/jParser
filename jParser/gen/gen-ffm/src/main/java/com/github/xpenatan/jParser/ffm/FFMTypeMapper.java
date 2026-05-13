@@ -40,7 +40,7 @@ public class FFMTypeMapper {
         javaToCType.put("int", "int32_t");
         javaToCType.put("float", "float");
         javaToCType.put("double", "double");
-        javaToCType.put("boolean", "int32_t");
+        javaToCType.put("boolean", "bool");
         javaToCType.put("short", "int16_t");
         javaToCType.put("byte", "int8_t");
         javaToCType.put("char", "uint16_t");
@@ -54,7 +54,7 @@ public class FFMTypeMapper {
         javaToCType.put("double[]", "double*");
         javaToCType.put("byte[]", "int8_t*");
         javaToCType.put("short[]", "int16_t*");
-        javaToCType.put("boolean[]", "int32_t*");
+        javaToCType.put("boolean[]", "bool*");
         javaToCType.put("char[]", "uint16_t*");
 
         // Java primitive → cast needed in invokeExact return
