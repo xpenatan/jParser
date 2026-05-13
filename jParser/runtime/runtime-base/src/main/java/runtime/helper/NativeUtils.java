@@ -227,38 +227,21 @@ public class NativeUtils {
 
     /*[-FFM;-ADD]
         private static final class FFMHandles {
-            private static final java.lang.foreign.Linker.Option[] LINKER_OPTIONS_CRITICAL = new java.lang.foreign.Linker.Option[] { java.lang.foreign.Linker.Option.critical(true) };
-            private static final java.lang.foreign.Linker.Option[] LINKER_OPTIONS_DEFAULT = new java.lang.foreign.Linker.Option[0];
-            private static final java.lang.foreign.SymbolLookup LOOKUP = java.lang.foreign.SymbolLookup.loaderLookup();
-            private static final java.lang.foreign.Linker LINKER = java.lang.foreign.Linker.nativeLinker();
+            static final java.lang.invoke.MethodHandle internal_native_copyToByteBuffer = com.github.xpenatan.jparser.runtime.helper.FFMDowncallHelper.downcallCritical(
+                    "jparser_com_github_xpenatan_jparser_idl_helper_IDLUtils_internal_1native_1copyToByteBuffer__JJII",
+                    java.lang.foreign.FunctionDescriptor.ofVoid(
+                            java.lang.foreign.ValueLayout.JAVA_LONG,
+                            java.lang.foreign.ValueLayout.JAVA_LONG,
+                            java.lang.foreign.ValueLayout.JAVA_INT,
+                            java.lang.foreign.ValueLayout.JAVA_INT));
 
-            static final java.lang.invoke.MethodHandle internal_native_copyToByteBuffer;
-            static {
-                java.lang.foreign.MemorySegment symbol = LOOKUP.find("jparser_com_github_xpenatan_jparser_idl_helper_IDLUtils_internal_1native_1copyToByteBuffer__JJII").orElseThrow();
-                java.lang.foreign.FunctionDescriptor descriptor = java.lang.foreign.FunctionDescriptor.ofVoid(java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_INT, java.lang.foreign.ValueLayout.JAVA_INT);
-                java.lang.invoke.MethodHandle handle;
-                try {
-                    handle = LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_CRITICAL);
-                }
-                catch(Throwable ignored) {
-                    handle = LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_DEFAULT);
-                }
-                internal_native_copyToByteBuffer = handle;
-            }
-
-            static final java.lang.invoke.MethodHandle internal_native_copyFromByteBuffer;
-            static {
-                java.lang.foreign.MemorySegment symbol = LOOKUP.find("jparser_com_github_xpenatan_jparser_idl_helper_IDLUtils_internal_1native_1copyFromByteBuffer__JJII").orElseThrow();
-                java.lang.foreign.FunctionDescriptor descriptor = java.lang.foreign.FunctionDescriptor.ofVoid(java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_LONG, java.lang.foreign.ValueLayout.JAVA_INT, java.lang.foreign.ValueLayout.JAVA_INT);
-                java.lang.invoke.MethodHandle handle;
-                try {
-                    handle = LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_CRITICAL);
-                }
-                catch(Throwable ignored) {
-                    handle = LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_DEFAULT);
-                }
-                internal_native_copyFromByteBuffer = handle;
-            }
+            static final java.lang.invoke.MethodHandle internal_native_copyFromByteBuffer = com.github.xpenatan.jparser.runtime.helper.FFMDowncallHelper.downcallCritical(
+                    "jparser_com_github_xpenatan_jparser_idl_helper_IDLUtils_internal_1native_1copyFromByteBuffer__JJII",
+                    java.lang.foreign.FunctionDescriptor.ofVoid(
+                            java.lang.foreign.ValueLayout.JAVA_LONG,
+                            java.lang.foreign.ValueLayout.JAVA_LONG,
+                            java.lang.foreign.ValueLayout.JAVA_INT,
+                            java.lang.foreign.ValueLayout.JAVA_INT));
         }
     */
 }
