@@ -70,6 +70,9 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ./gradlew :examples:TestLib:app:desktop-ffm:TestLib_enum_benchmark_compare
 
 ./gradlew :examples:TestLib:app:web:TestLib_run_benchmark_web
+
+./gradlew :jParser:benchmark:benchmark-core:perf_smoke
+./gradlew :phase3_perf_smoke
 ```
 
 ## SharedLib

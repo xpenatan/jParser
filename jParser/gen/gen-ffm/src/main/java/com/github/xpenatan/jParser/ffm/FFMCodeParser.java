@@ -701,7 +701,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         }
 
         bodyCode.append("    } catch(Throwable e) {\n");
-        bodyCode.append("        throw FFMHandles.rethrow(e);\n");
+        bodyCode.append("        throw com.github.xpenatan.jparser.runtime.helper.FFMDowncallHelper.rethrow(e);\n");
         bodyCode.append("    }\n");
 
         if(!isVoid) {
@@ -758,29 +758,12 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         StringBuilder sb = new StringBuilder();
         sb.append("private static final class FFMHandles {\n");
-        sb.append("    private static final java.lang.foreign.SymbolLookup LOOKUP = java.lang.foreign.SymbolLookup.loaderLookup();\n");
-        sb.append("    private static final java.lang.foreign.Linker.Option[] LINKER_OPTIONS_CRITICAL = new java.lang.foreign.Linker.Option[] { java.lang.foreign.Linker.Option.critical(true) };\n");
-        sb.append("    private static final java.lang.foreign.Linker.Option[] LINKER_OPTIONS_DEFAULT = new java.lang.foreign.Linker.Option[0];\n");
-        sb.append("    private static final java.lang.foreign.Linker LINKER = java.lang.foreign.Linker.nativeLinker();\n");
-        sb.append("\n");
-        sb.append("    static RuntimeException rethrow(Throwable e) {\n");
-        sb.append("        if(e instanceof RuntimeException) return (RuntimeException)e;\n");
-        sb.append("        if(e instanceof Error) throw (Error)e;\n");
-        sb.append("        return new RuntimeException(e);\n");
-        sb.append("    }\n\n");
-        sb.append("    static java.lang.invoke.MethodHandle downcallDefault(String symbolName, java.lang.foreign.FunctionDescriptor descriptor) {\n");
-        sb.append("        java.lang.foreign.MemorySegment symbol = LOOKUP.find(symbolName).orElseThrow();\n");
-        sb.append("        return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_DEFAULT);\n");
-        sb.append("    }\n\n");
-        sb.append("    static java.lang.invoke.MethodHandle downcallCritical(String symbolName, java.lang.foreign.FunctionDescriptor descriptor) {\n");
-        sb.append("        java.lang.foreign.MemorySegment symbol = LOOKUP.find(symbolName).orElseThrow();\n");
-        sb.append("        return LINKER.downcallHandle(symbol, descriptor, LINKER_OPTIONS_CRITICAL);\n");
-        sb.append("    }\n\n");
+        String helperClass = "com.github.xpenatan.jparser.runtime.helper.FFMDowncallHelper";
 
         for(FFMMethodHandleRegistry.FFMEntry entry : entries) {
             String descriptor = FFMMethodHandleRegistry.buildFunctionDescriptor(entry);
             boolean useCritical = resolveGeneratedCriticalMode(className, entry);
-            String downcallMethod = useCritical ? "downcallCritical" : "downcallDefault";
+            String downcallMethod = useCritical ? helperClass + ".downcallCritical" : helperClass + ".downcallDefault";
             sb.append("    static final java.lang.invoke.MethodHandle ").append(entry.handleName)
               .append(" = ").append(downcallMethod).append("(\"").append(entry.symbolName).append("\", ")
               .append(descriptor).append(");\n\n");

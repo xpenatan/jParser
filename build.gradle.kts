@@ -42,4 +42,10 @@ allprojects()  {
     }
 }
 
+tasks.register("phase3_perf_smoke") {
+    group = "verification"
+    description = "Run Phase 3 performance smoke benchmark task"
+    dependsOn(":jParser:benchmark:benchmark-core:perf_smoke")
+}
+
 apply(plugin = "publish")

@@ -8,6 +8,7 @@ include(":jParser:gen:gen-ffm")
 
 include(":jParser:api:api-core")
 include(":jParser:api:api-web")
+include(":jParser:benchmark:benchmark-core")
 
 include(":jParser:runtime:runtime-base")
 include(":jParser:runtime:runtime-build")
