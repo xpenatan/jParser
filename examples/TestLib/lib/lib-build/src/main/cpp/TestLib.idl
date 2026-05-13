@@ -137,7 +137,7 @@ interface TestStaticMethodClass {
     static long getIntValue02();
     static float getFloatValue01();
     static float getFloatValue02();
-    static float getBoolValue01();
+    static boolean getBoolValue01();
     [Const, Value] static NativeString getStrValue01();
     [Const] static TestObjectClass getPointerObject01();
     static TestObjectClass getPointerObject02();
