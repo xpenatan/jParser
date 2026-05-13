@@ -33,11 +33,16 @@ public abstract class DefaultCodeParser implements CodeParser {
     public static final String CMD_NATIVE = "-NATIVE";
 
     private ArrayList<BlockComment> cache = new ArrayList<>();
+    protected boolean keepGeneratedCommandComments = true;
 
     public final String headerCMD;
 
     public DefaultCodeParser(String headerCMD) {
         this.headerCMD = headerCMD;
+    }
+
+    public void setKeepGeneratedCommandComments(boolean keepGeneratedCommandComments) {
+        this.keepGeneratedCommandComments = keepGeneratedCommandComments;
     }
 
     protected boolean shouldRemoveCommentBlock(String headerCommands) {
@@ -76,8 +81,8 @@ public abstract class DefaultCodeParser implements CodeParser {
         for(int i = 0; i < cache.size(); i++) {
             BlockComment otherTopBlockComment = cache.get(i);
             if(CodeParserItem.obtainHeaderCommands(otherTopBlockComment) != null) {
-                parserBlock(otherTopBlockComment, otherTopBlockComment);
-//                otherTopBlockComment.remove();
+                boolean parsed = parserBlock(otherTopBlockComment, otherTopBlockComment);
+                removeCommandCommentIfNeeded(parsed, otherTopBlockComment);
             }
         }
         cache.clear();
@@ -115,8 +120,8 @@ public abstract class DefaultCodeParser implements CodeParser {
             if(blockComment != null) {
                 String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
                 if(headerCommands != null) {
-//                blockComment.remove();
                     blockParsed = parserBlock(node, blockComment);
+                    removeCommandCommentIfNeeded(blockParsed, blockComment);
                 }
             }
             while(cache.size() > 0) {
@@ -130,11 +135,13 @@ public abstract class DefaultCodeParser implements CodeParser {
                 }
                 if(CodeParserItem.obtainHeaderCommands(otherTopBlockComment) != null) {
                     if(blockParsed) {
-                        parserBlock(otherTopBlockComment, otherTopBlockComment);
+                        boolean parsed = parserBlock(otherTopBlockComment, otherTopBlockComment);
+                        removeCommandCommentIfNeeded(parsed, otherTopBlockComment);
                     }
                     else {
                         if(parserBlock(node, otherTopBlockComment)) {
                             blockParsed = true;
+                            removeCommandCommentIfNeeded(true, otherTopBlockComment);
                         }
                     }
                 }
@@ -144,11 +151,18 @@ public abstract class DefaultCodeParser implements CodeParser {
             if(blockComment != null) {
                 String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
                 if(headerCommands != null) {
-                    parserBlock(node, blockComment);
+                    boolean parsed = parserBlock(node, blockComment);
+                    removeCommandCommentIfNeeded(parsed, blockComment);
                 }
             }
             //If node does not contains a block comment then just parse all cache nodes.
             onParseCodeEnd();
+        }
+    }
+
+    private void removeCommandCommentIfNeeded(boolean parsed, BlockComment blockComment) {
+        if(parsed && !keepGeneratedCommandComments) {
+            blockComment.remove();
         }
     }
 

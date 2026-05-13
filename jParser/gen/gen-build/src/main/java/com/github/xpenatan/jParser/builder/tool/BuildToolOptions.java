@@ -17,6 +17,8 @@ public class BuildToolOptions {
     public boolean generateJNI = false;
     public boolean generateFFM = false;
     public boolean generateCore = true;
+    /** Keep parsed command comments like [-FFM;-REPLACE_BLOCK] in generated Java output. */
+    public boolean keepGeneratedCommandComments = false;
 
     /** Optional build-time FFM critical policy used by FFMCodeParser generation. */
     public FFMClassData ffmClassData;

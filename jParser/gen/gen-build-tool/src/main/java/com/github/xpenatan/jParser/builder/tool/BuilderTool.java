@@ -47,6 +47,7 @@ public class BuilderTool {
 
         if(op.generateCore) {
             IDLDefaultCodeParser coreParser = new IDLDefaultCodeParser(op.packageName, "CORE", idlReader, op.getSourceDir());
+            coreParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             coreParser.generateClass = true;
             coreParser.generateNativeBindings = false;
             coreParser.idlRenaming = packageRenaming;
@@ -57,6 +58,7 @@ public class BuilderTool {
 //            NativeCPPGenerator.SKIP_GLUE_CODE = true;
             CppGenerator cppGenerator = new NativeCPPGenerator(op.getCPPDestinationPath());
             CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.packageName, op.getSourceDir());
+            cppParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             cppParser.generateClass = true;
             cppParser.idlRenaming = packageRenaming;
             JParser.generate(cppParser, op.getModuleBaseJavaDir(), op.getJNIJavaOutputPath());
@@ -65,6 +67,7 @@ public class BuilderTool {
         if(op.generateWeb) {
 //            EmscriptenTarget.SKIP_GLUE_CODE = true;
             TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.webModuleName, op.packageName, op.getSourceDir());
+            teavmParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             teavmParser.idlRenaming = packageRenaming;
             JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getTeaVMJavaOutputPath());
         }
@@ -72,6 +75,7 @@ public class BuilderTool {
         if(op.generateFFM) {
             FFMCppGenerator ffmGenerator = new FFMCppGenerator(op.getCPPDestinationPath());
             FFMCodeParser ffmParser = new FFMCodeParser(ffmGenerator, idlReader, op.packageName, op.getSourceDir());
+            ffmParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             ffmParser.setFFMClassData(op.ffmClassData);
             ffmParser.generateClass = true;
             ffmParser.idlRenaming = packageRenaming;
