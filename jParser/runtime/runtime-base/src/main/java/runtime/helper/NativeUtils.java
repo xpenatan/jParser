@@ -92,7 +92,7 @@ public class NativeUtils {
         return 0L;
     }
 
-    private static final boolean BATCH_ARRAY_COPY = Boolean.getBoolean("jparser.ffm.batchArrayCopy");
+    private static final boolean BATCH_ARRAY_COPY = Boolean.parseBoolean(System.getProperty("jparser.ffm.batchArrayCopy", "true"));
     private static final int BATCH_ARRAY_COPY_MIN_BYTES = Integer.getInteger("jparser.ffm.batchArrayCopyMinBytes", 128);
     private static final int BATCH_ARRAY_COPY_SCRATCH_MIN = Integer.getInteger("jparser.ffm.batchArrayCopyScratchMin", 4096);
     private static final ThreadLocal<ByteBuffer> BATCH_COPY_SCRATCH = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(BATCH_ARRAY_COPY_SCRATCH_MIN));

@@ -34,6 +34,13 @@ public class NativeByteArray extends NativeArray {
     public static void arraycopy(byte[] src, int  srcPos,
                                  NativeByteArray dest, int destPos,
                                  int length) {
+        if(length <= 0) {
+            return;
+        }
+        if(NativeUtils.useBatchArrayCopy(length)) {
+            NativeUtils.copyByteArrayToNative(src, srcPos, dest, destPos, length);
+            return;
+        }
         int srcP = srcPos;
         int destP = destPos;
         int count = 0;
@@ -49,6 +56,13 @@ public class NativeByteArray extends NativeArray {
     public static void arraycopy(NativeByteArray src, int  srcPos,
                                  byte[] dest, int destPos,
                                  int length) {
+        if(length <= 0) {
+            return;
+        }
+        if(NativeUtils.useBatchArrayCopy(length)) {
+            NativeUtils.copyByteArrayFromNative(src, srcPos, dest, destPos, length);
+            return;
+        }
         int srcP = srcPos;
         int destP = destPos;
         int count = 0;

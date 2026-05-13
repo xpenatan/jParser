@@ -14,6 +14,16 @@ public class FFMClassData {
      */
     public FFMCriticalMethodListener methodListener;
 
+    /**
+     * When enabled, generated String-return bridges use a bounded reinterpret length.
+     */
+    public boolean boundedStringReturn = false;
+
+    /**
+     * Max bytes used when bounded String-return decode is enabled.
+     */
+    public long boundedStringReturnMaxBytes = 4096L;
+
     public FFMClassData() {
     }
 

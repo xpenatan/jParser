@@ -692,7 +692,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             // invokeExact returns MemorySegment — convert to Java String.
             bodyCode.append("        java.lang.foreign.MemorySegment _retSeg = (java.lang.foreign.MemorySegment) FFMHandles.").append(handleName)
                     .append(".invokeExact(").append(invokeArgs).append(");\n");
-            bodyCode.append("        return _retSeg.reinterpret(Long.MAX_VALUE).getString(0);\n");
+            bodyCode.append("        return _retSeg.reinterpret(").append(getStringReturnDecodeBound()).append("L).getString(0);\n");
         }
         else {
             String castType = FFMTypeMapper.getFFMCast(returnTypeStr);
@@ -712,6 +712,13 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         BlockStmt body = StaticJavaParser.parseBlock(bodyCode.toString());
         methodDeclaration.setBody(body);
+    }
+
+    private long getStringReturnDecodeBound() {
+        if(ffmClassData == null || !ffmClassData.boundedStringReturn) {
+            return Long.MAX_VALUE;
+        }
+        return Math.max(1L, ffmClassData.boundedStringReturnMaxBytes);
     }
 
     /**
