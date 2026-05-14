@@ -10,9 +10,10 @@ public class FFMClassData {
     }
 
     /**
-     * Default critical mode for generated methods.
+     * Default critical mode for all generated methods. When disabled, only generated
+     * attribute get/set bridges are selected by default.
      */
-    public boolean defaultCritical = true;
+    public boolean defaultCritical = false;
 
     /**
      * Optional per-method override.
@@ -42,4 +43,3 @@ public class FFMClassData {
     public FFMClassData() {
     }
 }
-

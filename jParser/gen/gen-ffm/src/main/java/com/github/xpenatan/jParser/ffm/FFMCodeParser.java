@@ -50,12 +50,6 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     private static final String HEADER_CMD = "FFM";
     private static final String CALLBACK_UPCALL_ARENA_FIELD = "upcallArena";
     private static final String CALLBACK_RELEASE_METHOD = "releaseUpcallResources";
-    private static final String[] CRITICAL_SAFE_TYPES = new String[] {
-            "void", "int", "long", "float", "double"
-    };
-    private static final String[] CRITICAL_ALL_PRIMITIVE_TYPES = new String[] {
-            "void", "boolean", "byte", "char", "short", "int", "long", "float", "double"
-    };
 
     // Same template tags as CppCodeParser (the C++ code is largely the same)
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
@@ -1360,32 +1354,16 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         return out.toString();
     }
 
-    private boolean isCriticalEligible(FFMMethodHandleRegistry.FFMEntry entry) {
-        if(entry.callbackRelatedByIDL) {
-            return false;
-        }
-        if(!isCriticalAllowedType(entry.returnType)) {
-            return false;
-        }
-        for(FFMMethodHandleRegistry.ParamInfo parameter : entry.parameters) {
-            if(!isCriticalAllowedType(parameter.javaType)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private boolean resolveGeneratedCriticalMode(String className, FFMMethodHandleRegistry.FFMEntry entry) {
-        boolean criticalEligible = isCriticalEligible(entry);
-        boolean defaultCritical = false;
-
         // Generator policy: attribute get/set bridges are hot and safe candidates for critical mode.
-        if(criticalEligible && entry.attributeAccessorByGenerator) {
-            defaultCritical = true;
+        boolean useCritical = false;
+
+        if(entry.attributeAccessorByGenerator) {
+            useCritical = true;
         }
 
         if(ffmClassData != null) {
-            defaultCritical = defaultCritical || ffmClassData.defaultCritical;
+            useCritical = useCritical || ffmClassData.defaultCritical;
             FFMCriticalMethodListener methodListener = ffmClassData.methodListener;
             if(methodListener != null) {
                 FFMCriticalMethodData methodData = new FFMCriticalMethodData(
@@ -1396,18 +1374,17 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                         entry.returnType,
                         entry.parameters,
                         entry.callbackRelatedByIDL,
-                        entry.attributeAccessorByGenerator,
-                        criticalEligible);
+                        entry.attributeAccessorByGenerator);
                 FFMCriticalMode decision = methodListener.onCriticalMode(methodData);
                 if(decision == FFMCriticalMode.ENABLE) {
-                    defaultCritical = true;
+                    useCritical = true;
                 }
                 else if(decision == FFMCriticalMode.DISABLE) {
-                    defaultCritical = false;
+                    useCritical = false;
                 }
             }
         }
-        return defaultCritical && criticalEligible;
+        return useCritical;
     }
 
     private boolean isGeneratedAttributeAccessor(String methodName, String symbolName) {
@@ -1516,24 +1493,6 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             normalized = normalized.substring(packageSeparator + 1);
         }
         return normalized;
-    }
-
-    private boolean isCriticalAllowedType(String javaType) {
-        for(String primitiveType : CRITICAL_SAFE_TYPES) {
-            if(primitiveType.equals(javaType)) {
-                return true;
-            }
-        }
-        // Wider primitive mode remains opt-in for advanced users.
-        if(!java.lang.Boolean.getBoolean("jparser.ffm.criticalAllPrimitives")) {
-            return false;
-        }
-        for(String primitiveType : CRITICAL_ALL_PRIMITIVE_TYPES) {
-            if(primitiveType.equals(javaType)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void ensureDeleteNativeReleasesUpcalls(ClassOrInterfaceDeclaration classDeclaration) {

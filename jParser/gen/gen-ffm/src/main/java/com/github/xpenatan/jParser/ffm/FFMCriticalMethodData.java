@@ -14,7 +14,6 @@ public class FFMCriticalMethodData {
     public final List<FFMMethodHandleRegistry.ParamInfo> parameters;
     public final boolean callbackRelatedByIDL;
     public final boolean attributeAccessorByGenerator;
-    public final boolean criticalEligibleByType;
 
     public FFMCriticalMethodData(String className,
                                  String symbolName,
@@ -23,8 +22,7 @@ public class FFMCriticalMethodData {
                                  String returnType,
                                  List<FFMMethodHandleRegistry.ParamInfo> parameters,
                                  boolean callbackRelatedByIDL,
-                                 boolean attributeAccessorByGenerator,
-                                 boolean criticalEligibleByType) {
+                                 boolean attributeAccessorByGenerator) {
         this.className = className;
         this.symbolName = symbolName;
         this.javaMethodName = javaMethodName;
@@ -33,7 +31,5 @@ public class FFMCriticalMethodData {
         this.parameters = parameters;
         this.callbackRelatedByIDL = callbackRelatedByIDL;
         this.attributeAccessorByGenerator = attributeAccessorByGenerator;
-        this.criticalEligibleByType = criticalEligibleByType;
     }
 }
-

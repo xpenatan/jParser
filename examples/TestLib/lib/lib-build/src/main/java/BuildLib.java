@@ -8,6 +8,7 @@ import com.github.xpenatan.jParser.builder.targets.WindowsMSVCTarget;
 import com.github.xpenatan.jParser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jParser.builder.tool.BuilderTool;
+import com.github.xpenatan.jParser.cpp.JNIClassData;
 import com.github.xpenatan.jParser.ffm.FFMClassData;
 import com.github.xpenatan.jParser.ffm.FFMCriticalMethodData;
 import com.github.xpenatan.jParser.ffm.FFMCriticalMethodListener;
@@ -41,12 +42,13 @@ public class BuildLib {
         data.modulePrefix = modulePrefix;
 
         BuildToolOptions op = new BuildToolOptions(data, args);
+
+        op.ffmClassData.symbolNameMode = FFMClassData.SymbolNameMode.OBFUSCATED;
+        op.jniClassData.symbolNameMode = JNIClassData.SymbolNameMode.OBFUSCATED;
+
         op.ffmClassData.methodListener = new FFMCriticalMethodListener() {
             @Override
             public FFMCriticalMode onCriticalMode(FFMCriticalMethodData methodData) {
-                if(!methodData.criticalEligibleByType || methodData.callbackRelatedByIDL) {
-                    return FFMCriticalMode.DISABLE;
-                }
                 return null;
             }
         };

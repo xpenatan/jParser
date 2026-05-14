@@ -40,7 +40,7 @@ public class BuildRuntimeHelper {
         data.modulePrefix = modulePrefix;
         BuildToolOptions op = new BuildToolOptions(data, args);
         // Runtime helper methods are predominantly simple set/get operations.
-        // Keep critical mode enabled by default, while FFMCodeParser still enforces type eligibility safety.
+        // Keep critical mode enabled by default for the generated runtime helper.
         op.ffmClassData.defaultCritical = true;
         op.ffmClassData.symbolNameMode = FFMClassData.SymbolNameMode.OBFUSCATED;
         op.jniClassData.symbolNameMode = JNIClassData.SymbolNameMode.OBFUSCATED;
