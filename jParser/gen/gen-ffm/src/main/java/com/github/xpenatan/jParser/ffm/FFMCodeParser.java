@@ -1364,10 +1364,13 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         if(ownerIsEnum) {
             useCritical = true;
         }
-        String jm = entry.javaMethodName;
+        String jm = entry.javaMethodName.toLowerCase();
 
         if(jm.endsWith("_addr") ||
-                jm.endsWith("_deleteNative")) {
+                jm.endsWith("_deleteNative") ||
+                jm.endsWith("_get") ||
+                jm.endsWith("_set")
+        ) {
             useCritical = true;
         }
 
