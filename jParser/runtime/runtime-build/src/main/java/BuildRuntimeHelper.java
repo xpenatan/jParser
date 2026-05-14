@@ -45,6 +45,8 @@ public class BuildRuntimeHelper {
         op.ffmClassData.symbolNameMode = FFMClassData.SymbolNameMode.OBFUSCATED;
         op.jniClassData.symbolNameMode = JNIClassData.SymbolNameMode.OBFUSCATED;
 
+        op.ffmClassData.logMethod = true;
+
         BuilderTool.build(op, new BuildToolListener() {
             @Override
             public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {

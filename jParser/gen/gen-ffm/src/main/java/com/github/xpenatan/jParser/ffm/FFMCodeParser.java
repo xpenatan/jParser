@@ -720,7 +720,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
      * Inject the FFMHandles inner class into a Java class with all MethodHandle field declarations.
      */
     private void injectFFMHandlesClass(CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, String className) {
-        String innerClassSource = buildFFMHandlesSource(className);
+        String innerClassSource = buildFFMHandlesSource(className, false);
         if(innerClassSource == null) return;
 
         ClassOrInterfaceDeclaration innerClass = StaticJavaParser.parseBodyDeclaration(innerClassSource)
@@ -734,7 +734,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
      * Inject the FFMHandles inner class into an enum declaration.
      */
     private void injectFFMHandlesClassForEnum(CompilationUnit unit, EnumDeclaration enumDeclaration, String className) {
-        String innerClassSource = buildFFMHandlesSource(className);
+        String innerClassSource = buildFFMHandlesSource(className, true);
         if(innerClassSource == null) return;
 
         ClassOrInterfaceDeclaration innerClass = StaticJavaParser.parseBodyDeclaration(innerClassSource)
@@ -747,7 +747,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     /**
      * Build the FFMHandles inner class source code for a given class name.
      */
-    private String buildFFMHandlesSource(String className) {
+    private String buildFFMHandlesSource(String className, boolean ownerIsEnum) {
         List<FFMMethodHandleRegistry.FFMEntry> entries = registry.getEntries(className);
         if(entries.isEmpty()) return null;
 
@@ -757,7 +757,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         for(FFMMethodHandleRegistry.FFMEntry entry : entries) {
             String descriptor = FFMMethodHandleRegistry.buildFunctionDescriptor(entry);
-            boolean useCritical = resolveGeneratedCriticalMode(className, entry);
+            boolean useCritical = resolveGeneratedCriticalMode(className, entry, ownerIsEnum);
             String downcallMethod = useCritical ? helperClass + ".downcallCritical" : helperClass + ".downcallDefault";
             sb.append("    static final java.lang.invoke.MethodHandle ").append(entry.handleName)
               .append(" = ").append(downcallMethod).append("(\"").append(entry.symbolName).append("\", ")
@@ -1354,11 +1354,20 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         return out.toString();
     }
 
-    private boolean resolveGeneratedCriticalMode(String className, FFMMethodHandleRegistry.FFMEntry entry) {
+    private boolean resolveGeneratedCriticalMode(String className, FFMMethodHandleRegistry.FFMEntry entry, boolean ownerIsEnum) {
         // Generator policy: attribute get/set bridges are hot and safe candidates for critical mode.
         boolean useCritical = false;
 
         if(entry.attributeAccessorByGenerator) {
+            useCritical = true;
+        }
+        if(ownerIsEnum) {
+            useCritical = true;
+        }
+        String jm = entry.javaMethodName;
+
+        if(jm.endsWith("_addr") ||
+                jm.endsWith("_deleteNative")) {
             useCritical = true;
         }
 
@@ -1382,6 +1391,10 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                 else if(decision == FFMCriticalMode.DISABLE) {
                     useCritical = false;
                 }
+            }
+
+            if(ffmClassData.logMethod) {
+                System.out.println("UseCritical: " + useCritical + " | " + className + "." + entry.javaMethodName);
             }
         }
         return useCritical;

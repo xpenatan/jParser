@@ -14,6 +14,7 @@ public class FFMClassData {
      * attribute get/set bridges are selected by default.
      */
     public boolean defaultCritical = false;
+    public boolean logMethod = false;
 
     /**
      * Optional per-method override.

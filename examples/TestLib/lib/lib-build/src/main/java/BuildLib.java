@@ -46,6 +46,7 @@ public class BuildLib {
         op.ffmClassData.symbolNameMode = FFMClassData.SymbolNameMode.OBFUSCATED;
         op.jniClassData.symbolNameMode = JNIClassData.SymbolNameMode.OBFUSCATED;
 
+        op.ffmClassData.logMethod = true;
         op.ffmClassData.methodListener = new FFMCriticalMethodListener() {
             @Override
             public FFMCriticalMode onCriticalMode(FFMCriticalMethodData methodData) {
