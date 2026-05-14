@@ -9,6 +9,7 @@ import com.github.xpenatan.jParser.builder.tool.BuildToolListener;
 import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
 import com.github.xpenatan.jParser.builder.tool.BuilderTool;
 import com.github.xpenatan.jParser.core.JParser;
+import com.github.xpenatan.jParser.cpp.JNIClassData;
 import com.github.xpenatan.jParser.ffm.FFMClassData;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.util.ArrayList;

@@ -1,17 +1,22 @@
 package com.github.xpenatan.jParser.cpp;
 
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.type.ArrayType;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.utils.Pair;
 import com.github.xpenatan.jParser.core.JParser;
@@ -33,6 +38,10 @@ import com.github.xpenatan.jParser.idl.parser.IDLMethodOperation;
 import com.github.xpenatan.jParser.idl.parser.IDLMethodParser;
 import com.github.xpenatan.jParser.idl.parser.data.IDLParameterData;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class CppCodeParser extends IDLDefaultCodeParser {
 
@@ -207,6 +216,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             "\nreturn (jlong)[ENUM];\n";
 
     private final CppGenerator cppGenerator;
+    private JNIClassData jniClassData;
+    private final Map<String, HolderUnitData> holderUnitByOwner = new HashMap<>();
+    private CompilationUnit currentCompilationUnit;
+    private JParserItem currentParserItem;
 
     public CppCodeParser(CppGenerator cppGenerator, String cppDir) {
         this(cppGenerator, null, "", cppDir);
@@ -215,6 +228,30 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     public CppCodeParser(CppGenerator cppGenerator, IDLReader idlReader, String basePackage, String cppDir) {
         super(basePackage, HEADER_CMD, idlReader, cppDir);
         this.cppGenerator = cppGenerator;
+    }
+
+    public void setJNIClassData(JNIClassData jniClassData) {
+        this.jniClassData = jniClassData;
+    }
+
+    @Override
+    public void onParseFileStart(JParser jParser, JParserItem parserItem) {
+        super.onParseFileStart(jParser, parserItem);
+        currentParserItem = parserItem;
+    }
+
+    @Override
+    public void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
+        super.onParserComplete(jParser, parserItems);
+        for(JParserItem parserItem : parserItems) {
+            if(parserItem != null && parserItem.unit != null) {
+                pruneUnusedJNIImports(parserItem.unit);
+            }
+        }
+        for(HolderUnitData holderUnitData : holderUnitByOwner.values()) {
+            pruneUnusedJNIImports(holderUnitData.unit);
+            parserItems.add(new JParserItem(holderUnitData.unit, holderUnitData.destinationBaseDir));
+        }
     }
 
     @Override
@@ -935,11 +972,337 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     @Override
     protected void setJavaBodyNativeCMD(String content, MethodDeclaration methodDeclaration) {
+        if(shouldMoveToJNIHolder(methodDeclaration)) {
+            MethodDeclaration holderMethod = moveToJNIHolder(methodDeclaration);
+            cppGenerator.addNativeCode(holderMethod, content);
+            return;
+        }
         cppGenerator.addNativeCode(methodDeclaration, content);
+    }
+
+    private boolean shouldMoveToJNIHolder(MethodDeclaration methodDeclaration) {
+        if(!methodDeclaration.isStatic()) {
+            return false;
+        }
+        return methodDeclaration.getParentNode().isPresent() && methodDeclaration.getParentNode().get() instanceof TypeDeclaration;
+    }
+
+    private MethodDeclaration moveToJNIHolder(MethodDeclaration originalMethod) {
+        TypeDeclaration ownerType = (TypeDeclaration)originalMethod.getParentNode().get();
+        CompilationUnit ownerUnit = ownerType.findCompilationUnit().orElse(currentCompilationUnit);
+        if(ownerUnit == null) {
+            throw new RuntimeException("Missing compilation unit for native holder generation");
+        }
+        String packageName = ownerUnit.getPackageDeclaration().map(it -> it.getNameAsString()).orElse("");
+        String ownerKey = packageName + "." + ownerType.getNameAsString();
+
+        HolderUnitData holderUnitData = holderUnitByOwner.get(ownerKey);
+        if(holderUnitData == null) {
+            holderUnitData = createHolderUnit(ownerUnit, packageName, ownerType.getNameAsString());
+            holderUnitByOwner.put(ownerKey, holderUnitData);
+        }
+
+        MethodDeclaration holderMethod = originalMethod.clone();
+        if(!keepGeneratedCommandComments) {
+            holderMethod.removeComment();
+        }
+        holderMethod.setName(buildHolderMethodName(packageName, ownerType.getNameAsString(), originalMethod));
+        holderMethod.setPrivate(false);
+        holderMethod.setProtected(false);
+        holderMethod.setPublic(true);
+        holderMethod.getBody().ifPresent(holderMethod::remove);
+        addImportsForHolderMethod(holderUnitData, ownerUnit, holderMethod);
+        holderUnitData.holderClass.addMember(holderMethod);
+        pruneHolderImports(holderUnitData, packageName);
+
+        rewriteOriginalToBridge(originalMethod, holderUnitData.qualifiedClassName, holderMethod.getNameAsString());
+        return holderMethod;
+    }
+
+    private HolderUnitData createHolderUnit(CompilationUnit ownerUnit, String packageName, String ownerName) {
+        String destinationBaseDir = currentParserItem != null ? currentParserItem.destinationBaseDir : null;
+        if(destinationBaseDir == null) {
+            throw new RuntimeException("Missing parser destination for native holder generation");
+        }
+
+        String holderPackage = resolveHolderPackage(packageName, ownerName);
+        CompilationUnit unit = new CompilationUnit();
+        unit.setPackageDeclaration(holderPackage);
+
+        if(!packageName.isEmpty()) {
+            unit.addImport(packageName + ".*");
+        }
+
+        ClassOrInterfaceDeclaration holderClass = new ClassOrInterfaceDeclaration();
+        holderClass.setInterface(false);
+        holderClass.setFinal(true);
+        holderClass.setPublic(true);
+        holderClass.setName(buildHolderClassName(packageName, ownerName));
+        unit.addType(holderClass);
+
+        HolderUnitData data = new HolderUnitData();
+        data.unit = unit;
+        data.holderClass = holderClass;
+        data.destinationBaseDir = destinationBaseDir;
+        data.qualifiedClassName = holderPackage + "." + holderClass.getNameAsString();
+        return data;
+    }
+
+    private void pruneHolderImports(HolderUnitData holderUnitData, String ownerPackageName) {
+        Set<String> referencedTypes = new HashSet<>();
+        for(MethodDeclaration method : holderUnitData.holderClass.getMethods()) {
+            collectReferencedTypeNames(method.getType(), referencedTypes);
+            for(Parameter parameter : method.getParameters()) {
+                collectReferencedTypeNames(parameter.getType(), referencedTypes);
+            }
+        }
+
+        for(int i = holderUnitData.unit.getImports().size() - 1; i >= 0; i--) {
+            ImportDeclaration importDeclaration = holderUnitData.unit.getImports().get(i);
+            if(importDeclaration.isAsterisk()) {
+                continue;
+            }
+            String simpleName = importDeclaration.getName().getIdentifier();
+            if(!referencedTypes.contains(simpleName)) {
+                holderUnitData.unit.getImports().remove(i);
+            }
+        }
+    }
+
+    private void addImportsForHolderMethod(HolderUnitData holderUnitData, CompilationUnit ownerUnit, MethodDeclaration holderMethod) {
+        Set<String> referencedTypes = new HashSet<>();
+        collectReferencedTypeNames(holderMethod.getType(), referencedTypes);
+        for(Parameter parameter : holderMethod.getParameters()) {
+            collectReferencedTypeNames(parameter.getType(), referencedTypes);
+        }
+
+        for(String typeName : referencedTypes) {
+            ImportDeclaration importDeclaration = findImportBySimpleName(ownerUnit, typeName);
+            if(importDeclaration == null) {
+                continue;
+            }
+            boolean alreadyImported = false;
+            for(ImportDeclaration existingImport : holderUnitData.unit.getImports()) {
+                if(existingImport.getNameAsString().equals(importDeclaration.getNameAsString())) {
+                    alreadyImported = true;
+                    break;
+                }
+            }
+            if(!alreadyImported) {
+                holderUnitData.unit.addImport(importDeclaration.clone());
+            }
+        }
+    }
+
+    private ImportDeclaration findImportBySimpleName(CompilationUnit ownerUnit, String simpleTypeName) {
+        for(ImportDeclaration importDeclaration : ownerUnit.getImports()) {
+            if(importDeclaration.isAsterisk() || importDeclaration.isStatic()) {
+                continue;
+            }
+            if(importDeclaration.getName().getIdentifier().equals(simpleTypeName)) {
+                return importDeclaration;
+            }
+        }
+        return null;
+    }
+
+    private void collectReferencedTypeNames(Type type, Set<String> referencedTypes) {
+        if(type == null) {
+            return;
+        }
+        if(type.isArrayType()) {
+            ArrayType arrayType = type.asArrayType();
+            collectReferencedTypeNames(arrayType.getComponentType(), referencedTypes);
+            return;
+        }
+        if(type.isClassOrInterfaceType()) {
+            ClassOrInterfaceType classType = type.asClassOrInterfaceType();
+            referencedTypes.add(classType.getNameAsString());
+            if(classType.getTypeArguments().isPresent()) {
+                NodeList<Type> typeArguments = classType.getTypeArguments().get();
+                for(Type typeArgument : typeArguments) {
+                    collectReferencedTypeNames(typeArgument, referencedTypes);
+                }
+            }
+        }
+    }
+
+    private void pruneUnusedJNIImports(CompilationUnit unit) {
+        if(unit == null || !isJNIHolderUnit(unit)) {
+            return;
+        }
+
+        Set<String> referencedTypes = new HashSet<>();
+        for(TypeDeclaration<?> typeDeclaration : unit.getTypes()) {
+            if(typeDeclaration instanceof ClassOrInterfaceDeclaration) {
+                ClassOrInterfaceDeclaration classDeclaration = (ClassOrInterfaceDeclaration)typeDeclaration;
+                classDeclaration.getExtendedTypes().forEach(type -> collectReferencedTypeNames(type, referencedTypes));
+                classDeclaration.getImplementedTypes().forEach(type -> collectReferencedTypeNames(type, referencedTypes));
+            }
+
+            for(FieldDeclaration field : typeDeclaration.getFields()) {
+                collectReferencedTypeNames(field.getElementType(), referencedTypes);
+            }
+
+            for(ConstructorDeclaration constructor : typeDeclaration.getConstructors()) {
+                for(Parameter parameter : constructor.getParameters()) {
+                    collectReferencedTypeNames(parameter.getType(), referencedTypes);
+                }
+                constructor.getThrownExceptions().forEach(type -> collectReferencedTypeNames(type, referencedTypes));
+            }
+
+            for(MethodDeclaration method : typeDeclaration.getMethods()) {
+                collectReferencedTypeNames(method.getType(), referencedTypes);
+                for(Parameter parameter : method.getParameters()) {
+                    collectReferencedTypeNames(parameter.getType(), referencedTypes);
+                }
+                method.getThrownExceptions().forEach(type -> collectReferencedTypeNames(type, referencedTypes));
+            }
+        }
+
+        for(int i = unit.getImports().size() - 1; i >= 0; i--) {
+            ImportDeclaration importDeclaration = unit.getImports().get(i);
+            if(importDeclaration.isAsterisk() || importDeclaration.isStatic()) {
+                continue;
+            }
+            String simpleName = importDeclaration.getName().getIdentifier();
+            if(!referencedTypes.contains(simpleName)) {
+                unit.getImports().remove(i);
+            }
+        }
+    }
+
+    private boolean isJNIHolderUnit(CompilationUnit unit) {
+        String packageName = unit.getPackageDeclaration().map(it -> it.getNameAsString()).orElse("");
+        if(packageName.endsWith(".natives") || packageName.equals("n")) {
+            return true;
+        }
+        for(TypeDeclaration<?> typeDeclaration : unit.getTypes()) {
+            if(typeDeclaration.getNameAsString().startsWith("JNI_")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void rewriteOriginalToBridge(MethodDeclaration methodDeclaration, String holderClassName, String holderMethodName) {
+        methodDeclaration.removeModifier(Modifier.Keyword.NATIVE);
+        StringBuilder args = new StringBuilder();
+        NodeList<Parameter> parameters = methodDeclaration.getParameters();
+        for(int i = 0; i < parameters.size(); i++) {
+            if(i > 0) {
+                args.append(", ");
+            }
+            args.append(parameters.get(i).getNameAsString());
+        }
+
+        String prefix = methodDeclaration.getType().isVoidType() ? "" : "return ";
+        String body = "{" + prefix + holderClassName + "." + holderMethodName + "(" + args + ");}";
+        methodDeclaration.setBody(StaticJavaParser.parseBlock(body));
+    }
+
+    private String buildHolderClassName(String packageName, String ownerName) {
+        if(getSymbolNameMode() == JNIClassData.SymbolNameMode.OBFUSCATED) {
+            return buildObfuscatedToken(packageName + "|" + ownerName);
+        }
+        return "JNI_" + sanitizeToken(ownerName);
+    }
+
+    private String resolveHolderPackage(String packageName, String ownerName) {
+        if(getSymbolNameMode() != JNIClassData.SymbolNameMode.OBFUSCATED) {
+            return packageName.isEmpty() ? "natives" : packageName + ".natives";
+        }
+        String rootPackage = "n";
+        if(jniClassData != null && jniClassData.obfuscatedRootPackage != null && !jniClassData.obfuscatedRootPackage.trim().isEmpty()) {
+            rootPackage = jniClassData.obfuscatedRootPackage.trim();
+        }
+        String safeRoot = sanitizePackagePath(rootPackage);
+        return safeRoot;
+    }
+
+    private String buildHolderMethodName(String packageName, String ownerName, MethodDeclaration methodDeclaration) {
+        if(getSymbolNameMode() != JNIClassData.SymbolNameMode.OBFUSCATED) {
+            return methodDeclaration.getNameAsString();
+        }
+        StringBuilder fingerprint = new StringBuilder();
+        fingerprint.append(packageName)
+                .append('|')
+                .append(ownerName)
+                .append('|')
+                .append(methodDeclaration.getNameAsString())
+                .append('|');
+        NodeList<Parameter> parameters = methodDeclaration.getParameters();
+        for(int i = 0; i < parameters.size(); i++) {
+            if(i > 0) {
+                fingerprint.append(',');
+            }
+            fingerprint.append(parameters.get(i).getType().asString());
+        }
+        return buildObfuscatedToken(fingerprint.toString());
+    }
+
+    private String buildObfuscatedToken(String fingerprint) {
+        String salt = jniClassData != null && jniClassData.symbolObfuscationSalt != null ? jniClassData.symbolObfuscationSalt : "";
+        return "n" + Integer.toUnsignedString((salt + "|" + fingerprint).hashCode());
+    }
+
+    private JNIClassData.SymbolNameMode getSymbolNameMode() {
+        if(jniClassData == null) {
+            return JNIClassData.SymbolNameMode.DEFAULT;
+        }
+        return jniClassData.symbolNameMode;
+    }
+
+    private static String sanitizeToken(String value) {
+        StringBuilder out = new StringBuilder(value.length());
+        for(int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+                out.append(c);
+            }
+            else {
+                out.append('_');
+            }
+        }
+        if(out.length() == 0) {
+            return "x";
+        }
+        return out.toString();
+    }
+
+    private static String sanitizePackagePath(String packagePath) {
+        String[] tokens = packagePath.split("\\.");
+        StringBuilder out = new StringBuilder(packagePath.length());
+        for(int i = 0; i < tokens.length; i++) {
+            String token = tokens[i].trim();
+            if(token.isEmpty()) {
+                continue;
+            }
+            String clean = sanitizeToken(token).toLowerCase();
+            if(clean.isEmpty()) {
+                continue;
+            }
+            if(i > 0 && out.length() > 0) {
+                out.append('.');
+            }
+            out.append(clean);
+        }
+        if(out.length() == 0) {
+            return "n";
+        }
+        return out.toString();
+    }
+
+    private static class HolderUnitData {
+        CompilationUnit unit;
+        ClassOrInterfaceDeclaration holderClass;
+        String qualifiedClassName;
+        String destinationBaseDir;
     }
 
     @Override
     public void onParseClassStart(JParser jParser, CompilationUnit unit, TypeDeclaration classOrEnum) {
+        currentCompilationUnit = unit;
         String nameAsString = classOrEnum.getNameAsString();
 
         String include = classCppPath.get(nameAsString);

@@ -174,10 +174,120 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
      * Build the symbol name for a native method.
      * Must match exactly with what FFMCodeParser generates for SymbolLookup.find().
      */
-    public static String buildSymbolName(String packageName, String className, String methodName, ArrayList<FFMArgument> arguments) {
-        String packageNameCPP = packageName.replace(".", "_");
-        String escapedClassName = className.replace("_", "_1");
-        String escapedMethodName = methodName.replace("_", "_1");
+    public static String buildSymbolName(String packageName, String className, String methodName, ArrayList<FFMArgument> arguments, boolean overloadedMethod, FFMClassData ffmClassData) {
+        FFMClassData.SymbolNameMode mode = ffmClassData != null ? ffmClassData.symbolNameMode : FFMClassData.SymbolNameMode.DEFAULT;
+        if(mode == FFMClassData.SymbolNameMode.OBFUSCATED) {
+            return buildObfuscatedSymbolName(packageName, className, methodName, arguments, ffmClassData);
+        }
+        return buildCompactSymbolName(packageName, className, methodName, arguments, overloadedMethod);
+    }
+
+    private static String buildCompactSymbolName(String packageName, String className, String methodName, ArrayList<FFMArgument> arguments, boolean overloadedMethod) {
+        String packageToken = sanitizePackageToken(packageName);
+        String classToken = sanitizeToken(className);
+        String methodToken = sanitizeToken(stripNativeMarker(methodName));
+        String base = packageToken + "_" + classToken + "_" + methodToken;
+        if(overloadedMethod) {
+            return base + "_" + buildCompactSignatureToken(arguments);
+        }
+        return base;
+    }
+
+    private static String buildObfuscatedSymbolName(String packageName, String className, String methodName, ArrayList<FFMArgument> arguments, FFMClassData ffmClassData) {
+        String salt = ffmClassData != null && ffmClassData.symbolObfuscationSalt != null ? ffmClassData.symbolObfuscationSalt : "";
+        StringBuilder fingerprint = new StringBuilder();
+        fingerprint.append(packageName).append('|').append(className).append('|').append(methodName).append('|');
+        for(int i = 0; i < arguments.size(); i++) {
+            if(i > 0) {
+                fingerprint.append(',');
+            }
+            fingerprint.append(arguments.get(i).javaType);
+        }
+        return "n" + Integer.toUnsignedString((salt + "|" + fingerprint).hashCode());
+    }
+
+    private static String buildCompactSignatureToken(ArrayList<FFMArgument> arguments) {
+        if(arguments.isEmpty()) {
+            return "v";
+        }
+        StringBuilder out = new StringBuilder(arguments.size() * 3);
+        for(int i = 0; i < arguments.size(); i++) {
+            if(i > 0) {
+                out.append('_');
+            }
+            out.append(compactTypeToken(arguments.get(i).javaType));
+        }
+        return out.toString();
+    }
+
+    private static String compactTypeToken(String javaType) {
+        switch(javaType) {
+            case "boolean": return "z";
+            case "byte": return "b";
+            case "char": return "c";
+            case "short": return "s";
+            case "int": return "i";
+            case "long": return "l";
+            case "float": return "f";
+            case "double": return "d";
+            case "String": return "str";
+            case "MemorySegment":
+            case "java.lang.foreign.MemorySegment": return "addr";
+            default:
+                if(javaType.endsWith("[]")) {
+                    return compactTypeToken(javaType.substring(0, javaType.length() - 2)) + "a";
+                }
+                return "obj";
+        }
+    }
+
+    private static String sanitizeToken(String value) {
+        StringBuilder out = new StringBuilder(value.length());
+        for(int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+                out.append(Character.toLowerCase(c));
+            }
+            else if(c == '_' || c == '$') {
+                out.append('_');
+            }
+        }
+        if(out.length() == 0) {
+            return "x";
+        }
+        return out.toString();
+    }
+
+    private static String stripNativeMarker(String methodName) {
+        String marker = "internal_native_";
+        if(methodName.startsWith(marker)) {
+            return methodName.substring(marker.length());
+        }
+        return methodName;
+    }
+
+    private static String sanitizePackageToken(String packageName) {
+        String[] tokens = packageName.split("\\.");
+        StringBuilder out = new StringBuilder(packageName.length());
+        for(int i = 0; i < tokens.length; i++) {
+            if(i > 0) {
+                out.append('_');
+            }
+            out.append(sanitizeToken(tokens[i]));
+        }
+        return out.toString();
+    }
+
+    private static boolean isOverloadedMethod(TypeDeclaration classOrEnum, String methodName) {
+        int count = 0;
+        if(classOrEnum.isClassOrInterfaceDeclaration()) {
+            count = classOrEnum.asClassOrInterfaceDeclaration().getMethodsByName(methodName).size();
+        }
+        else if(classOrEnum.isEnumDeclaration()) {
+            count = classOrEnum.asEnumDeclaration().getMethodsByName(methodName).size();
+        }
+        return count > 1;
+    }
 
     private void registerObfuscationMapping(MethodDeclaration nativeMethod, String packageName, String className, String symbolName, ArrayList<FFMArgument> arguments) {
         if(!isObfuscatedMode()) {
@@ -201,7 +311,27 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
         obfuscationMapping.put(symbolName, signature.toString());
     }
 
-        return "jparser_" + packageNameCPP + "_" + escapedClassName + "_" + escapedMethodName + paramsType;
+    private boolean isObfuscatedMode() {
+        FFMClassData.SymbolNameMode mode = ffmClassData != null ? ffmClassData.symbolNameMode : FFMClassData.SymbolNameMode.DEFAULT;
+        return mode == FFMClassData.SymbolNameMode.OBFUSCATED;
+    }
+
+    private void writeObfuscationMappingFile(String gluePathStr) {
+        if(!isObfuscatedMode() || SKIP_GLUE_CODE) {
+            return;
+        }
+        String mapPath = gluePathStr + cppGlueName + ".mapping.txt";
+        CustomFileDescriptor mappingFile = new CustomFileDescriptor(mapPath);
+        StringBuilder mapText = new StringBuilder();
+        mapText.append("# FFM obfuscation mapping\n");
+        mapText.append("# <symbol> = <package>.<class>#<method>(<params>) : <return>\n");
+        for(Map.Entry<String, String> entry : obfuscationMapping.entrySet()) {
+            mapText.append(entry.getKey())
+                    .append(" = ")
+                    .append(entry.getValue())
+                    .append('\n');
+        }
+        mappingFile.writeString(mapText.toString(), false);
     }
 
     @Override

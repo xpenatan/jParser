@@ -41,8 +41,7 @@ public class BuildLib {
         data.modulePrefix = modulePrefix;
 
         BuildToolOptions op = new BuildToolOptions(data, args);
-        FFMClassData ffmClassData = new FFMClassData(false);
-        ffmClassData.methodListener = new FFMCriticalMethodListener() {
+        op.ffmClassData.methodListener = new FFMCriticalMethodListener() {
             @Override
             public FFMCriticalMode onCriticalMode(FFMCriticalMethodData methodData) {
                 if(!methodData.criticalEligibleByType || methodData.callbackRelatedByIDL) {
@@ -51,7 +50,6 @@ public class BuildLib {
                 return null;
             }
         };
-        op.ffmClassData = ffmClassData;
         op.addAdditionalIDLRefPath(IDLReader.getRuntimeHelperFile());
 
         BuilderTool.build(op, new BuildToolListener() {

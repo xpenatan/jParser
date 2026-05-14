@@ -58,6 +58,7 @@ public class BuilderTool {
 //            NativeCPPGenerator.SKIP_GLUE_CODE = true;
             CppGenerator cppGenerator = new NativeCPPGenerator(op.getCPPDestinationPath());
             CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.packageName, op.getSourceDir());
+            cppParser.setJNIClassData(op.jniClassData);
             cppParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             cppParser.generateClass = true;
             cppParser.idlRenaming = packageRenaming;

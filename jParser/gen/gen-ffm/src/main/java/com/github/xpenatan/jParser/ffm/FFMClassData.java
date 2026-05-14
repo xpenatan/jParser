@@ -41,9 +41,5 @@ public class FFMClassData {
 
     public FFMClassData() {
     }
-
-    public FFMClassData(boolean defaultCritical) {
-        this.defaultCritical = defaultCritical;
-    }
 }
 
