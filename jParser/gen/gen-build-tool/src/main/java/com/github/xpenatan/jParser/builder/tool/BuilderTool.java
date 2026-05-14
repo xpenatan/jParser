@@ -74,6 +74,7 @@ public class BuilderTool {
 
         if(op.generateFFM) {
             FFMCppGenerator ffmGenerator = new FFMCppGenerator(op.getCPPDestinationPath());
+            ffmGenerator.setFFMClassData(op.ffmClassData);
             FFMCodeParser ffmParser = new FFMCodeParser(ffmGenerator, idlReader, op.packageName, op.getSourceDir());
             ffmParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             ffmParser.setFFMClassData(op.ffmClassData);

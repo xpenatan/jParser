@@ -610,6 +610,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         String packageName = compilationUnit.getPackageDeclaration().get().getNameAsString();
         String className = classOrEnum.getNameAsString();
         String methodName = methodDeclaration.getNameAsString();
+        boolean overloadedMethod = isOverloadedMethod(classOrEnum, methodName);
 
         // Build parameter info
         List<FFMMethodHandleRegistry.ParamInfo> paramInfos = new ArrayList<>();
@@ -636,7 +637,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         String handleName = methodName + "__" + overloadSuffix;
 
         String returnType = methodDeclaration.getType().toString();
-        String symbolName = FFMCppGenerator.buildSymbolName(packageName, className, methodName, ffmArgs);
+        String symbolName = FFMCppGenerator.buildSymbolName(packageName, className, methodName, ffmArgs, overloadedMethod, ffmClassData);
         boolean attributeAccessorByGenerator = isGeneratedAttributeAccessor(methodName, symbolName);
 
         boolean callbackRelatedByIDL = isIDLCallbackRelatedClass(className)
@@ -1482,6 +1483,10 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             return classOrEnum.asEnumDeclaration().getMethodsByName(methodName);
         }
         return new ArrayList<>();
+    }
+
+    private boolean isOverloadedMethod(TypeDeclaration classOrEnum, String methodName) {
+        return getMethodsByName(classOrEnum, methodName).size() > 1;
     }
 
     private boolean isIDLCallbackRelatedType(String javaType) {

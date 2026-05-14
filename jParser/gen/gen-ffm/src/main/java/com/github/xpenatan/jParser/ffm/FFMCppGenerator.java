@@ -11,7 +11,9 @@ import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 /**
  * Generates FFMGlue.cpp/.h with extern "C" exported functions using standard C types.
@@ -23,10 +25,12 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
 
     private String glueCppDestinationDir;
     private String cppGlueName = "FFMGlue";
+    private FFMClassData ffmClassData;
 
     StringBuilder mainPrinter = new StringBuilder();
     StringBuilder headerPrinter = new StringBuilder();
     StringBuilder codePrinter = new StringBuilder();
+    private final TreeMap<String, String> obfuscationMapping = new TreeMap<>();
 
     private boolean init = true;
 
@@ -36,6 +40,10 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
         } catch(IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void setFFMClassData(FFMClassData ffmClassData) {
+        this.ffmClassData = ffmClassData;
     }
 
     private void print(PrintType type, String text) {
@@ -90,12 +98,11 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
     @Override
     public void addNativeCode(MethodDeclaration nativeMethod, String content) {
         String methodName = nativeMethod.getNameAsString();
-        boolean isStatic = nativeMethod.isStatic();
         TypeDeclaration classOrEnum = (TypeDeclaration) nativeMethod.getParentNode().get();
         CompilationUnit compilationUnit = classOrEnum.findCompilationUnit().get();
         String packageName = compilationUnit.getPackageDeclaration().get().getNameAsString();
         String className = classOrEnum.getNameAsString();
-        String packageNameCPP = packageName.replace(".", "_");
+        boolean overloadedMethod = isOverloadedMethod(classOrEnum, methodName);
         String returnTypeStr = nativeMethod.getType().toString();
         String returnType = FFMTypeMapper.getCType(returnTypeStr);
 
@@ -109,7 +116,6 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
             }
         }
 
-        String paramsType = "";
         String prefixCode = "";
         String suffixCode = "";
 
@@ -117,9 +123,6 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
             FFMArgument argument = arguments.get(i);
             String paramName = argument.name;
             String cType = argument.cType;
-            String valueType = argument.overloadSuffix;
-            paramsType += valueType;
-
             if(i > 0) {
                 params += ", ";
             }
@@ -128,18 +131,7 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
             params += cType + " " + paramName;
         }
 
-        if(!paramsType.isEmpty()) {
-            paramsType = "__" + paramsType;
-        }
-        else {
-            paramsType = "__";
-        }
-
         params += ")";
-
-        // Escape underscores in method/class names for symbol name
-        String escapedMethodName = methodName.replace("_", "_1");
-        String escapedClassName = className.replace("_", "_1");
 
         boolean haveReturn = containsReturnStatement(content);
         if(haveReturn) {
@@ -154,9 +146,9 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
 
         content = prefixCode + "\n" + content + "\n" + suffixCode;
 
-        String fullMethodName = packageNameCPP + "_" + escapedClassName + "_" + escapedMethodName + paramsType + params;
-
-        print(PrintType.MAIN, "FFM_EXPORT " + returnType + " jparser_" + fullMethodName + " {");
+        String symbolName = buildSymbolName(packageName, className, methodName, arguments, overloadedMethod, ffmClassData);
+        registerObfuscationMapping(nativeMethod, packageName, className, symbolName, arguments);
+        print(PrintType.MAIN, "FFM_EXPORT " + returnType + " " + symbolName + params + " {");
         content = "\t" + content.replace("\n", "\n\t");
         print(PrintType.MAIN, content);
         print(PrintType.MAIN, "}");
@@ -187,16 +179,27 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
         String escapedClassName = className.replace("_", "_1");
         String escapedMethodName = methodName.replace("_", "_1");
 
-        String paramsType = "";
-        for(FFMArgument argument : arguments) {
-            paramsType += argument.overloadSuffix;
+    private void registerObfuscationMapping(MethodDeclaration nativeMethod, String packageName, String className, String symbolName, ArrayList<FFMArgument> arguments) {
+        if(!isObfuscatedMode()) {
+            return;
         }
-        if(!paramsType.isEmpty()) {
-            paramsType = "__" + paramsType;
+        StringBuilder signature = new StringBuilder();
+        signature.append(packageName)
+                .append('.')
+                .append(className)
+                .append('#')
+                .append(nativeMethod.getNameAsString())
+                .append('(');
+        for(int i = 0; i < arguments.size(); i++) {
+            if(i > 0) {
+                signature.append(", ");
+            }
+            signature.append(arguments.get(i).javaType);
         }
-        else {
-            paramsType = "__";
-        }
+        signature.append(") : ")
+                .append(nativeMethod.getType().toString());
+        obfuscationMapping.put(symbolName, signature.toString());
+    }
 
         return "jparser_" + packageNameCPP + "_" + escapedClassName + "_" + escapedMethodName + paramsType;
     }
@@ -225,6 +228,7 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
         CustomFileDescriptor cppFile = new CustomFileDescriptor(cppGluePath);
         String include = "#include \"" + cppGlueName + ".h\"";
         cppFile.writeString(include, false);
+        writeObfuscationMappingFile(gluePathStr);
     }
 
     private FFMArgument getArgument(Parameter parameter) {

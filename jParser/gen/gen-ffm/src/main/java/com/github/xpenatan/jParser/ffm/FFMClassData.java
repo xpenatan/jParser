@@ -4,6 +4,11 @@ package com.github.xpenatan.jParser.ffm;
  * Build-time policy for generated FFM downcall critical mode.
  */
 public class FFMClassData {
+    public enum SymbolNameMode {
+        DEFAULT,
+        OBFUSCATED
+    }
+
     /**
      * Default critical mode for generated methods.
      */
@@ -13,6 +18,16 @@ public class FFMClassData {
      * Optional per-method override.
      */
     public FFMCriticalMethodListener methodListener;
+
+    /**
+     * Symbol naming mode for generated FFM glue exports.
+     */
+    public SymbolNameMode symbolNameMode = SymbolNameMode.DEFAULT;
+
+    /**
+     * Optional salt used by OBFUSCATED symbol mode.
+     */
+    public String symbolObfuscationSalt = "";
 
     /**
      * When enabled, generated String-return bridges use a bounded reinterpret length.
