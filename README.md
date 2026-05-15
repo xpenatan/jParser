@@ -5,7 +5,7 @@
 
 <p align="center">
   <a href="https://github.com/xpenatan/jParser/actions/workflows/snapshot.yml"><img src="https://github.com/xpenatan/jParser/actions/workflows/snapshot.yml/badge.svg" alt="Build"></a>
-  <a href="https://central.sonatype.com/artifact/com.github.xpenatan.jParser/jParser-core"><img src="https://img.shields.io/maven-central/v/com.github.xpenatan.jParser/jParser-core" alt="Maven Central Version"></a>
+  <a href="https://central.sonatype.com/artifact/com.github.xpenatan.jParser/gen-core"><img src="https://img.shields.io/maven-central/v/com.github.xpenatan.jParser/jParser-core" alt="Maven Central Version"></a>
   <a href="https://central.sonatype.com/service/rest/repository/browse/maven-snapshots/com/github/xpenatan/jParser/"><img src="https://img.shields.io/badge/snapshot---SNAPSHOT-red" alt="Snapshot"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License"></a>
 </p>
