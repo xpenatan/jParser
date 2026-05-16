@@ -539,10 +539,16 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         cppGenerator.addNativeCode(methodDeclaration, content);
 
         // Register the MethodHandle entry for this native method
+        TypeDeclaration classOrEnum = (TypeDeclaration)methodDeclaration.getParentNode().get();
+        String className = classOrEnum.getNameAsString();
         String handleName = registerNativeMethod(methodDeclaration);
+        FFMMethodHandleRegistry.FFMEntry entry = registry.findEntry(className, handleName);
+        if(entry == null) {
+            throw new IllegalStateException("Missing FFM entry for handle: " + className + "." + handleName);
+        }
 
         // Transform the native method into an FFM bridge method
-        convertToFFMBridgeMethod(methodDeclaration, handleName);
+        convertToFFMBridgeMethod(methodDeclaration, handleName, className + "." + entry.javaMethodName, entry.symbolName, entry.useCritical);
     }
 
     // ==================== Lifecycle Hooks ====================
@@ -637,7 +643,18 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         boolean callbackRelatedByIDL = isIDLCallbackRelatedClass(className)
                 || hasCallbackRelatedIDLParameter(methodDeclaration)
                 || hasCallbackRelatedWrapperParameter(classOrEnum, methodDeclaration);
-        registry.register(className, symbolName, methodName, handleName, returnType, paramInfos, callbackRelatedByIDL, attributeAccessorByGenerator);
+        FFMMethodHandleRegistry.FFMEntry entry = new FFMMethodHandleRegistry.FFMEntry(
+                symbolName,
+                methodName,
+                handleName,
+                returnType,
+                paramInfos,
+                callbackRelatedByIDL,
+                attributeAccessorByGenerator,
+                false);
+        boolean ownerIsEnum = classOrEnum instanceof EnumDeclaration;
+        boolean useCritical = resolveGeneratedCriticalMode(className, entry, ownerIsEnum);
+        registry.register(className, symbolName, methodName, handleName, returnType, paramInfos, callbackRelatedByIDL, attributeAccessorByGenerator, useCritical);
         return handleName;
     }
 
@@ -647,7 +664,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
      *
      * @param handleName the unique field name in FFMHandles (includes overload suffix)
      */
-    private void convertToFFMBridgeMethod(MethodDeclaration methodDeclaration, String handleName) {
+    private void convertToFFMBridgeMethod(MethodDeclaration methodDeclaration, String handleName, String javaMethodName, String symbolName, boolean useCritical) {
         // Remove native modifier
         methodDeclaration.removeModifier(Modifier.Keyword.NATIVE);
 
@@ -677,6 +694,11 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         StringBuilder bodyCode = new StringBuilder();
         bodyCode.append("{\n");
         bodyCode.append("    try {\n");
+        if(useCritical) {
+            bodyCode.append("        com.github.xpenatan.jparser.runtime.helper.FFMCriticalCrashTrace.mark(\"")
+                    .append(escapeJavaString(symbolName)).append("\", \"")
+                    .append(escapeJavaString(javaMethodName)).append("\");\n");
+        }
 
         if(isVoid) {
             bodyCode.append("        FFMHandles.").append(handleName)
@@ -720,7 +742,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
      * Inject the FFMHandles inner class into a Java class with all MethodHandle field declarations.
      */
     private void injectFFMHandlesClass(CompilationUnit unit, ClassOrInterfaceDeclaration classDeclaration, String className) {
-        String innerClassSource = buildFFMHandlesSource(className, false);
+        String innerClassSource = buildFFMHandlesSource(className);
         if(innerClassSource == null) return;
 
         ClassOrInterfaceDeclaration innerClass = StaticJavaParser.parseBodyDeclaration(innerClassSource)
@@ -734,7 +756,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
      * Inject the FFMHandles inner class into an enum declaration.
      */
     private void injectFFMHandlesClassForEnum(CompilationUnit unit, EnumDeclaration enumDeclaration, String className) {
-        String innerClassSource = buildFFMHandlesSource(className, true);
+        String innerClassSource = buildFFMHandlesSource(className);
         if(innerClassSource == null) return;
 
         ClassOrInterfaceDeclaration innerClass = StaticJavaParser.parseBodyDeclaration(innerClassSource)
@@ -747,7 +769,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     /**
      * Build the FFMHandles inner class source code for a given class name.
      */
-    private String buildFFMHandlesSource(String className, boolean ownerIsEnum) {
+    private String buildFFMHandlesSource(String className) {
         List<FFMMethodHandleRegistry.FFMEntry> entries = registry.getEntries(className);
         if(entries.isEmpty()) return null;
 
@@ -757,7 +779,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         for(FFMMethodHandleRegistry.FFMEntry entry : entries) {
             String descriptor = FFMMethodHandleRegistry.buildFunctionDescriptor(entry);
-            boolean useCritical = resolveGeneratedCriticalMode(className, entry, ownerIsEnum);
+            boolean useCritical = entry.useCritical;
             String downcallMethod = useCritical ? helperClass + ".downcallCritical" : helperClass + ".downcallDefault";
             sb.append("    static final java.lang.invoke.MethodHandle ").append(entry.handleName)
               .append(" = ").append(downcallMethod).append("(\"").append(entry.symbolName).append("\", ")
@@ -1350,6 +1372,21 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             else {
                 out.append('_');
             }
+        }
+        return out.toString();
+    }
+
+    private String escapeJavaString(String value) {
+        if(value == null || value.isEmpty()) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder(value.length() + 8);
+        for(int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if(c == '\\' || c == '"') {
+                out.append('\\');
+            }
+            out.append(c);
         }
         return out.toString();
     }

@@ -20,9 +20,10 @@ public class FFMMethodHandleRegistry {
      */
     public void register(String className, String symbolName, String javaMethodName,
                          String handleName, String returnType, List<ParamInfo> parameters,
-                         boolean callbackRelatedByIDL, boolean attributeAccessorByGenerator) {
+                         boolean callbackRelatedByIDL, boolean attributeAccessorByGenerator,
+                         boolean useCritical) {
         List<FFMEntry> entries = classEntries.computeIfAbsent(className, k -> new ArrayList<>());
-        entries.add(new FFMEntry(symbolName, javaMethodName, handleName, returnType, parameters, callbackRelatedByIDL, attributeAccessorByGenerator));
+        entries.add(new FFMEntry(symbolName, javaMethodName, handleName, returnType, parameters, callbackRelatedByIDL, attributeAccessorByGenerator, useCritical));
     }
 
     /**
@@ -30,6 +31,22 @@ public class FFMMethodHandleRegistry {
      */
     public List<FFMEntry> getEntries(String className) {
         return classEntries.getOrDefault(className, new ArrayList<>());
+    }
+
+    /**
+     * Find a registered entry by class and handle name.
+     */
+    public FFMEntry findEntry(String className, String handleName) {
+        List<FFMEntry> entries = classEntries.get(className);
+        if(entries == null) {
+            return null;
+        }
+        for(FFMEntry entry : entries) {
+            if(entry.handleName.equals(handleName)) {
+                return entry;
+            }
+        }
+        return null;
     }
 
     /**
@@ -109,9 +126,12 @@ public class FFMMethodHandleRegistry {
         public final boolean callbackRelatedByIDL;
         /** True when the generator recognizes this native bridge as an IDL attribute getter/setter. */
         public final boolean attributeAccessorByGenerator;
+        /** True when this native method should use critical downcall generation. */
+        public final boolean useCritical;
 
         public FFMEntry(String symbolName, String javaMethodName, String handleName, String returnType,
-                        List<ParamInfo> parameters, boolean callbackRelatedByIDL, boolean attributeAccessorByGenerator) {
+                        List<ParamInfo> parameters, boolean callbackRelatedByIDL, boolean attributeAccessorByGenerator,
+                        boolean useCritical) {
             this.symbolName = symbolName;
             this.javaMethodName = javaMethodName;
             this.handleName = handleName;
@@ -119,6 +139,7 @@ public class FFMMethodHandleRegistry {
             this.parameters = parameters;
             this.callbackRelatedByIDL = callbackRelatedByIDL;
             this.attributeAccessorByGenerator = attributeAccessorByGenerator;
+            this.useCritical = useCritical;
         }
     }
 
