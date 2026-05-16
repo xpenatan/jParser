@@ -423,6 +423,9 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Delete generated Classes
+        run: ./gradlew clean
+
       - name: Download windows natives runtime
         uses: actions/download-artifact@v8
         with:
