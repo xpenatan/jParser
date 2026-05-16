@@ -468,6 +468,18 @@ jobs:
       - name: Generate runtime project
         run: ./gradlew runtime_helper_build_project
 
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "bot@github.com"
+
+      - name: Commit generated code
+        if: ${{ inputs.shouldUpload }}
+        run: |
+          git add .
+          git commit -m "Commit generated code" || echo "No changes to commit"
+          git push origin HEAD
+
       - name: Prepare Release deploy files
         if: ${{ inputs.shouldUpload && inputs.isRelease }}
         run: ./gradlew prepareReleaseDeploy
