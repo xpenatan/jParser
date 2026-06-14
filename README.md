@@ -68,7 +68,7 @@ Compiles the C/C++ source into platform-specific native libraries:
 |---|---|---|--------------|
 | **JNI** | Java Native Interface | Windows, Linux, macOS, Android | 8+           |
 | **FFM** | Foreign Function & Memory API | Windows, Linux, macOS | 22+          |
-| **TeaVM** | JavaScript / WASM | Web browsers | 11+          |
+| **TeaVM** | JavaScript / WASM | Web browsers | Java 17+ for TeaVM 0.15 web modules/tooling |
 
 ## Code Block Convention
 

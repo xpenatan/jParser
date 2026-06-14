@@ -1,1 +1,12 @@
-* text=false
+* text=auto eol=lf
+
+# Binary files.
+*.png binary
+*.jpg binary
+*.jar binary
+*.ttf binary
+*.js binary
+*.wasm binary
+*.mp3 binary
+*.ogg binary
+*.wav binary

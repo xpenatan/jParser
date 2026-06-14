@@ -18,6 +18,7 @@ dependencies {
     api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
     api("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
     api("org.teavm:teavm-jso-impl:${LibExt.teaVMVersion}")
+    api("org.teavm:teavm-extension-spi:${LibExt.teaVMVersion}")
 }
 
 java {

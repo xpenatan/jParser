@@ -15,9 +15,6 @@ tasks.jar {
 }
 
 dependencies {
-    implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
-    implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
-
     implementation(project(":examples:SharedLib:libA:lib-web"))
     implementation(project(":jParser:loader:loader-web"))
     implementation(project(":jParser:loader:loader-core"))

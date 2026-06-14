@@ -70,5 +70,6 @@ private static native void internal_native_doSomething(long this_addr);
 ## Toolchain Notes
 
 - JDK 11+ required for core build tooling.
+- TeaVM 0.15+ web modules and compiler/tooling require JDK 17+.
 - FFM tasks require newer JDK (22+; 25 preferred by project docs).
 - Desktop FFM launcher tasks in examples use `LibExt.javaFFMTarget` from Gradle configuration.

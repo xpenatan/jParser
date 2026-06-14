@@ -837,6 +837,33 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 castLongToIntIfNeeded(unit, jParser.unitArray);
             }
         }
+
+        addSubstitutionPolicy(parserItems, jParser.genDir);
+    }
+
+    private void addSubstitutionPolicy(ArrayList<JParserItem> parserItems, String genDir) {
+        String generatedPackage = PACKAGE_PREFIX + basePackage;
+        String policyPackage = generatedPackage + ".teavm";
+        String policyClassName = "JParserTeaVMSubstitutionPolicy";
+
+        CompilationUnit unit = new CompilationUnit();
+        unit.setPackageDeclaration(policyPackage);
+        unit.addImport("org.teavm.extension.spi.substitution.SubstitutionPolicy");
+        unit.addImport("org.teavm.extension.spi.substitution.SubstitutionSink");
+
+        ClassOrInterfaceDeclaration policyClass = unit.addClass(policyClassName, Modifier.Keyword.PUBLIC);
+        policyClass.addImplementedType("SubstitutionPolicy");
+        MethodDeclaration contribute = policyClass.addMethod("contribute", Modifier.Keyword.PUBLIC);
+        contribute.addMarkerAnnotation("Override");
+        contribute.addParameter("SubstitutionSink", "sink");
+        BlockStmt body = new BlockStmt();
+        MethodCallExpr substitutePackage = new MethodCallExpr(new NameExpr("sink"), "substitutePackage");
+        substitutePackage.addArgument(new StringLiteralExpr(basePackage));
+        substitutePackage.addArgument(new StringLiteralExpr(generatedPackage));
+        body.addStatement(new ExpressionStmt(substitutePackage));
+        contribute.setBody(body);
+
+        parserItems.add(new JParserItem(unit, genDir));
     }
 
     @Override

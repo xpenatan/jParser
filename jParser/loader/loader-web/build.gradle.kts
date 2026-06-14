@@ -6,9 +6,10 @@ val moduleName = "loader-web"
 
 dependencies {
     implementation(project(":jParser:loader:loader-core"))
-    implementation("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
-    implementation("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
-    implementation("org.teavm:teavm-jso-impl:${LibExt.teaVMVersion}")
+    api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
+    api("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
+    api("org.teavm:teavm-jso-impl:${LibExt.teaVMVersion}")
+    api("org.teavm:teavm-extension-spi:${LibExt.teaVMVersion}")
 
     implementation("com.github.xpenatan:jMultiplatform:${LibExt.jMultiplatform}")
 }
