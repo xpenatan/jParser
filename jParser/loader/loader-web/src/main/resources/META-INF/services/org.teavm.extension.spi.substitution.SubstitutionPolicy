@@ -1,2 +1,3 @@
+com.github.xpenatan.jParser.loader.teavm.JParserAutoSubstitutionPolicy
 com.github.xpenatan.jParser.loader.teavm.JParserLoaderSubstitutionPolicy
 com.github.xpenatan.jParser.loader.teavm.GdxTeaVMSubstitutionPolicy

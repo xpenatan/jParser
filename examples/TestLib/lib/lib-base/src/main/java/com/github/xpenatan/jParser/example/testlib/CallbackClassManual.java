@@ -314,7 +314,7 @@ public class CallbackClassManual extends NativeObject {
             onStringCallback onStringCallback = new onStringCallback() {
                 @Override
                 public void onStringCallback(int strValue01) {
-                    internal_onStringCallback(gen.com.github.xpenatan.jparser.runtime.helper.NativeUtils.getJSString(strValue01));
+                    internal_onStringCallback(gen.web.com.github.xpenatan.jparser.runtime.helper.NativeUtils.getJSString(strValue01));
                 }
             };
             internal_native_setupCallbacks((int)native_address, onVoidCallback, onIntCallback, onFloatCallback, onBoolCallback, onStringCallback);

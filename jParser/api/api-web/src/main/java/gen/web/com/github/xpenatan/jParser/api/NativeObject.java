@@ -1,4 +1,4 @@
-package gen.com.github.xpenatan.jParser.api;
+package gen.web.com.github.xpenatan.jParser.api;
 
 /**
  * @author xpenatan
