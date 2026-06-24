@@ -46,10 +46,23 @@ public abstract class DefaultCodeParser implements CodeParser {
     }
 
     protected boolean shouldRemoveCommentBlock(String headerCommands) {
-        if(!headerCommands.startsWith(CMD_HEADER_START + headerCMD)) {
+        if(!matchesHeaderCommand(headerCommands)) {
             return true;
         }
         return false;
+    }
+
+    private boolean matchesHeaderCommand(String headerCommands) {
+        String parserHeader = CMD_HEADER_START + headerCMD;
+        if(!headerCommands.startsWith(parserHeader)) {
+            return false;
+        }
+        int nextIndex = parserHeader.length();
+        if(nextIndex >= headerCommands.length()) {
+            return false;
+        }
+        char next = headerCommands.charAt(nextIndex);
+        return next == ';' || next == ']';
     }
 
     @Override
@@ -169,7 +182,7 @@ public abstract class DefaultCodeParser implements CodeParser {
     private boolean parserBlock(Node node, BlockComment blockComment) {
         String headerCommands = CodeParserItem.obtainHeaderCommands(blockComment);
         if(headerCommands != null) {
-            if(headerCommands.startsWith(CMD_HEADER_START + headerCMD) && headerCommands.endsWith(CMD_HEADER_END)) {
+            if(matchesHeaderCommand(headerCommands) && headerCommands.endsWith(CMD_HEADER_END)) {
                 String content = CodeParserItem.obtainContent(headerCommands, blockComment);
                 parseCodeBlock(node, headerCommands, content);
                 return true;
