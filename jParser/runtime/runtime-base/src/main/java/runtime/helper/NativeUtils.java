@@ -179,7 +179,7 @@ public class NativeUtils {
     */
     /*[-TEAVM_C;-REPLACE_BLOCK]
         {
-            long sourceAddress = source.native_void_address;
+            int sourceAddress = (int)source.native_void_address;
             for(int i = 0; i < sizeInBytes; i++) {
                 destination.put(offset + i, internal_native_readByte(sourceAddress, i));
             }
@@ -202,7 +202,7 @@ public class NativeUtils {
     */
     /*[-TEAVM_C;-REPLACE_BLOCK]
         {
-            long destinationAddress = destination.native_void_address;
+            int destinationAddress = (int)destination.native_void_address;
             for(int i = 0; i < sizeInBytes; i++) {
                 internal_native_writeByte(destinationAddress, offset + i, source.get(i));
             }

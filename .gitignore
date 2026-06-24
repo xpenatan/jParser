@@ -65,4 +65,5 @@ out/
 .codiumai
 .kotlin/
 
-CURRENT_CHAT_CONTEXT.MD
+# Local agent recovery state
+.agents/*

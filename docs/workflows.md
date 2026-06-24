@@ -21,10 +21,11 @@ Use at least one compile or test task relevant to changed modules. Examples:
 
 ## Handoff Checklist
 
-- `CURRENT_CHAT_CONTEXT` includes:
+- `.agents/agents_memory.md` includes:
   - what changed
   - why it changed
   - validation result
   - next recommended task
-- Keep `CURRENT_CHAT_CONTEXT` as rolling current state: replace/update prior entries instead of appending history.
+- Keep `.agents/agents_memory.md` as rolling current state: replace/update prior entries instead of appending history.
+- Use `.agents/agents_plan.md` for active multi-step work, and clear or rewrite it when the scope changes or completes.
 - Mention any environment blockers explicitly (toolchain, missing native artifacts, classifier jars).
