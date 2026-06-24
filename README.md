@@ -160,8 +160,9 @@ Every native class extends `IDLBase`, which provides common memory-management fu
 | Xcode CLI tools | macOS native builds |
 | [Emscripten SDK](https://emscripten.org/) | Web builds (JS/WASM) |
 
-> **Windows (MSVC):** Ensure `vcvarsall.bat` is on your system `PATH`. It is typically located at:
-> `C:\Program Files\Microsoft Visual Studio\[Year]\[Edition]\VC\Auxiliary\Build\`
+> **Windows (MSVC):** Windows native builds initialize the Visual Studio C++ environment with `vcvarsall.bat`.
+> The build auto-detects it from `VCVARSALL_PATH` / `JPARSER_VCVARSALL`, `PATH`, Visual Studio environment variables, or `vswhere.exe`.
+> To force a location, pass `-Djparser.vcvarsall=C:\Program Files\Microsoft Visual Studio\[Year]\[Edition]\VC\Auxiliary\Build\vcvarsall.bat`.
 
 ## Documentation
 
