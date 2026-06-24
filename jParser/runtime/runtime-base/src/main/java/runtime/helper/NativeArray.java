@@ -43,6 +43,10 @@ public class NativeArray extends NativeObject {
       Native::NativeArray* nativeObject = (Native::NativeArray*)this_addr;
       nativeObject->resize(size);
     */
+    /*[-TEAVM_C;-NATIVE]
+      Native::NativeArray* nativeObject = (Native::NativeArray*)this_addr;
+      nativeObject->resize(size);
+    */
     public static native void internal_native_resize(long this_addr, int size);
 }
 

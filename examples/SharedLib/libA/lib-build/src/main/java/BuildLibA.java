@@ -71,8 +71,102 @@ public class BuildLibA {
                 if(op.containsArg("macArm_ffm")) {
                     targets.add(getMacTarget(op, true, true));
                 }
+
+                if(op.containsArg("windows64_teavm_c")) {
+                    targets.add(getWindowVCTeaVMCTarget(op));
+                }
+                if(op.containsArg("android_teavm_c")) {
+                    targets.add(getAndroidTeaVMCTarget(op));
+                }
             }
         });
+    }
+
+    private static BuildMultiTarget getWindowVCTeaVMCTarget(BuildToolOptions op) {
+        String api = "teavm_c";
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        String config = "/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"";
+
+        WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
+        compileStaticTarget.libDirSuffix += api;
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("/std:c++17");
+        compileStaticTarget.cppFlags.add("/DLIBA_EXPORTS");
+        compileStaticTarget.cppFlags.add(config);
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
+        linkTarget.libDirSuffix += api;
+        linkTarget.setupTeaVMCGlueCode(libBuildCPPPath);
+        linkTarget.cppFlags.add("/std:c++17");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("-DLL");
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getAndroidTeaVMCTarget(BuildToolOptions op) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+        String api = "teavm_c";
+
+        AndroidTarget.ApiLevel apiLevel = AndroidTarget.ApiLevel.Android_10_29;
+        ArrayList<AndroidTarget.Target> targets = new ArrayList<>();
+        targets.add(AndroidTarget.Target.x86);
+        targets.add(AndroidTarget.Target.x86_64);
+        targets.add(AndroidTarget.Target.armeabi_v7a);
+        targets.add(AndroidTarget.Target.arm64_v8a);
+
+        String config;
+        if(BuildTarget.isWindows()) {
+            config = "-DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"";
+        }
+        else {
+            config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+        }
+
+        for(int i = 0; i < targets.size(); i++) {
+            AndroidTarget.Target target = targets.get(i);
+
+            AndroidTarget compileStaticTarget = new AndroidTarget(target, apiLevel);
+            compileStaticTarget.libDirSuffix += api;
+            compileStaticTarget.isStatic = true;
+            compileStaticTarget.cppFlags.add("-std=c++17");
+            compileStaticTarget.cppFlags.add("-fPIC");
+            compileStaticTarget.cppFlags.add("-DLIBA_EXPORTS");
+            compileStaticTarget.cppFlags.add(config);
+            compileStaticTarget.headerDirs.add("-I" + sourceDir);
+            compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+            compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+            compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+            multiTarget.add(compileStaticTarget);
+
+            AndroidTarget linkTarget = new AndroidTarget(target, apiLevel);
+            linkTarget.libDirSuffix += api;
+            linkTarget.setupTeaVMCGlueCode(libBuildCPPPath);
+            linkTarget.cppFlags.add("-std=c++17");
+            linkTarget.cppFlags.add("-fPIC");
+            linkTarget.headerDirs.add("-I" + sourceDir);
+            linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+            linkTarget.linkerFlags.add("-Wl,--whole-archive");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() + "/" + api + "/lib" + op.libName + ".a");
+            linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+            linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
+            multiTarget.add(linkTarget);
+        }
+
+        return multiTarget;
     }
 
     private static BuildMultiTarget getWindowVCTarget(BuildToolOptions op, boolean isFFM) {

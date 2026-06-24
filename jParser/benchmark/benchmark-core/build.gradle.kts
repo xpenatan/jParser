@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":jParser:runtime:runtime-ffm"))
+    implementation(project(":jParser:runtime:runtime-jvm:ffm"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 
@@ -19,4 +19,3 @@ tasks.register<JavaExec>("perf_smoke") {
     classpath = sourceSets["main"].runtimeClasspath
     jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
-

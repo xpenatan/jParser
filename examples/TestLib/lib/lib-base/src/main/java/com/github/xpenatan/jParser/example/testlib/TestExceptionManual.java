@@ -17,6 +17,9 @@ public class TestExceptionManual extends NativeObject {
         var testException = new [MODULE].TestExceptionManual();
         return [MODULE].getPointer(testException);
     */
+    /*[-TEAVM_C;-NATIVE]
+        return (int64_t)new TestExceptionManual();
+    */
     private static native long internal_native_create_addr();
 
     public int setDataToNullPointer() {
@@ -30,6 +33,10 @@ public class TestExceptionManual extends NativeObject {
     /*[-TEAVM;-NATIVE]
         var nativeObject = [MODULE].wrapPointer(this_addr, [MODULE].TestExceptionManual);
         return nativeObject.setDataToNullPointer();
+    */
+    /*[-TEAVM_C;-NATIVE]
+        TestExceptionManual* nativeObject = (TestExceptionManual*)this_addr;
+        return nativeObject->setDataToNullPointer();
     */
     private static native int internal_native_setDataToNullPointer(long this_addr);
 
@@ -51,6 +58,10 @@ public class TestExceptionManual extends NativeObject {
             console.log(\"An error occurred from javascript:\", error.message);
             throw new Error(\"Rethrow new Error to java\");
         }
+    */
+    /*[-TEAVM_C;-NATIVE]
+        TestExceptionManual* nativeObject = (TestExceptionManual*)this_addr;
+        nativeObject->callJavaMethod((CallbackExceptionManual*)callback_addr);
     */
     private static native void internal_native_callJavaMethod(long this_addr, long callback_addr);
 }

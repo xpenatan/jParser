@@ -2,143 +2,102 @@
 
 This document explains the Maven artifact setup used by jParser runtime modules so external libraries can replicate it exactly.
 
-Modules covered:
-- `idl/runtime/runtime-jni`
-- `idl/runtime/runtime-ffm`
-- `idl/runtime/runtime-android`
-- `idl/runtime/runtime-web`
+## Module Layout
 
-## Why this setup exists
+Top-level runtime modules:
 
-The runtime modules support two different use cases:
+- `jParser/runtime/runtime-base`
+- `jParser/runtime/runtime-build`
+- `jParser/runtime/runtime-core`
+- `jParser/runtime/runtime-c/core`
+- `jParser/runtime/runtime-c/desktop`
+- `jParser/runtime/runtime-c/android`
 
-1. Local/in-repo project dependencies
-- Keep main runtime artifacts convenient for module-to-module usage.
-- For desktop/web, non-publish builds include native payload in the main jar.
+JVM/Java-side runtime implementation modules are grouped internally:
 
-2. Published Maven artifacts
-- Keep the main artifact classes-only.
-- Publish native/web payload in classifier artifacts.
+- `jParser/runtime/runtime-jvm/jni`
+- `jParser/runtime/runtime-jvm/ffm`
+- `jParser/runtime/runtime-jvm/web`
+- `jParser/runtime/runtime-jvm/android`
 
-## Local vs publish behavior
+The internal `runtime-jvm` folder is not part of the public Maven artifact names.
 
-Desktop (`runtime-jni`, `runtime-ffm`) and web (`runtime-web`) use this gate:
+## Published Artifact Names
 
-When `includeNativesInMainJar` is `false`, main jar includes native/web files.
-When `includeNativesInMainJar` is `true`, main jar is classes-only and payload is published in classifier artifacts.
+Existing JVM/web artifacts keep their names:
 
-Android (`runtime-android`) stages JNI libs and publishes a single AAR that contains all supported ABI `.so` files.
-
-## Classifier artifacts by module
-
+- `runtime-core`
 - `runtime-jni`
-  - bundled: `desktop`
-  - per-platform: `windows_x64`, `linux_x64`, `mac_x64`, `mac_arm64`
-
 - `runtime-ffm`
-  - bundled: `desktop`
-  - per-platform: `windows_x64`, `linux_x64`, `mac_x64`, `mac_arm64`
+- `runtime-web`
+- `runtime-android`
 
-- `runtime-android` (artifactId `runtime-android`)
-  - single AAR containing: `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`
+TeaVM C artifacts use separate modules for generated Java and platform native payloads:
 
-- `runtime-web` (artifactId `runtime-web`)
-  - bundled web payload: `wasm` (contains both `idl.js` and `idl.wasm`)
+- `runtime-c`
+- `runtime-c_windows_x64`
+- `runtime-c_linux_x64`
+- `runtime-c_mac_x64`
+- `runtime-c_mac_arm64`
+- `runtime-c_android`
 
-## Reference pattern for desktop modules
+The main `runtime-c` artifact is published from `runtime-c/core` and contains generated Java classes only. Desktop native split artifacts are published from `runtime-c/desktop` and contain only the compiled native payload for that platform. Android payloads are published from their own child module.
 
-```kotlin
-val nativeJars = platforms.map { (classifier, config) ->
-    tasks.register<Jar>("nativeJar${classifier}") {
-        config()
-        archiveClassifier.set(classifier)
-    }
-}
+## Local vs Publish Behavior
 
-val nativeDesktopJar = tasks.register<Jar>("nativeJarDesktop") {
-    archiveClassifier.set("desktop")
-    listOf(
-        "windows_x64" to windowsFile,
-        "linux_x64" to linuxFile,
-        "mac_x64" to macFile,
-        "mac_arm64" to macArmFile,
-    ).forEach { (folder, path) ->
-        val nativeFile = file(path)
-        if(nativeFile.exists()) {
-            from(nativeFile) { into(folder) }
-        }
-    }
-}
+Desktop JVM modules (`runtime-jni`, `runtime-ffm`) and web (`runtime-web`) keep local project dependencies convenient by adding native/web payloads to the main jar for non-publish builds.
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-            artifact(nativeDesktopJar)
-            nativeJars.forEach { artifact(it) }
-        }
-    }
-}
-```
+Published main artifacts are classes-only. Native/web payloads are published as separate artifacts with explicit artifact IDs.
 
-## Reference pattern for Android module
+TeaVM C is stricter:
+
+- `runtime-c` is always Java classes only.
+- `runtime-c_<platform>` artifacts are native payload only.
+- Native payloads are not bundled into the main `runtime-c` jar.
+- Android does not consume desktop native artifacts; it uses `runtime-c/android`.
+
+Android (`runtime-android`) publishes a single AAR containing supported ABI `.so` files.
+
+## Artifact Examples
+
+JNI:
 
 ```kotlin
-val filterJniLibs by tasks.registering(Copy::class) {
-    into(layout.buildDirectory.dir("tmp/jniLibs"))
-    from("$projectDir/../runtime-build/build/c++/libs/android")
-    include("**/*.so")
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            artifactId = "runtime-android"
-            from(components["release"])
-        }
-    }
-}
+api("com.github.xpenatan.jParser:runtime-jni:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-jni_windows_x64:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-jni_linux_x64:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-jni_mac_x64:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-jni_mac_arm64:${LibExt.jParserVersion}")
 ```
 
-Consumer dependency format for Android:
+TeaVM C:
 
 ```kotlin
-implementation("com.github.xpenatan.jParser:runtime-android:<version>")
+api("com.github.xpenatan.jParser:runtime-c:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-c_windows_x64:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-c_linux_x64:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-c_mac_x64:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-c_mac_arm64:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-c_android:${LibExt.jParserVersion}")
 ```
 
-## Reference pattern for TeaVM web module
+Web:
 
 ```kotlin
-val wasmJar = tasks.register<Jar>("wasmJar") {
-    from(emscriptenJS, emscriptenWASM)
-    archiveClassifier.set("wasm")
-}
-
-tasks.named<Jar>("jar") {
-    if(!isPublishingTask) {
-        from(emscriptenJS, emscriptenWASM)
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-            artifact(wasmJar)
-        }
-    }
-}
+implementation("com.github.xpenatan.jParser:runtime-web:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-web_wasm:${LibExt.jParserVersion}")
 ```
 
-## Copy checklist for external libraries
+Android:
 
-1. Define platform/ABI native file paths.
-2. Create per-platform classifier jar tasks (desktop/web), or a single AAR for Android.
-3. Create one bundled classifier artifact (`desktop`, `wasm`) if needed.
-4. Use publish-task detection for local vs publish behavior.
-5. Publish main classes artifact with `from(components["java"])` when applicable.
-6. Attach classifier artifacts (or the single Android AAR) in `publishing`.
-7. Verify with:
-   - local build task (non-publish)
-   - `publishMavenPublicationToMavenLocal`
-   - jar/aar content inspection for expected payload.
+```kotlin
+implementation("com.github.xpenatan.jParser:runtime-android:${LibExt.jParserVersion}")
+```
+
+## Copy Checklist For External Libraries
+
+1. Keep generated/public Java classes in the main runtime artifact.
+2. Publish platform native payloads as separate artifact IDs using underscore platform suffixes.
+3. Keep native payload jars free of generated Java classes.
+4. Keep main publish artifacts classes-only.
+5. Verify with a local compile/generation task and jar content inspection when changing artifact layout.

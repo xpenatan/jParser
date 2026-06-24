@@ -16,8 +16,8 @@ Startup/session protocol is defined in `AGENTS.md` (`Start Here (Mandatory)`). T
 Use at least one compile or test task relevant to changed modules. Examples:
 
 - `gradlew.bat :jParser:jParser-core:compileJava`
-- `gradlew.bat :examples:TestLib:app:desktop-jni:test`
-- `gradlew.bat :examples:TestLib:app:desktop-ffm:test`
+- `gradlew.bat :examples:TestLib:app:platforms:desktop-jni:test`
+- `gradlew.bat :examples:TestLib:app:platforms:desktop-ffm:test`
 
 ## Handoff Checklist
 

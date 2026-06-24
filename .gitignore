@@ -30,32 +30,36 @@ out/
 *.log
 
 **/runtime/runtime-core/src/main/java/**
-**/runtime/runtime-web/src/main/java/**
-**/runtime/runtime-ffm/src/main/java/**
-**/runtime/runtime-jni/src/main/java/**
-**/runtime/runtime-android/src/main/java/**
+**/runtime/runtime-jvm/**/src/main/java/**
+**/runtime/runtime-c/**/src/main/java/**
 
 **/webapp/**
 **/lib/core/src/**
-**/lib/desktop/src/main/**
 
 **/lib/lib-web/src/main/java/**
 **/lib/lib-core/src/main/java/**
 **/lib/lib-ffm/src/main/java/**
 **/lib/lib-jni/src/main/java/**
 **/lib/lib-android/src/main/java/**
+**/lib/lib-c/**/src/main/java/**
 
 **/libA/lib-web/src/main/java/**
 **/libA/lib-core/src/main/java/**
 **/libA/lib-ffm/src/main/java/**
 **/libA/lib-jni/src/main/java/**
 **/libA/lib-android/src/main/java/**
+**/libA/lib-c/**/src/main/java/**
 
 **/libB/lib-web/src/main/java/**
 **/libB/lib-core/src/main/java/**
 **/libB/lib-ffm/src/main/java/**
 **/libB/lib-jni/src/main/java/**
 **/libB/lib-android/src/main/java/**
+**/libB/lib-c/**/src/main/java/**
+
+**/android/libs
+**/android-c/libs
+
 
 **/app/android/libs/
 .codiumai

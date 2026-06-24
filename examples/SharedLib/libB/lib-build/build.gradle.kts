@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":jParser:gen:gen-core"))
     implementation(project(":jParser:gen:gen-idl"))
     implementation(project(":jParser:gen:gen-web"))
+    implementation(project(":jParser:gen:gen-c"))
     implementation(project(":jParser:gen:gen-jni"))
     implementation(project(":jParser:gen:gen-build"))
     implementation(project(":jParser:gen:gen-build-tool"))
@@ -32,6 +33,24 @@ tasks.register<JavaExec>("LibB_build_project_web_wasm") {
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("gen_web", "web_wasm")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("LibB_build_project_windows64_teavm_c") {
+    group = "lib"
+    description = "Generate TeaVM C Java bindings and compile native library for Windows"
+    dependsOn(":examples:SharedLib:libA:lib-build:LibA_build_project_windows64_teavm_c")
+    mainClass.set(mainClassName)
+    args = mutableListOf("gen_teavm_c", "windows64_teavm_c")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("LibB_build_project_android_teavm_c") {
+    group = "lib"
+    description = "Generate TeaVM C Java bindings and compile native library for Android"
+    dependsOn(":examples:SharedLib:libA:lib-build:LibA_build_project_android_teavm_c")
+    mainClass.set(mainClassName)
+    args = mutableListOf("gen_teavm_c", "android_teavm_c")
     classpath = sourceSets["main"].runtimeClasspath
 }
 

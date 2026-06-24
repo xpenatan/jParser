@@ -283,6 +283,12 @@ public abstract class DefaultBuildTarget extends BuildTarget {
         cppInclude.add(ffmGlueDir + "/FFMGlue.cpp");
     }
 
+    public void setupTeaVMCGlueCode(String libBuildCPPPath) {
+        String teaVMCGlueDir = libBuildCPPPath + "/src/teavmcglue";
+        headerDirs.add("-I" + teaVMCGlueDir);
+        cppInclude.add(teaVMCGlueDir + "/TeaVMCGlue.cpp");
+    }
+
     public static ArrayList<CustomFileDescriptor> getCPPFiles(CustomFileDescriptor dir, ArrayList<String> cppIncludes, ArrayList<String> cppExcludes) {
         ArrayList<CustomFileDescriptor> files = new ArrayList<>();
         getAllFiles(dir, files);

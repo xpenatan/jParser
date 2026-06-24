@@ -32,11 +32,15 @@ public class BuildRuntimeHelper {
         data.packageName = basePackage;
         data.cppSourcePath = null;
         data.modulePrefix = modulePrefix;
+        data.moduleJNISuffix = "-jvm/jni";
+        data.moduleWebSuffix = "-jvm/web";
+        data.moduleFFMSuffix = "-jvm/ffm";
         BuildToolOptions op = new BuildToolOptions(data, args);
         // Runtime helper methods are predominantly simple set/get operations.
         // Keep critical mode enabled by default for the generated runtime helper.
         op.ffmClassData.defaultCritical = true;
         op.ffmClassData.symbolNameMode = FFMClassData.SymbolNameMode.OBFUSCATED;
+        op.teaVMCClassData.symbolNameMode = FFMClassData.SymbolNameMode.OBFUSCATED;
         op.jniClassData.symbolNameMode = JNIClassData.SymbolNameMode.OBFUSCATED;
 
         op.ffmClassData.logMethod = true;
@@ -49,46 +53,63 @@ public class BuildRuntimeHelper {
                     targets.add(getTeavmTarget(op, idlReader));
                 }
                 if(op.containsArg("windows64_jni")) {
-                    targets.add(getWindowVCTarget(op, false, ffmNativeBuildConfig));
+                    targets.add(getWindowVCTarget(op, "jni", false, ffmNativeBuildConfig));
                 }
                 if(op.containsArg("linux64_jni")) {
-                    targets.add(getLinuxTarget(op, false, ffmNativeBuildConfig));
+                    targets.add(getLinuxTarget(op, "jni", false, ffmNativeBuildConfig));
                 }
                 if(op.containsArg("mac64_jni")) {
-                    targets.add(getMacTarget(op, false, false, ffmNativeBuildConfig));
+                    targets.add(getMacTarget(op, false, "jni", false, ffmNativeBuildConfig));
                 }
                 if(op.containsArg("macArm_jni")) {
-                    targets.add(getMacTarget(op, true, false, ffmNativeBuildConfig));
+                    targets.add(getMacTarget(op, true, "jni", false, ffmNativeBuildConfig));
                 }
                 if(op.containsArg("android_jni")) {
-                    targets.add(getAndroidTarget(op));
+                    targets.add(getAndroidTarget(op, "jni"));
                 }
                 if(op.containsArg("ios_jni")) {
-                    targets.add(getIOSTarget(op));
+                    targets.add(getIOSTarget(op, "jni"));
                 }
 
                 if(op.containsArg("windows64_ffm")) {
-                    targets.add(getWindowVCTarget(op, true, ffmNativeBuildConfig));
+                    targets.add(getWindowVCTarget(op, "ffm", true, ffmNativeBuildConfig));
                 }
                 if(op.containsArg("linux64_ffm")) {
-                    targets.add(getLinuxTarget(op, true, ffmNativeBuildConfig));
+                    targets.add(getLinuxTarget(op, "ffm", true, ffmNativeBuildConfig));
                 }
                 if(op.containsArg("mac64_ffm")) {
-                    targets.add(getMacTarget(op, false, true, ffmNativeBuildConfig));
+                    targets.add(getMacTarget(op, false, "ffm", true, ffmNativeBuildConfig));
                 }
                 if(op.containsArg("macArm_ffm")) {
-                    targets.add(getMacTarget(op, true, true, ffmNativeBuildConfig));
+                    targets.add(getMacTarget(op, true, "ffm", true, ffmNativeBuildConfig));
+                }
+
+                if(op.containsArg("windows64_teavm_c")) {
+                    targets.add(getWindowVCTarget(op, "teavm_c", false, ffmNativeBuildConfig));
+                }
+                if(op.containsArg("linux64_teavm_c")) {
+                    targets.add(getLinuxTarget(op, "teavm_c", false, ffmNativeBuildConfig));
+                }
+                if(op.containsArg("mac64_teavm_c")) {
+                    targets.add(getMacTarget(op, false, "teavm_c", false, ffmNativeBuildConfig));
+                }
+                if(op.containsArg("macArm_teavm_c")) {
+                    targets.add(getMacTarget(op, true, "teavm_c", false, ffmNativeBuildConfig));
+                }
+                if(op.containsArg("android_teavm_c")) {
+                    targets.add(getAndroidTarget(op, "teavm_c"));
+                }
+                if(op.containsArg("ios_teavm_c")) {
+                    targets.add(getIOSTarget(op, "teavm_c"));
                 }
             }
         });
     }
 
 
-    private static BuildMultiTarget getWindowVCTarget(BuildToolOptions op, boolean isFFM, FFMNativeBuildConfig ffmNativeBuildConfig) {
+    private static BuildMultiTarget getWindowVCTarget(BuildToolOptions op, String api, boolean isFFM, FFMNativeBuildConfig ffmNativeBuildConfig) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
-
-        String api = isFFM ? "ffm" : "jni";
 
         // Make a static library
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
@@ -103,12 +124,7 @@ public class BuildRuntimeHelper {
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
         linkTarget.libDirSuffix += api;
-        if(isFFM) {
-            linkTarget.setupFFMGlueCode(libBuildCPPPath);
-        }
-        else {
-            linkTarget.setupJNIGlueCode(libBuildCPPPath);
-        }
+        setupGlueCode(linkTarget, api, libBuildCPPPath);
         linkTarget.cppFlags.add("-std:c++17");
         applyFFMWindowsCompileFlags(linkTarget, isFFM, ffmNativeBuildConfig);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
@@ -120,11 +136,9 @@ public class BuildRuntimeHelper {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getLinuxTarget(BuildToolOptions op, boolean isFFM, FFMNativeBuildConfig ffmNativeBuildConfig) {
+    private static BuildMultiTarget getLinuxTarget(BuildToolOptions op, String api, boolean isFFM, FFMNativeBuildConfig ffmNativeBuildConfig) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
-
-        String api = isFFM ? "ffm" : "jni";
 
         // Make a static library
         LinuxTarget compileStaticTarget = new LinuxTarget();
@@ -140,12 +154,7 @@ public class BuildRuntimeHelper {
 
         LinuxTarget linkTarget = new LinuxTarget();
         linkTarget.libDirSuffix += api;
-        if(isFFM) {
-            linkTarget.setupFFMGlueCode(libBuildCPPPath);
-        }
-        else {
-            linkTarget.setupJNIGlueCode(libBuildCPPPath);
-        }
+        setupGlueCode(linkTarget, api, libBuildCPPPath);
         linkTarget.cppFlags.add("-std=c++17");
         linkTarget.cppFlags.add("-fPIC");
         applyFFMUnixCompileFlags(linkTarget.cppFlags, isFFM, ffmNativeBuildConfig);
@@ -160,11 +169,9 @@ public class BuildRuntimeHelper {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm, boolean isFFM, FFMNativeBuildConfig ffmNativeBuildConfig) {
+    private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm, String api, boolean isFFM, FFMNativeBuildConfig ffmNativeBuildConfig) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
-
-        String api = isFFM ? "ffm" : "jni";
 
         // Make a static library
         MacTarget compileStaticTarget = new MacTarget(isArm);
@@ -180,12 +187,7 @@ public class BuildRuntimeHelper {
 
         MacTarget linkTarget = new MacTarget(isArm);
         linkTarget.libDirSuffix += api;
-        if(isFFM) {
-            linkTarget.setupFFMGlueCode(libBuildCPPPath);
-        }
-        else {
-            linkTarget.setupJNIGlueCode(libBuildCPPPath);
-        }
+        setupGlueCode(linkTarget, api, libBuildCPPPath);
         linkTarget.cppFlags.add("-std=c++17");
         linkTarget.cppFlags.add("-fPIC");
         applyFFMUnixCompileFlags(linkTarget.cppFlags, isFFM, ffmNativeBuildConfig);
@@ -246,7 +248,7 @@ public class BuildRuntimeHelper {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getAndroidTarget(BuildToolOptions op) {
+    private static BuildMultiTarget getAndroidTarget(BuildToolOptions op, String api) {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
@@ -263,6 +265,9 @@ public class BuildRuntimeHelper {
 
             // Make a static library
             AndroidTarget compileStaticTarget = new AndroidTarget(target, apiLevel);
+            if(api.equals("teavm_c")) {
+                compileStaticTarget.libDirSuffix += api;
+            }
             compileStaticTarget.isStatic = true;
             compileStaticTarget.cppFlags.add("-std=c++17");
             compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
@@ -271,11 +276,18 @@ public class BuildRuntimeHelper {
             multiTarget.add(compileStaticTarget);
 
             AndroidTarget linkTarget = new AndroidTarget(target, apiLevel);
-            linkTarget.setupJNIGlueCode(libBuildCPPPath);
+            if(api.equals("teavm_c")) {
+                linkTarget.libDirSuffix += api;
+            }
+            setupGlueCode(linkTarget, api, libBuildCPPPath);
             linkTarget.cppFlags.add("-std=c++17");
             linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             linkTarget.linkerFlags.add("-Wl,--whole-archive");
-            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() +"/lib" + op.libName + ".a");
+            String staticLibPath = libBuildCPPPath + "/libs/android/" + target.getFolder() + "/";
+            if(api.equals("teavm_c")) {
+                staticLibPath += api + "/";
+            }
+            linkTarget.linkerFlags.add(staticLibPath + "lib" + op.libName + ".a");
             linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
             linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
             multiTarget.add(linkTarget);
@@ -284,7 +296,7 @@ public class BuildRuntimeHelper {
         return multiTarget;
     }
 
-    private static BuildMultiTarget getIOSTarget(BuildToolOptions op)  {
+    private static BuildMultiTarget getIOSTarget(BuildToolOptions op, String api)  {
         BuildMultiTarget multiTarget = new BuildMultiTarget();
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
@@ -293,6 +305,9 @@ public class BuildRuntimeHelper {
 
         // Make a static library
         IOSTarget compileStaticTarget = new IOSTarget();
+        if(api.equals("teavm_c")) {
+            compileStaticTarget.libDirSuffix += api;
+        }
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++17");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
@@ -303,15 +318,34 @@ public class BuildRuntimeHelper {
         multiTarget.add(compileStaticTarget);
 
         IOSTarget linkTarget = new IOSTarget();
-        linkTarget.setupJNIGlueCode(libBuildCPPPath);
+        if(api.equals("teavm_c")) {
+            linkTarget.libDirSuffix += api;
+        }
+        setupGlueCode(linkTarget, api, libBuildCPPPath);
         linkTarget.cppFlags.add("-std=c++17");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add("-Wl,-force_load");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
+        String staticLibPath = libBuildCPPPath + "/libs/ios/";
+        if(api.equals("teavm_c")) {
+            staticLibPath += api + "/";
+        }
+        linkTarget.linkerFlags.add(staticLibPath + "lib" + op.libName + "_.a");
         multiTarget.add(linkTarget);
 
         return multiTarget;
+    }
+
+    private static void setupGlueCode(com.github.xpenatan.jParser.builder.DefaultBuildTarget target, String api, String libBuildCPPPath) {
+        if(api.equals("ffm")) {
+            target.setupFFMGlueCode(libBuildCPPPath);
+        }
+        else if(api.equals("teavm_c")) {
+            target.setupTeaVMCGlueCode(libBuildCPPPath);
+        }
+        else {
+            target.setupJNIGlueCode(libBuildCPPPath);
+        }
     }
 
     private static void applyFFMWindowsCompileFlags(WindowsMSVCTarget target, boolean isFFM, FFMNativeBuildConfig ffmNativeBuildConfig) {

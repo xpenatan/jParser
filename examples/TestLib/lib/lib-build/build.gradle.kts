@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":jParser:gen:gen-core"))
     implementation(project(":jParser:gen:gen-idl"))
     implementation(project(":jParser:gen:gen-web"))
+    implementation(project(":jParser:gen:gen-c"))
     implementation(project(":jParser:gen:gen-jni"))
     implementation(project(":jParser:gen:gen-ffm"))
     implementation(project(":jParser:gen:gen-build"))
@@ -29,6 +30,54 @@ tasks.register<JavaExec>("TestLib_build_project_web_wasm") {
     description = "Generate native project"
     mainClass.set(mainClassName)
     args = mutableListOf("gen_web", "web_wasm")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_windows64_teavm_c") {
+    group = "lib"
+    description = "Generate TeaVM C Java bindings and compile native library for Windows"
+    mainClass.set(mainClassName)
+    args = mutableListOf("gen_teavm_c", "windows64_teavm_c")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_linux64_teavm_c") {
+    group = "lib"
+    description = "Generate TeaVM C Java bindings and compile native library for Linux"
+    mainClass.set(mainClassName)
+    args = mutableListOf("gen_teavm_c", "linux64_teavm_c")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_mac64_teavm_c") {
+    group = "lib"
+    description = "Generate TeaVM C Java bindings and compile native library for macOS"
+    mainClass.set(mainClassName)
+    args = mutableListOf("gen_teavm_c", "mac64_teavm_c")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_macArm_teavm_c") {
+    group = "lib"
+    description = "Generate TeaVM C Java bindings and compile native library for macOS ARM"
+    mainClass.set(mainClassName)
+    args = mutableListOf("gen_teavm_c", "macArm_teavm_c")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_android_teavm_c") {
+    group = "lib"
+    description = "Generate TeaVM C Java bindings and compile native library for Android"
+    mainClass.set(mainClassName)
+    args = mutableListOf("gen_teavm_c", "android_teavm_c")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("TestLib_build_project_ios_teavm_c") {
+    group = "lib"
+    description = "Generate TeaVM C Java bindings and compile native library for iOS"
+    mainClass.set(mainClassName)
+    args = mutableListOf("gen_teavm_c", "ios_teavm_c")
     classpath = sourceSets["main"].runtimeClasspath
 }
 

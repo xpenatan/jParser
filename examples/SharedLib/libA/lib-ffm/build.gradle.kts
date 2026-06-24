@@ -11,7 +11,7 @@ java {
 dependencies {
     api(project(":jParser:loader:loader-core"))
     api(project(":jParser:api:api-core"))
-    api(project(":jParser:runtime:runtime-ffm"))
+    api(project(":jParser:runtime:runtime-jvm:ffm"))
 }
 
 // Bundle FFM-compiled native libraries into the JAR.

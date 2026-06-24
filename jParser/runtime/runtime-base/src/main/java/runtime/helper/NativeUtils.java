@@ -4,6 +4,31 @@ import com.github.xpenatan.jParser.api.NativeObject;
 import java.nio.ByteBuffer;
 
 public class NativeUtils {
+    /*[-TEAVM_C;-NATIVE]
+        #include <cstring>
+
+        extern "C" {
+        TEAVMC_EXPORT void jparser_com_github_xpenatan_jparser_runtime_helper_NativeUtils_copyToByteBuffer_l_l_i_i(int64_t data_addr, int64_t destination_addr, int32_t offset, int32_t sizeInBytes) {
+            void* data = (void*)data_addr;
+            char* bufferAddress = (char*)destination_addr;
+            memcpy(bufferAddress + offset, data, sizeInBytes);
+        }
+
+        TEAVMC_EXPORT void jparser_com_github_xpenatan_jparser_runtime_helper_NativeUtils_copyFromByteBuffer_l_l_i_i(int64_t source_addr, int64_t data_addr, int32_t offset, int32_t sizeInBytes) {
+            void* data = (void*)data_addr;
+            char* sourceAddress = (char*)source_addr;
+            memcpy((char*)data + offset, sourceAddress, sizeInBytes);
+        }
+
+        TEAVMC_EXPORT int8_t jparser_com_github_xpenatan_jparser_runtime_helper_NativeUtils_readByte_l_i(int64_t data_addr, int32_t offset) {
+            return *((int8_t*)data_addr + offset);
+        }
+
+        TEAVMC_EXPORT void jparser_com_github_xpenatan_jparser_runtime_helper_NativeUtils_writeByte_l_i_b(int64_t data_addr, int32_t offset, int8_t value) {
+            *((int8_t*)data_addr + offset) = value;
+        }
+        }
+    */
 
     private static final Object NULL_SEGMENT = null;
 
@@ -88,6 +113,15 @@ public class NativeUtils {
             }
         }
     */
+    /*[-TEAVM_C;-REPLACE]
+        public static long address(ByteBuffer byteBuffer) {
+            if(byteBuffer == null) {
+                return 0L;
+            }
+            org.teavm.classlib.java.nio.file.TAddressBasedBuffer addressBasedBuffer = (org.teavm.classlib.java.nio.file.TAddressBasedBuffer)(Object)byteBuffer;
+            return addressBasedBuffer.getDataAddress().toLong();
+        }
+    */
     public static long address(ByteBuffer byteBuffer) {
         return 0L;
     }
@@ -143,6 +177,14 @@ public class NativeUtils {
             internal_native_copyToByteBuffer(source.native_void_address, destinationAddress, offset, sizeInBytes);
         }
     */
+    /*[-TEAVM_C;-REPLACE_BLOCK]
+        {
+            long sourceAddress = source.native_void_address;
+            for(int i = 0; i < sizeInBytes; i++) {
+                destination.put(offset + i, internal_native_readByte(sourceAddress, i));
+            }
+        }
+    */
     public static void copyToByteBuffer(NativeObject source, ByteBuffer destination, int offset, int sizeInBytes) {
         internal_native_copyToByteBuffer(source.native_void_address, destination, offset, sizeInBytes);
     }
@@ -156,6 +198,14 @@ public class NativeUtils {
     /*[-FFM;-REPLACE_BLOCK]
         {
             internal_native_copyFromByteBuffer(source, destination.native_void_address, offset, sizeInBytes);
+        }
+    */
+    /*[-TEAVM_C;-REPLACE_BLOCK]
+        {
+            long destinationAddress = destination.native_void_address;
+            for(int i = 0; i < sizeInBytes; i++) {
+                internal_native_writeByte(destinationAddress, offset + i, source.get(i));
+            }
         }
     */
     public static void copyFromByteBuffer(ByteBuffer source, NativeObject destination, int offset, int sizeInBytes) {
@@ -191,6 +241,10 @@ public class NativeUtils {
             } catch(Throwable e) { throw new RuntimeException(e); }
         }
     */
+    /*[-TEAVM_C;-REPLACE]
+        @org.teavm.interop.Import(name = "jparser_com_github_xpenatan_jparser_runtime_helper_NativeUtils_copyToByteBuffer_l_l_i_i")
+        public static native void internal_native_copyToByteBuffer(long data_addr, long destination_addr, int offset, int sizeInBytes);
+    */
     public static native void internal_native_copyToByteBuffer(long data_addr, ByteBuffer destination, int offset, int sizeInBytes);
 
     /*[-TEAVM;-REPLACE]
@@ -223,7 +277,23 @@ public class NativeUtils {
             } catch(Throwable e) { throw new RuntimeException(e); }
         }
     */
+    /*[-TEAVM_C;-REPLACE]
+        @org.teavm.interop.Import(name = "jparser_com_github_xpenatan_jparser_runtime_helper_NativeUtils_copyFromByteBuffer_l_l_i_i")
+        public static native void internal_native_copyFromByteBuffer(long source_addr, long data_addr, int offset, int sizeInBytes);
+    */
     public static native void internal_native_copyFromByteBuffer(ByteBuffer source, long data_addr, int offset, int sizeInBytes);
+
+    /*[-TEAVM_C;-REPLACE]
+        @org.teavm.interop.Import(name = "jparser_com_github_xpenatan_jparser_runtime_helper_NativeUtils_readByte_l_i")
+        private static native byte internal_native_readByte(long data_addr, int offset);
+    */
+    private static native byte internal_native_readByte(long data_addr, int offset);
+
+    /*[-TEAVM_C;-REPLACE]
+        @org.teavm.interop.Import(name = "jparser_com_github_xpenatan_jparser_runtime_helper_NativeUtils_writeByte_l_i_b")
+        private static native void internal_native_writeByte(long data_addr, int offset, byte value);
+    */
+    private static native void internal_native_writeByte(long data_addr, int offset, byte value);
 
     /*[-FFM;-ADD]
         private static final class FFMHandles {

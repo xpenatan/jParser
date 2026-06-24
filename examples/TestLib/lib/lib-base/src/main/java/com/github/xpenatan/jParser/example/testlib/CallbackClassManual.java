@@ -112,6 +112,56 @@ public class CallbackClassManual extends NativeObject {
         }
         }
     */
+    /*[-TEAVM_C;-NATIVE]
+        typedef void (*fp_CCMImpl_onVoidCallback)(int32_t, int64_t, int64_t);
+        typedef int32_t (*fp_CCMImpl_onIntCallback)(int32_t, int32_t, int32_t);
+        typedef float (*fp_CCMImpl_onFloatCallback)(int32_t, float, float);
+        typedef int32_t (*fp_CCMImpl_onBoolCallback)(int32_t, int32_t);
+        typedef void (*fp_CCMImpl_onStringCallback)(int32_t, void*);
+        class CallbackClassManualImpl : public CallbackClassManual {
+        private:
+            int32_t teavmc_callback_id = -1;
+            fp_CCMImpl_onVoidCallback onVoidCallback_ptr = nullptr;
+            fp_CCMImpl_onIntCallback onIntCallback_ptr = nullptr;
+            fp_CCMImpl_onFloatCallback onFloatCallback_ptr = nullptr;
+            fp_CCMImpl_onBoolCallback onBoolCallback_ptr = nullptr;
+            fp_CCMImpl_onStringCallback onStringCallback_ptr = nullptr;
+        public:
+            void setupCallback(int32_t callback_id, fp_CCMImpl_onVoidCallback a, fp_CCMImpl_onIntCallback b, fp_CCMImpl_onFloatCallback c, fp_CCMImpl_onBoolCallback d, fp_CCMImpl_onStringCallback e) {
+                this->teavmc_callback_id = callback_id;
+                this->onVoidCallback_ptr = a;
+                this->onIntCallback_ptr = b;
+                this->onFloatCallback_ptr = c;
+                this->onBoolCallback_ptr = d;
+                this->onStringCallback_ptr = e;
+            }
+            virtual void onVoidCallback(TestObjectClass& refData, TestObjectClass* pointerData) const {
+                if(onVoidCallback_ptr != nullptr) onVoidCallback_ptr(teavmc_callback_id, (int64_t)&refData, (int64_t)pointerData);
+            }
+            virtual int onIntCallback(int intValue01, int intValue02) const {
+                if(onIntCallback_ptr == nullptr) return 0;
+                return (int)onIntCallback_ptr(teavmc_callback_id, intValue01, intValue02);
+            }
+            virtual float onFloatCallback(float floatValue01, float floatValue02) const {
+                if(onFloatCallback_ptr == nullptr) return 0;
+                return (float)onFloatCallback_ptr(teavmc_callback_id, floatValue01, floatValue02);
+            }
+            virtual bool onBoolCallback(bool boolValue01) const {
+                if(onBoolCallback_ptr == nullptr) return false;
+                return (bool)onBoolCallback_ptr(teavmc_callback_id, boolValue01);
+            }
+            virtual void onStringCallback(const char* strValue01) const {
+                if(onStringCallback_ptr != nullptr) onStringCallback_ptr(teavmc_callback_id, (void*)strValue01);
+            }
+        };
+
+        extern "C" {
+        TEAVMC_EXPORT void teavmc_CallbackClassManual_setupCallbacks(int64_t this_addr, int32_t callback_id, fp_CCMImpl_onVoidCallback onVoidCallback_fp, fp_CCMImpl_onIntCallback onIntCallback_fp, fp_CCMImpl_onFloatCallback onFloatCallback_fp, fp_CCMImpl_onBoolCallback onBoolCallback_fp, fp_CCMImpl_onStringCallback onStringCallback_fp) {
+            CallbackClassManualImpl* nativeObject = (CallbackClassManualImpl*)this_addr;
+            nativeObject->setupCallback(callback_id, onVoidCallback_fp, onIntCallback_fp, onFloatCallback_fp, onBoolCallback_fp, onStringCallback_fp);
+        }
+        }
+    */
 
     /*[-FFM;-ADD]
         private java.lang.foreign.Arena ffm_upcallArena;
@@ -152,6 +202,95 @@ public class CallbackClassManual extends NativeObject {
         private void internal_ffm_onStringCallback(java.lang.foreign.MemorySegment seg) {
             String str = seg.reinterpret(Long.MAX_VALUE).getString(0);
             internal_onStringCallback(str);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        private static final java.util.ArrayList<CallbackClassManual> TEAVMC_CALLBACKS = new java.util.ArrayList<>();
+    */
+    /*[-TEAVM_C;-ADD]
+        private int teavmcCallbackId = -1;
+    */
+    /*[-TEAVM_C;-ADD]
+        private int teavmcRegisterCallback() {
+            if(teavmcCallbackId < 0) {
+                teavmcCallbackId = TEAVMC_CALLBACKS.size();
+                TEAVMC_CALLBACKS.add(this);
+            }
+            else {
+                TEAVMC_CALLBACKS.set(teavmcCallbackId, this);
+            }
+            return teavmcCallbackId;
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        private static String teavmcCStringToString(org.teavm.interop.Address address) {
+            if(address == null || address.toLong() == 0) {
+                return null;
+            }
+            int length = 0;
+            while(address.add(length).getByte() != 0) {
+                length++;
+            }
+            char[] chars = new char[length];
+            for(int i = 0; i < length; i++) {
+                chars[i] = (char)(address.add(i).getByte() & 0xFF);
+            }
+            return new String(chars);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        private static abstract class TEAVMC_onVoidCallback_Function extends org.teavm.interop.Function {
+            public abstract void call(int callbackId, long refData, long pointerData);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        @org.teavm.interop.Export(name = "teavmc_CallbackClassManual_onVoidCallback")
+        private static void teavmc_onVoidCallback(int callbackId, long refData, long pointerData) {
+            TEAVMC_CALLBACKS.get(callbackId).internal_onVoidCallback(refData, pointerData);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        private static abstract class TEAVMC_onIntCallback_Function extends org.teavm.interop.Function {
+            public abstract int call(int callbackId, int intValue01, int intValue02);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        @org.teavm.interop.Export(name = "teavmc_CallbackClassManual_onIntCallback")
+        private static int teavmc_onIntCallback(int callbackId, int intValue01, int intValue02) {
+            return TEAVMC_CALLBACKS.get(callbackId).internal_onIntCallback(intValue01, intValue02);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        private static abstract class TEAVMC_onFloatCallback_Function extends org.teavm.interop.Function {
+            public abstract float call(int callbackId, float floatValue01, float floatValue02);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        @org.teavm.interop.Export(name = "teavmc_CallbackClassManual_onFloatCallback")
+        private static float teavmc_onFloatCallback(int callbackId, float floatValue01, float floatValue02) {
+            return TEAVMC_CALLBACKS.get(callbackId).internal_onFloatCallback(floatValue01, floatValue02);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        private static abstract class TEAVMC_onBoolCallback_Function extends org.teavm.interop.Function {
+            public abstract boolean call(int callbackId, boolean boolValue01);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        @org.teavm.interop.Export(name = "teavmc_CallbackClassManual_onBoolCallback")
+        private static boolean teavmc_onBoolCallback(int callbackId, boolean boolValue01) {
+            return TEAVMC_CALLBACKS.get(callbackId).internal_onBoolCallback(boolValue01);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        private static abstract class TEAVMC_onStringCallback_Function extends org.teavm.interop.Function {
+            public abstract void call(int callbackId, org.teavm.interop.Address strValue01);
+        }
+    */
+    /*[-TEAVM_C;-ADD]
+        @org.teavm.interop.Export(name = "teavmc_CallbackClassManual_onStringCallback")
+        private static void teavmc_onStringCallback(int callbackId, org.teavm.interop.Address strValue01) {
+            TEAVMC_CALLBACKS.get(callbackId).internal_onStringCallback(teavmcCStringToString(strValue01));
         }
     */
 
@@ -223,6 +362,15 @@ public class CallbackClassManual extends NativeObject {
     /*[-TEAVM;-NATIVE]
         return BigInt(-1);
     */
+    /*[-TEAVM_C;-NATIVE]
+        long long myCode = 0;
+        myCode++;
+        #ifdef __ANDROID__
+            return 1;
+        #else
+            return 0;
+        #endif
+    */
     /*[-JNI;-NATIVE]
         long long myCode = 0;
         myCode++;
@@ -246,6 +394,9 @@ public class CallbackClassManual extends NativeObject {
     /*[-TEAVM;-NATIVE]
         var CallbackClassManualImpl = new [MODULE].CallbackClassManualImpl();
         return [MODULE].getPointer(CallbackClassManualImpl);
+    */
+    /*[-TEAVM_C;-NATIVE]
+        return (int64_t)new CallbackClassManualImpl();
     */
     /*[-FFM;-REPLACE]
         private static long internal_native_create_addr() {
@@ -320,6 +471,17 @@ public class CallbackClassManual extends NativeObject {
             internal_native_setupCallbacks((int)native_address, onVoidCallback, onIntCallback, onFloatCallback, onBoolCallback, onStringCallback);
         }
     */
+    /*[-TEAVM_C;-REPLACE_BLOCK]
+        {
+            int callbackId = teavmcRegisterCallback();
+            internal_native_setupCallbacks(native_address, callbackId,
+                    org.teavm.interop.Function.get(TEAVMC_onVoidCallback_Function.class, CallbackClassManual.class, "teavmc_onVoidCallback"),
+                    org.teavm.interop.Function.get(TEAVMC_onIntCallback_Function.class, CallbackClassManual.class, "teavmc_onIntCallback"),
+                    org.teavm.interop.Function.get(TEAVMC_onFloatCallback_Function.class, CallbackClassManual.class, "teavmc_onFloatCallback"),
+                    org.teavm.interop.Function.get(TEAVMC_onBoolCallback_Function.class, CallbackClassManual.class, "teavmc_onBoolCallback"),
+                    org.teavm.interop.Function.get(TEAVMC_onStringCallback_Function.class, CallbackClassManual.class, "teavmc_onStringCallback"));
+        }
+    */
     private void setupCallbacks() {
         internal_native_setupCallbacks(native_address);
     }
@@ -337,6 +499,13 @@ public class CallbackClassManual extends NativeObject {
             try { FFMHandles.setupCallbacks.invokeExact(this_addr, onVoidCallback_fp, onIntCallback_fp, onFloatCallback_fp, onBoolCallback_fp, onStringCallback_fp); }
             catch(Throwable e) { throw new RuntimeException(e); }
         }
+    */
+    /*[-TEAVM_C;-NATIVE]
+        // Replaced by the explicit TeaVM C import below.
+    */
+    /*[-TEAVM_C;-REPLACE]
+        @org.teavm.interop.Import(name = "teavmc_CallbackClassManual_setupCallbacks")
+        private static native void internal_native_setupCallbacks(long this_addr, int callbackId, TEAVMC_onVoidCallback_Function onVoidCallback_fp, TEAVMC_onIntCallback_Function onIntCallback_fp, TEAVMC_onFloatCallback_Function onFloatCallback_fp, TEAVMC_onBoolCallback_Function onBoolCallback_fp, TEAVMC_onStringCallback_Function onStringCallback_fp);
     */
     private native void internal_native_setupCallbacks(long this_addr);
 

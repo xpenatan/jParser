@@ -13,7 +13,10 @@ import com.github.xpenatan.jParser.idl.IDLFile;
 import com.github.xpenatan.jParser.idl.IDLRenaming;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import com.github.xpenatan.jParser.idl.parser.IDLDefaultCodeParser;
+import com.github.xpenatan.jParser.c.TeaVMCCodeParser;
+import com.github.xpenatan.jParser.c.TeaVMCGenerator;
 import com.github.xpenatan.jParser.teavm.TeaVMCodeParser;
+import java.io.File;
 import java.util.ArrayList;
 
 public class BuilderTool {
@@ -73,6 +76,18 @@ public class BuilderTool {
             JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getTeaVMJavaOutputPath());
         }
 
+        if(op.generateTeaVMC) {
+            TeaVMCGenerator teaVMCGenerator = new TeaVMCGenerator(op.getCPPDestinationPath());
+            teaVMCGenerator.setFFMClassData(op.teaVMCClassData);
+            addTeaVMCDefaultInclude(op, teaVMCGenerator);
+            TeaVMCCodeParser teaVMCParser = new TeaVMCCodeParser(teaVMCGenerator, idlReader, op.packageName, op.getSourceDir());
+            teaVMCParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
+            teaVMCParser.setSymbolData(op.teaVMCClassData);
+            teaVMCParser.generateClass = true;
+            teaVMCParser.idlRenaming = packageRenaming;
+            JParser.generate(teaVMCParser, op.getModuleBaseJavaDir(), op.getCJavaOutputPath());
+        }
+
         if(op.generateFFM) {
             FFMCppGenerator ffmGenerator = new FFMCppGenerator(op.getCPPDestinationPath());
             ffmGenerator.setFFMClassData(op.ffmClassData);
@@ -88,6 +103,24 @@ public class BuilderTool {
         JBuilder.build(buildConfig, targets);
     }
 
+    private static void addTeaVMCDefaultInclude(BuildToolOptions op, TeaVMCGenerator teaVMCGenerator) {
+        String includeName = findCustomInclude(op, "CustomCode.h");
+        if(includeName == null) {
+            includeName = findCustomInclude(op, "IDLCustomCode.h");
+        }
+        if(includeName != null) {
+            teaVMCGenerator.addNativeCode((com.github.javaparser.ast.Node)null, "#include \"" + includeName + "\"");
+        }
+    }
+
+    private static String findCustomInclude(BuildToolOptions op, String includeName) {
+        File includeFile = new File(op.getCustomSourceDir(), includeName);
+        if(includeFile.exists()) {
+            return includeName;
+        }
+        return null;
+    }
+
     private static void applyAutoGenerateFlags(BuildToolOptions op) {
         if(op.containsArg("gen_ffm")) {
             op.generateFFM = true;
@@ -99,6 +132,10 @@ public class BuilderTool {
 
         if(op.containsArg("gen_web")) {
             op.generateWeb = true;
+        }
+
+        if(op.containsArg("gen_teavm_c")) {
+            op.generateTeaVMC = true;
         }
     }
 

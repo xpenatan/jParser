@@ -47,7 +47,7 @@ import java.util.List;
  */
 public class FFMCodeParser extends IDLDefaultCodeParser {
 
-    private static final String HEADER_CMD = "FFM";
+    private static final String DEFAULT_HEADER_CMD = "FFM";
     private static final String CALLBACK_UPCALL_ARENA_FIELD = "upcallArena";
     private static final String CALLBACK_RELEASE_METHOD = "releaseUpcallResources";
 
@@ -225,17 +225,23 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     protected static final String ENUM_GET_INT_TEMPLATE =
             "\nreturn (int64_t)[ENUM];\n";
 
-    private final FFMNativeCodeGenerator cppGenerator;
+    protected final FFMNativeCodeGenerator cppGenerator;
     private final FFMMethodHandleRegistry registry = new FFMMethodHandleRegistry();
     private FFMClassData ffmClassData;
+    protected final String nativeHeaderCMD;
 
     public FFMCodeParser(FFMNativeCodeGenerator cppGenerator, String cppDir) {
         this(cppGenerator, null, "", cppDir);
     }
 
     public FFMCodeParser(FFMNativeCodeGenerator cppGenerator, IDLReader idlReader, String basePackage, String cppDir) {
-        super(basePackage, HEADER_CMD, idlReader, cppDir);
+        this(cppGenerator, idlReader, basePackage, cppDir, DEFAULT_HEADER_CMD);
+    }
+
+    protected FFMCodeParser(FFMNativeCodeGenerator cppGenerator, IDLReader idlReader, String basePackage, String cppDir, String headerCMD) {
+        super(basePackage, headerCMD, idlReader, cppDir);
         this.cppGenerator = cppGenerator;
+        this.nativeHeaderCMD = headerCMD;
     }
 
     public void setFFMClassData(FFMClassData ffmClassData) {
@@ -259,7 +265,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         String constructor = classTypeName + "(" + params + ")";
         String content = GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_CONSTRUCTOR, constructor);
 
-        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String header = "[-" + nativeHeaderCMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + content;
         nativeMethodDeclaration.setBlockComment(blockComment);
     }
@@ -278,7 +284,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         String content = METHOD_DELETE_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_TYPE, classTypeName);
 
-        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String header = "[-" + nativeHeaderCMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + content;
         nativeMethodDeclaration.setBlockComment(blockComment);
     }
@@ -411,7 +417,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         }
 
         if(content != null) {
-            String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+            String header = "[-" + nativeHeaderCMD + ";" + CMD_NATIVE + "]";
             String blockComment = header + content;
             nativeMethod.setBlockComment(blockComment);
         }
@@ -424,7 +430,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                                          MethodDeclaration nativeMethodDeclaration) {
         String enumStr = enumItem.name;
         String content = ENUM_GET_INT_TEMPLATE.replace(TEMPLATE_TAG_ENUM, enumStr);
-        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String header = "[-" + nativeHeaderCMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + content;
         nativeMethodDeclaration.setBlockComment(blockComment);
     }
@@ -512,7 +518,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
             // 3. Set C++ code for the native setupCallback method
             String cppSetupBody = generateFFMSetupCallbackCPPBody(idlCallbackClass, methods);
-            String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+            String header = "[-" + nativeHeaderCMD + ";" + CMD_NATIVE + "]";
             nativeMethodDeclaration.setBlockComment(header + cppSetupBody);
 
             // 4. Generate C++ callback class and emit it via the generator
@@ -567,6 +573,10 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     public void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
         super.onParserComplete(jParser, parserItems);
 
+        if(!shouldInjectFFMHandles()) {
+            return;
+        }
+
         // For each class that has registered MethodHandle entries, inject the FFMHandles inner class
         for(JParserItem parserItem : parserItems) {
             if(parserItem.notAllowed) continue;
@@ -589,6 +599,10 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                 }
             }
         }
+    }
+
+    protected boolean shouldInjectFFMHandles() {
+        return true;
     }
 
     // ==================== FFM Bridge Method Generation ====================
@@ -846,7 +860,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         // Attach to constructor block comment (same pattern as CppCodeParser).
         // parseCodeBlock will emit the code via cppGenerator.addNativeCode().
-        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]\n";
+        String header = "[-" + nativeHeaderCMD + ";" + CMD_NATIVE + "]\n";
         String code = header + cppClass.toString();
         classDeclaration.getConstructors().get(0).setBlockComment(code);
     }
@@ -1177,7 +1191,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
                 break;
         }
 
-        String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
+        String header = "[-" + nativeHeaderCMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + content;
         nativeMethod.setBlockComment(blockComment);
     }
@@ -1536,5 +1550,3 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
     }
 
 }
-
-

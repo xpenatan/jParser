@@ -200,8 +200,8 @@ jParser projects follow a module pattern centered on source (`-base`), generator
 ./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_ffm
 
 # 3. Run the desktop app
-./gradlew :examples:TestLib:app:desktop-jni:TestLib_run_app_desktop_jni
-./gradlew :examples:TestLib:app:desktop-ffm:TestLib_run_app_desktop_ffm
+./gradlew :examples:TestLib:app:platforms:desktop-jni:TestLib_run_app_desktop_jni
+./gradlew :examples:TestLib:app:platforms:desktop-ffm:TestLib_run_app_desktop_ffm
 ```
 
 > Replace `windows64` with `linux64`, `mac64`, or `macArm` for other platforms.

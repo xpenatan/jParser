@@ -20,7 +20,7 @@ dependencies {
     implementation(project(":jParser:loader:loader-core"))
 
     implementation(project(":jParser:api:api-web"))
-    api(project(":jParser:runtime:runtime-web"))
+    api(project(":jParser:runtime:runtime-jvm:web"))
 }
 
 tasks.named("clean") {

@@ -25,6 +25,7 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
 
     private String glueCppDestinationDir;
     private String cppGlueName = "FFMGlue";
+    private String exportMacroName = "FFM_EXPORT";
     private FFMClassData ffmClassData;
 
     StringBuilder mainPrinter = new StringBuilder();
@@ -35,8 +36,14 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
     private boolean init = true;
 
     public FFMCppGenerator(String cppDestinationDir) {
+        this(cppDestinationDir, "ffmglue", "FFMGlue", "FFM_EXPORT");
+    }
+
+    protected FFMCppGenerator(String cppDestinationDir, String glueDirName, String cppGlueName, String exportMacroName) {
+        this.cppGlueName = cppGlueName;
+        this.exportMacroName = exportMacroName;
         try {
-            this.glueCppDestinationDir = new File(cppDestinationDir, "ffmglue").getCanonicalPath() + File.separator;
+            this.glueCppDestinationDir = new File(cppDestinationDir, glueDirName).getCanonicalPath() + File.separator;
         } catch(IOException e) {
             throw new RuntimeException(e);
         }
@@ -53,9 +60,9 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
             headerPrinter.append("#include <cstdint>\n");
             headerPrinter.append("\n");
             headerPrinter.append("#ifdef _WIN32\n");
-            headerPrinter.append("    #define FFM_EXPORT __declspec(dllexport)\n");
+            headerPrinter.append("    #define " + exportMacroName + " __declspec(dllexport)\n");
             headerPrinter.append("#else\n");
-            headerPrinter.append("    #define FFM_EXPORT __attribute__((visibility(\"default\")))\n");
+            headerPrinter.append("    #define " + exportMacroName + " __attribute__((visibility(\"default\")))\n");
             headerPrinter.append("#endif\n");
             headerPrinter.append("\n");
             mainPrinter.append("\n");
@@ -148,7 +155,7 @@ public class FFMCppGenerator implements FFMNativeCodeGenerator {
 
         String symbolName = buildSymbolName(packageName, className, methodName, arguments, overloadedMethod, ffmClassData);
         registerObfuscationMapping(nativeMethod, packageName, className, symbolName, arguments);
-        print(PrintType.MAIN, "FFM_EXPORT " + returnType + " " + symbolName + params + " {");
+        print(PrintType.MAIN, exportMacroName + " " + returnType + " " + symbolName + params + " {");
         content = "\t" + content.replace("\n", "\n\t");
         print(PrintType.MAIN, content);
         print(PrintType.MAIN, "}");

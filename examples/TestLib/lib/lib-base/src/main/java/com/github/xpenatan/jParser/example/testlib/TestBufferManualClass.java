@@ -5,6 +5,16 @@ import java.nio.ByteBuffer;
 
 public class TestBufferManualClass extends NativeObject {
 
+    /*[-TEAVM_C;-NATIVE]
+        extern "C" {
+        TEAVMC_EXPORT void jparser_com_github_xpenatan_jParser_example_testlib_TestBufferManualClass_updateByteBuffer_l_l_i_b(int64_t this_addr, int64_t data_ptr, int32_t size, int8_t value) {
+            TestBufferManualClass* nativeObject = (TestBufferManualClass*)this_addr;
+            unsigned char* byteData = (unsigned char*)data_ptr;
+            nativeObject->updateByteBuffer(byteData, (int)size, (unsigned char)value);
+        }
+        }
+    */
+
     /*[-FFM;-NATIVE]
         extern "C" {
         FFM_EXPORT void jparser_com_github_xpenatan_jParser_example_testlib_TestBufferManualClass_internal_1native_1updateByteBuffer__JJIB(int64_t this_addr, int64_t data_ptr, int32_t size, int8_t value) {
@@ -35,6 +45,13 @@ public class TestBufferManualClass extends NativeObject {
             internal_native_updateByteBuffer(native_address, dataPtr, size, value);
         }
     */
+    /*[-TEAVM_C;-REPLACE_BLOCK]
+        {
+            for(int i = 0; i < size; i++) {
+                data.put(i, value);
+            }
+        }
+    */
     public void updateByteBuffer(ByteBuffer data, int size, byte value) {
         internal_native_updateByteBuffer(native_address, data, size, value);
     }
@@ -54,6 +71,10 @@ public class TestBufferManualClass extends NativeObject {
             try { FFMHandles.updateByteBuffer.invokeExact(this_addr, data_ptr, size, value); }
             catch(Throwable e) { throw new RuntimeException(e); }
         }
+    */
+    /*[-TEAVM_C;-REPLACE]
+        @org.teavm.interop.Import(name = "jparser_com_github_xpenatan_jParser_example_testlib_TestBufferManualClass_updateByteBuffer_l_l_i_b")
+        private static native void internal_native_updateByteBuffer(long this_addr, long data_ptr, int size, byte value);
     */
     private static native void internal_native_updateByteBuffer(long this_addr, ByteBuffer data, int size, byte value);
 }

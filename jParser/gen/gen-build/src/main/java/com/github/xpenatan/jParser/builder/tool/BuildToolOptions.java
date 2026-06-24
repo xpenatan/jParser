@@ -15,6 +15,7 @@ public class BuildToolOptions {
     public final String webModuleName;
     public final String packageName;
     public boolean generateWeb = false;
+    public boolean generateTeaVMC = false;
     public boolean generateJNI = false;
     public boolean generateFFM = false;
     public boolean generateCore = true;
@@ -23,6 +24,9 @@ public class BuildToolOptions {
 
     /** Optional build-time FFM critical policy used by FFMCodeParser generation. */
     public final FFMClassData ffmClassData = new FFMClassData();
+
+    /** Optional symbol naming policy used by TeaVM C generation. */
+    public final FFMClassData teaVMCClassData = new FFMClassData();
 
     /** Optional build-time JNI naming policy used by CppCodeParser generation. */
     public final JNIClassData jniClassData = new JNIClassData();
@@ -37,6 +41,7 @@ public class BuildToolOptions {
     private String moduleJNISuffix;
     private String moduleWebSuffix;
     private String moduleFFMSuffix;
+    private String moduleCSuffix;
     private String moduleBasePath;
     private String moduleBuildPath;
     private String moduleBuildCPPPath;
@@ -44,6 +49,7 @@ public class BuildToolOptions {
     private String moduleJNIPath;
     private String moduleTeavmPath;
     private String moduleFFMPath;
+    private String moduleCPath;
     private ArrayList<IDLFile> idlPath = new ArrayList<>();
     private ArrayList<IDLFile> idlPathRef = new ArrayList<>();
     private ArrayList<String> additionalSourceDirs = new ArrayList<>();
@@ -67,6 +73,7 @@ public class BuildToolOptions {
         this.moduleJNISuffix = params.moduleJNISuffix;
         this.moduleWebSuffix = params.moduleWebSuffix;
         this.moduleFFMSuffix = params.moduleFFMSuffix;
+        this.moduleCSuffix = params.moduleCSuffix;
         this.modulePath = params.modulePath;
         this.args = args;
 
@@ -103,6 +110,7 @@ public class BuildToolOptions {
         moduleJNIPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleJNISuffix, "-jni");
         moduleTeavmPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleWebSuffix, "-web");
         moduleFFMPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleFFMSuffix, "-ffm");
+        moduleCPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleCSuffix, "-c/core");
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         cppPath = moduleBuildPath + "/src/main/cpp/";
@@ -191,6 +199,9 @@ public class BuildToolOptions {
         return moduleTeavmPath + "/src/main/java";
     }
 
+    public String getCJavaOutputPath() {
+        return moduleCPath + "/src/main/java";
+    }
 
     public String getModuleTeaVMPath() {
         return moduleTeavmPath;
@@ -198,6 +209,10 @@ public class BuildToolOptions {
 
     public String getModuleFFMPath() {
         return moduleFFMPath;
+    }
+
+    public String getModuleCPath() {
+        return moduleCPath;
     }
 
     public IDLFile[] getIDL() {
@@ -304,6 +319,11 @@ public class BuildToolOptions {
          * Optional module suffix used for the FFM module. Defaults to "-ffm".
          */
         public String moduleFFMSuffix;
+
+        /**
+         * Optional module suffix used for the TeaVM C module. Defaults to "-c".
+         */
+        public String moduleCSuffix;
 
         /**
          * The C++ source path or relative path specifies the location where the build is executed, such as "/build/MyCPlusPlusLib".

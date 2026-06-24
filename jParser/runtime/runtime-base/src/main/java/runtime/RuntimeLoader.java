@@ -15,6 +15,13 @@ public class RuntimeLoader {
         #include "IDLCustomCode.h"
     */
 
+    /*[-TEAVM_C;-REPLACE_BLOCK]
+    {
+        if(listener != null) {
+            listener.onLoad(true, null);
+        }
+    }
+    */
     public static void init(JParserLibraryLoaderListener listener) {
         JParserLibraryLoader.load(LIB_NAME, listener);
     }

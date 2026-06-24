@@ -35,7 +35,7 @@ android {
 dependencies {
     implementation(project(":jParser:loader:loader-core"))
     implementation(project(":jParser:api:api-core"))
-    implementation(project(":jParser:runtime:runtime-android"))
+    implementation(project(":jParser:runtime:runtime-jvm:android"))
     implementation(project(":examples:SharedLib:libA:lib-jni"))
 }
 

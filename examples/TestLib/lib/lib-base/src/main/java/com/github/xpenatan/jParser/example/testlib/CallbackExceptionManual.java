@@ -27,6 +27,15 @@ public class CallbackExceptionManual extends NativeObject {
                 }
         };
     */
+    /*[-TEAVM_C;-NATIVE]
+        class CallbackExceptionManualImpl : public CallbackExceptionManual {
+        public:
+            void setupCallback() {
+            }
+            virtual void callJava() const {
+            }
+        };
+    */
 
     /*[-TEAVM;-ADD]
         @org.teavm.jso.JSFunctor
@@ -48,6 +57,9 @@ public class CallbackExceptionManual extends NativeObject {
         var nativeObject = new [MODULE].CallbackExceptionManualImpl();
         return [MODULE].getPointer(nativeObject);
     */
+    /*[-TEAVM_C;-NATIVE]
+        return (int64_t)new CallbackExceptionManualImpl();
+    */
     private static native long internal_native_create_addr();
 
     /*[-TEAVM;-REPLACE_BLOCK]
@@ -61,6 +73,11 @@ public class CallbackExceptionManual extends NativeObject {
             internal_native_setupCallbacks((int)native_address, callJava);
         }
     */
+    /*[-TEAVM_C;-REPLACE_BLOCK]
+        {
+            internal_native_setupCallbacks(native_address);
+        }
+    */
     private void setupCallbacks() {
         internal_native_setupCallbacks(native_address);
     }
@@ -72,6 +89,10 @@ public class CallbackExceptionManual extends NativeObject {
     /*[-TEAVM;-REPLACE]
         @org.teavm.jso.JSBody(params = { "this_addr", "callJava" }, script = "var nativeObject = [MODULE].wrapPointer(this_addr, [MODULE].CallbackExceptionManualImpl); nativeObject.callJava = callJava;")
         private static native void internal_native_setupCallbacks(int this_addr, callJava callJava);
+    */
+    /*[-TEAVM_C;-NATIVE]
+        CallbackExceptionManualImpl* nativeObject = (CallbackExceptionManualImpl*)this_addr;
+        nativeObject->setupCallback();
     */
     private native void internal_native_setupCallbacks(long this_addr);
 

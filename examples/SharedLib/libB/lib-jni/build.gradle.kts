@@ -25,7 +25,7 @@ dependencies {
     implementation(project(":examples:SharedLib:libA:lib-jni"))
     api(project(":jParser:loader:loader-core"))
     api(project(":jParser:api:api-core"))
-    api(project(":jParser:runtime:runtime-jni"))
+    api(project(":jParser:runtime:runtime-jvm:jni"))
 }
 
 tasks.named("clean") {

@@ -38,6 +38,10 @@ public class NativeString extends NativeObject {
         NativeString* nativeObject = (NativeString*)this_addr;
         return nativeObject->c_str();
     */
+    /*[-TEAVM_C;-NATIVE]
+        NativeString* nativeObject = (NativeString*)this_addr;
+        return nativeObject->c_str();
+    */
     private static native String internal_native_c_str(long this_addr);
 
     public String data() {
@@ -57,6 +61,10 @@ public class NativeString extends NativeObject {
         return returnedJSObj;
     */
     /*[-FFM;-NATIVE]
+        NativeString* nativeObject = (NativeString*)this_addr;
+        return nativeObject->data();
+    */
+    /*[-TEAVM_C;-NATIVE]
         NativeString* nativeObject = (NativeString*)this_addr;
         return nativeObject->data();
     */
