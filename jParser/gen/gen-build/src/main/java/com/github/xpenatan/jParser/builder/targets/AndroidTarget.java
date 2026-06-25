@@ -2,14 +2,18 @@ package com.github.xpenatan.jParser.builder.targets;
 
 import com.github.xpenatan.jParser.builder.BuildConfig;
 import com.github.xpenatan.jParser.builder.DefaultBuildTarget;
-import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Properties;
 
 public class AndroidTarget extends DefaultBuildTarget {
 
     public static boolean DEBUG_BUILD;
 
-    private String ndkHome = System.getenv("ANDROID_NDK_HOME");
+    private String ndkHome = resolveNdkHome();
     private String target;
     private String apiLevel;
     private String sysroot;
@@ -24,7 +28,7 @@ public class AndroidTarget extends DefaultBuildTarget {
         linkerCompiler.clear();
 
         if(ndkHome == null) {
-            return;
+            throw new IllegalStateException("Android NDK not found. Set ANDROID_NDK_HOME, ANDROID_NDK_ROOT, ANDROID_SDK_ROOT/ANDROID_HOME, or sdk.dir in local.properties with an installed ndk directory.");
         }
         this.libPrefix = "lib";
 
@@ -93,6 +97,93 @@ public class AndroidTarget extends DefaultBuildTarget {
             linkerFlags.add("-Wl,--strip-all");
             libSuffix = ".so";
             linkerOutputCommand = "-o";
+        }
+    }
+
+    private static String resolveNdkHome() {
+        String ndkHome = firstNonEmpty(System.getenv("ANDROID_NDK_HOME"), System.getenv("ANDROID_NDK_ROOT"));
+        if(ndkHome != null) {
+            return ndkHome;
+        }
+
+        String sdkHome = firstNonEmpty(System.getenv("ANDROID_SDK_ROOT"), System.getenv("ANDROID_HOME"));
+        if(sdkHome == null) {
+            sdkHome = resolveSdkHomeFromLocalProperties();
+        }
+        if(sdkHome == null) {
+            return null;
+        }
+
+        File ndkDir = new File(sdkHome, "ndk");
+        File[] installedNdks = ndkDir.listFiles(file -> file.isDirectory() && new File(file, "toolchains/llvm/prebuilt").exists());
+        if(installedNdks != null && installedNdks.length > 0) {
+            Arrays.sort(installedNdks, new Comparator<File>() {
+                @Override
+                public int compare(File left, File right) {
+                    return compareVersion(right.getName(), left.getName());
+                }
+            });
+            return installedNdks[0].getAbsolutePath();
+        }
+
+        File legacyNdkBundle = new File(sdkHome, "ndk-bundle");
+        if(legacyNdkBundle.isDirectory()) {
+            return legacyNdkBundle.getAbsolutePath();
+        }
+        return null;
+    }
+
+    private static String resolveSdkHomeFromLocalProperties() {
+        File directory = new File(System.getProperty("user.dir"));
+        while(directory != null) {
+            File localProperties = new File(directory, "local.properties");
+            if(localProperties.isFile()) {
+                Properties properties = new Properties();
+                try(FileInputStream inputStream = new FileInputStream(localProperties)) {
+                    properties.load(inputStream);
+                    String sdkDir = firstNonEmpty(properties.getProperty("sdk.dir"), null);
+                    if(sdkDir != null && new File(sdkDir).isDirectory()) {
+                        return sdkDir;
+                    }
+                }
+                catch(IOException ignored) {
+                }
+            }
+            directory = directory.getParentFile();
+        }
+        return null;
+    }
+
+    private static String firstNonEmpty(String first, String second) {
+        if(first != null && !first.trim().isEmpty()) {
+            return first;
+        }
+        if(second != null && !second.trim().isEmpty()) {
+            return second;
+        }
+        return null;
+    }
+
+    private static int compareVersion(String left, String right) {
+        String[] leftParts = left.split("\\.");
+        String[] rightParts = right.split("\\.");
+        int max = Math.max(leftParts.length, rightParts.length);
+        for(int i = 0; i < max; i++) {
+            int leftValue = i < leftParts.length ? parseVersionPart(leftParts[i]) : 0;
+            int rightValue = i < rightParts.length ? parseVersionPart(rightParts[i]) : 0;
+            if(leftValue != rightValue) {
+                return Integer.compare(leftValue, rightValue);
+            }
+        }
+        return left.compareTo(right);
+    }
+
+    private static int parseVersionPart(String value) {
+        try {
+            return Integer.parseInt(value);
+        }
+        catch(NumberFormatException ignored) {
+            return 0;
         }
     }
 

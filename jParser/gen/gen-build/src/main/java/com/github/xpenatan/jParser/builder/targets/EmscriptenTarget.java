@@ -6,6 +6,7 @@ import com.github.xpenatan.jParser.builder.JProcess;
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
     public EmscriptenTarget(SourceLanguage language) {
         this.libDirSuffix = "emscripten/";
         this.tempBuildDir = "target/emscripten/";
+        configureEmscriptenEnvironment();
 
         String cppCompilerr = "";
         if(language == SourceLanguage.C) {
@@ -285,10 +287,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
     }
 
     private boolean createGlueCode(CustomFileDescriptor mergedIDLFile, CustomFileDescriptor jsglueDir) {
-        String pythonCmd = "python";
-        if(isUnix()) {
-            pythonCmd = "python3";
-        }
+        String pythonCmd = resolvePythonCommand();
 
         CustomFileDescriptor WEBIDL_BINDER_FILE = new CustomFileDescriptor(WEBIDL_BINDER_SCRIPT, CustomFileDescriptor.FileType.Absolute);
         String webIDLBinder = WEBIDL_BINDER_FILE.readString();
@@ -302,15 +301,87 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         generateGlueCommand.add(mergedIDLFile.toString());
         generateGlueCommand.add("glue");
 
-        HashMap<String, String> environment = new HashMap<>();
+        HashMap<String, String> environment = new HashMap<>(this.environment);
+        File emsdkPython = resolveEmsdkPython();
+        if(emsdkPython != null) {
+            environment.put("EMSDK_PYTHON", emsdkPython.getAbsolutePath());
+        }
         String pathSep = isWindows() ? ";" : ":";
         String currentPythonPath = environment.get("PYTHONPATH");
+        if(currentPythonPath == null) {
+            currentPythonPath = System.getenv("PYTHONPATH");
+        }
         if (currentPythonPath == null) currentPythonPath = "";
         if (!currentPythonPath.isEmpty()) currentPythonPath += pathSep;
         currentPythonPath += EMSCRIPTEN_ROOT;
         environment.put("PYTHONPATH", currentPythonPath);
 
         return JProcess.startProcess(jsglueDir.file(), generateGlueCommand, environment);
+    }
+
+    private static String resolvePythonCommand() {
+        String emsdkPython = firstNonEmpty(System.getenv("EMSDK_PYTHON"), null);
+        if(emsdkPython != null && new File(emsdkPython).isFile()) {
+            return emsdkPython;
+        }
+
+        File python = resolveEmsdkPython();
+        if(python != null) {
+            return python.getAbsolutePath();
+        }
+
+        if(isUnix()) {
+            return "python3";
+        }
+        return "python";
+    }
+
+    private void configureEmscriptenEnvironment() {
+        File emsdkPython = resolveEmsdkPython();
+        if(emsdkPython != null) {
+            environment.put("EMSDK_PYTHON", emsdkPython.getAbsolutePath());
+        }
+
+        String emsdk = firstNonEmpty(System.getenv("EMSDK"), null);
+        if(emsdk != null) {
+            environment.put("EMSDK", emsdk);
+        }
+
+        String emscripten = firstNonEmpty(System.getenv("EMSCRIPTEN"), null);
+        if(emscripten != null) {
+            environment.put("EMSCRIPTEN", emscripten);
+        }
+    }
+
+    private static File resolveEmsdkPython() {
+        String emsdk = firstNonEmpty(System.getenv("EMSDK"), null);
+        if(emsdk != null && !emsdk.trim().isEmpty()) {
+            File pythonRoot = new File(emsdk, "python");
+            File[] pythonBins = pythonRoot.listFiles(file -> file.isDirectory());
+            if(pythonBins != null && pythonBins.length > 0) {
+                for(File pythonBin : pythonBins) {
+                    File python = new File(pythonBin, isWindows() ? "python.exe" : "bin/python3");
+                    if(python.isFile()) {
+                        return python;
+                    }
+                    python = new File(pythonBin, "python3");
+                    if(python.isFile()) {
+                        return python;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String firstNonEmpty(String first, String second) {
+        if(first != null && !first.trim().isEmpty()) {
+            return first;
+        }
+        if(second != null && !second.trim().isEmpty()) {
+            return second;
+        }
+        return null;
     }
 
     private CustomFileDescriptor mergeIDLFile(CustomFileDescriptor jsglueDir) {
