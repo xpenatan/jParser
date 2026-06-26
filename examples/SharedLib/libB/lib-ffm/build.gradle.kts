@@ -22,7 +22,12 @@ val linuxFile = "$libDir/linux/ffm/libLibB64.so"
 val macFile = "$libDir/mac/ffm/libLibB64.dylib"
 val macArmFile = "$libDir/mac/arm/ffm/libLibBarm64.dylib"
 
+tasks.named("compileJava") {
+    dependsOn(":examples:SharedLib:libB:plugin:jParser_generate")
+}
+
 tasks.jar {
+    dependsOn(":examples:SharedLib:libB:plugin:jParser_build_windows64_ffm")
     from(windowsFile)
     from(linuxFile)
     from(macFile)

@@ -65,9 +65,9 @@ val generateTeaVMC by tasks.registering(JavaExec::class) {
 val generateTeaVMCImportHeader by tasks.registering {
     dependsOn(
         generateTeaVMC,
-        ":jParser:runtime:runtime-build:runtime_helper_build_project_android_teavm_c",
-        ":examples:SharedLib:libA:lib-build:LibA_build_project_android_teavm_c",
-        ":examples:SharedLib:libB:lib-build:LibB_build_project_android_teavm_c"
+        ":jParser:runtime:plugin:jParser_build_android_teavm_c",
+        ":examples:SharedLib:libA:plugin:jParser_build_android_teavm_c",
+        ":examples:SharedLib:libB:plugin:jParser_build_android_teavm_c"
     )
     outputs.file(teavmOutputDir.map { it.file("teavmc_imports.h") })
     doLast {
@@ -124,8 +124,14 @@ val androidAbis = listOf(
     AndroidAbi("x86_64", "x86_64-linux-android29", "x86_64-linux-android"),
 )
 
+fun ndkHome(): String {
+    return System.getenv("ANDROID_NDK_HOME")
+        ?: System.getenv("ANDROID_NDK_ROOT")
+        ?: android.ndkDirectory.absolutePath
+}
+
 fun ndkClang(): String {
-    val ndkHome = System.getenv("ANDROID_NDK_HOME") ?: error("ANDROID_NDK_HOME is required for android-c")
+    val ndkHome = ndkHome()
     val osFolder = when {
         org.gradle.internal.os.OperatingSystem.current().isWindows -> "windows-x86_64"
         org.gradle.internal.os.OperatingSystem.current().isMacOsX -> "darwin-x86_64"
@@ -136,7 +142,7 @@ fun ndkClang(): String {
 }
 
 fun ndkSysroot(): String {
-    val ndkHome = System.getenv("ANDROID_NDK_HOME") ?: error("ANDROID_NDK_HOME is required for android-c")
+    val ndkHome = ndkHome()
     val osFolder = when {
         org.gradle.internal.os.OperatingSystem.current().isWindows -> "windows-x86_64"
         org.gradle.internal.os.OperatingSystem.current().isMacOsX -> "darwin-x86_64"

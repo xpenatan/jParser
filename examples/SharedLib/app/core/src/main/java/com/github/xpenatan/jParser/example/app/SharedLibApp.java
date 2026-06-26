@@ -57,6 +57,7 @@ public class SharedLibApp extends ApplicationAdapter {
         if(init) {
             init = false;
             testPass = SharedLib.test();
+            System.out.println("SharedLib Test Pass " + testPass);
             color = testPass ? Color.LIME : Color.RED;
             return;
         }

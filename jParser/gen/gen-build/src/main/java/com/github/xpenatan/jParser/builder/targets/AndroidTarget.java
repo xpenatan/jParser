@@ -2,9 +2,11 @@ package com.github.xpenatan.jParser.builder.targets;
 
 import com.github.xpenatan.jParser.builder.BuildConfig;
 import com.github.xpenatan.jParser.builder.DefaultBuildTarget;
+import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Properties;
@@ -97,6 +99,20 @@ public class AndroidTarget extends DefaultBuildTarget {
             linkerFlags.add("-Wl,--strip-all");
             libSuffix = ".so";
             linkerOutputCommand = "-o";
+        }
+    }
+
+    @Override
+    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String outputPath) {
+        if(!isStatic) {
+            addFlagIfMissing("-Wl,-soname," + new File(outputPath).getName());
+        }
+        super.onLink(compiledObjects, objFilePath, outputPath);
+    }
+
+    private void addFlagIfMissing(String flag) {
+        if(!linkerFlags.contains(flag)) {
+            linkerFlags.add(flag);
         }
     }
 

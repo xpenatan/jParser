@@ -15,6 +15,7 @@ val macFile = "$libDir/mac/jni/libLibB64.dylib"
 val macArmFile = "$libDir/mac/arm/jni/libLibBarm64.dylib"
 
 tasks.jar {
+    dependsOn(":examples:SharedLib:libB:plugin:jParser_build_windows64_jni")
     from(windowsFile)
     from(linuxFile)
     from(macFile)
@@ -26,6 +27,10 @@ dependencies {
     api(project(":jParser:loader:loader-core"))
     api(project(":jParser:api:api-core"))
     api(project(":jParser:runtime:runtime-jvm:jni"))
+}
+
+tasks.named("compileJava") {
+    dependsOn(":examples:SharedLib:libB:plugin:jParser_generate")
 }
 
 tasks.named("clean") {

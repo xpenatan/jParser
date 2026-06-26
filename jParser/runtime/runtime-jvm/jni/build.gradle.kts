@@ -10,53 +10,45 @@ val linuxFile = "$libDir/linux/jni/libruntime64.so"
 val macFile = "$libDir/mac/jni/libruntime64.dylib"
 val macArmFile = "$libDir/mac/arm/jni/libruntimearm64.dylib"
 
+val nativeBuildTasks: Map<String, String> = mapOf(
+    "windows_x64" to ":jParser:runtime:plugin:jParser_build_windows64_jni",
+    "linux_x64" to ":jParser:runtime:plugin:jParser_build_linux64_jni",
+    "mac_x64" to ":jParser:runtime:plugin:jParser_build_mac64_jni",
+    "mac_arm64" to ":jParser:runtime:plugin:jParser_build_macArm_jni",
+)
+
 dependencies {
     implementation(project(":jParser:api:api-core"))
     implementation(project(":jParser:loader:loader-core"))
 }
 
 // Build per-platform native jars as standalone artifacts (no Maven classifier usage).
-val platforms: MutableMap<String, Jar.() -> Unit> = mutableMapOf()
-if(file(windowsFile).exists()) {
-    platforms["windows_x64"] = { from(windowsFile) }
-}
-if(file(linuxFile).exists()) {
-    platforms["linux_x64"] = { from(linuxFile) }
-}
-if(file(macFile).exists()) {
-    platforms["mac_x64"] = { from(macFile) }
-}
-if(file(macArmFile).exists()) {
-    platforms["mac_arm64"] = { from(macArmFile) }
-}
+val platforms: Map<String, String> = mapOf(
+    "windows_x64" to windowsFile,
+    "linux_x64" to linuxFile,
+    "mac_x64" to macFile,
+    "mac_arm64" to macArmFile,
+)
 
-val nativeJars = platforms.map { (platform, config) ->
+val nativeJars = platforms.map { (platform, nativeFile) ->
     platform to tasks.register<Jar>("nativeJar_${platform}") {
-        config()
+        dependsOn(nativeBuildTasks.getValue(platform))
+        from(nativeFile)
         archiveBaseName.set("${moduleName}-${platform}")
         archiveClassifier.set("")
     }
 }
 
 val nativeDesktopJar = tasks.register<Jar>("nativeJarDesktop") {
+    dependsOn(nativeBuildTasks.values)
     archiveBaseName.set("${moduleName}-desktop")
     archiveClassifier.set("")
-    listOf(
-        "windows_x64" to windowsFile,
-        "linux_x64" to linuxFile,
-        "mac_x64" to macFile,
-        "mac_arm64" to macArmFile,
-    ).forEach { (folder, path) ->
-        val nativeFile = file(path)
-        if(nativeFile.exists()) {
-            from(nativeFile) {
-                into(folder)
-            }
+    platforms.forEach { (folder, path) ->
+        from(path) {
+            into(folder)
         }
     }
 }
-
-val nativeFiles = listOf(windowsFile, linuxFile, macFile, macArmFile).map(::file).filter { it.exists() }
 
 val taskNames = gradle.startParameter.taskNames
 fun isTaskRequested(taskName: String): Boolean {
@@ -66,11 +58,16 @@ val isPrepareDeployTask = isTaskRequested("prepareReleaseDeploy") || isTaskReque
 val isPublishTask = taskNames.any { it.contains("publish", ignoreCase = true) }
 val includeNativesInMainJar = !(isPrepareDeployTask || isPublishTask)
 
+tasks.named("compileJava") {
+    dependsOn(":jParser:runtime:plugin:jParser_generate")
+}
+
 tasks.named<Jar>("jar") {
+    dependsOn(":jParser:runtime:plugin:jParser_build_windows64_jni")
     // For in-repo project dependencies, keep classes and native payload in the same jar.
     // During publishing, keep main runtime-jni artifact classes-only.
     if(includeNativesInMainJar) {
-        from(nativeFiles)
+        from(windowsFile, linuxFile, macFile, macArmFile)
     }
 }
 

@@ -10,7 +10,8 @@ public class Build {
     public static void main(String[] args) throws IOException {
         AssetFileHandle assetsPath = new AssetFileHandle("../../assets");
         WebBackend webBackend = new WebBackend();
-        webBackend.setStartJettyAfterBuild(true);
+        boolean startJetty = Boolean.parseBoolean(System.getProperty("jparser.web.startJetty", "true"));
+        webBackend.setStartJettyAfterBuild(startJetty);
         new TeaCompiler(webBackend)
                 .addAssets(assetsPath)
                 .setOptimizationLevel(TeaVMOptimizationLevel.SIMPLE)

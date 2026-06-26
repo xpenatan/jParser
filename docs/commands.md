@@ -118,9 +118,42 @@ Build libA before libB.
 
 Where applicable, replace `windows64` with `linux64`, `mac64`, or `macArm`.
 
+## jParser Gradle plugin
+
+```text
+./gradlew -p jParser/tools/gradle-plugin check
+./gradlew -p jParser/tools/gradle-plugin validatePlugins
+
+./gradlew :jParser:runtime:plugin:tasks --group jParser --all
+./gradlew :jParser:runtime:plugin:jParser_generate
+./gradlew :jParser:runtime:plugin:jParser_build_windows64_jni
+./gradlew :jParser:runtime:plugin:jParser_build_windows64_ffm
+./gradlew :jParser:runtime:plugin:jParser_build_android_jni
+./gradlew :jParser:runtime:plugin:jParser_build_web_wasm
+
+./gradlew :examples:TestLib:lib:plugin:tasks --group jParser --all
+./gradlew :examples:TestLib:lib:plugin:jParser_generate
+./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_jni
+./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_ffm
+./gradlew :examples:TestLib:lib:plugin:jParser_build_android_jni
+./gradlew :examples:TestLib:lib:plugin:jParser_build_web_wasm
+
+./gradlew :examples:SharedLib:libA:plugin:tasks --group jParser --all
+./gradlew :examples:SharedLib:libA:plugin:jParser_generate
+./gradlew :examples:SharedLib:libB:plugin:tasks --group jParser --all
+./gradlew :examples:SharedLib:libB:plugin:jParser_generate
+./gradlew :examples:SharedLib:libB:plugin:jParser_build_windows64_jni
+./gradlew :examples:SharedLib:libB:plugin:jParser_build_windows64_ffm
+./gradlew :examples:SharedLib:libB:plugin:jParser_build_android_jni
+./gradlew :examples:SharedLib:libB:plugin:jParser_build_web_wasm
+```
+
+The plugin id is `com.github.xpenatan.jparser`; the Maven implementation artifact is `com.github.xpenatan.jParser:jparser-gradle-plugin`.
+
 ## Quick compile sanity checks
 
 ```text
 ./gradlew :jParser:gen:gen-core:compileJava
 ./gradlew :jParser:gen:gen-build-tool:compileJava
+./gradlew -p jParser/tools/gradle-plugin compileKotlin
 ```

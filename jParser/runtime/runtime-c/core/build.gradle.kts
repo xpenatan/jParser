@@ -12,6 +12,10 @@ dependencies {
     api("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 }
 
+tasks.named("compileJava") {
+    dependsOn(":jParser:runtime:plugin:jParser_generate")
+}
+
 tasks.named("clean") {
     doFirst {
         val srcPath = "$projectDir/src/main/java"

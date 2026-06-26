@@ -19,6 +19,12 @@ dependencies {
 tasks.register<JavaExec>("SharedLib_run_app_web") {
     group = "example-web"
     description = "Build web app"
+    dependsOn(
+        ":jParser:runtime:plugin:jParser_build_web_wasm",
+        ":examples:SharedLib:libA:plugin:jParser_build_web_wasm",
+        ":examples:SharedLib:libB:plugin:jParser_build_web_wasm"
+    )
     mainClass.set("Build")
     classpath = sourceSets["main"].runtimeClasspath
+    systemProperty("jparser.web.startJetty", System.getProperty("jparser.web.startJetty", "true"))
 }

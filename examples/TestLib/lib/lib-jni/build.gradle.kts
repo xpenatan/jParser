@@ -21,7 +21,12 @@ dependencies {
     api(project(":jParser:runtime:runtime-jvm:jni"))
 }
 
+tasks.named("compileJava") {
+    dependsOn(":examples:TestLib:lib:plugin:jParser_generate")
+}
+
 tasks.jar {
+    dependsOn(":examples:TestLib:lib:plugin:jParser_build_windows64_jni")
     from(windowsFile)
     from(linuxFile)
     from(macFile)

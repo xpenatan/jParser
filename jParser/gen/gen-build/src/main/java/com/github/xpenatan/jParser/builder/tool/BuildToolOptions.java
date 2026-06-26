@@ -53,6 +53,7 @@ public class BuildToolOptions {
     private ArrayList<IDLFile> idlPath = new ArrayList<>();
     private ArrayList<IDLFile> idlPathRef = new ArrayList<>();
     private ArrayList<String> additionalSourceDirs = new ArrayList<>();
+    private ArrayList<String> additionalJavaImportPackages = new ArrayList<>();
     private String moduleBaseJavaDir;
     private String sourcePath;
     private String customSourceDir;
@@ -235,6 +236,16 @@ public class BuildToolOptions {
         String [] path = new String[additionalSourceDirs.size()];
         additionalSourceDirs.toArray(path);
         return path;
+    }
+
+    public void addAdditionalJavaImportPackage(String packageName) {
+        additionalJavaImportPackages.add(packageName);
+    }
+
+    public String[] getAdditionalJavaImportPackages() {
+        String [] packages = new String[additionalJavaImportPackages.size()];
+        additionalJavaImportPackages.toArray(packages);
+        return packages;
     }
 
     public String getModuleBaseJavaDir() {

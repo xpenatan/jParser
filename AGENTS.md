@@ -54,6 +54,8 @@ Maintenance rule: when module/task names change, update `AGENTS.md` and related 
 - Runtime implementation modules: `runtime-jvm/jni`, `runtime-jvm/ffm`, `runtime-jvm/web`, `runtime-jvm/android`, plus `runtime-c/core`, `runtime-c/desktop`, and `runtime-c/android`.
 - App platform modules in examples: `app:platforms:desktop-jni`, `app:platforms:desktop-ffm`, `app:platforms:desktop-c`, `app:platforms:web`, `app:platforms:android`, `app:platforms:android-c`.
 - Runtime generator module: `jParser:runtime:runtime-build` (tasks like `runtime_helper_build_project_<target>`).
+- Gradle plugin included build: `jParser/tools/gradle-plugin` (plugin id `com.github.xpenatan.jparser`, artifact `jparser-gradle-plugin`).
+- Gradle plugin validation fixtures: `jParser/runtime/plugin`, `examples/TestLib/lib/plugin`, `examples/SharedLib/libA/plugin`, and `examples/SharedLib/libB/plugin`.
 - Benchmark module namespace: `jParser:benchmark:benchmark-core`.
 
 ## 6) JNI / FFM Essentials

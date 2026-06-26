@@ -23,6 +23,8 @@ buildscript {
     }
 }
 
+LibExt.configure(rootProject.projectDir)
+
 allprojects()  {
     repositories {
         mavenLocal()

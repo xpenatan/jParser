@@ -9,6 +9,10 @@ dependencies {
     implementation(project(":jParser:loader:loader-core"))
 }
 
+tasks.named("compileJava") {
+    dependsOn(":jParser:runtime:plugin:jParser_generate")
+}
+
 java {
     sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
     targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)

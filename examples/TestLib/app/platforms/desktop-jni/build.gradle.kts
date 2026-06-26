@@ -13,7 +13,11 @@ tasks.test {
     useJUnit()
     systemProperty("java.awt.headless", "true")
     // Ensure JNI native artifacts are built before running tests
-    dependsOn(":examples:TestLib:lib:lib-jni:assemble")
+    dependsOn(
+        ":jParser:runtime:plugin:jParser_build_windows64_jni",
+        ":examples:TestLib:lib:plugin:jParser_build_windows64_jni",
+        ":examples:TestLib:lib:lib-jni:assemble"
+    )
     // Print test standard output (System.out.println) to the console for CI logs
     testLogging {
         showStandardStreams = true
@@ -52,6 +56,10 @@ dependencies {
 tasks.register<JavaExec>("TestLib_run_app_desktop_jni") {
     group = "example-desktop"
     description = "Run desktop app with JNI bridge"
+    dependsOn(
+        ":jParser:runtime:plugin:jParser_build_windows64_jni",
+        ":examples:TestLib:lib:plugin:jParser_build_windows64_jni"
+    )
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath
     if(isMacOs) {

@@ -55,6 +55,7 @@ public class AppTest extends ApplicationAdapter {
 
     private void runTests() {
         testPass = TestLib.test();
+        System.out.println("TestLib Test Pass " + testPass);
         color = testPass ? Color.LIME : Color.RED;
     }
 }

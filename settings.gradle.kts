@@ -1,3 +1,15 @@
+pluginManagement {
+    includeBuild("jParser/tools/gradle-plugin")
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+        }
+        gradlePluginPortal()
+    }
+}
+
 include(":jParser:gen:gen-core")
 include(":jParser:gen:gen-build")
 include(":jParser:gen:gen-build-tool")
@@ -21,6 +33,7 @@ include(":jParser:runtime:runtime-jvm:android")
 include(":jParser:runtime:runtime-c:core")
 include(":jParser:runtime:runtime-c:desktop")
 include(":jParser:runtime:runtime-c:android")
+include(":jParser:runtime:plugin")
 
 include(":jParser:loader:loader-core")
 include(":jParser:loader:loader-web")
@@ -35,6 +48,7 @@ include(":examples:TestLib:lib:lib-android")
 include(":examples:TestLib:lib:lib-c:core")
 include(":examples:TestLib:lib:lib-c:desktop")
 include(":examples:TestLib:lib:lib-c:android")
+include(":examples:TestLib:lib:plugin")
 
 include(":examples:TestLib:app:core")
 include(":examples:TestLib:app:platforms:desktop-jni")
@@ -54,6 +68,7 @@ include(":examples:SharedLib:libA:lib-android")
 include(":examples:SharedLib:libA:lib-c:core")
 include(":examples:SharedLib:libA:lib-c:desktop")
 include(":examples:SharedLib:libA:lib-c:android")
+include(":examples:SharedLib:libA:plugin")
 
 include(":examples:SharedLib:libB:lib-build")
 include(":examples:SharedLib:libB:lib-base")
@@ -65,6 +80,7 @@ include(":examples:SharedLib:libB:lib-android")
 include(":examples:SharedLib:libB:lib-c:core")
 include(":examples:SharedLib:libB:lib-c:desktop")
 include(":examples:SharedLib:libB:lib-c:android")
+include(":examples:SharedLib:libB:plugin")
 
 include(":examples:SharedLib:app:core")
 include(":examples:SharedLib:app:platforms:desktop-jni")

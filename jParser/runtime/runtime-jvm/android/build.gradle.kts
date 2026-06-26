@@ -39,6 +39,10 @@ dependencies {
     implementation(project(":jParser:loader:loader-core"))
 }
 
+tasks.named("preBuild").configure {
+    dependsOn(":jParser:runtime:plugin:jParser_build_android_jni")
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {

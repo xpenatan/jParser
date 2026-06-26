@@ -68,6 +68,8 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
 
     private static final String PACKAGE_PREFIX = "gen.web.";
 
+    private static final String WEB_RUNTIME_HELPER_PACKAGE = PACKAGE_PREFIX + "com.github.xpenatan.jparser.runtime.helper";
+
     protected static final String TEMPLATE_TAG_TYPE = "[TYPE]";
     protected static final String TEMPLATE_TAG_METHOD = "[METHOD]";
     protected static final String TEMPLATE_TAG_ATTRIBUTE = "[ATTRIBUTE]";
@@ -712,7 +714,10 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 // Edge case where String need to be converted
                 paramName = NativeUtils.class.getSimpleName() + ".getJSString(" + paramName + ")";
                 typeStr = "int";
-                JParserHelper.addMissingImportType(jParser, unit, NativeUtils.class.getSimpleName());
+                String importName = WEB_RUNTIME_HELPER_PACKAGE + "." + NativeUtils.class.getSimpleName();
+                if(!JParserHelper.containsImport(unit, importName, true)) {
+                    unit.addImport(importName);
+                }
             }
             if(JParserHelper.isLong(type)) {
                 typeStr = "int";

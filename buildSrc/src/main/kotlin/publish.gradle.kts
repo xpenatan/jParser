@@ -109,8 +109,24 @@ configure(libProjects) {
     }
 }
 
+val gradlePluginBuildDir = rootProject.layout.projectDirectory.dir("jParser/tools/gradle-plugin").asFile
+val prepareGradlePluginSnapshotDeploy = tasks.register<GradleBuild>("prepareGradlePluginSnapshotDeploy") {
+    group = "publishing"
+    description = "Prepare local snapshot deploy files for the jParser Gradle plugin."
+    dir = gradlePluginBuildDir
+    tasks = listOf("prepareSnapshotDeploy")
+}
+
+val prepareGradlePluginReleaseDeploy = tasks.register<GradleBuild>("prepareGradlePluginReleaseDeploy") {
+    group = "publishing"
+    description = "Prepare local release deploy files for the jParser Gradle plugin."
+    dir = gradlePluginBuildDir
+    tasks = listOf("prepareReleaseDeploy")
+}
+
 tasks.register<Zip>("zipStagingDeploy") {
     dependsOn(libProjects.map { it.tasks.named("publish") })
+    dependsOn(prepareGradlePluginReleaseDeploy)
     from(rootProject.layout.buildDirectory.dir("staging-deploy"))
     archiveFileName.set("staging-deploy.zip")
     destinationDirectory.set(rootProject.layout.buildDirectory)
@@ -173,10 +189,12 @@ tasks.register("publishRelease") {
 tasks.register("publishSnapshot") {
     group = "publishing"
     dependsOn(libProjects.map { it.tasks.withType<PublishToMavenRepository>() })
+    dependsOn(prepareGradlePluginSnapshotDeploy)
 }
 
 tasks.register("prepareSnapshotDeploy") {
     group = "publishing"
     dependsOn(libProjects.map { it.tasks.withType<PublishToMavenRepository>() })
+    dependsOn(prepareGradlePluginSnapshotDeploy)
     onlyIf { LibExt.libVersion.endsWith("-SNAPSHOT") }
 }

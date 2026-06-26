@@ -11,7 +11,11 @@ sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/t
 tasks.test {
     useJUnit()
     systemProperty("java.awt.headless", "true")
-    dependsOn(":examples:TestLib:lib:lib-ffm:assemble")
+    dependsOn(
+        ":jParser:runtime:plugin:jParser_build_windows64_ffm",
+        ":examples:TestLib:lib:plugin:jParser_build_windows64_ffm",
+        ":examples:TestLib:lib:lib-ffm:assemble"
+    )
     testLogging {
         showStandardStreams = true
         events("passed", "skipped", "failed")
@@ -48,6 +52,10 @@ dependencies {
 tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {
     group = "example-desktop"
     description = "Run desktop app with FFM bridge"
+    dependsOn(
+        ":jParser:runtime:plugin:jParser_build_windows64_ffm",
+        ":examples:TestLib:lib:plugin:jParser_build_windows64_ffm"
+    )
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {

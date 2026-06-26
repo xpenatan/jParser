@@ -21,9 +21,9 @@ tasks.register<JavaExec>("SharedLib_build_app_desktop_c") {
     group = "example-desktop"
     description = "Build SharedLib headless app with TeaVM C"
     dependsOn(
-        ":jParser:runtime:runtime-build:runtime_helper_build_project_windows64_teavm_c",
-        ":examples:SharedLib:libA:lib-build:LibA_build_project_windows64_teavm_c",
-        ":examples:SharedLib:libB:lib-build:LibB_build_project_windows64_teavm_c",
+        ":jParser:runtime:plugin:jParser_build_windows64_teavm_c",
+        ":examples:SharedLib:libA:plugin:jParser_build_windows64_teavm_c",
+        ":examples:SharedLib:libB:plugin:jParser_build_windows64_teavm_c",
         ":examples:SharedLib:libA:lib-c:core:jar",
         ":examples:SharedLib:libB:lib-c:core:jar"
     )

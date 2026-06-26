@@ -47,6 +47,22 @@ Example app modules in examples use:
 
 Pattern repeats across `examples/`, `idl/`, `loader/`, and `jParser/` modules (see `settings.gradle.kts`).
 
+## Gradle Plugin Support
+
+`jParser/tools/gradle-plugin` is an included build that publishes the Maven artifact `com.github.xpenatan.jParser:jparser-gradle-plugin` and plugin id `com.github.xpenatan.jparser`.
+
+The plugin is scoped to build-module orchestration: it creates one task namespace with `jParser_generate` and platform build tasks such as `jParser_build_windows64_jni`. The tasks reuse `BuilderTool`, `BuildToolOptions`, `BuildMultiTarget`, and the platform target classes through `JParserBuildRunner` and `DefaultBuildTargetFactory` in `jParser:gen:gen-build-tool`.
+
+Symbol naming is configured with the typed enum `JParserSymbolNameMode` (`DEFAULT` or `OBFUSCATED`) for `jniSymbolNameMode`, `ffmSymbolNameMode`, and `teaVMCSymbolNameMode`; plugin build scripts must not set these values with raw strings.
+
+The plugin included build follows the libfdx layout: it is not included as a root subproject, and its `settings.gradle.kts` must not include or remap root `:jParser:*` projects. It also must not rename the root project to the Maven artifact id; leave the included build name as the folder-derived `gradle-plugin`, and keep artifact naming in `build.gradle.kts`. It sources required local Java code directly from the root tree so IDE imports do not create duplicate `jparser-gradle-plugin.jParser.*` modules. `jParser/tools/gradle-plugin/buildSrc` sources the single root `buildSrc/src/main/kotlin/LibExt.kt` file for build-script constants. Do not add another `LibExt.kt` under `jParser/tools`; root `LibExt` is the only source of truth.
+
+Generated output modules stay unchanged: `lib-core`, `lib-jni`, `lib-ffm`, `lib-web`, `lib-android`, and `lib-c/*` keep their current source and native resource layout. The plugin only replaces repetitive `lib-build` JavaExec/task and native target setup.
+
+Runtime helper generation uses the same plugin in `jParser/runtime/plugin` with `runtimeHelper()` enabled. This module sits next to `runtime-build`, has only a `build.gradle.kts`, and keeps the runtime tree from introducing one-off wrapper folders. That mode keeps `idlName` and `cppSourcePath` optional, generates the runtime helper sources, compiles `RuntimeHelper.cpp`, and switches the web target to the existing Emscripten main-module defaults.
+
+Shared-library examples use per-library plugin modules in `examples/SharedLib/libA/plugin` and `examples/SharedLib/libB/plugin`. These are normal root Gradle modules with only a `build.gradle.kts`; `libB` declares its `libA` module reference through `dependency("libA") { reference(...) }`, which expands IDL refs, header paths, native link inputs, and project task dependencies.
+
 ## JNI vs FFM
 
 ### JNI

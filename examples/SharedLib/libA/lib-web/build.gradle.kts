@@ -10,7 +10,12 @@ java {
 val emscriptenJS = "$projectDir/../lib-build/build/c++/libs/emscripten/LibA.js"
 val emscriptenWASM = "$projectDir/../lib-build/build/c++/libs/emscripten/LibA.wasm"
 
+tasks.named("compileJava") {
+    dependsOn(":examples:SharedLib:libA:plugin:jParser_generate")
+}
+
 tasks.jar {
+    dependsOn(":examples:SharedLib:libA:plugin:jParser_build_web_wasm")
     from(emscriptenJS, emscriptenWASM)
 }
 

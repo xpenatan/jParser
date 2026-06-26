@@ -7,6 +7,7 @@ val teavmCLibsDir = "$projectDir/../../runtime-build/build/c++/libs/android"
 val stagedJniLibsDir = layout.buildDirectory.dir("generated/teavmCJniLibs")
 
 val stageTeaVMCJniLibs by tasks.registering(Copy::class) {
+    dependsOn(":jParser:runtime:plugin:jParser_build_android_teavm_c")
     listOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a").forEach { abi ->
         from("$teavmCLibsDir/$abi/teavm_c") {
             include("*.so")

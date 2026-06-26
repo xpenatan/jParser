@@ -5,6 +5,8 @@ plugins {
     id("java")
 }
 
+sourceSets["test"].java.srcDir(rootProject.file("examples/SharedLib/app/core/src/test/java"))
+
 java {
     sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
     targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
@@ -25,11 +27,45 @@ dependencies {
     implementation(project(":examples:SharedLib:libB:lib-ffm"))
 
     implementation(project(":jParser:runtime:runtime-jvm:ffm"))
+
+    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+}
+
+tasks.test {
+    useJUnit()
+    systemProperty("java.awt.headless", "true")
+    dependsOn(
+        ":jParser:runtime:plugin:jParser_build_windows64_ffm",
+        ":examples:SharedLib:libA:plugin:jParser_build_windows64_ffm",
+        ":examples:SharedLib:libB:plugin:jParser_build_windows64_ffm",
+        ":examples:SharedLib:libA:lib-ffm:assemble",
+        ":examples:SharedLib:libB:lib-ffm:assemble"
+    )
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
+    })
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    testLogging {
+        showStandardStreams = true
+        events("passed", "skipped", "failed")
+    }
+    if(isMacOs) {
+        jvmArgs("-XstartOnFirstThread")
+    }
+}
+
+tasks.named("test") {
+    outputs.upToDateWhen { false }
 }
 
 tasks.register<JavaExec>("SharedLib_run_app_desktop_ffm") {
     group = "example-desktop"
     description = "Run desktop app with FFM bridge"
+    dependsOn(
+        ":jParser:runtime:plugin:jParser_build_windows64_ffm",
+        ":examples:SharedLib:libA:plugin:jParser_build_windows64_ffm",
+        ":examples:SharedLib:libB:plugin:jParser_build_windows64_ffm"
+    )
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {

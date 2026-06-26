@@ -57,6 +57,8 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     public IDLRenaming idlRenaming;
 
+    private final ArrayList<String> additionalJavaImportPackages = new ArrayList<>();
+
     /**
      * @param basePackage Base module source. This is used to generate other sources
      * @param headerCMD   This is the first command option that this parser will use. Ex teavm, C++.
@@ -87,8 +89,15 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             return;
         }
 
+        if(JParser.CREATE_RUNTIME_HELPER) {
+            rewriteRuntimeHelperPackages(jParser);
+        }
+
         classCppPath = getClassCppPath();
         createBaseUnitFromResources(jParser);
+        if(JParser.CREATE_RUNTIME_HELPER) {
+            rewriteRuntimeHelperPackages(jParser);
+        }
         generateIDLJavaClasses(jParser, jParser.genDir);
     }
 
@@ -140,6 +149,28 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 }
             } catch(IOException e) {
                 throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void addAdditionalJavaImportPackage(String packageName) {
+        if(packageName != null && !packageName.trim().isEmpty()) {
+            additionalJavaImportPackages.add(packageName.trim());
+        }
+    }
+
+    private void rewriteRuntimeHelperPackages(JParser jParser) {
+        if(basePackage == null || basePackage.isEmpty()) {
+            return;
+        }
+        for(int i = 0; i < jParser.unitArray.size(); i++) {
+            JParserItem item = jParser.unitArray.get(i);
+            if(item.unit == null || item.unit.getPackageDeclaration().isEmpty()) {
+                continue;
+            }
+            String packageName = item.unit.getPackageDeclaration().get().getNameAsString();
+            if(packageName.equals("runtime") || packageName.startsWith("runtime.")) {
+                item.unit.setPackageDeclaration(getUpdatePackage(item.unit));
             }
         }
     }
@@ -324,6 +355,15 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         }
                     }
                 }
+                else {
+                    String runtimeHelperImport = getRuntimeHelperImport(idlClass.extendClass);
+                    if(runtimeHelperImport != null && !JParser.CREATE_RUNTIME_HELPER) {
+                        JParserHelper.addMissingImportType(unit, runtimeHelperImport);
+                        if(classOrInterfaceDeclaration.getExtendedTypes().isEmpty()) {
+                            classOrInterfaceDeclaration.addExtendedType(idlClass.extendClass);
+                        }
+                    }
+                }
             }
             else {
                 String name = Native_Object_CLASS;
@@ -368,6 +408,15 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                         addImport(jParser, unit, type);
                     }
                 }
+
+                List<ConstructorDeclaration> constructors = classDeclaration.getConstructors();
+                for(ConstructorDeclaration constructor : constructors) {
+                    NodeList<Parameter> parameters = constructor.getParameters();
+                    for(Parameter parameter : parameters) {
+                        Type type = parameter.getType();
+                        addImport(jParser, unit, type);
+                    }
+                }
             }
 
             {
@@ -377,6 +426,10 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 for(ImportDeclaration anImport : imports) {
                     Name name = anImport.getName();
                     String identifier = name.getIdentifier();
+                    String runtimeHelperImport = getRuntimeHelperImport(identifier);
+                    if(runtimeHelperImport != null && runtimeHelperImport.equals(anImport.getNameAsString())) {
+                        continue;
+                    }
                     JParserItem parserUnitItem = jParser.getParserUnitItem(identifier);
                     if(parserUnitItem != null) {
                         importsToRemove.add(anImport);
@@ -422,11 +475,21 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
 
     }
 
-    private static void addImport(JParser jParser, CompilationUnit unit, Type elementType) {
+    private void addImport(JParser jParser, CompilationUnit unit, Type elementType) {
         if(elementType.isClassOrInterfaceType()) {
+            String typeStr = elementType.asString();
+            String runtimeHelperImport = getRuntimeHelperImport(typeStr);
+            if(runtimeHelperImport != null && !JParser.CREATE_RUNTIME_HELPER) {
+                if(!JParserHelper.containsImport(unit, runtimeHelperImport, true)) {
+                    unit.addImport(runtimeHelperImport);
+                }
+                return;
+            }
             if(!JParserHelper.addMissingImportType(jParser, unit, elementType)) {
+                if(addAdditionalJavaImport(unit, typeStr)) {
+                    return;
+                }
                 // class type not found. Try to get from resources.
-                String typeStr = elementType.asString();
                 Collection<String> resources = ResourceList.getResources(Pattern.compile("/*.*/" + typeStr + ".class"));
                 for(String resource : resources) {
                     resource = resource.replace("/", ".").replace(".class", "");
@@ -435,6 +498,63 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                     }
                 }
             }
+        }
+    }
+
+    private boolean addAdditionalJavaImport(CompilationUnit unit, String typeName) {
+        if(idlReader.getClass(typeName) == null && idlReader.getEnum(typeName) == null) {
+            return false;
+        }
+        String currentPackage = unit.getPackageDeclaration()
+                .map(packageDeclaration -> packageDeclaration.getNameAsString())
+                .orElse("");
+        for(int i = 0; i < additionalJavaImportPackages.size(); i++) {
+            String packageName = additionalJavaImportPackages.get(i);
+            if(packageName.equals(currentPackage)) {
+                continue;
+            }
+            String importName = packageName + "." + typeName;
+            if(!JParserHelper.containsImport(unit, importName, true)) {
+                unit.addImport(importName);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static String getRuntimeHelperImport(String typeName) {
+        switch(typeName) {
+            case "NativeArray":
+            case "NativeBool":
+            case "NativeBoolArray":
+            case "NativeByte":
+            case "NativeByteArray":
+            case "NativeDouble":
+            case "NativeDouble2":
+            case "NativeDouble3":
+            case "NativeDouble4":
+            case "NativeDoubleArray":
+            case "NativeFloat":
+            case "NativeFloat2":
+            case "NativeFloat3":
+            case "NativeFloat4":
+            case "NativeFloatArray":
+            case "NativeInt":
+            case "NativeInt2":
+            case "NativeInt3":
+            case "NativeInt4":
+            case "NativeIntArray":
+            case "NativeLong":
+            case "NativeLong2":
+            case "NativeLong3":
+            case "NativeLong4":
+            case "NativeLongArray":
+            case "NativeString":
+            case "NativeTemp":
+            case "NativeUtils":
+                return "com.github.xpenatan.jparser.runtime.helper." + typeName;
+            default:
+                return null;
         }
     }
 

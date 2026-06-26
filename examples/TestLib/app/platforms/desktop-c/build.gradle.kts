@@ -20,8 +20,8 @@ tasks.register<JavaExec>("TestLib_build_app_desktop_c") {
     group = "example-desktop"
     description = "Build TestLib headless app with TeaVM C"
     dependsOn(
-        ":jParser:runtime:runtime-build:runtime_helper_build_project_windows64_teavm_c",
-        ":examples:TestLib:lib:lib-build:TestLib_build_project_windows64_teavm_c",
+        ":jParser:runtime:plugin:jParser_build_windows64_teavm_c",
+        ":examples:TestLib:lib:plugin:jParser_build_windows64_teavm_c",
         ":examples:TestLib:lib:lib-c:core:jar"
     )
     mainClass.set("BuildTeaVMC")

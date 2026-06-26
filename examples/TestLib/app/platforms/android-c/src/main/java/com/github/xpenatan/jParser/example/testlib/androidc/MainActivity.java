@@ -20,6 +20,7 @@ public class MainActivity extends Activity {
         catch(Throwable t) {
             failure = t;
         }
+        System.out.println("TestLib Android-C Pass " + passed);
 
         TextView view = new TextView(this);
         view.setGravity(Gravity.CENTER);

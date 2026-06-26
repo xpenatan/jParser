@@ -13,6 +13,7 @@ import com.github.xpenatan.jParser.idl.IDLFile;
 import com.github.xpenatan.jParser.idl.IDLRenaming;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import com.github.xpenatan.jParser.idl.parser.IDLDefaultCodeParser;
+import com.github.xpenatan.jParser.idl.parser.IDLClassGeneratorParser;
 import com.github.xpenatan.jParser.c.TeaVMCCodeParser;
 import com.github.xpenatan.jParser.c.TeaVMCGenerator;
 import com.github.xpenatan.jParser.teavm.TeaVMCodeParser;
@@ -50,6 +51,7 @@ public class BuilderTool {
 
         if(op.generateCore) {
             IDLDefaultCodeParser coreParser = new IDLDefaultCodeParser(op.packageName, "CORE", idlReader, op.getSourceDir());
+            applyAdditionalJavaImportPackages(coreParser, op);
             coreParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             coreParser.generateClass = true;
             coreParser.generateNativeBindings = false;
@@ -61,6 +63,7 @@ public class BuilderTool {
 //            NativeCPPGenerator.SKIP_GLUE_CODE = true;
             CppGenerator cppGenerator = new NativeCPPGenerator(op.getCPPDestinationPath());
             CppCodeParser cppParser = new CppCodeParser(cppGenerator, idlReader, op.packageName, op.getSourceDir());
+            applyAdditionalJavaImportPackages(cppParser, op);
             cppParser.setJNIClassData(op.jniClassData);
             cppParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             cppParser.generateClass = true;
@@ -71,6 +74,7 @@ public class BuilderTool {
         if(op.generateWeb) {
 //            EmscriptenTarget.SKIP_GLUE_CODE = true;
             TeaVMCodeParser teavmParser = new TeaVMCodeParser(idlReader, op.webModuleName, op.packageName, op.getSourceDir());
+            applyAdditionalJavaImportPackages(teavmParser, op);
             teavmParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             teavmParser.idlRenaming = packageRenaming;
             JParser.generate(teavmParser, op.getModuleBaseJavaDir(), op.getTeaVMJavaOutputPath());
@@ -81,6 +85,7 @@ public class BuilderTool {
             teaVMCGenerator.setFFMClassData(op.teaVMCClassData);
             addTeaVMCDefaultInclude(op, teaVMCGenerator);
             TeaVMCCodeParser teaVMCParser = new TeaVMCCodeParser(teaVMCGenerator, idlReader, op.packageName, op.getSourceDir());
+            applyAdditionalJavaImportPackages(teaVMCParser, op);
             teaVMCParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             teaVMCParser.setSymbolData(op.teaVMCClassData);
             teaVMCParser.generateClass = true;
@@ -92,6 +97,7 @@ public class BuilderTool {
             FFMCppGenerator ffmGenerator = new FFMCppGenerator(op.getCPPDestinationPath());
             ffmGenerator.setFFMClassData(op.ffmClassData);
             FFMCodeParser ffmParser = new FFMCodeParser(ffmGenerator, idlReader, op.packageName, op.getSourceDir());
+            applyAdditionalJavaImportPackages(ffmParser, op);
             ffmParser.setKeepGeneratedCommandComments(op.keepGeneratedCommandComments);
             ffmParser.setFFMClassData(op.ffmClassData);
             ffmParser.generateClass = true;
@@ -101,6 +107,13 @@ public class BuilderTool {
 
         BuildConfig buildConfig = new BuildConfig(op);
         JBuilder.build(buildConfig, targets);
+    }
+
+    private static void applyAdditionalJavaImportPackages(IDLClassGeneratorParser parser, BuildToolOptions op) {
+        String[] packages = op.getAdditionalJavaImportPackages();
+        for(int i = 0; i < packages.length; i++) {
+            parser.addAdditionalJavaImportPackage(packages[i]);
+        }
     }
 
     private static void addTeaVMCDefaultInclude(BuildToolOptions op, TeaVMCGenerator teaVMCGenerator) {

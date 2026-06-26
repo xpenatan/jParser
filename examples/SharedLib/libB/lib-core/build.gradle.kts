@@ -18,6 +18,10 @@ dependencies {
     implementation(project(":jParser:runtime:runtime-core"))
 }
 
+tasks.named("compileJava") {
+    dependsOn(":examples:SharedLib:libB:plugin:jParser_generate")
+}
+
 tasks.named("clean") {
     doFirst {
         val srcPath = "$projectDir/src/main/"

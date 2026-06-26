@@ -5,7 +5,6 @@ import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
 import com.github.xpenatan.jParser.loader.JParserLibraryLoaderOptions;
 import com.github.xpenatan.jParser.loader.JParserLibraryLoaderPlatform;
 import java.util.HashSet;
-import javax.script.ScriptException;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSFunctor;
 import org.teavm.jso.browser.Window;
@@ -13,6 +12,8 @@ import org.teavm.jso.dom.html.HTMLDocument;
 import org.teavm.jso.dom.html.HTMLScriptElement;
 
 public class JParserLibraryLoader {
+
+    private static final String DEFAULT_SCRIPT_PATH = "scripts/";
 
     private static HashSet<String> loadedLibraries = new HashSet<>();
 
@@ -57,20 +58,24 @@ public class JParserLibraryLoader {
             }
         };
 
-        String scriptPath = JMultiplatform.getInstance().getMap().getObject(JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH, String.class);
-        if(scriptPath != null) {
-            if(fullLibraryName.endsWith(".js")) {
-                loadJS(lis, fullLibraryName, scriptPath);
-            }
-            else {
-                loadWasm(lis, fullLibraryName, scriptPath, ".js",true);
-            }
+        String scriptPath = getScriptPath();
+        if(fullLibraryName.endsWith(".js")) {
+            loadJS(lis, fullLibraryName, scriptPath);
         }
         else {
-            String platformWebScriptPath = JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH;
-            String error = "JMultiplatform " + platformWebScriptPath + " is not set";
-            listener.onLoad(false, new ScriptException(error));
+            loadWasm(lis, fullLibraryName, scriptPath, ".js",true);
         }
+    }
+
+    private static String getScriptPath() {
+        String scriptPath = JMultiplatform.getInstance().getMap().getObject(JParserLibraryLoaderPlatform.PLATFORM_WEB_SCRIPT_PATH, String.class);
+        if(scriptPath == null) {
+            return DEFAULT_SCRIPT_PATH;
+        }
+        if(scriptPath.length() > 0 && !scriptPath.endsWith("/")) {
+            return scriptPath + "/";
+        }
+        return scriptPath;
     }
 
     private static void loadWasm(JParserLibraryLoaderListener listener, String libraryName, String prefix, String postfix, boolean autoLoadWasm) {
@@ -115,7 +120,7 @@ public class JParserLibraryLoader {
             listener.onLoad(true, null);
         });
         scriptElement.addEventListener("error", (error) -> {
-            listener.onLoad(false, new ScriptException("Failed to load javascript: " + url));
+            listener.onLoad(false, new IllegalStateException("Failed to load javascript: " + url));
         });
         scriptElement.setSrc(url);
         document.getBody().appendChild(scriptElement);

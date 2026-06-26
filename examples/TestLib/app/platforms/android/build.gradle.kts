@@ -68,6 +68,10 @@ tasks.register("copyAndroidNatives") {
 
 tasks.whenTaskAdded {
     if ("package" in name) {
-        dependsOn("copyAndroidNatives")
+        dependsOn(
+            "copyAndroidNatives",
+            ":jParser:runtime:plugin:jParser_build_android_jni",
+            ":examples:TestLib:lib:plugin:jParser_build_android_jni"
+        )
     }
 }
