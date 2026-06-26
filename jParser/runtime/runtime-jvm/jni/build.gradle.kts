@@ -11,11 +11,12 @@ val macFile = "$libDir/mac/jni/libruntime64.dylib"
 val macArmFile = "$libDir/mac/arm/jni/libruntimearm64.dylib"
 
 val nativeBuildTasks: Map<String, String> = mapOf(
-    "windows_x64" to ":jParser:runtime:plugin:jParser_build_windows64_jni",
-    "linux_x64" to ":jParser:runtime:plugin:jParser_build_linux64_jni",
-    "mac_x64" to ":jParser:runtime:plugin:jParser_build_mac64_jni",
-    "mac_arm64" to ":jParser:runtime:plugin:jParser_build_macArm_jni",
+    "windows_x64" to ":jParser:runtime:runtime-build:runtime_helper_build_project_windows64_jni",
+    "linux_x64" to ":jParser:runtime:runtime-build:runtime_helper_build_project_linux64_jni",
+    "mac_x64" to ":jParser:runtime:runtime-build:runtime_helper_build_project_mac64_jni",
+    "mac_arm64" to ":jParser:runtime:runtime-build:runtime_helper_build_project_macArm_jni",
 )
+val hostNativeBuildTask = nativeBuildTasks.getValue(LibExt.hostDesktopPlatform)
 
 dependencies {
     implementation(project(":jParser:api:api-core"))
@@ -59,11 +60,11 @@ val isPublishTask = taskNames.any { it.contains("publish", ignoreCase = true) }
 val includeNativesInMainJar = !(isPrepareDeployTask || isPublishTask)
 
 tasks.named("compileJava") {
-    dependsOn(":jParser:runtime:plugin:jParser_generate")
+    dependsOn(":jParser:runtime:runtime-build:runtime_helper_build_project")
 }
 
 tasks.named<Jar>("jar") {
-    dependsOn(":jParser:runtime:plugin:jParser_build_windows64_jni")
+    dependsOn(hostNativeBuildTask)
     // For in-repo project dependencies, keep classes and native payload in the same jar.
     // During publishing, keep main runtime-jni artifact classes-only.
     if(includeNativesInMainJar) {

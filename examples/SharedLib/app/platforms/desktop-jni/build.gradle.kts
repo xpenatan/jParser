@@ -12,6 +12,9 @@ java {
 }
 
 val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
+val runtimeJniBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "jni")
+val libAJniBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:lib-build", "LibA", "jni")
+val libBJniBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:lib-build", "LibB", "jni")
 
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))
@@ -31,9 +34,9 @@ tasks.test {
     useJUnit()
     systemProperty("java.awt.headless", "true")
     dependsOn(
-        ":jParser:runtime:plugin:jParser_build_windows64_jni",
-        ":examples:SharedLib:libA:plugin:jParser_build_windows64_jni",
-        ":examples:SharedLib:libB:plugin:jParser_build_windows64_jni",
+        runtimeJniBuildTask,
+        libAJniBuildTask,
+        libBJniBuildTask,
         ":examples:SharedLib:libA:lib-jni:assemble",
         ":examples:SharedLib:libB:lib-jni:assemble"
     )
@@ -54,9 +57,9 @@ tasks.register<JavaExec>("SharedLib_run_app_desktop_jni") {
     group = "example-desktop"
     description = "Run desktop app with JNI bridge"
     dependsOn(
-        ":jParser:runtime:plugin:jParser_build_windows64_jni",
-        ":examples:SharedLib:libA:plugin:jParser_build_windows64_jni",
-        ":examples:SharedLib:libB:plugin:jParser_build_windows64_jni"
+        runtimeJniBuildTask,
+        libAJniBuildTask,
+        libBJniBuildTask
     )
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath

@@ -16,7 +16,7 @@ dependencies {
 }
 
 tasks.named("compileJava") {
-    dependsOn(":examples:SharedLib:libB:plugin:jParser_generate")
+    dependsOn(":examples:SharedLib:libB:lib-build:LibB_build_project")
 }
 
 tasks.named("clean") {

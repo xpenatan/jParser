@@ -13,7 +13,7 @@ dependencies {
 }
 
 tasks.named("compileJava") {
-    dependsOn(":jParser:runtime:plugin:jParser_generate")
+    dependsOn(":jParser:runtime:runtime-build:runtime_helper_build_project")
 }
 
 tasks.named("clean") {

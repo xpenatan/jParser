@@ -13,9 +13,10 @@ val windowsFile = "$libDir/windows/vc/jni/LibA64.dll"
 val linuxFile = "$libDir/linux/jni/libLibA64.so"
 val macFile = "$libDir/mac/jni/libLibA64.dylib"
 val macArmFile = "$libDir/mac/arm/jni/libLibAarm64.dylib"
+val hostNativeBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:lib-build", "LibA", "jni")
 
 tasks.jar {
-    dependsOn(":examples:SharedLib:libA:plugin:jParser_build_windows64_jni")
+    dependsOn(hostNativeBuildTask)
     from(windowsFile)
     from(linuxFile)
     from(macFile)
@@ -29,7 +30,7 @@ dependencies {
 }
 
 tasks.named("compileJava") {
-    dependsOn(":examples:SharedLib:libA:plugin:jParser_generate")
+    dependsOn(":examples:SharedLib:libA:lib-build:LibA_build_project")
 }
 
 tasks.named("clean") {

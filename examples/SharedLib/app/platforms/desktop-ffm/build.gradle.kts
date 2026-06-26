@@ -16,6 +16,9 @@ java {
 }
 
 val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
+val runtimeFfmBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "ffm")
+val libAFfmBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:lib-build", "LibA", "ffm")
+val libBFfmBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:lib-build", "LibB", "ffm")
 
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))
@@ -35,9 +38,9 @@ tasks.test {
     useJUnit()
     systemProperty("java.awt.headless", "true")
     dependsOn(
-        ":jParser:runtime:plugin:jParser_build_windows64_ffm",
-        ":examples:SharedLib:libA:plugin:jParser_build_windows64_ffm",
-        ":examples:SharedLib:libB:plugin:jParser_build_windows64_ffm",
+        runtimeFfmBuildTask,
+        libAFfmBuildTask,
+        libBFfmBuildTask,
         ":examples:SharedLib:libA:lib-ffm:assemble",
         ":examples:SharedLib:libB:lib-ffm:assemble"
     )
@@ -62,9 +65,9 @@ tasks.register<JavaExec>("SharedLib_run_app_desktop_ffm") {
     group = "example-desktop"
     description = "Run desktop app with FFM bridge"
     dependsOn(
-        ":jParser:runtime:plugin:jParser_build_windows64_ffm",
-        ":examples:SharedLib:libA:plugin:jParser_build_windows64_ffm",
-        ":examples:SharedLib:libB:plugin:jParser_build_windows64_ffm"
+        runtimeFfmBuildTask,
+        libAFfmBuildTask,
+        libBFfmBuildTask
     )
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath

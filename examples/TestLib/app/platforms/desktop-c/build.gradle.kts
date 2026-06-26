@@ -16,12 +16,15 @@ dependencies {
     implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 }
 
+val runtimeTeaVMCBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "teavm_c")
+val testLibTeaVMCBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:lib-build", "TestLib", "teavm_c")
+
 tasks.register<JavaExec>("TestLib_build_app_desktop_c") {
     group = "example-desktop"
     description = "Build TestLib headless app with TeaVM C"
     dependsOn(
-        ":jParser:runtime:plugin:jParser_build_windows64_teavm_c",
-        ":examples:TestLib:lib:plugin:jParser_build_windows64_teavm_c",
+        runtimeTeaVMCBuildTask,
+        testLibTeaVMCBuildTask,
         ":examples:TestLib:lib:lib-c:core:jar"
     )
     mainClass.set("BuildTeaVMC")

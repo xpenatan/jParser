@@ -8,14 +8,17 @@ plugins {
 // JNI and FFM app modules without duplicating test code.
 sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
 
+val runtimeJniBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "jni")
+val testLibJniBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:lib-build", "TestLib", "jni")
+
 // Configure headless tests for JNI module
 tasks.test {
     useJUnit()
     systemProperty("java.awt.headless", "true")
     // Ensure JNI native artifacts are built before running tests
     dependsOn(
-        ":jParser:runtime:plugin:jParser_build_windows64_jni",
-        ":examples:TestLib:lib:plugin:jParser_build_windows64_jni",
+        runtimeJniBuildTask,
+        testLibJniBuildTask,
         ":examples:TestLib:lib:lib-jni:assemble"
     )
     // Print test standard output (System.out.println) to the console for CI logs
@@ -57,8 +60,8 @@ tasks.register<JavaExec>("TestLib_run_app_desktop_jni") {
     group = "example-desktop"
     description = "Run desktop app with JNI bridge"
     dependsOn(
-        ":jParser:runtime:plugin:jParser_build_windows64_jni",
-        ":examples:TestLib:lib:plugin:jParser_build_windows64_jni"
+        runtimeJniBuildTask,
+        testLibJniBuildTask
     )
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath

@@ -6,7 +6,7 @@ val moduleName = "runtime-web"
 
 val emscriptenJS = "$projectDir/../../runtime-build/build/c++/libs/emscripten/runtime.js"
 val emscriptenWASM = "$projectDir/../../runtime-build/build/c++/libs/emscripten/runtime.wasm"
-val webBuildTask = ":jParser:runtime:plugin:jParser_build_web_wasm"
+val webBuildTask = ":jParser:runtime:runtime-build:runtime_helper_build_project_web_wasm"
 
 val wasmJar = tasks.register<Jar>("wasmJar") {
     dependsOn(webBuildTask)
@@ -26,7 +26,7 @@ val isPublishTask = taskNames.any { it.contains("publish", ignoreCase = true) }
 val includeNativesInMainJar = !(isPrepareDeployTask || isPublishTask)
 
 tasks.named("compileJava") {
-    dependsOn(":jParser:runtime:plugin:jParser_generate")
+    dependsOn(":jParser:runtime:runtime-build:runtime_helper_build_project")
 }
 
 tasks.named<Jar>("jar") {

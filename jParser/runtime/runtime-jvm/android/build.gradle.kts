@@ -40,7 +40,7 @@ dependencies {
 }
 
 tasks.named("preBuild").configure {
-    dependsOn(":jParser:runtime:plugin:jParser_build_android_jni")
+    dependsOn(":jParser:runtime:runtime-build:runtime_helper_build_project_android_jni")
 }
 
 publishing {

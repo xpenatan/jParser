@@ -15,7 +15,7 @@ dependencies {
 }
 
 tasks.named("compileJava") {
-    dependsOn(":examples:TestLib:lib:plugin:jParser_generate")
+    dependsOn(":examples:TestLib:lib:lib-build:TestLib_build_project")
 }
 
 tasks.named("clean") {

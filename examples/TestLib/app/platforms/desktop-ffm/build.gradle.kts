@@ -7,13 +7,16 @@ plugins {
 
 sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
 
+val runtimeFfmBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "ffm")
+val testLibFfmBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:lib-build", "TestLib", "ffm")
+
 // Configure headless tests for JNI module
 tasks.test {
     useJUnit()
     systemProperty("java.awt.headless", "true")
     dependsOn(
-        ":jParser:runtime:plugin:jParser_build_windows64_ffm",
-        ":examples:TestLib:lib:plugin:jParser_build_windows64_ffm",
+        runtimeFfmBuildTask,
+        testLibFfmBuildTask,
         ":examples:TestLib:lib:lib-ffm:assemble"
     )
     testLogging {
@@ -53,8 +56,8 @@ tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {
     group = "example-desktop"
     description = "Run desktop app with FFM bridge"
     dependsOn(
-        ":jParser:runtime:plugin:jParser_build_windows64_ffm",
-        ":examples:TestLib:lib:plugin:jParser_build_windows64_ffm"
+        runtimeFfmBuildTask,
+        testLibFfmBuildTask
     )
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath

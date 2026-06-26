@@ -20,13 +20,14 @@ val windowsFile = "$libDir/windows/vc/ffm/TestLib64.dll"
 val linuxFile = "$libDir/linux/ffm/libTestLib64.so"
 val macFile = "$libDir/mac/ffm/libTestLib64.dylib"
 val macArmFile = "$libDir/mac/arm/ffm/libTestLibarm64.dylib"
+val hostNativeBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:lib-build", "TestLib", "ffm")
 
 tasks.named("compileJava") {
-    dependsOn(":examples:TestLib:lib:plugin:jParser_generate")
+    dependsOn(":examples:TestLib:lib:lib-build:TestLib_build_project")
 }
 
 tasks.jar {
-    dependsOn(":examples:TestLib:lib:plugin:jParser_build_windows64_ffm")
+    dependsOn(hostNativeBuildTask)
     from(windowsFile)
     from(linuxFile)
     from(macFile)

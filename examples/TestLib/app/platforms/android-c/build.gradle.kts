@@ -63,8 +63,8 @@ val generateTeaVMC by tasks.registering(JavaExec::class) {
 val generateTeaVMCImportHeader by tasks.registering {
     dependsOn(
         generateTeaVMC,
-        ":jParser:runtime:plugin:jParser_build_android_teavm_c",
-        ":examples:TestLib:lib:plugin:jParser_build_android_teavm_c"
+        ":jParser:runtime:runtime-build:runtime_helper_build_project_android_teavm_c",
+        ":examples:TestLib:lib:lib-build:TestLib_build_project_android_teavm_c"
     )
     outputs.file(teavmOutputDir.map { it.file("teavmc_imports.h") })
     doLast {

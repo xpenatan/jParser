@@ -3,7 +3,7 @@ plugins {
 }
 
 val filterJniLibs by tasks.registering(Copy::class) {
-    dependsOn(":examples:SharedLib:libA:plugin:jParser_build_android_jni")
+    dependsOn(":examples:SharedLib:libA:lib-build:LibA_build_project_android_jni")
     from("$projectDir/../lib-build/build/c++/libs/android")
     into(layout.buildDirectory.dir("tmp/jniLibs"))
     include("**/*.so")

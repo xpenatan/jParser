@@ -70,8 +70,8 @@ tasks.whenTaskAdded {
     if ("package" in name) {
         dependsOn(
             "copyAndroidNatives",
-            ":jParser:runtime:plugin:jParser_build_android_jni",
-            ":examples:TestLib:lib:plugin:jParser_build_android_jni"
+            ":jParser:runtime:runtime-build:runtime_helper_build_project_android_jni",
+            ":examples:TestLib:lib:lib-build:TestLib_build_project_android_jni"
         )
     }
 }
