@@ -15,7 +15,6 @@ tasks.named("compileJava") {
 }
 
 tasks.jar {
-    dependsOn(":examples:SharedLib:libB:lib-build:LibB_build_project_web_wasm")
     from(emscriptenJS, emscriptenWASM)
 }
 

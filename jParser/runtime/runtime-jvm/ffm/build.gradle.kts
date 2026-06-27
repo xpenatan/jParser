@@ -10,13 +10,13 @@ val linuxFile = "$libDir/linux/ffm/libruntime64.so"
 val macFile = "$libDir/mac/ffm/libruntime64.dylib"
 val macArmFile = "$libDir/mac/arm/ffm/libruntimearm64.dylib"
 
-val nativeBuildTasks: Map<String, String> = mapOf(
-    "windows_x64" to ":jParser:runtime:runtime-build:runtime_helper_build_project_windows64_ffm",
-    "linux_x64" to ":jParser:runtime:runtime-build:runtime_helper_build_project_linux64_ffm",
-    "mac_x64" to ":jParser:runtime:runtime-build:runtime_helper_build_project_mac64_ffm",
-    "mac_arm64" to ":jParser:runtime:runtime-build:runtime_helper_build_project_macArm_ffm",
-)
-val hostNativeBuildTask = nativeBuildTasks.getValue(LibExt.hostDesktopPlatform)
+val taskNames = gradle.startParameter.taskNames
+fun isTaskRequested(taskName: String): Boolean {
+    return taskNames.any { it == taskName || it.endsWith(":$taskName") }
+}
+val isPrepareDeployTask = isTaskRequested("prepareReleaseDeploy") || isTaskRequested("prepareSnapshotDeploy")
+val isPublishTask = taskNames.any { it.contains("publish", ignoreCase = true) }
+val includeNativesInMainJar = !(isPrepareDeployTask || isPublishTask)
 
 dependencies {
     implementation(project(":jParser:api:api-core"))
@@ -33,7 +33,6 @@ val platforms: Map<String, String> = mapOf(
 
 val nativeJars = platforms.map { (platform, nativeFile) ->
     platform to tasks.register<Jar>("nativeJar_${platform}") {
-        dependsOn(nativeBuildTasks.getValue(platform))
         from(nativeFile)
         archiveBaseName.set("${moduleName}-${platform}")
         archiveClassifier.set("")
@@ -41,7 +40,6 @@ val nativeJars = platforms.map { (platform, nativeFile) ->
 }
 
 val nativeDesktopJar = tasks.register<Jar>("nativeJarDesktop") {
-    dependsOn(nativeBuildTasks.values)
     archiveBaseName.set("${moduleName}-desktop")
     archiveClassifier.set("")
     platforms.forEach { (folder, path) ->
@@ -51,20 +49,11 @@ val nativeDesktopJar = tasks.register<Jar>("nativeJarDesktop") {
     }
 }
 
-val taskNames = gradle.startParameter.taskNames
-fun isTaskRequested(taskName: String): Boolean {
-    return taskNames.any { it == taskName || it.endsWith(":$taskName") }
-}
-val isPrepareDeployTask = isTaskRequested("prepareReleaseDeploy") || isTaskRequested("prepareSnapshotDeploy")
-val isPublishTask = taskNames.any { it.contains("publish", ignoreCase = true) }
-val includeNativesInMainJar = !(isPrepareDeployTask || isPublishTask)
-
 tasks.named("compileJava") {
     dependsOn(":jParser:runtime:runtime-build:runtime_helper_build_project")
 }
 
 tasks.named<Jar>("jar") {
-    dependsOn(hostNativeBuildTask)
     // For in-repo project dependencies, keep classes and native payload in the same jar.
     // During publishing, keep main runtime-ffm artifact classes-only.
     if(includeNativesInMainJar) {

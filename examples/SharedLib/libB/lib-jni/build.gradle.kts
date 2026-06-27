@@ -13,10 +13,8 @@ val windowsFile = "$libDir/windows/vc/jni/LibB64.dll"
 val linuxFile = "$libDir/linux/jni/libLibB64.so"
 val macFile = "$libDir/mac/jni/libLibB64.dylib"
 val macArmFile = "$libDir/mac/arm/jni/libLibBarm64.dylib"
-val hostNativeBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:lib-build", "LibB", "jni")
 
 tasks.jar {
-    dependsOn(hostNativeBuildTask)
     from(windowsFile)
     from(linuxFile)
     from(macFile)

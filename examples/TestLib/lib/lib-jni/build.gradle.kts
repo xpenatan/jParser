@@ -14,7 +14,6 @@ val windowsFile = "$libDir/windows/vc/jni/TestLib64.dll"
 val linuxFile = "$libDir/linux/jni/libTestLib64.so"
 val macFile = "$libDir/mac/jni/libTestLib64.dylib"
 val macArmFile = "$libDir/mac/arm/jni/libTestLibarm64.dylib"
-val hostNativeBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:lib-build", "TestLib", "jni")
 
 dependencies {
     api(project(":jParser:loader:loader-core"))
@@ -27,7 +26,6 @@ tasks.named("compileJava") {
 }
 
 tasks.jar {
-    dependsOn(hostNativeBuildTask)
     from(windowsFile)
     from(linuxFile)
     from(macFile)

@@ -17,9 +17,9 @@ dependencies {
     implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 }
 
-val runtimeTeaVMCBuildTask = LibExt.hostPluginTask(":jParser:runtime:plugin", "teavm_c")
-val libATeaVMCBuildTask = LibExt.hostPluginTask(":examples:SharedLib:libA:plugin", "teavm_c")
-val libBTeaVMCBuildTask = LibExt.hostPluginTask(":examples:SharedLib:libB:plugin", "teavm_c")
+val runtimeTeaVMCBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "teavm_c")
+val libATeaVMCBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:lib-build", "LibA", "teavm_c")
+val libBTeaVMCBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:lib-build", "LibB", "teavm_c")
 
 tasks.register<JavaExec>("SharedLib_build_app_desktop_c") {
     group = "example-desktop"

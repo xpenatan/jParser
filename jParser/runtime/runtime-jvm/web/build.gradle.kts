@@ -6,16 +6,6 @@ val moduleName = "runtime-web"
 
 val emscriptenJS = "$projectDir/../../runtime-build/build/c++/libs/emscripten/runtime.js"
 val emscriptenWASM = "$projectDir/../../runtime-build/build/c++/libs/emscripten/runtime.wasm"
-val webBuildTask = ":jParser:runtime:runtime-build:runtime_helper_build_project_web_wasm"
-
-val wasmJar = tasks.register<Jar>("wasmJar") {
-    dependsOn(webBuildTask)
-    // Publish web runtime payload as a standalone wasm artifact.
-    from(emscriptenJS, emscriptenWASM)
-    archiveBaseName.set("${moduleName}-wasm")
-    archiveClassifier.set("")
-}
-
 
 val taskNames = gradle.startParameter.taskNames
 fun isTaskRequested(taskName: String): Boolean {
@@ -25,12 +15,18 @@ val isPrepareDeployTask = isTaskRequested("prepareReleaseDeploy") || isTaskReque
 val isPublishTask = taskNames.any { it.contains("publish", ignoreCase = true) }
 val includeNativesInMainJar = !(isPrepareDeployTask || isPublishTask)
 
+val wasmJar = tasks.register<Jar>("wasmJar") {
+    // Publish web runtime payload as a standalone wasm artifact.
+    from(emscriptenJS, emscriptenWASM)
+    archiveBaseName.set("${moduleName}-wasm")
+    archiveClassifier.set("")
+}
+
 tasks.named("compileJava") {
     dependsOn(":jParser:runtime:runtime-build:runtime_helper_build_project")
 }
 
 tasks.named<Jar>("jar") {
-    dependsOn(webBuildTask)
     // For in-repo project dependencies, keep classes and web payload in the same jar.
     // During publishing, keep main runtime-web artifact classes-only.
     if(includeNativesInMainJar) {

@@ -3,6 +3,7 @@ plugins {
 }
 
 val moduleName = "runtime-android"
+val androidLibDir = "$projectDir/../../runtime-build/build/c++/libs/android"
 
 android {
     namespace = "com.github.xpenatan.jparser.runtime"
@@ -14,7 +15,7 @@ android {
 
     sourceSets {
         named("main") {
-            jniLibs.srcDirs("$projectDir/../../runtime-build/build/c++/libs/android")
+            jniLibs.srcDirs(androidLibDir)
         }
     }
     compileOptions {
@@ -37,10 +38,6 @@ android {
 dependencies {
     implementation(project(":jParser:api:api-core"))
     implementation(project(":jParser:loader:loader-core"))
-}
-
-tasks.named("preBuild").configure {
-    dependsOn(":jParser:runtime:runtime-build:runtime_helper_build_project_android_jni")
 }
 
 publishing {

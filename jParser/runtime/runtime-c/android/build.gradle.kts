@@ -5,10 +5,10 @@ plugins {
 val moduleName = "runtime-c_android"
 val teavmCLibsDir = "$projectDir/../../runtime-build/build/c++/libs/android"
 val stagedJniLibsDir = layout.buildDirectory.dir("generated/teavmCJniLibs")
+val androidAbis = listOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
 
 val stageTeaVMCJniLibs by tasks.registering(Copy::class) {
-    dependsOn(":jParser:runtime:runtime-build:runtime_helper_build_project_android_teavm_c")
-    listOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a").forEach { abi ->
+    androidAbis.forEach { abi ->
         from("$teavmCLibsDir/$abi/teavm_c") {
             include("*.so")
             into(abi)
