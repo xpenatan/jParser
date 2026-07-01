@@ -7,6 +7,7 @@ import com.github.xpenatan.jParser.builder.targets.EmscriptenTarget;
 import com.github.xpenatan.jParser.builder.targets.IOSTarget;
 import com.github.xpenatan.jParser.builder.targets.LinuxTarget;
 import com.github.xpenatan.jParser.builder.targets.MacTarget;
+import com.github.xpenatan.jParser.builder.targets.SourceLanguage;
 import com.github.xpenatan.jParser.builder.targets.WindowsMSVCTarget;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.io.File;
@@ -17,6 +18,10 @@ import java.util.ArrayList;
  * by projects that do not need a custom hand-written BuildLib entrypoint.
  */
 public class DefaultBuildTargetFactory {
+
+    public void addTargets(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
+        addTargets(op, idlReader, targets, DefaultBuildTargetConfig.fromBuildToolOptions(op));
+    }
 
     public void addTargets(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets, DefaultBuildTargetConfig config) {
         if(op.containsArg("web_wasm")) {
@@ -59,10 +64,10 @@ public class DefaultBuildTargetFactory {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
-        WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
+        WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget(config.sourceLanguage);
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
-        addCppStandard(compileStaticTarget.cppFlags, api, true, config);
+        addSourceStandard(compileStaticTarget.cppFlags, api, true, config);
         applyFFMWindowsCompileFlags(compileStaticTarget, isFFM, config.ffmNative);
         addDefaultSources(compileStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
         applyCompileHooks(compileStaticTarget, config, targetArg);
@@ -89,10 +94,10 @@ public class DefaultBuildTargetFactory {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
-        LinuxTarget compileStaticTarget = new LinuxTarget();
+        LinuxTarget compileStaticTarget = new LinuxTarget(config.sourceLanguage);
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
-        addCppStandard(compileStaticTarget.cppFlags, api, false, config);
+        addSourceStandard(compileStaticTarget.cppFlags, api, false, config);
         addFlagIfMissing(compileStaticTarget.cppFlags, "-fPIC");
         applyFFMUnixCompileFlags(compileStaticTarget.cppFlags, isFFM, config.ffmNative);
         addDefaultSources(compileStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
@@ -122,10 +127,10 @@ public class DefaultBuildTargetFactory {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
-        MacTarget compileStaticTarget = new MacTarget(isArm);
+        MacTarget compileStaticTarget = new MacTarget(config.sourceLanguage, isArm);
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
-        addCppStandard(compileStaticTarget.cppFlags, api, false, config);
+        addSourceStandard(compileStaticTarget.cppFlags, api, false, config);
         addFlagIfMissing(compileStaticTarget.cppFlags, "-fPIC");
         applyFFMUnixCompileFlags(compileStaticTarget.cppFlags, isFFM, config.ffmNative);
         addDefaultSources(compileStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
@@ -154,10 +159,10 @@ public class DefaultBuildTargetFactory {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
-        EmscriptenTarget compileStaticTarget = new EmscriptenTarget();
+        EmscriptenTarget compileStaticTarget = new EmscriptenTarget(config.sourceLanguage);
         compileStaticTarget.isStatic = true;
         compileStaticTarget.compileGlueCode = false;
-        addCppStandard(compileStaticTarget.cppFlags, "web", false, config);
+        addSourceStandard(compileStaticTarget.cppFlags, "web", false, config);
         addFlagIfMissing(compileStaticTarget.cppFlags, "-fPIC");
         addDefaultSources(compileStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
         applyCompileHooks(compileStaticTarget, config, targetArg);
@@ -204,12 +209,12 @@ public class DefaultBuildTargetFactory {
         for(int i = 0; i < config.androidTargets.size(); i++) {
             AndroidTarget.Target target = config.androidTargets.get(i);
 
-            AndroidTarget compileStaticTarget = new AndroidTarget(target, config.androidApiLevel);
+            AndroidTarget compileStaticTarget = new AndroidTarget(config.sourceLanguage, target, config.androidApiLevel);
             if(api.equals("teavm_c")) {
                 compileStaticTarget.libDirSuffix += api;
             }
             compileStaticTarget.isStatic = true;
-            addCppStandard(compileStaticTarget.cppFlags, api, false, config);
+            addSourceStandard(compileStaticTarget.cppFlags, api, false, config);
             addFlagIfMissing(compileStaticTarget.cppFlags, "-fPIC");
             addDefaultSources(compileStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
             applyCompileHooks(compileStaticTarget, config, targetArg);
@@ -240,12 +245,12 @@ public class DefaultBuildTargetFactory {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
-        IOSTarget compileStaticTarget = new IOSTarget();
+        IOSTarget compileStaticTarget = new IOSTarget(config.sourceLanguage);
         if(api.equals("teavm_c")) {
             compileStaticTarget.libDirSuffix += api;
         }
         compileStaticTarget.isStatic = true;
-        addCppStandard(compileStaticTarget.cppFlags, api, false, config);
+        addSourceStandard(compileStaticTarget.cppFlags, api, false, config);
         addDefaultSources(compileStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
         applyCompileHooks(compileStaticTarget, config, targetArg);
         multiTarget.add(compileStaticTarget);
@@ -449,6 +454,15 @@ public class DefaultBuildTargetFactory {
             standard = config.jniCppStandard;
         }
         flags.add((windows ? "/std:" : "-std=") + standard);
+    }
+
+    private void addSourceStandard(ArrayList<String> flags, String api, boolean windows, DefaultBuildTargetConfig config) {
+        if(config.sourceLanguage == SourceLanguage.C) {
+            flags.add((windows ? "/std:" : "-std=") + config.cStandard);
+        }
+        else {
+            addCppStandard(flags, api, windows, config);
+        }
     }
 
     private String ownStaticLibPath(BuildToolOptions op, String platform, String api) {

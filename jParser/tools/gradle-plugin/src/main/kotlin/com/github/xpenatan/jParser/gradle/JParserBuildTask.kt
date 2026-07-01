@@ -88,6 +88,8 @@ abstract class JParserBuildTask : DefaultTask() {
         config.ffmCppStandard = extension.ffmCppStandard.get()
         config.teaVMCCppStandard = extension.teaVMCCppStandard.get()
         config.webCppStandard = extension.webCppStandard.get()
+        config.sourceLanguage = extension.sourceLanguage.get()
+        config.cStandard = extension.cStandard.get()
         config.webMainModuleName = extension.webMainModuleName.get()
         config.webSideModule = extension.webSideModule.get()
         config.webForcedInclude = extension.webForcedInclude.orNull?.let(::normalizeProjectPath)

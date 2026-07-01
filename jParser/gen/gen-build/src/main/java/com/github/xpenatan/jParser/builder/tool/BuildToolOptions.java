@@ -3,6 +3,7 @@ package com.github.xpenatan.jParser.builder.tool;
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jParser.cpp.JNIClassData;
 import com.github.xpenatan.jParser.ffm.FFMClassData;
+import com.github.xpenatan.jParser.builder.targets.SourceLanguage;
 import com.github.xpenatan.jParser.idl.IDLFile;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.io.File;
@@ -33,6 +34,13 @@ public class BuildToolOptions {
 
     /** Name of the idl file located in [Module Build Path] + src/main/cpp/myidl.idl. The default is libName but can be changed. */
     public String idlName;
+
+    public final String jniCppStandard;
+    public final String ffmCppStandard;
+    public final String teaVMCCppStandard;
+    public final String webCppStandard;
+    public final SourceLanguage sourceLanguage;
+    public final String cStandard;
 
     private String modulePrefix;
     private String moduleBaseSuffix;
@@ -76,6 +84,12 @@ public class BuildToolOptions {
         this.moduleFFMSuffix = params.moduleFFMSuffix;
         this.moduleCSuffix = params.moduleCSuffix;
         this.modulePath = params.modulePath;
+        this.jniCppStandard = stringOrDefault(params.jniCppStandard, "c++11");
+        this.ffmCppStandard = stringOrDefault(params.ffmCppStandard, "c++11");
+        this.teaVMCCppStandard = stringOrDefault(params.teaVMCCppStandard, "c++17");
+        this.webCppStandard = stringOrDefault(params.webCppStandard, "c++11");
+        this.sourceLanguage = params.sourceLanguage != null ? params.sourceLanguage : SourceLanguage.CPP;
+        this.cStandard = stringOrDefault(params.cStandard, "c17");
         this.args = args;
 
         if(params.cppSourcePath != null) {
@@ -140,6 +154,13 @@ public class BuildToolOptions {
             return normalized;
         }
         return "-" + normalized;
+    }
+
+    private static String stringOrDefault(String value, String defaultValue) {
+        if(value == null || value.trim().isEmpty()) {
+            return defaultValue;
+        }
+        return value;
     }
 
     public boolean containsArg(String arg) {
@@ -335,6 +356,21 @@ public class BuildToolOptions {
          * Optional module suffix used for the TeaVM C module. Defaults to "-c".
          */
         public String moduleCSuffix;
+
+        /**
+         * C++ standards used by the generated glue/link targets.
+         */
+        public String jniCppStandard = "c++11";
+        public String ffmCppStandard = "c++11";
+        public String teaVMCCppStandard = "c++17";
+        public String webCppStandard = "c++11";
+
+        /**
+         * Source language and standard used by static source compilation targets.
+         * Generated jParser glue remains C++.
+         */
+        public SourceLanguage sourceLanguage = SourceLanguage.CPP;
+        public String cStandard = "c17";
 
         /**
          * The C++ source path or relative path specifies the location where the build is executed, such as "/build/MyCPlusPlusLib".

@@ -16,6 +16,10 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
     // https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-by-category?view=msvc-170
 
     public WindowsMSVCTarget() {
+        this(SourceLanguage.CPP);
+    }
+
+    public WindowsMSVCTarget(SourceLanguage language) {
         this.libDirSuffix = "windows/vc/";
         this.tempBuildDir = "target/windows/vc/";
         linkObjSuffix = "**.obj";
@@ -40,6 +44,10 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
         }
         linkerOutputCommand = "/OUT:";
         libSuffix = "64.dll";
+
+        if(language == SourceLanguage.C) {
+            cppFlags.add("/TC");
+        }
     }
 
     @Override

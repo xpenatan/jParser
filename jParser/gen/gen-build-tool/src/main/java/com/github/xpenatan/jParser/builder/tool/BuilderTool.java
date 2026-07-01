@@ -22,6 +22,14 @@ import java.util.ArrayList;
 
 public class BuilderTool {
 
+    public static void build(BuildToolOptions op) {
+        build(op, defaultBuildToolListener(), null);
+    }
+
+    public static void build(BuildToolOptions op, IDLRenaming packageRenaming) {
+        build(op, defaultBuildToolListener(), packageRenaming);
+    }
+
     public static void build(BuildToolOptions op, BuildToolListener listener) {
         build(op, listener, null);
     }
@@ -150,6 +158,17 @@ public class BuilderTool {
         if(op.containsArg("gen_teavm_c")) {
             op.generateTeaVMC = true;
         }
+    }
+
+    private static BuildToolListener defaultBuildToolListener() {
+        return new BuildToolListener() {
+            private final DefaultBuildTargetFactory factory = new DefaultBuildTargetFactory();
+
+            @Override
+            public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
+                factory.addTargets(op, idlReader, targets);
+            }
+        };
     }
 
 }

@@ -2,12 +2,14 @@ package com.github.xpenatan.jParser.builder.tool;
 
 import com.github.xpenatan.jParser.builder.BuildMultiTarget;
 import com.github.xpenatan.jParser.builder.targets.AndroidTarget;
+import com.github.xpenatan.jParser.builder.targets.SourceLanguage;
 import com.github.xpenatan.jParser.builder.targets.WindowsMSVCTarget;
 import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.cpp.JNIClassData;
 import com.github.xpenatan.jParser.ffm.FFMClassData;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class JParserBuildRunner {
 
@@ -100,6 +102,8 @@ public class JParserBuildRunner {
         request.targetConfig.ffmCppStandard = property("jparser.ffmCppStandard", request.targetConfig.ffmCppStandard);
         request.targetConfig.teaVMCCppStandard = property("jparser.teaVMCCppStandard", request.targetConfig.teaVMCCppStandard);
         request.targetConfig.webCppStandard = property("jparser.webCppStandard", request.targetConfig.webCppStandard);
+        request.targetConfig.sourceLanguage = SourceLanguage.valueOf(property("jparser.sourceLanguage", request.targetConfig.sourceLanguage.name()).toUpperCase(Locale.ROOT));
+        request.targetConfig.cStandard = property("jparser.cStandard", request.targetConfig.cStandard);
         request.targetConfig.webMainModuleName = property("jparser.webMainModuleName", request.targetConfig.webMainModuleName);
         request.targetConfig.webSideModule = intProperty("jparser.webSideModule", request.targetConfig.webSideModule);
         request.targetConfig.webForcedInclude = property("jparser.webForcedInclude", null);

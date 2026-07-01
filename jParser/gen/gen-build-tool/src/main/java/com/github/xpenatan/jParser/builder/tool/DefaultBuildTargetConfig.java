@@ -1,6 +1,7 @@
 package com.github.xpenatan.jParser.builder.tool;
 
 import com.github.xpenatan.jParser.builder.targets.AndroidTarget;
+import com.github.xpenatan.jParser.builder.targets.SourceLanguage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,8 @@ public class DefaultBuildTargetConfig {
     public String ffmCppStandard = "c++11";
     public String teaVMCCppStandard = "c++17";
     public String webCppStandard = "c++11";
+    public SourceLanguage sourceLanguage = SourceLanguage.CPP;
+    public String cStandard = "c17";
 
     public String webMainModuleName = "runtime";
     public int webSideModule = 2;
@@ -38,6 +41,17 @@ public class DefaultBuildTargetConfig {
         androidTargets.add(AndroidTarget.Target.x86_64);
         androidTargets.add(AndroidTarget.Target.armeabi_v7a);
         androidTargets.add(AndroidTarget.Target.arm64_v8a);
+    }
+
+    public static DefaultBuildTargetConfig fromBuildToolOptions(BuildToolOptions op) {
+        DefaultBuildTargetConfig config = new DefaultBuildTargetConfig();
+        config.jniCppStandard = op.jniCppStandard;
+        config.ffmCppStandard = op.ffmCppStandard;
+        config.teaVMCCppStandard = op.teaVMCCppStandard;
+        config.webCppStandard = op.webCppStandard;
+        config.sourceLanguage = op.sourceLanguage;
+        config.cStandard = op.cStandard;
+        return config;
     }
 
     public TargetHooks target(String targetArg) {

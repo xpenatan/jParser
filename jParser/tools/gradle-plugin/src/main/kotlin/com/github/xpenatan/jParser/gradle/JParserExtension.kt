@@ -1,6 +1,7 @@
 package com.github.xpenatan.jParser.gradle
 
 import com.github.xpenatan.jParser.builder.tool.JParserSymbolNameMode
+import com.github.xpenatan.jParser.builder.targets.SourceLanguage
 import org.gradle.api.Action
 import org.gradle.api.Named
 import org.gradle.api.NamedDomainObjectContainer
@@ -46,6 +47,8 @@ open class JParserExtension @Inject constructor(
     val ffmCppStandard: Property<String> = objects.property(String::class.java).convention("c++11")
     val teaVMCCppStandard: Property<String> = objects.property(String::class.java).convention("c++17")
     val webCppStandard: Property<String> = objects.property(String::class.java).convention("c++11")
+    val sourceLanguage: Property<SourceLanguage> = objects.property(SourceLanguage::class.java).convention(SourceLanguage.CPP)
+    val cStandard: Property<String> = objects.property(String::class.java).convention("c17")
     val webMainModuleName: Property<String> = objects.property(String::class.java).convention("runtime")
     val webSideModule: Property<Int> = objects.property(Int::class.javaObjectType).convention(2)
     val webForcedInclude: Property<String> = objects.property(String::class.java)
