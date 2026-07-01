@@ -30,34 +30,12 @@ base {
 }
 
 dependencies {
-    implementation("com.github.javaparser:javaparser-symbol-solver-core:${LibExt.javaparserVersion}")
-    implementation("com.github.javaparser:javaparser-core:${LibExt.javaparserVersion}")
+    implementation("com.github.xpenatan.jParser:gen-build:${LibExt.libVersion}")
+    implementation("com.github.xpenatan.jParser:gen-build-tool:${LibExt.libVersion}")
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
-}
-
-sourceSets {
-    main {
-        java.srcDirs(
-            "../../api/api-core/src/main/java",
-            "../../loader/loader-core/src/main/java",
-            "../../runtime/runtime-base/src/main/java",
-            "../../gen/gen-core/src/main/java",
-            "../../gen/gen-idl/src/main/java",
-            "../../gen/gen-jni/src/main/java",
-            "../../gen/gen-ffm/src/main/java",
-            "../../gen/gen-web/src/main/java",
-            "../../gen/gen-c/src/main/java",
-            "../../gen/gen-build/src/main/java",
-            "../../gen/gen-build-tool/src/main/java"
-        )
-        resources.srcDirs(
-            "../../runtime/runtime-base/src/main/resources",
-            "../../gen/gen-build/src/main/resources"
-        )
-    }
 }
 
 java {
