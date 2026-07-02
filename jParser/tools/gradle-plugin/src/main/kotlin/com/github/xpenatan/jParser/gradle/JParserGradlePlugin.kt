@@ -33,23 +33,23 @@ class JParserGradlePlugin : Plugin<Project> {
             "Generate jParser Java sources for all configured APIs."
         )
         val targets = listOf(
-            BuildTarget("web_wasm", listOf("web_wasm"), "Build jParser TeaVM web WASM side module."),
-            BuildTarget("windows64_jni", listOf("windows64_jni"), "Build jParser Windows x64 JNI native library."),
-            BuildTarget("linux64_jni", listOf("linux64_jni"), "Build jParser Linux x64 JNI native library."),
-            BuildTarget("mac64_jni", listOf("mac64_jni"), "Build jParser macOS x64 JNI native library."),
-            BuildTarget("macArm_jni", listOf("macArm_jni"), "Build jParser macOS ARM JNI native library."),
-            BuildTarget("android_jni", listOf("android_jni"), "Build jParser Android JNI native libraries."),
-            BuildTarget("ios_jni", listOf("ios_jni"), "Build jParser iOS JNI native library."),
-            BuildTarget("windows64_ffm", listOf("windows64_ffm"), "Build jParser Windows x64 FFM native library."),
-            BuildTarget("linux64_ffm", listOf("linux64_ffm"), "Build jParser Linux x64 FFM native library."),
-            BuildTarget("mac64_ffm", listOf("mac64_ffm"), "Build jParser macOS x64 FFM native library."),
-            BuildTarget("macArm_ffm", listOf("macArm_ffm"), "Build jParser macOS ARM FFM native library."),
-            BuildTarget("windows64_teavm_c", listOf("windows64_teavm_c"), "Build jParser Windows x64 TeaVM C native library."),
-            BuildTarget("linux64_teavm_c", listOf("linux64_teavm_c"), "Build jParser Linux x64 TeaVM C native library."),
-            BuildTarget("mac64_teavm_c", listOf("mac64_teavm_c"), "Build jParser macOS x64 TeaVM C native library."),
-            BuildTarget("macArm_teavm_c", listOf("macArm_teavm_c"), "Build jParser macOS ARM TeaVM C native library."),
-            BuildTarget("android_teavm_c", listOf("android_teavm_c"), "Build jParser Android TeaVM C native libraries."),
-            BuildTarget("ios_teavm_c", listOf("ios_teavm_c"), "Build jParser iOS TeaVM C native library.")
+            BuildTarget(JParserTargets.WEB_WASM, "Build jParser TeaVM web WASM side module."),
+            BuildTarget(JParserTargets.WINDOWS64_JNI, "Build jParser Windows x64 JNI native library."),
+            BuildTarget(JParserTargets.LINUX64_JNI, "Build jParser Linux x64 JNI native library."),
+            BuildTarget(JParserTargets.MAC64_JNI, "Build jParser macOS x64 JNI native library."),
+            BuildTarget(JParserTargets.MAC_ARM_JNI, "Build jParser macOS ARM JNI native library."),
+            BuildTarget(JParserTargets.ANDROID_JNI, "Build jParser Android JNI native libraries."),
+            BuildTarget(JParserTargets.IOS_JNI, "Build jParser iOS JNI native library."),
+            BuildTarget(JParserTargets.WINDOWS64_FFM, "Build jParser Windows x64 FFM native library."),
+            BuildTarget(JParserTargets.LINUX64_FFM, "Build jParser Linux x64 FFM native library."),
+            BuildTarget(JParserTargets.MAC64_FFM, "Build jParser macOS x64 FFM native library."),
+            BuildTarget(JParserTargets.MAC_ARM_FFM, "Build jParser macOS ARM FFM native library."),
+            BuildTarget(JParserTargets.WINDOWS64_TEAVM_C, "Build jParser Windows x64 TeaVM C native library."),
+            BuildTarget(JParserTargets.LINUX64_TEAVM_C, "Build jParser Linux x64 TeaVM C native library."),
+            BuildTarget(JParserTargets.MAC64_TEAVM_C, "Build jParser macOS x64 TeaVM C native library."),
+            BuildTarget(JParserTargets.MAC_ARM_TEAVM_C, "Build jParser macOS ARM TeaVM C native library."),
+            BuildTarget(JParserTargets.ANDROID_TEAVM_C, "Build jParser Android TeaVM C native libraries."),
+            BuildTarget(JParserTargets.IOS_TEAVM_C, "Build jParser iOS TeaVM C native library.")
         )
         targets.forEach { target ->
             tasks[target.targetArg] = registerBuildTask(
@@ -123,9 +123,10 @@ class JParserGradlePlugin : Plugin<Project> {
 
     private data class BuildTarget(
         val targetArg: String,
-        val args: List<String>,
         val description: String
-    )
+    ) {
+        val args: List<String> = listOf(targetArg)
+    }
 
     private companion object {
         const val TASK_GROUP = "jParser"

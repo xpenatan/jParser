@@ -54,6 +54,40 @@ class JParserGradlePluginTest {
         assertContains(result.output, "jParser.libName must be configured")
     }
 
+    @Test
+    fun exposesTargetConstantsToBuildScripts() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("TestLib")
+                modulePrefix.set("lib")
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("src/main/cpp/source/TestLib/src")
+
+                native {
+                    target(JParserTargets.WEB_WASM) {
+                        compileFlag("-msimd128")
+                    }
+                    target(JParserTargets.WINDOWS64_JNI) {
+                        compileFlag("/MP2")
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result = runner(projectDir, "tasks", "--group", "jParser", "--all", "--console=plain").build()
+
+        assertContains(result.output, "jParser_build_${JParserTargets.WEB_WASM}")
+        assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}")
+    }
+
     private fun createProject(buildFile: String): File {
         val projectDir = Files.createTempDirectory("jparser-gradle-plugin-test").toFile()
         File(projectDir, "settings.gradle.kts").writeText("")
