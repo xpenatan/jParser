@@ -174,6 +174,22 @@ open class JParserNamedTargetHooks @Inject constructor(
     private val targetName: String,
     objects: ObjectFactory
 ) : JParserTargetHooks(objects), Named {
+    val androidTargets: NamedDomainObjectContainer<JParserAndroidTargetHooks> =
+        objects.domainObjectContainer(JParserAndroidTargetHooks::class.java) { name ->
+            objects.newInstance(JParserAndroidTargetHooks::class.java, name, objects)
+        }
+
+    override fun getName(): String = targetName
+
+    fun androidTarget(name: String, action: Action<in JParserAndroidTargetHooks>) {
+        androidTargets.create(name, action)
+    }
+}
+
+open class JParserAndroidTargetHooks @Inject constructor(
+    private val targetName: String,
+    objects: ObjectFactory
+) : JParserTargetHooks(objects), Named {
     override fun getName(): String = targetName
 }
 

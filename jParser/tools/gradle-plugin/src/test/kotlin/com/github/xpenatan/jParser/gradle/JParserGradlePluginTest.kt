@@ -90,6 +90,44 @@ class JParserGradlePluginTest {
     }
 
     @Test
+    fun supportsAndroidAbiTargetHooks() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("TestLib")
+                modulePrefix.set("lib")
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("src/main/cpp/source/TestLib/src")
+
+                native {
+                    target(JParserTargets.ANDROID_JNI) {
+                        androidTarget("armeabi_v7a") {
+                            compileFlag("-DTEST_ARMV7_ONLY")
+                        }
+                    }
+                    target(JParserTargets.ANDROID_TEAVM_C) {
+                        androidTarget("armeabi_v7a") {
+                            compileFlag("-DTEST_ARMV7_C_ONLY")
+                        }
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result = runner(projectDir, "tasks", "--group", "jParser", "--all", "--console=plain").build()
+
+        assertContains(result.output, "jParser_build_${JParserTargets.ANDROID_JNI}")
+        assertContains(result.output, "jParser_build_${JParserTargets.ANDROID_TEAVM_C}")
+    }
+
+    @Test
     fun supportsPrefixlessModuleLayout() {
         val projectDir = createProject(
             """

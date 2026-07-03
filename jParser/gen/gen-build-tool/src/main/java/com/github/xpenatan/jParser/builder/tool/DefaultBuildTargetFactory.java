@@ -216,8 +216,8 @@ public class DefaultBuildTargetFactory {
             compileStaticTarget.isStatic = true;
             addSourceStandard(compileStaticTarget.cppFlags, api, false, config);
             addFlagIfMissing(compileStaticTarget.cppFlags, "-fPIC");
-            addDefaultSources(compileStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
-            applyCompileHooks(compileStaticTarget, config, targetArg);
+            addDefaultSources(compileStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg, target);
+            applyCompileHooks(compileStaticTarget, config, targetArg, target);
             multiTarget.add(compileStaticTarget);
 
             AndroidTarget linkTarget = new AndroidTarget(target, config.androidApiLevel);
@@ -227,14 +227,14 @@ public class DefaultBuildTargetFactory {
             setupGlueCode(linkTarget, api, libBuildCPPPath);
             addCppStandard(linkTarget.cppFlags, api, false, config);
             addFlagIfMissing(linkTarget.cppFlags, "-fPIC");
-            addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
+            addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg, target);
             linkTarget.linkerFlags.add("-Wl,--whole-archive");
             linkTarget.linkerFlags.add(ownStaticLibPath(op, target, api));
             linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
             linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
-            applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.UNIX_WHOLE_ARCHIVE, target.getFolder());
-            applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg, target.getFolder());
-            applyLinkHooks(linkTarget, config, targetArg);
+            applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.UNIX_WHOLE_ARCHIVE, target);
+            applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg, target);
+            applyLinkHooks(linkTarget, config, targetArg, target);
             multiTarget.add(linkTarget);
         }
         return multiTarget;
@@ -272,10 +272,21 @@ public class DefaultBuildTargetFactory {
     }
 
     private void addDefaultSources(DefaultBuildTarget target, String sourceDir, String customSourceDir, String libBuildCPPPath, DefaultBuildTargetConfig config, String targetArg) {
-        addDefaultHeaders(target, sourceDir, customSourceDir, libBuildCPPPath, config, targetArg);
+        addDefaultSources(target, sourceDir, customSourceDir, libBuildCPPPath, config, targetArg, null);
+    }
+
+    private void addDefaultSources(DefaultBuildTarget target, String sourceDir, String customSourceDir, String libBuildCPPPath, DefaultBuildTargetConfig config, String targetArg, AndroidTarget.Target androidTarget) {
+        addDefaultHeaders(target, sourceDir, customSourceDir, libBuildCPPPath, config, targetArg, androidTarget);
         DefaultBuildTargetConfig.TargetHooks hooks = hook(config, targetArg);
-        boolean includeDefaultSources = hooks.includeDefaultSources != null ? hooks.includeDefaultSources.booleanValue() : true;
-        boolean includeCustomSources = hooks.includeCustomSources != null ? hooks.includeCustomSources.booleanValue() : true;
+        DefaultBuildTargetConfig.TargetHooks androidHooks = androidHook(config, targetArg, androidTarget);
+        Boolean includeDefaultSourcesValue = androidHooks != null && androidHooks.includeDefaultSources != null
+            ? androidHooks.includeDefaultSources
+            : hooks.includeDefaultSources;
+        Boolean includeCustomSourcesValue = androidHooks != null && androidHooks.includeCustomSources != null
+            ? androidHooks.includeCustomSources
+            : hooks.includeCustomSources;
+        boolean includeDefaultSources = includeDefaultSourcesValue != null ? includeDefaultSourcesValue.booleanValue() : true;
+        boolean includeCustomSources = includeCustomSourcesValue != null ? includeCustomSourcesValue.booleanValue() : true;
         if(config.runtimeHelperMode && libBuildCPPPath != null && !libBuildCPPPath.trim().isEmpty()) {
             target.cppInclude.add(libBuildCPPPath + "/src/runtime/RuntimeHelper.cpp");
         }
@@ -288,6 +299,10 @@ public class DefaultBuildTargetFactory {
     }
 
     private void addDefaultHeaders(DefaultBuildTarget target, String sourceDir, String customSourceDir, String libBuildCPPPath, DefaultBuildTargetConfig config, String targetArg) {
+        addDefaultHeaders(target, sourceDir, customSourceDir, libBuildCPPPath, config, targetArg, null);
+    }
+
+    private void addDefaultHeaders(DefaultBuildTarget target, String sourceDir, String customSourceDir, String libBuildCPPPath, DefaultBuildTargetConfig config, String targetArg, AndroidTarget.Target androidTarget) {
         if(sourceDir != null && !sourceDir.trim().isEmpty()) {
             addHeaderDir(target, sourceDir);
         }
@@ -298,10 +313,14 @@ public class DefaultBuildTargetFactory {
             addHeaderDir(target, libBuildCPPPath + "/src/runtime/");
             addHeaderDir(target, libBuildCPPPath + "/src/idl/");
         }
-        applyHeaderHooks(target, config, targetArg);
+        applyHeaderHooks(target, config, targetArg, androidTarget);
     }
 
     private void applyCompileHooks(DefaultBuildTarget target, DefaultBuildTargetConfig config, String targetArg) {
+        applyCompileHooks(target, config, targetArg, null);
+    }
+
+    private void applyCompileHooks(DefaultBuildTarget target, DefaultBuildTargetConfig config, String targetArg, AndroidTarget.Target androidTarget) {
         addAll(target.cppInclude, config.globalHooks.cppIncludes);
         addAll(target.cppExclude, config.globalHooks.cppExcludes);
         addAll(target.cppFlags, config.globalHooks.compileFlags);
@@ -311,9 +330,20 @@ public class DefaultBuildTargetFactory {
         addAll(target.cppExclude, hooks.cppExcludes);
         addAll(target.cppFlags, hooks.compileFlags);
         applyForcedIncludes(target, hooks.forcedIncludes);
+        DefaultBuildTargetConfig.TargetHooks androidHooks = androidHook(config, targetArg, androidTarget);
+        if(androidHooks != null) {
+            addAll(target.cppInclude, androidHooks.cppIncludes);
+            addAll(target.cppExclude, androidHooks.cppExcludes);
+            addAll(target.cppFlags, androidHooks.compileFlags);
+            applyForcedIncludes(target, androidHooks.forcedIncludes);
+        }
     }
 
     private void applyLinkHooks(DefaultBuildTarget target, DefaultBuildTargetConfig config, String targetArg) {
+        applyLinkHooks(target, config, targetArg, null);
+    }
+
+    private void applyLinkHooks(DefaultBuildTarget target, DefaultBuildTargetConfig config, String targetArg, AndroidTarget.Target androidTarget) {
         addAll(target.cppFlags, config.globalHooks.compileFlags);
         addAll(target.linkerFlags, config.globalHooks.linkerFlags);
         applyForcedIncludes(target, config.globalHooks.forcedIncludes);
@@ -321,15 +351,31 @@ public class DefaultBuildTargetFactory {
         addAll(target.cppFlags, hooks.compileFlags);
         addAll(target.linkerFlags, hooks.linkerFlags);
         applyForcedIncludes(target, hooks.forcedIncludes);
+        DefaultBuildTargetConfig.TargetHooks androidHooks = androidHook(config, targetArg, androidTarget);
+        if(androidHooks != null) {
+            addAll(target.cppFlags, androidHooks.compileFlags);
+            addAll(target.linkerFlags, androidHooks.linkerFlags);
+            applyForcedIncludes(target, androidHooks.forcedIncludes);
+        }
     }
 
     private void applyHeaderHooks(DefaultBuildTarget target, DefaultBuildTargetConfig config, String targetArg) {
+        applyHeaderHooks(target, config, targetArg, null);
+    }
+
+    private void applyHeaderHooks(DefaultBuildTarget target, DefaultBuildTargetConfig config, String targetArg, AndroidTarget.Target androidTarget) {
         for(int i = 0; i < config.globalHooks.headerDirs.size(); i++) {
             addHeaderDir(target, config.globalHooks.headerDirs.get(i));
         }
         DefaultBuildTargetConfig.TargetHooks hooks = hook(config, targetArg);
         for(int i = 0; i < hooks.headerDirs.size(); i++) {
             addHeaderDir(target, hooks.headerDirs.get(i));
+        }
+        DefaultBuildTargetConfig.TargetHooks androidHooks = androidHook(config, targetArg, androidTarget);
+        if(androidHooks != null) {
+            for(int i = 0; i < androidHooks.headerDirs.size(); i++) {
+                addHeaderDir(target, androidHooks.headerDirs.get(i));
+            }
         }
     }
 
@@ -341,12 +387,19 @@ public class DefaultBuildTargetFactory {
         return hooks;
     }
 
+    private DefaultBuildTargetConfig.TargetHooks androidHook(DefaultBuildTargetConfig config, String targetArg, AndroidTarget.Target androidTarget) {
+        if(androidTarget == null) {
+            return null;
+        }
+        return config.findTarget(targetArg + ":" + androidTarget.name());
+    }
+
     private void applyStaticLinkerInputs(ArrayList<String> flags, DefaultBuildTargetConfig config, String targetArg, LinkStyle style) {
-        applyStaticLinkerInputs(flags, config, targetArg, style, null);
+        applyStaticLinkerInputs(flags, config, targetArg, style, (String)null);
     }
 
     private void applySharedLinkerInputs(ArrayList<String> flags, DefaultBuildTargetConfig config, String targetArg) {
-        applySharedLinkerInputs(flags, config, targetArg, null);
+        applySharedLinkerInputs(flags, config, targetArg, (String)null);
     }
 
     private void applyStaticLinkerInputs(ArrayList<String> flags, DefaultBuildTargetConfig config, String targetArg, LinkStyle style, String androidAbi) {
@@ -357,6 +410,24 @@ public class DefaultBuildTargetFactory {
     private void applySharedLinkerInputs(ArrayList<String> flags, DefaultBuildTargetConfig config, String targetArg, String androidAbi) {
         addSharedLinkerInputs(flags, config.globalHooks.sharedLinkerInputs, androidAbi);
         addSharedLinkerInputs(flags, hook(config, targetArg).sharedLinkerInputs, androidAbi);
+    }
+
+    private void applyStaticLinkerInputs(ArrayList<String> flags, DefaultBuildTargetConfig config, String targetArg, LinkStyle style, AndroidTarget.Target androidTarget) {
+        String androidAbi = androidTarget.getFolder();
+        applyStaticLinkerInputs(flags, config, targetArg, style, androidAbi);
+        DefaultBuildTargetConfig.TargetHooks androidHooks = androidHook(config, targetArg, androidTarget);
+        if(androidHooks != null) {
+            addLinkerInputs(flags, androidHooks.staticLinkerInputs, style, androidAbi);
+        }
+    }
+
+    private void applySharedLinkerInputs(ArrayList<String> flags, DefaultBuildTargetConfig config, String targetArg, AndroidTarget.Target androidTarget) {
+        String androidAbi = androidTarget.getFolder();
+        applySharedLinkerInputs(flags, config, targetArg, androidAbi);
+        DefaultBuildTargetConfig.TargetHooks androidHooks = androidHook(config, targetArg, androidTarget);
+        if(androidHooks != null) {
+            addSharedLinkerInputs(flags, androidHooks.sharedLinkerInputs, androidAbi);
+        }
     }
 
     private void applyWebExports(EmscriptenTarget target, DefaultBuildTargetConfig config, String targetArg) {

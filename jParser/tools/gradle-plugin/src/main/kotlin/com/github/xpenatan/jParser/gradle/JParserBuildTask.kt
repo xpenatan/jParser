@@ -103,14 +103,14 @@ abstract class JParserBuildTask : DefaultTask() {
         }
         copyHooks(extension.native, config.globalHooks)
         extension.native.targets.forEach { hooks ->
-            copyHooks(hooks, config.target(hooks.name))
+            copyNamedTargetHooks(hooks, config)
         }
         extension.dependencies.forEach { dependency ->
             configureDependencyReference(dependency, request, config)
             request.additionalIDLRefPaths.addAll(dependency.idlRefPaths.get().map(::normalizeProjectPath))
             copyHooks(dependency.native, config.globalHooks)
             dependency.native.targets.forEach { hooks ->
-                copyHooks(hooks, config.target(hooks.name))
+                copyNamedTargetHooks(hooks, config)
             }
         }
     }
@@ -154,6 +154,14 @@ abstract class JParserBuildTask : DefaultTask() {
 
         config.target("android_jni").sharedLinkerInputs.add("$nativeBuildPath/libs/android/{androidAbi}/lib$libName.so")
         config.target("android_teavm_c").sharedLinkerInputs.add("$nativeBuildPath/libs/android/{androidAbi}/teavm_c/lib$libName.so")
+    }
+
+    private fun copyNamedTargetHooks(source: JParserNamedTargetHooks, config: DefaultBuildTargetConfig) {
+        copyHooks(source, config.target(source.name))
+        source.androidTargets.forEach { androidHooks ->
+            val androidTarget = AndroidTarget.Target.valueOf(androidHooks.name)
+            copyHooks(androidHooks, config.target("${source.name}:${androidTarget.name}"))
+        }
     }
 
     private fun copyHooks(source: JParserTargetHooks, target: DefaultBuildTargetConfig.TargetHooks) {

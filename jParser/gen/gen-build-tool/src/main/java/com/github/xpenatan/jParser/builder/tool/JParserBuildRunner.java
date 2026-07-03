@@ -137,7 +137,15 @@ public class JParserBuildRunner {
                 }
             }
         }
+        fillAndroidTargetHooks(request.targetConfig, "android_jni");
+        fillAndroidTargetHooks(request.targetConfig, "android_teavm_c");
         return request;
+    }
+
+    private static void fillAndroidTargetHooks(DefaultBuildTargetConfig config, String targetName) {
+        for(AndroidTarget.Target target : AndroidTarget.Target.values()) {
+            fillHooks(config.target(targetName + ":" + target.name()), "jparser.native." + targetName + "." + target.name());
+        }
     }
 
     private static void fillHooks(DefaultBuildTargetConfig.TargetHooks hooks, String prefix) {
