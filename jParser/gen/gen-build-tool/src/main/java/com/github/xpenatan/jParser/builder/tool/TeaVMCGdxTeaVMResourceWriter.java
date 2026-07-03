@@ -14,13 +14,14 @@ import java.util.Locale;
 final class TeaVMCGdxTeaVMResourceWriter {
     private static final String PROPERTIES_PATH = "META-INF/gdx-teavm.properties";
     private static final String RESOURCE_ROOT = "external_cpp/jparser";
+    private static final String GENERATED_RESOURCES_PATH = "build/generated/jparser/resources/main";
 
     private TeaVMCGdxTeaVMResourceWriter() {
     }
 
     static void write(BuildToolOptions op) {
         try {
-            Path resourceRoot = Path.of(op.getModuleCPath(), "src/main/resources");
+            Path resourceRoot = Path.of(op.getModuleCPath(), GENERATED_RESOURCES_PATH);
             Path libRoot = resourceRoot.resolve(RESOURCE_ROOT).resolve(resourceName(op.libName));
             cleanDirectory(libRoot);
 
@@ -75,24 +76,20 @@ final class TeaVMCGdxTeaVMResourceWriter {
         sb.append("  list(APPEND ").append(variablePrefix).append("_LIBRARY_CANDIDATES\n");
         sb.append("    \"${").append(variablePrefix).append("_NATIVE_ROOT}/windows_x64/")
                 .append(libName).append("64_.lib\")\n");
-        sb.append("  )\n");
         sb.append("elseif(APPLE)\n");
         sb.append("  if(CMAKE_SYSTEM_PROCESSOR MATCHES \"arm64|aarch64|ARM64\")\n");
         sb.append("    list(APPEND ").append(variablePrefix).append("_LIBRARY_CANDIDATES\n");
         sb.append("      \"${").append(variablePrefix).append("_NATIVE_ROOT}/mac_arm64/lib")
                 .append(libName).append("arm64_.a\")\n");
-        sb.append("    )\n");
         sb.append("  else()\n");
         sb.append("    list(APPEND ").append(variablePrefix).append("_LIBRARY_CANDIDATES\n");
         sb.append("      \"${").append(variablePrefix).append("_NATIVE_ROOT}/mac_x64/lib")
                 .append(libName).append("64_.a\")\n");
-        sb.append("    )\n");
         sb.append("  endif()\n");
         sb.append("elseif(UNIX)\n");
         sb.append("  list(APPEND ").append(variablePrefix).append("_LIBRARY_CANDIDATES\n");
         sb.append("    \"${").append(variablePrefix).append("_NATIVE_ROOT}/linux_x64/lib")
                 .append(libName).append("64_.a\")\n");
-        sb.append("  )\n");
         sb.append("endif()\n\n");
 
         sb.append("foreach(").append(variablePrefix).append("_LIBRARY_CANDIDATE IN LISTS ")
@@ -218,7 +215,27 @@ final class TeaVMCGdxTeaVMResourceWriter {
         if(!Files.exists(source)) {
             return;
         }
+        List<Path> conventionalHeaderDirs = conventionalHeaderDirs(source);
+        if(!conventionalHeaderDirs.isEmpty()) {
+            for(Path headerDir : conventionalHeaderDirs) {
+                copyHeaderTree(headerDir, target.resolve(source.relativize(headerDir)));
+            }
+            return;
+        }
         copyHeaderTree(source, target);
+    }
+
+    private static List<Path> conventionalHeaderDirs(Path source) {
+        List<Path> dirs = new ArrayList<>();
+        Path includeDir = source.resolve("include");
+        if(Files.isDirectory(includeDir)) {
+            dirs.add(includeDir);
+        }
+        Path srcDir = source.resolve("src");
+        if(Files.isDirectory(srcDir)) {
+            dirs.add(srcDir);
+        }
+        return dirs;
     }
 
     private static void copyRuntimeHelper(Path runtimeRoot) throws IOException {
