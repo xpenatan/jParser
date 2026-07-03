@@ -99,6 +99,7 @@ public class BuilderTool {
             teaVMCParser.generateClass = true;
             teaVMCParser.idlRenaming = packageRenaming;
             JParser.generate(teaVMCParser, op.getModuleBaseJavaDir(), op.getCJavaOutputPath());
+            TeaVMCGdxTeaVMResourceWriter.write(op);
         }
 
         if(op.generateFFM) {

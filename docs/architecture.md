@@ -87,6 +87,7 @@ Shared-library examples use per-library plugin modules in `examples/SharedLib/li
 - Generated Java is written to the C output path (`BuildToolOptions.getCJavaOutputPath()`), not the TeaVM web output path.
 - Native libraries are selected by platform target args such as `windows64_teavm_c`, `android_teavm_c`, or `ios_teavm_c`.
 - IDL callback implementation glue is generated with TeaVM C imports/exports and C function pointers when callbacks are present.
+- When TeaVM C generation runs, the C core artifact also receives gdx-teavm classpath resources: a `META-INF/gdx-teavm.properties` marker, `external_cpp/cmake/post_target` CMake hook, import prototypes, generated glue, copied custom sources, runtime helper header, and header-only source includes. Platform modules still package the matching static native libraries under `external_cpp/jparser/<lib>/native/<platform>`.
 
 ## Native Comment Block Contract (`lib-base`)
 
