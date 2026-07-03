@@ -77,7 +77,7 @@ public class JParserBuildRunner {
         }
         request.params.webModuleName = property("jparser.webModuleName", request.params.libName);
         request.params.packageName = property("jparser.packageName", null);
-        request.params.modulePrefix = property("jparser.modulePrefix", null);
+        request.params.modulePrefix = propertyAllowBlank("jparser.modulePrefix", null);
         request.params.cppSourcePath = property("jparser.cppSourcePath", null);
         request.params.modulePath = property("jparser.modulePath", null);
         request.params.moduleBaseSuffix = property("jparser.moduleBaseSuffix", null);
@@ -160,7 +160,7 @@ public class JParserBuildRunner {
 
     private static void validate(JParserBuildRequest request) {
         require("libName", request.params.libName);
-        require("modulePrefix", request.params.modulePrefix);
+        require("modulePrefix", request.params.modulePrefix, true);
         require("packageName", request.params.packageName);
         if(!request.targetConfig.runtimeHelperMode) {
             require("cppSourcePath", request.params.cppSourcePath);
@@ -168,7 +168,14 @@ public class JParserBuildRunner {
     }
 
     private static void require(String name, String value) {
+        require(name, value, false);
+    }
+
+    private static void require(String name, String value, boolean allowEmpty) {
         if(value == null || value.trim().isEmpty()) {
+            if(allowEmpty && value != null && value.isEmpty()) {
+                return;
+            }
             throw new IllegalArgumentException("jParser build request requires " + name);
         }
     }
@@ -179,6 +186,14 @@ public class JParserBuildRunner {
             return fallback;
         }
         return value;
+    }
+
+    private static String propertyAllowBlank(String name, String fallback) {
+        String value = System.getProperty(name);
+        if(value == null) {
+            return fallback;
+        }
+        return value.trim();
     }
 
     private static boolean booleanProperty(String name, boolean fallback) {

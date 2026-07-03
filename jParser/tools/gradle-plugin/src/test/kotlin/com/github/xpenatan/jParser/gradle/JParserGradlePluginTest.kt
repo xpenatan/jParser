@@ -1,6 +1,7 @@
 package com.github.xpenatan.jParser.gradle
 
 import org.gradle.testkit.runner.GradleRunner
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -88,6 +89,51 @@ class JParserGradlePluginTest {
         assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}")
     }
 
+    @Test
+    fun supportsPrefixlessModuleLayout() {
+        val projectDir = createProject(
+            """
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("testlib")
+                modulePrefix.set("")
+                modulePath.set(layout.projectDirectory.asFile.absolutePath)
+                moduleBuildSuffix.set("builder")
+                moduleCoreSuffix.set("core")
+                moduleJNISuffix.set("shared/jni")
+                moduleFFMSuffix.set("desktop/ffm")
+                moduleWebSuffix.set("web/wasm")
+                moduleCSuffix.set("shared/c")
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("source")
+            }
+            """.trimIndent()
+        )
+        File(projectDir, "builder/src/main/cpp").mkdirs()
+        File(projectDir, "builder/src/main/cpp/testlib.idl").writeText(
+            """
+            interface TestObject {
+                void TestObject();
+            };
+            """.trimIndent()
+        )
+        File(projectDir, "base/src/main/java").mkdirs()
+        File(projectDir, "source").mkdirs()
+
+        runner(projectDir, "jParser_generate", "--console=plain").build()
+
+        assertGeneratedClass(projectDir, "core/src/main/java", "TestObject.java")
+        assertGeneratedClass(projectDir, "shared/jni/src/main/java", "TestObject.java")
+        assertGeneratedClass(projectDir, "desktop/ffm/src/main/java", "TestObject.java")
+        assertGeneratedClass(projectDir, "web/wasm/src/main/java", "TestObject.java")
+        assertGeneratedClass(projectDir, "shared/c/src/main/java", "TestObject.java")
+        assertFalse(File(projectDir, "-core").exists())
+        assertFalse(File(projectDir, "testlib-core").exists())
+    }
+
     private fun createProject(buildFile: String): File {
         val projectDir = Files.createTempDirectory("jparser-gradle-plugin-test").toFile()
         File(projectDir, "settings.gradle.kts").writeText("")
@@ -104,5 +150,11 @@ class JParserGradlePluginTest {
 
     private fun assertContains(output: String, expected: String) {
         assertTrue("Expected output to contain '$expected'.\n$output", output.contains(expected))
+    }
+
+    private fun assertGeneratedClass(projectDir: File, moduleJavaDir: String, className: String) {
+        val rootDir = File(projectDir, moduleJavaDir)
+        val generated = rootDir.walkTopDown().any { it.isFile && it.name == className }
+        assertTrue("Expected $className under ${rootDir.absolutePath}", generated)
     }
 }

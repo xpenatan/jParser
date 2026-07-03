@@ -75,7 +75,7 @@ public class BuildToolOptions {
         this.idlName = params.idlName;
         this.webModuleName = params.webModuleName;
         this.packageName = params.packageName;
-        this.modulePrefix = params.modulePrefix;
+        this.modulePrefix = params.modulePrefix != null ? params.modulePrefix : "";
         this.moduleBaseSuffix = params.moduleBaseSuffix;
         this.moduleBuildSuffix = params.moduleBuildSuffix;
         this.moduleCoreSuffix = params.moduleCoreSuffix;
@@ -119,13 +119,13 @@ public class BuildToolOptions {
                 throw new RuntimeException(e);
             }
         }
-        moduleBasePath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleBaseSuffix, "-base");
-        moduleBuildPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleBuildSuffix, "-build");
-        moduleCorePath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleCoreSuffix, "-core");
-        moduleJNIPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleJNISuffix, "-jni");
-        moduleTeavmPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleWebSuffix, "-web");
-        moduleFFMPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleFFMSuffix, "-ffm");
-        moduleCPath = modulePath + "/" + modulePrefix + resolveModuleSuffix(moduleCSuffix, "-c/core");
+        moduleBasePath = resolveModulePath(moduleBaseSuffix, "-base");
+        moduleBuildPath = resolveModulePath(moduleBuildSuffix, "-build");
+        moduleCorePath = resolveModulePath(moduleCoreSuffix, "-core");
+        moduleJNIPath = resolveModulePath(moduleJNISuffix, "-jni");
+        moduleTeavmPath = resolveModulePath(moduleWebSuffix, "-web");
+        moduleFFMPath = resolveModulePath(moduleFFMSuffix, "-ffm");
+        moduleCPath = resolveModulePath(moduleCSuffix, "-c/core");
 
         moduleBaseJavaDir = moduleBasePath + "/src/main/java";
         cppPath = moduleBuildPath + "/src/main/cpp/";
@@ -140,6 +140,27 @@ public class BuildToolOptions {
         moduleBuildCPPPath = moduleBuildPath + "/build/c++";
         libsDir = moduleBuildCPPPath + "/libs";
         cppDestinationPath = moduleBuildCPPPath + "/src";
+    }
+
+    private String resolveModulePath(String moduleSuffix, String defaultSuffix) {
+        return modulePath + "/" + resolveModuleName(moduleSuffix, defaultSuffix);
+    }
+
+    private String resolveModuleName(String moduleSuffix, String defaultSuffix) {
+        String prefix = modulePrefix != null ? modulePrefix.trim() : "";
+        String suffix = resolveModuleSuffix(moduleSuffix, defaultSuffix);
+        if(prefix.isEmpty()) {
+            return trimLeadingModuleSeparators(suffix);
+        }
+        return prefix + suffix;
+    }
+
+    private static String trimLeadingModuleSeparators(String value) {
+        String normalized = value.replace("\\", "/").trim();
+        while(normalized.startsWith("-") || normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+        return normalized;
     }
 
     private static String resolveModuleSuffix(String moduleSuffix, String defaultSuffix) {

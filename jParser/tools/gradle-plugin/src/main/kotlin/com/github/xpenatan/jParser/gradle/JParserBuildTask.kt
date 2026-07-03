@@ -38,7 +38,7 @@ abstract class JParserBuildTask : DefaultTask() {
         val request = JParserBuildRequest()
         request.generateCore = generateCore.get()
         request.params.libName = required(extension.libName.orNull, "libName")
-        request.params.modulePrefix = required(extension.modulePrefix.orNull, "modulePrefix")
+        request.params.modulePrefix = required(extension.modulePrefix.orNull, "modulePrefix", allowEmpty = true)
         request.params.packageName = required(extension.packageName.orNull, "packageName")
         request.params.modulePath = normalizeProjectPath(extension.modulePath.orNull ?: project.projectDir.parentFile.absolutePath)
         request.params.moduleBuildSuffix = extension.moduleBuildSuffix.orNull
@@ -125,9 +125,11 @@ abstract class JParserBuildTask : DefaultTask() {
             ?: libName.substring(0, 1).lowercase() + libName.substring(1)
         request.additionalJavaImportPackages.add(referencePackageName)
         val modulePath = normalizeProjectPath(required(dependency.referenceModulePath.orNull, "dependency.${dependency.name}.referenceModulePath"))
-        val modulePrefix = dependency.referenceModulePrefix.orNull?.takeIf { it.isNotBlank() } ?: "lib"
-        val moduleBuildSuffix = resolveModuleSuffix(dependency.referenceModuleBuildSuffix.orNull, "-build")
-        val moduleBuildPath = File(modulePath, modulePrefix + moduleBuildSuffix).absolutePath.replace('\\', '/')
+        val modulePrefix = dependency.referenceModulePrefix.orNull ?: "lib"
+        val moduleBuildPath = File(
+            modulePath,
+            resolveModuleName(modulePrefix, dependency.referenceModuleBuildSuffix.orNull, "-build")
+        ).absolutePath.replace('\\', '/')
         val nativeBuildPath = "$moduleBuildPath/build/c++"
 
         request.additionalIDLRefPaths.add("$moduleBuildPath/src/main/cpp/$libName.idl")
@@ -171,9 +173,17 @@ abstract class JParserBuildTask : DefaultTask() {
         source.webMainModuleName.orNull?.let { target.webMainModuleName = it }
     }
 
-    private fun required(value: String?, name: String): String {
-        return value?.takeIf { it.isNotBlank() }
-            ?: throw GradleException("jParser.$name must be configured for task $path")
+    private fun required(value: String?, name: String, allowEmpty: Boolean = false): String {
+        if(value == null) {
+            throw GradleException("jParser.$name must be configured for task $path")
+        }
+        if(!allowEmpty && value.isBlank()) {
+            throw GradleException("jParser.$name must be configured for task $path")
+        }
+        if(allowEmpty && value.isNotEmpty() && value.isBlank()) {
+            throw GradleException("jParser.$name must not contain only whitespace for task $path")
+        }
+        return value
     }
 
     private fun normalizeProjectPath(value: String): String {
@@ -199,10 +209,19 @@ abstract class JParserBuildTask : DefaultTask() {
             return file.absolutePath.replace('\\', '/')
         }
         if(value.startsWith("/") || value.startsWith("\\")) {
-            val moduleBuildDir = File(modulePath, modulePrefix + resolveModuleSuffix(moduleBuildSuffix, "-build"))
+            val moduleBuildDir = File(modulePath, resolveModuleName(modulePrefix, moduleBuildSuffix, "-build"))
             return File(moduleBuildDir, value.trimStart('/', '\\')).absolutePath.replace('\\', '/')
         }
         return normalizeProjectPath(value)
+    }
+
+    private fun resolveModuleName(modulePrefix: String, moduleSuffix: String?, defaultSuffix: String): String {
+        val prefix = modulePrefix.trim()
+        val suffix = resolveModuleSuffix(moduleSuffix, defaultSuffix)
+        if(prefix.isEmpty()) {
+            return suffix.trimStart('-', '/', '\\')
+        }
+        return prefix + suffix
     }
 
     private fun resolveModuleSuffix(moduleSuffix: String?, defaultSuffix: String): String {
