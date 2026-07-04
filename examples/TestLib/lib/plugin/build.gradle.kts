@@ -25,8 +25,15 @@ val defaultNativeTargets = listOf(
 
 jParser {
     libName.set("TestLib")
-    modulePrefix.set("lib")
+    modulePrefix.set("")
     modulePath.set(file("..").absolutePath)
+    moduleBaseSuffix.set("base")
+    moduleBuildSuffix.set("builder")
+    moduleCoreSuffix.set("core")
+    moduleJNISuffix.set("shared/jni")
+    moduleFFMSuffix.set("desktop/ffm")
+    moduleWebSuffix.set("web/wasm")
+    moduleCSuffix.set("shared/c")
     packageName.set("com.github.xpenatan.jParser.example.testlib")
     cppSourcePath.set("/src/main/cpp/source/TestLib/src")
 

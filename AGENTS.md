@@ -40,7 +40,7 @@ When architecture, module names, tasks, generated-output rules, or public comman
 
 ## 4) Project Snapshot
 
-- jParser generates Java/native bindings for `JNI`, `FFM`, TeaVM web, and TeaVM C from `lib-base` + IDL.
+- jParser generates Java/native bindings for `JNI`, `FFM`, TeaVM web, and TeaVM C from handwritten base modules + IDL.
 - Pipeline entry point: `jParser/jParser-build-tool` (`BuilderTool.build()`).
 - Do not hand-edit generated outputs; edit source modules and generators.
 - Root module source of truth: `settings.gradle.kts`.
@@ -50,7 +50,7 @@ Maintenance rule: when module/task names change, update `AGENTS.md` and related 
 
 ## 5) Current Module Naming (Examples)
 
-- Library pipeline modules: `lib-base`, `lib-build`, `lib-core`, `lib-jni`, `lib-ffm`, `lib-web`, `lib-android`, and optional TeaVM C modules under `lib-c/core`, `lib-c/desktop`, `lib-c/android`.
+- Example library pipeline modules: `base`, `builder`, `core`, `shared/jni`, `shared/c`, `desktop/ffm`, `desktop/c`, `web/wasm`, `android/jni`, and `android/c`.
 - Runtime implementation modules: `runtime-jvm/jni`, `runtime-jvm/ffm`, `runtime-jvm/web`, `runtime-jvm/android`, plus `runtime-c/core`, `runtime-c/desktop`, and `runtime-c/android`.
 - App platform modules in examples: `app:platforms:desktop-jni`, `app:platforms:desktop-ffm`, `app:platforms:desktop-c`, `app:platforms:web`, `app:platforms:android`, `app:platforms:android-c`.
 - Runtime generator module: `jParser:runtime:runtime-build` (tasks like `runtime_helper_build_project_<target>`).
@@ -65,7 +65,7 @@ Maintenance rule: when module/task names change, update `AGENTS.md` and related 
 - `BuildToolOptions.generateCPP` default `true`; `generateFFM` default `false`.
 - Detailed toolchain/platform notes live in `docs/architecture.md` and `docs/commands.md`.
 
-## 7) Native Block Convention (`lib-base`)
+## 7) Native Block Convention (`base`)
 
 - Headers: `JNI`, `FFM`, `TEAVM`, `TEAVM_C`.
 - Commands: `-ADD`, `-ADD_RAW`, `-REMOVE`, `-REPLACE`, `-REPLACE_BLOCK`, `-NATIVE`.

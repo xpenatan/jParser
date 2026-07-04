@@ -8,7 +8,7 @@ plugins {
 sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
 
 val runtimeFfmBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "ffm")
-val testLibFfmBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:lib-build", "TestLib", "ffm")
+val testLibFfmBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "ffm")
 
 // Configure headless tests for JNI module
 tasks.test {
@@ -17,7 +17,7 @@ tasks.test {
     dependsOn(
         runtimeFfmBuildTask,
         testLibFfmBuildTask,
-        ":examples:TestLib:lib:lib-ffm:assemble"
+        ":examples:TestLib:lib:desktop:ffm:assemble"
     )
     testLogging {
         showStandardStreams = true
@@ -46,7 +46,7 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:TestLib:lib:lib-ffm"))
+    implementation(project(":examples:TestLib:lib:desktop:ffm"))
 
     implementation(project(":jParser:runtime:runtime-jvm:ffm"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")

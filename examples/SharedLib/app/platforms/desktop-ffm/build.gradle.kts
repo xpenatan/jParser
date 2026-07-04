@@ -17,8 +17,8 @@ java {
 
 val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
 val runtimeFfmBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "ffm")
-val libAFfmBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:lib-build", "LibA", "ffm")
-val libBFfmBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:lib-build", "LibB", "ffm")
+val libAFfmBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "ffm")
+val libBFfmBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "ffm")
 
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))
@@ -26,8 +26,8 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:SharedLib:libA:lib-ffm"))
-    implementation(project(":examples:SharedLib:libB:lib-ffm"))
+    implementation(project(":examples:SharedLib:libA:desktop:ffm"))
+    implementation(project(":examples:SharedLib:libB:desktop:ffm"))
 
     implementation(project(":jParser:runtime:runtime-jvm:ffm"))
 
@@ -41,8 +41,8 @@ tasks.test {
         runtimeFfmBuildTask,
         libAFfmBuildTask,
         libBFfmBuildTask,
-        ":examples:SharedLib:libA:lib-ffm:assemble",
-        ":examples:SharedLib:libB:lib-ffm:assemble"
+        ":examples:SharedLib:libA:desktop:ffm:assemble",
+        ":examples:SharedLib:libB:desktop:ffm:assemble"
     )
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))

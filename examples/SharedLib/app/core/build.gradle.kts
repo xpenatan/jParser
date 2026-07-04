@@ -8,16 +8,16 @@ java {
 }
 
 dependencies {
-    // compileOnly: app/core compiles against lib-core's API, but does NOT
+    // compileOnly: app/core compiles against core's API, but does NOT
     // propagate it transitively. Each platform module (desktop-jni, desktop-ffm,
     // android, teavm) provides the actual native bridge implementation.
-    compileOnly(project(":examples:SharedLib:libA:lib-core"))
-    compileOnly(project(":examples:SharedLib:libB:lib-core"))
+    compileOnly(project(":examples:SharedLib:libA:core"))
+    compileOnly(project(":examples:SharedLib:libB:core"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
 
-    testImplementation(project(":examples:SharedLib:libA:lib-jni"))
-    testImplementation(project(":examples:SharedLib:libB:lib-jni"))
+    testImplementation(project(":examples:SharedLib:libA:shared:jni"))
+    testImplementation(project(":examples:SharedLib:libB:shared:jni"))
     testImplementation(project(":jParser:runtime:runtime-jvm:jni"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }

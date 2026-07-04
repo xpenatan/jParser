@@ -14,8 +14,8 @@ import java.util.ArrayList;
  * different parameter types. The native work is intentionally trivial so the
  * measurement isolates bridge overhead, not native computation.
  * <p>
- * Results are printed to stdout. Run this on desktop with either lib-core (JNI)
- * or lib-ffm (FFM) on the classpath to compare. On TeaVM the iteration count
+ * Results are printed to stdout. Run this on desktop with either core/JNI
+ * or desktop/ffm on the classpath to compare. On TeaVM the iteration count
  * is reduced automatically.
  */
 public class NativeBridgeBenchmark {
@@ -155,7 +155,6 @@ public class NativeBridgeBenchmark {
         System.out.printf("  %-38s %8.1f ms   %8.2f Mcalls/s%n", label, medianMs, mcallsPerSec);
     }
 }
-
 
 
 

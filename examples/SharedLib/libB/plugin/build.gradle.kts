@@ -10,12 +10,19 @@ else {
     "-DLIB_USER_CONFIG=\"LibACustomConfig.h\""
 }
 val windowsUserConfig = "/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\""
-val libBCustomHeader = file("../lib-build/src/main/cpp/custom/LibBCustomCode.h").absolutePath
+val libBCustomHeader = file("../builder/src/main/cpp/custom/LibBCustomCode.h").absolutePath
 
 jParser {
     libName.set("LibB")
-    modulePrefix.set("lib")
+    modulePrefix.set("")
     modulePath.set(file("..").absolutePath)
+    moduleBaseSuffix.set("base")
+    moduleBuildSuffix.set("builder")
+    moduleCoreSuffix.set("core")
+    moduleJNISuffix.set("shared/jni")
+    moduleFFMSuffix.set("desktop/ffm")
+    moduleWebSuffix.set("web/wasm")
+    moduleCSuffix.set("shared/c")
     packageName.set("libB")
     cppSourcePath.set("/src/main/cpp/source")
     webForcedInclude.set(libBCustomHeader)
@@ -25,6 +32,8 @@ jParser {
             libName = "LibA",
             packageName = "libA",
             modulePath = file("../../libA").absolutePath,
+            modulePrefix = "",
+            moduleBuildSuffix = "builder",
             projectPath = ":examples:SharedLib:libA:plugin"
         )
 

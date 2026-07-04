@@ -8,12 +8,12 @@ java {
 }
 
 dependencies {
-    compileOnly(project(":examples:TestLib:lib:lib-core"))
+    compileOnly(project(":examples:TestLib:lib:core"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
 
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
-    testImplementation(project(":examples:TestLib:lib:lib-base"))
-    testImplementation(project(":examples:TestLib:lib:lib-core"))
+    testImplementation(project(":examples:TestLib:lib:base"))
+    testImplementation(project(":examples:TestLib:lib:core"))
     testCompileOnly(project(":jParser:runtime:runtime-core"))
 }

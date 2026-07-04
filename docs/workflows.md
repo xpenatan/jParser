@@ -4,8 +4,8 @@ Startup/session protocol is defined in `AGENTS.md` (`Start Here (Mandatory)`). T
 
 ## Editing Rules
 
-- Do not hand-edit generated outputs in `lib-core`, `lib-jni`, `lib-ffm`, `lib-android`, `lib-web`.
-- Prefer edits in source modules (`lib-base`, parser modules, build modules).
+- Do not hand-edit generated outputs in example modules such as `core`, `shared/jni`, `shared/c`, `desktop/ffm`, `android/jni`, `android/c`, or `web/wasm`.
+- Prefer edits in source modules (`base`, parser modules, build modules).
 - If generator logic changes, regenerate artifacts before app/test validation.
 - When modules/tasks are renamed, update `AGENTS.md`, `README.md`, and related docs in the same change.
 - Validate documentation command/module names against `settings.gradle.kts` and Gradle task definitions.

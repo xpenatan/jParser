@@ -1,0 +1,429 @@
+import com.github.xpenatan.jParser.builder.BuildMultiTarget;
+import com.github.xpenatan.jParser.builder.BuildTarget;
+import com.github.xpenatan.jParser.builder.targets.AndroidTarget;
+import com.github.xpenatan.jParser.builder.targets.EmscriptenTarget;
+import com.github.xpenatan.jParser.builder.targets.IOSTarget;
+import com.github.xpenatan.jParser.builder.targets.LinuxTarget;
+import com.github.xpenatan.jParser.builder.targets.MacTarget;
+import com.github.xpenatan.jParser.builder.targets.WindowsMSVCTarget;
+import com.github.xpenatan.jParser.builder.tool.BuildToolListener;
+import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
+import com.github.xpenatan.jParser.builder.tool.BuilderTool;
+import com.github.xpenatan.jParser.idl.IDLReader;
+import java.util.ArrayList;
+
+public class BuildLibA {
+
+    public static void main(String[] args) throws Exception {
+        String libName = "LibA";
+        String modulePrefix = "";
+        String basePackage = "libA";
+        String sourceDir = "/src/main/cpp/source";
+
+        WindowsMSVCTarget.DEBUG_BUILD = true;
+//        NativeCPPGenerator.SKIP_GLUE_CODE = true;
+
+        BuildToolOptions.BuildToolParams data = new BuildToolOptions.BuildToolParams();
+        data.libName = libName;
+        data.idlName = libName;
+        data.webModuleName = libName;
+        data.packageName = basePackage;
+        data.cppSourcePath = sourceDir;
+        data.modulePrefix = modulePrefix;
+        data.moduleBaseSuffix = "base";
+        data.moduleBuildSuffix = "builder";
+        data.moduleCoreSuffix = "core";
+        data.moduleJNISuffix = "shared/jni";
+        data.moduleWebSuffix = "web/wasm";
+        data.moduleFFMSuffix = "desktop/ffm";
+        data.moduleCSuffix = "shared/c";
+
+        BuildToolOptions op = new BuildToolOptions(data, args);
+        op.addAdditionalIDLRefPath(IDLReader.getRuntimeHelperFile());
+
+        BuilderTool.build(op, new BuildToolListener() {
+            @Override
+            public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
+                if(op.containsArg("web_wasm")) {
+                    targets.add(getTeavmTarget(op, idlReader));
+                }
+                if(op.containsArg("windows64_jni")) {
+                    targets.add(getWindowVCTarget(op, false));
+                }
+                if(op.containsArg("linux64_jni")) {
+                    targets.add(getLinuxTarget(op, false));
+                }
+                if(op.containsArg("mac64_jni")) {
+                    targets.add(getMacTarget(op, false, false));
+                }
+                if(op.containsArg("macArm_jni") ) {
+                    targets.add(getMacTarget(op, true, false));
+                }
+                if(op.containsArg("android_jni")) {
+                    targets.add(getAndroidTarget(op));
+                }
+                if(op.containsArg("ios_jni")) {
+                    targets.add(getIOSTarget(op));
+                }
+
+                if(op.containsArg("windows64_ffm")) {
+                    targets.add(getWindowVCTarget(op, true));
+                }
+                if(op.containsArg("linux64_ffm")) {
+                    targets.add(getLinuxTarget(op, true));
+                }
+                if(op.containsArg("mac64_ffm")) {
+                    targets.add(getMacTarget(op, false, true));
+                }
+                if(op.containsArg("macArm_ffm")) {
+                    targets.add(getMacTarget(op, true, true));
+                }
+
+                if(op.containsArg("windows64_teavm_c")) {
+                    targets.add(getWindowVCTeaVMCTarget(op));
+                }
+                if(op.containsArg("android_teavm_c")) {
+                    targets.add(getAndroidTeaVMCTarget(op));
+                }
+            }
+        });
+    }
+
+    private static BuildMultiTarget getWindowVCTeaVMCTarget(BuildToolOptions op) {
+        String api = "teavm_c";
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        String config = "/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"";
+
+        WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
+        compileStaticTarget.libDirSuffix += api;
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("/std:c++17");
+        compileStaticTarget.cppFlags.add("/DLIBA_EXPORTS");
+        compileStaticTarget.cppFlags.add(config);
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
+        linkTarget.libDirSuffix += api;
+        linkTarget.setupTeaVMCGlueCode(libBuildCPPPath);
+        linkTarget.cppFlags.add("/std:c++17");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("-DLL");
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getAndroidTeaVMCTarget(BuildToolOptions op) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+        String api = "teavm_c";
+
+        AndroidTarget.ApiLevel apiLevel = AndroidTarget.ApiLevel.Android_10_29;
+        ArrayList<AndroidTarget.Target> targets = new ArrayList<>();
+        targets.add(AndroidTarget.Target.x86);
+        targets.add(AndroidTarget.Target.x86_64);
+        targets.add(AndroidTarget.Target.armeabi_v7a);
+        targets.add(AndroidTarget.Target.arm64_v8a);
+
+        String config;
+        if(BuildTarget.isWindows()) {
+            config = "-DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"";
+        }
+        else {
+            config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+        }
+
+        for(int i = 0; i < targets.size(); i++) {
+            AndroidTarget.Target target = targets.get(i);
+
+            AndroidTarget compileStaticTarget = new AndroidTarget(target, apiLevel);
+            compileStaticTarget.libDirSuffix += api;
+            compileStaticTarget.isStatic = true;
+            compileStaticTarget.cppFlags.add("-std=c++17");
+            compileStaticTarget.cppFlags.add("-fPIC");
+            compileStaticTarget.cppFlags.add("-DLIBA_EXPORTS");
+            compileStaticTarget.cppFlags.add(config);
+            compileStaticTarget.headerDirs.add("-I" + sourceDir);
+            compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+            compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+            compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+            multiTarget.add(compileStaticTarget);
+
+            AndroidTarget linkTarget = new AndroidTarget(target, apiLevel);
+            linkTarget.libDirSuffix += api;
+            linkTarget.setupTeaVMCGlueCode(libBuildCPPPath);
+            linkTarget.cppFlags.add("-std=c++17");
+            linkTarget.cppFlags.add("-fPIC");
+            linkTarget.headerDirs.add("-I" + sourceDir);
+            linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+            linkTarget.linkerFlags.add("-Wl,--whole-archive");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() + "/" + api + "/lib" + op.libName + ".a");
+            linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+            linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
+            multiTarget.add(linkTarget);
+        }
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getWindowVCTarget(BuildToolOptions op, boolean isFFM) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        String config = "/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"";
+
+        String api = isFFM ? "ffm" : "jni";
+
+        // Make a static library
+        WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
+        compileStaticTarget.libDirSuffix += api;
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("/std:c++11");
+        compileStaticTarget.cppFlags.add("/DLIBA_EXPORTS");
+        compileStaticTarget.cppFlags.add(config);
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
+        linkTarget.libDirSuffix += api;
+        if(isFFM) {
+            linkTarget.setupFFMGlueCode(libBuildCPPPath);
+        }
+        else {
+            linkTarget.setupJNIGlueCode(libBuildCPPPath);
+        }
+        linkTarget.cppFlags.add("/std:c++11");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("-DLL");
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getLinuxTarget(BuildToolOptions op, boolean isFFM) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+
+        String api = isFFM ? "ffm" : "jni";
+
+        // Make a static library
+        LinuxTarget compileStaticTarget = new LinuxTarget();
+        compileStaticTarget.libDirSuffix += api;
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add(config);
+        compileStaticTarget.cppFlags.add("-fPIC");
+        compileStaticTarget.cppFlags.add("-fvisibility=hidden");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        LinuxTarget linkTarget = new LinuxTarget();
+        linkTarget.libDirSuffix += api;
+        if(isFFM) {
+            linkTarget.setupFFMGlueCode(libBuildCPPPath);
+        }
+        else {
+            linkTarget.setupJNIGlueCode(libBuildCPPPath);
+        }
+        linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("-fPIC");
+        linkTarget.cppFlags.add(config);
+        linkTarget.cppFlags.add("-fvisibility=hidden");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("-Wl,-soname,libLibA64.so");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/" + api + "/lib" + op.libName + "64_.a");
+
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getMacTarget(BuildToolOptions op, boolean isArm, boolean isFFM) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+
+        String api = isFFM ? "ffm" : "jni";
+
+        // Make a static library
+        MacTarget compileStaticTarget = new MacTarget(isArm);
+        compileStaticTarget.libDirSuffix += api;
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add(config);
+        compileStaticTarget.cppFlags.add("-fPIC");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        MacTarget linkTarget = new MacTarget(isArm);
+        linkTarget.libDirSuffix += api;
+        if(isFFM) {
+            linkTarget.setupFFMGlueCode(libBuildCPPPath);
+        }
+        else {
+            linkTarget.setupJNIGlueCode(libBuildCPPPath);
+        }
+        linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add(config);
+        linkTarget.cppFlags.add("-fPIC");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+
+        linkTarget.linkerFlags.add("-Wl,-force_load");
+        if(isArm) {
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/" + api + "/lib" + op.libName + "64_.a");
+        }
+        else {
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/" + api + "/lib" + op.libName + "64_.a");
+        }
+
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getTeavmTarget(BuildToolOptions op, IDLReader idlReader) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        // Make a static library
+        EmscriptenTarget compileStaticTarget = new EmscriptenTarget();
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.compileGlueCode = false;
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.cppFlags.add("-fPIC");
+//        compileStaticTarget.cppFlags.add(config);
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        // Compile glue code and link to make js file
+        EmscriptenTarget linkTarget = new EmscriptenTarget();
+        linkTarget.idlReader = idlReader;
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.cppFlags.add("-fPIC");
+//        linkTarget.cppFlags.add(config);
+        linkTarget.headerDirs.add("-include" + op.getCustomSourceDir() + "LibACustomCode.h");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/emscripten/" + op.libName + "_.a");
+        linkTarget.mainModuleName = "runtime";
+        linkTarget.linkerFlags.add("-sSIDE_MODULE=1");
+        multiTarget.add(linkTarget);
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getAndroidTarget(BuildToolOptions op) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        AndroidTarget.ApiLevel apiLevel = AndroidTarget.ApiLevel.Android_10_29;
+        ArrayList<AndroidTarget.Target> targets = new ArrayList<>();
+
+        targets.add(AndroidTarget.Target.x86);
+        targets.add(AndroidTarget.Target.x86_64);
+        targets.add(AndroidTarget.Target.armeabi_v7a);
+        targets.add(AndroidTarget.Target.arm64_v8a);
+
+        String config;
+        if(BuildTarget.isWindows()) {
+            config = "-DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\"";
+        }
+        else {
+            config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+        }
+
+        for(int i = 0; i < targets.size(); i++) {
+            AndroidTarget.Target target = targets.get(i);
+
+            // Make a static library
+            AndroidTarget compileStaticTarget = new AndroidTarget(target, apiLevel);
+            compileStaticTarget.isStatic = true;
+            compileStaticTarget.cppFlags.add("-std=c++11");
+            compileStaticTarget.cppFlags.add("-fPIC");
+            compileStaticTarget.cppFlags.add(config);
+            compileStaticTarget.headerDirs.add("-I" + sourceDir);
+            compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+            compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+            compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+            multiTarget.add(compileStaticTarget);
+
+            AndroidTarget linkTarget = new AndroidTarget(target, apiLevel);
+            linkTarget.setupJNIGlueCode(libBuildCPPPath);
+            linkTarget.cppFlags.add("-std=c++11");
+            linkTarget.cppFlags.add("-fPIC");
+            linkTarget.cppFlags.add(config);
+            linkTarget.headerDirs.add("-I" + sourceDir);
+            linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+            linkTarget.linkerFlags.add("-Wl,--whole-archive");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/android/" + target.getFolder() +"/lib" + op.libName + ".a");
+            linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
+            linkTarget.linkerFlags.add("-Wl,-soname,libLibA.so");
+            linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
+            multiTarget.add(linkTarget);
+        }
+
+        return multiTarget;
+    }
+
+    private static BuildMultiTarget getIOSTarget(BuildToolOptions op)  {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String libBuildCPPPath = op.getModuleBuildCPPPath();
+
+        // TODO WIP/not working
+
+        // Make a static library
+        IOSTarget compileStaticTarget = new IOSTarget();
+        compileStaticTarget.isStatic = true;
+        compileStaticTarget.cppFlags.add("-std=c++11");
+        compileStaticTarget.headerDirs.add("-I" + sourceDir);
+        compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
+        compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+        multiTarget.add(compileStaticTarget);
+
+        IOSTarget linkTarget = new IOSTarget();
+        linkTarget.setupJNIGlueCode(libBuildCPPPath);
+        linkTarget.cppFlags.add("-std=c++11");
+        linkTarget.headerDirs.add("-I" + sourceDir);
+        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.linkerFlags.add("-Wl,-force_load");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
+        multiTarget.add(linkTarget);
+
+        return multiTarget;
+    }
+}

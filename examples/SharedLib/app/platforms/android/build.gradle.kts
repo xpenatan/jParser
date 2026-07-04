@@ -43,8 +43,8 @@ dependencies {
     natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-x86")
 
     implementation(project(":examples:SharedLib:app:core"))
-    api(project(":examples:SharedLib:libA:lib-android"))
-    api(project(":examples:SharedLib:libB:lib-android"))
+    api(project(":examples:SharedLib:libA:android:jni"))
+    api(project(":examples:SharedLib:libB:android:jni"))
 }
 
 
@@ -67,8 +67,8 @@ tasks.whenTaskAdded {
         dependsOn(
             "copyAndroidNatives",
             ":jParser:runtime:runtime-build:runtime_helper_build_project_android_jni",
-            ":examples:SharedLib:libA:lib-build:LibA_build_project_android_jni",
-            ":examples:SharedLib:libB:lib-build:LibB_build_project_android_jni"
+            ":examples:SharedLib:libA:builder:LibA_build_project_android_jni",
+            ":examples:SharedLib:libB:builder:LibB_build_project_android_jni"
         )
     }
 }

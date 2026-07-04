@@ -9,7 +9,7 @@ plugins {
 sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
 
 val runtimeJniBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "jni")
-val testLibJniBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:lib-build", "TestLib", "jni")
+val testLibJniBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "jni")
 
 // Configure headless tests for JNI module
 tasks.test {
@@ -19,7 +19,7 @@ tasks.test {
     dependsOn(
         runtimeJniBuildTask,
         testLibJniBuildTask,
-        ":examples:TestLib:lib:lib-jni:assemble"
+        ":examples:TestLib:lib:shared:jni:assemble"
     )
     // Print test standard output (System.out.println) to the console for CI logs
     testLogging {
@@ -49,7 +49,7 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:TestLib:lib:lib-jni"))
+    implementation(project(":examples:TestLib:lib:shared:jni"))
 
     implementation(project(":jParser:runtime:runtime-jvm:jni"))
 

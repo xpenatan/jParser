@@ -4,26 +4,26 @@
 
 Primary orchestration is in `jParser/jParser-build-tool` via `BuilderTool.build()`:
 
-1. IDL parsing (`IDLReader`) from `lib-build/src/main/cpp/*.idl`
-2. Core API generation (`IDLDefaultCodeParser`) into `lib-core`
-3. JNI generation (`CppCodeParser`) into `lib-jni` and `lib-android`
-4. TeaVM web generation (`TeaVMCodeParser` from `gen-web`) into `lib-web`
-5. TeaVM C generation (`TeaVMCCodeParser` from `gen-c`) into `*-c` TeaVM C Java bindings plus `TeaVMCGlue.cpp`
-6. FFM generation (`FFMCodeParser`) into `lib-ffm`
+1. IDL parsing (`IDLReader`) from the build module's `src/main/cpp/*.idl`
+2. Core API generation (`IDLDefaultCodeParser`) into the configured core module
+3. JNI generation (`CppCodeParser`) into the configured JNI module
+4. TeaVM web generation (`TeaVMCodeParser` from `gen-web`) into the configured web module
+5. TeaVM C generation (`TeaVMCCodeParser` from `gen-c`) into the configured C module plus `TeaVMCGlue.cpp`
+6. FFM generation (`FFMCodeParser`) into the configured FFM module
 7. Native compile (`JBuilder.build()`) via platform targets
 
 ## Module Conventions
 
-- `*-base`: handwritten Java with target-specific comment blocks
-- `*-build`: Gradle entry for generation + native build
-- `*-core`: generated bridge-agnostic API
-- `*-jni`: generated JNI Java + desktop JNI natives
-- `*-ffm`: generated FFM Java + desktop FFM natives
-- `*-android`: generated Android JNI output
-- `*-web`: generated TeaVM web output
-- `*-c/core`: generated TeaVM C Java output
-- `*-c/desktop`: TeaVM C desktop native payloads
-- `*-c/android`: TeaVM C Android native payloads
+- `base`: handwritten Java with target-specific comment blocks in examples
+- `builder`: Gradle entry for generation + native build in examples
+- `core`: generated bridge-agnostic API in examples
+- `shared/jni`: generated JNI Java shared by desktop and Android JNI examples
+- `shared/c`: generated TeaVM C Java shared by desktop and Android C examples
+- `desktop/ffm`: generated FFM Java + desktop FFM natives
+- `desktop/c`: TeaVM C desktop native payloads
+- `android/jni`: Android JNI packaging
+- `android/c`: Android TeaVM C native packaging
+- `web/wasm`: generated TeaVM web output
 
 Runtime modules keep shared API/build modules at the top level and group implementation modules by runtime family:
 
@@ -57,7 +57,7 @@ Symbol naming is configured with the typed enum `JParserSymbolNameMode` (`DEFAUL
 
 The plugin included build follows the libfdx layout: it is not included as a root subproject, and its `settings.gradle.kts` must not include or remap root `:jParser:*` projects. It also must not rename the root project to the Maven artifact id; leave the included build name as the folder-derived `gradle-plugin`, and keep artifact naming in `build.gradle.kts`. It sources required local Java code directly from the root tree so IDE imports do not create duplicate `jparser-gradle-plugin.jParser.*` modules. `jParser/tools/gradle-plugin/buildSrc` sources the single root `buildSrc/src/main/kotlin/LibExt.kt` file for build-script constants. Do not add another `LibExt.kt` under `jParser/tools`; root `LibExt` is the only source of truth.
 
-Generated output modules stay unchanged: `lib-core`, `lib-jni`, `lib-ffm`, `lib-web`, `lib-android`, and `lib-c/*` keep their current source and native resource layout. The plugin only replaces repetitive `lib-build` JavaExec/task and native target setup.
+Example generated output modules use the jBox3D-style layout: `core`, `shared/jni`, `shared/c`, `desktop/ffm`, and `web/wasm`, with native packaging under `desktop/c`, `android/jni`, and `android/c`. The plugin fixtures keep their separate `plugin` modules, but set suffix overrides so generation targets this layout.
 
 Runtime helper generation uses the same plugin in `jParser/runtime/plugin` with `runtimeHelper()` enabled. This module sits next to `runtime-build`, has only a `build.gradle.kts`, and keeps the runtime tree from introducing one-off wrapper folders. That mode keeps `idlName` and `cppSourcePath` optional, generates the runtime helper sources, compiles `RuntimeHelper.cpp`, and switches the web target to the existing Emscripten main-module defaults.
 
@@ -89,7 +89,7 @@ Shared-library examples use per-library plugin modules in `examples/SharedLib/li
 - IDL callback implementation glue is generated with TeaVM C imports/exports and C function pointers when callbacks are present.
 - When TeaVM C generation runs, the C core artifact also receives gdx-teavm classpath resources: a `META-INF/gdx-teavm.properties` marker, `external_cpp/cmake/post_target` CMake hook, import prototypes, generated glue, copied custom sources, runtime helper header, and header-only source includes. Platform modules still package the matching static native libraries under `external_cpp/jparser/<lib>/native/<platform>`.
 
-## Native Comment Block Contract (`lib-base`)
+## Native Comment Block Contract (`base`)
 
 Supported headers: `JNI`, `FFM`, `TEAVM`, `TEAVM_C`.
 

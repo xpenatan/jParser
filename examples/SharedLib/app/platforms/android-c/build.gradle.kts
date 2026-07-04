@@ -11,15 +11,15 @@ val teavmOutputDir = layout.buildDirectory.dir("teavm-c")
 
 dependencies {
     teavmBuild(project(":examples:SharedLib:app:core"))
-    teavmBuild(project(":examples:SharedLib:libA:lib-c:core"))
-    teavmBuild(project(":examples:SharedLib:libB:lib-c:core"))
+    teavmBuild(project(":examples:SharedLib:libA:shared:c"))
+    teavmBuild(project(":examples:SharedLib:libB:shared:c"))
     teavmBuild(project(":jParser:runtime:runtime-c:core"))
     teavmBuild("org.teavm:teavm-tooling:${LibExt.teaVMVersion}")
     teavmBuild("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 
     implementation(project(":jParser:runtime:runtime-c:android"))
-    implementation(project(":examples:SharedLib:libA:lib-c:android"))
-    implementation(project(":examples:SharedLib:libB:lib-c:android"))
+    implementation(project(":examples:SharedLib:libA:android:c"))
+    implementation(project(":examples:SharedLib:libB:android:c"))
 }
 
 android {
@@ -66,15 +66,15 @@ val generateTeaVMCImportHeader by tasks.registering {
     dependsOn(
         generateTeaVMC,
         ":jParser:runtime:runtime-build:runtime_helper_build_project_android_teavm_c",
-        ":examples:SharedLib:libA:lib-build:LibA_build_project_android_teavm_c",
-        ":examples:SharedLib:libB:lib-build:LibB_build_project_android_teavm_c"
+        ":examples:SharedLib:libA:builder:LibA_build_project_android_teavm_c",
+        ":examples:SharedLib:libB:builder:LibB_build_project_android_teavm_c"
     )
     outputs.file(teavmOutputDir.map { it.file("teavmc_imports.h") })
     doLast {
         val headers = listOf(
             rootProject.file("jParser/runtime/runtime-build/build/c++/src/teavmcglue/TeaVMCGlue.h"),
-            rootProject.file("examples/SharedLib/libA/lib-build/build/c++/src/teavmcglue/TeaVMCGlue.h"),
-            rootProject.file("examples/SharedLib/libB/lib-build/build/c++/src/teavmcglue/TeaVMCGlue.h"),
+            rootProject.file("examples/SharedLib/libA/builder/build/c++/src/teavmcglue/TeaVMCGlue.h"),
+            rootProject.file("examples/SharedLib/libB/builder/build/c++/src/teavmcglue/TeaVMCGlue.h"),
         )
         val seen = linkedSetOf<String>()
         val lines = mutableListOf(
@@ -184,8 +184,8 @@ val buildTeaVMCAndroidNative by tasks.registering {
                 File(generatedDir, "all.c").absolutePath,
                 appBridge.absolutePath,
                 "-L${rootProject.file("jParser/runtime/runtime-build/build/c++/libs/android/${abi.abi}/teavm_c").absolutePath}",
-                "-L${rootProject.file("examples/SharedLib/libA/lib-build/build/c++/libs/android/${abi.abi}/teavm_c").absolutePath}",
-                "-L${rootProject.file("examples/SharedLib/libB/lib-build/build/c++/libs/android/${abi.abi}/teavm_c").absolutePath}",
+                "-L${rootProject.file("examples/SharedLib/libA/builder/build/c++/libs/android/${abi.abi}/teavm_c").absolutePath}",
+                "-L${rootProject.file("examples/SharedLib/libB/builder/build/c++/libs/android/${abi.abi}/teavm_c").absolutePath}",
                 "-lruntime",
                 "-lLibA",
                 "-lLibB",

@@ -13,8 +13,8 @@ java {
 
 val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
 val runtimeJniBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "jni")
-val libAJniBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:lib-build", "LibA", "jni")
-val libBJniBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:lib-build", "LibB", "jni")
+val libAJniBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "jni")
+val libBJniBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "jni")
 
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))
@@ -22,8 +22,8 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:SharedLib:libA:lib-jni"))
-    implementation(project(":examples:SharedLib:libB:lib-jni"))
+    implementation(project(":examples:SharedLib:libA:shared:jni"))
+    implementation(project(":examples:SharedLib:libB:shared:jni"))
 
     implementation(project(":jParser:runtime:runtime-jvm:jni"))
 
@@ -37,8 +37,8 @@ tasks.test {
         runtimeJniBuildTask,
         libAJniBuildTask,
         libBJniBuildTask,
-        ":examples:SharedLib:libA:lib-jni:assemble",
-        ":examples:SharedLib:libB:lib-jni:assemble"
+        ":examples:SharedLib:libA:shared:jni:assemble",
+        ":examples:SharedLib:libB:shared:jni:assemble"
     )
     testLogging {
         showStandardStreams = true

@@ -31,23 +31,23 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ### TestLib native generation
 
 ```text
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_jni
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_linux64_jni
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_mac64_jni
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_macArm_jni
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_android_jni
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_ios_jni
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_ffm
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_linux64_ffm
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_mac64_ffm
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_macArm_ffm
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_teavm_c
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_linux64_teavm_c
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_mac64_teavm_c
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_macArm_teavm_c
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_android_teavm_c
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_ios_teavm_c
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_web_wasm
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_jni
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_linux64_jni
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_mac64_jni
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_macArm_jni
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_android_jni
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_ios_jni
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_ffm
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_linux64_ffm
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_mac64_ffm
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_macArm_ffm
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_teavm_c
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_linux64_teavm_c
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_mac64_teavm_c
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_macArm_teavm_c
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_android_teavm_c
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_ios_teavm_c
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_web_wasm
 ```
 
 ### TestLib app run/build
@@ -94,17 +94,17 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 Build libA before libB.
 
 ```text
-./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_windows64_jni
-./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_windows64_ffm
-./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_windows64_teavm_c
-./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_android_teavm_c
-./gradlew :examples:SharedLib:libA:lib-build:LibA_build_project_web_wasm
+./gradlew :examples:SharedLib:libA:builder:LibA_build_project_windows64_jni
+./gradlew :examples:SharedLib:libA:builder:LibA_build_project_windows64_ffm
+./gradlew :examples:SharedLib:libA:builder:LibA_build_project_windows64_teavm_c
+./gradlew :examples:SharedLib:libA:builder:LibA_build_project_android_teavm_c
+./gradlew :examples:SharedLib:libA:builder:LibA_build_project_web_wasm
 
-./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_windows64_jni
-./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_windows64_ffm
-./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_windows64_teavm_c
-./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_android_teavm_c
-./gradlew :examples:SharedLib:libB:lib-build:LibB_build_project_web_wasm
+./gradlew :examples:SharedLib:libB:builder:LibB_build_project_windows64_jni
+./gradlew :examples:SharedLib:libB:builder:LibB_build_project_windows64_ffm
+./gradlew :examples:SharedLib:libB:builder:LibB_build_project_windows64_teavm_c
+./gradlew :examples:SharedLib:libB:builder:LibB_build_project_android_teavm_c
+./gradlew :examples:SharedLib:libB:builder:LibB_build_project_web_wasm
 
 ./gradlew :examples:SharedLib:app:platforms:desktop-jni:SharedLib_run_app_desktop_jni
 ./gradlew :examples:SharedLib:app:platforms:desktop-ffm:SharedLib_run_app_desktop_ffm

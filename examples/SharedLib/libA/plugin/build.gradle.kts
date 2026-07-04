@@ -10,12 +10,19 @@ else {
     "-DLIB_USER_CONFIG=\"LibACustomConfig.h\""
 }
 val windowsUserConfig = "/DLIB_USER_CONFIG=\"\\\"LibACustomConfig.h\\\"\""
-val customHeader = file("../lib-build/src/main/cpp/custom/LibACustomCode.h").absolutePath
+val customHeader = file("../builder/src/main/cpp/custom/LibACustomCode.h").absolutePath
 
 jParser {
     libName.set("LibA")
-    modulePrefix.set("lib")
+    modulePrefix.set("")
     modulePath.set(file("..").absolutePath)
+    moduleBaseSuffix.set("base")
+    moduleBuildSuffix.set("builder")
+    moduleCoreSuffix.set("core")
+    moduleJNISuffix.set("shared/jni")
+    moduleFFMSuffix.set("desktop/ffm")
+    moduleWebSuffix.set("web/wasm")
+    moduleCSuffix.set("shared/c")
     packageName.set("libA")
     cppSourcePath.set("/src/main/cpp/source")
     windowsDebugBuild.set(true)
