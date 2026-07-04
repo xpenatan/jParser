@@ -2,6 +2,7 @@ package com.github.xpenatan.jParser.gradle
 
 import com.github.xpenatan.jParser.builder.tool.JParserSymbolNameMode
 import com.github.xpenatan.jParser.builder.targets.SourceLanguage
+import com.github.xpenatan.jParser.idl.IDLRenaming
 import org.gradle.api.Action
 import org.gradle.api.Named
 import org.gradle.api.NamedDomainObjectContainer
@@ -40,6 +41,7 @@ open class JParserExtension @Inject constructor(
     val jniSymbolNameMode: Property<JParserSymbolNameMode> = objects.property(JParserSymbolNameMode::class.java)
     val ffmSymbolNameMode: Property<JParserSymbolNameMode> = objects.property(JParserSymbolNameMode::class.java)
     val teaVMCSymbolNameMode: Property<JParserSymbolNameMode> = objects.property(JParserSymbolNameMode::class.java)
+    val idlRenaming: Property<IDLRenaming> = objects.property(IDLRenaming::class.java)
     val ffmLogMethod: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
     val ffmDefaultCritical: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 
@@ -84,6 +86,10 @@ open class JParserExtension @Inject constructor(
 
     fun runtimeHelper() {
         runtimeHelperMode.set(true)
+    }
+
+    fun idlRenaming(value: IDLRenaming) {
+        idlRenaming.set(value)
     }
 
     fun webExportedFunction(value: String) {

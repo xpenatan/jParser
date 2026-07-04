@@ -61,7 +61,7 @@ public class JParserBuildRunner {
                 public void onAddTarget(BuildToolOptions op, IDLReader idlReader, ArrayList<BuildMultiTarget> targets) {
                     factory.addTargets(op, idlReader, targets, request.targetConfig);
                 }
-            });
+            }, request.idlRenaming);
         }
         finally {
             JParser.CREATE_RUNTIME_HELPER = previousRuntimeHelperMode;

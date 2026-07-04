@@ -31,6 +31,7 @@ base {
 
 dependencies {
     implementation("com.github.xpenatan.jParser:gen-build:${LibExt.libVersion}")
+    implementation("com.github.xpenatan.jParser:gen-idl:${LibExt.libVersion}")
     implementation("com.github.xpenatan.jParser:gen-build-tool:${LibExt.libVersion}")
 
     testImplementation(gradleTestKit())

@@ -67,6 +67,7 @@ abstract class JParserBuildTask : DefaultTask() {
         request.params.moduleCSuffix = extension.moduleCSuffix.orNull
 
         request.keepGeneratedCommandComments = extension.keepGeneratedCommandComments.get()
+        setIDLRenaming(request, extension.idlRenaming.orNull)
         request.jniSymbolNameMode = extension.jniSymbolNameMode.orNull
         request.ffmSymbolNameMode = extension.ffmSymbolNameMode.orNull
         request.teaVMCSymbolNameMode = extension.teaVMCSymbolNameMode.orNull
@@ -78,6 +79,15 @@ abstract class JParserBuildTask : DefaultTask() {
 
         configureTargetConfig(request, request.targetConfig)
         return request
+    }
+
+    private fun setIDLRenaming(request: JParserBuildRequest, renaming: Any?) {
+        if(renaming == null) {
+            return
+        }
+        val field = request.javaClass.fields.firstOrNull { it.name == "idlRenaming" }
+            ?: throw GradleException("jParser.idlRenaming requires a jParser gen-build-tool dependency with IDL renaming support")
+        field.set(request, renaming)
     }
 
     private fun configureTargetConfig(request: JParserBuildRequest, config: DefaultBuildTargetConfig) {

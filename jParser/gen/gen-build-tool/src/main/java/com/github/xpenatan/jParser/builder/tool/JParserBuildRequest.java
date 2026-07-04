@@ -1,5 +1,6 @@
 package com.github.xpenatan.jParser.builder.tool;
 
+import com.github.xpenatan.jParser.idl.IDLRenaming;
 import java.util.ArrayList;
 
 public class JParserBuildRequest {
@@ -11,6 +12,7 @@ public class JParserBuildRequest {
     public final ArrayList<String> additionalJavaImportPackages = new ArrayList<>();
 
     public boolean keepGeneratedCommandComments;
+    public IDLRenaming idlRenaming;
     public JParserSymbolNameMode jniSymbolNameMode;
     public JParserSymbolNameMode ffmSymbolNameMode;
     public JParserSymbolNameMode teaVMCSymbolNameMode;

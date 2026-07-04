@@ -172,6 +172,58 @@ class JParserGradlePluginTest {
         assertFalse(File(projectDir, "testlib-core").exists())
     }
 
+    @Test
+    fun supportsIDLMethodNameRenaming() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.idl.IDLRenaming
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("testlib")
+                modulePrefix.set("")
+                modulePath.set(layout.projectDirectory.asFile.absolutePath)
+                moduleBuildSuffix.set("builder")
+                moduleCoreSuffix.set("core")
+                moduleJNISuffix.set("shared/jni")
+                moduleFFMSuffix.set("desktop/ffm")
+                moduleWebSuffix.set("web/wasm")
+                moduleCSuffix.set("shared/c")
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("source")
+                idlRenaming(object : IDLRenaming {
+                    override fun getIDLMethodName(methodName: String): String {
+                        if(methodName.isEmpty()) {
+                            return methodName
+                        }
+                        return methodName.substring(0, 1).lowercase() + methodName.substring(1)
+                    }
+                })
+            }
+            """.trimIndent()
+        )
+        File(projectDir, "builder/src/main/cpp").mkdirs()
+        File(projectDir, "builder/src/main/cpp/testlib.idl").writeText(
+            """
+            interface TestObject {
+                void TestObject();
+                void DoThing();
+            };
+            """.trimIndent()
+        )
+        File(projectDir, "base/src/main/java").mkdirs()
+        File(projectDir, "source").mkdirs()
+
+        runner(projectDir, "jParser_generate", "--console=plain").build()
+
+        val generated = findGeneratedClass(projectDir, "core/src/main/java", "TestObject.java").readText()
+        assertTrue(generated.contains("public void doThing("))
+        assertFalse(generated.contains("public void DoThing("))
+    }
+
     private fun createProject(buildFile: String): File {
         val projectDir = Files.createTempDirectory("jparser-gradle-plugin-test").toFile()
         File(projectDir, "settings.gradle.kts").writeText("")
@@ -191,8 +243,13 @@ class JParserGradlePluginTest {
     }
 
     private fun assertGeneratedClass(projectDir: File, moduleJavaDir: String, className: String) {
+        findGeneratedClass(projectDir, moduleJavaDir, className)
+    }
+
+    private fun findGeneratedClass(projectDir: File, moduleJavaDir: String, className: String): File {
         val rootDir = File(projectDir, moduleJavaDir)
-        val generated = rootDir.walkTopDown().any { it.isFile && it.name == className }
-        assertTrue("Expected $className under ${rootDir.absolutePath}", generated)
+        val generated = rootDir.walkTopDown().firstOrNull { it.isFile && it.name == className }
+        assertTrue("Expected $className under ${rootDir.absolutePath}", generated != null)
+        return generated!!
     }
 }
