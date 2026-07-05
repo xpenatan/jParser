@@ -128,6 +128,7 @@ val publishGradlePluginSnapshot = tasks.register<GradleBuild>("publishGradlePlug
 val prepareGradlePluginReleaseDeploy = tasks.register<GradleBuild>("prepareGradlePluginReleaseDeploy") {
     group = "publishing"
     description = "Prepare local release deploy files for the jParser Gradle plugin."
+    dependsOn(libProjects.map { it.tasks.withType<PublishToMavenRepository>() })
     dir = gradlePluginBuildDir
     tasks = listOf("prepareReleaseDeploy")
 }
