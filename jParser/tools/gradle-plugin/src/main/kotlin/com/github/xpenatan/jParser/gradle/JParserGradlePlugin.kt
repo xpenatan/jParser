@@ -3,6 +3,7 @@ package com.github.xpenatan.jParser.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
@@ -29,7 +30,7 @@ class JParserGradlePlugin : Plugin<Project> {
             extension,
             "jParser_generate",
             "",
-            listOf("gen_jni", "gen_ffm", "gen_web", "gen_teavm_c"),
+            project.provider { resolveGenerateArgs(extension) },
             "Generate jParser Java sources for all configured APIs."
         )
         val targets = listOf(
@@ -57,7 +58,7 @@ class JParserGradlePlugin : Plugin<Project> {
                 extension,
                 "jParser_build_${target.targetArg}",
                 target.targetArg,
-                target.args,
+                project.provider { target.args },
                 target.description
             )
         }
@@ -69,7 +70,7 @@ class JParserGradlePlugin : Plugin<Project> {
         extension: JParserExtension,
         taskName: String,
         targetArg: String,
-        args: List<String>,
+        args: Provider<List<String>>,
         taskDescription: String
     ): TaskProvider<JParserBuildTask> {
         return project.tasks.register<JParserBuildTask>(taskName) {
@@ -77,9 +78,29 @@ class JParserGradlePlugin : Plugin<Project> {
             description = taskDescription
             this.extension = extension
             this.targetArg.set(targetArg)
-            this.buildArgs.set(args)
+            this.buildArgs.convention(args)
             this.generateCore.set(targetArg.isBlank())
         }
+    }
+
+    private fun resolveGenerateArgs(extension: JParserExtension): List<String> {
+        val targetNames = extension.native.targets.names
+        val args = mutableListOf<String>()
+
+        if(extension.moduleJNISuffix.isPresent || targetNames.any { it.endsWith("_jni") }) {
+            args.add("gen_jni")
+        }
+        if(extension.moduleFFMSuffix.isPresent || targetNames.any { it.endsWith("_ffm") }) {
+            args.add("gen_ffm")
+        }
+        if(extension.moduleWebSuffix.isPresent || targetNames.contains(JParserTargets.WEB_WASM)) {
+            args.add("gen_web")
+        }
+        if(extension.moduleCSuffix.isPresent || targetNames.any { it.endsWith("_teavm_c") }) {
+            args.add("gen_teavm_c")
+        }
+
+        return args
     }
 
     private fun configureTaskDependencies(

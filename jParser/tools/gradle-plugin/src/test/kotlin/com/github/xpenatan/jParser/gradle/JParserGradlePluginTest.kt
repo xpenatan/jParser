@@ -173,6 +173,89 @@ class JParserGradlePluginTest {
     }
 
     @Test
+    fun generateSkipsUnusedPlatformModules() {
+        val projectDir = createProject(
+            """
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("testlib")
+                modulePrefix.set("")
+                modulePath.set(layout.projectDirectory.asFile.absolutePath)
+                moduleBuildSuffix.set("builder")
+                moduleCoreSuffix.set("core")
+                moduleJNISuffix.set("shared/jni")
+                moduleFFMSuffix.set("desktop/ffm")
+                moduleWebSuffix.set("web/wasm")
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("source")
+            }
+            """.trimIndent()
+        )
+        File(projectDir, "builder/src/main/cpp").mkdirs()
+        File(projectDir, "builder/src/main/cpp/testlib.idl").writeText(
+            """
+            interface TestObject {
+                void TestObject();
+            };
+            """.trimIndent()
+        )
+        File(projectDir, "base/src/main/java").mkdirs()
+        File(projectDir, "source").mkdirs()
+
+        runner(projectDir, "jParser_generate", "--console=plain").build()
+
+        assertGeneratedClass(projectDir, "core/src/main/java", "TestObject.java")
+        assertGeneratedClass(projectDir, "shared/jni/src/main/java", "TestObject.java")
+        assertGeneratedClass(projectDir, "desktop/ffm/src/main/java", "TestObject.java")
+        assertGeneratedClass(projectDir, "web/wasm/src/main/java", "TestObject.java")
+        assertFalse(File(projectDir, "shared/c/src/main/java").exists())
+    }
+
+    @Test
+    fun generateIncludesPlatformFromConfiguredNativeTarget() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("testlib")
+                modulePrefix.set("lib")
+                modulePath.set(layout.projectDirectory.asFile.absolutePath)
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("source")
+
+                native {
+                    target(JParserTargets.WINDOWS64_TEAVM_C) {}
+                }
+            }
+            """.trimIndent()
+        )
+        File(projectDir, "lib-build/src/main/cpp").mkdirs()
+        File(projectDir, "lib-build/src/main/cpp/testlib.idl").writeText(
+            """
+            interface TestObject {
+                void TestObject();
+            };
+            """.trimIndent()
+        )
+        File(projectDir, "lib-base/src/main/java").mkdirs()
+        File(projectDir, "source").mkdirs()
+
+        runner(projectDir, "jParser_generate", "--console=plain").build()
+
+        assertGeneratedClass(projectDir, "lib-core/src/main/java", "TestObject.java")
+        assertGeneratedClass(projectDir, "lib-c/core/src/main/java", "TestObject.java")
+        assertFalse(File(projectDir, "lib-jni/src/main/java").exists())
+    }
+
+    @Test
     fun supportsIDLMethodNameRenaming() {
         val projectDir = createProject(
             """
