@@ -128,6 +128,101 @@ class JParserGradlePluginTest {
     }
 
     @Test
+    fun supportsTypedAndroidEnums() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.builder.targets.AndroidTarget
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("testlib")
+                modulePrefix.set("lib")
+                modulePath.set(layout.projectDirectory.asFile.absolutePath)
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("source")
+                androidApiLevel.set(AndroidTarget.ApiLevel.Android_13_33)
+                androidTargets.set(listOf(AndroidTarget.Target.arm64_v8a, AndroidTarget.Target.x86_64))
+
+                native {
+                    target(JParserTargets.ANDROID_JNI) {
+                        androidTarget(AndroidTarget.Target.arm64_v8a) {
+                            compileFlag("-DTEST_ARM64_ONLY")
+                        }
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+        File(projectDir, "lib-build/src/main/cpp").mkdirs()
+        File(projectDir, "lib-build/src/main/cpp/testlib.idl").writeText(
+            """
+            interface TestObject {
+                void TestObject();
+            };
+            """.trimIndent()
+        )
+        File(projectDir, "lib-base/src/main/java").mkdirs()
+        File(projectDir, "source").mkdirs()
+
+        runner(projectDir, "jParser_generate", "--console=plain").build()
+
+        assertGeneratedClass(projectDir, "lib-core/src/main/java", "TestObject.java")
+        assertGeneratedClass(projectDir, "lib-jni/src/main/java", "TestObject.java")
+    }
+
+    @Test
+    fun supportsGradleFilePathInputs() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("testlib")
+                modulePrefix.set("")
+                modulePath(layout.projectDirectory)
+                moduleBuildSuffix.set("builder")
+                moduleCoreSuffix.set("core")
+                packageName.set("com.example.testlib")
+                cppSourcePath(file("source").toPath())
+                webForcedInclude(layout.projectDirectory.file("include/web_force.h"))
+                additionalIDLPath(layout.projectDirectory.file("builder/src/main/cpp/extra.idl"))
+                additionalIDLRefPath(file("builder/src/main/cpp/ref.idl"))
+                additionalSourceDir(layout.buildDirectory.dir("generated-native"))
+
+                dependency("dep") {
+                    referenceLibName.set("dep")
+                    referenceModulePath(layout.projectDirectory.dir("dep"))
+                    idlRefPath(layout.projectDirectory.file("dep/builder/src/main/cpp/dep.idl"))
+                }
+
+                native {
+                    target(JParserTargets.WINDOWS64_JNI) {
+                        headerDir(layout.projectDirectory.dir("include"))
+                        cppInclude(layout.projectDirectory.file("source/native.cpp"))
+                        cppExclude(file("source/skip.cpp"))
+                        staticLinkerInput(layout.projectDirectory.file("libs/native.lib"))
+                        sharedLinkerInput(file("libs/native.dll").toPath())
+                        forcedInclude(layout.projectDirectory.file("include/force.h"))
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result = runner(projectDir, "tasks", "--group", "jParser", "--all", "--console=plain").build()
+
+        assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}")
+    }
+
+    @Test
     fun supportsPrefixlessModuleLayout() {
         val projectDir = createProject(
             """

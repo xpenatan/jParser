@@ -106,10 +106,10 @@ abstract class JParserBuildTask : DefaultTask() {
         config.webMainModule = extension.webMainModule.get()
         config.webExportedFunctions.addAll(extension.webExportedFunctions.get())
         config.webExportedRuntimeMethods.addAll(extension.webExportedRuntimeMethods.get())
-        config.androidApiLevel = AndroidTarget.ApiLevel.valueOf(extension.androidApiLevel.get())
+        config.androidApiLevel = extension.androidApiLevel.get()
         config.androidTargets.clear()
         extension.androidTargets.get().forEach { target ->
-            config.androidTargets.add(AndroidTarget.Target.valueOf(target))
+            config.androidTargets.add(target)
         }
         copyHooks(extension.native, config.globalHooks)
         extension.native.targets.forEach { hooks ->

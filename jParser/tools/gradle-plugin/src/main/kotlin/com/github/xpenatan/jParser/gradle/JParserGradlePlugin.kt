@@ -30,7 +30,7 @@ class JParserGradlePlugin : Plugin<Project> {
             extension,
             "jParser_generate",
             "",
-            project.provider { resolveGenerateArgs(extension) },
+            project.provider { resolveGenerateTargets(extension).map { it.arg } },
             "Generate jParser Java sources for all configured APIs."
         )
         val targets = listOf(
@@ -83,24 +83,24 @@ class JParserGradlePlugin : Plugin<Project> {
         }
     }
 
-    private fun resolveGenerateArgs(extension: JParserExtension): List<String> {
+    private fun resolveGenerateTargets(extension: JParserExtension): List<JParserGenerationTarget> {
         val targetNames = extension.native.targets.names
-        val args = mutableListOf<String>()
+        val targets = mutableListOf<JParserGenerationTarget>()
 
         if(extension.moduleJNISuffix.isPresent || targetNames.any { it.endsWith("_jni") }) {
-            args.add("gen_jni")
+            targets.add(JParserGenerationTarget.JNI)
         }
         if(extension.moduleFFMSuffix.isPresent || targetNames.any { it.endsWith("_ffm") }) {
-            args.add("gen_ffm")
+            targets.add(JParserGenerationTarget.FFM)
         }
         if(extension.moduleWebSuffix.isPresent || targetNames.contains(JParserTargets.WEB_WASM)) {
-            args.add("gen_web")
+            targets.add(JParserGenerationTarget.WEB)
         }
         if(extension.moduleCSuffix.isPresent || targetNames.any { it.endsWith("_teavm_c") }) {
-            args.add("gen_teavm_c")
+            targets.add(JParserGenerationTarget.TEAVM_C)
         }
 
-        return args
+        return targets
     }
 
     private fun configureTaskDependencies(
