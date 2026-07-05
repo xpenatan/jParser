@@ -13,9 +13,10 @@ class JParserGradlePlugin : Plugin<Project> {
         project.pluginManager.apply(JavaPlugin::class.java)
 
         val extension = project.extensions.create<JParserExtension>("jParser", project, project.objects)
-        val buildTasks = registerBuildTasks(project, extension)
+        val buildTasks = registerBuildTasks(project, extension).toMutableMap()
 
         project.afterEvaluate {
+            registerVariantBuildTasks(project, extension, buildTasks.getValue(""))
             configureTaskDependencies(project, extension, buildTasks)
         }
     }
@@ -71,20 +72,22 @@ class JParserGradlePlugin : Plugin<Project> {
         taskName: String,
         targetArg: String,
         args: Provider<List<String>>,
-        taskDescription: String
+        taskDescription: String,
+        targetVariant: String = ""
     ): TaskProvider<JParserBuildTask> {
         return project.tasks.register<JParserBuildTask>(taskName) {
             group = TASK_GROUP
             description = taskDescription
             this.extension = extension
             this.targetArg.set(targetArg)
+            this.targetVariant.set(targetVariant)
             this.buildArgs.convention(args)
             this.generateCore.set(targetArg.isBlank())
         }
     }
 
     private fun resolveGenerateTargets(extension: JParserExtension): List<JParserGenerationTarget> {
-        val targetNames = extension.native.targets.names
+        val targetNames = extension.native.targets.names + extension.native.variants.mapNotNull { it.targetName.orNull }
         val targets = mutableListOf<JParserGenerationTarget>()
 
         if(extension.moduleJNISuffix.isPresent || targetNames.any { it.endsWith("_jni") }) {
@@ -101,6 +104,55 @@ class JParserGradlePlugin : Plugin<Project> {
         }
 
         return targets
+    }
+
+    private fun registerVariantBuildTasks(
+        project: Project,
+        extension: JParserExtension,
+        generateTask: TaskProvider<JParserBuildTask>
+    ) {
+        extension.native.variants.forEach { variant ->
+            val targetName = variant.targetName.orNull?.takeIf { it.isNotBlank() }
+                ?: throw IllegalArgumentException("jParser native target variant '${variant.name}' is missing targetName")
+            val variantName = variant.variantName.orNull?.takeIf { it.isNotBlank() }
+                ?: throw IllegalArgumentException("jParser native target variant '${variant.name}' is missing variantName")
+            val taskProvider = registerBuildTask(
+                project,
+                extension,
+                "jParser_build_${targetName}_${variantName}",
+                targetName,
+                project.provider { listOf(targetName) },
+                "Build jParser $targetName native library variant '$variantName'.",
+                variantName
+            )
+            taskProvider.configure {
+                dependsOn(generateTask)
+                dependsOn(extension.native.taskDependencies)
+                if(variant.includeBaseTargetHooks.get()) {
+                    extension.native.targets.findByName(targetName)?.let { hooks ->
+                        dependsOn(hooks.taskDependencies)
+                    }
+                }
+                dependsOn(variant.taskDependencies)
+                extension.dependencies.forEach { dependency ->
+                    dependsOn(dependency.taskDependencies)
+                    dependency.referenceProjectPath.orNull?.takeIf { it.isNotBlank() }?.let { projectPath ->
+                        dependsOn("$projectPath:jParser_build_$targetName")
+                    }
+                    if(dependency.referenceProjectPath.orNull.isNullOrBlank()) {
+                        dependency.referenceIncludedBuildName.orNull?.takeIf { it.isNotBlank() }?.let { buildName ->
+                            dependsOn(project.gradle.includedBuild(buildName).task(":jParser_build_$targetName"))
+                        }
+                    }
+                    dependsOn(dependency.native.taskDependencies)
+                    if(variant.includeBaseTargetHooks.get()) {
+                        dependency.native.targets.findByName(targetName)?.let { hooks ->
+                            dependsOn(hooks.taskDependencies)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun configureTaskDependencies(

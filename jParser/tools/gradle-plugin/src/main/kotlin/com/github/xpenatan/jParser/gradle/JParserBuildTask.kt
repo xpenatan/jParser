@@ -23,6 +23,9 @@ abstract class JParserBuildTask : DefaultTask() {
     abstract val targetArg: Property<String>
 
     @get:Input
+    abstract val targetVariant: Property<String>
+
+    @get:Input
     abstract val generateCore: Property<Boolean>
 
     @get:Internal
@@ -112,8 +115,18 @@ abstract class JParserBuildTask : DefaultTask() {
             config.androidTargets.add(target)
         }
         copyHooks(extension.native, config.globalHooks)
+        val activeVariant = findActiveVariant()
+        val skipBaseTargetHooks = activeVariant != null && !activeVariant.includeBaseTargetHooks.get()
         extension.native.targets.forEach { hooks ->
-            copyNamedTargetHooks(hooks, config)
+            if(!(skipBaseTargetHooks && hooks.name == targetArg.get())) {
+                copyNamedTargetHooks(hooks, config)
+            }
+        }
+        activeVariant?.let { variant ->
+            copyHooks(variant, config.target(targetArg.get()))
+            setOutputDirectoryPrefix(config.target(targetArg.get()), normalizeOutputDirectoryPrefix(
+                variant.outputDirectoryPrefix.orNull ?: variant.variantName.get()
+            ))
         }
         extension.dependencies.forEach { dependency ->
             configureDependencyReference(dependency, request, config)
@@ -123,6 +136,14 @@ abstract class JParserBuildTask : DefaultTask() {
                 copyNamedTargetHooks(hooks, config)
             }
         }
+    }
+
+    private fun findActiveVariant(): JParserNativeTargetVariantHooks? {
+        val variantName = targetVariant.orNull?.takeIf { it.isNotBlank() } ?: return null
+        val targetName = targetArg.get()
+        return extension.native.variants.firstOrNull { variant ->
+            variant.targetName.orNull == targetName && variant.variantName.orNull == variantName
+        } ?: throw GradleException("No jParser native target variant '$variantName' configured for target '$targetName'")
     }
 
     private fun configureDependencyReference(
@@ -189,6 +210,17 @@ abstract class JParserBuildTask : DefaultTask() {
         source.includeCustomSources.orNull?.let { target.includeCustomSources = it }
         source.webSideModule.orNull?.let { target.webSideModule = it }
         source.webMainModuleName.orNull?.let { target.webMainModuleName = it }
+        source.outputDirectoryPrefix.orNull?.let { setOutputDirectoryPrefix(target, normalizeOutputDirectoryPrefix(it)) }
+    }
+
+    private fun normalizeOutputDirectoryPrefix(value: String): String {
+        return value.trim().replace('\\', '/').trim('/')
+    }
+
+    private fun setOutputDirectoryPrefix(targetHooks: Any, value: String) {
+        val field = targetHooks.javaClass.fields.firstOrNull { it.name == "outputDirectoryPrefix" }
+            ?: throw GradleException("jParser native target variants require a gen-build-tool dependency with outputDirectoryPrefix support")
+        field.set(targetHooks, value)
     }
 
     private fun required(value: String?, name: String, allowEmpty: Boolean = false): String {

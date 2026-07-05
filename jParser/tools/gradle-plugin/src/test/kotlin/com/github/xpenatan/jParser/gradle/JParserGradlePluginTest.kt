@@ -223,6 +223,54 @@ class JParserGradlePluginTest {
     }
 
     @Test
+    fun supportsNativeTargetVariants() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("testlib")
+                modulePrefix.set("lib")
+                modulePath.set(layout.projectDirectory.asFile.absolutePath)
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("source")
+
+                native {
+                    targetVariant(JParserTargets.WINDOWS64_JNI, "wgpu") {
+                        headerDir("include/wgpu")
+                    }
+                    targetVariant(JParserTargets.WINDOWS64_JNI, "dawn") {
+                        headerDir("include/dawn")
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+        File(projectDir, "lib-build/src/main/cpp").mkdirs()
+        File(projectDir, "lib-build/src/main/cpp/testlib.idl").writeText(
+            """
+            interface TestObject {
+                void TestObject();
+            };
+            """.trimIndent()
+        )
+        File(projectDir, "lib-base/src/main/java").mkdirs()
+        File(projectDir, "source").mkdirs()
+
+        val result = runner(projectDir, "tasks", "--group", "jParser", "--all", "--console=plain").build()
+
+        assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}_wgpu")
+        assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}_dawn")
+
+        runner(projectDir, "jParser_generate", "--console=plain").build()
+        assertGeneratedClass(projectDir, "lib-jni/src/main/java", "TestObject.java")
+    }
+
+    @Test
     fun supportsPrefixlessModuleLayout() {
         val projectDir = createProject(
             """

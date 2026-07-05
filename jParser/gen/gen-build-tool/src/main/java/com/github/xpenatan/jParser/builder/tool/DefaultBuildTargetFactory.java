@@ -65,6 +65,7 @@ public class DefaultBuildTargetFactory {
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget(config.sourceLanguage);
+        applyOutputDirectoryPrefix(compileStaticTarget, config, targetArg);
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
         addSourceStandard(compileStaticTarget.cppFlags, api, true, config);
@@ -74,12 +75,13 @@ public class DefaultBuildTargetFactory {
         multiTarget.add(compileStaticTarget);
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
+        applyOutputDirectoryPrefix(linkTarget, config, targetArg);
         linkTarget.libDirSuffix += api;
         setupGlueCode(linkTarget, api, libBuildCPPPath);
         addCppStandard(linkTarget.cppFlags, api, true, config);
         applyFFMWindowsCompileFlags(linkTarget, isFFM, config.ffmNative);
         addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
-        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + ownStaticLibPath(op, "windows", api));
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + ownStaticLibPath(op, config, targetArg, "windows", api));
         linkTarget.linkerFlags.add("-DLL");
         applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.WINDOWS_WHOLE_ARCHIVE);
         applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg);
@@ -95,6 +97,7 @@ public class DefaultBuildTargetFactory {
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         LinuxTarget compileStaticTarget = new LinuxTarget(config.sourceLanguage);
+        applyOutputDirectoryPrefix(compileStaticTarget, config, targetArg);
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
         addSourceStandard(compileStaticTarget.cppFlags, api, false, config);
@@ -105,6 +108,7 @@ public class DefaultBuildTargetFactory {
         multiTarget.add(compileStaticTarget);
 
         LinuxTarget linkTarget = new LinuxTarget();
+        applyOutputDirectoryPrefix(linkTarget, config, targetArg);
         linkTarget.libDirSuffix += api;
         setupGlueCode(linkTarget, api, libBuildCPPPath);
         addCppStandard(linkTarget.cppFlags, api, false, config);
@@ -112,7 +116,7 @@ public class DefaultBuildTargetFactory {
         applyFFMUnixCompileFlags(linkTarget.cppFlags, isFFM, config.ffmNative);
         addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(ownStaticLibPath(op, "linux", api));
+        linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg, "linux", api));
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.UNIX_WHOLE_ARCHIVE);
         applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg);
@@ -128,6 +132,7 @@ public class DefaultBuildTargetFactory {
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         MacTarget compileStaticTarget = new MacTarget(config.sourceLanguage, isArm);
+        applyOutputDirectoryPrefix(compileStaticTarget, config, targetArg);
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
         addSourceStandard(compileStaticTarget.cppFlags, api, false, config);
@@ -138,6 +143,7 @@ public class DefaultBuildTargetFactory {
         multiTarget.add(compileStaticTarget);
 
         MacTarget linkTarget = new MacTarget(isArm);
+        applyOutputDirectoryPrefix(linkTarget, config, targetArg);
         linkTarget.libDirSuffix += api;
         setupGlueCode(linkTarget, api, libBuildCPPPath);
         addCppStandard(linkTarget.cppFlags, api, false, config);
@@ -145,7 +151,7 @@ public class DefaultBuildTargetFactory {
         applyFFMUnixCompileFlags(linkTarget.cppFlags, isFFM, config.ffmNative);
         addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
         linkTarget.linkerFlags.add("-Wl,-force_load");
-        linkTarget.linkerFlags.add(ownStaticLibPath(op, isArm ? "macArm" : "mac", api));
+        linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg, isArm ? "macArm" : "mac", api));
         applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.MAC_FORCE_LOAD);
         applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg);
         applyFFMUnixLinkFlags(linkTarget.linkerFlags, isFFM, config.ffmNative);
@@ -160,6 +166,7 @@ public class DefaultBuildTargetFactory {
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         EmscriptenTarget compileStaticTarget = new EmscriptenTarget(config.sourceLanguage);
+        applyOutputDirectoryPrefix(compileStaticTarget, config, targetArg);
         compileStaticTarget.isStatic = true;
         compileStaticTarget.compileGlueCode = false;
         addSourceStandard(compileStaticTarget.cppFlags, "web", false, config);
@@ -169,13 +176,14 @@ public class DefaultBuildTargetFactory {
         multiTarget.add(compileStaticTarget);
 
         EmscriptenTarget linkTarget = new EmscriptenTarget();
+        applyOutputDirectoryPrefix(linkTarget, config, targetArg);
         linkTarget.idlReader = idlReader;
         addCppStandard(linkTarget.cppFlags, "web", false, config);
         addFlagIfMissing(linkTarget.cppFlags, "-fPIC");
         addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
         addForcedInclude(linkTarget, config.webForcedInclude != null ? config.webForcedInclude : findCustomInclude(op, "CustomCode.h", "IDLCustomCode.h"));
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
-        linkTarget.linkerFlags.add(op.getModuleBuildCPPPath() + "/libs/emscripten/" + op.libName + "_.a");
+        linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg, "emscripten", "web"));
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.UNIX_WHOLE_ARCHIVE);
         applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg);
@@ -210,6 +218,7 @@ public class DefaultBuildTargetFactory {
             AndroidTarget.Target target = config.androidTargets.get(i);
 
             AndroidTarget compileStaticTarget = new AndroidTarget(config.sourceLanguage, target, config.androidApiLevel);
+            applyOutputDirectoryPrefix(compileStaticTarget, config, targetArg);
             if(api.equals("teavm_c")) {
                 compileStaticTarget.libDirSuffix += api;
             }
@@ -221,6 +230,7 @@ public class DefaultBuildTargetFactory {
             multiTarget.add(compileStaticTarget);
 
             AndroidTarget linkTarget = new AndroidTarget(target, config.androidApiLevel);
+            applyOutputDirectoryPrefix(linkTarget, config, targetArg);
             if(api.equals("teavm_c")) {
                 linkTarget.libDirSuffix += api;
             }
@@ -229,7 +239,7 @@ public class DefaultBuildTargetFactory {
             addFlagIfMissing(linkTarget.cppFlags, "-fPIC");
             addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg, target);
             linkTarget.linkerFlags.add("-Wl,--whole-archive");
-            linkTarget.linkerFlags.add(ownStaticLibPath(op, target, api));
+            linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg, target, api));
             linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
             linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
             applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.UNIX_WHOLE_ARCHIVE, target);
@@ -246,6 +256,7 @@ public class DefaultBuildTargetFactory {
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
         IOSTarget compileStaticTarget = new IOSTarget(config.sourceLanguage);
+        applyOutputDirectoryPrefix(compileStaticTarget, config, targetArg);
         if(api.equals("teavm_c")) {
             compileStaticTarget.libDirSuffix += api;
         }
@@ -256,6 +267,7 @@ public class DefaultBuildTargetFactory {
         multiTarget.add(compileStaticTarget);
 
         IOSTarget linkTarget = new IOSTarget();
+        applyOutputDirectoryPrefix(linkTarget, config, targetArg);
         if(api.equals("teavm_c")) {
             linkTarget.libDirSuffix += api;
         }
@@ -263,7 +275,7 @@ public class DefaultBuildTargetFactory {
         addCppStandard(linkTarget.cppFlags, api, false, config);
         addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
         linkTarget.linkerFlags.add("-Wl,-force_load");
-        linkTarget.linkerFlags.add(ownStaticLibPath(op, "ios", api));
+        linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg, "ios", api));
         applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.MAC_FORCE_LOAD);
         applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg);
         applyLinkHooks(linkTarget, config, targetArg);
@@ -536,32 +548,65 @@ public class DefaultBuildTargetFactory {
         }
     }
 
-    private String ownStaticLibPath(BuildToolOptions op, String platform, String api) {
+    private String ownStaticLibPath(BuildToolOptions op, DefaultBuildTargetConfig config, String targetArg, String platform, String api) {
         String libBuildCPPPath = op.getModuleBuildCPPPath();
+        String prefix = outputDirectoryPrefix(config, targetArg);
+        if(platform.equals("emscripten")) {
+            return libBuildCPPPath + "/libs/" + prefix + "emscripten/" + op.libName + "_.a";
+        }
         if(platform.equals("windows")) {
-            return libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib";
+            return libBuildCPPPath + "/libs/" + prefix + "windows/vc/" + api + "/" + op.libName + "64_.lib";
         }
         if(platform.equals("linux")) {
-            return libBuildCPPPath + "/libs/linux/" + api + "/lib" + op.libName + "64_.a";
+            return libBuildCPPPath + "/libs/" + prefix + "linux/" + api + "/lib" + op.libName + "64_.a";
         }
         if(platform.equals("macArm")) {
-            return libBuildCPPPath + "/libs/mac/arm/" + api + "/lib" + op.libName + "64_.a";
+            return libBuildCPPPath + "/libs/" + prefix + "mac/arm/" + api + "/lib" + op.libName + "64_.a";
         }
         if(platform.equals("mac")) {
-            return libBuildCPPPath + "/libs/mac/" + api + "/lib" + op.libName + "64_.a";
+            return libBuildCPPPath + "/libs/" + prefix + "mac/" + api + "/lib" + op.libName + "64_.a";
         }
         if(platform.equals("ios")) {
-            return libBuildCPPPath + "/libs/ios/" + (api.equals("teavm_c") ? api + "/" : "") + "lib" + op.libName + "_.a";
+            return libBuildCPPPath + "/libs/" + prefix + "ios/" + (api.equals("teavm_c") ? api + "/" : "") + "lib" + op.libName + "_.a";
         }
-        return libBuildCPPPath + "/libs/" + platform + "/" + api + "/lib" + op.libName + "64_.a";
+        return libBuildCPPPath + "/libs/" + prefix + platform + "/" + api + "/lib" + op.libName + "64_.a";
     }
 
-    private String ownStaticLibPath(BuildToolOptions op, AndroidTarget.Target target, String api) {
-        String staticLibPath = op.getModuleBuildCPPPath() + "/libs/android/" + target.getFolder() + "/";
+    private String ownStaticLibPath(BuildToolOptions op, DefaultBuildTargetConfig config, String targetArg, AndroidTarget.Target target, String api) {
+        String staticLibPath = op.getModuleBuildCPPPath() + "/libs/" + outputDirectoryPrefix(config, targetArg) + "android/" + target.getFolder() + "/";
         if(api.equals("teavm_c")) {
             staticLibPath += api + "/";
         }
         return staticLibPath + "lib" + op.libName + ".a";
+    }
+
+    private void applyOutputDirectoryPrefix(DefaultBuildTarget target, DefaultBuildTargetConfig config, String targetArg) {
+        String prefix = outputDirectoryPrefix(config, targetArg);
+        if(prefix.isEmpty()) {
+            return;
+        }
+        target.libDirSuffix = prefix + target.libDirSuffix;
+        if(target.tempBuildDir != null && target.tempBuildDir.startsWith("target/")) {
+            target.tempBuildDir = "target/" + prefix + target.tempBuildDir.substring("target/".length());
+        }
+    }
+
+    private String outputDirectoryPrefix(DefaultBuildTargetConfig config, String targetArg) {
+        DefaultBuildTargetConfig.TargetHooks hooks = hook(config, targetArg);
+        if(hooks.outputDirectoryPrefix == null || hooks.outputDirectoryPrefix.trim().isEmpty()) {
+            return "";
+        }
+        String value = hooks.outputDirectoryPrefix.trim().replace('\\', '/');
+        while(value.startsWith("/")) {
+            value = value.substring(1);
+        }
+        while(value.endsWith("/")) {
+            value = value.substring(0, value.length() - 1);
+        }
+        if(value.isEmpty()) {
+            return "";
+        }
+        return value + "/";
     }
 
     private void applyFFMWindowsCompileFlags(WindowsMSVCTarget target, boolean isFFM, DefaultBuildTargetConfig.FFMNativeBuildConfig ffmNativeBuildConfig) {

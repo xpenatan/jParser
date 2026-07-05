@@ -90,5 +90,6 @@ public class DefaultBuildTargetConfig {
         public Boolean includeCustomSources;
         public Integer webSideModule;
         public String webMainModuleName;
+        public String outputDirectoryPrefix;
     }
 }

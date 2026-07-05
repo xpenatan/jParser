@@ -282,9 +282,24 @@ open class JParserNativeHooks @Inject constructor(
         objects.domainObjectContainer(JParserNamedTargetHooks::class.java) { name ->
             objects.newInstance(JParserNamedTargetHooks::class.java, name, objects)
         }
+    val variants: NamedDomainObjectContainer<JParserNativeTargetVariantHooks> =
+        objects.domainObjectContainer(JParserNativeTargetVariantHooks::class.java) { name ->
+            objects.newInstance(JParserNativeTargetVariantHooks::class.java, name, objects)
+        }
 
     fun target(name: String, action: Action<in JParserNamedTargetHooks>) {
         targets.create(name, action)
+    }
+
+    fun targetVariant(targetName: String, variantName: String, action: Action<in JParserNativeTargetVariantHooks>) {
+        val normalizedVariantName = variantName.trim()
+        require(normalizedVariantName.isNotEmpty()) { "jParser native target variant name must not be empty" }
+        variants.create("${targetName}_${normalizedVariantName}") {
+            this.targetName.set(targetName)
+            this.variantName.set(normalizedVariantName)
+            this.outputDirectoryPrefix.convention(normalizedVariantName)
+            action.execute(this)
+        }
     }
 }
 
@@ -432,6 +447,25 @@ open class JParserNamedTargetHooks @Inject constructor(
     }
 }
 
+/** Variant-specific hooks for one native target, exposed as `jParser_build_<target>_<variant>`. */
+open class JParserNativeTargetVariantHooks @Inject constructor(
+    private val variantKey: String,
+    objects: ObjectFactory
+) : JParserTargetHooks(objects), Named {
+    val targetName: Property<String> = objects.property(String::class.java)
+    val variantName: Property<String> = objects.property(String::class.java)
+
+    /**
+     * Whether the base target hooks should be applied before this variant's hooks.
+     *
+     * Defaults to `false` because variants often swap mutually exclusive include/link inputs,
+     * for example two native backend libraries for the same platform target.
+     */
+    val includeBaseTargetHooks: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
+
+    override fun getName(): String = variantKey
+}
+
 /** Android ABI-specific hooks under an Android target. */
 open class JParserAndroidTargetHooks @Inject constructor(
     private val targetName: String,
@@ -512,6 +546,15 @@ open class JParserTargetHooks @Inject constructor(
 
     /** Emscripten main module name consumed by this web side-module target. */
     val webMainModuleName: Property<String> = objects.property(String::class.java)
+
+    /**
+     * Prefix inserted under `build/c++/libs` and `build/c++/target` for this target.
+     *
+     * This is primarily used by native target variants so mutually exclusive builds of
+     * the same platform target can coexist, for example `libs/wgpu/windows/vc/jni` and
+     * `libs/dawn/windows/vc/jni`.
+     */
+    val outputDirectoryPrefix: Property<String> = objects.property(String::class.java)
 
     /** Extra Gradle task dependencies added to the generated jParser task for this scope. */
     val taskDependencies = mutableListOf<Any>()
@@ -650,6 +693,10 @@ open class JParserTargetHooks @Inject constructor(
 
     fun webExportedRuntimeMethod(value: String) {
         webExportedRuntimeMethods.add(value)
+    }
+
+    fun outputDirectoryPrefix(value: String) {
+        outputDirectoryPrefix.set(value)
     }
 
     fun dependsOn(vararg tasks: Any) {

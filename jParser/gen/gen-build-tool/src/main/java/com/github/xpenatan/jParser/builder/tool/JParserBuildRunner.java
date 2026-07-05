@@ -164,6 +164,7 @@ public class JParserBuildRunner {
             hooks.webSideModule = Integer.valueOf(sideModule.trim());
         }
         hooks.webMainModuleName = property(prefix + ".webMainModuleName", null);
+        hooks.outputDirectoryPrefix = property(prefix + ".outputDirectoryPrefix", null);
     }
 
     private static void validate(JParserBuildRequest request) {
