@@ -7,7 +7,7 @@ plugins {
 
 sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
 
-val runtimeFfmBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "ffm")
+val runtimeFfmBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "ffm")
 val testLibFfmBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "ffm")
 
 // Configure headless tests for JNI module
@@ -48,7 +48,7 @@ dependencies {
 
     implementation(project(":examples:TestLib:lib:desktop:ffm"))
 
-    implementation(project(":jParser:runtime:runtime-jvm:ffm"))
+    implementation(project(":jParser:runtime:desktop:ffm"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 

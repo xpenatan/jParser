@@ -11,13 +11,13 @@ dependencies {
     implementation(project(":examples:SharedLib:app:core"))
     implementation(project(":examples:SharedLib:libA:shared:c"))
     implementation(project(":examples:SharedLib:libB:shared:c"))
-    implementation(project(":jParser:runtime:runtime-c:core"))
+    implementation(project(":jParser:runtime:shared:c"))
 
     implementation("org.teavm:teavm-tooling:${LibExt.teaVMVersion}")
     implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 }
 
-val runtimeTeaVMCBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "teavm_c")
+val runtimeTeaVMCBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "teavm_c")
 val libATeaVMCBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "teavm_c")
 val libBTeaVMCBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "teavm_c")
 

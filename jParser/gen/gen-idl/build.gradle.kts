@@ -5,7 +5,7 @@ plugins {
 val moduleName = "gen-idl"
 
 dependencies {
-    implementation(project(":jParser:runtime:runtime-base"))
+    implementation(project(":jParser:runtime:base"))
     implementation(project(":jParser:gen:gen-core"))
     implementation(project(":jParser:api:api-core"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")

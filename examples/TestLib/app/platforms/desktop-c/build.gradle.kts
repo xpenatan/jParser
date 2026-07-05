@@ -10,13 +10,13 @@ java {
 dependencies {
     implementation(project(":examples:TestLib:app:core"))
     implementation(project(":examples:TestLib:lib:shared:c"))
-    implementation(project(":jParser:runtime:runtime-c:core"))
+    implementation(project(":jParser:runtime:shared:c"))
 
     implementation("org.teavm:teavm-tooling:${LibExt.teaVMVersion}")
     implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 }
 
-val runtimeTeaVMCBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "teavm_c")
+val runtimeTeaVMCBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "teavm_c")
 val testLibTeaVMCBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "teavm_c")
 
 tasks.register<JavaExec>("TestLib_build_app_desktop_c") {

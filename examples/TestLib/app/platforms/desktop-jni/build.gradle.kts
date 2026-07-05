@@ -8,7 +8,7 @@ plugins {
 // JNI and FFM app modules without duplicating test code.
 sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
 
-val runtimeJniBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "jni")
+val runtimeJniBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "jni")
 val testLibJniBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "jni")
 
 // Configure headless tests for JNI module
@@ -51,7 +51,7 @@ dependencies {
 
     implementation(project(":examples:TestLib:lib:shared:jni"))
 
-    implementation(project(":jParser:runtime:runtime-jvm:jni"))
+    implementation(project(":jParser:runtime:shared:jni"))
 
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }

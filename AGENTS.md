@@ -51,9 +51,9 @@ Maintenance rule: when module/task names change, update `AGENTS.md` and related 
 ## 5) Current Module Naming (Examples)
 
 - Example library pipeline modules: `base`, `builder`, `core`, `shared/jni`, `shared/c`, `desktop/ffm`, `desktop/c`, `web/wasm`, `android/jni`, and `android/c`.
-- Runtime implementation modules: `runtime-jvm/jni`, `runtime-jvm/ffm`, `runtime-jvm/web`, `runtime-jvm/android`, plus `runtime-c/core`, `runtime-c/desktop`, and `runtime-c/android`.
+- Runtime modules: `runtime/base`, `runtime/builder`, `runtime/core`, `runtime/shared/jni`, `runtime/shared/c`, `runtime/desktop/ffm`, `runtime/desktop/c`, `runtime/web/wasm`, `runtime/android/jni`, and `runtime/android/c`.
 - App platform modules in examples: `app:platforms:desktop-jni`, `app:platforms:desktop-ffm`, `app:platforms:desktop-c`, `app:platforms:web`, `app:platforms:android`, `app:platforms:android-c`.
-- Runtime generator module: `jParser:runtime:runtime-build` (tasks like `runtime_helper_build_project_<target>`).
+- Runtime generator module: `jParser:runtime:builder` (tasks like `runtime_helper_build_project_<target>`).
 - Gradle plugin included build: `jParser/tools/gradle-plugin` (plugin id `com.github.xpenatan.jparser`, artifact `jparser-gradle-plugin`).
 - Gradle plugin validation fixtures: `jParser/runtime/plugin`, `examples/TestLib/lib/plugin`, `examples/SharedLib/libA/plugin`, and `examples/SharedLib/libB/plugin`.
 - Benchmark module namespace: `jParser:benchmark:benchmark-core`.

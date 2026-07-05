@@ -12,7 +12,7 @@ dependencies {
     implementation(project(":examples:SharedLib:libA:desktop:ffm"))
     api(project(":jParser:loader:loader-core"))
     api(project(":jParser:api:api-core"))
-    api(project(":jParser:runtime:runtime-jvm:ffm"))
+    api(project(":jParser:runtime:desktop:ffm"))
 }
 
 // Bundle FFM-compiled native libraries into the JAR.

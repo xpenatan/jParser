@@ -10,7 +10,7 @@ java {
 dependencies {
     api(project(":jParser:api:api-core"))
     api(project(":jParser:loader:loader-core"))
-    api(project(":jParser:runtime:runtime-c:core"))
+    api(project(":jParser:runtime:shared:c"))
     api("org.teavm:teavm-core:${LibExt.teaVMVersion}")
 }
 

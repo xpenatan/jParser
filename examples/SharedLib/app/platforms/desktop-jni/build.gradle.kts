@@ -12,7 +12,7 @@ java {
 }
 
 val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
-val runtimeJniBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:runtime-build", "runtime_helper", "jni")
+val runtimeJniBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "jni")
 val libAJniBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "jni")
 val libBJniBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "jni")
 
@@ -25,7 +25,7 @@ dependencies {
     implementation(project(":examples:SharedLib:libA:shared:jni"))
     implementation(project(":examples:SharedLib:libB:shared:jni"))
 
-    implementation(project(":jParser:runtime:runtime-jvm:jni"))
+    implementation(project(":jParser:runtime:shared:jni"))
 
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }

@@ -25,14 +25,22 @@ Primary orchestration is in `jParser/jParser-build-tool` via `BuilderTool.build(
 - `android/c`: Android TeaVM C native packaging
 - `web/wasm`: generated TeaVM web output
 
-Runtime modules keep shared API/build modules at the top level and group implementation modules by runtime family:
+Runtime modules mirror the example and binding layout:
 
-- `runtime-core`: public/shared runtime API.
-- `runtime-build`: generator and native build driver.
-- `runtime-jvm/jni`, `runtime-jvm/ffm`, `runtime-jvm/web`, `runtime-jvm/android`: JVM/Java-side implementation modules published as `runtime-jni`, `runtime-ffm`, `runtime-web`, and `runtime-android`.
-- `runtime-c/core`: TeaVM C generated Java classes published as `runtime-c`.
-- `runtime-c/desktop`: desktop native-only split artifacts such as `runtime-c_windows_x64`.
-- `runtime-c/android`: Android TeaVM C native packaging published as `runtime-c_android`.
+- `runtime/base`: handwritten runtime helper source published as `runtime-base`.
+- `runtime/builder`: generator and native build driver.
+- `runtime/core`: public/shared runtime API published as `runtime-core`.
+- `runtime/shared/jni`: generated JNI Java shared by desktop and Android, published as `runtime-jni`.
+- `runtime/shared/c`: generated TeaVM C Java classes published as `runtime-c`.
+- `runtime/desktop/ffm`: generated FFM Java and desktop FFM native payloads, published as `runtime-ffm`.
+- `runtime/desktop/c`: desktop TeaVM C native-only split artifacts such as `runtime-c_windows_x64`.
+- `runtime/web/wasm`: generated TeaVM web output and WebAssembly payloads, published as `runtime-web`.
+- `runtime/android/jni`: Android JNI packaging published as `runtime-android`.
+- `runtime/android/c`: Android TeaVM C native packaging published as `runtime-c_android`.
+
+`runtime-web` owns jParser's TeaVM web substitution service. Binding web modules should depend on `runtime-web`; the runtime policy maps any class to `emu.web.<original-class>` or `gen.web.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.web` rule is evaluated before `gen.web`, so explicit emulation wins over generated substitutions. `loader-web` contains the web loader implementation classes but does not register a TeaVM substitution service itself.
+
+`runtime/shared/c` owns jParser's TeaVM C substitution service. Binding C modules should depend on `runtime-c`; the runtime policy maps any class to `emu.c.<original-class>` or `gen.c.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.c` rule is evaluated before `gen.c`, so explicit emulation wins over generated substitutions.
 
 Example app modules in examples use:
 
@@ -55,13 +63,13 @@ The plugin is scoped to build-module orchestration: it creates one task namespac
 
 Symbol naming is configured with the typed build-tool enum `JParserSymbolNameMode` (`DEFAULT` or `OBFUSCATED`) for `jniSymbolNameMode`, `ffmSymbolNameMode`, and `teaVMCSymbolNameMode`; plugin build scripts must not set these values with raw strings.
 
-IDL method renaming is configured by passing an `IDLRenaming` callback to the plugin with `idlRenaming(...)`. This is the same hook used by manual `BuilderTool.build` calls, so builds can rename methods, enums, or packages without rewriting source IDL files.
+IDL method renaming is configured by passing an `IDLRenaming` callback to the plugin with `idlRenaming(...)`. This is the same hook used by manual `BuilderTool.build` calls, so builds can rename methods, enums, or packages without rewriting source IDL files. `IDLMethod.name` remains the original IDL/native method name; `IDLMethod.bindingName` stores the generated Java/API method name after explicit IDL `Rename`, overload suffix cleanup, and `IDLRenaming`.
 
 The plugin included build follows the libfdx layout: it is not included as a root subproject, and its `settings.gradle.kts` must not include or remap root `:jParser:*` projects. It also must not rename the root project to the Maven artifact id; leave the included build name as the folder-derived `gradle-plugin`, and keep artifact naming in `build.gradle.kts`. Plugin code depends on the jParser generator/build artifacts instead of sourcing their classes into the plugin jar. `jParser/tools/gradle-plugin/buildSrc` sources the single root `buildSrc/src/main/kotlin/LibExt.kt` file for build-script constants. Do not add another `LibExt.kt` under `jParser/tools`; root `LibExt` is the only source of truth.
 
 Example generated output modules use the jBox3D-style layout: `core`, `shared/jni`, `shared/c`, `desktop/ffm`, and `web/wasm`, with native packaging under `desktop/c`, `android/jni`, and `android/c`. The plugin fixtures keep their separate `plugin` modules, but set suffix overrides so generation targets this layout.
 
-Runtime helper generation uses the same plugin in `jParser/runtime/plugin` with `runtimeHelper()` enabled. This module sits next to `runtime-build`, has only a `build.gradle.kts`, and keeps the runtime tree from introducing one-off wrapper folders. That mode keeps `idlName` and `cppSourcePath` optional, generates the runtime helper sources, compiles `RuntimeHelper.cpp`, and switches the web target to the existing Emscripten main-module defaults.
+Runtime helper generation uses the same plugin in `jParser/runtime/plugin` with `runtimeHelper()` enabled. This module sits next to `runtime/builder`, has only a `build.gradle.kts`, and keeps the runtime tree from introducing one-off wrapper folders. That mode keeps `idlName` and `cppSourcePath` optional, generates the runtime helper sources, compiles `RuntimeHelper.cpp`, and switches the web target to the existing Emscripten main-module defaults.
 
 Shared-library examples use per-library plugin modules in `examples/SharedLib/libA/plugin` and `examples/SharedLib/libB/plugin`. These are normal root Gradle modules with only a `build.gradle.kts`; `libB` declares its `libA` module reference through `dependency("libA") { reference(...) }`, which expands IDL refs, header paths, native link inputs, and project task dependencies.
 
@@ -90,6 +98,7 @@ Shared-library examples use per-library plugin modules in `examples/SharedLib/li
 - Native libraries are selected by platform target args such as `windows64_teavm_c`, `android_teavm_c`, or `ios_teavm_c`.
 - IDL callback implementation glue is generated with TeaVM C imports/exports and C function pointers when callbacks are present.
 - When TeaVM C generation runs, the C core artifact also receives gdx-teavm classpath resources: a `META-INF/gdx-teavm.properties` marker, `external_cpp/cmake/post_target` CMake hook, import prototypes, generated glue, copied custom sources, runtime helper header, and header-only source includes. Platform modules still package the matching static native libraries under `external_cpp/jparser/<lib>/native/<platform>`.
+- TeaVM C substitution is generic and classpath-driven: `emu.c.*` replacements win over `gen.c.*` replacements, and classes without a matching replacement remain unchanged.
 
 ## Native Comment Block Contract (`base`)
 

@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":jParser:gen:gen-build-tool"))
     implementation(project(":jParser:gen:gen-ffm"))
 
-    implementation(project(":jParser:runtime:runtime-core"))
+    implementation(project(":jParser:runtime:core"))
 }
 
 tasks.register<JavaExec>("LibA_build_project") {

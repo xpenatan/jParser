@@ -19,7 +19,7 @@ tasks.register<JavaExec>("TestLib_run_app_web") {
     group = "example-web"
     description = "Build web app"
     dependsOn(
-        ":jParser:runtime:runtime-build:runtime_helper_build_project_web_wasm",
+        ":jParser:runtime:builder:runtime_helper_build_project_web_wasm",
         ":examples:TestLib:lib:builder:TestLib_build_project_web_wasm"
     )
     mainClass.set("Build")
@@ -31,7 +31,7 @@ tasks.register<JavaExec>("TestLib_run_benchmark_web") {
     group = "example-web"
     description = "Build web benchmark"
     dependsOn(
-        ":jParser:runtime:runtime-build:runtime_helper_build_project_web_wasm",
+        ":jParser:runtime:builder:runtime_helper_build_project_web_wasm",
         ":examples:TestLib:lib:builder:TestLib_build_project_web_wasm"
     )
     mainClass.set("BenchmarkBuild")

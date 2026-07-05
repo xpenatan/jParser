@@ -6,7 +6,7 @@ plugins {
 
 jParser {
     libName.set("runtime")
-    modulePrefix.set("runtime")
+    modulePrefix.set("")
     modulePath.set(file("..").absolutePath)
     packageName.set("com.github.xpenatan.jparser.runtime")
     webModuleName.set("runtime")
@@ -19,10 +19,13 @@ jParser {
     ffmSymbolNameMode.set(JParserSymbolNameMode.OBFUSCATED)
     teaVMCSymbolNameMode.set(JParserSymbolNameMode.OBFUSCATED)
 
-    moduleJNISuffix.set("jvm/jni")
-    moduleWebSuffix.set("jvm/web")
-    moduleFFMSuffix.set("jvm/ffm")
-    moduleCSuffix.set("c/core")
+    moduleBaseSuffix.set("base")
+    moduleBuildSuffix.set("builder")
+    moduleCoreSuffix.set("core")
+    moduleJNISuffix.set("shared/jni")
+    moduleWebSuffix.set("web/wasm")
+    moduleFFMSuffix.set("desktop/ffm")
+    moduleCSuffix.set("shared/c")
 
     jniCppStandard.set("c++17")
     ffmCppStandard.set("c++17")

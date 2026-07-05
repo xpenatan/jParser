@@ -30,7 +30,7 @@
 
 ## Overview
 
-Inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen), jParser lets you embed native C/C++ code directly inside Java source files using annotated comment blocks. Each block is translated into target-specific Java source code, enabling a single `lib-base` module to produce a bridge-agnostic `lib-core` API plus platform bridge outputs for **JNI** (desktop/mobile), **FFM** (desktop, Java 25+), and **TeaVM** (web via JS/WASM).
+Inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen), jParser lets you embed native C/C++ code directly inside Java source files using annotated comment blocks. Each block is translated into target-specific Java source code, enabling a single `base` module to produce a bridge-agnostic `core` API plus platform bridge outputs for **JNI** (desktop/mobile), **FFM** (desktop, Java 25+), and **TeaVM** (web via JS/WASM).
 
 For web targets, jParser uses [Emscripten](https://emscripten.org/) to compile C/C++ into JS/WASM and [TeaVM](https://github.com/konsoletyper/teavm) to generate the corresponding Java-to-JavaScript bridge via `@JSBody` annotations.
 
@@ -40,15 +40,17 @@ jParser consists of two main stages:
 
 ### 1. Code Generation
 
-Reads the hand-written Java source in the `lib-base` module — which contains embedded native code blocks — and generates platform-specific Java source for each target:
+Reads the hand-written Java source in the `base` module, which contains embedded native code blocks, and generates platform-specific Java source for each target:
 
 | Output Module | Target | Description                                    |
 |---------------|---|------------------------------------------------|
-| `lib-core`    | Core API | Generated bridge-agnostic API classes          |
-| `lib-jni`     | JNI (Desktop) | Generated desktop JNI Java + native jars       |
-| `lib-android` | JNI (Android) | Generated Android JNI Java + Android packaging |
-| `lib-web`     | TeaVM | Generated `@JSBody`-annotated Java for web     |
-| `lib-ffm`     | FFM | Generated FFM Java for desktop (Java 25+)      |
+| `core` | Core API | Generated bridge-agnostic API classes |
+| `shared/jni` | JNI | Generated JNI Java shared by desktop and Android |
+| `shared/c` | TeaVM C | Generated TeaVM C Java shared by desktop and Android |
+| `desktop/ffm` | FFM | Generated FFM Java for desktop (Java 25+) |
+| `web/wasm` | TeaVM web | Generated `@JSBody`-annotated Java for web |
+| `android/jni` | JNI (Android) | Android JNI packaging |
+| `android/c` | TeaVM C (Android) | Android TeaVM C packaging |
 
 ### 2. Native Compilation
 
@@ -72,7 +74,7 @@ Compiles the C/C++ source into platform-specific native libraries:
 
 ## Code Block Convention
 
-In `lib-base` Java source files, native code is embedded via annotated comment blocks. jParser reads these blocks and generates the appropriate code for each target.
+In `base` Java source files, native code is embedded via annotated comment blocks. jParser reads these blocks and generates the appropriate code for each target.
 
 ```java
 public class MyLib extends IDLBase {
@@ -177,28 +179,31 @@ For a complete working example, refer to the [`examples/TestLib`](examples/TestL
 
 ### Module Layout
 
-jParser projects follow a module pattern centered on source (`-base`), generator entry (`-build`), and generated outputs (`-core`, `-jni`, `-ffm`, `-web`, `-android`):
+jParser projects follow a module pattern centered on source (`base`), generator entry (`builder`), and generated/runtime-specific outputs:
 
 | Module Suffix | Purpose |
 |---------------|---|
-| `lib-base`    | Hand-written Java source with embedded native code blocks |
-| `lib-build`   | Build entry point — configures IDL, targets, runs generation + compilation |
-| `lib-core`    | **Generated** bridge-agnostic API output _(do not hand-edit)_ |
-| `lib-jni`     | **Generated** desktop JNI Java output + JNI native libs _(do not hand-edit)_ |
-| `lib-android` | **Generated** Android JNI Java output + Android JNI packaging _(do not hand-edit)_ |
-| `lib-web`     | **Generated** TeaVM Java output _(do not hand-edit)_ |
-| `lib-ffm`     | **Generated** FFM Java output _(do not hand-edit)_ |
+| `base` | Hand-written Java source with embedded native code blocks |
+| `builder` | Build entry point that configures IDL, targets, generation, and native compilation |
+| `core` | **Generated** bridge-agnostic API output _(do not hand-edit)_ |
+| `shared/jni` | **Generated** JNI Java shared by desktop and Android JNI _(do not hand-edit)_ |
+| `shared/c` | **Generated** TeaVM C Java shared by desktop and Android C _(do not hand-edit)_ |
+| `desktop/ffm` | **Generated** desktop FFM Java output + native payloads _(do not hand-edit)_ |
+| `desktop/c` | Desktop TeaVM C native payloads |
+| `web/wasm` | **Generated** TeaVM WebAssembly output _(do not hand-edit)_ |
+| `android/jni` | Android JNI packaging |
+| `android/c` | Android TeaVM C packaging |
 
 ### Build Example: TestLib
 
 ```text
 # 1. Build runtime (required once)
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_windows64_jni
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_windows64_ffm
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_jni
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_ffm
 
 # 2. Generate code + compile native library
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_jni
-./gradlew :examples:TestLib:lib:lib-build:TestLib_build_project_windows64_ffm
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_jni
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_ffm
 
 # 3. Run the desktop app
 ./gradlew :examples:TestLib:app:platforms:desktop-jni:TestLib_run_app_desktop_jni

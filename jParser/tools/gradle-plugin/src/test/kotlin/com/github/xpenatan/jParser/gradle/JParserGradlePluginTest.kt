@@ -222,6 +222,10 @@ class JParserGradlePluginTest {
         val generated = findGeneratedClass(projectDir, "core/src/main/java", "TestObject.java").readText()
         assertTrue(generated.contains("public void doThing("))
         assertFalse(generated.contains("public void DoThing("))
+
+        val generatedWeb = findGeneratedClass(projectDir, "web/wasm/src/main/java", "TestObject.java").readText()
+        assertTrue(generatedWeb.contains("jsObj.doThing();"))
+        assertFalse(generatedWeb.contains("jsObj.DoThing();"))
     }
 
     private fun createProject(buildFile: String): File {

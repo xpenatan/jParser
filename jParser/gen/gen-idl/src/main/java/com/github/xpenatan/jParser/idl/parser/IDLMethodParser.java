@@ -126,11 +126,8 @@ public class IDLMethodParser {
         if(idlMethod.skip) {
             return null;
         }
-        String methodName = idlMethod.name;
-        String renamedName = idlMethod.getRenamedName();
-        if(renamedName != null) {
-            methodName = renamedName;
-        }
+        String updatedMethodName = resolveBindingName(idlParser, idlMethod);
+        idlMethod.setBindingName(updatedMethodName);
 
         Type returnType = null;
 
@@ -144,12 +141,6 @@ public class IDLMethodParser {
             }
         }
 
-        // Remove methods characters if it contains "__1", "__2", etc.
-        String fixedMethodName = methodName.replaceFirst("__\\d$", "");
-        String updatedMethodName = fixedMethodName;
-        if(idlParser.idlRenaming != null) {
-            updatedMethodName = idlParser.idlRenaming.getIDLMethodName(fixedMethodName);
-        }
         ArrayList<IDLParameter> parameters = idlMethod.parameters;
         MethodDeclaration methodDeclaration = classDeclaration.addMethod(updatedMethodName, Modifier.Keyword.PUBLIC);
         methodDeclaration.setStatic(idlMethod.isStaticMethod);
@@ -169,6 +160,14 @@ public class IDLMethodParser {
         methodDeclaration.setType(returnType);
         IDLDefaultCodeParser.setDefaultReturnValues(jParser, unit, returnType, methodDeclaration);
         return methodDeclaration;
+    }
+
+    private static String resolveBindingName(IDLDefaultCodeParser idlParser, IDLMethod idlMethod) {
+        String bindingName = idlMethod.getDefaultBindingName();
+        if(idlParser.idlRenaming != null) {
+            bindingName = idlParser.idlRenaming.getIDLMethodName(bindingName);
+        }
+        return bindingName;
     }
 
     public static boolean canGenerateMethod(MethodDeclaration containsMethod) {
@@ -602,7 +601,7 @@ public class IDLMethodParser {
             String paramType = parameter.getJavaType();
             paramTypes[i] = paramType;
         }
-        List<MethodDeclaration> methods = JParserHelper.getMethodsByName(classOrInterfaceDeclaration, idlMethod.name);
+        List<MethodDeclaration> methods = JParserHelper.getMethodsByName(classOrInterfaceDeclaration, idlMethod.getBindingName());
 
         if(methods.size() > 0) {
             for(MethodDeclaration method : methods) {

@@ -11,7 +11,7 @@ java {
 dependencies {
     api(project(":jParser:loader:loader-core"))
     api(project(":jParser:api:api-core"))
-    api(project(":jParser:runtime:runtime-core"))
+    api(project(":jParser:runtime:core"))
 }
 
 tasks.named("compileJava") {

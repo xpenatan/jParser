@@ -6,21 +6,19 @@ This document explains the Maven artifact setup used by jParser runtime modules 
 
 Top-level runtime modules:
 
-- `jParser/runtime/runtime-base`
-- `jParser/runtime/runtime-build`
-- `jParser/runtime/runtime-core`
-- `jParser/runtime/runtime-c/core`
-- `jParser/runtime/runtime-c/desktop`
-- `jParser/runtime/runtime-c/android`
+- `jParser/runtime/base`
+- `jParser/runtime/builder`
+- `jParser/runtime/core`
+- `jParser/runtime/shared/c`
+- `jParser/runtime/desktop/c`
+- `jParser/runtime/android/c`
 
-JVM/Java-side runtime implementation modules are grouped internally:
+Runtime implementation modules:
 
-- `jParser/runtime/runtime-jvm/jni`
-- `jParser/runtime/runtime-jvm/ffm`
-- `jParser/runtime/runtime-jvm/web`
-- `jParser/runtime/runtime-jvm/android`
-
-The internal `runtime-jvm` folder is not part of the public Maven artifact names.
+- `jParser/runtime/shared/jni`
+- `jParser/runtime/desktop/ffm`
+- `jParser/runtime/web/wasm`
+- `jParser/runtime/android/jni`
 
 ## Published Artifact Names
 
@@ -41,7 +39,7 @@ TeaVM C artifacts use separate modules for generated Java and platform native pa
 - `runtime-c_mac_arm64`
 - `runtime-c_android`
 
-The main `runtime-c` artifact is published from `runtime-c/core` and contains generated Java classes only. Desktop native split artifacts are published from `runtime-c/desktop` and contain only the compiled native payload for that platform. Android payloads are published from their own child module.
+The main `runtime-c` artifact is published from `jParser/runtime/shared/c` and contains generated Java classes only. Desktop native split artifacts are published from `jParser/runtime/desktop/c` and contain only the compiled native payload for that platform. Android payloads are published from `jParser/runtime/android/c`.
 
 ## Local vs Publish Behavior
 
@@ -54,7 +52,7 @@ TeaVM C is stricter:
 - `runtime-c` is always Java classes only.
 - `runtime-c_<platform>` artifacts are native payload only.
 - Native payloads are not bundled into the main `runtime-c` jar.
-- Android does not consume desktop native artifacts; it uses `runtime-c/android`.
+- Android does not consume desktop native artifacts; it uses `jParser/runtime/android/c`.
 
 Android (`runtime-android`) publishes a single AAR containing supported ABI `.so` files.
 

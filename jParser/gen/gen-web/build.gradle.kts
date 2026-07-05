@@ -6,7 +6,7 @@ val moduleName = "gen-web"
 
 dependencies {
     api(project(":jParser:gen:gen-idl"))
-    implementation(project(":jParser:runtime:runtime-base"))
+    implementation(project(":jParser:runtime:base"))
     implementation(project(":jParser:gen:gen-core"))
     implementation(project(":jParser:api:api-core"))
 }

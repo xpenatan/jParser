@@ -12,11 +12,11 @@ val teavmOutputDir = layout.buildDirectory.dir("teavm-c")
 dependencies {
     teavmBuild(project(":examples:TestLib:app:core"))
     teavmBuild(project(":examples:TestLib:lib:shared:c"))
-    teavmBuild(project(":jParser:runtime:runtime-c:core"))
+    teavmBuild(project(":jParser:runtime:shared:c"))
     teavmBuild("org.teavm:teavm-tooling:${LibExt.teaVMVersion}")
     teavmBuild("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 
-    implementation(project(":jParser:runtime:runtime-c:android"))
+    implementation(project(":jParser:runtime:android:c"))
     implementation(project(":examples:TestLib:lib:android:c"))
 }
 
@@ -63,13 +63,13 @@ val generateTeaVMC by tasks.registering(JavaExec::class) {
 val generateTeaVMCImportHeader by tasks.registering {
     dependsOn(
         generateTeaVMC,
-        ":jParser:runtime:runtime-build:runtime_helper_build_project_android_teavm_c",
+        ":jParser:runtime:builder:runtime_helper_build_project_android_teavm_c",
         ":examples:TestLib:lib:builder:TestLib_build_project_android_teavm_c"
     )
     outputs.file(teavmOutputDir.map { it.file("teavmc_imports.h") })
     doLast {
         val headers = listOf(
-            rootProject.file("jParser/runtime/runtime-build/build/c++/src/teavmcglue/TeaVMCGlue.h"),
+            rootProject.file("jParser/runtime/builder/build/c++/src/teavmcglue/TeaVMCGlue.h"),
             rootProject.file("examples/TestLib/lib/builder/build/c++/src/teavmcglue/TeaVMCGlue.h"),
         )
         val seen = linkedSetOf<String>()
@@ -178,7 +178,7 @@ val buildTeaVMCAndroidNative by tasks.registering {
                 "-include", importHeader.absolutePath,
                 File(generatedDir, "all.c").absolutePath,
                 appBridge.absolutePath,
-                "-L${rootProject.file("jParser/runtime/runtime-build/build/c++/libs/android/${abi.abi}/teavm_c").absolutePath}",
+                "-L${rootProject.file("jParser/runtime/builder/build/c++/libs/android/${abi.abi}/teavm_c").absolutePath}",
                 "-L${rootProject.file("examples/TestLib/lib/builder/build/c++/libs/android/${abi.abi}/teavm_c").absolutePath}",
                 "-lruntime",
                 "-lTestLib",

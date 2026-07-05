@@ -25,6 +25,7 @@ public class IDLMethod {
     public boolean isStaticMethod = false;
     public String operator = "";
     public String bindsToName = null;
+    public String bindingName = null;
 
     public final ArrayList<IDLParameter> parameters = new ArrayList<>();
 
@@ -155,6 +156,26 @@ public class IDLMethod {
         return name;
     }
 
+    public void setBindingName(String bindingName) {
+        this.bindingName = bindingName;
+    }
+
+    public String getBindingName() {
+        if(bindingName != null) {
+            return bindingName;
+        }
+        return getDefaultBindingName();
+    }
+
+    public String getDefaultBindingName() {
+        String bindingName = name;
+        String renamedName = getRenamedName();
+        if(renamedName != null) {
+            bindingName = renamedName;
+        }
+        return bindingName.replaceFirst("__\\d$", "");
+    }
+
     public String getRenamedName() {
         if(idlLine.idlCommand.containsCommand(IDLCommand.CMD_RENAME)) {
             String commandValue = idlLine.idlCommand.getCommandValue(IDLCommand.CMD_RENAME);
@@ -176,6 +197,7 @@ public class IDLMethod {
         cloned.isReturnArray = isReturnArray;
         cloned.isStaticMethod = isStaticMethod;
         cloned.isReturnRef = isReturnRef;
+        cloned.bindingName = bindingName;
 
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);

@@ -10,5 +10,5 @@ java {
 dependencies {
     implementation(project(":jParser:loader:loader-core"))
     implementation(project(":jParser:api:api-core"))
-    implementation(project(":jParser:runtime:runtime-core"))
+    implementation(project(":jParser:runtime:core"))
 }

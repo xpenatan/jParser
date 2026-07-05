@@ -29,9 +29,13 @@ out/
 .temp/
 *.log
 
-**/runtime/runtime-core/src/main/java/**
-**/runtime/runtime-jvm/**/src/main/java/**
-**/runtime/runtime-c/**/src/main/java/**
+**/runtime/core/src/main/java/**
+**/runtime/shared/c/src/main/java/**
+**/runtime/shared/jni/src/main/java/**
+**/runtime/desktop/ffm/src/main/java/**
+**/runtime/web/wasm/src/main/java/**
+**/runtime/android/c/src/main/java/**
+**/runtime/android/jni/src/main/java/**
 
 **/webapp/**
 **/lib/core/src/**

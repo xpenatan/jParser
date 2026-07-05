@@ -24,8 +24,8 @@ dependencies {
     implementation(project(":jParser:loader:loader-core"))
     implementation(project(":jParser:api:api-web"))
     implementation(project(":jParser:api:api-core"))
-    implementation(project(":jParser:runtime:runtime-core"))
-    implementation(project(":jParser:runtime:runtime-jvm:web"))
+    implementation(project(":jParser:runtime:core"))
+    implementation(project(":jParser:runtime:web:wasm"))
 }
 
 tasks.named("clean") {

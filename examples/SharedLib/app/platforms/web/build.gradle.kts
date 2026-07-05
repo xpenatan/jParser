@@ -20,7 +20,7 @@ tasks.register<JavaExec>("SharedLib_run_app_web") {
     group = "example-web"
     description = "Build web app"
     dependsOn(
-        ":jParser:runtime:runtime-build:runtime_helper_build_project_web_wasm",
+        ":jParser:runtime:builder:runtime_helper_build_project_web_wasm",
         ":examples:SharedLib:libA:builder:LibA_build_project_web_wasm",
         ":examples:SharedLib:libB:builder:LibB_build_project_web_wasm"
     )

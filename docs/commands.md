@@ -9,23 +9,23 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ### Runtime (helper)
 
 ```text
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_windows64_jni
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_linux64_jni
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_mac64_jni
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_macArm_jni
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_android_jni
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_ios_jni
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_windows64_ffm
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_linux64_ffm
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_mac64_ffm
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_macArm_ffm
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_windows64_teavm_c
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_linux64_teavm_c
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_mac64_teavm_c
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_macArm_teavm_c
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_android_teavm_c
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_ios_teavm_c
-./gradlew :jParser:runtime:runtime-build:runtime_helper_build_project_web_wasm
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_jni
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_linux64_jni
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_mac64_jni
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_macArm_jni
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_android_jni
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_ios_jni
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_ffm
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_linux64_ffm
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_mac64_ffm
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_macArm_ffm
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_teavm_c
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_linux64_teavm_c
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_mac64_teavm_c
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_macArm_teavm_c
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_android_teavm_c
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_ios_teavm_c
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_web_wasm
 ```
 
 ### TestLib native generation
