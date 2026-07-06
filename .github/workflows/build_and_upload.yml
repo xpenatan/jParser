@@ -53,6 +53,9 @@ jobs:
       - name: Build runtime FFM project
         run: ./gradlew runtime_helper_build_project_windows64_ffm
 
+      - name: Build runtime TeaVM C project
+        run: ./gradlew runtime_helper_build_project_windows64_teavm_c
+
       - name: Build TestLib JNI project
         run: ./gradlew TestLib_build_project_windows64_jni
 
@@ -111,6 +114,9 @@ jobs:
       - name: Build runtime FFM project
         run: ./gradlew runtime_helper_build_project_linux64_ffm
 
+      - name: Build runtime TeaVM C project
+        run: ./gradlew runtime_helper_build_project_linux64_teavm_c
+
       - name: Build TestLib JNI project
         run: ./gradlew TestLib_build_project_linux64_jni
 
@@ -168,6 +174,9 @@ jobs:
 
       - name: Build runtime FFM project
         run: ./gradlew runtime_helper_build_project_mac64_ffm
+
+      - name: Build runtime TeaVM C project
+        run: ./gradlew runtime_helper_build_project_mac64_teavm_c
 
       - name: Build TestLib JNI project
         run: |
@@ -234,6 +243,9 @@ jobs:
 
       - name: Build runtime FFM project
         run: ./gradlew runtime_helper_build_project_macArm_ffm
+
+      - name: Build runtime TeaVM C project
+        run: ./gradlew runtime_helper_build_project_macArm_teavm_c
 
       - name: Build TestLib JNI project
         run: |
@@ -368,6 +380,11 @@ jobs:
 
       - name: Build project runtime
         run: ./gradlew runtime_helper_build_project_android_jni
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Build runtime TeaVM C project
+        run: ./gradlew runtime_helper_build_project_android_teavm_c
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
