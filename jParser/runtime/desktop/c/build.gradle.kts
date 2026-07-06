@@ -24,7 +24,7 @@ val nativeJars = platforms.map { (platform, nativeFile) ->
         archiveClassifier.set("")
         doFirst {
             if(!file(nativeFile).isFile) {
-                throw GradleException("Missing desktop TeaVM C native library for $platform: $nativeFile")
+                logger.warn("Missing desktop TeaVM C native library for $platform: $nativeFile")
             }
         }
     }
