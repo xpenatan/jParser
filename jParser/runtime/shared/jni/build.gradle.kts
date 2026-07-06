@@ -39,16 +39,6 @@ val nativeJars = platforms.map { (platform, nativeFile) ->
     }
 }
 
-val nativeDesktopJar = tasks.register<Jar>("nativeJarDesktop") {
-    archiveBaseName.set("${moduleName}-desktop")
-    archiveClassifier.set("")
-    platforms.forEach { (folder, path) ->
-        from(path) {
-            into(folder)
-        }
-    }
-}
-
 tasks.named("compileJava") {
     dependsOn(":jParser:runtime:builder:runtime_helper_build_project")
 }
@@ -67,7 +57,6 @@ val nativeRuntime by configurations.creating {
 }
 
 artifacts {
-    add(nativeRuntime.name, nativeDesktopJar)
     nativeJars.forEach { add(nativeRuntime.name, it.second) }
 }
 
@@ -95,13 +84,6 @@ publishing {
             group = LibExt.groupId
             version = LibExt.libVersion
             from(components["java"])
-        }
-
-        create<MavenPublication>("mavenDesktopNative") {
-            artifactId = "${moduleName}-desktop"
-            group = LibExt.groupId
-            version = LibExt.libVersion
-            artifact(nativeDesktopJar)
         }
 
         nativeJars.forEach { (platform, nativeJar) ->
