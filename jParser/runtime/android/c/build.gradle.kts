@@ -2,7 +2,7 @@ plugins {
     id("com.android.library")
 }
 
-val moduleName = "runtime-c-android"
+val moduleName = "runtime-android-c"
 val teavmCLibsDir = "$projectDir/../../builder/build/c++/libs/android"
 val stagedJniLibsDir = layout.buildDirectory.dir("generated/teavmCJniLibs")
 
