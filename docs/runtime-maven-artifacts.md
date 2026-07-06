@@ -19,6 +19,7 @@ Runtime implementation modules:
 - `jParser/runtime/desktop/ffm`
 - `jParser/runtime/web/wasm`
 - `jParser/runtime/android/jni`
+- `jParser/runtime/android/c`
 
 ## Published Artifact Names
 
@@ -51,6 +52,8 @@ TeaVM C artifacts use separate modules for generated Java and platform native pa
 
 The main `runtime-c` artifact is published from `jParser/runtime/shared/c` and contains generated Java classes only. Desktop native split artifacts are published from `jParser/runtime/desktop/c` and contain only the compiled native payload for that platform. Android TeaVM C native split artifacts are published from `jParser/runtime/android/c`.
 
+`jParser/runtime/android/c` builds local native-only AAR files with the `runtime-android-c-<abi>` archive base name. Maven publication still uses the public artifact IDs `runtime-c_android_<abi>`.
+
 ## Local vs Publish Behavior
 
 Desktop JVM modules (`runtime-jni`, `runtime-ffm`) and web (`runtime-web`) keep local project dependencies convenient by adding native/web payloads to the main jar for non-publish builds.
@@ -65,6 +68,8 @@ TeaVM C is stricter:
 - Android does not consume desktop native artifacts; it uses `jParser/runtime/android/c`.
 
 Android JNI keeps local project dependencies convenient by adding all ABI payloads to the main `runtime-android` AAR for non-publish builds. Published `runtime-android` is classes-only, and `runtime-android_<abi>` artifacts contain one ABI payload each.
+
+Android TeaVM C uses `runtime-c` for generated Java classes and `runtime-c_android_<abi>` native-only AARs for Android native payloads.
 
 ## Artifact Examples
 
@@ -99,7 +104,7 @@ implementation("com.github.xpenatan.jParser:runtime-web:${LibExt.jParserVersion}
 implementation("com.github.xpenatan.jParser:runtime-web_wasm:${LibExt.jParserVersion}")
 ```
 
-Android:
+Android JNI:
 
 ```kotlin
 implementation("com.github.xpenatan.jParser:runtime-android:${LibExt.jParserVersion}")
@@ -109,10 +114,20 @@ implementation("com.github.xpenatan.jParser:runtime-android_armeabi_v7a:${LibExt
 implementation("com.github.xpenatan.jParser:runtime-android_arm64_v8a:${LibExt.jParserVersion}")
 ```
 
+Android TeaVM C:
+
+```kotlin
+implementation("com.github.xpenatan.jParser:runtime-c:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-c_android_x86:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-c_android_x86_64:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-c_android_armeabi_v7a:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-c_android_arm64_v8a:${LibExt.jParserVersion}")
+```
+
 ## Copy Checklist For External Libraries
 
 1. Keep generated/public Java classes in the main runtime artifact.
 2. Publish platform native payloads as separate artifact IDs using underscore platform suffixes.
-3. Keep native payload jars free of generated Java classes.
+3. Keep native payload jars/AARs free of generated Java classes.
 4. Keep main publish artifacts classes-only.
 5. Verify with a local compile/generation task and jar content inspection when changing artifact layout.
