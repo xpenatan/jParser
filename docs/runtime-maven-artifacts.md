@@ -30,6 +30,13 @@ Existing JVM/web artifacts keep their names:
 - `runtime-web`
 - `runtime-android`
 
+Android JNI native payloads are split by ABI:
+
+- `runtime-android_x86`
+- `runtime-android_x86_64`
+- `runtime-android_armeabi_v7a`
+- `runtime-android_arm64_v8a`
+
 TeaVM C artifacts use separate modules for generated Java and platform native payloads:
 
 - `runtime-c`
@@ -37,9 +44,12 @@ TeaVM C artifacts use separate modules for generated Java and platform native pa
 - `runtime-c_linux_x64`
 - `runtime-c_mac_x64`
 - `runtime-c_mac_arm64`
-- `runtime-c_android`
+- `runtime-c_android_x86`
+- `runtime-c_android_x86_64`
+- `runtime-c_android_armeabi_v7a`
+- `runtime-c_android_arm64_v8a`
 
-The main `runtime-c` artifact is published from `jParser/runtime/shared/c` and contains generated Java classes only. Desktop native split artifacts are published from `jParser/runtime/desktop/c` and contain only the compiled native payload for that platform. Android payloads are published from `jParser/runtime/android/c`.
+The main `runtime-c` artifact is published from `jParser/runtime/shared/c` and contains generated Java classes only. Desktop native split artifacts are published from `jParser/runtime/desktop/c` and contain only the compiled native payload for that platform. Android TeaVM C native split artifacts are published from `jParser/runtime/android/c`.
 
 ## Local vs Publish Behavior
 
@@ -54,7 +64,7 @@ TeaVM C is stricter:
 - Native payloads are not bundled into the main `runtime-c` jar.
 - Android does not consume desktop native artifacts; it uses `jParser/runtime/android/c`.
 
-Android (`runtime-android`) publishes a single AAR containing supported ABI `.so` files.
+Android JNI keeps local project dependencies convenient by adding all ABI payloads to the main `runtime-android` AAR for non-publish builds. Published `runtime-android` is classes-only, and `runtime-android_<abi>` artifacts contain one ABI payload each.
 
 ## Artifact Examples
 
@@ -76,7 +86,10 @@ api("com.github.xpenatan.jParser:runtime-c_windows_x64:${LibExt.jParserVersion}"
 api("com.github.xpenatan.jParser:runtime-c_linux_x64:${LibExt.jParserVersion}")
 api("com.github.xpenatan.jParser:runtime-c_mac_x64:${LibExt.jParserVersion}")
 api("com.github.xpenatan.jParser:runtime-c_mac_arm64:${LibExt.jParserVersion}")
-api("com.github.xpenatan.jParser:runtime-c_android:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-c_android_x86:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-c_android_x86_64:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-c_android_armeabi_v7a:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-c_android_arm64_v8a:${LibExt.jParserVersion}")
 ```
 
 Web:
@@ -90,6 +103,10 @@ Android:
 
 ```kotlin
 implementation("com.github.xpenatan.jParser:runtime-android:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-android_x86:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-android_x86_64:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-android_armeabi_v7a:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-android_arm64_v8a:${LibExt.jParserVersion}")
 ```
 
 ## Copy Checklist For External Libraries

@@ -70,7 +70,7 @@ object LibExt {
     const val jMultiplatform = "0.1.3"
 
     // Example Dependencies
-    const val gdxVersion = "1.14.0"
+    const val gdxVersion = "1.14.2"
     const val gdxTeaVMVersion = "1.5.6"
 
     const val jUnitVersion = "4.13.2"

@@ -35,8 +35,8 @@ Runtime modules mirror the example and binding layout:
 - `runtime/desktop/ffm`: generated FFM Java and desktop FFM native payloads, published as `runtime-ffm`.
 - `runtime/desktop/c`: desktop TeaVM C native-only split artifacts such as `runtime-c_windows_x64`.
 - `runtime/web/wasm`: generated TeaVM web output and WebAssembly payloads, published as `runtime-web`.
-- `runtime/android/jni`: Android JNI packaging published as `runtime-android`.
-- `runtime/android/c`: Android TeaVM C native packaging published as `runtime-c_android`.
+- `runtime/android/jni`: Android JNI packaging published as classes-only `runtime-android` plus ABI payload artifacts such as `runtime-android_arm64_v8a`.
+- `runtime/android/c`: Android TeaVM C native packaging published as ABI payload artifacts such as `runtime-c_android_arm64_v8a`.
 
 `runtime-web` owns jParser's TeaVM web substitution service. Binding web modules should depend on `runtime-web`; the runtime policy maps any class to `emu.web.<original-class>` or `gen.web.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.web` rule is evaluated before `gen.web`, so explicit emulation wins over generated substitutions. `loader-web` contains the web loader implementation classes but does not register a TeaVM substitution service itself.
 
