@@ -2,7 +2,7 @@ plugins {
     id("base")
 }
 
-val moduleName = "runtime-c"
+val moduleName = "runtime-desktop-c"
 
 val libDir = "${projectDir}/../../builder/build/c++/libs"
 val windowsFile = "$libDir/windows/vc/teavm_c/runtime64.dll"

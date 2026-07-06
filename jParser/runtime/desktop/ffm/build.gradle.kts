@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-val moduleName = "runtime-ffm"
+val moduleName = "runtime-desktop-ffm"
 
 val libDir = "${projectDir}/../../builder/build/c++/libs"
 val windowsFile = "$libDir/windows/vc/ffm/runtime64.dll"
