@@ -16,9 +16,9 @@ dependencies {
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
 
-    testImplementation(project(":examples:SharedLib:libA:shared:jni"))
-    testImplementation(project(":examples:SharedLib:libB:shared:jni"))
-    testImplementation(project(":jParser:runtime:shared:jni"))
+    testImplementation(project(":examples:SharedLib:libA:shared:LibA-jni"))
+    testImplementation(project(":examples:SharedLib:libB:shared:LibB-jni"))
+    testImplementation(project(":jParser:runtime:shared:runtime-jni"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 

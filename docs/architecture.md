@@ -17,30 +17,34 @@ Primary orchestration is in `jParser/jParser-build-tool` via `BuilderTool.build(
 - `base`: handwritten Java with target-specific comment blocks in examples
 - `builder`: Gradle entry for generation + native build in examples
 - `core`: generated bridge-agnostic API in examples
-- `shared/jni`: generated JNI Java shared by desktop and Android JNI examples
-- `shared/c`: generated TeaVM C Java shared by desktop and Android C examples
-- `desktop/ffm`: generated FFM Java + desktop FFM natives
-- `desktop/c`: TeaVM C desktop native payloads
-- `android/jni`: Android JNI packaging
-- `android/c`: Android TeaVM C native packaging
-- `web/wasm`: generated TeaVM web output
+- `shared/<Lib>-jni`: generated JNI Java shared by desktop and Android JNI examples
+- `shared/<Lib>-c`: generated TeaVM C Java shared by desktop and Android C examples
+- `desktop/<Lib>-desktop-jni`: desktop JNI native packaging with a dependency on `shared/<Lib>-jni`
+- `desktop/<Lib>-desktop-ffm`: generated FFM Java + desktop FFM natives
+- `desktop/<Lib>-desktop-c`: TeaVM C desktop native payloads
+- `android/<Lib>-android`: Android JNI packaging with a dependency on `shared/<Lib>-jni`
+- `android/<Lib>-android-c`: Android TeaVM C native packaging
+- `web/<Lib>-web`: generated TeaVM web output
 
 Runtime modules mirror the example and binding layout:
 
 - `runtime/base`: handwritten runtime helper source published as `runtime-base`.
 - `runtime/builder`: generator and native build driver.
 - `runtime/core`: public/shared runtime API published as `runtime-core`.
-- `runtime/shared/jni`: generated JNI Java shared by desktop and Android, published as `runtime-jni`.
-- `runtime/shared/c`: generated TeaVM C Java classes published as `runtime-c`.
-- `runtime/desktop/ffm`: generated FFM Java and desktop FFM native payloads, published as `runtime-ffm`.
-- `runtime/desktop/c`: desktop TeaVM C native-only split artifacts such as `runtime-c_windows_x64`.
-- `runtime/web/wasm`: generated TeaVM web output and WebAssembly payloads, published as `runtime-web`.
-- `runtime/android/jni`: Android JNI packaging published as classes-only `runtime-android` plus ABI payload artifacts such as `runtime-android_arm64_v8a`.
-- `runtime/android/c`: Android TeaVM C native packaging published as ABI payload artifacts such as `runtime-c_android_arm64_v8a`.
+- `runtime/shared/runtime-jni`: generated JNI Java shared by desktop and Android, published as Java-only `runtime-jni`.
+- `runtime/shared/runtime-c`: generated TeaVM C Java classes published as `runtime-c`.
+- `runtime/desktop/runtime-desktop-jni`: desktop JNI packaging published as `runtime-desktop-jni` with a dependency on `runtime-jni`, plus native-only split artifacts such as `runtime-desktop-jni_windows_x64`.
+- `runtime/desktop/runtime-desktop-ffm`: generated FFM Java and desktop FFM native payloads, published as `runtime-desktop-ffm`.
+- `runtime/desktop/runtime-desktop-c`: desktop TeaVM C native-only split artifacts such as `runtime-desktop-c_windows_x64`.
+- `runtime/web/runtime-web`: generated TeaVM web output and WebAssembly payloads, published as `runtime-web`.
+- `runtime/android/runtime-android`: Android JNI packaging published as `runtime-android` with a dependency on `runtime-jni`, plus ABI payload artifacts such as `runtime-android_arm64_v8a`.
+- `runtime/android/runtime-android-c`: Android TeaVM C packaging published as `runtime-android-c` plus ABI payload artifacts such as `runtime-android-c_arm64_v8a`.
+
+Split runtime Gradle project paths use the same artifact-style leaf names as the folders. Example split modules follow the same pattern, such as `:examples:TestLib:lib:shared:TestLib-jni` at `examples/TestLib/lib/shared/TestLib-jni` and `:examples:TestLib:lib:desktop:TestLib-desktop-jni` at `examples/TestLib/lib/desktop/TestLib-desktop-jni`.
 
 `runtime-web` owns jParser's TeaVM web substitution service. Binding web modules should depend on `runtime-web`; the runtime policy maps any class to `emu.web.<original-class>` or `gen.web.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.web` rule is evaluated before `gen.web`, so explicit emulation wins over generated substitutions. `loader-web` contains the web loader implementation classes but does not register a TeaVM substitution service itself.
 
-`runtime/shared/c` owns jParser's TeaVM C substitution service. Binding C modules should depend on `runtime-c`; the runtime policy maps any class to `emu.c.<original-class>` or `gen.c.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.c` rule is evaluated before `gen.c`, so explicit emulation wins over generated substitutions.
+`runtime/shared/runtime-c` owns jParser's TeaVM C substitution service. Binding C modules should depend on `runtime-c`; the runtime policy maps any class to `emu.c.<original-class>` or `gen.c.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.c` rule is evaluated before `gen.c`, so explicit emulation wins over generated substitutions.
 
 Example app modules in examples use:
 
@@ -77,7 +81,7 @@ Path-like plugin DSL methods keep string properties for compatibility, but provi
 
 The plugin included build follows the libfdx layout: it is not included as a root subproject, and its `settings.gradle.kts` must not include or remap root `:jParser:*` projects. It also must not rename the root project to the Maven artifact id; leave the included build name as the folder-derived `gradle-plugin`, and keep artifact naming in `build.gradle.kts`. Plugin code depends on the jParser generator/build artifacts instead of sourcing their classes into the plugin jar. `jParser/tools/gradle-plugin/buildSrc` sources the single root `buildSrc/src/main/kotlin/LibExt.kt` file for build-script constants. Do not add another `LibExt.kt` under `jParser/tools`; root `LibExt` is the only source of truth.
 
-Example generated output modules use the jBox3D-style layout: `core`, `shared/jni`, `shared/c`, `desktop/ffm`, and `web/wasm`, with native packaging under `desktop/c`, `android/jni`, and `android/c`. The plugin fixtures keep their separate `plugin` modules, but set suffix overrides so generation targets this layout.
+Example generated output modules use the jBox3D-style layout: `core`, `shared/<Lib>-jni`, `shared/<Lib>-c`, `desktop/<Lib>-desktop-ffm`, and `web/<Lib>-web`, with native packaging under `desktop/<Lib>-desktop-jni`, `desktop/<Lib>-desktop-c`, `android/<Lib>-android`, and `android/<Lib>-android-c`. The plugin fixtures keep their separate `plugin` modules, but set suffix overrides so generation targets this layout.
 
 Runtime helper generation uses the same plugin in `jParser/runtime/plugin` with `runtimeHelper()` enabled. This module sits next to `runtime/builder`, has only a `build.gradle.kts`, and keeps the runtime tree from introducing one-off wrapper folders. That mode keeps `idlName` and `cppSourcePath` optional, generates the runtime helper sources, compiles `RuntimeHelper.cpp`, and switches the web target to the existing Emscripten main-module defaults.
 

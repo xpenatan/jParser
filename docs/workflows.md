@@ -4,7 +4,7 @@ Startup/session protocol is defined in `AGENTS.md` (`Start Here (Mandatory)`). T
 
 ## Editing Rules
 
-- Do not hand-edit generated outputs in example modules such as `core`, `shared/jni`, `shared/c`, `desktop/ffm`, `android/jni`, `android/c`, or `web/wasm`.
+- Do not hand-edit generated outputs in example modules such as `core`, `shared/<Lib>-jni`, `shared/<Lib>-c`, `desktop/<Lib>-desktop-ffm`, or `web/<Lib>-web`; native packaging modules such as `desktop/<Lib>-desktop-jni`, `desktop/<Lib>-desktop-c`, `android/<Lib>-android`, and `android/<Lib>-android-c` should only package generated native outputs.
 - Prefer edits in source modules (`base`, parser modules, build modules).
 - If generator logic changes, regenerate artifacts before app/test validation.
 - When modules/tasks are renamed, update `AGENTS.md`, `README.md`, and related docs in the same change.

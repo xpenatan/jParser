@@ -29,6 +29,14 @@ out/
 .temp/
 *.log
 
+# Generated Java from artifact-style runtime/example modules
+**/shared/*-jni/src/main/java/**
+**/shared/*-c/src/main/java/**
+**/desktop/*-desktop-ffm/src/main/java/**
+**/web/*-web/src/main/java/**
+**/android/*-android/src/main/java/**
+**/android/*-android-c/src/main/java/**
+
 **/runtime/core/src/main/java/**
 **/runtime/shared/c/src/main/java/**
 **/runtime/shared/jni/src/main/java/**

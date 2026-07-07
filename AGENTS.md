@@ -50,8 +50,10 @@ Maintenance rule: when module/task names change, update `AGENTS.md` and related 
 
 ## 5) Current Module Naming (Examples)
 
-- Example library pipeline modules: `base`, `builder`, `core`, `shared/jni`, `shared/c`, `desktop/ffm`, `desktop/c`, `web/wasm`, `android/jni`, and `android/c`.
-- Runtime modules: `runtime/base`, `runtime/builder`, `runtime/core`, `runtime/shared/jni`, `runtime/shared/c`, `runtime/desktop/ffm`, `runtime/desktop/c`, `runtime/web/wasm`, `runtime/android/jni`, and `runtime/android/c`.
+- Example library pipeline folders: `base`, `builder`, `core`, `shared/<Lib>-jni`, `shared/<Lib>-c`, `desktop/<Lib>-desktop-jni`, `desktop/<Lib>-desktop-ffm`, `desktop/<Lib>-desktop-c`, `web/<Lib>-web`, `android/<Lib>-android`, and `android/<Lib>-android-c`.
+- Runtime folders: `runtime/base`, `runtime/builder`, `runtime/core`, `runtime/shared/runtime-jni`, `runtime/shared/runtime-c`, `runtime/desktop/runtime-desktop-jni`, `runtime/desktop/runtime-desktop-ffm`, `runtime/desktop/runtime-desktop-c`, `runtime/web/runtime-web`, `runtime/android/runtime-android`, and `runtime/android/runtime-android-c`.
+- Split Gradle project paths use the same artifact-style leaf names as the folders, for example `:jParser:runtime:shared:runtime-jni`, `:jParser:runtime:desktop:runtime-desktop-jni`, `:jParser:runtime:desktop:runtime-desktop-ffm`, `:jParser:runtime:web:runtime-web`, `:jParser:runtime:android:runtime-android`, `:jParser:runtime:shared:runtime-c`, `:jParser:runtime:desktop:runtime-desktop-c`, and `:jParser:runtime:android:runtime-android-c`.
+- Example split Gradle paths follow the same pattern, such as `:examples:TestLib:lib:shared:TestLib-jni`, `:examples:TestLib:lib:shared:TestLib-c`, `:examples:TestLib:lib:desktop:TestLib-desktop-jni`, `:examples:TestLib:lib:desktop:TestLib-desktop-ffm`, `:examples:TestLib:lib:desktop:TestLib-desktop-c`, `:examples:TestLib:lib:web:TestLib-web`, `:examples:TestLib:lib:android:TestLib-android`, and `:examples:TestLib:lib:android:TestLib-android-c`.
 - App platform modules in examples: `app:platforms:desktop-jni`, `app:platforms:desktop-ffm`, `app:platforms:desktop-c`, `app:platforms:web`, `app:platforms:android`, `app:platforms:android-c`.
 - Runtime generator module: `jParser:runtime:builder` (tasks like `runtime_helper_build_project_<target>`).
 - Gradle plugin included build: `jParser/tools/gradle-plugin` (plugin id `com.github.xpenatan.jparser`, artifact `jparser-gradle-plugin`).

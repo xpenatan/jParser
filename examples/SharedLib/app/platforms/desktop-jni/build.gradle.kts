@@ -22,10 +22,10 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:SharedLib:libA:shared:jni"))
-    implementation(project(":examples:SharedLib:libB:shared:jni"))
+    implementation(project(":examples:SharedLib:libA:desktop:LibA-desktop-jni"))
+    implementation(project(":examples:SharedLib:libB:desktop:LibB-desktop-jni"))
 
-    implementation(project(":jParser:runtime:shared:jni"))
+    implementation(project(":jParser:runtime:desktop:runtime-desktop-jni"))
 
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
@@ -37,8 +37,8 @@ tasks.test {
         runtimeJniBuildTask,
         libAJniBuildTask,
         libBJniBuildTask,
-        ":examples:SharedLib:libA:shared:jni:assemble",
-        ":examples:SharedLib:libB:shared:jni:assemble"
+        ":examples:SharedLib:libA:desktop:LibA-desktop-jni:assemble",
+        ":examples:SharedLib:libB:desktop:LibB-desktop-jni:assemble"
     )
     testLogging {
         showStandardStreams = true

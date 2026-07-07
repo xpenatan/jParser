@@ -36,10 +36,10 @@ public class BuildLibB {
         data.moduleBaseSuffix = "base";
         data.moduleBuildSuffix = "builder";
         data.moduleCoreSuffix = "core";
-        data.moduleJNISuffix = "shared/jni";
-        data.moduleWebSuffix = "web/wasm";
-        data.moduleFFMSuffix = "desktop/ffm";
-        data.moduleCSuffix = "shared/c";
+        data.moduleJNISuffix = "shared/LibB-jni";
+        data.moduleWebSuffix = "web/LibB-web";
+        data.moduleFFMSuffix = "desktop/LibB-desktop-ffm";
+        data.moduleCSuffix = "shared/LibB-c";
 
         BuildToolOptions op = new BuildToolOptions(data, args);
 

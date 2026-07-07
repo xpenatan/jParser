@@ -1,0 +1,48 @@
+plugins {
+    id("com.android.library")
+}
+
+val filterJniLibs by tasks.registering(Copy::class) {
+    from("$projectDir/../../builder/build/c++/libs/android")
+    into(layout.buildDirectory.dir("tmp/jniLibs"))
+    include("**/*.so")
+    exclude("**/*.a")
+}
+
+tasks.named("preBuild").configure {
+    dependsOn(filterJniLibs)
+}
+
+android {
+    namespace = "com.github.xpenatan.jparser.example.libB"
+    compileSdk = 36
+
+    defaultConfig {
+        minSdk = 29
+    }
+
+    sourceSets {
+        named("main") {
+            jniLibs.srcDirs("$projectDir/../../builder/build/c++/libs/android")
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+        targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+    }
+}
+
+dependencies {
+    implementation(project(":jParser:loader:loader-core"))
+    implementation(project(":jParser:api:api-core"))
+    implementation(project(":jParser:runtime:android:runtime-android"))
+    implementation(project(":examples:SharedLib:libA:android:LibA-android"))
+    implementation(project(":examples:SharedLib:libB:shared:LibB-jni"))
+}
+
+tasks.named("clean") {
+    doFirst {
+        val srcPath = "$projectDir/src/main/"
+        project.delete(files(srcPath))
+    }
+}

@@ -34,10 +34,10 @@ public class BuildRuntimeHelper {
         data.moduleBaseSuffix = "base";
         data.moduleBuildSuffix = "builder";
         data.moduleCoreSuffix = "core";
-        data.moduleJNISuffix = "shared/jni";
-        data.moduleWebSuffix = "web/wasm";
-        data.moduleFFMSuffix = "desktop/ffm";
-        data.moduleCSuffix = "shared/c";
+        data.moduleJNISuffix = "shared/runtime-jni";
+        data.moduleWebSuffix = "web/runtime-web";
+        data.moduleFFMSuffix = "desktop/runtime-desktop-ffm";
+        data.moduleCSuffix = "shared/runtime-c";
         BuildToolOptions op = new BuildToolOptions(data, args);
         // Runtime helper methods are predominantly simple set/get operations.
         // Keep critical mode enabled by default for the generated runtime helper.

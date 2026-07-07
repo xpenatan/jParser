@@ -19,7 +19,7 @@ tasks.test {
     dependsOn(
         runtimeJniBuildTask,
         testLibJniBuildTask,
-        ":examples:TestLib:lib:shared:jni:assemble"
+        ":examples:TestLib:lib:desktop:TestLib-desktop-jni:assemble"
     )
     // Print test standard output (System.out.println) to the console for CI logs
     testLogging {
@@ -49,9 +49,9 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:TestLib:lib:shared:jni"))
+    implementation(project(":examples:TestLib:lib:desktop:TestLib-desktop-jni"))
 
-    implementation(project(":jParser:runtime:shared:jni"))
+    implementation(project(":jParser:runtime:desktop:runtime-desktop-jni"))
 
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }

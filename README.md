@@ -45,12 +45,12 @@ Reads the hand-written Java source in the `base` module, which contains embedded
 | Output Module | Target | Description                                    |
 |---------------|---|------------------------------------------------|
 | `core` | Core API | Generated bridge-agnostic API classes |
-| `shared/jni` | JNI | Generated JNI Java shared by desktop and Android |
-| `shared/c` | TeaVM C | Generated TeaVM C Java shared by desktop and Android |
-| `desktop/ffm` | FFM | Generated FFM Java for desktop (Java 25+) |
-| `web/wasm` | TeaVM web | Generated `@JSBody`-annotated Java for web |
-| `android/jni` | JNI (Android) | Android JNI packaging |
-| `android/c` | TeaVM C (Android) | Android TeaVM C packaging |
+| `shared/<Lib>-jni` | JNI | Generated JNI Java shared by desktop and Android |
+| `shared/<Lib>-c` | TeaVM C | Generated TeaVM C Java shared by desktop and Android |
+| `desktop/<Lib>-desktop-ffm` | FFM | Generated FFM Java for desktop (Java 25+) |
+| `web/<Lib>-web` | TeaVM web | Generated `@JSBody`-annotated Java for web |
+| `android/<Lib>-android` | JNI (Android) | Android JNI packaging |
+| `android/<Lib>-android-c` | TeaVM C (Android) | Android TeaVM C packaging |
 
 ### 2. Native Compilation
 
@@ -186,13 +186,14 @@ jParser projects follow a module pattern centered on source (`base`), generator 
 | `base` | Hand-written Java source with embedded native code blocks |
 | `builder` | Build entry point that configures IDL, targets, generation, and native compilation |
 | `core` | **Generated** bridge-agnostic API output _(do not hand-edit)_ |
-| `shared/jni` | **Generated** JNI Java shared by desktop and Android JNI _(do not hand-edit)_ |
-| `shared/c` | **Generated** TeaVM C Java shared by desktop and Android C _(do not hand-edit)_ |
-| `desktop/ffm` | **Generated** desktop FFM Java output + native payloads _(do not hand-edit)_ |
-| `desktop/c` | Desktop TeaVM C native payloads |
-| `web/wasm` | **Generated** TeaVM WebAssembly output _(do not hand-edit)_ |
-| `android/jni` | Android JNI packaging |
-| `android/c` | Android TeaVM C packaging |
+| `shared/<Lib>-jni` | **Generated** JNI Java shared by desktop and Android JNI _(do not hand-edit)_ |
+| `shared/<Lib>-c` | **Generated** TeaVM C Java shared by desktop and Android C _(do not hand-edit)_ |
+| `desktop/<Lib>-desktop-jni` | Desktop JNI native payloads |
+| `desktop/<Lib>-desktop-ffm` | **Generated** desktop FFM Java output + native payloads _(do not hand-edit)_ |
+| `desktop/<Lib>-desktop-c` | Desktop TeaVM C native payloads |
+| `web/<Lib>-web` | **Generated** TeaVM WebAssembly output _(do not hand-edit)_ |
+| `android/<Lib>-android` | Android JNI packaging |
+| `android/<Lib>-android-c` | Android TeaVM C packaging |
 
 ### Build Example: TestLib
 

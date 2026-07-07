@@ -33,10 +33,10 @@ public class BuildLibA {
         data.moduleBaseSuffix = "base";
         data.moduleBuildSuffix = "builder";
         data.moduleCoreSuffix = "core";
-        data.moduleJNISuffix = "shared/jni";
-        data.moduleWebSuffix = "web/wasm";
-        data.moduleFFMSuffix = "desktop/ffm";
-        data.moduleCSuffix = "shared/c";
+        data.moduleJNISuffix = "shared/LibA-jni";
+        data.moduleWebSuffix = "web/LibA-web";
+        data.moduleFFMSuffix = "desktop/LibA-desktop-ffm";
+        data.moduleCSuffix = "shared/LibA-c";
 
         BuildToolOptions op = new BuildToolOptions(data, args);
         op.addAdditionalIDLRefPath(IDLReader.getRuntimeHelperFile());

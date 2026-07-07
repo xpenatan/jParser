@@ -17,7 +17,7 @@ tasks.test {
     dependsOn(
         runtimeFfmBuildTask,
         testLibFfmBuildTask,
-        ":examples:TestLib:lib:desktop:ffm:assemble"
+        ":examples:TestLib:lib:desktop:TestLib-desktop-ffm:assemble"
     )
     testLogging {
         showStandardStreams = true
@@ -46,9 +46,9 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:TestLib:lib:desktop:ffm"))
+    implementation(project(":examples:TestLib:lib:desktop:TestLib-desktop-ffm"))
 
-    implementation(project(":jParser:runtime:desktop:ffm"))
+    implementation(project(":jParser:runtime:desktop:runtime-desktop-ffm"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 

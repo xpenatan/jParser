@@ -9,8 +9,8 @@ java {
 
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))
-    implementation(project(":examples:SharedLib:libA:web:wasm"))
-    implementation(project(":examples:SharedLib:libB:web:wasm"))
+    implementation(project(":examples:SharedLib:libA:web:LibA-web"))
+    implementation(project(":examples:SharedLib:libB:web:LibB-web"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
     implementation("com.github.xpenatan.gdx-teavm:backend-web:${LibExt.gdxTeaVMVersion}")

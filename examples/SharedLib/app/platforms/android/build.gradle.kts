@@ -43,8 +43,8 @@ dependencies {
     natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-x86")
 
     implementation(project(":examples:SharedLib:app:core"))
-    api(project(":examples:SharedLib:libA:android:jni"))
-    api(project(":examples:SharedLib:libB:android:jni"))
+    api(project(":examples:SharedLib:libA:android:LibA-android"))
+    api(project(":examples:SharedLib:libB:android:LibB-android"))
 }
 
 

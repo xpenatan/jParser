@@ -26,10 +26,10 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
 
-    implementation(project(":examples:SharedLib:libA:desktop:ffm"))
-    implementation(project(":examples:SharedLib:libB:desktop:ffm"))
+    implementation(project(":examples:SharedLib:libA:desktop:LibA-desktop-ffm"))
+    implementation(project(":examples:SharedLib:libB:desktop:LibB-desktop-ffm"))
 
-    implementation(project(":jParser:runtime:desktop:ffm"))
+    implementation(project(":jParser:runtime:desktop:runtime-desktop-ffm"))
 
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
@@ -41,8 +41,8 @@ tasks.test {
         runtimeFfmBuildTask,
         libAFfmBuildTask,
         libBFfmBuildTask,
-        ":examples:SharedLib:libA:desktop:ffm:assemble",
-        ":examples:SharedLib:libB:desktop:ffm:assemble"
+        ":examples:SharedLib:libA:desktop:LibA-desktop-ffm:assemble",
+        ":examples:SharedLib:libB:desktop:LibB-desktop-ffm:assemble"
     )
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))

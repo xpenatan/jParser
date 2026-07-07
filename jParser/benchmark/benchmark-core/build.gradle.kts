@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":jParser:runtime:desktop:ffm"))
+    implementation(project(":jParser:runtime:desktop:runtime-desktop-ffm"))
     testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 

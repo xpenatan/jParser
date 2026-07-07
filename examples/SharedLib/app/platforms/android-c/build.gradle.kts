@@ -11,15 +11,15 @@ val teavmOutputDir = layout.buildDirectory.dir("teavm-c")
 
 dependencies {
     teavmBuild(project(":examples:SharedLib:app:core"))
-    teavmBuild(project(":examples:SharedLib:libA:shared:c"))
-    teavmBuild(project(":examples:SharedLib:libB:shared:c"))
-    teavmBuild(project(":jParser:runtime:shared:c"))
+    teavmBuild(project(":examples:SharedLib:libA:shared:LibA-c"))
+    teavmBuild(project(":examples:SharedLib:libB:shared:LibB-c"))
+    teavmBuild(project(":jParser:runtime:shared:runtime-c"))
     teavmBuild("org.teavm:teavm-tooling:${LibExt.teaVMVersion}")
     teavmBuild("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
 
-    implementation(project(":jParser:runtime:android:c"))
-    implementation(project(":examples:SharedLib:libA:android:c"))
-    implementation(project(":examples:SharedLib:libB:android:c"))
+    implementation(project(":jParser:runtime:android:runtime-android-c"))
+    implementation(project(":examples:SharedLib:libA:android:LibA-android-c"))
+    implementation(project(":examples:SharedLib:libB:android:LibB-android-c"))
 }
 
 android {

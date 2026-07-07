@@ -9,7 +9,7 @@ java {
 
 dependencies {
     implementation(project(":examples:TestLib:app:core"))
-    implementation(project(":examples:TestLib:lib:web:wasm"))
+    implementation(project(":examples:TestLib:lib:web:TestLib-web"))
 
     implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
     implementation("com.github.xpenatan.gdx-teavm:backend-web:${LibExt.gdxTeaVMVersion}")

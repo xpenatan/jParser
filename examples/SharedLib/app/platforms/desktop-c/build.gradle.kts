@@ -9,9 +9,9 @@ java {
 
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))
-    implementation(project(":examples:SharedLib:libA:shared:c"))
-    implementation(project(":examples:SharedLib:libB:shared:c"))
-    implementation(project(":jParser:runtime:shared:c"))
+    implementation(project(":examples:SharedLib:libA:shared:LibA-c"))
+    implementation(project(":examples:SharedLib:libB:shared:LibB-c"))
+    implementation(project(":jParser:runtime:shared:runtime-c"))
 
     implementation("org.teavm:teavm-tooling:${LibExt.teaVMVersion}")
     implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
@@ -28,8 +28,8 @@ tasks.register<JavaExec>("SharedLib_build_app_desktop_c") {
         runtimeTeaVMCBuildTask,
         libATeaVMCBuildTask,
         libBTeaVMCBuildTask,
-        ":examples:SharedLib:libA:shared:c:jar",
-        ":examples:SharedLib:libB:shared:c:jar"
+        ":examples:SharedLib:libA:shared:LibA-c:jar",
+        ":examples:SharedLib:libB:shared:LibB-c:jar"
     )
     mainClass.set("BuildTeaVMC")
     classpath = sourceSets["main"].runtimeClasspath

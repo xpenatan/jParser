@@ -37,10 +37,10 @@ public class BuildLib {
         data.moduleBaseSuffix = "base";
         data.moduleBuildSuffix = "builder";
         data.moduleCoreSuffix = "core";
-        data.moduleJNISuffix = "shared/jni";
-        data.moduleWebSuffix = "web/wasm";
-        data.moduleFFMSuffix = "desktop/ffm";
-        data.moduleCSuffix = "shared/c";
+        data.moduleJNISuffix = "shared/TestLib-jni";
+        data.moduleWebSuffix = "web/TestLib-web";
+        data.moduleFFMSuffix = "desktop/TestLib-desktop-ffm";
+        data.moduleCSuffix = "shared/TestLib-c";
 
         BuildToolOptions op = new BuildToolOptions(data, args);
 
