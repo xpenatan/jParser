@@ -437,6 +437,7 @@ class JParserGradlePluginTest {
             interface TestObject {
                 void TestObject();
                 void DoThing();
+                [BindTo="DoThing"] void DoThing__1(TestObject other);
             };
             """.trimIndent()
         )
@@ -450,8 +451,10 @@ class JParserGradlePluginTest {
         assertFalse(generated.contains("public void DoThing("))
 
         val generatedWeb = findGeneratedClass(projectDir, "web/wasm/src/main/java", "TestObject.java").readText()
-        assertTrue(generatedWeb.contains("jsObj.doThing();"))
-        assertFalse(generatedWeb.contains("jsObj.DoThing();"))
+        assertTrue(generatedWeb.contains("jsObj.DoThing();"))
+        assertTrue(generatedWeb.contains("jsObj.DoThing__1(other_addr);"))
+        assertFalse(generatedWeb.contains("jsObj.doThing();"))
+        assertFalse(generatedWeb.contains("jsObj.doThing(other_addr);"))
     }
 
     private fun createProject(buildFile: String): File {
