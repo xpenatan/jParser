@@ -35,10 +35,15 @@ class JParserGradlePlugin : Plugin<Project> {
         extension: JParserExtension,
         buildTasks: MutableMap<String, TaskProvider<JParserBuildTask>>
     ) {
+        val configuredTargetNames = extension.native.targets.names +
+                extension.native.variants.mapNotNull { variant -> variant.targetName.orNull?.takeIf { it.isNotBlank() } }
         val variantTargetNames = extension.native.variants
             .mapNotNull { variant -> variant.targetName.orNull?.takeIf { it.isNotBlank() } }
             .toSet()
         buildTargets.forEach { target ->
+            if(!isBuildTargetEnabled(extension, target.targetArg, configuredTargetNames)) {
+                return@forEach
+            }
             if(target.targetArg in variantTargetNames) {
                 return@forEach
             }
@@ -50,6 +55,23 @@ class JParserGradlePlugin : Plugin<Project> {
                 project.provider { target.args },
                 target.description
             )
+        }
+    }
+
+    private fun isBuildTargetEnabled(
+        extension: JParserExtension,
+        targetArg: String,
+        configuredTargetNames: Collection<String>
+    ): Boolean {
+        if(targetArg in configuredTargetNames) {
+            return true
+        }
+        return when {
+            targetArg == JParserTargets.WEB_WASM -> extension.moduleWebSuffix.isPresent
+            targetArg.endsWith("_jni") -> extension.moduleJNISuffix.isPresent
+            targetArg.endsWith("_ffm") -> extension.moduleFFMSuffix.isPresent
+            targetArg.endsWith("_teavm_c") -> extension.moduleCSuffix.isPresent
+            else -> false
         }
     }
 

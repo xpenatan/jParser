@@ -22,6 +22,9 @@ class JParserGradlePluginTest {
             jParser {
                 libName.set("TestLib")
                 modulePrefix.set("lib")
+                moduleJNISuffix.set("-jni")
+                moduleFFMSuffix.set("-ffm")
+                moduleWebSuffix.set("-web")
                 packageName.set("com.example.testlib")
                 cppSourcePath.set("src/main/cpp/source/TestLib/src")
                 jniSymbolNameMode.set(JParserSymbolNameMode.OBFUSCATED)
@@ -37,7 +40,7 @@ class JParserGradlePluginTest {
         assertContains(result.output, "jParser_build_web_wasm")
         assertContains(result.output, "jParser_build_windows64_jni")
         assertContains(result.output, "jParser_build_linux64_ffm")
-        assertContains(result.output, "jParser_build_android_teavm_c")
+        assertDoesNotContainTask(result.output, "jParser_build_android_teavm_c")
     }
 
     @Test
@@ -124,6 +127,36 @@ class JParserGradlePluginTest {
         val result = runner(projectDir, "tasks", "--group", "jParser", "--all", "--console=plain").build()
 
         assertContains(result.output, "jParser_build_${JParserTargets.ANDROID_JNI}")
+        assertContains(result.output, "jParser_build_${JParserTargets.ANDROID_TEAVM_C}")
+    }
+
+    @Test
+    fun registersExplicitTeaVMCTargetWithoutModuleCSuffix() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("TestLib")
+                modulePrefix.set("lib")
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("src/main/cpp/source/TestLib/src")
+
+                native {
+                    target(JParserTargets.ANDROID_TEAVM_C) {
+                        compileFlag("-DTEST_TEAVM_C")
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result = runner(projectDir, "tasks", "--group", "jParser", "--all", "--console=plain").build()
+
         assertContains(result.output, "jParser_build_${JParserTargets.ANDROID_TEAVM_C}")
     }
 
