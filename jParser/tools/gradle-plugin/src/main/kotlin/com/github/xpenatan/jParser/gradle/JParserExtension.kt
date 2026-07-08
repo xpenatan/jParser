@@ -287,11 +287,12 @@ open class JParserNativeHooks @Inject constructor(
             objects.newInstance(JParserNativeTargetVariantHooks::class.java, name, objects)
         }
 
-    fun target(name: String, action: Action<in JParserNamedTargetHooks>) {
-        targets.create(name, action)
+    fun target(target: JParserTargets, action: Action<in JParserNamedTargetHooks>) {
+        targets.create(target.targetName, action)
     }
 
-    fun targetVariant(targetName: String, variantName: String, action: Action<in JParserNativeTargetVariantHooks>) {
+    fun targetVariant(target: JParserTargets, variantName: String, action: Action<in JParserNativeTargetVariantHooks>) {
+        val targetName = target.targetName
         val normalizedVariantName = variantName.trim()
         require(normalizedVariantName.isNotEmpty()) { "jParser native target variant name must not be empty" }
         variants.create("${targetName}_${normalizedVariantName}") {

@@ -35,43 +35,55 @@ class JParserGradlePlugin : Plugin<Project> {
         extension: JParserExtension,
         buildTasks: MutableMap<String, TaskProvider<JParserBuildTask>>
     ) {
-        val configuredTargetNames = extension.native.targets.names +
-                extension.native.variants.mapNotNull { variant -> variant.targetName.orNull?.takeIf { it.isNotBlank() } }
+        val targetHookNames = extension.native.targets.names.toSet()
         val variantTargetNames = extension.native.variants
             .mapNotNull { variant -> variant.targetName.orNull?.takeIf { it.isNotBlank() } }
             .toSet()
+        val hasExplicitNativeTargets = targetHookNames.isNotEmpty() || variantTargetNames.isNotEmpty()
         buildTargets.forEach { target ->
-            if(!isBuildTargetEnabled(extension, target.targetArg, configuredTargetNames)) {
+            val targetArg = target.targetArg
+            if(targetArg in variantTargetNames) {
                 return@forEach
             }
-            if(target.targetArg in variantTargetNames) {
+            if(hasExplicitNativeTargets && targetArg !in targetHookNames) {
                 return@forEach
             }
-            buildTasks[target.targetArg] = registerBuildTask(
+            if(!hasExplicitNativeTargets && !isBuildTargetEnabledByModule(extension, target.target)) {
+                return@forEach
+            }
+            buildTasks[targetArg] = registerBuildTask(
                 project,
                 extension,
-                "jParser_build_${target.targetArg}",
-                target.targetArg,
+                "jParser_build_$targetArg",
+                targetArg,
                 project.provider { target.args },
                 target.description
             )
         }
     }
 
-    private fun isBuildTargetEnabled(
+    private fun isBuildTargetEnabledByModule(
         extension: JParserExtension,
-        targetArg: String,
-        configuredTargetNames: Collection<String>
+        target: JParserTargets
     ): Boolean {
-        if(targetArg in configuredTargetNames) {
-            return true
-        }
-        return when {
-            targetArg == JParserTargets.WEB_WASM -> extension.moduleWebSuffix.isPresent
-            targetArg.endsWith("_jni") -> extension.moduleJNISuffix.isPresent
-            targetArg.endsWith("_ffm") -> extension.moduleFFMSuffix.isPresent
-            targetArg.endsWith("_teavm_c") -> extension.moduleCSuffix.isPresent
-            else -> false
+        return when(target) {
+            JParserTargets.WEB_WASM -> extension.moduleWebSuffix.isPresent
+            JParserTargets.WINDOWS64_JNI,
+            JParserTargets.LINUX64_JNI,
+            JParserTargets.MAC64_JNI,
+            JParserTargets.MAC_ARM_JNI,
+            JParserTargets.ANDROID_JNI,
+            JParserTargets.IOS_JNI -> extension.moduleJNISuffix.isPresent
+            JParserTargets.WINDOWS64_FFM,
+            JParserTargets.LINUX64_FFM,
+            JParserTargets.MAC64_FFM,
+            JParserTargets.MAC_ARM_FFM -> extension.moduleFFMSuffix.isPresent
+            JParserTargets.WINDOWS64_TEAVM_C,
+            JParserTargets.LINUX64_TEAVM_C,
+            JParserTargets.MAC64_TEAVM_C,
+            JParserTargets.MAC_ARM_TEAVM_C,
+            JParserTargets.ANDROID_TEAVM_C,
+            JParserTargets.IOS_TEAVM_C -> extension.moduleCSuffix.isPresent
         }
     }
 
@@ -105,7 +117,7 @@ class JParserGradlePlugin : Plugin<Project> {
         if(extension.moduleFFMSuffix.isPresent || targetNames.any { it.endsWith("_ffm") }) {
             targets.add(JParserGenerationTarget.FFM)
         }
-        if(extension.moduleWebSuffix.isPresent || targetNames.contains(JParserTargets.WEB_WASM)) {
+        if(extension.moduleWebSuffix.isPresent || targetNames.contains(JParserTargets.WEB_WASM.targetName)) {
             targets.add(JParserGenerationTarget.WEB)
         }
         if(extension.moduleCSuffix.isPresent || targetNames.any { it.endsWith("_teavm_c") }) {
@@ -204,9 +216,10 @@ class JParserGradlePlugin : Plugin<Project> {
     }
 
     private data class BuildTarget(
-        val targetArg: String,
+        val target: JParserTargets,
         val description: String
     ) {
+        val targetArg: String = target.targetName
         val args: List<String> = listOf(targetArg)
     }
 

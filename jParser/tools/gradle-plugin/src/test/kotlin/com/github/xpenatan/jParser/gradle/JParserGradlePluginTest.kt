@@ -161,6 +161,64 @@ class JParserGradlePluginTest {
     }
 
     @Test
+    fun registersOnlyExplicitNativeTargetsWhenAnyNativeTargetIsConfigured() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("TestLib")
+                modulePrefix.set("lib")
+                moduleJNISuffix.set("-jni")
+                moduleFFMSuffix.set("-ffm")
+                moduleWebSuffix.set("-web")
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("src/main/cpp/source/TestLib/src")
+
+                native {
+                    listOf(JParserTargets.WINDOWS64_JNI, JParserTargets.WINDOWS64_FFM).forEach { targetName ->
+                        target(targetName) {
+                            compileFlag("-DROOT_HOOK")
+                        }
+                        targetVariant(targetName, "wgpu") {
+                            compileFlag("-DWGPU")
+                        }
+                        targetVariant(targetName, "dawn") {
+                            compileFlag("-DDAWN")
+                        }
+                    }
+                    target(JParserTargets.LINUX64_JNI) {}
+                    target(JParserTargets.LINUX64_FFM) {}
+                    target(JParserTargets.ANDROID_JNI) {}
+                    target(JParserTargets.WEB_WASM) {}
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result = runner(projectDir, "tasks", "--group", "jParser", "--all", "--console=plain").build()
+
+        assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}_wgpu")
+        assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}_dawn")
+        assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_FFM}_wgpu")
+        assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_FFM}_dawn")
+        assertContains(result.output, "jParser_build_${JParserTargets.LINUX64_JNI}")
+        assertContains(result.output, "jParser_build_${JParserTargets.LINUX64_FFM}")
+        assertContains(result.output, "jParser_build_${JParserTargets.ANDROID_JNI}")
+        assertContains(result.output, "jParser_build_${JParserTargets.WEB_WASM}")
+        assertDoesNotContainTask(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}")
+        assertDoesNotContainTask(result.output, "jParser_build_${JParserTargets.WINDOWS64_FFM}")
+        assertDoesNotContainTask(result.output, "jParser_build_${JParserTargets.IOS_JNI}")
+        assertDoesNotContainTask(result.output, "jParser_build_${JParserTargets.MAC64_JNI}")
+        assertDoesNotContainTask(result.output, "jParser_build_${JParserTargets.ANDROID_TEAVM_C}")
+        assertDoesNotContainTask(result.output, "jParser_build_${JParserTargets.LINUX64_TEAVM_C}")
+    }
+
+    @Test
     fun supportsTypedAndroidEnums() {
         val projectDir = createProject(
             """

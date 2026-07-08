@@ -1,26 +1,27 @@
 import com.github.xpenatan.jParser.builder.tool.JParserSymbolNameMode
+import com.github.xpenatan.jParser.gradle.JParserTargets
 
 plugins {
     id("com.github.xpenatan.jparser")
 }
 
 val defaultNativeTargets = listOf(
-    "windows64_jni",
-    "linux64_jni",
-    "mac64_jni",
-    "macArm_jni",
-    "android_jni",
-    "ios_jni",
-    "windows64_ffm",
-    "linux64_ffm",
-    "mac64_ffm",
-    "macArm_ffm",
-    "windows64_teavm_c",
-    "linux64_teavm_c",
-    "mac64_teavm_c",
-    "macArm_teavm_c",
-    "android_teavm_c",
-    "ios_teavm_c"
+    JParserTargets.WINDOWS64_JNI,
+    JParserTargets.LINUX64_JNI,
+    JParserTargets.MAC64_JNI,
+    JParserTargets.MAC_ARM_JNI,
+    JParserTargets.ANDROID_JNI,
+    JParserTargets.IOS_JNI,
+    JParserTargets.WINDOWS64_FFM,
+    JParserTargets.LINUX64_FFM,
+    JParserTargets.MAC64_FFM,
+    JParserTargets.MAC_ARM_FFM,
+    JParserTargets.WINDOWS64_TEAVM_C,
+    JParserTargets.LINUX64_TEAVM_C,
+    JParserTargets.MAC64_TEAVM_C,
+    JParserTargets.MAC_ARM_TEAVM_C,
+    JParserTargets.ANDROID_TEAVM_C,
+    JParserTargets.IOS_TEAVM_C
 )
 
 jParser {
@@ -47,7 +48,7 @@ jParser {
         defaultNativeTargets.forEach { targetName ->
             target(targetName) {}
         }
-        target("web_wasm") {
+        target(JParserTargets.WEB_WASM) {
             linkerFlag("-Wl,--export-all")
             linkerFlag("-lc++abi")
             linkerFlag("-lc++")

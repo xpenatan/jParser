@@ -1,3 +1,5 @@
+import com.github.xpenatan.jParser.gradle.JParserTargets
+
 plugins {
     id("com.github.xpenatan.jparser")
 }
@@ -30,54 +32,54 @@ jParser {
     webForcedInclude.set(customHeader)
 
     native {
-        target("windows64_jni") {
+        target(JParserTargets.WINDOWS64_JNI) {
             compileFlag("/DLIBA_EXPORTS")
             compileFlag(windowsUserConfig)
         }
-        target("windows64_ffm") {
+        target(JParserTargets.WINDOWS64_FFM) {
             compileFlag("/DLIBA_EXPORTS")
             compileFlag(windowsUserConfig)
         }
-        target("windows64_teavm_c") {
+        target(JParserTargets.WINDOWS64_TEAVM_C) {
             compileFlag("/DLIBA_EXPORTS")
             compileFlag(windowsUserConfig)
         }
-        target("linux64_jni") {
+        target(JParserTargets.LINUX64_JNI) {
             compileFlag(nativeUserConfig)
             compileFlag("-fvisibility=hidden")
             linkerFlag("-Wl,-soname,libLibA64.so")
         }
-        target("linux64_ffm") {
+        target(JParserTargets.LINUX64_FFM) {
             compileFlag(nativeUserConfig)
             compileFlag("-fvisibility=hidden")
             linkerFlag("-Wl,-soname,libLibA64.so")
         }
-        target("linux64_teavm_c") {
+        target(JParserTargets.LINUX64_TEAVM_C) {
             compileFlag(nativeUserConfig)
         }
-        target("mac64_jni") {
+        target(JParserTargets.MAC64_JNI) {
             compileFlag(nativeUserConfig)
         }
-        target("mac64_ffm") {
+        target(JParserTargets.MAC64_FFM) {
             compileFlag(nativeUserConfig)
         }
-        target("mac64_teavm_c") {
+        target(JParserTargets.MAC64_TEAVM_C) {
             compileFlag(nativeUserConfig)
         }
-        target("macArm_jni") {
+        target(JParserTargets.MAC_ARM_JNI) {
             compileFlag(nativeUserConfig)
         }
-        target("macArm_ffm") {
+        target(JParserTargets.MAC_ARM_FFM) {
             compileFlag(nativeUserConfig)
         }
-        target("macArm_teavm_c") {
+        target(JParserTargets.MAC_ARM_TEAVM_C) {
             compileFlag(nativeUserConfig)
         }
-        target("android_jni") {
+        target(JParserTargets.ANDROID_JNI) {
             compileFlag(nativeUserConfig)
             linkerFlag("-Wl,-soname,libLibA.so")
         }
-        target("android_teavm_c") {
+        target(JParserTargets.ANDROID_TEAVM_C) {
             compileFlag("-DLIBA_EXPORTS")
             compileFlag(nativeUserConfig)
         }
