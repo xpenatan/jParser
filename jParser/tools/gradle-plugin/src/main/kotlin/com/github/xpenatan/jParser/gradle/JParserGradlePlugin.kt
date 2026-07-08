@@ -13,20 +13,8 @@ class JParserGradlePlugin : Plugin<Project> {
         project.pluginManager.apply(JavaPlugin::class.java)
 
         val extension = project.extensions.create<JParserExtension>("jParser", project, project.objects)
-        val buildTasks = registerBuildTasks(project, extension).toMutableMap()
-
-        project.afterEvaluate {
-            registerVariantBuildTasks(project, extension, buildTasks.getValue(""))
-            configureTaskDependencies(project, extension, buildTasks)
-        }
-    }
-
-    private fun registerBuildTasks(
-        project: Project,
-        extension: JParserExtension
-    ): Map<String, TaskProvider<JParserBuildTask>> {
-        val tasks = linkedMapOf<String, TaskProvider<JParserBuildTask>>()
-        tasks[""] = registerBuildTask(
+        val buildTasks = linkedMapOf<String, TaskProvider<JParserBuildTask>>()
+        buildTasks[""] = registerBuildTask(
             project,
             extension,
             "jParser_generate",
@@ -34,27 +22,27 @@ class JParserGradlePlugin : Plugin<Project> {
             project.provider { resolveGenerateTargets(extension).map { it.arg } },
             "Generate jParser Java sources for all configured APIs."
         )
-        val targets = listOf(
-            BuildTarget(JParserTargets.WEB_WASM, "Build jParser TeaVM web WASM side module."),
-            BuildTarget(JParserTargets.WINDOWS64_JNI, "Build jParser Windows x64 JNI native library."),
-            BuildTarget(JParserTargets.LINUX64_JNI, "Build jParser Linux x64 JNI native library."),
-            BuildTarget(JParserTargets.MAC64_JNI, "Build jParser macOS x64 JNI native library."),
-            BuildTarget(JParserTargets.MAC_ARM_JNI, "Build jParser macOS ARM JNI native library."),
-            BuildTarget(JParserTargets.ANDROID_JNI, "Build jParser Android JNI native libraries."),
-            BuildTarget(JParserTargets.IOS_JNI, "Build jParser iOS JNI native library."),
-            BuildTarget(JParserTargets.WINDOWS64_FFM, "Build jParser Windows x64 FFM native library."),
-            BuildTarget(JParserTargets.LINUX64_FFM, "Build jParser Linux x64 FFM native library."),
-            BuildTarget(JParserTargets.MAC64_FFM, "Build jParser macOS x64 FFM native library."),
-            BuildTarget(JParserTargets.MAC_ARM_FFM, "Build jParser macOS ARM FFM native library."),
-            BuildTarget(JParserTargets.WINDOWS64_TEAVM_C, "Build jParser Windows x64 TeaVM C native library."),
-            BuildTarget(JParserTargets.LINUX64_TEAVM_C, "Build jParser Linux x64 TeaVM C native library."),
-            BuildTarget(JParserTargets.MAC64_TEAVM_C, "Build jParser macOS x64 TeaVM C native library."),
-            BuildTarget(JParserTargets.MAC_ARM_TEAVM_C, "Build jParser macOS ARM TeaVM C native library."),
-            BuildTarget(JParserTargets.ANDROID_TEAVM_C, "Build jParser Android TeaVM C native libraries."),
-            BuildTarget(JParserTargets.IOS_TEAVM_C, "Build jParser iOS TeaVM C native library.")
-        )
-        targets.forEach { target ->
-            tasks[target.targetArg] = registerBuildTask(
+
+        project.afterEvaluate {
+            registerNativeBuildTasks(project, extension, buildTasks)
+            registerVariantBuildTasks(project, extension, buildTasks.getValue(""))
+            configureTaskDependencies(project, extension, buildTasks)
+        }
+    }
+
+    private fun registerNativeBuildTasks(
+        project: Project,
+        extension: JParserExtension,
+        buildTasks: MutableMap<String, TaskProvider<JParserBuildTask>>
+    ) {
+        val variantTargetNames = extension.native.variants
+            .mapNotNull { variant -> variant.targetName.orNull?.takeIf { it.isNotBlank() } }
+            .toSet()
+        buildTargets.forEach { target ->
+            if(target.targetArg in variantTargetNames) {
+                return@forEach
+            }
+            buildTasks[target.targetArg] = registerBuildTask(
                 project,
                 extension,
                 "jParser_build_${target.targetArg}",
@@ -63,7 +51,6 @@ class JParserGradlePlugin : Plugin<Project> {
                 target.description
             )
         }
-        return tasks
     }
 
     private fun registerBuildTask(
@@ -203,5 +190,24 @@ class JParserGradlePlugin : Plugin<Project> {
 
     private companion object {
         const val TASK_GROUP = "jParser"
+        val buildTargets = listOf(
+            BuildTarget(JParserTargets.WEB_WASM, "Build jParser TeaVM web WASM side module."),
+            BuildTarget(JParserTargets.WINDOWS64_JNI, "Build jParser Windows x64 JNI native library."),
+            BuildTarget(JParserTargets.LINUX64_JNI, "Build jParser Linux x64 JNI native library."),
+            BuildTarget(JParserTargets.MAC64_JNI, "Build jParser macOS x64 JNI native library."),
+            BuildTarget(JParserTargets.MAC_ARM_JNI, "Build jParser macOS ARM JNI native library."),
+            BuildTarget(JParserTargets.ANDROID_JNI, "Build jParser Android JNI native libraries."),
+            BuildTarget(JParserTargets.IOS_JNI, "Build jParser iOS JNI native library."),
+            BuildTarget(JParserTargets.WINDOWS64_FFM, "Build jParser Windows x64 FFM native library."),
+            BuildTarget(JParserTargets.LINUX64_FFM, "Build jParser Linux x64 FFM native library."),
+            BuildTarget(JParserTargets.MAC64_FFM, "Build jParser macOS x64 FFM native library."),
+            BuildTarget(JParserTargets.MAC_ARM_FFM, "Build jParser macOS ARM FFM native library."),
+            BuildTarget(JParserTargets.WINDOWS64_TEAVM_C, "Build jParser Windows x64 TeaVM C native library."),
+            BuildTarget(JParserTargets.LINUX64_TEAVM_C, "Build jParser Linux x64 TeaVM C native library."),
+            BuildTarget(JParserTargets.MAC64_TEAVM_C, "Build jParser macOS x64 TeaVM C native library."),
+            BuildTarget(JParserTargets.MAC_ARM_TEAVM_C, "Build jParser macOS ARM TeaVM C native library."),
+            BuildTarget(JParserTargets.ANDROID_TEAVM_C, "Build jParser Android TeaVM C native libraries."),
+            BuildTarget(JParserTargets.IOS_TEAVM_C, "Build jParser iOS TeaVM C native library.")
+        )
     }
 }

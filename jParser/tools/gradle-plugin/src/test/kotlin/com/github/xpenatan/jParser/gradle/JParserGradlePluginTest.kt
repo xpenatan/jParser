@@ -246,6 +246,9 @@ class JParserGradlePluginTest {
                     targetVariant(JParserTargets.WINDOWS64_JNI, "dawn") {
                         headerDir("include/dawn")
                     }
+                    targetVariant(JParserTargets.LINUX64_JNI, "wgpu") {
+                        headerDir("include/linux-wgpu")
+                    }
                 }
             }
             """.trimIndent()
@@ -265,6 +268,9 @@ class JParserGradlePluginTest {
 
         assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}_wgpu")
         assertContains(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}_dawn")
+        assertContains(result.output, "jParser_build_${JParserTargets.LINUX64_JNI}_wgpu")
+        assertDoesNotContainTask(result.output, "jParser_build_${JParserTargets.WINDOWS64_JNI}")
+        assertDoesNotContainTask(result.output, "jParser_build_${JParserTargets.LINUX64_JNI}")
 
         runner(projectDir, "jParser_generate", "--console=plain").build()
         assertGeneratedClass(projectDir, "lib-jni/src/main/java", "TestObject.java")
@@ -473,6 +479,13 @@ class JParserGradlePluginTest {
 
     private fun assertContains(output: String, expected: String) {
         assertTrue("Expected output to contain '$expected'.\n$output", output.contains(expected))
+    }
+
+    private fun assertDoesNotContainTask(output: String, taskName: String) {
+        val hasTaskLine = output.lineSequence().any { line ->
+            line == taskName || line.startsWith("$taskName -")
+        }
+        assertFalse("Expected output to not contain task '$taskName'.\n$output", hasTaskLine)
     }
 
     private fun assertGeneratedClass(projectDir: File, moduleJavaDir: String, className: String) {
