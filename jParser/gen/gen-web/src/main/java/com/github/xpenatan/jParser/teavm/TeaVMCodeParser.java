@@ -629,7 +629,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
             for(int i = 0; i < methods.size(); i++) {
                 Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>> pair = methods.get(i);
                 IDLMethod idlMethod = pair.a;
-                String methodName = idlMethod.getBindingName();
+                String methodName = idlMethod.name;
                 values.add(new StringLiteralExpr(methodName));
                 nativeMethodDeclaration.addParameter(methodName, methodName);
                 script += " " + callbackClassName + "." + methodName + " = " + methodName + ";";
@@ -651,7 +651,7 @@ public class TeaVMCodeParser extends IDLDefaultCodeParser {
                 MethodDeclaration publicMethod = methodPair.b;
                 String internalMethodName = internalMethod.getNameAsString();
                 String paramCode = "";
-                String methodName = idlMethod.getBindingName();
+                String methodName = idlMethod.name;
 
                 Type returnType = internalMethod.getType();
                 String returnTypeStr = returnType.asString();

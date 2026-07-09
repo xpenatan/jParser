@@ -536,6 +536,16 @@ class JParserGradlePluginTest {
                 void DoThing();
                 [BindTo="DoThing"] void DoThing__1(TestObject other);
             };
+
+            interface CallbackObject {
+            };
+
+            [JSImplementation="CallbackObject"]
+            interface CallbackObjectImpl {
+                void CallbackObjectImpl();
+                void OnCallback();
+            };
+            CallbackObjectImpl implements CallbackObject;
             """.trimIndent()
         )
         File(projectDir, "base/src/main/java").mkdirs()
@@ -547,11 +557,23 @@ class JParserGradlePluginTest {
         assertTrue(generated.contains("public void doThing("))
         assertFalse(generated.contains("public void DoThing("))
 
+        val generatedCallback = findGeneratedClass(projectDir, "core/src/main/java", "CallbackObject.java").readText()
+        assertTrue(generatedCallback.contains("protected void onCallback("))
+        assertTrue(generatedCallback.contains("private void internal_OnCallback("))
+        assertFalse(generatedCallback.contains("internal_onCallback("))
+
         val generatedWeb = findGeneratedClass(projectDir, "web/wasm/src/main/java", "TestObject.java").readText()
         assertTrue(generatedWeb.contains("jsObj.DoThing();"))
         assertTrue(generatedWeb.contains("jsObj.DoThing__1(other_addr);"))
         assertFalse(generatedWeb.contains("jsObj.doThing();"))
         assertFalse(generatedWeb.contains("jsObj.doThing(other_addr);"))
+
+        val generatedWebCallback = findGeneratedClass(projectDir, "web/wasm/src/main/java", "CallbackObject.java").readText()
+        assertTrue(generatedWebCallback.contains("protected void onCallback("))
+        assertTrue(generatedWebCallback.contains("private void internal_OnCallback("))
+        assertTrue(generatedWebCallback.contains("CallbackObjectImpl.OnCallback = OnCallback;"))
+        assertTrue(generatedWebCallback.contains("public interface OnCallback"))
+        assertFalse(generatedWebCallback.contains("CallbackObjectImpl.onCallback = onCallback;"))
     }
 
     private fun createProject(buildFile: String): File {

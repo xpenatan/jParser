@@ -150,7 +150,7 @@ public class IDLCallbackParser {
                 }
                 blockStmt.addStatement(returnStmt);
             }
-            String internName = internalMethod.getNameAsString();
+            String internName = method.name;
             internalMethod.setName(CALLBACK_INTERNAL_METHOD + internName);
             internalMethod.setBody(blockStmt);
 
