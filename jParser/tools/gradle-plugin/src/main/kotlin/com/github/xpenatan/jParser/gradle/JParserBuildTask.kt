@@ -124,6 +124,7 @@ abstract class JParserBuildTask : DefaultTask() {
         }
         activeVariant?.let { variant ->
             copyHooks(variant, config.target(targetArg.get()))
+            copyAndroidTargetHooks(variant.androidTargets, targetArg.get(), config)
             setOutputDirectoryPrefix(config.target(targetArg.get()), normalizeOutputDirectoryPrefix(
                 variant.outputDirectoryPrefix.orNull ?: variant.variantName.get()
             ))
@@ -189,9 +190,17 @@ abstract class JParserBuildTask : DefaultTask() {
 
     private fun copyNamedTargetHooks(source: JParserNamedTargetHooks, config: DefaultBuildTargetConfig) {
         copyHooks(source, config.target(source.name))
-        source.androidTargets.forEach { androidHooks ->
+        copyAndroidTargetHooks(source.androidTargets, source.name, config)
+    }
+
+    private fun copyAndroidTargetHooks(
+        source: Iterable<JParserAndroidTargetHooks>,
+        targetName: String,
+        config: DefaultBuildTargetConfig
+    ) {
+        source.forEach { androidHooks ->
             val androidTarget = AndroidTarget.Target.valueOf(androidHooks.name)
-            copyHooks(androidHooks, config.target("${source.name}:${androidTarget.name}"))
+            copyHooks(androidHooks, config.target("$targetName:${androidTarget.name}"))
         }
     }
 

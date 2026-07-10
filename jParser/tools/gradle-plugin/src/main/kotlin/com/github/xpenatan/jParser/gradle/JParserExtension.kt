@@ -453,6 +453,10 @@ open class JParserNativeTargetVariantHooks @Inject constructor(
     private val variantKey: String,
     objects: ObjectFactory
 ) : JParserTargetHooks(objects), Named {
+    val androidTargets: NamedDomainObjectContainer<JParserAndroidTargetHooks> =
+        objects.domainObjectContainer(JParserAndroidTargetHooks::class.java) { name ->
+            objects.newInstance(JParserAndroidTargetHooks::class.java, name, objects)
+        }
     val targetName: Property<String> = objects.property(String::class.java)
     val variantName: Property<String> = objects.property(String::class.java)
 
@@ -465,6 +469,14 @@ open class JParserNativeTargetVariantHooks @Inject constructor(
     val includeBaseTargetHooks: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 
     override fun getName(): String = variantKey
+
+    fun androidTarget(name: String, action: Action<in JParserAndroidTargetHooks>) {
+        androidTargets.create(name, action)
+    }
+
+    fun androidTarget(target: AndroidTarget.Target, action: Action<in JParserAndroidTargetHooks>) {
+        androidTarget(target.name, action)
+    }
 }
 
 /** Android ABI-specific hooks under an Android target. */

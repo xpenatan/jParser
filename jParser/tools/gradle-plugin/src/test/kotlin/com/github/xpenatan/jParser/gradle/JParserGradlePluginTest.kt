@@ -131,6 +131,92 @@ class JParserGradlePluginTest {
     }
 
     @Test
+    fun supportsAndroidAbiHooksOnNativeTargetVariants() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.builder.targets.AndroidTarget
+            import com.github.xpenatan.jParser.builder.tool.JParserBuildRequest
+            import com.github.xpenatan.jParser.gradle.JParserBuildTask
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("TestLib")
+                modulePrefix.set("lib")
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("src/main/cpp/source/TestLib/src")
+
+                native {
+                    target(JParserTargets.ANDROID_JNI) {
+                        compileFlag("-DBASE_ROOT")
+                        androidTarget(AndroidTarget.Target.arm64_v8a) {
+                            compileFlag("-DBASE_ARM64")
+                        }
+                        androidTarget("x86_64") {
+                            compileFlag("-DBASE_X86_64")
+                        }
+                    }
+                    targetVariant(JParserTargets.ANDROID_JNI, "wgpu") {
+                        compileFlag("-DWGPU_ROOT")
+                        androidTarget(AndroidTarget.Target.arm64_v8a) {
+                            compileFlag("-DWGPU_ARM64")
+                        }
+                        androidTarget("x86_64") {
+                            compileFlag("-DWGPU_X86_64")
+                        }
+                    }
+                    targetVariant(JParserTargets.ANDROID_JNI, "dawn") {
+                        includeBaseTargetHooks.set(true)
+                        compileFlag("-DDAWN_ROOT")
+                        androidTarget(AndroidTarget.Target.arm64_v8a) {
+                            compileFlag("-DDAWN_ARM64")
+                        }
+                    }
+                }
+            }
+
+            tasks.register("verifyAndroidVariantHooks") {
+                doLast {
+                    check(tasks.findByName("jParser_build_android_jni") == null)
+
+                    fun request(taskName: String): JParserBuildRequest {
+                        val task = tasks.named<JParserBuildTask>(taskName).get()
+                        val method = JParserBuildTask::class.java.getDeclaredMethod("createRequest")
+                        method.isAccessible = true
+                        return method.invoke(task) as JParserBuildRequest
+                    }
+
+                    fun compileFlags(request: JParserBuildRequest, targetName: String): List<String> {
+                        return request.targetConfig.findTarget(targetName)?.compileFlags?.toList().orEmpty()
+                    }
+
+                    val wgpu = request("jParser_build_android_jni_wgpu")
+                    check(compileFlags(wgpu, "android_jni") == listOf("-DWGPU_ROOT"))
+                    check(compileFlags(wgpu, "android_jni:arm64_v8a") == listOf("-DWGPU_ARM64"))
+                    check(compileFlags(wgpu, "android_jni:x86_64") == listOf("-DWGPU_X86_64"))
+                    check(wgpu.targetConfig.findTarget("android_jni")?.outputDirectoryPrefix == "wgpu")
+
+                    val dawn = request("jParser_build_android_jni_dawn")
+                    check(compileFlags(dawn, "android_jni") == listOf("-DBASE_ROOT", "-DDAWN_ROOT"))
+                    check(compileFlags(dawn, "android_jni:arm64_v8a") == listOf("-DBASE_ARM64", "-DDAWN_ARM64"))
+                    check(compileFlags(dawn, "android_jni:x86_64") == listOf("-DBASE_X86_64"))
+                    check(dawn.targetConfig.findTarget("android_jni")?.outputDirectoryPrefix == "dawn")
+
+                    println("Verified Android variant ABI hook inheritance")
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result = runner(projectDir, "verifyAndroidVariantHooks", "--console=plain").build()
+
+        assertContains(result.output, "Verified Android variant ABI hook inheritance")
+    }
+
+    @Test
     fun registersExplicitTeaVMCTargetWithoutModuleCSuffix() {
         val projectDir = createProject(
             """
