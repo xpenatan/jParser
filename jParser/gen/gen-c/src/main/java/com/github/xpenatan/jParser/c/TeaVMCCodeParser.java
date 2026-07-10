@@ -2,6 +2,7 @@ package com.github.xpenatan.jParser.c;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
@@ -10,8 +11,10 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.utils.Pair;
 import com.github.xpenatan.jParser.core.JParser;
+import com.github.xpenatan.jParser.core.JParserItem;
 import com.github.xpenatan.jParser.ffm.FFMClassData;
 import com.github.xpenatan.jParser.ffm.FFMCodeParser;
 import com.github.xpenatan.jParser.ffm.FFMCppGenerator;
@@ -22,12 +25,18 @@ import com.github.xpenatan.jParser.idl.IDLConstructor;
 import com.github.xpenatan.jParser.idl.IDLMethod;
 import com.github.xpenatan.jParser.idl.IDLParameter;
 import com.github.xpenatan.jParser.idl.IDLReader;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class TeaVMCCodeParser extends FFMCodeParser {
 
     private static final String HEADER_CMD = "TEAVM_C";
+
+    private static final String PACKAGE_PREFIX = "gen.c.";
 
     private FFMClassData symbolData;
 
@@ -55,6 +64,50 @@ public class TeaVMCCodeParser extends FFMCodeParser {
     @Override
     protected boolean shouldInjectFFMHandles() {
         return false;
+    }
+
+    @Override
+    public void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
+        super.onParserComplete(jParser, parserItems);
+
+        String packagePrefixPath = PACKAGE_PREFIX.replace(".", File.separator);
+        Set<JParserItem> generatedItems = new HashSet<>(parserItems);
+        for(JParserItem parserItem : parserItems) {
+            CompilationUnit unit = parserItem.unit;
+            for(ImportDeclaration anImport : unit.getImports()) {
+                Name name = anImport.getName();
+                String importPath = "";
+                Optional<Name> qualifier = name.getQualifier();
+                if(qualifier.isPresent()) {
+                    importPath = qualifier.get().asString();
+                }
+                String identifier = name.getIdentifier();
+
+                if(importPath.startsWith(PACKAGE_PREFIX)) {
+                    continue;
+                }
+
+                JParserItem importedParserItem = jParser.getParserUnitItem(identifier);
+                if(importedParserItem != null && generatedItems.contains(importedParserItem)) {
+                    anImport.setName(PACKAGE_PREFIX + importPath + "." + identifier);
+                }
+            }
+
+            String publicPackage = getUpdatePackage(unit);
+            String publicPackagePath = publicPackage == null ? "" : publicPackage.replace(".", File.separator);
+            String currentPackagePath = parserItem.packagePathName;
+            if(currentPackagePath == null || currentPackagePath.isEmpty()) {
+                currentPackagePath = publicPackagePath;
+            }
+            parserItem.packagePathName = packagePrefixPath + currentPackagePath;
+
+            if(publicPackage == null || publicPackage.isEmpty()) {
+                unit.setPackageDeclaration(PACKAGE_PREFIX.substring(0, PACKAGE_PREFIX.length() - 1));
+            }
+            else {
+                unit.setPackageDeclaration(PACKAGE_PREFIX + publicPackage);
+            }
+        }
     }
 
     @Override

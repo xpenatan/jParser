@@ -12,6 +12,8 @@ dependencies {
     implementation(project(":jParser:gen:gen-jni"))
     implementation(project(":jParser:gen:gen-ffm"))
     implementation(project(":jParser:gen:gen-build"))
+
+    testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 
 java {

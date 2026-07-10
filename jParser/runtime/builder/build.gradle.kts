@@ -21,7 +21,7 @@ tasks.register<JavaExec>("runtime_helper_build_project") {
     group = "jParser"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("gen_ffm", "gen_jni", "gen_web")
+    args = mutableListOf("gen_ffm", "gen_jni", "gen_web", "gen_teavm_c")
     classpath = sourceSets["main"].runtimeClasspath
 }
 

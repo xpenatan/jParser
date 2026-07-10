@@ -5,6 +5,8 @@ plugins {
 val moduleName = "runtime-c"
 
 dependencies {
+    api(project(":jParser:runtime:core"))
+
     implementation(project(":jParser:api:api-core"))
     implementation(project(":jParser:loader:loader-core"))
 
@@ -14,6 +16,10 @@ dependencies {
 }
 
 tasks.named("compileJava") {
+    dependsOn(":jParser:runtime:builder:runtime_helper_build_project")
+}
+
+tasks.named("processResources") {
     dependsOn(":jParser:runtime:builder:runtime_helper_build_project")
 }
 
@@ -32,7 +38,7 @@ java {
 sourceSets {
     main {
         java.setSrcDirs(listOf("src/main/java", "src/main/support/java"))
-        resources.setSrcDirs(listOf("src/main/resources"))
+        resources.setSrcDirs(listOf("src/main/resources", "build/generated/jparser/resources/main"))
     }
 }
 

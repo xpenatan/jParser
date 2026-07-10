@@ -8,16 +8,29 @@ java {
 }
 
 dependencies {
+    api(project(":examples:SharedLib:libA:core"))
     api(project(":jParser:api:api-core"))
     api(project(":jParser:loader:loader-core"))
     api(project(":jParser:runtime:shared:runtime-c"))
     api("org.teavm:teavm-core:${LibExt.teaVMVersion}")
 }
 
-val libATeaVMCBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "teavm_c")
+val libAGenerationTask = ":examples:SharedLib:libA:builder:LibA_build_project"
 
 tasks.named("compileJava") {
-    dependsOn(libATeaVMCBuildTask)
+    dependsOn(libAGenerationTask)
+}
+
+tasks.named("processResources") {
+    dependsOn(libAGenerationTask)
+}
+
+sourceSets {
+    main {
+        java.setSrcDirs(listOf("src/main/java"))
+        java.include("gen/c/**")
+        resources.setSrcDirs(listOf("src/main/resources", "build/generated/jparser/resources/main"))
+    }
 }
 
 tasks.named("clean") {

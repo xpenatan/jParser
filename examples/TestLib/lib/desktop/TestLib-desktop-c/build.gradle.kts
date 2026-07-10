@@ -5,10 +5,12 @@ plugins {
 val moduleName = "TestLib-desktop-c"
 
 val libDir = "${projectDir}/../../builder/build/c++/libs"
-val windowsFile = "$libDir/windows/vc/teavm_c/TestLib64.dll"
-val linuxFile = "$libDir/linux/teavm_c/libTestLib64.so"
-val macFile = "$libDir/mac/teavm_c/libTestLib64.dylib"
-val macArmFile = "$libDir/mac/arm/teavm_c/libTestLibarm64.dylib"
+val windowsFile = "$libDir/windows/vc/teavm_c/TestLib64_.lib"
+val linuxFile = "$libDir/linux/teavm_c/libTestLib64_.a"
+val macFile = "$libDir/mac/teavm_c/libTestLib64_.a"
+val macArmFile = "$libDir/mac/arm/teavm_c/libTestLib64_.a"
+val nativeResourceRoot = "external_cpp/jparser/testlib/native"
+val gdxTeaVMMarker = resources.text.fromString("ignore-resources=META-INF\n")
 
 val platforms: Map<String, String> = mapOf(
     "windows_x64" to windowsFile,
@@ -19,8 +21,19 @@ val platforms: Map<String, String> = mapOf(
 
 platforms.forEach { (platform, nativeFile) ->
     tasks.register<Jar>("nativeJar_${platform}") {
-        from(nativeFile)
+        from(nativeFile) {
+            into("$nativeResourceRoot/$platform")
+        }
+        from(gdxTeaVMMarker.asFile()) {
+            into("META-INF")
+            rename { "gdx-teavm.properties" }
+        }
         archiveBaseName.set("${moduleName}-${platform}")
         archiveClassifier.set("")
+        doFirst {
+            if(!file(nativeFile).isFile) {
+                logger.warn("Missing TestLib TeaVM C static archive for $platform: $nativeFile")
+            }
+        }
     }
 }

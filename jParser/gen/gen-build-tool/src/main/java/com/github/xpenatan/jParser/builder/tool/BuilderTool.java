@@ -17,6 +17,7 @@ import com.github.xpenatan.jParser.idl.parser.IDLClassGeneratorParser;
 import com.github.xpenatan.jParser.c.TeaVMCCodeParser;
 import com.github.xpenatan.jParser.c.TeaVMCGenerator;
 import com.github.xpenatan.jParser.teavm.TeaVMCodeParser;
+import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -89,6 +90,7 @@ public class BuilderTool {
         }
 
         if(op.generateTeaVMC) {
+            cleanGeneratedTeaVMCJavaOutput(op.getCJavaOutputPath());
             TeaVMCGenerator teaVMCGenerator = new TeaVMCGenerator(op.getCPPDestinationPath());
             teaVMCGenerator.setFFMClassData(op.teaVMCClassData);
             addTeaVMCDefaultInclude(op, teaVMCGenerator);
@@ -99,7 +101,7 @@ public class BuilderTool {
             teaVMCParser.generateClass = true;
             teaVMCParser.idlRenaming = packageRenaming;
             JParser.generate(teaVMCParser, op.getModuleBaseJavaDir(), op.getCJavaOutputPath());
-            TeaVMCGdxTeaVMResourceWriter.write(op);
+            TeaVMCPortableResourceWriter.write(op);
         }
 
         if(op.generateFFM) {
@@ -116,6 +118,13 @@ public class BuilderTool {
 
         BuildConfig buildConfig = new BuildConfig(op);
         JBuilder.build(buildConfig, targets);
+    }
+
+    static void cleanGeneratedTeaVMCJavaOutput(String outputPath) {
+        CustomFileDescriptor output = new CustomFileDescriptor(outputPath);
+        if(output.exists() && !output.deleteDirectory()) {
+            throw new IllegalStateException("Unable to clean generated TeaVM C Java output: " + outputPath);
+        }
     }
 
     private static void applyAdditionalJavaImportPackages(IDLClassGeneratorParser parser, BuildToolOptions op) {

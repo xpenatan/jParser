@@ -10,13 +10,28 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-final class TeaVMCGdxTeaVMResourceWriter {
+/**
+ * Writes generated TeaVM C bridge resources in a portable CMake layout.
+ *
+ * <p>The legacy {@code META-INF/gdx-teavm.properties} discovery marker and
+ * {@code TEAVM_APP_TARGET} CMake fallback remain part of the emitted contract so
+ * existing gdx-teavm consumers continue to discover and include these resources.</p>
+ */
+final class TeaVMCPortableResourceWriter {
     private static final String PROPERTIES_PATH = "META-INF/gdx-teavm.properties";
     private static final String RESOURCE_ROOT = "external_cpp/jparser";
     private static final String GENERATED_RESOURCES_PATH = "build/generated/jparser/resources/main";
+    private static final String CMAKE_TEMPLATE_RESOURCE =
+            "com/github/xpenatan/jParser/builder/tool/TeaVMCPortableResourceWriter.cmake";
+    private static final String LIBRARY_NAME_PLACEHOLDER = "@LIBRARY_NAME@";
+    private static final String RESOURCE_NAME_PLACEHOLDER = "@RESOURCE_NAME@";
+    private static final String VARIABLE_PREFIX_PLACEHOLDER = "@VARIABLE_PREFIX@";
+    private static final Pattern TEMPLATE_PLACEHOLDER_PATTERN = Pattern.compile("@[A-Z][A-Z0-9_]*@");
 
-    private TeaVMCGdxTeaVMResourceWriter() {
+    private TeaVMCPortableResourceWriter() {
     }
 
     static void write(BuildToolOptions op) {
@@ -48,116 +63,36 @@ final class TeaVMCGdxTeaVMResourceWriter {
                     .resolve("jparser_" + resourceName(op.libName) + "_teavm_c.cmake"), generateCMake(op.libName));
         }
         catch(IOException e) {
-            throw new RuntimeException("Failed to write gdx-teavm TeaVM C resources for " + op.libName, e);
+            throw new RuntimeException("Failed to write portable TeaVM C resources for " + op.libName, e);
         }
     }
 
-    private static String generateCMake(String libName) {
+    static String generateCMake(String libName) throws IOException {
         String resourceName = resourceName(libName);
         String variablePrefix = "JPARSER_" + cmakeIdentifier(libName) + "_TEAVMC";
-        StringBuilder sb = new StringBuilder();
-        sb.append("set(").append(variablePrefix).append("_ROOT \"${CMAKE_CURRENT_SOURCE_DIR}/c/external_cpp/jparser/")
-                .append(resourceName).append("\")\n");
-        sb.append("set(").append(variablePrefix).append("_GLUE_ROOT \"${").append(variablePrefix)
-                .append("_ROOT}/glue\")\n");
-        sb.append("set(").append(variablePrefix).append("_CUSTOM_ROOT \"${").append(variablePrefix)
-                .append("_ROOT}/custom\")\n");
-        sb.append("set(").append(variablePrefix).append("_RUNTIME_ROOT \"${").append(variablePrefix)
-                .append("_ROOT}/runtime\")\n");
-        sb.append("set(").append(variablePrefix).append("_SOURCE_ROOT \"${").append(variablePrefix)
-                .append("_ROOT}/source\")\n");
-        sb.append("set(").append(variablePrefix).append("_IMPORT_HEADER \"${").append(variablePrefix)
-                .append("_ROOT}/imports/teavmc_imports.h\")\n");
-        sb.append("set(").append(variablePrefix).append("_NATIVE_ROOT \"${").append(variablePrefix)
-                .append("_ROOT}/native\")\n\n");
+        String cmake = readClasspathText(CMAKE_TEMPLATE_RESOURCE);
+        cmake = replaceRequiredPlaceholder(cmake, LIBRARY_NAME_PLACEHOLDER, libName);
+        cmake = replaceRequiredPlaceholder(cmake, RESOURCE_NAME_PLACEHOLDER, resourceName);
+        cmake = replaceRequiredPlaceholder(cmake, VARIABLE_PREFIX_PLACEHOLDER, variablePrefix);
 
-        sb.append("set(").append(variablePrefix).append("_LIBRARY_CANDIDATES)\n");
-        sb.append("if(WIN32)\n");
-        sb.append("  list(APPEND ").append(variablePrefix).append("_LIBRARY_CANDIDATES\n");
-        sb.append("    \"${").append(variablePrefix).append("_NATIVE_ROOT}/windows_x64/")
-                .append(libName).append("64_.lib\")\n");
-        sb.append("elseif(APPLE)\n");
-        sb.append("  if(CMAKE_SYSTEM_PROCESSOR MATCHES \"arm64|aarch64|ARM64\")\n");
-        sb.append("    list(APPEND ").append(variablePrefix).append("_LIBRARY_CANDIDATES\n");
-        sb.append("      \"${").append(variablePrefix).append("_NATIVE_ROOT}/mac_arm64/lib")
-                .append(libName).append("arm64_.a\")\n");
-        sb.append("  else()\n");
-        sb.append("    list(APPEND ").append(variablePrefix).append("_LIBRARY_CANDIDATES\n");
-        sb.append("      \"${").append(variablePrefix).append("_NATIVE_ROOT}/mac_x64/lib")
-                .append(libName).append("64_.a\")\n");
-        sb.append("  endif()\n");
-        sb.append("elseif(UNIX)\n");
-        sb.append("  list(APPEND ").append(variablePrefix).append("_LIBRARY_CANDIDATES\n");
-        sb.append("    \"${").append(variablePrefix).append("_NATIVE_ROOT}/linux_x64/lib")
-                .append(libName).append("64_.a\")\n");
-        sb.append("endif()\n\n");
+        Matcher unresolvedPlaceholder = TEMPLATE_PLACEHOLDER_PATTERN.matcher(cmake);
+        if(unresolvedPlaceholder.find()) {
+            throw new IOException("Unresolved CMake template placeholder: " + unresolvedPlaceholder.group());
+        }
+        return cmake;
+    }
 
-        sb.append("foreach(").append(variablePrefix).append("_LIBRARY_CANDIDATE IN LISTS ")
-                .append(variablePrefix).append("_LIBRARY_CANDIDATES)\n");
-        sb.append("  if(EXISTS \"${").append(variablePrefix).append("_LIBRARY_CANDIDATE}\")\n");
-        sb.append("    set(").append(variablePrefix).append("_LIBRARY \"${").append(variablePrefix)
-                .append("_LIBRARY_CANDIDATE}\")\n");
-        sb.append("    break()\n");
-        sb.append("  endif()\n");
-        sb.append("endforeach()\n\n");
+    private static String replaceRequiredPlaceholder(String template, String placeholder, String value) throws IOException {
+        if(!template.contains(placeholder)) {
+            throw new IOException("Missing CMake template placeholder: " + placeholder);
+        }
+        return template.replace(placeholder, value);
+    }
 
-        sb.append("if(NOT ").append(variablePrefix).append("_LIBRARY)\n");
-        sb.append("  message(FATAL_ERROR \"Missing ").append(libName)
-                .append(" TeaVM C static library under ${").append(variablePrefix)
-                .append("_NATIVE_ROOT}. Add the matching native TeaVM C artifact to the app classpath or build/package it first.\")\n");
-        sb.append("endif()\n\n");
-
-        sb.append("set(").append(variablePrefix).append("_GLUE_SOURCE \"${").append(variablePrefix)
-                .append("_GLUE_ROOT}/TeaVMCGlue.cpp\")\n");
-        sb.append("if(NOT EXISTS \"${").append(variablePrefix).append("_GLUE_SOURCE}\")\n");
-        sb.append("  message(FATAL_ERROR \"Missing ").append(libName).append(" TeaVM C glue source: ${")
-                .append(variablePrefix).append("_GLUE_SOURCE}\")\n");
-        sb.append("endif()\n");
-        sb.append("if(NOT EXISTS \"${").append(variablePrefix).append("_IMPORT_HEADER}\")\n");
-        sb.append("  message(FATAL_ERROR \"Missing ").append(libName).append(" TeaVM C import header: ${")
-                .append(variablePrefix).append("_IMPORT_HEADER}\")\n");
-        sb.append("endif()\n\n");
-
-        sb.append("enable_language(CXX)\n");
-        sb.append("target_sources(${TEAVM_APP_TARGET} PRIVATE \"${").append(variablePrefix)
-                .append("_GLUE_SOURCE}\")\n");
-        sb.append("set_source_files_properties(\"${").append(variablePrefix)
-                .append("_GLUE_SOURCE}\" PROPERTIES LANGUAGE CXX)\n");
-        sb.append("set_property(TARGET ${TEAVM_APP_TARGET} PROPERTY CXX_STANDARD 17)\n");
-        sb.append("set_property(TARGET ${TEAVM_APP_TARGET} PROPERTY CXX_STANDARD_REQUIRED ON)\n\n");
-
-        sb.append("target_include_directories(${TEAVM_APP_TARGET} PRIVATE\n");
-        sb.append("  \"${").append(variablePrefix).append("_GLUE_ROOT}\"\n");
-        sb.append("  \"${").append(variablePrefix).append("_CUSTOM_ROOT}\"\n");
-        sb.append("  \"${").append(variablePrefix).append("_RUNTIME_ROOT}\"\n");
-        sb.append("  \"${").append(variablePrefix).append("_SOURCE_ROOT}\"\n");
-        sb.append("  \"${").append(variablePrefix).append("_SOURCE_ROOT}/include\"\n");
-        sb.append("  \"${").append(variablePrefix).append("_SOURCE_ROOT}/src\")\n\n");
-
-        sb.append("set(").append(variablePrefix)
-                .append("_PROJECT_ROOT \"${CMAKE_CURRENT_SOURCE_DIR}/c\")\n");
-        sb.append("file(GLOB_RECURSE ").append(variablePrefix).append("_GENERATED_C_SOURCES CONFIGURE_DEPENDS\n");
-        sb.append("  \"${").append(variablePrefix).append("_PROJECT_ROOT}/src/*.c\")\n");
-        sb.append("\n");
-        sb.append("if(MSVC)\n");
-        sb.append("  foreach(").append(variablePrefix).append("_SOURCE IN LISTS ")
-                .append(variablePrefix).append("_GENERATED_C_SOURCES)\n");
-        sb.append("    set_source_files_properties(\"${").append(variablePrefix)
-                .append("_SOURCE}\" PROPERTIES COMPILE_OPTIONS \"/FI${")
-                .append(variablePrefix).append("_IMPORT_HEADER}\")\n");
-        sb.append("  endforeach()\n");
-        sb.append("else()\n");
-        sb.append("  foreach(").append(variablePrefix).append("_SOURCE IN LISTS ")
-                .append(variablePrefix).append("_GENERATED_C_SOURCES)\n");
-        sb.append("    set_source_files_properties(\"${").append(variablePrefix)
-                .append("_SOURCE}\" PROPERTIES COMPILE_OPTIONS \"-include;${")
-                .append(variablePrefix).append("_IMPORT_HEADER}\")\n");
-        sb.append("  endforeach()\n");
-        sb.append("endif()\n\n");
-
-        sb.append("target_link_libraries(${TEAVM_APP_TARGET} PRIVATE \"${")
-                .append(variablePrefix).append("_LIBRARY}\")\n");
-        return sb.toString();
+    private static String readClasspathText(String resource) throws IOException {
+        try(InputStream input = requireClasspathResource(resource)) {
+            return new String(input.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 
     private static String generateImportHeader(Path glueHeader) throws IOException {
@@ -243,13 +178,18 @@ final class TeaVMCGdxTeaVMResourceWriter {
     }
 
     private static void copyClasspathResource(String resource, Path target) throws IOException {
-        try(InputStream input = TeaVMCGdxTeaVMResourceWriter.class.getClassLoader().getResourceAsStream(resource)) {
-            if(input == null) {
-                throw new IOException("Missing classpath resource: " + resource);
-            }
+        try(InputStream input = requireClasspathResource(resource)) {
             Files.createDirectories(target.getParent());
             Files.copy(input, target, StandardCopyOption.REPLACE_EXISTING);
         }
+    }
+
+    private static InputStream requireClasspathResource(String resource) throws IOException {
+        InputStream input = TeaVMCPortableResourceWriter.class.getClassLoader().getResourceAsStream(resource);
+        if(input == null) {
+            throw new IOException("Missing classpath resource: " + resource);
+        }
+        return input;
     }
 
     private static void copyHeaderTree(Path source, Path target) throws IOException {

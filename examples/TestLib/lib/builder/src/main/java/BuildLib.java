@@ -128,6 +128,7 @@ public class BuildLib {
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
         addCppStandard(compileStaticTarget.cppFlags, api, true);
+        applyTeaVMCWindowsRuntime(compileStaticTarget, api);
         applyFFMWindowsCompileFlags(compileStaticTarget, isFFM, ffmNativeBuildConfig);
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
@@ -139,6 +140,7 @@ public class BuildLib {
         linkTarget.libDirSuffix += api;
         setupGlueCode(linkTarget, api, libBuildCPPPath);
         addCppStandard(linkTarget.cppFlags, api, true);
+        applyTeaVMCWindowsRuntime(linkTarget, api);
         applyFFMWindowsCompileFlags(linkTarget, isFFM, ffmNativeBuildConfig);
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
@@ -382,6 +384,12 @@ public class BuildLib {
         }
         if(ffmNativeBuildConfig.pgoGenerate || ffmNativeBuildConfig.pgoUse) {
             addFlagIfMissing(target.cppFlags, "/GL");
+        }
+    }
+
+    private static void applyTeaVMCWindowsRuntime(WindowsMSVCTarget target, String api) {
+        if(api.equals("teavm_c") && !target.cppFlags.contains("/MD")) {
+            target.cppFlags.add("/MD");
         }
     }
 

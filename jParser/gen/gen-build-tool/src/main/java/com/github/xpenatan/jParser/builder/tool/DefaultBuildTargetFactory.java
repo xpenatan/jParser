@@ -69,6 +69,7 @@ public class DefaultBuildTargetFactory {
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
         addSourceStandard(compileStaticTarget.cppFlags, api, true, config);
+        applyTeaVMCWindowsRuntime(compileStaticTarget, api);
         applyFFMWindowsCompileFlags(compileStaticTarget, isFFM, config.ffmNative);
         addDefaultSources(compileStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
         applyCompileHooks(compileStaticTarget, config, targetArg);
@@ -79,6 +80,7 @@ public class DefaultBuildTargetFactory {
         linkTarget.libDirSuffix += api;
         setupGlueCode(linkTarget, api, libBuildCPPPath);
         addCppStandard(linkTarget.cppFlags, api, true, config);
+        applyTeaVMCWindowsRuntime(linkTarget, api);
         applyFFMWindowsCompileFlags(linkTarget, isFFM, config.ffmNative);
         addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + ownStaticLibPath(op, config, targetArg, "windows", api));
@@ -618,6 +620,12 @@ public class DefaultBuildTargetFactory {
         }
         if(ffmNativeBuildConfig.lto || ffmNativeBuildConfig.pgoGenerate || ffmNativeBuildConfig.pgoUse) {
             addFlagIfMissing(target.cppFlags, "/GL");
+        }
+    }
+
+    private void applyTeaVMCWindowsRuntime(WindowsMSVCTarget target, String api) {
+        if(api.equals("teavm_c")) {
+            addFlagIfMissing(target.cppFlags, "/MD");
         }
     }
 

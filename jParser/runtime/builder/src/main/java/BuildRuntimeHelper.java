@@ -119,6 +119,7 @@ public class BuildRuntimeHelper {
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std:c++17");
+        applyTeaVMCWindowsRuntime(compileStaticTarget, api);
         applyFFMWindowsCompileFlags(compileStaticTarget, isFFM, ffmNativeBuildConfig);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/runtime/RuntimeHelper.cpp");
@@ -129,6 +130,7 @@ public class BuildRuntimeHelper {
         linkTarget.libDirSuffix += api;
         setupGlueCode(linkTarget, api, libBuildCPPPath);
         linkTarget.cppFlags.add("-std:c++17");
+        applyTeaVMCWindowsRuntime(linkTarget, api);
         applyFFMWindowsCompileFlags(linkTarget, isFFM, ffmNativeBuildConfig);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib");
@@ -363,6 +365,12 @@ public class BuildRuntimeHelper {
         }
         if(ffmNativeBuildConfig.pgoGenerate || ffmNativeBuildConfig.pgoUse) {
             addFlagIfMissing(target.cppFlags, "/GL");
+        }
+    }
+
+    private static void applyTeaVMCWindowsRuntime(WindowsMSVCTarget target, String api) {
+        if(api.equals("teavm_c") && !target.cppFlags.contains("/MD")) {
+            target.cppFlags.add("/MD");
         }
     }
 

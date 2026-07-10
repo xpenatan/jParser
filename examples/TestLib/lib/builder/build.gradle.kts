@@ -21,7 +21,7 @@ tasks.register<JavaExec>("TestLib_build_project") {
     group = "lib"
     description = "Generate native project"
     mainClass.set(mainClassName)
-    args = mutableListOf("gen_jni", "gen_ffm", "gen_web")
+    args = mutableListOf("gen_jni", "gen_ffm", "gen_web", "gen_teavm_c")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
@@ -160,4 +160,3 @@ tasks.register<JavaExec>("TestLib_build_project_ios_jni") {
     args = mutableListOf("gen_jni", "ios_jni")
     classpath = sourceSets["main"].runtimeClasspath
 }
-

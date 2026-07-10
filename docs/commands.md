@@ -9,6 +9,7 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ### Runtime (helper)
 
 ```text
+./gradlew :jParser:runtime:builder:runtime_helper_build_project
 ./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_jni
 ./gradlew :jParser:runtime:builder:runtime_helper_build_project_linux64_jni
 ./gradlew :jParser:runtime:builder:runtime_helper_build_project_mac64_jni
@@ -31,6 +32,7 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ### TestLib native generation
 
 ```text
+./gradlew :examples:TestLib:lib:builder:TestLib_build_project
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_jni
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_linux64_jni
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_mac64_jni
@@ -49,6 +51,19 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_ios_teavm_c
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_web_wasm
 ```
+
+The aggregate `runtime_helper_build_project` and `TestLib_build_project` tasks generate core, JNI, FFM, TeaVM web, and TeaVM C outputs. Platform-specific `*_teavm_c` tasks also compile that platform's native output; use them when producing a static native resource jar.
+
+### TeaVM C jar packaging checks
+
+```text
+./gradlew :jParser:runtime:shared:runtime-c:jar
+./gradlew :jParser:runtime:desktop:runtime-desktop-c:nativeJar_windows_x64
+./gradlew :examples:TestLib:lib:shared:TestLib-c:jar
+./gradlew :examples:TestLib:lib:desktop:TestLib-desktop-c:nativeJar_windows_x64
+```
+
+Replace `windows_x64` with `linux_x64`, `mac_x64`, or `mac_arm64` after building the corresponding native TeaVM C target. Inspect the main C jar for `gen/c/**` and `external_cpp/cmake/post_target/**`; inspect the native jar for `external_cpp/jparser/<library>/native/<platform>/**` and `META-INF/gdx-teavm.properties`.
 
 ### TestLib app run/build
 

@@ -16,9 +16,9 @@ Primary orchestration is in `jParser/jParser-build-tool` via `BuilderTool.build(
 
 - `base`: handwritten Java with target-specific comment blocks in examples
 - `builder`: Gradle entry for generation + native build in examples
-- `core`: generated bridge-agnostic API in examples
+- `core`: generated bridge-agnostic public API in examples
 - `shared/<Lib>-jni`: generated JNI Java shared by desktop and Android JNI examples
-- `shared/<Lib>-c`: generated TeaVM C Java shared by desktop and Android C examples
+- `shared/<Lib>-c`: generated `gen.c.*` TeaVM C implementations and portable build resources shared by TeaVM C consumers
 - `desktop/<Lib>-desktop-jni`: desktop JNI native packaging with a dependency on `shared/<Lib>-jni`
 - `desktop/<Lib>-desktop-ffm`: generated FFM Java + desktop FFM natives
 - `desktop/<Lib>-desktop-c`: TeaVM C desktop native payloads
@@ -32,7 +32,7 @@ Runtime modules mirror the example and binding layout:
 - `runtime/builder`: generator and native build driver.
 - `runtime/core`: public/shared runtime API published as `runtime-core`.
 - `runtime/shared/runtime-jni`: generated JNI Java shared by desktop and Android, published as Java-only `runtime-jni`.
-- `runtime/shared/runtime-c`: generated TeaVM C Java classes published as `runtime-c`.
+- `runtime/shared/runtime-c`: generated `gen.c.*` TeaVM C implementations, the C substitution service, and portable build resources published as `runtime-c`; it exposes `runtime-core` as the public API.
 - `runtime/desktop/runtime-desktop-jni`: desktop JNI packaging published as `runtime-desktop-jni` with a dependency on `runtime-jni`, plus native-only split artifacts such as `runtime-desktop-jni_windows_x64`.
 - `runtime/desktop/runtime-desktop-ffm`: generated FFM Java and desktop FFM native payloads, published as `runtime-desktop-ffm`.
 - `runtime/desktop/runtime-desktop-c`: desktop TeaVM C native-only split artifacts such as `runtime-desktop-c_windows_x64`.
@@ -44,7 +44,7 @@ Split runtime Gradle project paths use the same artifact-style leaf names as the
 
 `runtime-web` owns jParser's TeaVM web substitution service. Binding web modules should depend on `runtime-web`; the runtime policy maps any class to `emu.web.<original-class>` or `gen.web.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.web` rule is evaluated before `gen.web`, so explicit emulation wins over generated substitutions. `loader-web` contains the web loader implementation classes but does not register a TeaVM substitution service itself.
 
-`runtime/shared/runtime-c` owns jParser's TeaVM C substitution service. Binding C modules should depend on `runtime-c`; the runtime policy maps any class to `emu.c.<original-class>` or `gen.c.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.c` rule is evaluated before `gen.c`, so explicit emulation wins over generated substitutions.
+`runtime/shared/runtime-c` owns jParser's TeaVM C substitution service. Public classes remain in `runtime-core` and each binding's `core` artifact. TeaVM C generation writes target implementations under `gen.c.<original-package>`, so the public API and its target implementation can coexist on the same classpath without duplicate classes. Binding C modules should expose their public `core` artifact and depend on `runtime-c`; the runtime policy maps any public class to `emu.c.<original-class>` or `gen.c.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.c` rule is evaluated before `gen.c`, so explicit emulation wins over generated substitutions.
 
 Example app modules in examples use:
 
@@ -108,11 +108,35 @@ Shared-library examples use per-library plugin modules in `examples/SharedLib/li
 - Native side: C ABI (`extern "C"`, `int64_t`, `int32_t`, no `JNIEnv*`).
 - Parser/generator: `TeaVMCCodeParser` with `TeaVMCGenerator` in `jParser:gen:gen-c`.
 - Build option is off by default (`BuildToolOptions.generateTeaVMC=false`) unless enabled with `gen_teavm_c`.
-- Generated Java is written to the C output path (`BuildToolOptions.getCJavaOutputPath()`), not the TeaVM web output path.
+- Before generation, jParser clears the generated C Java output path so public-package files left by an older generator cannot survive an upgrade. New Java is written to `gen.c.<original-package>` below `BuildToolOptions.getCJavaOutputPath()`, not to the public package or the TeaVM web output path. Imports between generated binding classes are rewritten to the same `gen.c` namespace; native ABI symbol names continue to use the original public package.
 - Native libraries are selected by platform target args such as `windows64_teavm_c`, `android_teavm_c`, or `ios_teavm_c`.
 - IDL callback implementation glue is generated with TeaVM C imports/exports and C function pointers when callbacks are present.
-- When TeaVM C generation runs, the C core artifact also receives gdx-teavm classpath resources: a `META-INF/gdx-teavm.properties` marker, `external_cpp/cmake/post_target` CMake hook, import prototypes, generated glue, copied custom sources, runtime helper header, and header-only source includes. Platform modules still package the matching static native libraries under `external_cpp/jparser/<lib>/native/<platform>`.
 - TeaVM C substitution is generic and classpath-driven: `emu.c.*` replacements win over `gen.c.*` replacements, and classes without a matching replacement remain unchanged.
+
+TeaVM C generation also writes portable native-build resources under the configured C module's `build/generated/jparser/resources/main` directory. The C module must add that directory to its main resources and make `processResources` depend on the generation task. The resulting main C jar contains:
+
+```text
+META-INF/gdx-teavm.properties
+external_cpp/cmake/post_target/jparser_<library>_teavm_c.cmake
+external_cpp/jparser/<library>/
+  glue/TeaVMCGlue.cpp
+  glue/TeaVMCGlue.h
+  imports/teavmc_imports.h
+  custom/**
+  runtime/RuntimeHelper.h
+  source/**
+```
+
+The CMake hook is consumer-neutral. Before including it, a native build can define:
+
+- `JPARSER_TEAVMC_APP_TARGET`: required application or library target that receives glue sources, include paths, and static link inputs.
+- `JPARSER_TEAVMC_GENERATED_SOURCE_ROOT`: optional root containing TeaVM-generated `.c` sources. It defaults to `${CMAKE_CURRENT_SOURCE_DIR}/c/src`.
+- `JPARSER_<LIBRARY>_TEAVMC_ROOT`: optional extracted resource root for one library. By default it is resolved relative to the CMake hook.
+- `JPARSER_<LIBRARY>_TEAVMC_LIBRARY`: optional explicit static archive path. Desktop archives are selected automatically from the packaged native resource tree; other platforms or custom layouts set this variable.
+
+The hook appends each library's forced import header to the generated C sources, allowing `runtime-c` and multiple generated bindings to coexist. It requests the `cxx_std_17` compile feature without lowering a consumer already using C++20 or newer, and locates the matching platform static archive under `external_cpp/jparser/<library>/native/<platform>`. Windows TeaVM C archives use the release dynamic CRT ABI (`/MD`, iterator-debug level 0); the hook applies that ABI in both Debug and Release application configurations so one packaged archive works in either build type.
+
+gdx-teavm remains a compatibility adapter rather than a requirement of this layout. Its classpath discovery reads the generated `META-INF/gdx-teavm.properties`, copies `external_cpp`, includes `external_cpp/cmake/post_target`, supplies `TEAVM_APP_TARGET` as the fallback application target, and uses the default generated-source root. Other TeaVM C launchers can extract the same resources, set the portable variables they need, and include the generated CMake hook directly.
 
 ## Native Comment Block Contract (`base`)
 
