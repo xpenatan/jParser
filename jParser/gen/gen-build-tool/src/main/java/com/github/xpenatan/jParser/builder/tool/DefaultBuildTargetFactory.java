@@ -694,7 +694,8 @@ public class DefaultBuildTargetFactory {
 
     private void addForcedInclude(DefaultBuildTarget target, String includePath) {
         if(includePath != null && !includePath.trim().isEmpty()) {
-            target.headerDirs.add("-include" + includePath);
+            String prefix = target instanceof WindowsMSVCTarget ? "/FI" : "-include";
+            addFlagIfMissing(target.headerDirs, prefix + includePath);
         }
     }
 

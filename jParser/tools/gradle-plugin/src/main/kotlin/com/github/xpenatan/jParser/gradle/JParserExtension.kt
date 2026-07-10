@@ -524,7 +524,7 @@ open class JParserTargetHooks @Inject constructor(
     /** Shared libraries passed to the linker. */
     val sharedLinkerInputs: ListProperty<String> = objects.listProperty(String::class.java).convention(emptyList())
 
-    /** Headers forced into each compilation unit before normal source includes. */
+    /** Headers forced into each compilation unit using `/FI` on MSVC and `-include` on other toolchains. */
     val forcedIncludes: ListProperty<String> = objects.listProperty(String::class.java).convention(emptyList())
 
     /** Extra Emscripten exported functions for web targets in this scope. */

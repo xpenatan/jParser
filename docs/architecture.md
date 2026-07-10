@@ -75,7 +75,7 @@ Native platform targets are selected with the typed `JParserTargets` enum, for e
 
 Android plugin configuration uses the build-tool enums directly: `androidApiLevel` is `Property<AndroidTarget.ApiLevel>`, `androidTargets` is `ListProperty<AndroidTarget.Target>`, and per-ABI hooks can use `androidTarget(AndroidTarget.Target.arm64_v8a) { ... }`. Keep the string overload only for compatibility with dynamic target names.
 
-Path-like plugin DSL methods keep string properties for compatibility, but provide typed overloads for Gradle `Directory`, `RegularFile`, and provider values, plus Java `File` and `Path`. Prefer these overloads for project files, generated directories, headers, forced includes, native source files, linker inputs, and dependency IDL/module paths. Keep string values for globs, compiler flags, linker flags, Gradle task paths, and placeholders such as `{androidAbi}`.
+Path-like plugin DSL methods keep string properties for compatibility, but provide typed overloads for Gradle `Directory`, `RegularFile`, and provider values, plus Java `File` and `Path`. Prefer these overloads for project files, generated directories, headers, forced includes, native source files, linker inputs, and dependency IDL/module paths. Keep string values for globs, compiler flags, linker flags, Gradle task paths, and placeholders such as `{androidAbi}`. The shared target factory translates `forcedInclude(...)` to MSVC `/FI<header>` on `WindowsMSVCTarget` and GCC/Clang `-include<header>` on other targets.
 
 `jParser_generate` composes build-runner switches from `JParserGenerationTarget` instead of raw `gen_jni`, `gen_ffm`, `gen_web`, and `gen_teavm_c` strings inside the plugin. The runner still receives the original string args at the boundary.
 

@@ -39,7 +39,45 @@ public class DefaultBuildTargetFactoryTest {
         }
     }
 
+    @Test
+    public void windowsForcedIncludesUseMsvcSyntax() throws Exception {
+        String includePath = temporaryFolder.newFile("force.h").getAbsolutePath();
+        DefaultBuildTargetConfig config = new DefaultBuildTargetConfig();
+        config.target("windows64_teavm_c").forcedIncludes.add(includePath);
+
+        ArrayList<BuildMultiTarget> targets = targetsFor(config, "gen_teavm_c", "windows64_teavm_c");
+
+        assertTrue(targets.size() == 1);
+        assertTrue(targets.get(0).multiTarget.size() == 2);
+        for(int i = 0; i < targets.get(0).multiTarget.size(); i++) {
+            DefaultBuildTarget target = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
+            assertTrue(target.headerDirs.contains("/FI" + includePath));
+            assertFalse(target.headerDirs.contains("-include" + includePath));
+        }
+    }
+
+    @Test
+    public void nonMsvcForcedIncludesKeepGccClangSyntax() throws Exception {
+        String includePath = temporaryFolder.newFile("force.h").getAbsolutePath();
+        DefaultBuildTargetConfig config = new DefaultBuildTargetConfig();
+        config.target("linux64_teavm_c").forcedIncludes.add(includePath);
+
+        ArrayList<BuildMultiTarget> targets = targetsFor(config, "gen_teavm_c", "linux64_teavm_c");
+
+        assertTrue(targets.size() == 1);
+        assertTrue(targets.get(0).multiTarget.size() == 2);
+        for(int i = 0; i < targets.get(0).multiTarget.size(); i++) {
+            DefaultBuildTarget target = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
+            assertTrue(target.headerDirs.contains("-include" + includePath));
+            assertFalse(target.headerDirs.contains("/FI" + includePath));
+        }
+    }
+
     private ArrayList<BuildMultiTarget> targetsFor(String... args) throws Exception {
+        return targetsFor(new DefaultBuildTargetConfig(), args);
+    }
+
+    private ArrayList<BuildMultiTarget> targetsFor(DefaultBuildTargetConfig config, String... args) throws Exception {
         BuildToolOptions.BuildToolParams params = new BuildToolOptions.BuildToolParams();
         params.libName = "PortableLib";
         params.packageName = "com.example.portable";
@@ -48,7 +86,7 @@ public class DefaultBuildTargetFactoryTest {
 
         BuildToolOptions options = new BuildToolOptions(params, args);
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
-        new DefaultBuildTargetFactory().addTargets(options, new IDLReader(), targets);
+        new DefaultBuildTargetFactory().addTargets(options, new IDLReader(), targets, config);
         return targets;
     }
 }
