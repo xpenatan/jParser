@@ -25,7 +25,7 @@ class JParserGradlePlugin : Plugin<Project> {
 
         project.afterEvaluate {
             registerNativeBuildTasks(project, extension, buildTasks)
-            registerVariantBuildTasks(project, extension, buildTasks.getValue(""))
+            registerVariantBuildTasks(project, extension)
             configureTaskDependencies(project, extension, buildTasks)
         }
     }
@@ -103,7 +103,7 @@ class JParserGradlePlugin : Plugin<Project> {
             this.targetArg.set(targetArg)
             this.targetVariant.set(targetVariant)
             this.buildArgs.convention(args)
-            this.generateCore.set(targetArg.isBlank())
+            this.generateCore.set(true)
         }
     }
 
@@ -129,25 +129,25 @@ class JParserGradlePlugin : Plugin<Project> {
 
     private fun registerVariantBuildTasks(
         project: Project,
-        extension: JParserExtension,
-        generateTask: TaskProvider<JParserBuildTask>
+        extension: JParserExtension
     ) {
         extension.native.variants.forEach { variant ->
             val targetName = variant.targetName.orNull?.takeIf { it.isNotBlank() }
                 ?: throw IllegalArgumentException("jParser native target variant '${variant.name}' is missing targetName")
             val variantName = variant.variantName.orNull?.takeIf { it.isNotBlank() }
                 ?: throw IllegalArgumentException("jParser native target variant '${variant.name}' is missing variantName")
+            val target = JParserTargets.fromTargetName(targetName)
+                ?: throw IllegalArgumentException("jParser native target variant '${variant.name}' has unknown targetName '$targetName'")
             val taskProvider = registerBuildTask(
                 project,
                 extension,
                 "jParser_build_${targetName}_${variantName}",
                 targetName,
-                project.provider { listOf(targetName) },
+                project.provider { listOf(target.generationTarget.arg, targetName) },
                 "Build jParser $targetName native library variant '$variantName'.",
                 variantName
             )
             taskProvider.configure {
-                dependsOn(generateTask)
                 dependsOn(extension.native.taskDependencies)
                 if(variant.includeBaseTargetHooks.get()) {
                     extension.native.targets.findByName(targetName)?.let { hooks ->
@@ -183,9 +183,6 @@ class JParserGradlePlugin : Plugin<Project> {
     ) {
         buildTasks.forEach { (targetArg, taskProvider) ->
             taskProvider.configure {
-                if(targetArg.isNotBlank()) {
-                    dependsOn(buildTasks.getValue(""))
-                }
                 dependsOn(extension.native.taskDependencies)
                 extension.native.targets.findByName(targetArg)?.let { hooks ->
                     dependsOn(hooks.taskDependencies)
@@ -220,7 +217,7 @@ class JParserGradlePlugin : Plugin<Project> {
         val description: String
     ) {
         val targetArg: String = target.targetName
-        val args: List<String> = listOf(targetArg)
+        val args: List<String> = listOf(target.generationTarget.arg, targetArg)
     }
 
     private companion object {

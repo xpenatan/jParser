@@ -1,6 +1,6 @@
 package com.github.xpenatan.jParser.gradle
 
-/** Generation switches understood by the build runner for `jParser_generate`. */
+/** Binding-family generation switches understood by the build runner. */
 enum class JParserGenerationTarget(val arg: String) {
     JNI("gen_jni"),
     FFM("gen_ffm"),

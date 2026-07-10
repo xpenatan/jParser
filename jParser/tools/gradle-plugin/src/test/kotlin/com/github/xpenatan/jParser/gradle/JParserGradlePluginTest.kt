@@ -219,6 +219,94 @@ class JParserGradlePluginTest {
     }
 
     @Test
+    fun scopesNativeBuildTaskGenerationToItsBindingFamily() {
+        val projectDir = createProject(
+            """
+            import com.github.xpenatan.jParser.gradle.JParserBuildTask
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("testlib")
+                modulePrefix.set("lib")
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("source")
+
+                native {
+                    target(JParserTargets.ANDROID_JNI) {}
+                    target(JParserTargets.WINDOWS64_FFM) {}
+                    target(JParserTargets.WEB_WASM) {}
+                    target(JParserTargets.ANDROID_TEAVM_C) {}
+                    targetVariant(JParserTargets.LINUX64_JNI, "wgpu") {}
+                }
+            }
+
+            tasks.register("verifyScopedNativeBuildTasks") {
+                doLast {
+                    fun verifyBuildTask(taskName: String, expectedArgs: List<String>) {
+                        val buildTask = tasks.getByName(taskName) as JParserBuildTask
+                        check(buildTask.buildArgs.get() == expectedArgs) {
+                            "Expected " + taskName + " buildArgs=" + expectedArgs +
+                                " but was " + buildTask.buildArgs.get()
+                        }
+                        check(buildTask.generateCore.get()) {
+                            "Expected " + taskName + " to generate core sources"
+                        }
+                        val dependencyPaths = buildTask.taskDependencies
+                            .getDependencies(buildTask)
+                            .map { it.path }
+                        check(":jParser_generate" !in dependencyPaths) {
+                            "Expected " + taskName + " to not depend on jParser_generate, dependencies=" + dependencyPaths
+                        }
+                    }
+
+                    verifyBuildTask(
+                        "jParser_build_android_jni",
+                        listOf("gen_jni", "android_jni")
+                    )
+                    verifyBuildTask(
+                        "jParser_build_windows64_ffm",
+                        listOf("gen_ffm", "windows64_ffm")
+                    )
+                    verifyBuildTask(
+                        "jParser_build_web_wasm",
+                        listOf("gen_web", "web_wasm")
+                    )
+                    verifyBuildTask(
+                        "jParser_build_android_teavm_c",
+                        listOf("gen_teavm_c", "android_teavm_c")
+                    )
+                    verifyBuildTask(
+                        "jParser_build_linux64_jni_wgpu",
+                        listOf("gen_jni", "linux64_jni")
+                    )
+
+                    val generateTask = tasks.getByName("jParser_generate") as JParserBuildTask
+                    check(
+                        generateTask.buildArgs.get() ==
+                            listOf("gen_jni", "gen_ffm", "gen_web", "gen_teavm_c")
+                    ) {
+                        "Unexpected jParser_generate buildArgs=" + generateTask.buildArgs.get()
+                    }
+                    check(generateTask.generateCore.get()) {
+                        "Expected jParser_generate to generate core sources"
+                    }
+
+                    println("Verified family-scoped native build tasks")
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result = runner(projectDir, "verifyScopedNativeBuildTasks", "--console=plain").build()
+
+        assertContains(result.output, "Verified family-scoped native build tasks")
+    }
+
+    @Test
     fun supportsTypedAndroidEnums() {
         val projectDir = createProject(
             """
@@ -493,6 +581,8 @@ class JParserGradlePluginTest {
         assertGeneratedClass(projectDir, "lib-core/src/main/java", "TestObject.java")
         assertGeneratedClass(projectDir, "lib-c/core/src/main/java", "TestObject.java")
         assertFalse(File(projectDir, "lib-jni/src/main/java").exists())
+        assertFalse(File(projectDir, "lib-ffm/src/main/java").exists())
+        assertFalse(File(projectDir, "lib-web/src/main/java").exists())
     }
 
     @Test
