@@ -388,8 +388,8 @@ public class BuildLib {
     }
 
     private static void applyTeaVMCWindowsRuntime(WindowsMSVCTarget target, String api) {
-        if(api.equals("teavm_c") && !target.cppFlags.contains("/MD")) {
-            target.cppFlags.add("/MD");
+        if(api.equals("teavm_c") && !target.cppFlags.contains("/MT")) {
+            target.cppFlags.add("/MT");
         }
     }
 

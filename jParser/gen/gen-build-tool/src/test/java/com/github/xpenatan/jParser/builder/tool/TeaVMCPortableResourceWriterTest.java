@@ -82,6 +82,8 @@ public class TeaVMCPortableResourceWriterTest {
         String cmake = TeaVMCPortableResourceWriter.generateCMake("TestLib");
 
         assertTrue(cmake.contains(
+                "target_compile_options(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"/MT\")"));
+        assertFalse(cmake.contains(
                 "target_compile_options(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"/MD\")"));
         assertTrue(cmake.contains(
                 "target_compile_definitions(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"_ITERATOR_DEBUG_LEVEL=0\")"));

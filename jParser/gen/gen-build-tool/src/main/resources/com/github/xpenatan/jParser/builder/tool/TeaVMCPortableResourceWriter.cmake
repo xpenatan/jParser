@@ -71,8 +71,8 @@ set_property(SOURCE "${@VARIABLE_PREFIX@_DISPATCH_SOURCE}" APPEND PROPERTY
   COMPILE_DEFINITIONS "JPARSER_TEAVMC_LINKAGE_MODE=${@VARIABLE_PREFIX@_LINKAGE_VALUE}")
 
 if(MSVC)
-  # Packaged Windows archives and generated C++ sources use the release dynamic CRT.
-  target_compile_options(${JPARSER_TEAVMC_APP_TARGET} PRIVATE "/MD")
+  # Packaged Windows archives and generated C++ sources use the release static CRT.
+  target_compile_options(${JPARSER_TEAVMC_APP_TARGET} PRIVATE "/MT")
   target_compile_definitions(${JPARSER_TEAVMC_APP_TARGET} PRIVATE "_ITERATOR_DEBUG_LEVEL=0")
 endif()
 

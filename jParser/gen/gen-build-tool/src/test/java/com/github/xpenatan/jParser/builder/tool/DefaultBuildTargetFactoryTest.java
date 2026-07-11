@@ -17,14 +17,15 @@ public class DefaultBuildTargetFactoryTest {
     public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
-    public void windowsTeaVMCUsesTheCMakeCompatibleDynamicRuntime() throws Exception {
+    public void windowsTeaVMCUsesTheCMakeCompatibleStaticRuntime() throws Exception {
         ArrayList<BuildMultiTarget> targets = targetsFor("gen_teavm_c", "windows64_teavm_c");
 
         assertTrue(targets.size() == 1);
         assertTrue(targets.get(0).multiTarget.size() == 2);
         for(int i = 0; i < targets.get(0).multiTarget.size(); i++) {
             DefaultBuildTarget target = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
-            assertTrue(target.cppFlags.contains("/MD"));
+            assertTrue(target.cppFlags.contains("/MT"));
+            assertFalse(target.cppFlags.contains("/MD"));
         }
     }
 
@@ -36,6 +37,7 @@ public class DefaultBuildTargetFactoryTest {
         for(int i = 0; i < targets.get(0).multiTarget.size(); i++) {
             DefaultBuildTarget target = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
             assertFalse(target.cppFlags.contains("/MD"));
+            assertFalse(target.cppFlags.contains("/MT"));
         }
     }
 

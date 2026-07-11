@@ -112,7 +112,7 @@ public class BuildLibB {
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("/std:c++17");
-        compileStaticTarget.cppFlags.add("/MD");
+        compileStaticTarget.cppFlags.add("/MT");
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
         compileStaticTarget.headerDirs.add("-I" + libASourcePath);
         compileStaticTarget.headerDirs.add("-I" + libACustomPath);
@@ -123,7 +123,7 @@ public class BuildLibB {
         linkTarget.libDirSuffix += api;
         linkTarget.setupTeaVMCGlueCode(libBuildCPPPath);
         linkTarget.cppFlags.add("/std:c++17");
-        linkTarget.cppFlags.add("/MD");
+        linkTarget.cppFlags.add("/MT");
         linkTarget.cppFlags.add(config);
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());

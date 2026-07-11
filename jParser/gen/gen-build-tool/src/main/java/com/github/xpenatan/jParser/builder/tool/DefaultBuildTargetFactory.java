@@ -625,7 +625,7 @@ public class DefaultBuildTargetFactory {
 
     private void applyTeaVMCWindowsRuntime(WindowsMSVCTarget target, String api) {
         if(api.equals("teavm_c")) {
-            addFlagIfMissing(target.cppFlags, "/MD");
+            addFlagIfMissing(target.cppFlags, "/MT");
         }
     }
 
