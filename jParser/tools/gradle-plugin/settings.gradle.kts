@@ -23,3 +23,40 @@ dependencyResolutionManagement {
         }
     }
 }
+
+val jParserRoot = rootDir.resolve("../../..").canonicalFile
+
+fun includeJParserProject(path: String, relativePath: String) {
+    include(path)
+    project(path).projectDir = jParserRoot.resolve(relativePath)
+}
+
+fun mapContainerProject(path: String) {
+    val relativePath = path.removePrefix(":").replace(':', '/')
+    val projectDirectory = rootDir.resolve(".gradle/local-project-containers/$relativePath")
+    check(projectDirectory.isDirectory || projectDirectory.mkdirs()) {
+        "Unable to create local project container directory: $projectDirectory"
+    }
+    project(path).projectDir = projectDirectory
+}
+
+// This plugin is developed together with the generator. Include the generator
+// projects directly so IDE sync and local plugin use never depend on a
+// previously published jParser snapshot.
+includeJParserProject(":jParser:api:api-core", "jParser/api/api-core")
+includeJParserProject(":jParser:loader:loader-core", "jParser/loader/loader-core")
+includeJParserProject(":jParser:runtime:base", "jParser/runtime/base")
+includeJParserProject(":jParser:gen:gen-core", "jParser/gen/gen-core")
+includeJParserProject(":jParser:gen:gen-idl", "jParser/gen/gen-idl")
+includeJParserProject(":jParser:gen:gen-jni", "jParser/gen/gen-jni")
+includeJParserProject(":jParser:gen:gen-ffm", "jParser/gen/gen-ffm")
+includeJParserProject(":jParser:gen:gen-web", "jParser/gen/gen-web")
+includeJParserProject(":jParser:gen:gen-c", "jParser/gen/gen-c")
+includeJParserProject(":jParser:gen:gen-build", "jParser/gen/gen-build")
+includeJParserProject(":jParser:gen:gen-build-tool", "jParser/gen/gen-build-tool")
+
+mapContainerProject(":jParser")
+mapContainerProject(":jParser:api")
+mapContainerProject(":jParser:loader")
+mapContainerProject(":jParser:runtime")
+mapContainerProject(":jParser:gen")

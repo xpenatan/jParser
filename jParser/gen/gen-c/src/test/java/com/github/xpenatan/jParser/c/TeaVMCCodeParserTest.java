@@ -47,6 +47,8 @@ public class TeaVMCCodeParserTest {
         assertTrue(Files.isRegularFile(generatedDependency));
         assertTrue(Files.isRegularFile(generatedApi));
         assertFalse(Files.exists(generatedRoot.resolve("com/example/api/PublicApi.java")));
+        assertFalse("The legacy one-argument generator must not invent a shared ABI identity",
+                Files.exists(cppRoot.resolve("teavmcabi")));
         assertTrue(parser.packagePaths.contains(path("gen/c/com/example/api")));
         assertTrue(parser.packagePaths.contains(path("gen/c/com/example/types")));
 

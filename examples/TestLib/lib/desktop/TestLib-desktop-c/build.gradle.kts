@@ -5,24 +5,35 @@ plugins {
 val moduleName = "TestLib-desktop-c"
 
 val libDir = "${projectDir}/../../builder/build/c++/libs"
-val windowsFile = "$libDir/windows/vc/teavm_c/TestLib64_.lib"
-val linuxFile = "$libDir/linux/teavm_c/libTestLib64_.a"
-val macFile = "$libDir/mac/teavm_c/libTestLib64_.a"
-val macArmFile = "$libDir/mac/arm/teavm_c/libTestLib64_.a"
 val nativeResourceRoot = "external_cpp/jparser/testlib/native"
 val gdxTeaVMMarker = resources.text.fromString("ignore-resources=META-INF\n")
 
-val platforms: Map<String, String> = mapOf(
-    "windows_x64" to windowsFile,
-    "linux_x64" to linuxFile,
-    "mac_x64" to macFile,
-    "mac_arm64" to macArmFile,
+val platforms: Map<String, List<String>> = mapOf(
+    "windows_x64" to listOf(
+        "$libDir/windows/vc/teavm_c/TestLib64_.lib",
+        "$libDir/windows/vc/teavm_c/TestLib64.lib",
+        "$libDir/windows/vc/teavm_c/TestLib64.dll",
+    ),
+    "linux_x64" to listOf(
+        "$libDir/linux/teavm_c/libTestLib64_.a",
+        "$libDir/linux/teavm_c/libTestLib64.so",
+    ),
+    "mac_x64" to listOf(
+        "$libDir/mac/teavm_c/libTestLib64_.a",
+        "$libDir/mac/teavm_c/libTestLib64.dylib",
+    ),
+    "mac_arm64" to listOf(
+        "$libDir/mac/arm/teavm_c/libTestLib64_.a",
+        "$libDir/mac/arm/teavm_c/libTestLibarm64.dylib",
+    ),
 )
 
-platforms.forEach { (platform, nativeFile) ->
+platforms.forEach { (platform, nativeFiles) ->
     tasks.register<Jar>("nativeJar_${platform}") {
-        from(nativeFile) {
-            into("$nativeResourceRoot/$platform")
+        nativeFiles.forEach { nativeFile ->
+            from(nativeFile) {
+                into("$nativeResourceRoot/$platform")
+            }
         }
         from(gdxTeaVMMarker.asFile()) {
             into("META-INF")
@@ -31,8 +42,12 @@ platforms.forEach { (platform, nativeFile) ->
         archiveBaseName.set("${moduleName}-${platform}")
         archiveClassifier.set("")
         doFirst {
-            if(!file(nativeFile).isFile) {
-                logger.warn("Missing TestLib TeaVM C static archive for $platform: $nativeFile")
+            val missingFiles = nativeFiles.filterNot { file(it).isFile }
+            if(missingFiles.isNotEmpty()) {
+                throw GradleException(
+                    "Missing TestLib TeaVM C native payloads for $platform:\n" +
+                        missingFiles.joinToString("\n")
+                )
             }
         }
     }

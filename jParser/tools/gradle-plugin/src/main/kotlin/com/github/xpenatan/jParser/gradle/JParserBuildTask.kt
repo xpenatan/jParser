@@ -68,6 +68,7 @@ abstract class JParserBuildTask : DefaultTask() {
         request.params.moduleWebSuffix = extension.moduleWebSuffix.orNull
         request.params.moduleFFMSuffix = extension.moduleFFMSuffix.orNull
         request.params.moduleCSuffix = extension.moduleCSuffix.orNull
+        request.params.teaVMCLinkage = extension.teaVMCLinkage.get()
 
         request.keepGeneratedCommandComments = extension.keepGeneratedCommandComments.get()
         setIDLRenaming(request, extension.idlRenaming.orNull)

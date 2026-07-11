@@ -24,6 +24,7 @@ var libProjects = mutableSetOf(
     project(":jParser:runtime:desktop:runtime-desktop-c"),
     project(":jParser:runtime:android:runtime-android-c"),
     project(":jParser:loader:loader-core"),
+    project(":jParser:loader:loader-c"),
     project(":jParser:loader:loader-web")
 )
 

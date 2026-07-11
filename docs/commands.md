@@ -52,18 +52,31 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_web_wasm
 ```
 
-The aggregate `runtime_helper_build_project` and `TestLib_build_project` tasks generate core, JNI, FFM, TeaVM web, and TeaVM C outputs. Platform-specific `*_teavm_c` tasks also compile that platform's native output; use them when producing a static native resource jar.
+The aggregate `runtime_helper_build_project` and `TestLib_build_project` tasks generate core, JNI, FFM, TeaVM web, and TeaVM C outputs. Platform-specific `*_teavm_c` tasks also compile that platform's native output; use them when producing a TeaVM C native payload jar.
+
+The same `*_teavm_c` task names are used for every native linkage mode. Select the mode in the Gradle plugin extension:
+
+```kotlin
+import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
+
+jParser {
+    teaVMCLinkage.set(TeaVMCLinkage.SHARED_LINKED)
+}
+```
+
+For a manual `BuilderTool` build, assign `BuildToolOptions.BuildToolParams.teaVMCLinkage` before creating `BuildToolOptions`. Builds launched through `JParserBuildRunner` may instead pass `-Djparser.teaVMCLinkage=RUNTIME_LOADED`. `STATIC` is used when no value is configured.
 
 ### TeaVM C jar packaging checks
 
 ```text
+./gradlew :jParser:loader:loader-c:jar
 ./gradlew :jParser:runtime:shared:runtime-c:jar
 ./gradlew :jParser:runtime:desktop:runtime-desktop-c:nativeJar_windows_x64
 ./gradlew :examples:TestLib:lib:shared:TestLib-c:jar
 ./gradlew :examples:TestLib:lib:desktop:TestLib-desktop-c:nativeJar_windows_x64
 ```
 
-Replace `windows_x64` with `linux_x64`, `mac_x64`, or `mac_arm64` after building the corresponding native TeaVM C target. Inspect the main C jar for `gen/c/**` and `external_cpp/cmake/post_target/**`; inspect the native jar for `external_cpp/jparser/<library>/native/<platform>/**` and `META-INF/gdx-teavm.properties`.
+Replace `windows_x64` with `linux_x64`, `mac_x64`, or `mac_arm64` after building the corresponding native TeaVM C target. Inspect `loader-c` for `external_cpp/jparser/loader/teavmc_loader.{h,cpp}` and its `jparser_00_teavmc_loader.cmake` hook. Inspect the main binding C jar for `gen/c/**`, `external_cpp/cmake/post_target/**`, and `external_cpp/jparser/<library>/teavmcabi/**`; inspect the native jar for `external_cpp/jparser/<library>/native/<platform>/**` and `META-INF/gdx-teavm.properties`. Dynamic linkage payloads must include the matching DLL, SO, or dylib (and a Windows import library for `SHARED_LINKED`). A consumer that discovers these files inside a native resource jar must extract them before CMake can link or stage them and before the operating-system loader can open them. The current gdx-teavm extractor also needs its extension allowlist updated to copy `.dll`, `.so`, and `.dylib` payloads.
 
 ### TestLib app run/build
 

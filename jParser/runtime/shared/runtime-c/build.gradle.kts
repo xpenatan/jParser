@@ -8,7 +8,7 @@ dependencies {
     api(project(":jParser:runtime:core"))
 
     implementation(project(":jParser:api:api-core"))
-    implementation(project(":jParser:loader:loader-core"))
+    api(project(":jParser:loader:loader-c"))
 
     api("org.teavm:teavm-core:${LibExt.teaVMVersion}")
     api("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")

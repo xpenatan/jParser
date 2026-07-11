@@ -38,6 +38,7 @@ public class BuildToolOptions {
     public final String jniCppStandard;
     public final String ffmCppStandard;
     public final String teaVMCCppStandard;
+    public final TeaVMCLinkage teaVMCLinkage;
     public final String webCppStandard;
     public final SourceLanguage sourceLanguage;
     public final String cStandard;
@@ -87,6 +88,7 @@ public class BuildToolOptions {
         this.jniCppStandard = stringOrDefault(params.jniCppStandard, "c++11");
         this.ffmCppStandard = stringOrDefault(params.ffmCppStandard, "c++11");
         this.teaVMCCppStandard = stringOrDefault(params.teaVMCCppStandard, "c++17");
+        this.teaVMCLinkage = params.teaVMCLinkage != null ? params.teaVMCLinkage : TeaVMCLinkage.STATIC;
         this.webCppStandard = stringOrDefault(params.webCppStandard, "c++11");
         this.sourceLanguage = params.sourceLanguage != null ? params.sourceLanguage : SourceLanguage.CPP;
         this.cStandard = stringOrDefault(params.cStandard, "c17");
@@ -384,6 +386,7 @@ public class BuildToolOptions {
         public String jniCppStandard = "c++11";
         public String ffmCppStandard = "c++11";
         public String teaVMCCppStandard = "c++17";
+        public TeaVMCLinkage teaVMCLinkage = TeaVMCLinkage.STATIC;
         public String webCppStandard = "c++11";
 
         /**

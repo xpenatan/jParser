@@ -68,7 +68,7 @@ public class JParserBuildRunner {
         }
     }
 
-    private static JParserBuildRequest fromSystemProperties() {
+    static JParserBuildRequest fromSystemProperties() {
         JParserBuildRequest request = new JParserBuildRequest();
         request.params.libName = property("jparser.libName", null);
         request.params.idlName = property("jparser.idlName", request.params.libName);
@@ -87,6 +87,8 @@ public class JParserBuildRunner {
         request.params.moduleWebSuffix = property("jparser.moduleWebSuffix", null);
         request.params.moduleFFMSuffix = property("jparser.moduleFFMSuffix", null);
         request.params.moduleCSuffix = property("jparser.moduleCSuffix", null);
+        request.params.teaVMCLinkage = teaVMCLinkageProperty(
+                "jparser.teaVMCLinkage", request.params.teaVMCLinkage);
 
         request.keepGeneratedCommandComments = booleanProperty("jparser.keepGeneratedCommandComments", false);
         request.targetConfig.addRuntimeHelperIDL = booleanProperty("jparser.addRuntimeHelperIDL", true);
@@ -235,6 +237,14 @@ public class JParserBuildRunner {
             return null;
         }
         return JParserSymbolNameMode.valueOf(value);
+    }
+
+    private static TeaVMCLinkage teaVMCLinkageProperty(String name, TeaVMCLinkage fallback) {
+        String value = property(name, null);
+        if(value == null) {
+            return fallback;
+        }
+        return TeaVMCLinkage.valueOf(value.trim().toUpperCase(Locale.ROOT));
     }
 
     private static JNIClassData.SymbolNameMode toJNISymbolNameMode(JParserSymbolNameMode mode) {

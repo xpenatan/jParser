@@ -91,7 +91,7 @@ public class BuilderTool {
 
         if(op.generateTeaVMC) {
             cleanGeneratedTeaVMCJavaOutput(op.getCJavaOutputPath());
-            TeaVMCGenerator teaVMCGenerator = new TeaVMCGenerator(op.getCPPDestinationPath());
+            TeaVMCGenerator teaVMCGenerator = new TeaVMCGenerator(op.getCPPDestinationPath(), op.libName);
             teaVMCGenerator.setFFMClassData(op.teaVMCClassData);
             addTeaVMCDefaultInclude(op, teaVMCGenerator);
             TeaVMCCodeParser teaVMCParser = new TeaVMCCodeParser(teaVMCGenerator, idlReader, op.packageName, op.getSourceDir());

@@ -2,6 +2,9 @@ package com.github.xpenatan.jParser.builder.targets;
 
 import com.github.xpenatan.jParser.builder.BuildConfig;
 import com.github.xpenatan.jParser.builder.DefaultBuildTarget;
+import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
+import java.io.File;
+import java.util.ArrayList;
 
 public class MacTarget extends DefaultBuildTarget {
 
@@ -92,6 +95,20 @@ public class MacTarget extends DefaultBuildTarget {
             linkerFlags.add("-mmacosx-version-min=" + macMinTarget);
             linkerFlags.add("-stdlib=libc++");
             linkerOutputCommand = "-o";
+        }
+    }
+
+    @Override
+    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String outputPath) {
+        if(!isStatic) {
+            addFlagIfMissing("-Wl,-install_name,@rpath/" + new File(outputPath).getName());
+        }
+        super.onLink(compiledObjects, objFilePath, outputPath);
+    }
+
+    private void addFlagIfMissing(String flag) {
+        if(!linkerFlags.contains(flag)) {
+            linkerFlags.add(flag);
         }
     }
 }

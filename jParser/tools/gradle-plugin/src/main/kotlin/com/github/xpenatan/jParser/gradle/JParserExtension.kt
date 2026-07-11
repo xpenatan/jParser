@@ -1,6 +1,7 @@
 package com.github.xpenatan.jParser.gradle
 
 import com.github.xpenatan.jParser.builder.tool.JParserSymbolNameMode
+import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
 import com.github.xpenatan.jParser.builder.targets.AndroidTarget
 import com.github.xpenatan.jParser.builder.targets.SourceLanguage
 import com.github.xpenatan.jParser.idl.IDLRenaming
@@ -72,6 +73,8 @@ open class JParserExtension @Inject constructor(
     val jniSymbolNameMode: Property<JParserSymbolNameMode> = objects.property(JParserSymbolNameMode::class.java)
     val ffmSymbolNameMode: Property<JParserSymbolNameMode> = objects.property(JParserSymbolNameMode::class.java)
     val teaVMCSymbolNameMode: Property<JParserSymbolNameMode> = objects.property(JParserSymbolNameMode::class.java)
+    val teaVMCLinkage: Property<TeaVMCLinkage> = objects.property(TeaVMCLinkage::class.java)
+        .convention(TeaVMCLinkage.STATIC)
     val idlRenaming: Property<IDLRenaming> = objects.property(IDLRenaming::class.java)
     val ffmLogMethod: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
     val ffmDefaultCritical: Property<Boolean> = objects.property(Boolean::class.java).convention(false)

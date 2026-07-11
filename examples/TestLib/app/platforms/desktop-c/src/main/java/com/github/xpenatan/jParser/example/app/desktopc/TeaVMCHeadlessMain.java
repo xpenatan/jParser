@@ -13,19 +13,28 @@ import com.github.xpenatan.jParser.example.app.tests.NamespaceTest;
 import com.github.xpenatan.jParser.example.app.tests.OperatorTest;
 import com.github.xpenatan.jParser.example.app.tests.PrimitiveTest;
 import com.github.xpenatan.jParser.example.testlib.TestLibLoader;
+import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
 import com.github.xpenatan.jparser.runtime.RuntimeLoader;
 
 public class TeaVMCHeadlessMain {
 
     public static void main(String[] args) {
-        RuntimeLoader.init(null);
-        TestLibLoader.init(null);
+        RuntimeLoader.init(requiredLoader("runtime"));
+        TestLibLoader.init(requiredLoader("TestLib"));
 
         if(!TestLib.test()) {
             printFailures();
             throw new AssertionError("TestLib TeaVM C tests failed");
         }
         System.out.println("TestLib TeaVM C tests passed");
+    }
+
+    private static JParserLibraryLoaderListener requiredLoader(String libraryName) {
+        return (success, error) -> {
+            if(!success) {
+                throw new IllegalStateException("Unable to load " + libraryName, error);
+            }
+        };
     }
 
     private static void printFailures() {

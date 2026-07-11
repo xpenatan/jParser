@@ -5,24 +5,35 @@ plugins {
 val moduleName = "runtime-desktop-c"
 
 val libDir = "${projectDir}/../../builder/build/c++/libs"
-val windowsFile = "$libDir/windows/vc/teavm_c/runtime64_.lib"
-val linuxFile = "$libDir/linux/teavm_c/libruntime64_.a"
-val macFile = "$libDir/mac/teavm_c/libruntime64_.a"
-val macArmFile = "$libDir/mac/arm/teavm_c/libruntime64_.a"
 val nativeResourceRoot = "external_cpp/jparser/runtime/native"
 val gdxTeaVMMarker = resources.text.fromString("ignore-resources=META-INF\n")
 
-val platforms: Map<String, String> = mapOf(
-    "windows_x64" to windowsFile,
-    "linux_x64" to linuxFile,
-    "mac_x64" to macFile,
-    "mac_arm64" to macArmFile,
+val platforms: Map<String, List<String>> = mapOf(
+    "windows_x64" to listOf(
+        "$libDir/windows/vc/teavm_c/runtime64_.lib",
+        "$libDir/windows/vc/teavm_c/runtime64.lib",
+        "$libDir/windows/vc/teavm_c/runtime64.dll",
+    ),
+    "linux_x64" to listOf(
+        "$libDir/linux/teavm_c/libruntime64_.a",
+        "$libDir/linux/teavm_c/libruntime64.so",
+    ),
+    "mac_x64" to listOf(
+        "$libDir/mac/teavm_c/libruntime64_.a",
+        "$libDir/mac/teavm_c/libruntime64.dylib",
+    ),
+    "mac_arm64" to listOf(
+        "$libDir/mac/arm/teavm_c/libruntime64_.a",
+        "$libDir/mac/arm/teavm_c/libruntimearm64.dylib",
+    ),
 )
 
-val nativeJars = platforms.map { (platform, nativeFile) ->
+val nativeJars = platforms.map { (platform, nativeFiles) ->
     platform to tasks.register<Jar>("nativeJar_${platform}") {
-        from(nativeFile) {
-            into("$nativeResourceRoot/$platform")
+        nativeFiles.forEach { nativeFile ->
+            from(nativeFile) {
+                into("$nativeResourceRoot/$platform")
+            }
         }
         from(gdxTeaVMMarker.asFile()) {
             into("META-INF")
@@ -31,8 +42,12 @@ val nativeJars = platforms.map { (platform, nativeFile) ->
         archiveBaseName.set("${moduleName}-${platform}")
         archiveClassifier.set("")
         doFirst {
-            if(!file(nativeFile).isFile) {
-                logger.warn("Missing desktop TeaVM C static archive for $platform: $nativeFile")
+            val missingFiles = nativeFiles.filterNot { file(it).isFile }
+            if(missingFiles.isNotEmpty()) {
+                throw GradleException(
+                    "Missing desktop TeaVM C native payloads for $platform:\n" +
+                        missingFiles.joinToString("\n")
+                )
             }
         }
     }

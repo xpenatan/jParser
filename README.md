@@ -17,6 +17,7 @@
 - [Overview](#overview)
 - [How It Works](#how-it-works)
 - [Supported Targets](#supported-targets)
+- [TeaVM C Native Linkage](#teavm-c-native-linkage)
 - [Code Block Convention](#code-block-convention)
 - [WebIDL Bindings](#webidl-bindings)
 - [IDLBase API](#idlbase-api)
@@ -30,7 +31,7 @@
 
 ## Overview
 
-Inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen), jParser lets you embed native C/C++ code directly inside Java source files using annotated comment blocks. Each block is translated into target-specific Java source code, enabling a single `base` module to produce a bridge-agnostic `core` API plus platform bridge outputs for **JNI** (desktop/mobile), **FFM** (desktop, Java 25+), and **TeaVM** (web via JS/WASM).
+Inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen), jParser lets you embed native C/C++ code directly inside Java source files using annotated comment blocks. Each block is translated into target-specific Java source code, enabling a single `base` module to produce a bridge-agnostic `core` API plus platform bridge outputs for **JNI** (desktop/mobile), **FFM** (desktop, Java 25+), **TeaVM web** (JS/WASM), and **TeaVM C** (native applications).
 
 For web targets, jParser uses [Emscripten](https://emscripten.org/) to compile C/C++ into JS/WASM and [TeaVM](https://github.com/konsoletyper/teavm) to generate the corresponding Java-to-JavaScript bridge via `@JSBody` annotations.
 
@@ -71,6 +72,51 @@ Compiles the C/C++ source into platform-specific native libraries:
 | **JNI** | Java Native Interface | Windows, Linux, macOS, Android | 8+           |
 | **FFM** | Foreign Function & Memory API | Windows, Linux, macOS | 22+          |
 | **TeaVM** | JavaScript / WASM | Web browsers | Java 17+ for TeaVM 0.15 web modules/tooling |
+| **TeaVM C** | TeaVM native C imports | Windows, Linux, macOS, Android | Java 17+ for TeaVM tooling |
+
+## TeaVM C Native Linkage
+
+TeaVM C generation supports three `TeaVMCLinkage` modes:
+
+| Mode | Native resolution | Deployment |
+|---|---|---|
+| `STATIC` | Links the packaged archive into the final native target. This remains the default. | Application executable, subject to unrelated shared dependencies |
+| `SHARED_LINKED` | Links against a DLL import library or a shared object/dylib; the operating-system loader resolves it when the process starts. | Application plus the matching shared native library |
+| `RUNTIME_LOADED` | `loader-c` opens the shared library on demand, validates its generated versioned API table, and binds the generated dispatch shim. | Application plus one runtime-selectable shared native library per logical binding |
+
+The Gradle plugin exposes the typed mode directly:
+
+```kotlin
+import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
+
+jParser {
+    teaVMCLinkage.set(TeaVMCLinkage.RUNTIME_LOADED)
+}
+```
+
+Manual builders set the same value before constructing `BuildToolOptions`:
+
+```java
+import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
+import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage;
+
+BuildToolOptions.BuildToolParams params = new BuildToolOptions.BuildToolParams();
+params.teaVMCLinkage = TeaVMCLinkage.SHARED_LINKED;
+BuildToolOptions options = new BuildToolOptions(params, args);
+```
+
+`loader-c` is the TeaVM C substitution for the normal `JParserLibraryLoader` API. On Windows it uses `LoadLibraryExW`/`GetProcAddress`; Linux, macOS, and Android use `dlopen`/`dlsym`. A logical library may be bound only once, and jParser intentionally keeps a successfully loaded library open for the process lifetime. Future iOS C support must use native code bundled with and signed as part of the application; it will not support downloading and executing arbitrary libraries.
+
+`RUNTIME_LOADED` derives the normal platform filename from the logical library name by default. To choose a specific backend or physical payload, set `JParserLibraryLoaderOptions.fileName`; this exact filename bypasses automatic prefix and architecture-suffix decoration, while `path` remains its containing directory:
+
+```java
+JParserLibraryLoaderOptions options = new JParserLibraryLoaderOptions();
+options.path = "plugins";
+options.fileName = "webgpu_dawn64.dll";
+JParserLibraryLoader.load("webgpu", options, listener);
+```
+
+Native binaries inside a dependency jar are build resources, not runtime files. A TeaVM C launcher or native-resource consumer must extract shared binaries to the filesystem and deploy them where the platform loader can open them. The generated portable CMake hook performs native target wiring and stages selected shared binaries for CMake-based consumers.
 
 ## Code Block Convention
 

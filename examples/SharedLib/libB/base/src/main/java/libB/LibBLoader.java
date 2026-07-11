@@ -2,6 +2,7 @@ package libB;
 
 import com.github.xpenatan.jParser.loader.JParserLibraryLoader;
 import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
+import com.github.xpenatan.jParser.loader.JParserLibraryLoaderOptions;
 
 public class LibBLoader {
 
@@ -19,14 +20,11 @@ public class LibBLoader {
 
     public static final String LIB_NAME = "LibB";
 
-    /*[-TEAVM_C;-REPLACE_BLOCK]
-    {
-        if(listener != null) {
-            listener.onLoad(true, null);
-        }
-    }
-    */
     public static void init(JParserLibraryLoaderListener listener) {
-        JParserLibraryLoader.load(LIB_NAME, listener);
+        init(null, listener);
+    }
+
+    public static void init(JParserLibraryLoaderOptions options, JParserLibraryLoaderListener listener) {
+        JParserLibraryLoader.load(LIB_NAME, options, listener);
     }
 }

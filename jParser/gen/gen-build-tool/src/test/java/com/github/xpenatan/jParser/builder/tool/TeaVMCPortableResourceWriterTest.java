@@ -11,6 +11,14 @@ public class TeaVMCPortableResourceWriterTest {
     private static final Pattern TEMPLATE_PLACEHOLDER_PATTERN = Pattern.compile("@[A-Z][A-Z0-9_]*@");
 
     @Test
+    public void generatedMarkerSelectsLoaderWithoutAddingADuplicateLoaderMarker() {
+        String properties = TeaVMCPortableResourceWriter.generateProperties();
+
+        assertTrue(properties.contains("ignore-resources=META-INF\n"));
+        assertTrue(properties.contains("resources=loader-c-\n"));
+    }
+
+    @Test
     public void generatedCMakeRendersTheClasspathTemplateWithoutPlaceholders() throws IOException {
         String cmake = TeaVMCPortableResourceWriter.generateCMake("TestLib");
 
@@ -20,8 +28,10 @@ public class TeaVMCPortableResourceWriterTest {
                 "get_filename_component(JPARSER_TESTLIB_TEAVMC_EXTERNAL_CPP_ROOT \"${CMAKE_CURRENT_LIST_DIR}/../..\" ABSOLUTE)"));
         assertTrue(cmake.contains(
                 "set(JPARSER_TESTLIB_TEAVMC_ROOT \"${JPARSER_TESTLIB_TEAVMC_EXTERNAL_CPP_ROOT}/jparser/testlib\")"));
+        assertTrue(cmake.contains("set(JPARSER_TESTLIB_TEAVMC_PLATFORM \"windows_x64\")"));
+        assertTrue(cmake.contains("set(JPARSER_TESTLIB_TEAVMC_STATIC_FILE \"TestLib64_.lib\")"));
         assertTrue(cmake.contains(
-                "${JPARSER_TESTLIB_TEAVMC_NATIVE_ROOT}/windows_x64/TestLib64_.lib"));
+                "${JPARSER_TESTLIB_TEAVMC_NATIVE_ROOT}/${JPARSER_TESTLIB_TEAVMC_PLATFORM}/${JPARSER_TESTLIB_TEAVMC_STATIC_FILE}"));
         assertFalse(TEMPLATE_PLACEHOLDER_PATTERN.matcher(cmake).find());
     }
 
@@ -52,7 +62,7 @@ public class TeaVMCPortableResourceWriterTest {
 
         assertTrue(cmake.contains("if(NOT DEFINED JPARSER_TESTLIB_TEAVMC_LIBRARY"));
         assertTrue(cmake.contains(
-                "set JPARSER_TESTLIB_TEAVMC_LIBRARY explicitly before including this file"));
+                "set JPARSER_TESTLIB_TEAVMC_LIBRARY explicitly"));
         assertTrue(cmake.contains(
                 "target_link_libraries(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"${JPARSER_TESTLIB_TEAVMC_LIBRARY}\")"));
     }
@@ -84,21 +94,50 @@ public class TeaVMCPortableResourceWriterTest {
     }
 
     @Test
+    public void generatedCMakePreservesStaticDefaultAndSupportsAllLinkageModes() throws IOException {
+        String staticCMake = TeaVMCPortableResourceWriter.generateCMake("TestLib", TeaVMCLinkage.STATIC);
+        String sharedCMake = TeaVMCPortableResourceWriter.generateCMake("TestLib", TeaVMCLinkage.SHARED_LINKED);
+        String runtimeCMake = TeaVMCPortableResourceWriter.generateCMake("TestLib", TeaVMCLinkage.RUNTIME_LOADED);
+
+        assertTrue(staticCMake.contains("set(JPARSER_TESTLIB_TEAVMC_LINKAGE \"STATIC\")"));
+        assertTrue(sharedCMake.contains("set(JPARSER_TESTLIB_TEAVMC_LINKAGE \"SHARED_LINKED\")"));
+        assertTrue(runtimeCMake.contains("set(JPARSER_TESTLIB_TEAVMC_LINKAGE \"RUNTIME_LOADED\")"));
+        assertTrue(runtimeCMake.contains("JPARSER_TEAVMC_LINKAGE_MODE=${JPARSER_TESTLIB_TEAVMC_LINKAGE_VALUE}"));
+        assertTrue(runtimeCMake.contains("${JPARSER_TESTLIB_TEAVMC_ABI_ROOT}/TeaVMCDispatch.cpp"));
+        assertTrue(runtimeCMake.contains("Runtime-loaded mode deliberately has no link dependency on the plugin"));
+        assertTrue(runtimeCMake.contains("APPEND PROPERTY BUILD_RPATH \"@loader_path\""));
+        assertTrue(runtimeCMake.contains("APPEND PROPERTY BUILD_RPATH \"$ORIGIN\""));
+    }
+
+    @Test
+    public void generatedCMakeSupportsSharedPayloadOverridesAndPortableStaging() throws IOException {
+        String cmake = TeaVMCPortableResourceWriter.generateCMake("TestLib");
+
+        assertTrue(cmake.contains("JPARSER_TESTLIB_TEAVMC_SHARED_LIBRARY"));
+        assertTrue(cmake.contains("JPARSER_TESTLIB_TEAVMC_IMPORT_LIBRARY"));
+        assertTrue(cmake.contains("JPARSER_TEAVMC_RUNTIME_OUTPUT_DIRECTORY"));
+        assertTrue(cmake.contains("copy_if_different"));
+        assertTrue(cmake.contains("${JPARSER_TESTLIB_TEAVMC_NATIVE_ROOT}/${JPARSER_TESTLIB_TEAVMC_PLATFORM}/shared/"));
+        assertTrue(cmake.contains("android/${ANDROID_ABI}"));
+        assertTrue(cmake.contains("required for future iOS-C layouts"));
+    }
+
+    @Test
     public void generatedCMakeUsesTheProducedMacArmStaticArchiveName() throws IOException {
         String cmake = TeaVMCPortableResourceWriter.generateCMake("TestLib");
 
-        assertTrue(cmake.contains("${JPARSER_TESTLIB_TEAVMC_NATIVE_ROOT}/mac_arm64/libTestLib64_.a"));
-        assertFalse(cmake.contains("${JPARSER_TESTLIB_TEAVMC_NATIVE_ROOT}/mac_arm64/libTestLibarm64_.a"));
+        assertTrue(cmake.contains("set(JPARSER_TESTLIB_TEAVMC_PLATFORM \"mac_arm64\")"));
+        assertTrue(cmake.contains("set(JPARSER_TESTLIB_TEAVMC_STATIC_FILE \"libTestLib64_.a\")"));
+        assertFalse(cmake.contains("libTestLibarm64_.a"));
     }
 
     private static void assertImportHeaderOptionsAppend(String cmake, String variablePrefix) {
         String source = "\"${" + variablePrefix + "_SOURCE}\"";
-        String importHeader = "${" + variablePrefix + "_IMPORT_HEADER}";
+        String importHeader = "${" + variablePrefix + "_ACTIVE_IMPORT_HEADER}";
 
-        assertTrue(cmake.contains(
-                "set_property(SOURCE " + source + " APPEND PROPERTY COMPILE_OPTIONS \"/FI" + importHeader + "\")"));
-        assertTrue(cmake.contains(
-                "set_property(SOURCE " + source + " APPEND PROPERTY COMPILE_OPTIONS \"-include\" \"" + importHeader + "\")"));
+        assertTrue(cmake.contains("set_property(SOURCE " + source + " APPEND PROPERTY"));
+        assertTrue(cmake.contains("COMPILE_OPTIONS \"/FI" + importHeader + "\""));
+        assertTrue(cmake.contains("COMPILE_OPTIONS \"-include\" \"" + importHeader + "\""));
         assertFalse(cmake.contains(
                 "set_source_files_properties(" + source + " PROPERTIES COMPILE_OPTIONS"));
     }

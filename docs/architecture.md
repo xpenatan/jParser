@@ -40,6 +40,12 @@ Runtime modules mirror the example and binding layout:
 - `runtime/android/runtime-android`: Android JNI packaging published as `runtime-android` with a dependency on `runtime-jni`, plus ABI payload artifacts such as `runtime-android_arm64_v8a`.
 - `runtime/android/runtime-android-c`: Android TeaVM C packaging published as `runtime-android-c` plus ABI payload artifacts such as `runtime-android-c_arm64_v8a`.
 
+Loader modules provide one public API with target substitutions:
+
+- `loader/loader-core`: `JParserLibraryLoader`, its listener, and shared loader options used by the public binding loaders.
+- `loader/loader-c`: TeaVM C's `emu.c` loader implementation plus the portable C/C++ loader header and source. `runtime-c` and generated binding C artifacts expose this module to TeaVM C applications.
+- `loader/loader-web`: the TeaVM web loader implementation.
+
 Split runtime Gradle project paths use the same artifact-style leaf names as the folders. Example split modules follow the same pattern, such as `:examples:TestLib:lib:shared:TestLib-jni` at `examples/TestLib/lib/shared/TestLib-jni` and `:examples:TestLib:lib:desktop:TestLib-desktop-jni` at `examples/TestLib/lib/desktop/TestLib-desktop-jni`.
 
 `runtime-web` owns jParser's TeaVM web substitution service. Binding web modules should depend on `runtime-web`; the runtime policy maps any class to `emu.web.<original-class>` or `gen.web.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.web` rule is evaluated before `gen.web`, so explicit emulation wins over generated substitutions. `loader-web` contains the web loader implementation classes but does not register a TeaVM substitution service itself.
@@ -79,7 +85,7 @@ Path-like plugin DSL methods keep string properties for compatibility, but provi
 
 `jParser_generate` composes build-runner switches from `JParserGenerationTarget` instead of raw `gen_jni`, `gen_ffm`, `gen_web`, and `gen_teavm_c` strings inside the plugin. The runner still receives the original string args at the boundary.
 
-The plugin included build follows the libfdx layout: it is not included as a root subproject, and its `settings.gradle.kts` must not include or remap root `:jParser:*` projects. It also must not rename the root project to the Maven artifact id; leave the included build name as the folder-derived `gradle-plugin`, and keep artifact naming in `build.gradle.kts`. Plugin code depends on the jParser generator/build artifacts instead of sourcing their classes into the plugin jar. `jParser/tools/gradle-plugin/buildSrc` sources the single root `buildSrc/src/main/kotlin/LibExt.kt` file for build-script constants. Do not add another `LibExt.kt` under `jParser/tools`; root `LibExt` is the only source of truth.
+The plugin included build follows the libfdx layout and is not included as a root subproject. Its `settings.gradle.kts` maps the generator modules and their transitive jParser modules from the repository into the plugin build, and `build.gradle.kts` uses direct project dependencies on `gen-build`, `gen-idl`, and `gen-build-tool`. Their build outputs are isolated below the plugin build directory so they do not collide with the same modules in the root build. The mirrored projects provide only the plugin classpath; their tests remain owned and executed by the root build. This guarantees that root IntelliJ sync and local plugin compilation use the current source tree rather than a previously published snapshot. The plugin publication still records those projects with their normal jParser Maven coordinates for external consumers. Leave the included build name as the folder-derived `gradle-plugin`, and keep artifact naming in `build.gradle.kts`. `jParser/tools/gradle-plugin/buildSrc` sources the single root `buildSrc/src/main/kotlin/LibExt.kt` file for build-script constants. Do not add another `LibExt.kt` under `jParser/tools`; root `LibExt` is the only source of truth.
 
 Example generated output modules use the jBox3D-style layout: `core`, `shared/<Lib>-jni`, `shared/<Lib>-c`, `desktop/<Lib>-desktop-ffm`, and `web/<Lib>-web`, with native packaging under `desktop/<Lib>-desktop-jni`, `desktop/<Lib>-desktop-c`, `android/<Lib>-android`, and `android/<Lib>-android-c`. The plugin fixtures keep their separate `plugin` modules, but set suffix overrides so generation targets this layout.
 
@@ -113,6 +119,19 @@ Shared-library examples use per-library plugin modules in `examples/SharedLib/li
 - IDL callback implementation glue is generated with TeaVM C imports/exports and C function pointers when callbacks are present.
 - TeaVM C substitution is generic and classpath-driven: `emu.c.*` replacements win over `gen.c.*` replacements, and classes without a matching replacement remain unchanged.
 
+TeaVM C native linkage is selected with the typed `TeaVMCLinkage` enum. `STATIC` is the compatibility default. `SHARED_LINKED` links the application against the generated shared library; the operating-system loader therefore resolves the symbols before application startup. `RUNTIME_LOADED` uses that shared library as a plugin while the application compiles a generated dispatch shim and the `loader-c` implementation. The public Java loader API remains `JParserLibraryLoader` in every mode. `JParserLibraryLoaderOptions.fileName` selects an exact physical payload name without automatic prefix or architecture-suffix decoration, and `path` selects its containing directory.
+
+Every generated TeaVM C library has a versioned API-table description derived from its exported C symbols. The runtime-loaded path resolves one generated provider symbol, then validates the logical library name, ABI version, API-table size, symbol count, and generated fingerprint before publishing the table to the dispatch shim. A failed validation leaves the shim unbound. A successfully bound logical library cannot be rebound to another file, and the loader deliberately provides no unload operation: native objects, callbacks, and function pointers may remain live for the process lifetime.
+
+Platform loading behavior is:
+
+- Windows: `LoadLibraryExW` and `GetProcAddress`; `SHARED_LINKED` additionally needs the DLL import library when linking the application.
+- Linux and macOS: `dlopen` with immediate, local symbol resolution and `dlsym`.
+- Android: the same `dlopen`/`dlsym` path, with ABI-specific `.so` payloads and no desktop architecture suffix added to the logical library name.
+- Future iOS C support: only native code bundled with and signed as part of the application is eligible. Arbitrary downloaded plugins are outside the supported model.
+
+Configuration is identical for the plugin and manual builder paths. The plugin uses `jParser { teaVMCLinkage.set(TeaVMCLinkage.RUNTIME_LOADED) }`; a manual builder assigns `BuildToolOptions.BuildToolParams.teaVMCLinkage` before constructing `BuildToolOptions`. The system-property runner also accepts `-Djparser.teaVMCLinkage=STATIC`, `SHARED_LINKED`, or `RUNTIME_LOADED` (case-insensitive).
+
 TeaVM C generation also writes portable native-build resources under the configured C module's `build/generated/jparser/resources/main` directory. The C module must add that directory to its main resources and make `processResources` depend on the generation task. The resulting main C jar contains:
 
 ```text
@@ -122,21 +141,58 @@ external_cpp/jparser/<library>/
   glue/TeaVMCGlue.cpp
   glue/TeaVMCGlue.h
   imports/teavmc_imports.h
+  teavmcabi/TeaVMCAbi.h
+  teavmcabi/TeaVMCDispatch.h
+  teavmcabi/TeaVMCDispatch.cpp
+  teavmcabi/teavmc_abi.properties
   custom/**
   runtime/RuntimeHelper.h
   source/**
 ```
 
-The CMake hook is consumer-neutral. Before including it, a native build can define:
+The separately published `loader-c` jar contributes the common resources that every mode needs:
 
-- `JPARSER_TEAVMC_APP_TARGET`: required application or library target that receives glue sources, include paths, and static link inputs.
+```text
+external_cpp/cmake/post_target/jparser_00_teavmc_loader.cmake
+external_cpp/jparser/loader/teavmc_loader.h
+external_cpp/jparser/loader/teavmc_loader.cpp
+```
+
+Generated binding jars add `resources=loader-c-` to their discovery marker, so gdx-teavm also extracts the versioned loader jar. `loader-c` deliberately has no second `META-INF/gdx-teavm.properties`: keeping a single marker avoids duplicate Java-resource failures when Android resolves `runtime-c` and its transitive loader dependency.
+
+Native payload artifacts add the archive, shared binary, and, on Windows, import library below `external_cpp/jparser/<library>/native/<platform>`. A consumer must extract the binding C jar, `loader-c`, and the selected native payload into one filesystem resource tree before configuring CMake. A shared binary cannot remain inside a jar at runtime; it must also be deployed as a physical file that the operating-system loader can open.
+
+The CMake hooks are consumer-neutral. The loader hook adds the common loader implementation once, and each binding hook adds its descriptor/dispatch source. Before including the hooks, a native build can define these global overrides:
+
+- `JPARSER_TEAVMC_APP_TARGET`: application or library target that receives the loader, generated sources, includes, and native link inputs. `TEAVM_APP_TARGET` remains its compatibility fallback.
 - `JPARSER_TEAVMC_GENERATED_SOURCE_ROOT`: optional root containing TeaVM-generated `.c` sources. It defaults to `${CMAKE_CURRENT_SOURCE_DIR}/c/src`.
+- `JPARSER_TEAVMC_LINKAGE`: optional `STATIC`, `SHARED_LINKED`, or `RUNTIME_LOADED` selection applied to every generated library hook that has no per-library override.
+- `JPARSER_TEAVMC_RUNTIME_OUTPUT_DIRECTORY`: optional post-build destination for shared libraries. It defaults to the application target's output directory.
+
+Each binding hook also accepts these per-library overrides, where `<LIBRARY>` is the upper-case CMake identifier generated from the logical library name:
+
 - `JPARSER_<LIBRARY>_TEAVMC_ROOT`: optional extracted resource root for one library. By default it is resolved relative to the CMake hook.
-- `JPARSER_<LIBRARY>_TEAVMC_LIBRARY`: optional explicit static archive path. Desktop archives are selected automatically from the packaged native resource tree; other platforms or custom layouts set this variable.
+- `JPARSER_<LIBRARY>_TEAVMC_LINKAGE`: optional linkage selection for this library. It wins over `JPARSER_TEAVMC_LINKAGE`; otherwise the hook uses the mode recorded when jParser generated it (`STATIC` by default).
+- `JPARSER_<LIBRARY>_TEAVMC_LIBRARY`: explicit static archive for `STATIC`.
+- `JPARSER_<LIBRARY>_TEAVMC_SHARED_LIBRARY`: explicit DLL, SO, or dylib for either dynamic mode.
+- `JPARSER_<LIBRARY>_TEAVMC_IMPORT_LIBRARY`: explicit Windows import library for `SHARED_LINKED`.
+- `JPARSER_<LIBRARY>_TEAVMC_RUNTIME_OUTPUT_DIRECTORY`: per-library shared-binary staging destination. It wins over the global runtime output directory.
 
-The hook appends each library's forced import header to the generated C sources, allowing `runtime-c` and multiple generated bindings to coexist. It requests the `cxx_std_17` compile feature without lowering a consumer already using C++20 or newer, and locates the matching platform static archive under `external_cpp/jparser/<library>/native/<platform>`. Windows TeaVM C archives use the release dynamic CRT ABI (`/MD`, iterator-debug level 0); the hook applies that ABI in both Debug and Release application configurations so one packaged archive works in either build type.
+Automatic payload selection uses these platform layouts:
 
-gdx-teavm remains a compatibility adapter rather than a requirement of this layout. Its classpath discovery reads the generated `META-INF/gdx-teavm.properties`, copies `external_cpp`, includes `external_cpp/cmake/post_target`, supplies `TEAVM_APP_TARGET` as the fallback application target, and uses the default generated-source root. Other TeaVM C launchers can extract the same resources, set the portable variables they need, and include the generated CMake hook directly.
+| Platform | Resource platform | Static file | Shared file | Windows import file |
+|---|---|---|---|---|
+| Windows x64 | `windows_x64` | `<Lib>64_.lib` | `<Lib>64.dll` | `<Lib>64.lib` |
+| Linux x64 | `linux_x64` | `lib<Lib>64_.a` | `lib<Lib>64.so` | -- |
+| macOS x64 | `mac_x64` | `lib<Lib>64_.a` | `lib<Lib>64.dylib` | -- |
+| macOS arm64 | `mac_arm64` | `lib<Lib>64_.a` | `lib<Lib>arm64.dylib` | -- |
+| Android (portable resource layout) | `android/${ANDROID_ABI}` | `lib<Lib>.a` | `lib<Lib>.so` | -- |
+
+For static archives, the hook checks `native/<platform>/<file>` and then `native/<platform>/static/<file>`. For dynamic payloads it checks `native/<platform>/shared/<file>` and then the direct platform path. jParser's current Android artifacts package shared libraries as AAR `jni/<abi>` entries rather than as portable `external_cpp` resources, so an Android CMake consumer must point `JPARSER_<LIBRARY>_TEAVMC_SHARED_LIBRARY` at its extracted/build-time `.so` and choose a staging destination that its application packaging includes. iOS currently has no automatic candidate layout; a future iOS C consumer must provide explicit payload overrides for code bundled with and signed as part of the application.
+
+`STATIC` compiles the glue into the application, links the archive, and forces the direct import header into TeaVM's generated C. `SHARED_LINKED` links the import/shared library, forces the direct import header, stages the shared binary, and adds `$ORIGIN` or `@loader_path` runtime search paths on Linux or macOS. `RUNTIME_LOADED` deliberately does not link the plugin; it forces the dispatch header, links the platform dynamic-loader support when required, and stages the plugin for `JParserLibraryLoader` to open. The hook requests `cxx_std_17` without lowering a newer consumer target. Windows TeaVM C artifacts use the release dynamic CRT ABI (`/MD`, iterator-debug level 0) in every application configuration.
+
+gdx-teavm remains a compatibility adapter rather than a requirement of this layout. Its classpath discovery reads the generated `META-INF/gdx-teavm.properties`, extracts supported `external_cpp` resources, includes `external_cpp/cmake/post_target`, supplies `TEAVM_APP_TARGET` as the fallback application target, and uses the default generated-source root. The current gdx-teavm extractor accepts source, header, CMake, and static-library extensions but not `.dll`, `.so`, or `.dylib`; it must be extended before `SHARED_LINKED` or `RUNTIME_LOADED` can consume jParser's packaged shared payloads through that adapter. Other TeaVM C launchers must extract the same resources and shared binaries, set the portable variables they need, and include all generated post-target hooks directly.
 
 ## Native Comment Block Contract (`base`)
 

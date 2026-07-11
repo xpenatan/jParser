@@ -73,23 +73,10 @@ public class JParserLibraryLoader {
             throw new RuntimeException("Should implement listener");
         }
         try {
-            String path = null;
-            if(options != null) {
-                path = options.path;
-            }
-
-            String prefix = "";
-            String suffix = "";
-            if (os != Os.Android) {
-                if(options == null || options.autoAddPrefix) {
-                    prefix = os.getLibPrefix();
-                }
-                if(options == null || options.autoAddSuffix) {
-                    suffix = architecture.toSuffix() + bitness.toSuffix();
-                }
-                suffix = suffix + "." + os.getLibExtension();
-            }
-            load(libraryName, path, prefix, suffix);
+            String path = options != null ? options.path : null;
+            String sourcePath = resolveSourcePath(libraryName, options);
+            boolean exactFileName = options != null && options.fileName != null && !options.fileName.isEmpty();
+            load(libraryName, path, sourcePath, exactFileName);
             listener.onLoad(true, null);
         }
         catch(Throwable e) {
@@ -97,7 +84,36 @@ public class JParserLibraryLoader {
         }
     }
 
-    private static void load(String libraryName, String path, String prefix, String suffix) throws IOException {
+    static String resolveSourcePath(String libraryName, JParserLibraryLoaderOptions options) {
+        String path = options != null ? options.path : null;
+        boolean exactFileName = options != null && options.fileName != null && !options.fileName.isEmpty();
+        if(path == null || (os == Os.Android && !exactFileName)) {
+            path = "";
+        }
+        else {
+            path += "/";
+            path = path.replace("//", "/");
+        }
+
+        if(exactFileName) {
+            return path + options.fileName;
+        }
+
+        String prefix = "";
+        String suffix = "";
+        if(os != Os.Android) {
+            if(options == null || options.autoAddPrefix) {
+                prefix = os.getLibPrefix();
+            }
+            if(options == null || options.autoAddSuffix) {
+                suffix = architecture.toSuffix() + bitness.toSuffix();
+            }
+            suffix = suffix + "." + os.getLibExtension();
+        }
+        return path + prefix + libraryName + suffix;
+    }
+
+    private static void load(String libraryName, String path, String sourcePath, boolean exactFileName) throws IOException {
         if (os == Os.IOS) return;
         if(path == null || os == Os.Android) {
             path = "";
@@ -108,15 +124,25 @@ public class JParserLibraryLoader {
         }
 
         final String fullLibraryName = path + libraryName;
-        final String sourcePath = path + prefix + libraryName + suffix;
 
         if(loadedLibraries.contains(fullLibraryName)) {
             // Already loaed. Just ignore.
             return;
         }
 
-        if (os == Os.Android)
-            System.loadLibrary(sourcePath);
+        if (os == Os.Android) {
+            if(exactFileName) {
+                File exactFile = new File(sourcePath);
+                if(!exactFile.isAbsolute()) {
+                    throw new JParserSharedLibraryLoadRuntimeException(
+                            "Android exact native-library fileName requires an absolute path: " + sourcePath);
+                }
+                System.load(exactFile.getAbsolutePath());
+            }
+            else {
+                System.loadLibrary(sourcePath);
+            }
+        }
         else {
             InputStream input = readFile(sourcePath);
             String sourceCrc = crc(input);

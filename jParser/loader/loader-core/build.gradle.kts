@@ -5,6 +5,7 @@ plugins {
 val moduleName = "loader-core"
 
 dependencies {
+    testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 
 java {

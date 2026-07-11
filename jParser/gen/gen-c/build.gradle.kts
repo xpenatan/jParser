@@ -18,6 +18,11 @@ java {
     targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
 }
 
+tasks.named<JavaCompile>("compileJava") {
+    // Enforce the published Java 8 API surface, not only Java 8 bytecode.
+    options.release.set(8)
+}
+
 java {
     withJavadocJar()
     withSourcesJar()

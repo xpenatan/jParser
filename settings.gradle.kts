@@ -37,6 +37,7 @@ include(":jParser:runtime:android:runtime-android-c")
 include(":jParser:runtime:plugin")
 
 include(":jParser:loader:loader-core")
+include(":jParser:loader:loader-c")
 include(":jParser:loader:loader-web")
 
 include(":examples:TestLib:lib:builder")

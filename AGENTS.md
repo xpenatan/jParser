@@ -57,6 +57,7 @@ Maintenance rule: when module/task names change, update `AGENTS.md` and related 
 - App platform modules in examples: `app:platforms:desktop-jni`, `app:platforms:desktop-ffm`, `app:platforms:desktop-c`, `app:platforms:web`, `app:platforms:android`, `app:platforms:android-c`.
 - Runtime generator module: `jParser:runtime:builder` (tasks like `runtime_helper_build_project_<target>`).
 - Gradle plugin included build: `jParser/tools/gradle-plugin` (plugin id `com.github.xpenatan.jparser`, artifact `jparser-gradle-plugin`).
+- TeaVM C loader modules: `jParser/loader/loader-core` provides the shared Java loader API, while `jParser/loader/loader-c` provides its `emu.c` substitution plus the portable C/C++ loader ABI and implementation.
 - Gradle plugin validation fixtures: `jParser/runtime/plugin`, `examples/TestLib/lib/plugin`, `examples/SharedLib/libA/plugin`, and `examples/SharedLib/libB/plugin`.
 - Benchmark module namespace: `jParser:benchmark:benchmark-core`.
 
@@ -65,6 +66,7 @@ Maintenance rule: when module/task names change, update `AGENTS.md` and related 
 - `JNI` generation: `CppCodeParser` + JNI C++ glue (`jlong`, `jint`, `JNIEnv*`).
 - `FFM` generation: `FFMCodeParser` + C ABI glue (`extern "C"`, `int64_t`, `int32_t`) with Java MethodHandle downcalls.
 - `BuildToolOptions.generateCPP` default `true`; `generateFFM` default `false`.
+- TeaVM C linkage uses `TeaVMCLinkage`: `STATIC` is the default, with `SHARED_LINKED` and `RUNTIME_LOADED` available for external native libraries. Runtime-loaded libraries bind once and stay loaded for the process lifetime.
 - Detailed toolchain/platform notes live in `docs/architecture.md` and `docs/commands.md`.
 
 ## 7) Native Block Convention (`base`)

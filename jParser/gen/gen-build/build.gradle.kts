@@ -9,6 +9,8 @@ dependencies {
     implementation(project(":jParser:gen:gen-idl"))
     implementation(project(":jParser:gen:gen-jni"))
     implementation(project(":jParser:gen:gen-ffm"))
+
+    testImplementation("junit:junit:${LibExt.jUnitVersion}")
 }
 
 java {

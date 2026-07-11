@@ -25,14 +25,29 @@ LibExt.isRelease = isReleaseIntent
 group = LibExt.groupId
 version = LibExt.libVersion
 
+subprojects {
+    group = LibExt.groupId
+    version = LibExt.libVersion
+    apply(plugin = "maven-publish")
+
+    val isolatedPath = path.removePrefix(":").replace(':', '/')
+    layout.buildDirectory.set(rootProject.layout.buildDirectory.dir("local-projects/$isolatedPath"))
+
+    // The root build owns generator test execution. These mirrored projects
+    // exist only to provide the local plugin compile/runtime classpath.
+    tasks.withType<Test>().configureEach {
+        enabled = false
+    }
+}
+
 base {
     archivesName.set(moduleName)
 }
 
 dependencies {
-    implementation("com.github.xpenatan.jParser:gen-build:${LibExt.libVersion}")
-    implementation("com.github.xpenatan.jParser:gen-idl:${LibExt.libVersion}")
-    implementation("com.github.xpenatan.jParser:gen-build-tool:${LibExt.libVersion}")
+    implementation(project(":jParser:gen:gen-build"))
+    implementation(project(":jParser:gen:gen-idl"))
+    implementation(project(":jParser:gen:gen-build-tool"))
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
