@@ -347,7 +347,7 @@ public class TeaVMCCodeParser extends FFMCodeParser {
             MethodDeclaration internalMethod = pair.b.a;
             String methodName = idlMethod.getCPPName();
             String functionClassName = teaVMCFunctionClassName(methodName);
-            String exportMethodName = teaVMCExportMethodName(methodName);
+            String exportMethodName = teaVMCExportMethodName(callbackClassName, methodName);
             addFunctionClass(classDeclaration, functionClassName, internalMethod);
             addExportMethod(classDeclaration, callbackClassName, exportMethodName, internalMethod);
             setupCall.append(", org.teavm.interop.Function.get(").append(functionClassName).append(".class, ").append(callbackClassName).append(".class, \"").append(exportMethodName).append("\")");
@@ -481,8 +481,8 @@ public class TeaVMCCodeParser extends FFMCodeParser {
         return "TEAVMC_" + methodName + "_Function";
     }
 
-    private String teaVMCExportMethodName(String methodName) {
-        return "teavmc_" + methodName;
+    static String teaVMCExportMethodName(String callbackClassName, String methodName) {
+        return "teavmc_" + callbackClassName + "_" + methodName;
     }
 
     private void addMemberIfMissing(com.github.javaparser.ast.body.ClassOrInterfaceDeclaration classDeclaration, String marker, String declaration) {

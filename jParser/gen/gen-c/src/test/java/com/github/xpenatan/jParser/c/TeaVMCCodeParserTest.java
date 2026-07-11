@@ -1,6 +1,8 @@
 package com.github.xpenatan.jParser.c;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.core.JParserItem;
@@ -22,6 +24,16 @@ public class TeaVMCCodeParserTest {
 
     @Rule
     public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    @Test
+    public void callbackExportsIncludeTheCallbackClassName() {
+        String adapterExport = TeaVMCCodeParser.teaVMCExportMethodName("RequestAdapterCallback", "OnCallback");
+        String deviceExport = TeaVMCCodeParser.teaVMCExportMethodName("RequestDeviceCallback", "OnCallback");
+
+        assertEquals("teavmc_RequestAdapterCallback_OnCallback", adapterExport);
+        assertEquals("teavmc_RequestDeviceCallback_OnCallback", deviceExport);
+        assertNotEquals(adapterExport, deviceExport);
+    }
 
     @Test
     public void generatesAlongsidePublicApiInGenCPackages() throws Exception {
