@@ -269,9 +269,9 @@ jParser projects follow a module pattern centered on source (`base`), generator 
 | [jImGui](https://github.com/xpenatan/jImGui) | Dear ImGui bindings for Java | Active |
 | [jJolt](https://github.com/xpenatan/jJolt) | Jolt Physics bindings for Java | Active |
 | [jLua](https://github.com/xpenatan/jLua) | Lua bindings for Java | Active |
-| [jBullet](https://github.com/xpenatan/jBullet) | Bullet Physics bindings for Java | Active |
 | [jBox3D](https://github.com/xpenatan/jBox3D) | Box3D bindings for Java | Active |
 | [jBox2D](https://github.com/xpenatan/jBox2D) | Box2D bindings for libGDX | Active |
+| [jBullet](https://github.com/xpenatan/jBullet) | Bullet Physics bindings for Java | Inactive |
 | [gdx-physx](https://github.com/xpenatan/gdx-physx) | PhysX bindings for libGDX | Inactive |
 
 ## Support
