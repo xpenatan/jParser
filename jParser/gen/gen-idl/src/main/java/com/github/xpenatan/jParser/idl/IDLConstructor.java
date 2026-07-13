@@ -46,11 +46,12 @@ public class IDLConstructor {
 
     public IDLConstructor clone() {
         IDLConstructor cloned = new IDLConstructor(idlFile, idlClass);
-        cloned.idlLine = idlLine;
+        cloned.idlLine = idlLine.copy();
         cloned.paramsLine = paramsLine;
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);
             IDLParameter clonedParam = parameter.clone();
+            clonedParam.idlConstructor = cloned;
             cloned.parameters.add(clonedParam);
         }
         return cloned;

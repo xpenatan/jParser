@@ -123,6 +123,8 @@ public class IDLParameter {
         clonedParam.isValue = isValue;
         clonedParam.isConst = isConst;
         clonedParam.isNewParam = isNewParam;
+        clonedParam.optional = optional;
+        clonedParam.idlClassOrEnum = idlClassOrEnum;
         clonedParam.tags.addAll(tags);
         return clonedParam;
     }

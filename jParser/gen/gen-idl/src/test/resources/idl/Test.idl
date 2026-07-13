@@ -52,6 +52,10 @@ interface ExtendClassTest {
 };
 ExtendClassTest implements NormalClassTest;
 
+interface OptionalMethodTest {
+    static NormalClassTest Create(optional long value); //[-NEW_OBJECT, RENAME=CreateRenamed]
+};
+
 enum EnumTest {
     "Test_Enum"
 };

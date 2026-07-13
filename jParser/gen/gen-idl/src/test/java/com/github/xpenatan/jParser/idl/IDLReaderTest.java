@@ -182,6 +182,23 @@ public class IDLReaderTest {
         Assert.assertEquals("NormalClassTest", idlClass.extendClass);
     }
 
+    @Test
+    public void test_optional_method_overload_preserves_return_contract() {
+        IDLReader idlReader = IDLReader.readIDL("src\\test\\resources\\idl\\Test.idl");
+        IDLClass idlClass = idlReader.getClass("OptionalMethodTest");
+
+        Assert.assertEquals(2, idlClass.methods.size());
+        IDLMethod fullMethod = idlClass.methods.get(0);
+        IDLMethod optionalOverload = idlClass.methods.get(1);
+
+        Assert.assertEquals(1, fullMethod.parameters.size());
+        Assert.assertEquals(0, optionalOverload.parameters.size());
+        Assert.assertTrue(optionalOverload.isReturnNewObject);
+        Assert.assertTrue(optionalOverload.isReturnMemoryOwned);
+        Assert.assertEquals("CreateRenamed", optionalOverload.getRenamedName());
+        Assert.assertEquals(fullMethod.returnClassType, optionalOverload.returnClassType);
+    }
+
 
 }
 

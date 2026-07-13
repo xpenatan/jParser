@@ -189,6 +189,7 @@ public class IDLMethod {
         cloned.idlLine = idlLine.copy();
         cloned.paramsLine = paramsLine;
         cloned.returnType = returnType;
+        cloned.returnClassType = returnClassType;
         cloned.name = name;
         cloned.skip = skip;
         cloned.isAny = isAny;
@@ -197,11 +198,16 @@ public class IDLMethod {
         cloned.isReturnArray = isReturnArray;
         cloned.isStaticMethod = isStaticMethod;
         cloned.isReturnRef = isReturnRef;
+        cloned.isReturnConst = isReturnConst;
+        cloned.isReturnNewObject = isReturnNewObject;
+        cloned.isReturnMemoryOwned = isReturnMemoryOwned;
+        cloned.operator = operator;
         cloned.bindingName = bindingName;
 
         for(int i = 0; i < parameters.size(); i++) {
             IDLParameter parameter = parameters.get(i);
             IDLParameter clonedParam = parameter.clone();
+            clonedParam.idlMethod = cloned;
             cloned.parameters.add(clonedParam);
         }
         return cloned;
