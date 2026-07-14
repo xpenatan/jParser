@@ -5,6 +5,8 @@ plugins {
 val moduleName = "gen-build"
 
 dependencies {
+    api(project(":jParser:api:api-core"))
+
     implementation(project(":jParser:gen:gen-core"))
     implementation(project(":jParser:gen:gen-idl"))
     implementation(project(":jParser:gen:gen-jni"))
