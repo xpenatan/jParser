@@ -67,7 +67,6 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         libSuffix = ".js";
 
         cppFlags.add("-c");
-        cppFlags.add("-flto");
 
         exportedRuntimeMethods.add("UTF8ToString");
         exportedRuntimeMethods.add("HEAP8");
