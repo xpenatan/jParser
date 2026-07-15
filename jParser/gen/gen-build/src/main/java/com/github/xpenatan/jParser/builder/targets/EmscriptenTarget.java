@@ -51,19 +51,16 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         this.tempBuildDir = "target/emscripten/";
         configureEmscriptenEnvironment();
 
-        String cppCompilerr = "";
+        String compilerCommand = "";
         if(language == SourceLanguage.C) {
-            cppCompilerr = EMSCRIPTEN_ROOT + "emcc";
+            compilerCommand = resolveEmscriptenTool(EMSCRIPTEN_ROOT, "emcc", isWindows());
         }
         else if(language == SourceLanguage.CPP) {
-            cppCompilerr = EMSCRIPTEN_ROOT + "em++";
-        }
-        if(isWindows()) {
-            cppCompilerr += ".bat";
+            compilerCommand = resolveEmscriptenTool(EMSCRIPTEN_ROOT, "em++", isWindows());
         }
 
-        cppCompiler.add(cppCompilerr);
-        linkerCompiler.add(cppCompilerr);
+        cppCompiler.add(compilerCommand);
+        linkerCompiler.add(compilerCommand);
         libSuffix = ".js";
 
         cppFlags.add("-c");
@@ -121,12 +118,7 @@ public class EmscriptenTarget extends DefaultBuildTarget {
             linkerCompiler.clear();
             linkerOutputCommand = "";
 
-            String cppCompilerr = EMSCRIPTEN_ROOT + "emar";
-            if(isWindows()) {
-                cppCompilerr += ".bat";
-            }
-
-            linkerCompiler.add(cppCompilerr);
+            linkerCompiler.add(resolveEmscriptenTool(EMSCRIPTEN_ROOT, "emar", isWindows()));
             linkerFlags.add("rcs");
             libSuffix = "_.a";
             if(IS_X64) {
@@ -199,6 +191,25 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         }
 
         return success;
+    }
+
+    static String resolveEmscriptenTool(String emscriptenRoot, String toolName, boolean windows) {
+        String toolPath = emscriptenRoot + toolName;
+        if(!windows) {
+            return toolPath;
+        }
+
+        String executablePath = toolPath + ".exe";
+        if(new File(executablePath).isFile()) {
+            return executablePath;
+        }
+
+        String batchPath = toolPath + ".bat";
+        if(new File(batchPath).isFile()) {
+            return batchPath;
+        }
+
+        return toolPath;
     }
 
     private void createSideModule(CustomFileDescriptor jsglueDir, String libName, CustomFileDescriptor libDir) {
