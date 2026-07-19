@@ -16,11 +16,19 @@ import java.util.ArrayList;
 
 public class BuildRuntimeHelper {
 
+    private static final String WINDOWS_COMPILE_FLAG_PROPERTY = "jparser.teaVMCWindowsCompileFlag";
+    private static final String WINDOWS_OUTPUT_PREFIX_PROPERTY = "jparser.teaVMCWindowsOutputPrefix";
+    private static String teaVMCWindowsCompileFlag = "";
+    private static String teaVMCWindowsOutputPrefix = "";
+
     public static void main(String[] args) throws Exception {
         String libName = "runtime";
         String basePackage = "com.github.xpenatan.jparser.runtime";
 
         WindowsMSVCTarget.DEBUG_BUILD = false;
+        teaVMCWindowsCompileFlag = System.getProperty(WINDOWS_COMPILE_FLAG_PROPERTY, "").trim();
+        teaVMCWindowsOutputPrefix = normalizeOutputPrefix(
+                System.getProperty(WINDOWS_OUTPUT_PREFIX_PROPERTY, ""));
         JParser.CREATE_RUNTIME_HELPER = true;
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
 
@@ -116,10 +124,11 @@ public class BuildRuntimeHelper {
 
         // Make a static library
         WindowsMSVCTarget compileStaticTarget = new WindowsMSVCTarget();
+        applyTeaVMCWindowsOutputPrefix(compileStaticTarget, api);
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std:c++17");
-        applyTeaVMCWindowsRuntime(compileStaticTarget, api);
+        applyTeaVMCWindowsCompileFlag(compileStaticTarget, api);
         applyFFMWindowsCompileFlags(compileStaticTarget, isFFM, ffmNativeBuildConfig);
         compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/runtime/RuntimeHelper.cpp");
@@ -127,13 +136,15 @@ public class BuildRuntimeHelper {
         multiTarget.add(compileStaticTarget);
 
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
+        applyTeaVMCWindowsOutputPrefix(linkTarget, api);
         linkTarget.libDirSuffix += api;
         setupGlueCode(linkTarget, api, libBuildCPPPath);
         linkTarget.cppFlags.add("-std:c++17");
-        applyTeaVMCWindowsRuntime(linkTarget, api);
+        applyTeaVMCWindowsCompileFlag(linkTarget, api);
         applyFFMWindowsCompileFlags(linkTarget, isFFM, ffmNativeBuildConfig);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
-        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/"
+                + teaVMCWindowsPathPrefix(api) + "windows/vc/" + api + "/" + op.libName + "64_.lib");
         linkTarget.linkerFlags.add("-DLL");
         applyFFMWindowsLinkFlags(linkTarget, isFFM, ffmNativeBuildConfig);
         multiTarget.add(linkTarget);
@@ -368,10 +379,34 @@ public class BuildRuntimeHelper {
         }
     }
 
-    private static void applyTeaVMCWindowsRuntime(WindowsMSVCTarget target, String api) {
-        if(api.equals("teavm_c") && !target.cppFlags.contains("/MT")) {
-            target.cppFlags.add("/MT");
+    private static void applyTeaVMCWindowsCompileFlag(WindowsMSVCTarget target, String api) {
+        if(api.equals("teavm_c") && !teaVMCWindowsCompileFlag.isEmpty()) {
+            addFlagIfMissing(target.cppFlags, teaVMCWindowsCompileFlag);
         }
+    }
+
+    private static void applyTeaVMCWindowsOutputPrefix(WindowsMSVCTarget target, String api) {
+        String prefix = teaVMCWindowsPathPrefix(api);
+        if(prefix.isEmpty()) {
+            return;
+        }
+        target.libDirSuffix = prefix + target.libDirSuffix;
+        target.tempBuildDir = "target/" + prefix + "windows/vc/";
+    }
+
+    private static String teaVMCWindowsPathPrefix(String api) {
+        return api.equals("teavm_c") ? teaVMCWindowsOutputPrefix : "";
+    }
+
+    private static String normalizeOutputPrefix(String value) {
+        String normalized = value == null ? "" : value.trim().replace('\\', '/');
+        while(normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+        while(normalized.endsWith("/")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized.isEmpty() ? "" : normalized + "/";
     }
 
     private static void applyFFMWindowsLinkFlags(WindowsMSVCTarget target, boolean isFFM, FFMNativeBuildConfig ffmNativeBuildConfig) {

@@ -78,15 +78,35 @@ public class TeaVMCPortableResourceWriterTest {
     }
 
     @Test
-    public void generatedCMakeMatchesThePackagedWindowsArchiveAbiInEveryConfiguration() throws IOException {
+    public void generatedCMakeNeverChangesTheConsumerRuntimeSelection() throws IOException {
         String cmake = TeaVMCPortableResourceWriter.generateCMake("TestLib");
 
-        assertTrue(cmake.contains(
+        assertFalse(cmake.contains(
                 "target_compile_options(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"/MT\")"));
         assertFalse(cmake.contains(
                 "target_compile_options(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"/MD\")"));
-        assertTrue(cmake.contains(
+        assertFalse(cmake.contains(
                 "target_compile_definitions(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"_ITERATOR_DEBUG_LEVEL=0\")"));
+        assertFalse(cmake.contains("JPARSER_TEAVMC_MSVC_RUNTIME"));
+        assertFalse(cmake.contains(
+                "set_property(TARGET ${JPARSER_TEAVMC_APP_TARGET} PROPERTY MSVC_RUNTIME_LIBRARY"));
+        assertTrue(cmake.contains(
+                "get_target_property(JPARSER_TESTLIB_TEAVMC_MSVC_RUNTIME_VALUE"));
+        assertTrue(cmake.contains("CMAKE_MSVC_RUNTIME_LIBRARY"));
+        assertTrue(cmake.contains(
+                "\"MultiThreaded$<$<CONFIG:Debug>:Debug>DLL\""));
+    }
+
+    @Test
+    public void generatedCMakeSearchesRuntimeSpecificWindowsPayloadsBeforeLegacyPaths() throws IOException {
+        String cmake = TeaVMCPortableResourceWriter.generateCMake("TestLib");
+
+        String runtimeSpecific = "${JPARSER_TESTLIB_TEAVMC_PLATFORM}/${JPARSER_TESTLIB_TEAVMC_MSVC_RUNTIME_SUBDIR}/static/${JPARSER_TESTLIB_TEAVMC_STATIC_FILE}";
+        String legacy = "${JPARSER_TESTLIB_TEAVMC_PLATFORM}/${JPARSER_TESTLIB_TEAVMC_STATIC_FILE}";
+        assertTrue(cmake.contains(runtimeSpecific));
+        assertTrue(cmake.indexOf(runtimeSpecific) < cmake.indexOf(legacy));
+        assertTrue(cmake.contains(
+                "${JPARSER_TESTLIB_TEAVMC_PLATFORM}/${JPARSER_TESTLIB_TEAVMC_MSVC_RUNTIME_SUBDIR}/shared/${JPARSER_TESTLIB_TEAVMC_SHARED_FILE}"));
     }
 
     @Test

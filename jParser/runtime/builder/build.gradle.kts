@@ -33,12 +33,31 @@ tasks.register<JavaExec>("runtime_helper_build_project_web_wasm") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-tasks.register<JavaExec>("runtime_helper_build_project_windows64_teavm_c") {
+val runtimeTeaVMCWindowsMT = tasks.register<JavaExec>("runtime_helper_build_project_windows64_teavm_c_mt") {
     group = "jParser"
-    description = "Generate TeaVM C code + compile native for Windows"
+    description = "Generate TeaVM C code + compile Windows natives with /MT"
     mainClass.set(mainClassName)
     args = mutableListOf("gen_teavm_c", "windows64_teavm_c")
+    systemProperty("jparser.teaVMCWindowsCompileFlag", "/MT")
+    systemProperty("jparser.teaVMCWindowsOutputPrefix", "mt")
     classpath = sourceSets["main"].runtimeClasspath
+}
+
+val runtimeTeaVMCWindowsMD = tasks.register<JavaExec>("runtime_helper_build_project_windows64_teavm_c_md") {
+    group = "jParser"
+    description = "Generate TeaVM C code + compile Windows natives with /MD"
+    mainClass.set(mainClassName)
+    args = mutableListOf("gen_teavm_c", "windows64_teavm_c")
+    systemProperty("jparser.teaVMCWindowsCompileFlag", "/MD")
+    systemProperty("jparser.teaVMCWindowsOutputPrefix", "md")
+    classpath = sourceSets["main"].runtimeClasspath
+    mustRunAfter(runtimeTeaVMCWindowsMT)
+}
+
+tasks.register("runtime_helper_build_project_windows64_teavm_c") {
+    group = "jParser"
+    description = "Build both /MT and /MD Windows TeaVM C runtime variants"
+    dependsOn(runtimeTeaVMCWindowsMT, runtimeTeaVMCWindowsMD)
 }
 
 tasks.register<JavaExec>("runtime_helper_build_project_linux64_teavm_c") {

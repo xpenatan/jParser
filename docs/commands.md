@@ -21,6 +21,8 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ./gradlew :jParser:runtime:builder:runtime_helper_build_project_mac64_ffm
 ./gradlew :jParser:runtime:builder:runtime_helper_build_project_macArm_ffm
 ./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_teavm_c
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_teavm_c_mt
+./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_teavm_c_md
 ./gradlew :jParser:runtime:builder:runtime_helper_build_project_linux64_teavm_c
 ./gradlew :jParser:runtime:builder:runtime_helper_build_project_mac64_teavm_c
 ./gradlew :jParser:runtime:builder:runtime_helper_build_project_macArm_teavm_c
@@ -44,6 +46,8 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_mac64_ffm
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_macArm_ffm
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_teavm_c
+./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_teavm_c_mt
+./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_teavm_c_md
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_linux64_teavm_c
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_mac64_teavm_c
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_macArm_teavm_c
@@ -52,7 +56,7 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_web_wasm
 ```
 
-The aggregate `runtime_helper_build_project` and `TestLib_build_project` tasks generate core, JNI, FFM, TeaVM web, and TeaVM C outputs. Platform-specific `*_teavm_c` tasks also compile that platform's native output; use them when producing a TeaVM C native payload jar.
+The aggregate `runtime_helper_build_project` and `TestLib_build_project` tasks generate core, JNI, FFM, TeaVM web, and TeaVM C outputs. Platform-specific `*_teavm_c` tasks also compile that platform's native output; use them when producing a TeaVM C native payload jar. The unsuffixed Windows runtime TeaVM C task builds both MT and MD variants; use its `_mt` or `_md` task when only one CRT family is needed. TestLib's plugin tasks demonstrate the general target-variant API and must both run before packaging its dual-runtime Windows native jar.
 
 The same `*_teavm_c` task names are used for every native linkage mode. Select the mode in the Gradle plugin extension:
 
@@ -65,6 +69,22 @@ jParser {
 ```
 
 For a manual `BuilderTool` build, assign `BuildToolOptions.BuildToolParams.teaVMCLinkage` before creating `BuildToolOptions`. Builds launched through `JParserBuildRunner` may instead pass `-Djparser.teaVMCLinkage=RUNTIME_LOADED`. `STATIC` is used when no value is configured.
+
+Windows producer CRT selection is independent from linkage and uses the same generic compiler hooks as every other platform:
+
+```kotlin
+import com.github.xpenatan.jParser.gradle.JParserTargets
+
+jParser {
+    native {
+        target(JParserTargets.WINDOWS64_TEAVM_C) {
+            compileFlag("/MD")
+        }
+    }
+}
+```
+
+jParser adds no CRT flag when none is supplied. The system-property runner accepts `-Djparser.native.windows64_teavm_c.compileFlags=/MD` when `windows64_teavm_c` is listed in `jparser.native.targets`. The same `compileFlag(...)`/`compileFlags` mechanism accepts GCC, Clang, Android NDK, or Apple toolchain flags for Linux, macOS, Android, and iOS targets. CMake consumers use the standard `CMAKE_MSVC_RUNTIME_LIBRARY` setting; generated hooks preserve it and use CMake's default MD family only for payload lookup when no selection exists.
 
 ### TeaVM C jar packaging checks
 

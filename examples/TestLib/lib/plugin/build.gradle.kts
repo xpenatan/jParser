@@ -16,7 +16,6 @@ val defaultNativeTargets = listOf(
     JParserTargets.LINUX64_FFM,
     JParserTargets.MAC64_FFM,
     JParserTargets.MAC_ARM_FFM,
-    JParserTargets.WINDOWS64_TEAVM_C,
     JParserTargets.LINUX64_TEAVM_C,
     JParserTargets.MAC64_TEAVM_C,
     JParserTargets.MAC_ARM_TEAVM_C,
@@ -47,6 +46,12 @@ jParser {
     native {
         defaultNativeTargets.forEach { targetName ->
             target(targetName) {}
+        }
+        targetVariant(JParserTargets.WINDOWS64_TEAVM_C, "mt") {
+            compileFlag("/MT")
+        }
+        targetVariant(JParserTargets.WINDOWS64_TEAVM_C, "md") {
+            compileFlag("/MD")
         }
         target(JParserTargets.WEB_WASM) {
             linkerFlag("-Wl,--export-all")

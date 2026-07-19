@@ -17,15 +17,29 @@ public class DefaultBuildTargetFactoryTest {
     public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
-    public void windowsTeaVMCUsesTheCMakeCompatibleStaticRuntime() throws Exception {
+    public void windowsTeaVMCDoesNotForceARuntimeFlag() throws Exception {
         ArrayList<BuildMultiTarget> targets = targetsFor("gen_teavm_c", "windows64_teavm_c");
 
         assertTrue(targets.size() == 1);
         assertTrue(targets.get(0).multiTarget.size() == 2);
         for(int i = 0; i < targets.get(0).multiTarget.size(); i++) {
             DefaultBuildTarget target = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
-            assertTrue(target.cppFlags.contains("/MT"));
             assertFalse(target.cppFlags.contains("/MD"));
+            assertFalse(target.cppFlags.contains("/MT"));
+        }
+    }
+
+    @Test
+    public void windowsTeaVMCPassesThroughRawCompilerFlags() throws Exception {
+        DefaultBuildTargetConfig config = new DefaultBuildTargetConfig();
+        config.target("windows64_teavm_c").compileFlags.add("/MD");
+
+        ArrayList<BuildMultiTarget> targets = targetsFor(config, "gen_teavm_c", "windows64_teavm_c");
+
+        for(int i = 0; i < targets.get(0).multiTarget.size(); i++) {
+            DefaultBuildTarget target = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
+            assertTrue(target.cppFlags.contains("/MD"));
+            assertFalse(target.cppFlags.contains("/MT"));
         }
     }
 

@@ -101,7 +101,6 @@ public class BuildLibA {
         compileStaticTarget.libDirSuffix += api;
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("/std:c++17");
-        compileStaticTarget.cppFlags.add("/MT");
         compileStaticTarget.cppFlags.add("/DLIBA_EXPORTS");
         compileStaticTarget.cppFlags.add(config);
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
@@ -114,7 +113,6 @@ public class BuildLibA {
         linkTarget.libDirSuffix += api;
         linkTarget.setupTeaVMCGlueCode(libBuildCPPPath);
         linkTarget.cppFlags.add("/std:c++17");
-        linkTarget.cppFlags.add("/MT");
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib");

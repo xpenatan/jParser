@@ -34,4 +34,33 @@ class JParserBuildTaskTest {
 
         assertEquals(TeaVMCLinkage.RUNTIME_LOADED, request.params.teaVMCLinkage)
     }
+
+    @Test
+    fun compilerFlagsFlowFromTargetHooksWithoutPlatformSpecificPolicy() {
+        val project = ProjectBuilder.builder().build()
+        val extension = JParserExtension(project, project.objects).apply {
+            libName.set("TestLib")
+            modulePrefix.set("")
+            packageName.set("com.example.testlib")
+            runtimeHelperMode.set(true)
+            native.target(JParserTargets.WINDOWS64_TEAVM_C) {
+                compileFlag("/MD")
+            }
+        }
+        val task = project.tasks.register("testJParserCompileFlags", JParserBuildTask::class.java).get().apply {
+            this.extension = extension
+            buildArgs.set(emptyList())
+            targetArg.set(JParserTargets.WINDOWS64_TEAVM_C.targetName)
+            targetVariant.set("")
+            generateCore.set(true)
+        }
+
+        val createRequest = JParserBuildTask::class.java.getDeclaredMethod("createRequest")
+        createRequest.isAccessible = true
+        val request = createRequest.invoke(task) as JParserBuildRequest
+
+        assertEquals(listOf("/MD"),
+            request.targetConfig.target(JParserTargets.WINDOWS64_TEAVM_C.targetName).compileFlags)
+        assertEquals(emptyList<String>(), request.targetConfig.globalHooks.compileFlags)
+    }
 }

@@ -18,6 +18,7 @@
 - [How It Works](#how-it-works)
 - [Supported Targets](#supported-targets)
 - [TeaVM C Native Linkage](#teavm-c-native-linkage)
+- [Windows MSVC Runtime](#windows-msvc-runtime)
 - [Code Block Convention](#code-block-convention)
 - [WebIDL Bindings](#webidl-bindings)
 - [IDLBase API](#idlbase-api)
@@ -117,6 +118,31 @@ JParserLibraryLoader.load("webgpu", options, listener);
 ```
 
 Native binaries inside a dependency jar are build resources, not runtime files. A TeaVM C launcher or native-resource consumer must extract shared binaries to the filesystem and deploy them where the platform loader can open them. The generated portable CMake hook performs native target wiring and stages selected shared binaries for CMake-based consumers.
+
+### Windows MSVC Runtime
+
+The Windows CRT family is a separate choice from TeaVM C native linkage. A static jParser library may be compiled with either `/MT` or `/MD`, and a DLL may also use either family. All static libraries linked into one final target must use a compatible CRT setting.
+
+For producer builds, jParser does not add a CRT flag by default. Producers can make the choice per Windows target or target variant:
+
+```kotlin
+import com.github.xpenatan.jParser.gradle.JParserTargets
+
+jParser {
+    native {
+        targetVariant(JParserTargets.WINDOWS64_TEAVM_C, "mt") {
+            compileFlag("/MT")
+        }
+        targetVariant(JParserTargets.WINDOWS64_TEAVM_C, "md") {
+            compileFlag("/MD")
+        }
+    }
+}
+```
+
+The variants produce separate `build/c++/libs/mt/...` and `build/c++/libs/md/...` trees. There is no runtime-specific jParser API: `compileFlag(...)` and `compileFlags` pass ordinary compiler options through unchanged. Manual factory users add them to `DefaultBuildTargetConfig.TargetHooks.compileFlags`. Linux, macOS, Android, and iOS use the same hooks for their own compiler and toolchain options; `/MT` and `/MD` themselves are MSVC-only.
+
+TeaVM C consumers select the runtime with standard CMake configuration, for example `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL` for MD or `MultiThreaded` for MT. Generated jParser hooks never change that setting. They only inspect it to choose a matching packaged Windows payload; when it is unset, the hook selects the MD payload matching CMake's default MSVC runtime family.
 
 ## Code Block Convention
 

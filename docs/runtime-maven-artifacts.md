@@ -66,7 +66,7 @@ TeaVM C artifacts use separate modules for generated Java and platform native pa
 - `runtime-android-c_armeabi_v7a`
 - `runtime-android-c_arm64_v8a`
 
-The main `runtime-c` artifact is published from `jParser/runtime/shared/runtime-c`. `runtime-core` remains its public API; `runtime-c` exposes that artifact and contributes the generated `gen.c.*` implementations, TeaVM C substitution service, glue/import headers, and portable CMake resources. Desktop native split artifacts are published from `jParser/runtime/desktop/runtime-desktop-c` and contain one static archive plus a gdx-teavm discovery marker for that platform. Android TeaVM C publishes a main `runtime-android-c` AAR from `jParser/runtime/android/runtime-android-c` with a dependency on `runtime-c`, plus native split AARs for each ABI.
+The main `runtime-c` artifact is published from `jParser/runtime/shared/runtime-c`. `runtime-core` remains its public API; `runtime-c` exposes that artifact and contributes the generated `gen.c.*` implementations, TeaVM C substitution service, glue/import headers, and portable CMake resources. Desktop native split artifacts are published from `jParser/runtime/desktop/runtime-desktop-c`. The Windows split contains both MT and MD static/shared payload sets; other desktop splits contain their platform payloads. Every split also carries a gdx-teavm discovery marker. Android TeaVM C publishes a main `runtime-android-c` AAR from `jParser/runtime/android/runtime-android-c` with a dependency on `runtime-c`, plus native split AARs for each ABI.
 
 `jParser/runtime/android/runtime-android-c` builds local native-only AAR files with the `runtime-android-c-<abi>` archive base name. Maven publication uses the public artifact IDs `runtime-android-c_<abi>`.
 
@@ -82,7 +82,7 @@ TeaVM C is stricter:
 
 - `runtime-core` and each binding's `core` artifact remain the public API.
 - `runtime-c` contains `gen.c.*` target implementations and portable build resources, but no platform native archive.
-- `runtime-desktop-c_<platform>` artifacts contain one static native archive at the portable resource path plus `META-INF/gdx-teavm.properties`; they contain no Java classes.
+- `runtime-desktop-c_<platform>` artifacts contain native payloads at the portable resource path plus `META-INF/gdx-teavm.properties`; they contain no Java classes. The Windows artifact includes `windows_x64/mt/{static,shared}` and `windows_x64/md/{static,shared}` payloads, plus the legacy direct MT path for compatibility.
 - Native payloads are not bundled into the main `runtime-c` jar.
 - Android does not consume desktop native artifacts; it uses `jParser/runtime/android/runtime-android-c`.
 
@@ -121,13 +121,14 @@ The generated CMake hook accepts portable integration variables:
 ```cmake
 set(JPARSER_TEAVMC_APP_TARGET my_teavm_application)
 set(JPARSER_TEAVMC_GENERATED_SOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/generated-c") # optional
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL") # optional standard CMake setting (MD)
 # These per-library overrides are optional for custom extraction/platform layouts:
 set(JPARSER_RUNTIME_TEAVMC_ROOT "/path/to/external_cpp/jparser/runtime")
 set(JPARSER_RUNTIME_TEAVMC_LIBRARY "/path/to/libruntime.a")
 include(path/to/external_cpp/cmake/post_target/jparser_runtime_teavm_c.cmake)
 ```
 
-`JPARSER_TEAVMC_APP_TARGET` identifies the target that receives generated glue and static link inputs. `JPARSER_TEAVMC_GENERATED_SOURCE_ROOT` identifies the TeaVM-generated C tree and defaults to `${CMAKE_CURRENT_SOURCE_DIR}/c/src`. Each rendered hook also accepts `JPARSER_<LIBRARY>_TEAVMC_ROOT` and `JPARSER_<LIBRARY>_TEAVMC_LIBRARY`; these allow relocated resources and explicit archives on platforms outside the automatic desktop candidate set. The hook requests `cxx_std_17` without downgrading newer C++ targets. Windows TeaVM C archives use the release static CRT ABI (`/MT`, iterator-debug level 0), and the hook applies that ABI to both Debug and Release consumers so `STATIC` applications do not require the MSVC runtime DLLs. gdx-teavm discovers and includes the same hook automatically; its `TEAVM_APP_TARGET` variable is supported as a compatibility fallback, so direct CMake consumers do not depend on gdx-teavm.
+`JPARSER_TEAVMC_APP_TARGET` identifies the target that receives generated glue and static link inputs. `JPARSER_TEAVMC_GENERATED_SOURCE_ROOT` identifies the TeaVM-generated C tree and defaults to `${CMAKE_CURRENT_SOURCE_DIR}/c/src`. Each rendered hook also accepts `JPARSER_<LIBRARY>_TEAVMC_ROOT` and `JPARSER_<LIBRARY>_TEAVMC_LIBRARY`; these allow relocated resources and explicit archives on platforms outside the automatic desktop candidate set. The hook requests `cxx_std_17` without downgrading newer C++ targets and never selects a Windows CRT. Consumers configure the standard target or `CMAKE_MSVC_RUNTIME_LIBRARY` setting themselves. The hook only inspects that existing setting to select the corresponding packaged payload; if neither is set, it selects the MD payload that matches CMake's default MSVC runtime family without changing the target. gdx-teavm discovers and includes the same hook automatically; its `TEAVM_APP_TARGET` variable is supported as a compatibility fallback, so direct CMake consumers do not depend on gdx-teavm.
 
 ## Artifact Examples
 
