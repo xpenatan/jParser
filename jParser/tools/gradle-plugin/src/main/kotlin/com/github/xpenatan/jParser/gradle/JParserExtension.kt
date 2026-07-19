@@ -439,6 +439,7 @@ open class JParserNamedTargetHooks @Inject constructor(
         objects.domainObjectContainer(JParserAndroidTargetHooks::class.java) { name ->
             objects.newInstance(JParserAndroidTargetHooks::class.java, name, objects)
         }
+    val consumer: JParserTeaVMCConsumerHooks = objects.newInstance(JParserTeaVMCConsumerHooks::class.java, objects)
 
     override fun getName(): String = targetName
 
@@ -448,6 +449,11 @@ open class JParserNamedTargetHooks @Inject constructor(
 
     fun androidTarget(target: AndroidTarget.Target, action: Action<in JParserAndroidTargetHooks>) {
         androidTarget(target.name, action)
+    }
+
+    fun consumer(action: Action<in JParserTeaVMCConsumerHooks>) {
+        consumer.enabled.set(true)
+        action.execute(consumer)
     }
 }
 
@@ -462,6 +468,7 @@ open class JParserNativeTargetVariantHooks @Inject constructor(
         }
     val targetName: Property<String> = objects.property(String::class.java)
     val variantName: Property<String> = objects.property(String::class.java)
+    val consumer: JParserTeaVMCConsumerHooks = objects.newInstance(JParserTeaVMCConsumerHooks::class.java, objects)
 
     /**
      * Whether the base target hooks should be applied before this variant's hooks.
@@ -480,7 +487,59 @@ open class JParserNativeTargetVariantHooks @Inject constructor(
     fun androidTarget(target: AndroidTarget.Target, action: Action<in JParserAndroidTargetHooks>) {
         androidTarget(target.name, action)
     }
+
+    fun consumer(action: Action<in JParserTeaVMCConsumerHooks>) {
+        consumer.enabled.set(true)
+        action.execute(consumer)
+    }
 }
+
+/** Portable native inputs needed when the generated TeaVM C binding is linked into an application. */
+open class JParserTeaVMCConsumerHooks @Inject constructor(
+    objects: ObjectFactory
+) {
+    val enabled: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
+    val selectorResources: ListProperty<String> = objects.listProperty(String::class.java).convention(emptyList())
+    val headerDirs: ListProperty<String> = objects.listProperty(String::class.java).convention(emptyList())
+    val compileDefinitions: ListProperty<String> = objects.listProperty(String::class.java).convention(emptyList())
+    val compileFlags: ListProperty<String> = objects.listProperty(String::class.java).convention(emptyList())
+    val staticLinkLibraries: ListProperty<String> = objects.listProperty(String::class.java).convention(emptyList())
+    val staticLinkerFlags: ListProperty<String> = objects.listProperty(String::class.java).convention(emptyList())
+    val staticLibraries = mutableListOf<JParserTeaVMCConsumerStaticLibrary>()
+
+    fun selectorResource(value: String) {
+        selectorResources.add(value)
+    }
+
+    fun headerDir(value: String) {
+        headerDirs.add(value)
+    }
+
+    fun compileDefinition(value: String) {
+        compileDefinitions.add(value)
+    }
+
+    fun compileFlag(value: String) {
+        compileFlags.add(value)
+    }
+
+    fun staticLibrary(resourcePath: String, overrideVariable: String = "") {
+        staticLibraries.add(JParserTeaVMCConsumerStaticLibrary(resourcePath, overrideVariable))
+    }
+
+    fun staticLinkLibrary(value: String) {
+        staticLinkLibraries.add(value)
+    }
+
+    fun staticLinkerFlag(value: String) {
+        staticLinkerFlags.add(value)
+    }
+}
+
+data class JParserTeaVMCConsumerStaticLibrary(
+    val resourcePath: String,
+    val overrideVariable: String
+)
 
 /** Android ABI-specific hooks under an Android target. */
 open class JParserAndroidTargetHooks @Inject constructor(

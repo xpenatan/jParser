@@ -34,6 +34,9 @@ Execution details and checklists: `docs/workflows.md`.
 - `docs/workflows.md`: editing workflow, verification minimum, and handoff checklist.
 - `docs/architecture.md`: pipeline, module map, JNI/FFM/TeaVM internals.
 - `docs/commands.md`: build/run/benchmark command matrix.
+- `docs/getting-started.md`: user-facing project layout and first builds.
+- `docs/binding-authoring.md`: native directives, WebIDL, and ownership reference.
+- `docs/teavm-c.md`: TeaVM C linkage, packaging, and consumer configuration.
 - `settings.gradle.kts`: root module source of truth.
 
 When architecture, module names, tasks, generated-output rules, or public commands change, update the canonical docs and user-facing references in the same change.
@@ -85,5 +88,8 @@ Canonical command matrices live in `docs/commands.md`.
 - `docs/workflows.md` - editing rules, verification minimum, handoff checklist.
 - `docs/architecture.md` - pipeline, module map, JNI/FFM/TeaVM internals.
 - `docs/commands.md` - full build/run/benchmark command matrix.
+- `docs/getting-started.md` - project layout and first TestLib builds.
+- `docs/binding-authoring.md` - directive, WebIDL, and ownership guide.
+- `docs/teavm-c.md` - native TeaVM C linkage and packaging guide.
 
 Keep this file concise. Put verbose command tables and background detail in `docs/`.

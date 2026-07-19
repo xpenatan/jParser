@@ -3,6 +3,7 @@ package com.github.xpenatan.jParser.gradle
 import com.github.xpenatan.jParser.builder.tool.DefaultBuildTargetConfig
 import com.github.xpenatan.jParser.builder.tool.JParserBuildRequest
 import com.github.xpenatan.jParser.builder.tool.JParserBuildRunner
+import com.github.xpenatan.jParser.builder.tool.TeaVMCConsumerConfig
 import com.github.xpenatan.jParser.builder.targets.AndroidTarget
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -82,6 +83,7 @@ abstract class JParserBuildTask : DefaultTask() {
         request.additionalSourceDirs.addAll(extension.additionalSourceDirs.get().map(::normalizeProjectPath))
 
         configureTargetConfig(request, request.targetConfig)
+        configureTeaVMCConsumers(request)
         return request
     }
 
@@ -138,6 +140,69 @@ abstract class JParserBuildTask : DefaultTask() {
                 copyNamedTargetHooks(hooks, config)
             }
         }
+    }
+
+    private fun configureTeaVMCConsumers(request: JParserBuildRequest) {
+        extension.native.targets.forEach { target ->
+            addTeaVMCConsumer(request, target.name, "default", target.consumer)
+        }
+        extension.native.variants.forEach { variant ->
+            addTeaVMCConsumer(
+                request,
+                required(variant.targetName.orNull, "native variant ${variant.name} targetName"),
+                required(variant.variantName.orNull, "native variant ${variant.name} variantName"),
+                variant.consumer
+            )
+        }
+    }
+
+    private fun addTeaVMCConsumer(
+        request: JParserBuildRequest,
+        targetName: String,
+        variantName: String,
+        source: JParserTeaVMCConsumerHooks
+    ) {
+        if(!source.enabled.get()) {
+            return
+        }
+        if(!targetName.endsWith("_teavm_c")) {
+            throw GradleException("jParser TeaVM C consumer metadata cannot be declared for target '$targetName'")
+        }
+
+        val consumer = TeaVMCConsumerConfig()
+        consumer.targetName = targetName
+        consumer.variantName = variantName
+        consumer.selectorResources.addAll(source.selectorResources.get().map(::normalizeConsumerResourcePath))
+        consumer.headerDirs.addAll(source.headerDirs.get().map(::normalizeConsumerResourcePath))
+        consumer.compileDefinitions.addAll(source.compileDefinitions.get().map(::requiredConsumerValue))
+        consumer.compileOptions.addAll(source.compileFlags.get().map(::requiredConsumerValue))
+        source.staticLibraries.forEach { library ->
+            consumer.staticLibraries.add(TeaVMCConsumerConfig.StaticLibrary(
+                normalizeConsumerResourcePath(library.resourcePath),
+                library.overrideVariable.trim()
+            ))
+        }
+        consumer.staticLinkLibraries.addAll(source.staticLinkLibraries.get().map(::requiredConsumerValue))
+        consumer.staticLinkOptions.addAll(source.staticLinkerFlags.get().map(::requiredConsumerValue))
+        request.teaVMCConsumers.add(consumer)
+    }
+
+    private fun normalizeConsumerResourcePath(value: String): String {
+        val normalized = value.trim().replace('\\', '/').trim('/')
+        if(normalized.isEmpty() || normalized.startsWith("../") || "/../" in normalized || normalized == "..") {
+            throw GradleException("jParser TeaVM C consumer resource paths must stay inside the packaged platform directory: '$value'")
+        }
+        if(File(value).isAbsolute || isPortableAbsolute(value)) {
+            throw GradleException("jParser TeaVM C consumer resource paths must be relative: '$value'")
+        }
+        return normalized
+    }
+
+    private fun requiredConsumerValue(value: String): String {
+        if(value.isBlank()) {
+            throw GradleException("jParser TeaVM C consumer values must not be blank")
+        }
+        return value
     }
 
     private fun findActiveVariant(): JParserNativeTargetVariantHooks? {

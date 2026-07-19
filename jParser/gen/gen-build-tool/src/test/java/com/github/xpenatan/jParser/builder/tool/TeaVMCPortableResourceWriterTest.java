@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 import org.junit.Test;
 
@@ -151,6 +152,73 @@ public class TeaVMCPortableResourceWriterTest {
         assertTrue(cmake.contains("set(JPARSER_TESTLIB_TEAVMC_PLATFORM \"mac_arm64\")"));
         assertTrue(cmake.contains("set(JPARSER_TESTLIB_TEAVMC_STATIC_FILE \"libTestLib64_.a\")"));
         assertFalse(cmake.contains("libTestLibarm64_.a"));
+    }
+
+    @Test
+    public void generatedCMakeAppliesResourceSelectedConsumerRequirements() throws IOException {
+        ArrayList<TeaVMCConsumerConfig> consumers = new ArrayList<>();
+        TeaVMCConsumerConfig wgpu = consumer("windows64_teavm_c", "wgpu", "include/webgpu/wgpu.h");
+        wgpu.headerDirs.add("include");
+        wgpu.staticLibraries.add(new TeaVMCConsumerConfig.StaticLibrary(
+                "deps/wgpu_native.lib",
+                "TESTLIB_WGPU_LIBRARY"));
+        wgpu.staticLinkLibraries.add("user32.lib");
+        consumers.add(wgpu);
+
+        TeaVMCConsumerConfig dawn = consumer("windows64_teavm_c", "dawn", "include/dawn/webgpu.h");
+        dawn.headerDirs.add("include");
+        dawn.compileDefinitions.add("TESTLIB_DAWN=1");
+        dawn.compileOptions.add("/Zc:preprocessor");
+        dawn.staticLibraries.add(new TeaVMCConsumerConfig.StaticLibrary(
+                "deps/webgpu_dawn.lib",
+                "TESTLIB_DAWN_LIBRARY"));
+        consumers.add(dawn);
+
+        String cmake = TeaVMCPortableResourceWriter.generateCMake(
+                "TestLib",
+                TeaVMCLinkage.STATIC,
+                consumers);
+
+        assertTrue(cmake.contains("JPARSER_TESTLIB_TEAVMC_CONSUMER_MATCH_COUNT"));
+        assertTrue(cmake.contains("include/webgpu/wgpu.h"));
+        assertTrue(cmake.contains("include/dawn/webgpu.h"));
+        assertTrue(cmake.contains("Multiple packaged TestLib TeaVM C consumer variants"));
+        assertTrue(cmake.contains("target_compile_definitions(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"TESTLIB_DAWN=1\")"));
+        assertTrue(cmake.contains("target_compile_options(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"/Zc:preprocessor\")"));
+        assertTrue(cmake.contains(
+                "${JPARSER_TESTLIB_TEAVMC_PLATFORM}/${JPARSER_TESTLIB_TEAVMC_MSVC_RUNTIME_SUBDIR}/deps/wgpu_native.lib"));
+        assertTrue(cmake.contains("if(DEFINED TESTLIB_WGPU_LIBRARY"));
+        assertTrue(cmake.contains("target_link_libraries(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"user32.lib\")"));
+        assertFalse(TEMPLATE_PLACEHOLDER_PATTERN.matcher(cmake).find());
+    }
+
+    @Test
+    public void generatedCMakeKeepsStaticConsumerLibrariesOutOfSharedLinkage() throws IOException {
+        ArrayList<TeaVMCConsumerConfig> consumers = new ArrayList<>();
+        TeaVMCConsumerConfig consumer = consumer("linux64_teavm_c", "native", "include/native/api.h");
+        consumer.staticLibraries.add(new TeaVMCConsumerConfig.StaticLibrary("deps/libnative.a", ""));
+        consumer.staticLinkOptions.add("SHELL:-pthread");
+        consumers.add(consumer);
+
+        String cmake = TeaVMCPortableResourceWriter.generateCMake(
+                "TestLib",
+                TeaVMCLinkage.SHARED_LINKED,
+                consumers);
+
+        int staticGuard = cmake.indexOf("if(JPARSER_TESTLIB_TEAVMC_LINKAGE STREQUAL \"STATIC\")", cmake.indexOf("CONSUMER_SELECTED"));
+        int staticLibrary = cmake.indexOf("deps/libnative.a");
+        int linkOption = cmake.indexOf("target_link_options(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"SHELL:-pthread\")");
+        assertTrue(staticGuard >= 0);
+        assertTrue(staticLibrary > staticGuard);
+        assertTrue(linkOption > staticGuard);
+    }
+
+    private static TeaVMCConsumerConfig consumer(String targetName, String variantName, String selector) {
+        TeaVMCConsumerConfig consumer = new TeaVMCConsumerConfig();
+        consumer.targetName = targetName;
+        consumer.variantName = variantName;
+        consumer.selectorResources.add(selector);
+        return consumer;
     }
 
     private static void assertImportHeaderOptionsAppend(String cmake, String variablePrefix) {

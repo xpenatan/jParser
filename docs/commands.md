@@ -1,4 +1,4 @@
-# Agent Commands Reference
+# Command Reference
 
 All commands run from repository root.
 

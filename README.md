@@ -1,6 +1,6 @@
 <h1 align="center">jParser</h1>
 <p align="center">
-  A Java code-generation library that bridges C/C++ native code to JVM platforms -- desktop, mobile, and web.
+  Generate Java bindings for C/C++ libraries across desktop, mobile, web, and native TeaVM applications.
 </p>
 
 <p align="center">
@@ -10,300 +10,79 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License"></a>
 </p>
 
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [How It Works](#how-it-works)
-- [Supported Targets](#supported-targets)
-- [TeaVM C Native Linkage](#teavm-c-native-linkage)
-- [Windows MSVC Runtime](#windows-msvc-runtime)
-- [Code Block Convention](#code-block-convention)
-- [WebIDL Bindings](#webidl-bindings)
-- [IDLBase API](#idlbase-api)
-- [Requirements](#requirements)
-- [Documentation](#documentation)
-- [Getting Started](#getting-started)
-- [Libraries Using jParser](#libraries-using-jparser)
-- [License](#license)
-
----
-
 ## Overview
 
-Inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen), jParser lets you embed native C/C++ code directly inside Java source files using annotated comment blocks. Each block is translated into target-specific Java source code, enabling a single `base` module to produce a bridge-agnostic `core` API plus platform bridge outputs for **JNI** (desktop/mobile), **FFM** (desktop, Java 25+), **TeaVM web** (JS/WASM), and **TeaVM C** (native applications).
+jParser turns a shared Java API, WebIDL definitions, and embedded native code blocks into bindings for multiple runtimes:
 
-For web targets, jParser uses [Emscripten](https://emscripten.org/) to compile C/C++ into JS/WASM and [TeaVM](https://github.com/konsoletyper/teavm) to generate the corresponding Java-to-JavaScript bridge via `@JSBody` annotations.
+| Target | Bridge | Platforms | Java requirement |
+|---|---|---|---|
+| JNI | Java Native Interface | Windows, Linux, macOS, Android | Java 8+ API |
+| FFM | Foreign Function & Memory API | Windows, Linux, macOS | Java 22+; 25 recommended |
+| TeaVM web | JavaScript / WebAssembly | Web browsers | Java 17+ tooling |
+| TeaVM C | TeaVM native C imports | Windows, Linux, macOS, Android | Java 17+ tooling |
 
-## How It Works
+A typical project has a hand-written `base` API and `builder` configuration. jParser generates the bridge-agnostic `core` API and target implementations, then invokes the appropriate native toolchain to build or package platform artifacts.
 
-jParser consists of two main stages:
+The project is inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen). Web builds use [Emscripten](https://emscripten.org/) and [TeaVM](https://github.com/konsoletyper/teavm).
 
-### 1. Code Generation
+## Quick Start
 
-Reads the hand-written Java source in the `base` module, which contains embedded native code blocks, and generates platform-specific Java source for each target:
+[`examples/TestLib`](examples/TestLib) is the smallest complete project to follow. From the repository root, a Windows JNI build is:
 
-| Output Module | Target | Description                                    |
-|---------------|---|------------------------------------------------|
-| `core` | Core API | Generated bridge-agnostic API classes |
-| `shared/<Lib>-jni` | JNI | Generated JNI Java shared by desktop and Android |
-| `shared/<Lib>-c` | TeaVM C | Generated TeaVM C Java shared by desktop and Android |
-| `desktop/<Lib>-desktop-ffm` | FFM | Generated FFM Java for desktop (Java 25+) |
-| `web/<Lib>-web` | TeaVM web | Generated `@JSBody`-annotated Java for web |
-| `android/<Lib>-android` | JNI (Android) | Android JNI packaging |
-| `android/<Lib>-android-c` | TeaVM C (Android) | Android TeaVM C packaging |
-
-### 2. Native Compilation
-
-Compiles the C/C++ source into platform-specific native libraries:
-
-| Platform | Toolchain |
-|---|---|
-| Windows | MSVC |
-| Linux | GCC / G++ |
-| macOS | Xcode CLI tools |
-| Android | Android NDK |
-| Web | Emscripten SDK |
-
-## Supported Targets
-
-| Target | Bridge | Platforms | Java Version |
-|---|---|---|--------------|
-| **JNI** | Java Native Interface | Windows, Linux, macOS, Android | 8+           |
-| **FFM** | Foreign Function & Memory API | Windows, Linux, macOS | 22+          |
-| **TeaVM** | JavaScript / WASM | Web browsers | Java 17+ for TeaVM 0.15 web modules/tooling |
-| **TeaVM C** | TeaVM native C imports | Windows, Linux, macOS, Android | Java 17+ for TeaVM tooling |
-
-## TeaVM C Native Linkage
-
-TeaVM C generation supports three `TeaVMCLinkage` modes:
-
-| Mode | Native resolution | Deployment |
-|---|---|---|
-| `STATIC` | Links the packaged archive into the final native target. This remains the default. | Application executable, subject to unrelated shared dependencies |
-| `SHARED_LINKED` | Links against a DLL import library or a shared object/dylib; the operating-system loader resolves it when the process starts. | Application plus the matching shared native library |
-| `RUNTIME_LOADED` | `loader-c` opens the shared library on demand, validates its generated versioned API table, and binds the generated dispatch shim. | Application plus one runtime-selectable shared native library per logical binding |
-
-The Gradle plugin exposes the typed mode directly:
-
-```kotlin
-import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
-
-jParser {
-    teaVMCLinkage.set(TeaVMCLinkage.RUNTIME_LOADED)
-}
+```powershell
+.\gradlew.bat :jParser:runtime:builder:runtime_helper_build_project_windows64_jni
+.\gradlew.bat :examples:TestLib:lib:builder:TestLib_build_project_windows64_jni
+.\gradlew.bat :examples:TestLib:app:platforms:desktop-jni:TestLib_run_app_desktop_jni
 ```
 
-Manual builders set the same value before constructing `BuildToolOptions`:
-
-```java
-import com.github.xpenatan.jParser.builder.tool.BuildToolOptions;
-import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage;
-
-BuildToolOptions.BuildToolParams params = new BuildToolOptions.BuildToolParams();
-params.teaVMCLinkage = TeaVMCLinkage.SHARED_LINKED;
-BuildToolOptions options = new BuildToolOptions(params, args);
-```
-
-`loader-c` is the TeaVM C substitution for the normal `JParserLibraryLoader` API. On Windows it uses `LoadLibraryExW`/`GetProcAddress`; Linux, macOS, and Android use `dlopen`/`dlsym`. A logical library may be bound only once, and jParser intentionally keeps a successfully loaded library open for the process lifetime. Future iOS C support must use native code bundled with and signed as part of the application; it will not support downloading and executing arbitrary libraries.
-
-`RUNTIME_LOADED` derives the normal platform filename from the logical library name by default. To choose a specific backend or physical payload, set `JParserLibraryLoaderOptions.fileName`; this exact filename bypasses automatic prefix and architecture-suffix decoration, while `path` remains its containing directory:
-
-```java
-JParserLibraryLoaderOptions options = new JParserLibraryLoaderOptions();
-options.path = "plugins";
-options.fileName = "webgpu_dawn64.dll";
-JParserLibraryLoader.load("webgpu", options, listener);
-```
-
-Native binaries inside a dependency jar are build resources, not runtime files. A TeaVM C launcher or native-resource consumer must extract shared binaries to the filesystem and deploy them where the platform loader can open them. The generated portable CMake hook performs native target wiring and stages selected shared binaries for CMake-based consumers.
-
-### Windows MSVC Runtime
-
-The Windows CRT family is a separate choice from TeaVM C native linkage. A static jParser library may be compiled with either `/MT` or `/MD`, and a DLL may also use either family. All static libraries linked into one final target must use a compatible CRT setting.
-
-For producer builds, jParser does not add a CRT flag by default. Producers can make the choice per Windows target or target variant:
-
-```kotlin
-import com.github.xpenatan.jParser.gradle.JParserTargets
-
-jParser {
-    native {
-        targetVariant(JParserTargets.WINDOWS64_TEAVM_C, "mt") {
-            compileFlag("/MT")
-        }
-        targetVariant(JParserTargets.WINDOWS64_TEAVM_C, "md") {
-            compileFlag("/MD")
-        }
-    }
-}
-```
-
-The variants produce separate `build/c++/libs/mt/...` and `build/c++/libs/md/...` trees. There is no runtime-specific jParser API: `compileFlag(...)` and `compileFlags` pass ordinary compiler options through unchanged. Manual factory users add them to `DefaultBuildTargetConfig.TargetHooks.compileFlags`. Linux, macOS, Android, and iOS use the same hooks for their own compiler and toolchain options; `/MT` and `/MD` themselves are MSVC-only.
-
-TeaVM C consumers select the runtime with standard CMake configuration, for example `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL` for MD or `MultiThreaded` for MT. Generated jParser hooks never change that setting. They only inspect it to choose a matching packaged Windows payload; when it is unset, the hook selects the MD payload matching CMake's default MSVC runtime family.
-
-## Code Block Convention
-
-In `base` Java source files, native code is embedded via annotated comment blocks. jParser reads these blocks and generates the appropriate code for each target.
-
-```java
-public class MyLib extends IDLBase {
-
-    // TeaVM replacement — generates @JSBody-annotated method for web
-    /*[-TEAVM;-REPLACE]
-        @org.teavm.jso.JSBody(params = {"this_addr"},
-            script = "var jsObj = [MODULE].wrapPointer(this_addr, [MODULE].MyType);"
-                   + "return jsObj.getValue();")
-        private static native int internal_native_getValue(int this_addr);
-    */
-    // JNI native code block — compiled into C++ for desktop & mobile
-    /*[-JNI;-NATIVE]
-        MyType* obj = (MyType*)this_addr;
-        return obj->getValue();
-    */
-    private static native int internal_native_getValue(long this_addr);
-}
-```
-
-### Available Commands
-
-| Command | Description |
-|---|---|
-| `-NATIVE` | Inline C/C++ code compiled for the target |
-| `-ADD` | Adds code to the generated output |
-| `-ADD_RAW` | Adds raw code without processing |
-| `-REMOVE` | Removes code from the generated output |
-| `-REPLACE` | Replaces the following method with the block content |
-| `-REPLACE_BLOCK` | Replaces the following code block |
-| `-IDL_SKIP` | Placed on a class comment to skip IDL generation for that class |
-
-## WebIDL Bindings
-
-To reduce the effort of manually porting each method, jParser supports **Emscripten WebIDL**. Define a `.idl` file and jParser automatically generates binding code for all targets.
-
-```idl
-interface NormalClass {
-    void NormalClass();
-    long addIntValue(long value1, long value2);
-    static long subIntValue(long value1, long value2);
-    attribute long intValue;
-    attribute float floatValue;
-};
-```
-
-This generates fully working Java classes with native bindings for JNI, FFM, and TeaVM — no manual glue code required.
-
-### WebIDL Notes
-
-- **IDL helper classes** (`IDLInt`, `IDLIntArray`, etc.) let you pass primitive pointers to C++. They work across Emscripten, desktop, and mobile.
-- **C++ enums** are converted into Java enums, each carrying the integer value from native code.
-- **`[Value]` methods** return a cached copy of the object. The cache is overwritten on each call — do not retain references.
-- **`[NoDelete]` classes** should not have `dispose()` called. All other classes require explicit disposal.
-
-## IDLBase API
-
-Every native class extends `IDLBase`, which provides common memory-management functionality.
-
-> **Important:** jParser does not automatically dispose C++ objects. You must call `dispose()` when you're done with an object to free native memory. Only objects you create or explicitly own require disposal. Creating and disposing native objects is expensive — avoid doing it every frame.
-
-| Method | Description |
-|---|---|
-| `ClassName.native_new()` | Creates an empty instance without native data |
-| `ClassName.NULL` | Returns a NULL instance — use instead of Java `null` for native parameters |
-| `dispose()` | Deletes the native instance (only if owned) |
-| `isDisposed()` | Checks whether the native instance has been disposed |
-| `native_setVoid(...)` | Sets an integer or long memory address |
-| `native_reset()` | Resets the instance to default state |
-| `native_takeOwnership()` | Takes ownership, enabling `dispose()` to delete the object |
-| `native_releaseOwnership()` | Releases ownership, preventing `dispose()` from deleting |
-| `native_hasOwnership()` | Checks whether you own the native instance |
-| `native_copy(...)` | Copies memory address and native data from another instance |
-
-> The `native_` prefix is used to avoid naming conflicts with C/C++ methods.
+Use `./gradlew` on Linux or macOS. See the [getting-started guide](docs/getting-started.md) for the module layout and FFM example, or the [command reference](docs/commands.md) for every platform target.
 
 ## Requirements
 
-| Requirement | Purpose |
+Install only the toolchains required by the targets you build:
+
+| Requirement | Used for |
 |---|---|
-| **JDK 11+** | Building jParser tool modules |
-| **JDK 22+** (25 recommended) | FFM modules and FFM-based apps |
+| JDK 11+ | Core jParser tooling |
+| JDK 17+ | TeaVM web and TeaVM C tooling |
+| JDK 22+ (25 recommended) | FFM modules and applications |
 | [Visual Studio C++](https://visualstudio.microsoft.com/vs/community/) | Windows native builds |
 | GCC / G++ | Linux native builds |
-| Xcode CLI tools | macOS native builds |
-| [Emscripten SDK](https://emscripten.org/) | Web builds (JS/WASM) |
+| Xcode command-line tools | macOS native builds |
+| Android NDK | Android native builds |
+| [Emscripten SDK](https://emscripten.org/) | Web JavaScript/WebAssembly builds |
 
-> **Windows (MSVC):** Windows native builds initialize the Visual Studio C++ environment with `vcvarsall.bat`.
-> The build auto-detects it from `VCVARSALL_PATH` / `JPARSER_VCVARSALL`, `PATH`, Visual Studio environment variables, or `vswhere.exe`.
-> To force a location, pass `-Djparser.vcvarsall=C:\Program Files\Microsoft Visual Studio\[Year]\[Edition]\VC\Auxiliary\Build\vcvarsall.bat`.
+Windows builds auto-detect `vcvarsall.bat` from `VCVARSALL_PATH`, `JPARSER_VCVARSALL`, `PATH`, Visual Studio environment variables, or `vswhere.exe`. Override it with `-Djparser.vcvarsall=<path>` when necessary.
 
 ## Documentation
 
-- Runtime publishing/classifier strategy guide: [`docs/runtime-maven-artifacts.md`](docs/runtime-maven-artifacts.md)
-- Architecture details: [`docs/architecture.md`](docs/architecture.md)
-- Workflow/checklists: [`docs/workflows.md`](docs/workflows.md)
-- Command matrix: [`docs/commands.md`](docs/commands.md)
+| Guide | Contents |
+|---|---|
+| [Getting started](docs/getting-started.md) | Project layout and the first TestLib builds |
+| [Binding authoring](docs/binding-authoring.md) | Native directive blocks, WebIDL, and `IDLBase` ownership |
+| [TeaVM C](docs/teavm-c.md) | Linkage modes, packaged dependencies, consumer metadata, and MSVC runtime selection |
+| [Command reference](docs/commands.md) | Build, run, packaging, and benchmark commands |
+| [Architecture](docs/architecture.md) | Generator pipeline, module map, and runtime internals |
+| [Runtime Maven artifacts](docs/runtime-maven-artifacts.md) | Published modules, classifiers, and native resource layouts |
+| [Contributor workflow](docs/workflows.md) | Editing, generation, and verification rules |
 
-## Getting Started
+## Projects Using jParser
 
-For a complete working example, refer to the [`examples/TestLib`](examples/TestLib) module.
-
-### Module Layout
-
-jParser projects follow a module pattern centered on source (`base`), generator entry (`builder`), and generated/runtime-specific outputs:
-
-| Module Suffix | Purpose |
-|---------------|---|
-| `base` | Hand-written Java source with embedded native code blocks |
-| `builder` | Build entry point that configures IDL, targets, generation, and native compilation |
-| `core` | **Generated** bridge-agnostic API output _(do not hand-edit)_ |
-| `shared/<Lib>-jni` | **Generated** JNI Java shared by desktop and Android JNI _(do not hand-edit)_ |
-| `shared/<Lib>-c` | **Generated** TeaVM C Java shared by desktop and Android C _(do not hand-edit)_ |
-| `desktop/<Lib>-desktop-jni` | Desktop JNI native payloads |
-| `desktop/<Lib>-desktop-ffm` | **Generated** desktop FFM Java output + native payloads _(do not hand-edit)_ |
-| `desktop/<Lib>-desktop-c` | Desktop TeaVM C native payloads |
-| `web/<Lib>-web` | **Generated** TeaVM WebAssembly output _(do not hand-edit)_ |
-| `android/<Lib>-android` | Android JNI packaging |
-| `android/<Lib>-android-c` | Android TeaVM C packaging |
-
-### Build Example: TestLib
-
-```text
-# 1. Build runtime (required once)
-./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_jni
-./gradlew :jParser:runtime:builder:runtime_helper_build_project_windows64_ffm
-
-# 2. Generate code + compile native library
-./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_jni
-./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_ffm
-
-# 3. Run the desktop app
-./gradlew :examples:TestLib:app:platforms:desktop-jni:TestLib_run_app_desktop_jni
-./gradlew :examples:TestLib:app:platforms:desktop-ffm:TestLib_run_app_desktop_ffm
-```
-
-> Replace `windows64` with `linux64`, `mac64`, or `macArm` for other platforms.
-> On Windows, use `gradlew.bat` instead of `./gradlew`.
-> Desktop FFM app tasks use `LibExt.javaFFMTarget`; ensure that Java toolchain is available when running `..._run_app_desktop_ffm` tasks.
-
-## Libraries Using jParser
-
-| Library | Description | Status |
+| Project | Description | Status |
 |---|---|---|
 | [jWebGPU](https://github.com/xpenatan/jWebGPU) | WebGPU bindings for Java | Active |
-| [jImGui](https://github.com/xpenatan/jImGui) | Dear ImGui bindings for Java | Active |
-| [jJolt](https://github.com/xpenatan/jJolt) | Jolt Physics bindings for Java | Active |
-| [jLua](https://github.com/xpenatan/jLua) | Lua bindings for Java | Active |
-| [jBox3D](https://github.com/xpenatan/jBox3D) | Box3D bindings for Java | Active |
-| [jBox2D](https://github.com/xpenatan/jBox2D) | Box2D bindings for Java | Active |
-| [jBullet](https://github.com/xpenatan/jBullet) | Bullet Physics bindings for Java | Inactive |
+| [jImGui](https://github.com/xpenatan/jImGui) | Dear ImGui bindings | Active |
+| [jJolt](https://github.com/xpenatan/jJolt) | Jolt Physics bindings | Active |
+| [jLua](https://github.com/xpenatan/jLua) | Lua bindings | Active |
+| [jBox3D](https://github.com/xpenatan/jBox3D) | Box3D bindings | Active |
+| [jBox2D](https://github.com/xpenatan/jBox2D) | Box2D bindings | Active |
+| [jBullet](https://github.com/xpenatan/jBullet) | Bullet bindings | Inactive |
 | [gdx-physx](https://github.com/xpenatan/gdx-physx) | PhysX bindings for libGDX | Inactive |
 
 ## Support
 
-If you find this project valuable and want to fuel its continued growth, please consider [sponsoring](https://github.com/sponsors/xpenatan) it. Your support keeps the momentum going!
+If jParser is useful to you, consider [sponsoring its development](https://github.com/sponsors/xpenatan).
 
 ## License
 
-jParser is licensed under the [Apache License 2.0](LICENSE).
+jParser is available under the [Apache License 2.0](LICENSE).

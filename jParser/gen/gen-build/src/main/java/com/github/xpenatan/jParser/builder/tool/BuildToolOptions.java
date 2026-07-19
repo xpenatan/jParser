@@ -29,6 +29,9 @@ public class BuildToolOptions {
     /** Optional symbol naming policy used by TeaVM C generation. */
     public final FFMClassData teaVMCClassData = new FFMClassData();
 
+    /** Portable native requirements applied when a final TeaVM C application consumes this library. */
+    public final ArrayList<TeaVMCConsumerConfig> teaVMCConsumers = new ArrayList<>();
+
     /** Optional build-time JNI naming policy used by CppCodeParser generation. */
     public final JNIClassData jniClassData = new JNIClassData();
 

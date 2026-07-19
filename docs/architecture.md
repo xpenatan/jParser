@@ -1,4 +1,4 @@
-# Agent Architecture Reference
+# Architecture Reference
 
 ## Core Build Pipeline
 
@@ -112,6 +112,8 @@ Shared-library examples use per-library plugin modules in `examples/SharedLib/li
 
 ### TeaVM C
 
+For public configuration and deployment guidance, see the [TeaVM C guide](teavm-c.md). This section describes generator and runtime internals.
+
 - Java side: static native methods annotated with `org.teavm.interop.Import`.
 - Native side: C ABI (`extern "C"`, `int64_t`, `int32_t`, no `JNIEnv*`).
 - Parser/generator: `TeaVMCCodeParser` with `TeaVMCGenerator` in `jParser:gen:gen-c`.
@@ -164,6 +166,12 @@ Generated binding jars add `resources=loader-c-` to their discovery marker, so g
 
 Native payload artifacts add the archive, shared binary, and, on Windows, import library below `external_cpp/jparser/<library>/native/<platform>`. A consumer must extract the binding C jar, `loader-c`, and the selected native payload into one filesystem resource tree before configuring CMake. A shared binary cannot remain inside a jar at runtime; it must also be deployed as a physical file that the operating-system loader can open.
 
+Producer native hooks and final-consumer metadata are intentionally separate. Target-level `headerDir`, `compileFlag`, linker inputs, and related hooks configure the producer build and may contain local absolute paths. A TeaVM C target or variant may additionally declare a nested `consumer { ... }` block containing only resource-relative selectors, include directories, compile definitions/options, static archives, and static link libraries/options. The Gradle plugin collects every enabled TeaVM C consumer declaration in the build request; `TeaVMCPortableResourceWriter` embeds them in the binding's one standard generated `jparser_<library>_teavm_c.cmake` file. Native payload artifacts therefore package headers/libraries, not additional ordered CMake hooks.
+
+For the current CMake platform, each generated consumer candidate checks every `selectorResource` below `native/<platform>`. Exactly one candidate must match. More than one matching artifact is rejected as ambiguous, while a configured platform with no matching artifact reports that the required native artifact is missing. Selected header directories and compile settings apply to the application target in every linkage mode. Declared packaged archives, system libraries, and linker options apply only when the binding linkage is `STATIC`; dynamic modes keep those implementation dependencies behind the binding shared library. A producer may give each packaged archive an optional CMake override variable. On Windows the generated candidate search first checks the consumer-selected `md` or `mt` resource subdirectory and then the platform root, without modifying `MSVC_RUNTIME_LIBRARY`.
+
+Consumer metadata maps `windows64_teavm_c`, `linux64_teavm_c`, `mac64_teavm_c`, `macArm_teavm_c`, and `android_teavm_c` to the portable resource layouts below. iOS has no automatic consumer-artifact mapping yet because its signed archive/framework packaging contract is not defined; iOS producer compiler/linker configuration remains available through the ordinary generic target hooks.
+
 The CMake hooks are consumer-neutral. The loader hook adds the common loader implementation once, and each binding hook adds its descriptor/dispatch source. Before including the hooks, a native build can define these global overrides:
 
 - `JPARSER_TEAVMC_APP_TARGET`: application or library target that receives the loader, generated sources, includes, and native link inputs. `TEAVM_APP_TARGET` remains its compatibility fallback.
@@ -197,6 +205,8 @@ For static archives, the hook checks `native/<platform>/<file>` and then `native
 gdx-teavm remains a compatibility adapter rather than a requirement of this layout. Its classpath discovery reads the generated `META-INF/gdx-teavm.properties`, extracts supported `external_cpp` resources, includes `external_cpp/cmake/post_target`, supplies `TEAVM_APP_TARGET` as the fallback application target, and uses the default generated-source root. The current gdx-teavm extractor accepts source, header, CMake, and static-library extensions but not `.dll`, `.so`, or `.dylib`; it must be extended before `SHARED_LINKED` or `RUNTIME_LOADED` can consume jParser's packaged shared payloads through that adapter. Other TeaVM C launchers must extract the same resources and shared binaries, set the portable variables they need, and include all generated post-target hooks directly.
 
 ## Native Comment Block Contract (`base`)
+
+For author-facing examples, WebIDL behavior, and `IDLBase` ownership, see [Binding Authoring](binding-authoring.md).
 
 Supported headers: `JNI`, `FFM`, `TEAVM`, `TEAVM_C`.
 

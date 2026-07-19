@@ -255,6 +255,8 @@ else()
     VERBATIM)
 endif()
 
+@CONSUMER_CONFIG@
+
 if(NOT EXISTS "${@VARIABLE_PREFIX@_ACTIVE_IMPORT_HEADER}")
   message(FATAL_ERROR "Missing @LIBRARY_NAME@ TeaVM C import/dispatch header: ${@VARIABLE_PREFIX@_ACTIVE_IMPORT_HEADER}")
 endif()
