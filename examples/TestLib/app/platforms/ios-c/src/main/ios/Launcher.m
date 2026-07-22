@@ -4,6 +4,20 @@
 
 int jparser_ios_teavm_main(int argc, char** argv);
 
+static NSString* const TestLibStatusFileName = @"jparser-ios-status.txt";
+
+static void TestLibWriteStatus(NSString* status) {
+    NSString* statusPath = [NSTemporaryDirectory()
+        stringByAppendingPathComponent:TestLibStatusFileName];
+    NSError* error = nil;
+    if(![status writeToFile:statusPath
+                  atomically:YES
+                    encoding:NSUTF8StringEncoding
+                       error:&error]) {
+        NSLog(@"Unable to write TestLib emulator status: %@", error);
+    }
+}
+
 @interface TestLibAppDelegate : UIResponder <UIApplicationDelegate>
 @property(strong, nonatomic) UIWindow* window;
 @property(strong, nonatomic) UIViewController* viewController;
@@ -36,22 +50,28 @@ int jparser_ios_teavm_main(int argc, char** argv);
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
 
+    TestLibWriteStatus(@"TestLib iOS TeaVM C emulator started\n");
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-        char* argv[] = { "TestLibIOSC", NULL };
-        int result = jparser_ios_teavm_main(1, argv);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if(result == 0) {
-                self.viewController.view.backgroundColor = [UIColor systemGreenColor];
-                self.statusLabel.text = @"TestLib TeaVM C\nPASS";
-                fprintf(stderr, "TestLib iOS TeaVM C emulator passed\n");
-            }
-            else {
-                self.viewController.view.backgroundColor = [UIColor systemRedColor];
-                self.statusLabel.text = [NSString stringWithFormat:@"TestLib TeaVM C\nFAILED (%d)", result];
-                fprintf(stderr, "TestLib iOS TeaVM C emulator failed with %d\n", result);
-            }
-            fflush(stderr);
-        });
+        @autoreleasepool {
+            char* argv[] = { "TestLibIOSC", NULL };
+            int result = jparser_ios_teavm_main(1, argv);
+            NSString* status = result == 0
+                ? @"TestLib iOS TeaVM C emulator passed\n"
+                : [NSString stringWithFormat:@"TestLib iOS TeaVM C emulator failed with %d\n", result];
+            TestLibWriteStatus(status);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(result == 0) {
+                    self.viewController.view.backgroundColor = [UIColor systemGreenColor];
+                    self.statusLabel.text = @"TestLib TeaVM C\nPASS";
+                }
+                else {
+                    self.viewController.view.backgroundColor = [UIColor systemRedColor];
+                    self.statusLabel.text = [NSString stringWithFormat:@"TestLib TeaVM C\nFAILED (%d)", result];
+                }
+                fprintf(stderr, "%s", status.UTF8String);
+                fflush(stderr);
+            });
+        }
     });
     return YES;
 }
