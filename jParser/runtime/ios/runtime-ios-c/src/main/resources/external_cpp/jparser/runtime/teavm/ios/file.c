@@ -357,7 +357,6 @@ int32_t teavm_file_canonicalize(char16_t* path, int32_t pathSize, char16_t** res
 }
 
 #endif
-
 #if TEAVM_WINDOWS
 #include <Windows.h>
 
@@ -695,4 +694,3 @@ int32_t teavm_file_canonicalize(char16_t* path, int32_t pathSize, char16_t** res
 }
 
 #endif
-
