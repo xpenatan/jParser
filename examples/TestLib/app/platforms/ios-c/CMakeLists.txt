@@ -20,8 +20,9 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     -Wno-unused-value)
 endif()
 
-# These hooks come from loader-c/runtime-ios-c/TestLib-ios-c resources. They
-# add generated glue and select the packaged SDK/architecture archive slice.
+# The extracted loader/runtime/TestLib resources provide these hooks. They
+# expose packaged iOS C compatibility and generated glue, then select the
+# packaged SDK/architecture archive slice.
 set(TEAVM_IOS_STATIC_DEPENDENCY_TARGETS "")
 set(TEAVM_EXTENSION_POST_TARGET_DIR
   "${CMAKE_CURRENT_SOURCE_DIR}/build/ios-c/c/external_cpp/cmake/post_target")
