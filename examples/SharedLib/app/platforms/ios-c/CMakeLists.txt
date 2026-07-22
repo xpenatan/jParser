@@ -9,7 +9,7 @@ set(JPARSER_TEAVMC_GENERATED_SOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/build/ios-
 set(TEAVM_APP_TARGET sharedlib_teavm_program)
 set(JPARSER_TEAVMC_APP_TARGET ${TEAVM_APP_TARGET})
 
-add_library(${TEAVM_APP_TARGET} STATIC
+add_library(${TEAVM_APP_TARGET} OBJECT
   "${JPARSER_TEAVMC_GENERATED_SOURCE_ROOT}/app_include.c")
 
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
@@ -33,11 +33,12 @@ foreach(TEAVM_EXTENSION_POST_TARGET_FILE IN LISTS TEAVM_EXTENSION_POST_TARGET_FI
   include("${TEAVM_EXTENSION_POST_TARGET_FILE}")
 endforeach()
 
-# jParser supplies libraries only; this handwritten custom emulator owns the
-# final app bundle, launch code, UI, and signing policy.
+# Flatten the packaged dependency archives into one consumer-side archive. The
+# generated program is an object library so Xcode does not have to expand a
+# configuration-dependent archive path inside this custom command.
 set(TEAVM_IOS_BUNDLE_ARCHIVE "${CMAKE_BINARY_DIR}/libSharedLibIOSC_bundle.a")
-set(TEAVM_IOS_BUNDLE_INPUTS "$<TARGET_FILE:${TEAVM_APP_TARGET}>")
-set(TEAVM_IOS_BUNDLE_DEPENDS ${TEAVM_APP_TARGET})
+set(TEAVM_IOS_BUNDLE_INPUTS "")
+set(TEAVM_IOS_BUNDLE_DEPENDS "")
 foreach(TEAVM_IOS_DEPENDENCY_TARGET IN LISTS TEAVM_IOS_STATIC_DEPENDENCY_TARGETS)
   list(APPEND TEAVM_IOS_BUNDLE_INPUTS "$<TARGET_FILE:${TEAVM_IOS_DEPENDENCY_TARGET}>")
   list(APPEND TEAVM_IOS_BUNDLE_DEPENDS ${TEAVM_IOS_DEPENDENCY_TARGET})
@@ -51,7 +52,9 @@ add_custom_command(
   VERBATIM)
 add_custom_target(sharedlib_teavm_bundle ALL DEPENDS "${TEAVM_IOS_BUNDLE_ARCHIVE}")
 
-add_executable(SharedLibIOSC MACOSX_BUNDLE "src/main/ios/Launcher.m")
+add_executable(SharedLibIOSC MACOSX_BUNDLE
+  "src/main/ios/Launcher.m"
+  $<TARGET_OBJECTS:${TEAVM_APP_TARGET}>)
 add_dependencies(SharedLibIOSC sharedlib_teavm_bundle)
 target_link_libraries(SharedLibIOSC PRIVATE
   "${TEAVM_IOS_BUNDLE_ARCHIVE}"
