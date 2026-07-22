@@ -12,7 +12,7 @@ val teavmOutputDir = iosProjectDir.map { it.dir("c/src") }
 val iosTeaVMRuntimeOverlayDir = iosProjectDir.map {
     it.dir("c/external_cpp/jparser/runtime/teavm/ios")
 }
-val iosTeaVMRuntimeOverlayFiles = listOf("definitions.h", "fiber.c")
+val iosTeaVMRuntimeOverlayFiles = listOf("definitions.h", "fiber.c", "file.c")
 val cmakeBuildDir = iosProjectDir.map { it.dir("cmake-simulator") }
 val hostArchitecture = System.getProperty("os.arch").lowercase()
 val defaultSimulatorArchitecture = if(hostArchitecture.contains("aarch64") || hostArchitecture.contains("arm64")) {
