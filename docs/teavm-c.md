@@ -113,6 +113,8 @@ TeaVM 0.15.0 also emits a Unix fiber runtime that uses POSIX realtime timers and
 
 The generated CMake hook selects one slice from `CMAKE_OSX_SYSROOT` and `CMAKE_OSX_ARCHITECTURES`. An iOS consumer must select exactly one architecture for a build. Device builds accept ARM64; simulator builds accept ARM64 or x86_64. The hook rejects `SHARED_LINKED` and `RUNTIME_LOADED` on iOS, links an imported static target, and appends that target to `TEAVM_IOS_STATIC_DEPENDENCY_TARGETS` when the consumer defines the list.
 
+When a custom launcher compiles TeaVM's generated program as a static library instead of the final executable, the final Apple link must force-load that generated program archive. Its generated library descriptors register through C++ static initializers and otherwise have no symbol reference that requires the linker to retain their archive members. The TestLib and SharedLib custom emulator CMake projects place `"-Wl,-force_load"` immediately before `${TEAVM_APP_TARGET}` in `target_link_libraries` for this reason. Packaged native dependency archives do not need to be force-loaded.
+
 jParser stops at this integration boundary. It generates TeaVM C bindings/resources, invokes `xcrun` to compile the static libraries, and packages the slices. It does not generate an application launcher, UI, `Info.plist`, Xcode project, signing configuration, or final bundle. Those belong to gdx-teavm, libfdx, or the consuming application. The committed TestLib and SharedLib `ios-c` applications are handwritten custom emulators that render their result in a real iPhone Simulator and verify the contract in GitHub Actions.
 
 ## Windows MSVC Runtime

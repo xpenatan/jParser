@@ -54,7 +54,12 @@ add_custom_target(testlib_teavm_bundle ALL DEPENDS "${TEAVM_IOS_BUNDLE_ARCHIVE}"
 
 add_executable(TestLibIOSC MACOSX_BUNDLE "src/main/ios/Launcher.m")
 add_dependencies(TestLibIOSC testlib_teavm_bundle)
+# The generated program is an archive only because this handwritten UIKit
+# launcher owns main(). Retain its descriptor-only members so their C++ static
+# initializers register every statically linked jParser library before TeaVM
+# calls RuntimeLoader.init().
 target_link_libraries(TestLibIOSC PRIVATE
+  "-Wl,-force_load"
   ${TEAVM_APP_TARGET}
   "${TEAVM_IOS_BUNDLE_ARCHIVE}"
   "-framework Foundation"
