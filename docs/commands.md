@@ -166,6 +166,31 @@ Build libA before libB.
 
 Where applicable, replace `windows64` with `linux64`, `mac64`, or `macArm`.
 
+## Publishing
+
+jParser uses the EasyPublishing plugin to coordinate the library modules and
+the nested `jParser/tools/gradle-plugin` build.
+
+```text
+./gradlew prepareSnapshot
+./gradlew publishSnapshot
+./gradlew prepareRelease
+./gradlew publishRelease
+```
+
+`prepareSnapshot` and `prepareRelease` create local Maven repositories in
+`build/snapshot-deploy` and `build/staging-deploy`, respectively. They do not
+upload artifacts. Build every cross-platform native payload before preparing a
+complete repository; native publication tasks fail when a required payload is
+missing.
+
+`publishSnapshot` uploads to the configured Sonatype snapshot repository.
+`publishRelease` prepares the release repository, creates the Maven Central
+bundle, and uploads it through the Central Portal. Remote publishing reads
+`CENTRAL_PORTAL_USERNAME`, `CENTRAL_PORTAL_PASSWORD`, `SIGNING_KEY`, and
+`SIGNING_PASSWORD` from the environment. Do not request snapshot and release
+publishing tasks in the same Gradle invocation.
+
 ## jParser Gradle plugin
 
 ```text

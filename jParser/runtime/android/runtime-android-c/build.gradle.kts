@@ -24,9 +24,9 @@ val taskNames = gradle.startParameter.taskNames
 fun isTaskRequested(taskName: String): Boolean {
     return taskNames.any { it == taskName || it.endsWith(":$taskName") }
 }
-val isPrepareDeployTask = isTaskRequested("prepareReleaseDeploy") || isTaskRequested("prepareSnapshotDeploy")
+val isPreparePublishingTask = isTaskRequested("prepareRelease") || isTaskRequested("prepareSnapshot")
 val isPublishTask = taskNames.any { it.contains("publish", ignoreCase = true) }
-val includeNativesInMainAar = !(isPrepareDeployTask || isPublishTask)
+val includeNativesInMainAar = !(isPreparePublishingTask || isPublishTask)
 
 val nativeAarManifest = layout.buildDirectory.file("generated/nativeAar/AndroidManifest.xml")
 val generateNativeAarManifest by tasks.registering {

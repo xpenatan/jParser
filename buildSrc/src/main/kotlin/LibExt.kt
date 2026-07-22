@@ -4,10 +4,13 @@ import java.util.*
 object LibExt {
     const val libName = "jParser"
     const val groupId = "com.github.xpenatan.jParser"
+    const val snapshotVersion = "-SNAPSHOT"
     private var configuredRootDirectory: File? = null
     var isRelease = false
+    val releaseVersion: String
+        get() = readReleaseVersion()
     var libVersion: String = ""
-        get() = getVersion()
+        get() = if(isRelease) releaseVersion else snapshotVersion
 
     val rootDirectory: File
         get() {
@@ -75,21 +78,15 @@ object LibExt {
 
     const val jUnitVersion = "4.13.2"
 
-    private fun getVersion(): String {
-        var libVersion = "-SNAPSHOT"
+    private fun readReleaseVersion(): String {
         val file = File(rootDirectory, "gradle.properties")
         if(file.exists()) {
             val properties = Properties()
             properties.load(file.inputStream())
-            val version = properties.getProperty("version")
-            if(isRelease) {
-                libVersion = version
-            }
+            return properties.getProperty("version")
+                ?: throw RuntimeException("version property should exist")
         }
-        else if(isRelease) {
-            throw RuntimeException("properties should exist")
-        }
-        return libVersion
+        throw RuntimeException("properties should exist")
     }
 
     private fun findRootDirectory(startDirectory: File): File {
