@@ -9,6 +9,10 @@ val iosResources: Configuration by configurations.creating
 val teavmClassesDir = layout.buildDirectory.dir("teavmBuild/classes")
 val iosProjectDir = layout.buildDirectory.dir("ios-c")
 val teavmOutputDir = iosProjectDir.map { it.dir("c/src") }
+val iosTeaVMRuntimeOverlayDir = iosProjectDir.map {
+    it.dir("c/external_cpp/jparser/runtime/teavm/ios")
+}
+val iosTeaVMRuntimeOverlayFiles = listOf("definitions.h", "fiber.c")
 val cmakeBuildDir = iosProjectDir.map { it.dir("cmake-simulator") }
 val hostArchitecture = System.getProperty("os.arch").lowercase()
 val defaultSimulatorArchitecture = if(hostArchitecture.contains("aarch64") || hostArchitecture.contains("arm64")) {
@@ -64,16 +68,41 @@ val extractIosResources by tasks.registering(Copy::class) {
     includeEmptyDirs = false
 }
 
-val stageIosEntrySource by tasks.registering(Copy::class) {
-    dependsOn(generateTeaVMC)
-    from("src/main/c/app_include.c")
-    into(teavmOutputDir)
+val stageIosSources by tasks.registering {
+    dependsOn(generateTeaVMC, extractIosResources)
+    inputs.file("src/main/c/app_include.c")
+    inputs.files(iosTeaVMRuntimeOverlayDir.map { overlayDir ->
+        iosTeaVMRuntimeOverlayFiles.map { overlayDir.file(it).asFile }
+    })
+    outputs.files(teavmOutputDir.map { outputDir ->
+        listOf("app_include.c", *iosTeaVMRuntimeOverlayFiles.toTypedArray())
+            .map { outputDir.file(it).asFile }
+    })
+    doFirst {
+        val overlayDir = iosTeaVMRuntimeOverlayDir.get().asFile
+        iosTeaVMRuntimeOverlayFiles.forEach { fileName ->
+            if(!overlayDir.resolve(fileName).isFile) {
+                throw GradleException("Missing packaged iOS TeaVM C runtime overlay: $fileName")
+            }
+        }
+    }
+    doLast {
+        val outputDir = teavmOutputDir.get().asFile
+        val overlayDir = iosTeaVMRuntimeOverlayDir.get().asFile
+        outputDir.mkdirs()
+        file("src/main/c/app_include.c")
+            .copyTo(outputDir.resolve("app_include.c"), overwrite = true)
+        iosTeaVMRuntimeOverlayFiles.forEach { fileName ->
+            overlayDir.resolve(fileName)
+                .copyTo(outputDir.resolve(fileName), overwrite = true)
+        }
+    }
 }
 
 val prepareIosCProject by tasks.registering {
     group = "example-ios"
     description = "Prepare the generated sources and packaged resources used by the custom iOS project"
-    dependsOn(extractIosResources, stageIosEntrySource)
+    dependsOn(stageIosSources)
 }
 
 val configureIosSimulator by tasks.registering(Exec::class) {
