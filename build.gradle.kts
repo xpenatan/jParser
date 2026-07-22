@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("com.github.xpenatan.easy-publishing") version "-SNAPSHOT"
+    id("com.github.xpenatan.easy-publishing") version "0.1.0"
     id("org.jetbrains.kotlin.android") version "2.2.21" apply false
 }
 
@@ -62,6 +62,7 @@ easyPublishing {
         ":jParser:runtime:shared:runtime-c",
         ":jParser:runtime:desktop:runtime-desktop-c",
         ":jParser:runtime:android:runtime-android-c",
+        ":jParser:runtime:ios:runtime-ios-c",
         ":jParser:loader:loader-core",
         ":jParser:loader:loader-c",
         ":jParser:loader:loader-web"

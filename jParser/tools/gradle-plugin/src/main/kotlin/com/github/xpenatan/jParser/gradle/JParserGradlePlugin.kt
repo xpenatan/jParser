@@ -239,7 +239,7 @@ class JParserGradlePlugin : Plugin<Project> {
             BuildTarget(JParserTargets.MAC64_TEAVM_C, "Build jParser macOS x64 TeaVM C native library."),
             BuildTarget(JParserTargets.MAC_ARM_TEAVM_C, "Build jParser macOS ARM TeaVM C native library."),
             BuildTarget(JParserTargets.ANDROID_TEAVM_C, "Build jParser Android TeaVM C native libraries."),
-            BuildTarget(JParserTargets.IOS_TEAVM_C, "Build jParser iOS TeaVM C native library.")
+            BuildTarget(JParserTargets.IOS_TEAVM_C, "Build jParser iOS TeaVM C static library slices.")
         )
     }
 }

@@ -142,7 +142,25 @@ public class TeaVMCPortableResourceWriterTest {
         assertTrue(cmake.contains("copy_if_different"));
         assertTrue(cmake.contains("${JPARSER_TESTLIB_TEAVMC_NATIVE_ROOT}/${JPARSER_TESTLIB_TEAVMC_PLATFORM}/shared/"));
         assertTrue(cmake.contains("android/${ANDROID_ABI}"));
-        assertTrue(cmake.contains("required for future iOS-C layouts"));
+        assertFalse(cmake.contains("future iOS-C layouts"));
+    }
+
+    @Test
+    public void generatedCMakeSelectsAndBundlesIOSStaticSlices() throws IOException {
+        String cmake = TeaVMCPortableResourceWriter.generateCMake("TestLib");
+
+        assertTrue(cmake.contains("CMAKE_SYSTEM_NAME STREQUAL \"iOS\""));
+        assertTrue(cmake.contains("CMAKE_OSX_SYSROOT"));
+        assertTrue(cmake.contains("set(JPARSER_TESTLIB_TEAVMC_IOS_SDK \"simulator\")"));
+        assertTrue(cmake.contains("set(JPARSER_TESTLIB_TEAVMC_IOS_SDK \"device\")"));
+        assertTrue(cmake.contains("CMAKE_OSX_ARCHITECTURES"));
+        assertTrue(cmake.contains(
+                "set(JPARSER_TESTLIB_TEAVMC_PLATFORM \"ios/${JPARSER_TESTLIB_TEAVMC_IOS_SDK}/${JPARSER_TESTLIB_TEAVMC_IOS_ARCHITECTURE}\")"));
+        assertTrue(cmake.contains("set(JPARSER_TESTLIB_TEAVMC_STATIC_FILE \"libTestLib64_.a\")"));
+        assertTrue(cmake.contains("jparser_testlib_teavmc_native"));
+        assertTrue(cmake.contains("list(APPEND TEAVM_IOS_STATIC_DEPENDENCY_TARGETS"));
+        assertTrue(cmake.contains("TeaVM C on iOS supports STATIC linkage only"));
+        assertTrue(cmake.contains("iOS device libraries support ARM64 only"));
     }
 
     @Test
@@ -189,6 +207,27 @@ public class TeaVMCPortableResourceWriterTest {
                 "${JPARSER_TESTLIB_TEAVMC_PLATFORM}/${JPARSER_TESTLIB_TEAVMC_MSVC_RUNTIME_SUBDIR}/deps/wgpu_native.lib"));
         assertTrue(cmake.contains("if(DEFINED TESTLIB_WGPU_LIBRARY"));
         assertTrue(cmake.contains("target_link_libraries(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"user32.lib\")"));
+        assertFalse(TEMPLATE_PLACEHOLDER_PATTERN.matcher(cmake).find());
+    }
+
+    @Test
+    public void generatedCMakeAcceptsIOSConsumerMetadataForEverySlice() throws IOException {
+        ArrayList<TeaVMCConsumerConfig> consumers = new ArrayList<>();
+        TeaVMCConsumerConfig consumer = consumer(
+                "ios_teavm_c", "native", "include/native.h");
+        consumer.staticLibraries.add(new TeaVMCConsumerConfig.StaticLibrary(
+                "deps/libnative.a", "TESTLIB_NATIVE_OVERRIDE"));
+        consumers.add(consumer);
+
+        String cmake = TeaVMCPortableResourceWriter.generateCMake(
+                "TestLib", TeaVMCLinkage.STATIC, consumers);
+
+        assertTrue(cmake.contains(
+                "\"${JPARSER_TESTLIB_TEAVMC_PLATFORM}\" MATCHES \"^ios/\""));
+        assertTrue(cmake.contains("ios_teavm_c:native"));
+        assertTrue(cmake.contains("jparser_testlib_teavmc_consumer_0_0"));
+        assertTrue(cmake.contains(
+                "list(APPEND TEAVM_IOS_STATIC_DEPENDENCY_TARGETS jparser_testlib_teavmc_consumer_0_0)"));
         assertFalse(TEMPLATE_PLACEHOLDER_PATTERN.matcher(cmake).find());
     }
 

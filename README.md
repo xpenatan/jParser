@@ -19,9 +19,9 @@ jParser turns a shared Java API, WebIDL definitions, and embedded native code bl
 | JNI | Java Native Interface | Windows, Linux, macOS, Android | Java 8+ API |
 | FFM | Foreign Function & Memory API | Windows, Linux, macOS | Java 22+; 25 recommended |
 | TeaVM web | JavaScript / WebAssembly | Web browsers | Java 17+ tooling |
-| TeaVM C | TeaVM native C imports | Windows, Linux, macOS, Android | Java 17+ tooling |
+| TeaVM C | TeaVM native C imports | Windows, Linux, macOS, Android, iOS | Java 17+ tooling |
 
-A typical project has a hand-written `base` API and `builder` configuration. jParser generates the bridge-agnostic `core` API and target implementations, then invokes the appropriate native toolchain to build or package platform artifacts.
+A typical project has a hand-written `base` API and `builder` configuration. jParser generates the bridge-agnostic `core` API and target implementations, then invokes the appropriate native toolchain to build or package platform artifacts. For iOS TeaVM C, jParser produces static library slices and portable CMake resources; the application framework or consumer owns the launcher, Xcode project, bundle metadata, signing, and final app packaging.
 
 The project is inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen). Web builds use [Emscripten](https://emscripten.org/) and [TeaVM](https://github.com/konsoletyper/teavm).
 
@@ -48,7 +48,7 @@ Install only the toolchains required by the targets you build:
 | JDK 22+ (25 recommended) | FFM modules and applications |
 | [Visual Studio C++](https://visualstudio.microsoft.com/vs/community/) | Windows native builds |
 | GCC / G++ | Linux native builds |
-| Xcode command-line tools | macOS native builds |
+| Xcode command-line tools | macOS and iOS native builds |
 | Android NDK | Android native builds |
 | [Emscripten SDK](https://emscripten.org/) | Web JavaScript/WebAssembly builds |
 

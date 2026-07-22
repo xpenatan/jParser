@@ -86,6 +86,9 @@ jParser {
                 compileFlag(nativeUserConfig)
                 linkerFlag("-Wl,--allow-shlib-undefined")
             }
+            target(JParserTargets.IOS_TEAVM_C) {
+                compileFlag(nativeUserConfig)
+            }
             target(JParserTargets.WEB_WASM) {
                 compileFlag(nativeUserConfig)
             }

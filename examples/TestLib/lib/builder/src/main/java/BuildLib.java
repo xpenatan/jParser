@@ -324,13 +324,20 @@ public class BuildLib {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
-        // TODO WIP/not working
-
-        // Make a static library
-        IOSTarget compileStaticTarget = new IOSTarget();
         if(api.equals("teavm_c")) {
-            compileStaticTarget.libDirSuffix += api;
+            for(IOSTarget target : IOSTarget.createStaticLibrarySlices(op.sourceLanguage)) {
+                target.libDirSuffix += api;
+                addCppStandard(target.cppFlags, api, false);
+                target.headerDirs.add("-I" + sourceDir);
+                target.headerDirs.add("-I" + op.getCustomSourceDir());
+                target.cppInclude.add(sourceDir + "**.cpp");
+                target.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+                multiTarget.add(target);
+            }
+            return multiTarget;
         }
+
+        IOSTarget compileStaticTarget = new IOSTarget();
         compileStaticTarget.isStatic = true;
         addCppStandard(compileStaticTarget.cppFlags, api, false);
         compileStaticTarget.headerDirs.add("-I" + sourceDir);
@@ -340,19 +347,13 @@ public class BuildLib {
         multiTarget.add(compileStaticTarget);
 
         IOSTarget linkTarget = new IOSTarget();
-        if(api.equals("teavm_c")) {
-            linkTarget.libDirSuffix += api;
-        }
         setupGlueCode(linkTarget, api, libBuildCPPPath);
         addCppStandard(linkTarget.cppFlags, api, false);
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add("-Wl,-force_load");
-        String staticLibPath = libBuildCPPPath + "/libs/ios/";
-        if(api.equals("teavm_c")) {
-            staticLibPath += api + "/";
-        }
-        linkTarget.linkerFlags.add(staticLibPath + "lib" + op.libName + "_.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/"
+                + compileStaticTarget.getResourcePlatform() + "/lib" + op.libName + "64_.a");
         multiTarget.add(linkTarget);
 
         return multiTarget;

@@ -85,8 +85,30 @@ public class BuildLibA {
                 if(op.containsArg("android_teavm_c")) {
                     targets.add(getAndroidTeaVMCTarget(op));
                 }
+                if(op.containsArg("ios_teavm_c")) {
+                    targets.add(getIOSTeaVMCTarget(op));
+                }
             }
         });
+    }
+
+    private static BuildMultiTarget getIOSTeaVMCTarget(BuildToolOptions op) {
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+        String sourceDir = op.getSourceDir();
+        String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+
+        for(IOSTarget target : IOSTarget.createStaticLibrarySlices(op.sourceLanguage)) {
+            target.libDirSuffix += "teavm_c";
+            target.cppFlags.add("-std=c++17");
+            target.cppFlags.add("-DLIBA_EXPORTS");
+            target.cppFlags.add(config);
+            target.headerDirs.add("-I" + sourceDir);
+            target.headerDirs.add("-I" + op.getCustomSourceDir());
+            target.cppInclude.add(sourceDir + "**.cpp");
+            target.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
+            multiTarget.add(target);
+        }
+        return multiTarget;
     }
 
     private static BuildMultiTarget getWindowVCTeaVMCTarget(BuildToolOptions op) {
@@ -403,9 +425,6 @@ public class BuildLibA {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
-        // TODO WIP/not working
-
-        // Make a static library
         IOSTarget compileStaticTarget = new IOSTarget();
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++11");
@@ -421,7 +440,8 @@ public class BuildLibA {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add("-Wl,-force_load");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/"
+                + compileStaticTarget.getResourcePlatform() + "/lib" + op.libName + "64_.a");
         multiTarget.add(linkTarget);
 
         return multiTarget;

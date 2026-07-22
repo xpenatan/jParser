@@ -2,79 +2,160 @@ package com.github.xpenatan.jParser.builder.targets;
 
 import com.github.xpenatan.jParser.builder.BuildConfig;
 import com.github.xpenatan.jParser.builder.DefaultBuildTarget;
-import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 
+/** Builds a native library slice with the Apple iOS toolchain. */
 public class IOSTarget extends DefaultBuildTarget {
 
-    public String xcframeworkBundleIdentifier = "";
-    public String platform = "iphonesimulator";
-    public String minIOSVersion = "11.0";
+    public static final String MIN_IOS_VERSION = "14.0";
 
-    public static String iphoneosSdk =  "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/";
-    public static String iphoneSimulatorSdk = "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk";
+    public enum SDK {
+        DEVICE("iphoneos", "device", "-miphoneos-version-min="),
+        SIMULATOR("iphonesimulator", "simulator", "-mios-simulator-version-min=");
+
+        private final String xcrunName;
+        private final String resourceName;
+        private final String deploymentFlag;
+
+        SDK(String xcrunName, String resourceName, String deploymentFlag) {
+            this.xcrunName = xcrunName;
+            this.resourceName = resourceName;
+            this.deploymentFlag = deploymentFlag;
+        }
+
+        public String getXcrunName() {
+            return xcrunName;
+        }
+
+        public String getResourceName() {
+            return resourceName;
+        }
+    }
+
+    public enum Architecture {
+        ARM64("arm64"),
+        X86_64("x86_64");
+
+        private final String clangName;
+
+        Architecture(String clangName) {
+            this.clangName = clangName;
+        }
+
+        public String getClangName() {
+            return clangName;
+        }
+    }
+
+    private final SDK sdk;
+    private final Architecture architecture;
+    private final String minIOSVersion;
 
     public IOSTarget() {
-        this(SourceLanguage.CPP);
+        this(SourceLanguage.CPP, SDK.SIMULATOR, Architecture.X86_64, MIN_IOS_VERSION);
     }
 
     public IOSTarget(SourceLanguage language) {
-        this.libDirSuffix = "ios/";
-        this.tempBuildDir = "target/ios/";
+        this(language, SDK.SIMULATOR, Architecture.X86_64, MIN_IOS_VERSION);
+    }
 
-        if(language == SourceLanguage.C) {
-            String cppCompilerr = "clang";
-            cppCompiler.add(cppCompilerr);
-            linkerCompiler.add(cppCompilerr);
+    public IOSTarget(SourceLanguage language, SDK sdk, Architecture architecture) {
+        this(language, sdk, architecture, MIN_IOS_VERSION);
+    }
+
+    public static IOSTarget[] createStaticLibrarySlices(SourceLanguage language) {
+        IOSTarget[] targets = new IOSTarget[] {
+                new IOSTarget(language, SDK.DEVICE, Architecture.ARM64),
+                new IOSTarget(language, SDK.SIMULATOR, Architecture.ARM64),
+                new IOSTarget(language, SDK.SIMULATOR, Architecture.X86_64)
+        };
+        for(IOSTarget target : targets) {
+            target.isStatic = true;
         }
-        else if(language == SourceLanguage.CPP) {
-            String cppCompilerr = "clang++";
-            cppCompiler.add(cppCompilerr);
-            linkerCompiler.add(cppCompilerr);
+        return targets;
+    }
+
+    public IOSTarget(SourceLanguage language, SDK sdk, Architecture architecture, String minIOSVersion) {
+        if(sdk == null) {
+            throw new IllegalArgumentException("iOS SDK must not be null");
+        }
+        if(architecture == null) {
+            throw new IllegalArgumentException("iOS architecture must not be null");
+        }
+        if(sdk == SDK.DEVICE && architecture != Architecture.ARM64) {
+            throw new IllegalArgumentException("iOS device libraries currently support ARM64 only");
+        }
+        if(minIOSVersion == null || minIOSVersion.trim().isEmpty()) {
+            throw new IllegalArgumentException("Minimum iOS version must not be blank");
         }
 
-        cppFlags.add("-isysroot" + iphoneSimulatorSdk);
-        cppFlags.add("-arch x86_64");
-        cppFlags.add("-mios-simulator-version-min=" + minIOSVersion);
-        cppFlags.add("-d");
+        this.sdk = sdk;
+        this.architecture = architecture;
+        this.minIOSVersion = minIOSVersion.trim();
+        this.libDirSuffix = getResourcePlatform() + "/";
+        this.tempBuildDir = "target/" + getResourcePlatform() + "/";
+        this.libPrefix = "lib";
+
+        String compiler = language == SourceLanguage.C ? "clang" : "clang++";
+        addXcrunTool(cppCompiler, compiler);
+        addXcrunTool(linkerCompiler, compiler);
+
+        cppFlags.add("-arch");
+        cppFlags.add(architecture.clangName);
+        cppFlags.add(sdk.deploymentFlag + this.minIOSVersion);
+        cppFlags.add("-fPIC");
         cppFlags.add("-c");
-
         cppFlags.add("-Wall");
         cppFlags.add("-O2");
-        cppFlags.add("-stdlib=libc++");
+        cppFlags.add("-fmessage-length=0");
+        cppFlags.add("-Wno-unused-variable");
+        cppFlags.add("-Wno-unused-but-set-variable");
+        cppFlags.add("-Wno-format");
+        if(language == SourceLanguage.CPP) {
+            cppFlags.add("-stdlib=libc++");
+        }
+    }
+
+    public SDK getSdk() {
+        return sdk;
+    }
+
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public String getMinIOSVersion() {
+        return minIOSVersion;
+    }
+
+    public String getResourcePlatform() {
+        return "ios/" + sdk.resourceName + "/" + architecture.clangName;
     }
 
     @Override
     protected void setup(BuildConfig config) {
-        CustomFileDescriptor iosDir = config.buildRootPath;
-        if(!iosDir.exists()) {
-            iosDir.mkdirs();
-        }
-
-        CustomFileDescriptor template = new CustomFileDescriptor("ios/Info.plist", CustomFileDescriptor.FileType.Classpath);
-        String templateStr = template.readString();
-        templateStr = templateStr.replace("%libName%", libName);
-        templateStr = templateStr.replace("%identifier%", xcframeworkBundleIdentifier);
-        templateStr = templateStr.replace("%platform%", platform);
-        templateStr = templateStr.replace("%minIOSVersion%", minIOSVersion);
-        CustomFileDescriptor applicationFile = iosDir.child(template.name());
-        applicationFile.writeString(templateStr, false);
-
         if(isStatic) {
             linkerCompiler.clear();
-            linkerCompiler.add("libtool");
+            addXcrunTool(linkerCompiler, "libtool");
             linkerFlags.add("-static");
             linkerFlags.add("-o");
             libSuffix = "64_.a";
             linkerOutputCommand = "";
+            return;
         }
-        else {
-            linkerFlags.add("-isysroot" + iphoneSimulatorSdk);
-            linkerFlags.add("-arch x86_64");
-            linkerFlags.add("-mios-simulator-version-min=" + minIOSVersion);
-            linkerFlags.add("-shared");
-            linkerFlags.add("-stdlib=libc++");
-            libSuffix = "";
-            linkerOutputCommand = "-o";
-        }
+
+        linkerFlags.add("-arch");
+        linkerFlags.add(architecture.clangName);
+        linkerFlags.add(sdk.deploymentFlag + minIOSVersion);
+        linkerFlags.add("-dynamiclib");
+        linkerFlags.add("-stdlib=libc++");
+        libSuffix = "64.dylib";
+        linkerOutputCommand = "-o";
+    }
+
+    private void addXcrunTool(java.util.ArrayList<String> command, String tool) {
+        command.add("xcrun");
+        command.add("--sdk");
+        command.add(sdk.xcrunName);
+        command.add(tool);
     }
 }

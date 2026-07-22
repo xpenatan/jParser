@@ -1,7 +1,7 @@
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
-    id("com.github.xpenatan.easy-publishing") version "-SNAPSHOT"
+    id("com.github.xpenatan.easy-publishing") version "0.1.0"
 }
 
 val moduleName = "jparser-gradle-plugin"

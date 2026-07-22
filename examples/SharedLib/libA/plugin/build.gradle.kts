@@ -83,5 +83,9 @@ jParser {
             compileFlag("-DLIBA_EXPORTS")
             compileFlag(nativeUserConfig)
         }
+        target(JParserTargets.IOS_TEAVM_C) {
+            compileFlag("-DLIBA_EXPORTS")
+            compileFlag(nativeUserConfig)
+        }
     }
 }

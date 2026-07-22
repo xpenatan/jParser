@@ -90,8 +90,32 @@ public class BuildLibB {
                 if(op.containsArg("android_teavm_c")) {
                     targets.add(getAndroidTeaVMCTarget(op, libAPath));
                 }
+                if(op.containsArg("ios_teavm_c")) {
+                    targets.add(getIOSTeaVMCTarget(op, libAPath));
+                }
             }
         });
+    }
+
+    private static BuildMultiTarget getIOSTeaVMCTarget(BuildToolOptions op, String libAPath) {
+        String libACPPPath = libAPath + "/builder/src/main/cpp";
+        String libASourcePath = libACPPPath + "/source";
+        String libACustomPath = libACPPPath + "/custom";
+        String sourceDir = op.getSourceDir();
+        String config = "-DLIB_USER_CONFIG=\"LibACustomConfig.h\"";
+        BuildMultiTarget multiTarget = new BuildMultiTarget();
+
+        for(IOSTarget target : IOSTarget.createStaticLibrarySlices(op.sourceLanguage)) {
+            target.libDirSuffix += "teavm_c";
+            target.cppFlags.add("-std=c++17");
+            target.cppFlags.add(config);
+            target.headerDirs.add("-I" + sourceDir);
+            target.headerDirs.add("-I" + libASourcePath);
+            target.headerDirs.add("-I" + libACustomPath);
+            target.cppInclude.add(sourceDir + "**.cpp");
+            multiTarget.add(target);
+        }
+        return multiTarget;
     }
 
     private static BuildMultiTarget getWindowVCTeaVMCTarget(BuildToolOptions op, String libAPath) {
@@ -468,9 +492,6 @@ public class BuildLibB {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
-        // TODO WIP/not working
-
-        // Make a static library
         IOSTarget compileStaticTarget = new IOSTarget();
         compileStaticTarget.isStatic = true;
         compileStaticTarget.cppFlags.add("-std=c++11");
@@ -484,7 +505,8 @@ public class BuildLibB {
         linkTarget.headerDirs.add("-I" + sourceDir);
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.linkerFlags.add("-Wl,-force_load");
-        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/ios/lib" + op.libName + "_.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/"
+                + compileStaticTarget.getResourcePlatform() + "/lib" + op.libName + "64_.a");
         linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
         linkTarget.linkerFlags.add("-Wl,-undefined,dynamic_lookup");
         multiTarget.add(linkTarget);

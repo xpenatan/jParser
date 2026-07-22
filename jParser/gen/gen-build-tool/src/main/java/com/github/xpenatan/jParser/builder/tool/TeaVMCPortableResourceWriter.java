@@ -262,8 +262,25 @@ final class TeaVMCPortableResourceWriter {
                     .append(" static consumer library for variant ").append(cmakeEscape(consumer.variantName))
                     .append(": ").append(cmakeEscape(library.resourcePath)).append("\")\n");
             out.append("    endif()\n");
-            out.append("    target_link_libraries(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"${")
+            String iosTarget = "jparser_" + resourceName(libName)
+                    + "_teavmc_consumer_" + consumerIndex + "_" + i;
+            out.append("    if(APPLE AND CMAKE_SYSTEM_NAME STREQUAL \"iOS\")\n");
+            out.append("      if(NOT TARGET ").append(iosTarget).append(")\n");
+            out.append("        add_library(").append(iosTarget).append(" STATIC IMPORTED GLOBAL)\n");
+            out.append("        set_target_properties(").append(iosTarget)
+                    .append(" PROPERTIES IMPORTED_LOCATION \"${")
                     .append(libraryVariable).append("}\")\n");
+            out.append("      endif()\n");
+            out.append("      target_link_libraries(${JPARSER_TEAVMC_APP_TARGET} PRIVATE ")
+                    .append(iosTarget).append(")\n");
+            out.append("      if(DEFINED TEAVM_IOS_STATIC_DEPENDENCY_TARGETS)\n");
+            out.append("        list(APPEND TEAVM_IOS_STATIC_DEPENDENCY_TARGETS ")
+                    .append(iosTarget).append(")\n");
+            out.append("      endif()\n");
+            out.append("    else()\n");
+            out.append("      target_link_libraries(${JPARSER_TEAVMC_APP_TARGET} PRIVATE \"${")
+                    .append(libraryVariable).append("}\")\n");
+            out.append("    endif()\n");
         }
         appendTargetValues(out, "target_link_libraries", consumer.staticLinkLibraries, 4);
         appendTargetValues(out, "target_link_options", consumer.staticLinkOptions, 4);
@@ -336,6 +353,8 @@ final class TeaVMCPortableResourceWriter {
                 return "mac_arm64";
             case "android_teavm_c":
                 return "android/*";
+            case "ios_teavm_c":
+                return "ios/*";
             default:
                 throw new IOException("Unsupported TeaVM C consumer target: " + targetName);
         }

@@ -48,7 +48,7 @@ options.fileName = "webgpu_dawn64.dll";
 JParserLibraryLoader.load("webgpu", options, listener);
 ```
 
-Shared binaries inside dependency jars are build resources, not files that an operating-system loader can open. A launcher must extract and deploy them to the filesystem. Future iOS C support is limited to native code bundled with and signed as part of the application; arbitrary downloaded plugins are outside that model.
+Shared binaries inside dependency jars are build resources, not files that an operating-system loader can open. A launcher must extract and deploy them to the filesystem. iOS supports `STATIC` linkage only: native code must be bundled with and signed as part of the application, and arbitrary downloaded plugins are outside that model.
 
 ## Packaged Native Dependencies
 
@@ -93,7 +93,23 @@ At CMake configure time, all `selectorResource(...)` entries for a candidate mus
 | `staticLinkLibrary(value)` | Adds a system or transitive library in `STATIC` mode |
 | `staticLinkerFlag(value)` | Adds a linker option in `STATIC` mode |
 
-Automatic consumer selection supports Windows x64, Linux x64, macOS x64/arm64, and Android ABI resource roots. iOS producer targets still accept generic compiler and linker hooks, but automatic iOS consumer-artifact selection awaits a defined archive/framework packaging layout.
+Automatic consumer selection supports Windows x64, Linux x64, macOS x64/arm64, Android ABI resource roots, and iOS device/simulator archive slices.
+
+## iOS Static Library Contract
+
+The `ios_teavm_c` producer target builds three static slices with the active Xcode toolchain:
+
+| SDK | Architecture | Resource directory |
+|---|---|---|
+| `iphoneos` | `arm64` | `ios/device/arm64` |
+| `iphonesimulator` | `arm64` | `ios/simulator/arm64` |
+| `iphonesimulator` | `x86_64` | `ios/simulator/x86_64` |
+
+Each slice is named `lib<Library>64_.a`. The `runtime-ios-c` artifact, and the equivalent `<Library>-ios-c` binding artifact, packages all three slices below `external_cpp/jparser/<library>/native/ios/**`. Keeping the slices together lets Xcode switch simulator architecture without resolving another Gradle dependency.
+
+The generated CMake hook selects one slice from `CMAKE_OSX_SYSROOT` and `CMAKE_OSX_ARCHITECTURES`. An iOS consumer must select exactly one architecture for a build. Device builds accept ARM64; simulator builds accept ARM64 or x86_64. The hook rejects `SHARED_LINKED` and `RUNTIME_LOADED` on iOS, links an imported static target, and appends that target to `TEAVM_IOS_STATIC_DEPENDENCY_TARGETS` when the consumer defines the list.
+
+jParser stops at this integration boundary. It generates TeaVM C bindings/resources, invokes `xcrun` to compile the static libraries, and packages the slices. It does not generate an application launcher, UI, `Info.plist`, Xcode project, signing configuration, or final bundle. Those belong to gdx-teavm, libfdx, or the consuming application. The committed TestLib and SharedLib `ios-c` applications are handwritten custom emulators that render their result in a real iPhone Simulator and verify the contract in GitHub Actions.
 
 ## Windows MSVC Runtime
 

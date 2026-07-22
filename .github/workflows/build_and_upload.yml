@@ -285,6 +285,175 @@ jobs:
           name: mac-natives-arm
           path: ./jParser/runtime/builder/build/c++/libs/
 
+  build_ios:
+    name: Build and test iOS TeaVM C
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.13.1
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: "corretto"
+          java-version: 25
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Build custom iOS emulator projects
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(uname -m)" = "arm64" ]; then
+            simulator_arch=arm64
+          else
+            simulator_arch=x86_64
+          fi
+          ./gradlew \
+            :examples:TestLib:app:platforms:ios-c:TestLib_build_app_ios_c \
+            :examples:SharedLib:app:platforms:ios-c:SharedLib_build_app_ios_c \
+            -PiosSimulatorArch="${simulator_arch}" \
+            --no-daemon --console=plain
+
+      - name: Verify packaged iOS archive slices
+        shell: bash
+        run: |
+          set -euo pipefail
+          for archive in \
+            jParser/runtime/builder/build/c++/libs/ios/device/arm64/teavm_c/libruntime64_.a \
+            jParser/runtime/builder/build/c++/libs/ios/simulator/arm64/teavm_c/libruntime64_.a \
+            jParser/runtime/builder/build/c++/libs/ios/simulator/x86_64/teavm_c/libruntime64_.a; do
+            test -f "${archive}"
+            xcrun lipo -info "${archive}"
+          done
+
+      - name: Boot iOS simulator
+        id: simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          device_udid="$(xcrun simctl list devices available --json | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          devices = [d for values in data["devices"].values() for d in values if d.get("isAvailable") and "iPhone" in d.get("name", "")]
+          if not devices:
+              raise SystemExit("No available iPhone simulator")
+          print(devices[0]["udid"])
+          ')"
+          echo "udid=${device_udid}" >> "${GITHUB_OUTPUT}"
+          xcrun simctl boot "${device_udid}" 2>/dev/null || true
+          xcrun simctl bootstatus "${device_udid}" -b
+
+      - name: Run TestLib custom emulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/ios-simulator-logs
+          app_path="$(find examples/TestLib/app/platforms/ios-c/build/ios-c/cmake-simulator -type d -name TestLibIOSC.app -print -quit)"
+          test -n "${app_path}"
+          xcrun simctl install "${{ steps.simulator.outputs.udid }}" "${app_path}"
+          log_path="build/ios-simulator-logs/testlib.log"
+          screenshot_path="build/ios-simulator-logs/testlib.png"
+          marker="TestLib iOS TeaVM C emulator passed"
+          : > "${log_path}"
+          xcrun simctl launch --console --terminate-running-process \
+            "${{ steps.simulator.outputs.udid }}" \
+            com.github.xpenatan.jparser.testlib.iosc \
+            2>&1 | tee "${log_path}" &
+          launch_pid=$!
+          passed=false
+          for attempt in $(seq 1 120); do
+            if grep -Fq "${marker}" "${log_path}"; then
+              passed=true
+              break
+            fi
+            if ! kill -0 "${launch_pid}" 2>/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          if [ "${passed}" != "true" ]; then
+            xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" \
+              com.github.xpenatan.jparser.testlib.iosc || true
+            wait "${launch_pid}" || true
+            echo "TestLib emulator did not report success"
+            exit 1
+          fi
+          sleep 1
+          xcrun simctl io "${{ steps.simulator.outputs.udid }}" screenshot "${screenshot_path}"
+          xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" \
+            com.github.xpenatan.jparser.testlib.iosc
+          wait "${launch_pid}" || true
+          grep -F "${marker}" "${log_path}"
+
+      - name: Run SharedLib custom emulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/ios-simulator-logs
+          app_path="$(find examples/SharedLib/app/platforms/ios-c/build/ios-c/cmake-simulator -type d -name SharedLibIOSC.app -print -quit)"
+          test -n "${app_path}"
+          xcrun simctl install "${{ steps.simulator.outputs.udid }}" "${app_path}"
+          log_path="build/ios-simulator-logs/sharedlib.log"
+          screenshot_path="build/ios-simulator-logs/sharedlib.png"
+          marker="SharedLib iOS TeaVM C emulator passed"
+          : > "${log_path}"
+          xcrun simctl launch --console --terminate-running-process \
+            "${{ steps.simulator.outputs.udid }}" \
+            com.github.xpenatan.jparser.sharedlib.iosc \
+            2>&1 | tee "${log_path}" &
+          launch_pid=$!
+          passed=false
+          for attempt in $(seq 1 120); do
+            if grep -Fq "${marker}" "${log_path}"; then
+              passed=true
+              break
+            fi
+            if ! kill -0 "${launch_pid}" 2>/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          if [ "${passed}" != "true" ]; then
+            xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" \
+              com.github.xpenatan.jparser.sharedlib.iosc || true
+            wait "${launch_pid}" || true
+            echo "SharedLib emulator did not report success"
+            exit 1
+          fi
+          sleep 1
+          xcrun simctl io "${{ steps.simulator.outputs.udid }}" screenshot "${screenshot_path}"
+          xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" \
+            com.github.xpenatan.jparser.sharedlib.iosc
+          wait "${launch_pid}" || true
+          grep -F "${marker}" "${log_path}"
+
+      - name: Shut down iOS simulator
+        if: ${{ always() && steps.simulator.outputs.udid != '' }}
+        run: xcrun simctl shutdown "${{ steps.simulator.outputs.udid }}" || true
+
+      - name: Upload iOS simulator logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-simulator-logs
+          path: ./build/ios-simulator-logs/
+          if-no-files-found: ignore
+
+      - name: Upload iOS runtime natives
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-natives
+          path: ./jParser/runtime/builder/build/c++/libs/ios/
+
   build_web:
     name: Build Web
     runs-on: ubuntu-latest
@@ -411,7 +580,7 @@ jobs:
 
   upload_natives:
     name: Upload Natives
-    needs: [build_windows, build_linux, build_mac_intel, build_mac_arm, build_android, build_web]
+    needs: [build_windows, build_linux, build_mac_intel, build_mac_arm, build_ios, build_android, build_web]
     runs-on: ubuntu-latest
 
     steps:
@@ -472,6 +641,12 @@ jobs:
         with:
           name: android-natives
           path: ./jParser/runtime/builder/build/c++/libs/
+
+      - name: Download iOS natives runtime
+        uses: actions/download-artifact@v8
+        with:
+          name: ios-natives
+          path: ./jParser/runtime/builder/build/c++/libs/ios/
 
       - name: Download web natives runtime
         uses: actions/download-artifact@v8

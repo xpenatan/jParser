@@ -92,11 +92,13 @@ jParser adds no CRT flag when none is supplied. The system-property runner accep
 ./gradlew :jParser:loader:loader-c:jar
 ./gradlew :jParser:runtime:shared:runtime-c:jar
 ./gradlew :jParser:runtime:desktop:runtime-desktop-c:nativeJar_windows_x64
+./gradlew :jParser:runtime:ios:runtime-ios-c:jar
 ./gradlew :examples:TestLib:lib:shared:TestLib-c:jar
 ./gradlew :examples:TestLib:lib:desktop:TestLib-desktop-c:nativeJar_windows_x64
+./gradlew :examples:TestLib:lib:ios:TestLib-ios-c:jar
 ```
 
-Replace `windows_x64` with `linux_x64`, `mac_x64`, or `mac_arm64` after building the corresponding native TeaVM C target. Inspect `loader-c` for `external_cpp/jparser/loader/teavmc_loader.{h,cpp}` and its `jparser_00_teavmc_loader.cmake` hook. Inspect the main binding C jar for `gen/c/**`, `external_cpp/cmake/post_target/**`, and `external_cpp/jparser/<library>/teavmcabi/**`; inspect the native jar for `external_cpp/jparser/<library>/native/<platform>/**` and `META-INF/gdx-teavm.properties`. Dynamic linkage payloads must include the matching DLL, SO, or dylib (and a Windows import library for `SHARED_LINKED`). A consumer that discovers these files inside a native resource jar must extract them before CMake can link or stage them and before the operating-system loader can open them. The current gdx-teavm extractor also needs its extension allowlist updated to copy `.dll`, `.so`, and `.dylib` payloads.
+Replace `windows_x64` with `linux_x64`, `mac_x64`, or `mac_arm64` after building the corresponding desktop TeaVM C target. iOS jar tasks run on macOS and first build device ARM64 plus simulator ARM64/x86_64 slices. Inspect `loader-c` for `external_cpp/jparser/loader/teavmc_loader.{h,cpp}` and its `jparser_00_teavmc_loader.cmake` hook. Inspect the main binding C jar for `gen/c/**`, `external_cpp/cmake/post_target/**`, and `external_cpp/jparser/<library>/teavmcabi/**`; inspect the native jar for `external_cpp/jparser/<library>/native/<platform>/**` and `META-INF/gdx-teavm.properties`. Dynamic linkage payloads must include the matching DLL, SO, or dylib (and a Windows import library for `SHARED_LINKED`). A consumer that discovers these files inside a native resource jar must extract them before CMake can link or stage them and before the operating-system loader can open them. The current gdx-teavm extractor also needs its extension allowlist updated to copy `.dll`, `.so`, and `.dylib` payloads.
 
 ### TestLib app run/build
 
@@ -107,7 +109,10 @@ Replace `windows_x64` with `linux_x64`, `mac_x64`, or `mac_arm64` after building
 ./gradlew :examples:TestLib:app:platforms:web:TestLib_run_app_web
 ./gradlew :examples:TestLib:app:platforms:android:assembleDebug
 ./gradlew :examples:TestLib:app:platforms:android-c:TestLib_build_app_android_c
+./gradlew :examples:TestLib:app:platforms:ios-c:TestLib_build_app_ios_c
 ```
+
+The iOS command requires macOS, Xcode, and CMake. The committed TestLib and SharedLib modules are handwritten custom emulator applications: each renders its running/pass/fail state in a real iPhone Simulator while consuming the TeaVM C inputs generated and packaged by jParser. jParser does not generate their launcher, UI, `Info.plist`, Xcode/CMake project, or signing configuration. Override the host-derived simulator architecture with `-PiosSimulatorArch=arm64` or `-PiosSimulatorArch=x86_64`.
 
 ### TestLib app tests
 
@@ -146,12 +151,14 @@ Build libA before libB.
 ./gradlew :examples:SharedLib:libA:builder:LibA_build_project_windows64_ffm
 ./gradlew :examples:SharedLib:libA:builder:LibA_build_project_windows64_teavm_c
 ./gradlew :examples:SharedLib:libA:builder:LibA_build_project_android_teavm_c
+./gradlew :examples:SharedLib:libA:builder:LibA_build_project_ios_teavm_c
 ./gradlew :examples:SharedLib:libA:builder:LibA_build_project_web_wasm
 
 ./gradlew :examples:SharedLib:libB:builder:LibB_build_project_windows64_jni
 ./gradlew :examples:SharedLib:libB:builder:LibB_build_project_windows64_ffm
 ./gradlew :examples:SharedLib:libB:builder:LibB_build_project_windows64_teavm_c
 ./gradlew :examples:SharedLib:libB:builder:LibB_build_project_android_teavm_c
+./gradlew :examples:SharedLib:libB:builder:LibB_build_project_ios_teavm_c
 ./gradlew :examples:SharedLib:libB:builder:LibB_build_project_web_wasm
 
 ./gradlew :examples:SharedLib:app:platforms:desktop-jni:SharedLib_run_app_desktop_jni
@@ -160,6 +167,7 @@ Build libA before libB.
 ./gradlew :examples:SharedLib:app:platforms:web:SharedLib_run_app_web
 ./gradlew :examples:SharedLib:app:platforms:android:assembleDebug
 ./gradlew :examples:SharedLib:app:platforms:android-c:SharedLib_build_app_android_c
+./gradlew :examples:SharedLib:app:platforms:ios-c:SharedLib_build_app_ios_c
 ```
 
 ## Cross-platform variants
@@ -202,6 +210,7 @@ publishing tasks in the same Gradle invocation.
 ./gradlew :jParser:runtime:plugin:jParser_build_windows64_jni
 ./gradlew :jParser:runtime:plugin:jParser_build_windows64_ffm
 ./gradlew :jParser:runtime:plugin:jParser_build_android_jni
+./gradlew :jParser:runtime:plugin:jParser_build_ios_teavm_c
 ./gradlew :jParser:runtime:plugin:jParser_build_web_wasm
 
 ./gradlew :examples:TestLib:lib:plugin:tasks --group jParser --all
@@ -209,6 +218,7 @@ publishing tasks in the same Gradle invocation.
 ./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_jni
 ./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_ffm
 ./gradlew :examples:TestLib:lib:plugin:jParser_build_android_jni
+./gradlew :examples:TestLib:lib:plugin:jParser_build_ios_teavm_c
 ./gradlew :examples:TestLib:lib:plugin:jParser_build_web_wasm
 
 ./gradlew :examples:SharedLib:libA:plugin:tasks --group jParser --all

@@ -255,11 +255,18 @@ public class DefaultBuildTargetFactory {
         String sourceDir = op.getSourceDir();
         String libBuildCPPPath = op.getModuleBuildCPPPath();
 
+        if(api.equals("teavm_c")) {
+            addIOSTeaVMCStaticTarget(op, config, targetArg, multiTarget,
+                    IOSTarget.SDK.DEVICE, IOSTarget.Architecture.ARM64);
+            addIOSTeaVMCStaticTarget(op, config, targetArg, multiTarget,
+                    IOSTarget.SDK.SIMULATOR, IOSTarget.Architecture.ARM64);
+            addIOSTeaVMCStaticTarget(op, config, targetArg, multiTarget,
+                    IOSTarget.SDK.SIMULATOR, IOSTarget.Architecture.X86_64);
+            return multiTarget;
+        }
+
         IOSTarget compileStaticTarget = new IOSTarget(config.sourceLanguage);
         applyOutputDirectoryPrefix(compileStaticTarget, config, targetArg);
-        if(api.equals("teavm_c")) {
-            compileStaticTarget.libDirSuffix += api;
-        }
         compileStaticTarget.isStatic = true;
         addSourceStandard(compileStaticTarget.cppFlags, api, false, config);
         addDefaultSources(compileStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
@@ -275,12 +282,31 @@ public class DefaultBuildTargetFactory {
         addCppStandard(linkTarget.cppFlags, api, false, config);
         addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
         linkTarget.linkerFlags.add("-Wl,-force_load");
-        linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg, "ios", api));
+        linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg,
+                compileStaticTarget.getResourcePlatform(), api));
         applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.MAC_FORCE_LOAD);
         applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg);
         applyLinkHooks(linkTarget, config, targetArg);
         multiTarget.add(linkTarget);
         return multiTarget;
+    }
+
+    private void addIOSTeaVMCStaticTarget(
+            BuildToolOptions op,
+            DefaultBuildTargetConfig config,
+            String targetArg,
+            BuildMultiTarget multiTarget,
+            IOSTarget.SDK sdk,
+            IOSTarget.Architecture architecture) {
+        IOSTarget target = new IOSTarget(config.sourceLanguage, sdk, architecture);
+        applyOutputDirectoryPrefix(target, config, targetArg);
+        target.libDirSuffix += "teavm_c";
+        target.isStatic = true;
+        addSourceStandard(target.cppFlags, "teavm_c", false, config);
+        addDefaultSources(target, op.getSourceDir(), op.getCustomSourceDir(),
+                op.getModuleBuildCPPPath(), config, targetArg);
+        applyCompileHooks(target, config, targetArg);
+        multiTarget.add(target);
     }
 
     private void addDefaultSources(DefaultBuildTarget target, String sourceDir, String customSourceDir, String libBuildCPPPath, DefaultBuildTargetConfig config, String targetArg) {
@@ -566,8 +592,10 @@ public class DefaultBuildTargetFactory {
         if(platform.equals("mac")) {
             return libBuildCPPPath + "/libs/" + prefix + "mac/" + api + "/lib" + op.libName + "64_.a";
         }
-        if(platform.equals("ios")) {
-            return libBuildCPPPath + "/libs/" + prefix + "ios/" + (api.equals("teavm_c") ? api + "/" : "") + "lib" + op.libName + "_.a";
+        if(platform.startsWith("ios/")) {
+            return libBuildCPPPath + "/libs/" + prefix + platform + "/"
+                    + (api.equals("teavm_c") ? api + "/" : "")
+                    + "lib" + op.libName + "64_.a";
         }
         return libBuildCPPPath + "/libs/" + prefix + platform + "/" + api + "/lib" + op.libName + "64_.a";
     }

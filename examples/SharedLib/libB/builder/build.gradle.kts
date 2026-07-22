@@ -54,6 +54,15 @@ tasks.register<JavaExec>("LibB_build_project_android_teavm_c") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
+tasks.register<JavaExec>("LibB_build_project_ios_teavm_c") {
+    group = "lib"
+    description = "Generate TeaVM C Java bindings and compile static iOS library slices"
+    dependsOn(":examples:SharedLib:libA:builder:LibA_build_project_ios_teavm_c")
+    mainClass.set(mainClassName)
+    args = mutableListOf("gen_teavm_c", "ios_teavm_c")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 tasks.register<JavaExec>("LibB_build_project_windows64_jni") {
     group = "lib"
     description = "Generate native project"
