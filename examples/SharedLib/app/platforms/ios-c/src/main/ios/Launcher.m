@@ -1,10 +1,13 @@
 #import <UIKit/UIKit.h>
 
+#include <fcntl.h>
 #include <stdio.h>
+#include <unistd.h>
 
 int jparser_ios_teavm_main(int argc, char** argv);
 
 static NSString* const SharedLibStatusFileName = @"jparser-ios-status.txt";
+static NSString* const SharedLibRuntimeLogFileName = @"jparser-ios-runtime.log";
 
 static void SharedLibWriteStatus(NSString* status) {
     NSString* statusPath = [NSTemporaryDirectory()
@@ -16,6 +19,23 @@ static void SharedLibWriteStatus(NSString* status) {
                        error:&error]) {
         NSLog(@"Unable to write SharedLib emulator status: %@", error);
     }
+}
+
+static void SharedLibRedirectRuntimeLog(void) {
+    NSString* logPath = [NSTemporaryDirectory()
+        stringByAppendingPathComponent:SharedLibRuntimeLogFileName];
+    int logFd = open(logPath.fileSystemRepresentation,
+        O_WRONLY | O_CREAT | O_APPEND, 0600);
+    if(logFd < 0) {
+        NSLog(@"Unable to open SharedLib TeaVM runtime log at %@", logPath);
+        return;
+    }
+    if(dup2(logFd, STDOUT_FILENO) < 0 || dup2(logFd, STDERR_FILENO) < 0) {
+        NSLog(@"Unable to redirect SharedLib TeaVM runtime output to %@", logPath);
+    }
+    close(logFd);
+    setvbuf(stdout, NULL, _IONBF, 0);
+    setvbuf(stderr, NULL, _IONBF, 0);
 }
 
 @interface SharedLibAppDelegate : UIResponder <UIApplicationDelegate>
@@ -53,6 +73,7 @@ static void SharedLibWriteStatus(NSString* status) {
     SharedLibWriteStatus(@"SharedLib iOS TeaVM C emulator started\n");
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
         @autoreleasepool {
+            SharedLibRedirectRuntimeLog();
             char* argv[] = { "SharedLibIOSC", NULL };
             int result = jparser_ios_teavm_main(1, argv);
             NSString* status = result == 0

@@ -361,14 +361,17 @@ jobs:
           test -n "${app_path}"
           xcrun simctl install "${{ steps.simulator.outputs.udid }}" "${app_path}"
           log_path="build/ios-simulator-logs/testlib.log"
+          runtime_log="build/ios-simulator-logs/testlib-runtime.log"
           system_log_path="build/ios-simulator-logs/testlib-system.log"
+          crash_log_path="build/ios-simulator-logs/testlib-crash.log"
           screenshot_path="build/ios-simulator-logs/testlib.png"
           marker="TestLib iOS TeaVM C emulator passed"
           data_path="$(xcrun simctl get_app_container \
             "${{ steps.simulator.outputs.udid }}" \
             com.github.xpenatan.jparser.testlib.iosc data)"
           status_path="${data_path}/tmp/jparser-ios-status.txt"
-          rm -f "${status_path}"
+          runtime_log_path="${data_path}/tmp/jparser-ios-runtime.log"
+          rm -f "${status_path}" "${runtime_log_path}"
           xcrun simctl launch --terminate-running-process \
             "${{ steps.simulator.outputs.udid }}" \
             com.github.xpenatan.jparser.testlib.iosc
@@ -386,20 +389,42 @@ jobs:
             else
               echo "TestLib emulator created no status file" > "${log_path}"
             fi
+            if [ -f "${runtime_log_path}" ]; then
+              cp "${runtime_log_path}" "${runtime_log}"
+            else
+              echo "TestLib emulator created no runtime log" > "${runtime_log}"
+            fi
             xcrun simctl io "${{ steps.simulator.outputs.udid }}" \
               screenshot "${screenshot_path}" || true
             xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" \
               log show --last 5m --style compact \
-              --predicate 'process == "TestLibIOSC"' \
+              --predicate 'process == "TestLibIOSC" OR eventMessage CONTAINS[c] "TestLibIOSC"' \
               > "${system_log_path}" 2>&1 || true
+            {
+              for report_dir in \
+                "${HOME}/Library/Logs/DiagnosticReports" \
+                "${HOME}/Library/Developer/CoreSimulator/Devices/${{ steps.simulator.outputs.udid }}/data/Library/Logs/CrashReporter" \
+                "${HOME}/Library/Developer/CoreSimulator/Devices/${{ steps.simulator.outputs.udid }}/data/Library/Logs/DiagnosticReports"; do
+                if [ -d "${report_dir}" ]; then
+                  find "${report_dir}" -type f \
+                    \( -name 'TestLibIOSC*.ips' -o -name 'TestLibIOSC*.crash' \) \
+                    -mmin -10 -print -exec cat {} \;
+                fi
+              done
+            } > "${crash_log_path}" 2>&1 || true
             xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" \
               com.github.xpenatan.jparser.testlib.iosc || true
             cat "${log_path}"
+            cat "${runtime_log}"
             cat "${system_log_path}"
+            cat "${crash_log_path}"
             echo "TestLib emulator did not report success"
             exit 1
           fi
           cp "${status_path}" "${log_path}"
+          if [ -f "${runtime_log_path}" ]; then
+            cp "${runtime_log_path}" "${runtime_log}"
+          fi
           sleep 1
           xcrun simctl io "${{ steps.simulator.outputs.udid }}" screenshot "${screenshot_path}"
           xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" \
@@ -415,14 +440,17 @@ jobs:
           test -n "${app_path}"
           xcrun simctl install "${{ steps.simulator.outputs.udid }}" "${app_path}"
           log_path="build/ios-simulator-logs/sharedlib.log"
+          runtime_log="build/ios-simulator-logs/sharedlib-runtime.log"
           system_log_path="build/ios-simulator-logs/sharedlib-system.log"
+          crash_log_path="build/ios-simulator-logs/sharedlib-crash.log"
           screenshot_path="build/ios-simulator-logs/sharedlib.png"
           marker="SharedLib iOS TeaVM C emulator passed"
           data_path="$(xcrun simctl get_app_container \
             "${{ steps.simulator.outputs.udid }}" \
             com.github.xpenatan.jparser.sharedlib.iosc data)"
           status_path="${data_path}/tmp/jparser-ios-status.txt"
-          rm -f "${status_path}"
+          runtime_log_path="${data_path}/tmp/jparser-ios-runtime.log"
+          rm -f "${status_path}" "${runtime_log_path}"
           xcrun simctl launch --terminate-running-process \
             "${{ steps.simulator.outputs.udid }}" \
             com.github.xpenatan.jparser.sharedlib.iosc
@@ -440,20 +468,42 @@ jobs:
             else
               echo "SharedLib emulator created no status file" > "${log_path}"
             fi
+            if [ -f "${runtime_log_path}" ]; then
+              cp "${runtime_log_path}" "${runtime_log}"
+            else
+              echo "SharedLib emulator created no runtime log" > "${runtime_log}"
+            fi
             xcrun simctl io "${{ steps.simulator.outputs.udid }}" \
               screenshot "${screenshot_path}" || true
             xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" \
               log show --last 5m --style compact \
-              --predicate 'process == "SharedLibIOSC"' \
+              --predicate 'process == "SharedLibIOSC" OR eventMessage CONTAINS[c] "SharedLibIOSC"' \
               > "${system_log_path}" 2>&1 || true
+            {
+              for report_dir in \
+                "${HOME}/Library/Logs/DiagnosticReports" \
+                "${HOME}/Library/Developer/CoreSimulator/Devices/${{ steps.simulator.outputs.udid }}/data/Library/Logs/CrashReporter" \
+                "${HOME}/Library/Developer/CoreSimulator/Devices/${{ steps.simulator.outputs.udid }}/data/Library/Logs/DiagnosticReports"; do
+                if [ -d "${report_dir}" ]; then
+                  find "${report_dir}" -type f \
+                    \( -name 'SharedLibIOSC*.ips' -o -name 'SharedLibIOSC*.crash' \) \
+                    -mmin -10 -print -exec cat {} \;
+                fi
+              done
+            } > "${crash_log_path}" 2>&1 || true
             xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" \
               com.github.xpenatan.jparser.sharedlib.iosc || true
             cat "${log_path}"
+            cat "${runtime_log}"
             cat "${system_log_path}"
+            cat "${crash_log_path}"
             echo "SharedLib emulator did not report success"
             exit 1
           fi
           cp "${status_path}" "${log_path}"
+          if [ -f "${runtime_log_path}" ]; then
+            cp "${runtime_log_path}" "${runtime_log}"
+          fi
           sleep 1
           xcrun simctl io "${{ steps.simulator.outputs.udid }}" screenshot "${screenshot_path}"
           xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" \
