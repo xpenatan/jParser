@@ -9,7 +9,7 @@ set(JPARSER_TEAVMC_GENERATED_SOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/build/ios-
 set(TEAVM_APP_TARGET testlib_teavm_program)
 set(JPARSER_TEAVMC_APP_TARGET ${TEAVM_APP_TARGET})
 
-add_library(${TEAVM_APP_TARGET} OBJECT
+add_library(${TEAVM_APP_TARGET} STATIC
   "${JPARSER_TEAVMC_GENERATED_SOURCE_ROOT}/app_include.c")
 
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
@@ -33,9 +33,9 @@ foreach(TEAVM_EXTENSION_POST_TARGET_FILE IN LISTS TEAVM_EXTENSION_POST_TARGET_FI
   include("${TEAVM_EXTENSION_POST_TARGET_FILE}")
 endforeach()
 
-# Flatten the packaged dependency archives into one consumer-side archive. The
-# generated program is an object library so Xcode does not have to expand a
-# configuration-dependent archive path inside this custom command.
+# Flatten only the packaged dependency archives into one consumer-side archive.
+# Link the generated program target normally so CMake owns its Xcode
+# configuration-dependent path.
 set(TEAVM_IOS_BUNDLE_ARCHIVE "${CMAKE_BINARY_DIR}/libTestLibIOSC_bundle.a")
 set(TEAVM_IOS_BUNDLE_INPUTS "")
 set(TEAVM_IOS_BUNDLE_DEPENDS "")
@@ -52,11 +52,10 @@ add_custom_command(
   VERBATIM)
 add_custom_target(testlib_teavm_bundle ALL DEPENDS "${TEAVM_IOS_BUNDLE_ARCHIVE}")
 
-add_executable(TestLibIOSC MACOSX_BUNDLE
-  "src/main/ios/Launcher.m"
-  $<TARGET_OBJECTS:${TEAVM_APP_TARGET}>)
+add_executable(TestLibIOSC MACOSX_BUNDLE "src/main/ios/Launcher.m")
 add_dependencies(TestLibIOSC testlib_teavm_bundle)
 target_link_libraries(TestLibIOSC PRIVATE
+  ${TEAVM_APP_TARGET}
   "${TEAVM_IOS_BUNDLE_ARCHIVE}"
   "-framework Foundation"
   "-framework UIKit")
