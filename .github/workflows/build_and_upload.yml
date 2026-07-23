@@ -670,7 +670,7 @@ jobs:
         id: version
         shell: bash
         run: |
-          version="$(python3 -c 'import pathlib, tomllib; print(tomllib.loads(pathlib.Path("gradle/libs.versions.toml").read_text(encoding="utf-8"))["versions"]["jParser"])')"
+          version="$(python3 -c 'import pathlib, tomllib; print(tomllib.loads(pathlib.Path("gradle/libs.versions.toml").read_text(encoding="utf-8"))["versions"]["jParserRelease"])')"
           test -n "$version"
           echo "value=$version" >> "$GITHUB_OUTPUT"
 
