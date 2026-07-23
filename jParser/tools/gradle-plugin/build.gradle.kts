@@ -68,8 +68,8 @@ publishing {
 
 easyPublishing {
     groupId.set(jParserGroup)
-    releaseVersion.set(libs.versions.jParserRelease)
-    snapshotVersion.set(libs.versions.jParserSnapshot)
+    releaseVersion.set(libs.versions.jParser)
+    snapshotVersion.set("-SNAPSHOT")
 
     snapshotRepositoryUrl.set("https://central.sonatype.com/repository/maven-snapshots/")
     releaseRepositoryUrl.set("https://central.sonatype.com")
