@@ -13,12 +13,12 @@ dependencies {
     implementation(project(":jParser:gen:gen-ffm"))
     implementation(project(":jParser:gen:gen-build"))
 
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testImplementation(libs.junit)
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
 }
 
 java {
@@ -30,8 +30,8 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            group = LibExt.groupId
-            version = LibExt.libVersion
+            group = project.group.toString()
+            version = project.version.toString()
             from(components["java"])
         }
     }

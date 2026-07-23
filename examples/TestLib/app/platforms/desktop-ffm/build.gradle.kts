@@ -7,8 +7,8 @@ plugins {
 
 sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
 
-val runtimeFfmBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "ffm")
-val testLibFfmBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "ffm")
+val runtimeFfmBuildTask = JParserBuildTasks.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "ffm")
+val testLibFfmBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "ffm")
 
 // Configure headless tests for JNI module
 tasks.test {
@@ -33,8 +33,8 @@ tasks.named("test") {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
 }
 
 val benchmarkDir = rootProject.layout.buildDirectory.dir("testlib-benchmark")
@@ -43,13 +43,13 @@ val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
 dependencies {
     implementation(project(":examples:TestLib:app:core"))
 
-    implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
-    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
+    implementation(variantOf(libs.gdxPlatform) { classifier("natives-desktop") })
+    implementation(libs.gdxBackendLwjgl3)
 
     implementation(project(":examples:TestLib:lib:desktop:TestLib-desktop-ffm"))
 
     implementation(project(":jParser:runtime:desktop:runtime-desktop-ffm"))
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testImplementation(libs.junit)
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {
@@ -62,7 +62,7 @@ tasks.register<JavaExec>("TestLib_run_app_desktop_ffm") {
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.javaFfm.get()))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {
@@ -77,7 +77,7 @@ tasks.register<JavaExec>("TestLib_enum_benchmark_ffm") {
     systemProperty("benchmark.enum.output", benchmarkDir.get().file("enum_benchmark_ffm.csv").asFile.absolutePath)
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.javaFfm.get()))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {
@@ -96,7 +96,7 @@ tasks.register<JavaExec>("TestLib_throughput_benchmark_ffm") {
     systemProperty("benchmark.output", benchmarkDir.get().file("benchmark_ffm.csv").asFile.absolutePath)
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.javaFfm.get()))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {
@@ -115,7 +115,7 @@ tasks.register<JavaExec>("TestLib_fps_benchmark_ffm") {
     systemProperty("benchmark.fps.output", benchmarkDir.get().file("fps_benchmark_ffm.csv").asFile.absolutePath)
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.javaFfm.get()))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {
@@ -134,7 +134,7 @@ tasks.register<JavaExec>("TestLib_fps_benchmark_interactive_ffm") {
     systemProperty("benchmark.fps.mode", "interactive")
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.javaFfm.get()))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {

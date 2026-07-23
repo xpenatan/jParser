@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.androidLibrary)
 }
 
 val teavmCLibsDir = "$projectDir/../../builder/build/c++/libs/android"
@@ -18,6 +18,7 @@ val stageTeaVMCJniLibs by tasks.registering(Copy::class) {
 android {
     namespace = "libB.c"
     compileSdk = 36
+    enableKotlin = false
 
     defaultConfig {
         minSdk = 29
@@ -25,13 +26,13 @@ android {
 
     sourceSets {
         named("main") {
-            jniLibs.srcDirs(stagedJniLibsDir)
+            jniLibs.directories.add(stagedJniLibsDir.get().asFile.absolutePath)
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
-        targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
     }
 }
 

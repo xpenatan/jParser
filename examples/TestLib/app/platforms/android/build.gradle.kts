@@ -1,6 +1,5 @@
 plugins {
-    id("com.android.application")
-    id("kotlin-android")
+    alias(libs.plugins.androidApplication)
 }
 
 android {
@@ -18,7 +17,7 @@ android {
         named("main") {
 //            java.srcDirs("src/main/kotlin")
 //            assets.srcDirs(project.file("../assets"))
-            jniLibs.srcDirs("libs")
+            jniLibs.directories.add("libs")
         }
     }
 
@@ -29,23 +28,20 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
-        targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
-    }
-    kotlinOptions {
-        jvmTarget = LibExt.javaMainTarget
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
     }
 }
 val natives: Configuration by configurations.creating
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
-    implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
-    implementation("com.badlogicgames.gdx:gdx-backend-android:${LibExt.gdxVersion}")
-    natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-armeabi-v7a")
-    natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-arm64-v8a")
-    natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-x86_64")
-    natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-x86")
+    coreLibraryDesugaring(libs.desugarJdkLibs)
+    implementation(libs.gdxCore)
+    implementation(libs.gdxBackendAndroid)
+    natives(variantOf(libs.gdxPlatform) { classifier("natives-armeabi-v7a") })
+    natives(variantOf(libs.gdxPlatform) { classifier("natives-arm64-v8a") })
+    natives(variantOf(libs.gdxPlatform) { classifier("natives-x86_64") })
+    natives(variantOf(libs.gdxPlatform) { classifier("natives-x86") })
 
     implementation(project(":examples:TestLib:app:core"))
     implementation(project(":examples:TestLib:lib:android:TestLib-android"))

@@ -667,12 +667,12 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Get version
-        uses: madhead/read-java-properties@latest
         id: version
-        with:
-          file: "./gradle.properties"
-          property: version
-          default: 0.0.1
+        shell: bash
+        run: |
+          version="$(python3 -c 'import pathlib, tomllib; print(tomllib.loads(pathlib.Path("gradle/libs.versions.toml").read_text(encoding="utf-8"))["versions"]["jParserRelease"])')"
+          test -n "$version"
+          echo "value=$version" >> "$GITHUB_OUTPUT"
 
       - name: Set up JDK 25
         uses: actions/setup-java@v5

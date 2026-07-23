@@ -51,8 +51,8 @@ tasks.named<Jar>("jar") {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
 }
 
 val nativeRuntime by configurations.creating {
@@ -68,15 +68,15 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            groupId = LibExt.groupId
-            version = LibExt.libVersion
+            groupId = project.group.toString()
+            version = project.version.toString()
             artifact(tasks.named("jar"))
             pom.withXml {
                 val dependenciesNode = asNode().appendNode("dependencies")
                 val dependencyNode = dependenciesNode.appendNode("dependency")
-                dependencyNode.appendNode("groupId", LibExt.groupId)
+                dependencyNode.appendNode("groupId", project.group.toString())
                 dependencyNode.appendNode("artifactId", "runtime-jni")
-                dependencyNode.appendNode("version", LibExt.libVersion)
+                dependencyNode.appendNode("version", project.version.toString())
                 dependencyNode.appendNode("scope", "compile")
             }
         }
@@ -84,8 +84,8 @@ publishing {
         nativeJars.forEach { (platform, nativeJar) ->
             create<MavenPublication>("mavenNative_${platform}") {
                 artifactId = "${moduleName}_${platform}"
-                groupId = LibExt.groupId
-                version = LibExt.libVersion
+                groupId = project.group.toString()
+                version = project.version.toString()
                 artifact(nativeJar)
             }
         }

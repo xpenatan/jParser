@@ -6,16 +6,16 @@ val moduleName = "loader-web"
 
 dependencies {
     implementation(project(":jParser:loader:loader-core"))
-    api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
-    api("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
-    api("org.teavm:teavm-jso-impl:${LibExt.teaVMVersion}")
+    api(libs.teavmJso)
+    api(libs.teavmJsoApis)
+    api(libs.teavmJsoImpl)
 
-    implementation("com.github.xpenatan:jMultiplatform:${LibExt.jMultiplatform}")
+    implementation(libs.jMultiplatform)
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
 }
 
 java {
@@ -27,8 +27,8 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            group = LibExt.groupId
-            version = LibExt.libVersion
+            group = project.group.toString()
+            version = project.version.toString()
             from(components["java"])
         }
     }

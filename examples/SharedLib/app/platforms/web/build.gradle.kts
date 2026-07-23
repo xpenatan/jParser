@@ -3,8 +3,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
 }
 
 dependencies {
@@ -12,8 +12,8 @@ dependencies {
     implementation(project(":examples:SharedLib:libA:web:LibA-web"))
     implementation(project(":examples:SharedLib:libB:web:LibB-web"))
 
-    implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
-    implementation("com.github.xpenatan.gdx-teavm:backend-web:${LibExt.gdxTeaVMVersion}")
+    implementation(libs.gdxCore)
+    implementation(libs.gdxTeavmBackendWeb)
 }
 
 tasks.register<JavaExec>("SharedLib_run_app_web") {

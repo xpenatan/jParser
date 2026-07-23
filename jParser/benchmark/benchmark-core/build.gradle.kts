@@ -4,12 +4,12 @@ plugins {
 
 dependencies {
     implementation(project(":jParser:runtime:desktop:runtime-desktop-ffm"))
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testImplementation(libs.junit)
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
 }
 
 tasks.register<JavaExec>("perf_smoke") {

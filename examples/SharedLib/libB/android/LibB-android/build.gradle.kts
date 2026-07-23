@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.androidLibrary)
 }
 
 val filterJniLibs by tasks.registering(Copy::class) {
@@ -16,6 +16,7 @@ tasks.named("preBuild").configure {
 android {
     namespace = "com.github.xpenatan.jparser.example.libB"
     compileSdk = 36
+    enableKotlin = false
 
     defaultConfig {
         minSdk = 29
@@ -23,12 +24,12 @@ android {
 
     sourceSets {
         named("main") {
-            jniLibs.srcDirs("$projectDir/../../builder/build/c++/libs/android")
+            jniLibs.directories.add("$projectDir/../../builder/build/c++/libs/android")
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
-        targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
     }
 }
 

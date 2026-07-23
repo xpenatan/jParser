@@ -6,14 +6,14 @@ val moduleName = "loader-c"
 
 dependencies {
     api(project(":jParser:loader:loader-core"))
-    api("org.teavm:teavm-interop:${LibExt.teaVMVersion}")
+    api(libs.teavmInterop)
 
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testImplementation(libs.junit)
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
     withJavadocJar()
     withSourcesJar()
 }
@@ -22,8 +22,8 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            groupId = LibExt.groupId
-            version = LibExt.libVersion
+            groupId = project.group.toString()
+            version = project.version.toString()
             from(components["java"])
         }
     }

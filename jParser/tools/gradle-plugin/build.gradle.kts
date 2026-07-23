@@ -1,17 +1,16 @@
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
-    id("com.github.xpenatan.easy-publishing") version "0.1.0"
+    alias(libs.plugins.easyPublishing)
 }
 
 val moduleName = "jparser-gradle-plugin"
+val jParserGroup = "com.github.xpenatan.jParser"
 
-LibExt.configure(rootProject.projectDir)
-LibExt.isRelease = rootProject.extra["easyPublishing.releaseRequested"] as Boolean
+group = jParserGroup
 
 subprojects {
-    group = LibExt.groupId
-    version = LibExt.libVersion
+    group = jParserGroup
     apply(plugin = "maven-publish")
 
     val isolatedPath = path.removePrefix(":").replace(':', '/')
@@ -21,6 +20,13 @@ subprojects {
     // exist only to provide the local plugin compile/runtime classpath.
     tasks.withType<Test>().configureEach {
         enabled = false
+    }
+}
+
+afterEvaluate {
+    val selectedVersion = project.version
+    subprojects {
+        version = selectedVersion
     }
 }
 
@@ -35,7 +41,7 @@ dependencies {
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testImplementation(libs.junit)
 }
 
 java {
@@ -61,9 +67,9 @@ publishing {
 }
 
 easyPublishing {
-    groupId.set(LibExt.groupId)
-    releaseVersion.set(LibExt.releaseVersion)
-    snapshotVersion.set(LibExt.snapshotVersion)
+    groupId.set(jParserGroup)
+    releaseVersion.set(libs.versions.jParserRelease)
+    snapshotVersion.set(libs.versions.jParserSnapshot)
 
     snapshotRepositoryUrl.set("https://central.sonatype.com/repository/maven-snapshots/")
     releaseRepositoryUrl.set("https://central.sonatype.com")

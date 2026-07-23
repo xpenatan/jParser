@@ -68,8 +68,8 @@ tasks.named("clean") {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
 }
 
 java {
@@ -81,16 +81,16 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            group = LibExt.groupId
-            version = LibExt.libVersion
+            group = project.group.toString()
+            version = project.version.toString()
             from(components["java"])
         }
 
         nativeJars.forEach { (platform, nativeJar) ->
             create<MavenPublication>("mavenNative_${platform}") {
                 artifactId = "${moduleName}_${platform}"
-                group = LibExt.groupId
-                version = LibExt.libVersion
+                group = project.group.toString()
+                version = project.version.toString()
                 artifact(nativeJar)
             }
         }

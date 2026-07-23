@@ -28,8 +28,7 @@ dependencies {
     teavmBuild(project(":examples:TestLib:app:core"))
     teavmBuild(project(":examples:TestLib:lib:shared:TestLib-c"))
     teavmBuild(project(":jParser:runtime:shared:runtime-c"))
-    teavmBuild("org.teavm:teavm-tooling:${LibExt.teaVMVersion}")
-    teavmBuild("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
+    teavmBuild(libs.bundles.teavmCompiler)
 
     iosResources(project(":jParser:runtime:ios:runtime-ios-c"))
     iosResources(project(":examples:TestLib:lib:ios:TestLib-ios-c"))
@@ -39,8 +38,8 @@ val compileTeaVMBuildJava by tasks.registering(JavaCompile::class) {
     source = fileTree("src/teavm/java")
     destinationDirectory.set(teavmClassesDir)
     classpath = teavmBuild
-    sourceCompatibility = LibExt.javaWebTarget
-    targetCompatibility = LibExt.javaWebTarget
+    sourceCompatibility = libs.versions.javaWeb.get()
+    targetCompatibility = libs.versions.javaWeb.get()
 }
 
 val generateTeaVMC by tasks.registering(JavaExec::class) {

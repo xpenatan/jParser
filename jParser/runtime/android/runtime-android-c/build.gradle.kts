@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.androidLibrary)
 }
 
 val moduleName = "runtime-android-c"
@@ -104,6 +104,7 @@ val stageTeaVMCJniLibs by tasks.registering(Copy::class) {
 android {
     namespace = "com.github.xpenatan.jparser.runtime.c"
     compileSdk = 36
+    enableKotlin = false
 
     defaultConfig {
         minSdk = 21
@@ -112,14 +113,14 @@ android {
     sourceSets {
         named("main") {
             if(includeNativesInMainAar) {
-                jniLibs.srcDirs(stagedJniLibsDir)
+                jniLibs.directories.add(stagedJniLibsDir.get().asFile.absolutePath)
             }
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
-        targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
     }
 
     buildTypes {
@@ -147,15 +148,15 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            groupId = LibExt.groupId
-            version = LibExt.libVersion
+            groupId = project.group.toString()
+            version = project.version.toString()
             artifact(mainAar)
             pom.withXml {
                 val dependenciesNode = asNode().appendNode("dependencies")
                 val dependencyNode = dependenciesNode.appendNode("dependency")
-                dependencyNode.appendNode("groupId", LibExt.groupId)
+                dependencyNode.appendNode("groupId", project.group.toString())
                 dependencyNode.appendNode("artifactId", "runtime-c")
-                dependencyNode.appendNode("version", LibExt.libVersion)
+                dependencyNode.appendNode("version", project.version.toString())
                 dependencyNode.appendNode("scope", "compile")
             }
         }
@@ -163,8 +164,8 @@ publishing {
         nativeAars.forEach { (abi, nativeAar) ->
             create<MavenPublication>("mavenNative_${abi.artifactSuffix}") {
                 artifactId = "${moduleName}_${abi.artifactSuffix}"
-                groupId = LibExt.groupId
-                version = LibExt.libVersion
+                groupId = project.group.toString()
+                version = project.version.toString()
                 artifact(nativeAar)
             }
         }

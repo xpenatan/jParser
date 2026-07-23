@@ -8,8 +8,8 @@ plugins {
 // JNI and FFM app modules without duplicating test code.
 sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
 
-val runtimeJniBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "jni")
-val testLibJniBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "jni")
+val runtimeJniBuildTask = JParserBuildTasks.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "jni")
+val testLibJniBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "jni")
 
 // Configure headless tests for JNI module
 tasks.test {
@@ -36,8 +36,8 @@ tasks.named("test") {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
 }
 
 val benchmarkDir = rootProject.layout.buildDirectory.dir("testlib-benchmark")
@@ -46,14 +46,14 @@ val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
 dependencies {
     implementation(project(":examples:TestLib:app:core"))
 
-    implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
-    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
+    implementation(variantOf(libs.gdxPlatform) { classifier("natives-desktop") })
+    implementation(libs.gdxBackendLwjgl3)
 
     implementation(project(":examples:TestLib:lib:desktop:TestLib-desktop-jni"))
 
     implementation(project(":jParser:runtime:desktop:runtime-desktop-jni"))
 
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testImplementation(libs.junit)
 }
 
 tasks.register<JavaExec>("TestLib_run_app_desktop_jni") {

@@ -74,8 +74,8 @@ publishing {
         nativeJars.forEach { (platform, nativeJar) ->
             create<MavenPublication>("mavenNative_${platform}") {
                 artifactId = "${moduleName}_${platform}"
-                groupId = LibExt.groupId
-                version = LibExt.libVersion
+                groupId = project.group.toString()
+                version = project.version.toString()
                 artifact(nativeJar)
             }
         }

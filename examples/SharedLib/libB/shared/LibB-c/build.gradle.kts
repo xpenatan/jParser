@@ -3,8 +3,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
 }
 
 dependencies {
@@ -13,7 +13,7 @@ dependencies {
     api(project(":jParser:api:api-core"))
     api(project(":jParser:loader:loader-core"))
     api(project(":jParser:runtime:shared:runtime-c"))
-    api("org.teavm:teavm-core:${LibExt.teaVMVersion}")
+    api(libs.teavmCore)
 }
 
 val libBGenerationTask = ":examples:SharedLib:libB:builder:LibB_build_project"

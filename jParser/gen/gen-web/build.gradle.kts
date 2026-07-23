@@ -12,8 +12,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
 }
 
 java {
@@ -25,8 +25,8 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            group = LibExt.groupId
-            version = LibExt.libVersion
+            group = project.group.toString()
+            version = project.version.toString()
             from(components["java"])
         }
     }

@@ -3,8 +3,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
 }
 
 dependencies {
@@ -12,12 +12,11 @@ dependencies {
     implementation(project(":examples:TestLib:lib:shared:TestLib-c"))
     implementation(project(":jParser:runtime:shared:runtime-c"))
 
-    implementation("org.teavm:teavm-tooling:${LibExt.teaVMVersion}")
-    implementation("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
+    implementation(libs.bundles.teavmCompiler)
 }
 
-val runtimeTeaVMCBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "teavm_c")
-val testLibTeaVMCBuildTask = LibExt.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "teavm_c")
+val runtimeTeaVMCBuildTask = JParserBuildTasks.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "teavm_c")
+val testLibTeaVMCBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "teavm_c")
 
 tasks.register<JavaExec>("TestLib_build_app_desktop_c") {
     group = "example-desktop"

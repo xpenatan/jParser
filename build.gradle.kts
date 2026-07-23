@@ -1,27 +1,41 @@
 plugins {
     id("java")
-    id("com.github.xpenatan.easy-publishing") version "0.1.0"
-    id("org.jetbrains.kotlin.android") version "2.2.21" apply false
+    alias(libs.plugins.easyPublishing)
 }
 
-buildscript {
-    repositories {
-        mavenCentral()
-        google()
-    }
-
-    val kotlinVersion = "2.1.10"
-
-    dependencies {
-        classpath("com.android.tools.build:gradle:8.12.3")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-    }
-}
-
-LibExt.configure(rootProject.projectDir)
-LibExt.isRelease = rootProject.extra["easyPublishing.releaseRequested"] as Boolean
+val jParserGroup = "com.github.xpenatan.jParser"
+val publishedModules = listOf(
+    ":jParser:gen:gen-core",
+    ":jParser:gen:gen-build",
+    ":jParser:gen:gen-build-tool",
+    ":jParser:gen:gen-idl",
+    ":jParser:gen:gen-jni",
+    ":jParser:gen:gen-ffm",
+    ":jParser:gen:gen-c",
+    ":jParser:gen:gen-web",
+    ":jParser:api:api-core",
+    ":jParser:api:api-web",
+    ":jParser:runtime:base",
+    ":jParser:runtime:core",
+    ":jParser:runtime:web:runtime-web",
+    ":jParser:runtime:shared:runtime-jni",
+    ":jParser:runtime:desktop:runtime-desktop-jni",
+    ":jParser:runtime:desktop:runtime-desktop-ffm",
+    ":jParser:runtime:android:runtime-android",
+    ":jParser:runtime:shared:runtime-c",
+    ":jParser:runtime:desktop:runtime-desktop-c",
+    ":jParser:runtime:android:runtime-android-c",
+    ":jParser:runtime:ios:runtime-ios-c",
+    ":jParser:loader:loader-core",
+    ":jParser:loader:loader-c",
+    ":jParser:loader:loader-web"
+)
 
 allprojects()  {
+    if(path == ":" || path in publishedModules) {
+        group = jParserGroup
+    }
+
     repositories {
         mavenLocal()
         google()
@@ -41,36 +55,11 @@ allprojects()  {
 }
 
 easyPublishing {
-    modules(
-        ":jParser:gen:gen-core",
-        ":jParser:gen:gen-build",
-        ":jParser:gen:gen-build-tool",
-        ":jParser:gen:gen-idl",
-        ":jParser:gen:gen-jni",
-        ":jParser:gen:gen-ffm",
-        ":jParser:gen:gen-c",
-        ":jParser:gen:gen-web",
-        ":jParser:api:api-core",
-        ":jParser:api:api-web",
-        ":jParser:runtime:base",
-        ":jParser:runtime:core",
-        ":jParser:runtime:web:runtime-web",
-        ":jParser:runtime:shared:runtime-jni",
-        ":jParser:runtime:desktop:runtime-desktop-jni",
-        ":jParser:runtime:desktop:runtime-desktop-ffm",
-        ":jParser:runtime:android:runtime-android",
-        ":jParser:runtime:shared:runtime-c",
-        ":jParser:runtime:desktop:runtime-desktop-c",
-        ":jParser:runtime:android:runtime-android-c",
-        ":jParser:runtime:ios:runtime-ios-c",
-        ":jParser:loader:loader-core",
-        ":jParser:loader:loader-c",
-        ":jParser:loader:loader-web"
-    )
+    modules(*publishedModules.toTypedArray())
 
-    groupId.set(LibExt.groupId)
-    releaseVersion.set(LibExt.releaseVersion)
-    snapshotVersion.set(LibExt.snapshotVersion)
+    groupId.set(jParserGroup)
+    releaseVersion.set(libs.versions.jParserRelease)
+    snapshotVersion.set(libs.versions.jParserSnapshot)
 
     snapshotRepositoryUrl.set("https://central.sonatype.com/repository/maven-snapshots/")
     releaseRepositoryUrl.set("https://central.sonatype.com")
@@ -79,7 +68,7 @@ easyPublishing {
     signingKey.set(providers.environmentVariable("SIGNING_KEY"))
     signingPassword.set(providers.environmentVariable("SIGNING_PASSWORD"))
 
-    pomName.set(LibExt.libName)
+    pomName.set("jParser")
     pomDescription.set("Java JNI code parser")
     projectUrl.set("https://github.com/xpenatan/jParser")
 

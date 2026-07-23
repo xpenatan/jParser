@@ -13,17 +13,12 @@ tasks.jar {
 
 dependencies {
     implementation(project(":jParser:api:api-core"))
-    api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
-    api("org.teavm:teavm-classlib:${LibExt.teaVMVersion}")
-    api("org.teavm:teavm-jso:${LibExt.teaVMVersion}")
-    api("org.teavm:teavm-jso-apis:${LibExt.teaVMVersion}")
-    api("org.teavm:teavm-jso-impl:${LibExt.teaVMVersion}")
-    api("org.teavm:teavm-extension-spi:${LibExt.teaVMVersion}")
+    api(libs.bundles.teavmWeb)
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaWebTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaWeb.get())
 }
 
 java {
@@ -35,8 +30,8 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            group = LibExt.groupId
-            version = LibExt.libVersion
+            group = project.group.toString()
+            version = project.version.toString()
             from(components["java"])
         }
     }

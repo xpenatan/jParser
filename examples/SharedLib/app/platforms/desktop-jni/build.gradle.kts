@@ -7,27 +7,27 @@ plugins {
 sourceSets["test"].java.srcDir(rootProject.file("examples/SharedLib/app/core/src/test/java"))
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
 }
 
 val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
-val runtimeJniBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "jni")
-val libAJniBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "jni")
-val libBJniBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "jni")
+val runtimeJniBuildTask = JParserBuildTasks.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "jni")
+val libAJniBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "jni")
+val libBJniBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "jni")
 
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))
 
-    implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
-    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
+    implementation(variantOf(libs.gdxPlatform) { classifier("natives-desktop") })
+    implementation(libs.gdxBackendLwjgl3)
 
     implementation(project(":examples:SharedLib:libA:desktop:LibA-desktop-jni"))
     implementation(project(":examples:SharedLib:libB:desktop:LibB-desktop-jni"))
 
     implementation(project(":jParser:runtime:desktop:runtime-desktop-jni"))
 
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testImplementation(libs.junit)
 }
 
 tasks.test {

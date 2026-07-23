@@ -8,30 +8,30 @@ plugins {
 sourceSets["test"].java.srcDir(rootProject.file("examples/SharedLib/app/core/src/test/java"))
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaFFMTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.javaFfm.get()))
     }
 }
 
 val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
-val runtimeFfmBuildTask = LibExt.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "ffm")
-val libAFfmBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "ffm")
-val libBFfmBuildTask = LibExt.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "ffm")
+val runtimeFfmBuildTask = JParserBuildTasks.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "ffm")
+val libAFfmBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "ffm")
+val libBFfmBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "ffm")
 
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))
 
-    implementation("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-desktop")
-    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${LibExt.gdxVersion}")
+    implementation(variantOf(libs.gdxPlatform) { classifier("natives-desktop") })
+    implementation(libs.gdxBackendLwjgl3)
 
     implementation(project(":examples:SharedLib:libA:desktop:LibA-desktop-ffm"))
     implementation(project(":examples:SharedLib:libB:desktop:LibB-desktop-ffm"))
 
     implementation(project(":jParser:runtime:desktop:runtime-desktop-ffm"))
 
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testImplementation(libs.junit)
 }
 
 tasks.test {
@@ -45,7 +45,7 @@ tasks.test {
         ":examples:SharedLib:libB:desktop:LibB-desktop-ffm:assemble"
     )
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.javaFfm.get()))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     testLogging {
@@ -72,7 +72,7 @@ tasks.register<JavaExec>("SharedLib_run_app_desktop_ffm") {
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(LibExt.javaFFMTarget))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.javaFfm.get()))
     })
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     if(isMacOs) {

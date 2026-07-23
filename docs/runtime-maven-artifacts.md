@@ -139,14 +139,20 @@ include(path/to/external_cpp/cmake/post_target/jparser_runtime_teavm_c.cmake)
 
 ## Artifact Examples
 
+Set `jParserVersion` to the published release or snapshot consumed by your build:
+
+```kotlin
+val jParserVersion = "<published-version>"
+```
+
 JNI:
 
 ```kotlin
-api("com.github.xpenatan.jParser:runtime-desktop-jni:${LibExt.jParserVersion}")
-api("com.github.xpenatan.jParser:runtime-desktop-jni_windows_x64:${LibExt.jParserVersion}")
-api("com.github.xpenatan.jParser:runtime-desktop-jni_linux_x64:${LibExt.jParserVersion}")
-api("com.github.xpenatan.jParser:runtime-desktop-jni_mac_x64:${LibExt.jParserVersion}")
-api("com.github.xpenatan.jParser:runtime-desktop-jni_mac_arm64:${LibExt.jParserVersion}")
+api("com.github.xpenatan.jParser:runtime-desktop-jni:$jParserVersion")
+api("com.github.xpenatan.jParser:runtime-desktop-jni_windows_x64:$jParserVersion")
+api("com.github.xpenatan.jParser:runtime-desktop-jni_linux_x64:$jParserVersion")
+api("com.github.xpenatan.jParser:runtime-desktop-jni_mac_x64:$jParserVersion")
+api("com.github.xpenatan.jParser:runtime-desktop-jni_mac_arm64:$jParserVersion")
 ```
 
 `runtime-desktop-jni` pulls `runtime-jni` transitively.
@@ -154,8 +160,8 @@ api("com.github.xpenatan.jParser:runtime-desktop-jni_mac_arm64:${LibExt.jParserV
 TeaVM C:
 
 ```kotlin
-api("com.github.xpenatan.jParser:runtime-c:${LibExt.jParserVersion}")
-api("com.github.xpenatan.jParser:runtime-desktop-c_windows_x64:${LibExt.jParserVersion}") // select the host platform
+api("com.github.xpenatan.jParser:runtime-c:$jParserVersion")
+api("com.github.xpenatan.jParser:runtime-desktop-c_windows_x64:$jParserVersion") // select the host platform
 ```
 
 Use exactly one matching `runtime-desktop-c_<platform>` artifact. Replace `windows_x64` with `linux_x64`, `mac_x64`, or `mac_arm64` as appropriate.
@@ -163,7 +169,7 @@ Use exactly one matching `runtime-desktop-c_<platform>` artifact. Replace `windo
 iOS TeaVM C:
 
 ```kotlin
-implementation("com.github.xpenatan.jParser:runtime-ios-c:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-ios-c:$jParserVersion")
 ```
 
 `runtime-ios-c` pulls `runtime-c` transitively and carries every supported iOS archive slice. The final application launcher/project remains consumer-owned.
@@ -171,18 +177,18 @@ implementation("com.github.xpenatan.jParser:runtime-ios-c:${LibExt.jParserVersio
 Web:
 
 ```kotlin
-implementation("com.github.xpenatan.jParser:runtime-web:${LibExt.jParserVersion}")
-implementation("com.github.xpenatan.jParser:runtime-web_wasm:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-web:$jParserVersion")
+implementation("com.github.xpenatan.jParser:runtime-web_wasm:$jParserVersion")
 ```
 
 Android JNI:
 
 ```kotlin
-implementation("com.github.xpenatan.jParser:runtime-android:${LibExt.jParserVersion}")
-implementation("com.github.xpenatan.jParser:runtime-android_x86:${LibExt.jParserVersion}")
-implementation("com.github.xpenatan.jParser:runtime-android_x86_64:${LibExt.jParserVersion}")
-implementation("com.github.xpenatan.jParser:runtime-android_armeabi_v7a:${LibExt.jParserVersion}")
-implementation("com.github.xpenatan.jParser:runtime-android_arm64_v8a:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-android:$jParserVersion")
+implementation("com.github.xpenatan.jParser:runtime-android_x86:$jParserVersion")
+implementation("com.github.xpenatan.jParser:runtime-android_x86_64:$jParserVersion")
+implementation("com.github.xpenatan.jParser:runtime-android_armeabi_v7a:$jParserVersion")
+implementation("com.github.xpenatan.jParser:runtime-android_arm64_v8a:$jParserVersion")
 ```
 
 `runtime-android` pulls `runtime-jni` transitively.
@@ -190,11 +196,11 @@ implementation("com.github.xpenatan.jParser:runtime-android_arm64_v8a:${LibExt.j
 Android TeaVM C:
 
 ```kotlin
-implementation("com.github.xpenatan.jParser:runtime-android-c:${LibExt.jParserVersion}")
-implementation("com.github.xpenatan.jParser:runtime-android-c_x86:${LibExt.jParserVersion}")
-implementation("com.github.xpenatan.jParser:runtime-android-c_x86_64:${LibExt.jParserVersion}")
-implementation("com.github.xpenatan.jParser:runtime-android-c_armeabi_v7a:${LibExt.jParserVersion}")
-implementation("com.github.xpenatan.jParser:runtime-android-c_arm64_v8a:${LibExt.jParserVersion}")
+implementation("com.github.xpenatan.jParser:runtime-android-c:$jParserVersion")
+implementation("com.github.xpenatan.jParser:runtime-android-c_x86:$jParserVersion")
+implementation("com.github.xpenatan.jParser:runtime-android-c_x86_64:$jParserVersion")
+implementation("com.github.xpenatan.jParser:runtime-android-c_armeabi_v7a:$jParserVersion")
+implementation("com.github.xpenatan.jParser:runtime-android-c_arm64_v8a:$jParserVersion")
 ```
 
 ## Copy Checklist For External Libraries

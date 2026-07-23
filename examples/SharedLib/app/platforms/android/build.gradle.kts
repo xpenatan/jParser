@@ -1,10 +1,11 @@
 plugins {
-    id("com.android.application")
+    alias(libs.plugins.androidApplication)
 }
 
 android {
     namespace = "com.github.xpenatan.jParser.example.sharedlib.android"
     compileSdk = 36
+    enableKotlin = false
 
     defaultConfig {
         applicationId = "com.github.xpenatan.jParser.example.sharedlib.android"
@@ -16,7 +17,7 @@ android {
     sourceSets {
         named("main") {
 //            assets.srcDirs(project.file("../assets"))
-            jniLibs.srcDirs("libs")
+            jniLibs.directories.add("libs")
         }
     }
 
@@ -27,20 +28,20 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
-        targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
     }
 }
 val natives: Configuration by configurations.creating
 
 dependencies {
-    implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
-    implementation("com.badlogicgames.gdx:gdx-backend-android:${LibExt.gdxVersion}")
+    implementation(libs.gdxCore)
+    implementation(libs.gdxBackendAndroid)
 
-    natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-armeabi-v7a")
-    natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-arm64-v8a")
-    natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-x86_64")
-    natives("com.badlogicgames.gdx:gdx-platform:${LibExt.gdxVersion}:natives-x86")
+    natives(variantOf(libs.gdxPlatform) { classifier("natives-armeabi-v7a") })
+    natives(variantOf(libs.gdxPlatform) { classifier("natives-arm64-v8a") })
+    natives(variantOf(libs.gdxPlatform) { classifier("natives-x86_64") })
+    natives(variantOf(libs.gdxPlatform) { classifier("natives-x86") })
 
     implementation(project(":examples:SharedLib:app:core"))
     api(project(":examples:SharedLib:libA:android:LibA-android"))

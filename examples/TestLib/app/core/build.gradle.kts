@@ -3,16 +3,16 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
-    targetCompatibility = JavaVersion.toVersion(LibExt.javaMainTarget)
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
 }
 
 dependencies {
     compileOnly(project(":examples:TestLib:lib:core"))
 
-    implementation("com.badlogicgames.gdx:gdx:${LibExt.gdxVersion}")
+    implementation(libs.gdxCore)
 
-    testImplementation("junit:junit:${LibExt.jUnitVersion}")
+    testImplementation(libs.junit)
     testImplementation(project(":examples:TestLib:lib:base"))
     testImplementation(project(":examples:TestLib:lib:core"))
     testCompileOnly(project(":jParser:runtime:core"))
