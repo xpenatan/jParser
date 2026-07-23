@@ -23,7 +23,7 @@ jParser turns a shared Java API, WebIDL definitions, and embedded native code bl
 
 A typical project has a hand-written `base` API and `builder` configuration. jParser generates the bridge-agnostic `core` API and target implementations, then invokes the appropriate native toolchain to build or package platform artifacts. For iOS TeaVM C, jParser produces static library slices and portable CMake resources; the application framework or consumer owns the launcher, Xcode project, bundle metadata, signing, and final app packaging.
 
-The project is inspired by [gdx-jnigen](https://github.com/libgdx/gdx-jnigen). Web builds use [Emscripten](https://emscripten.org/) and [TeaVM](https://github.com/konsoletyper/teavm).
+Web builds use [Emscripten](https://emscripten.org/) and [TeaVM](https://github.com/konsoletyper/teavm).
 
 ## Quick Start
 

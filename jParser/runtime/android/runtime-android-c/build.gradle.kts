@@ -148,13 +148,11 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            groupId = project.group.toString()
-            version = project.version.toString()
             artifact(mainAar)
             pom.withXml {
                 val dependenciesNode = asNode().appendNode("dependencies")
                 val dependencyNode = dependenciesNode.appendNode("dependency")
-                dependencyNode.appendNode("groupId", project.group.toString())
+                dependencyNode.appendNode("groupId", libs.versions.jParserGroup.get())
                 dependencyNode.appendNode("artifactId", "runtime-c")
                 dependencyNode.appendNode("version", project.version.toString())
                 dependencyNode.appendNode("scope", "compile")
@@ -164,8 +162,6 @@ publishing {
         nativeAars.forEach { (abi, nativeAar) ->
             create<MavenPublication>("mavenNative_${abi.artifactSuffix}") {
                 artifactId = "${moduleName}_${abi.artifactSuffix}"
-                groupId = project.group.toString()
-                version = project.version.toString()
                 artifact(nativeAar)
             }
         }

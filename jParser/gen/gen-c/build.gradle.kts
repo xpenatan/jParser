@@ -32,8 +32,6 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            group = project.group.toString()
-            version = project.version.toString()
             from(components["java"])
         }
     }

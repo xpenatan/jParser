@@ -115,7 +115,7 @@ The generated CMake hook selects one slice from `CMAKE_OSX_SYSROOT` and `CMAKE_O
 
 When a custom launcher compiles TeaVM's generated program as a static library instead of the final executable, the final Apple link must force-load that generated program archive. Its generated library descriptors register through C++ static initializers and otherwise have no symbol reference that requires the linker to retain their archive members. The TestLib and SharedLib custom emulator CMake projects place `"-Wl,-force_load"` immediately before `${TEAVM_APP_TARGET}` in `target_link_libraries` for this reason. Packaged native dependency archives do not need to be force-loaded.
 
-jParser stops at this integration boundary. It generates TeaVM C bindings/resources, invokes `xcrun` to compile the static libraries, and packages the slices. It does not generate an application launcher, UI, `Info.plist`, Xcode project, signing configuration, or final bundle. Those belong to gdx-teavm, libfdx, or the consuming application. The committed TestLib and SharedLib `ios-c` applications are handwritten custom emulators that render their result in a real iPhone Simulator and verify the contract in GitHub Actions.
+jParser stops at this integration boundary. It generates TeaVM C bindings/resources, invokes `xcrun` to compile the static libraries, and packages the slices. It does not generate an application launcher, UI, `Info.plist`, Xcode project, signing configuration, or final bundle. Those belong to the consuming application. The committed TestLib and SharedLib `ios-c` applications are handwritten custom emulators that render their result in a real iPhone Simulator and verify the contract in GitHub Actions.
 
 ## Windows MSVC Runtime
 

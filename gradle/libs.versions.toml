@@ -1,6 +1,9 @@
 [versions]
+jParserGroup = "com.github.xpenatan.jParser"
+jParserName = "jParser"
 jParserRelease = "1.2.6"
 jParserSnapshot = "-SNAPSHOT"
+
 javaMain = "1.8"
 javaWeb = "17"
 javaFfm = "25"

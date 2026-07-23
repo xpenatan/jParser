@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.easyPublishing)
 }
 
-val jParserGroup = "com.github.xpenatan.jParser"
 val publishedModules = listOf(
     ":jParser:gen:gen-core",
     ":jParser:gen:gen-build",
@@ -32,10 +31,6 @@ val publishedModules = listOf(
 )
 
 allprojects()  {
-    if(path == ":" || path in publishedModules) {
-        group = jParserGroup
-    }
-
     repositories {
         mavenLocal()
         google()
@@ -57,7 +52,7 @@ allprojects()  {
 easyPublishing {
     modules(*publishedModules.toTypedArray())
 
-    groupId.set(jParserGroup)
+    groupId.set(libs.versions.jParserGroup)
     releaseVersion.set(libs.versions.jParserRelease)
     snapshotVersion.set(libs.versions.jParserSnapshot)
 
@@ -68,7 +63,7 @@ easyPublishing {
     signingKey.set(providers.environmentVariable("SIGNING_KEY"))
     signingPassword.set(providers.environmentVariable("SIGNING_PASSWORD"))
 
-    pomName.set("jParser")
+    pomName.set(libs.versions.jParserName)
     pomDescription.set("Java JNI code parser")
     projectUrl.set("https://github.com/xpenatan/jParser")
 

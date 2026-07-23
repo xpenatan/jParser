@@ -68,13 +68,11 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            groupId = project.group.toString()
-            version = project.version.toString()
             artifact(tasks.named("jar"))
             pom.withXml {
                 val dependenciesNode = asNode().appendNode("dependencies")
                 val dependencyNode = dependenciesNode.appendNode("dependency")
-                dependencyNode.appendNode("groupId", project.group.toString())
+                dependencyNode.appendNode("groupId", libs.versions.jParserGroup.get())
                 dependencyNode.appendNode("artifactId", "runtime-jni")
                 dependencyNode.appendNode("version", project.version.toString())
                 dependencyNode.appendNode("scope", "compile")
@@ -84,8 +82,6 @@ publishing {
         nativeJars.forEach { (platform, nativeJar) ->
             create<MavenPublication>("mavenNative_${platform}") {
                 artifactId = "${moduleName}_${platform}"
-                groupId = project.group.toString()
-                version = project.version.toString()
                 artifact(nativeJar)
             }
         }

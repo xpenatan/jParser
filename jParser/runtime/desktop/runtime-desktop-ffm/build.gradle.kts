@@ -81,16 +81,12 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = moduleName
-            group = project.group.toString()
-            version = project.version.toString()
             from(components["java"])
         }
 
         nativeJars.forEach { (platform, nativeJar) ->
             create<MavenPublication>("mavenNative_${platform}") {
                 artifactId = "${moduleName}_${platform}"
-                group = project.group.toString()
-                version = project.version.toString()
                 artifact(nativeJar)
             }
         }

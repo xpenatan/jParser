@@ -5,12 +5,13 @@ plugins {
 }
 
 val moduleName = "jparser-gradle-plugin"
-val jParserGroup = "com.github.xpenatan.jParser"
-
-group = jParserGroup
+val localGeneratorProjects = mapOf(
+    "gen-build" to ":jParser:gen:gen-build",
+    "gen-idl" to ":jParser:gen:gen-idl",
+    "gen-build-tool" to ":jParser:gen:gen-build-tool"
+)
 
 subprojects {
-    group = jParserGroup
     apply(plugin = "maven-publish")
 
     val isolatedPath = path.removePrefix(":").replace(':', '/')
@@ -23,21 +24,14 @@ subprojects {
     }
 }
 
-afterEvaluate {
-    val selectedVersion = project.version
-    subprojects {
-        version = selectedVersion
-    }
-}
-
 base {
     archivesName.set(moduleName)
 }
 
 dependencies {
-    implementation(project(":jParser:gen:gen-build"))
-    implementation(project(":jParser:gen:gen-idl"))
-    implementation(project(":jParser:gen:gen-build-tool"))
+    localGeneratorProjects.values.forEach { projectPath ->
+        implementation(project(projectPath))
+    }
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
@@ -62,12 +56,27 @@ publishing {
     publications.withType<MavenPublication>().configureEach {
         if(name == "pluginMaven") {
             artifactId = moduleName
+            pom.withXml {
+                val rootNode = asNode()
+                (rootNode["dependencies"] as groovy.util.NodeList).forEach {
+                    rootNode.remove(it as groovy.util.Node)
+                }
+
+                val dependenciesNode = rootNode.appendNode("dependencies")
+                localGeneratorProjects.keys.forEach { dependencyArtifactId ->
+                    val dependencyNode = dependenciesNode.appendNode("dependency")
+                    dependencyNode.appendNode("groupId", libs.versions.jParserGroup.get())
+                    dependencyNode.appendNode("artifactId", dependencyArtifactId)
+                    dependencyNode.appendNode("version", project.version.toString())
+                    dependencyNode.appendNode("scope", "runtime")
+                }
+            }
         }
     }
 }
 
 easyPublishing {
-    groupId.set(jParserGroup)
+    groupId.set(libs.versions.jParserGroup)
     releaseVersion.set(libs.versions.jParserRelease)
     snapshotVersion.set(libs.versions.jParserSnapshot)
 
