@@ -12,6 +12,42 @@ import java.nio.file.Files
 class JParserBuildTaskTest {
 
     @Test
+    fun globalSourceSelectionFlowsIntoBuildRequest() {
+        val project = ProjectBuilder.builder().build()
+        val extension = JParserExtension(project, project.objects).apply {
+            libName.set("TestLib")
+            modulePrefix.set("")
+            packageName.set("com.example.testlib")
+            runtimeHelperMode.set(true)
+            native {
+                includeDefaultSources.set(false)
+                includeCustomSources.set(true)
+                cppInclude("explicit.cpp")
+                target(JParserTargets.WINDOWS64_JNI) {}
+            }
+        }
+        val task = project.tasks.register("testJParserSourceSelection", JParserBuildTask::class.java).get().apply {
+            this.extension = extension
+            buildArgs.set(emptyList())
+            targetArg.set(JParserTargets.WINDOWS64_JNI.targetName)
+            targetVariant.set("")
+            generateCore.set(true)
+        }
+
+        val createRequest = JParserBuildTask::class.java.getDeclaredMethod("createRequest")
+        createRequest.isAccessible = true
+        val request = createRequest.invoke(task) as JParserBuildRequest
+
+        assertEquals(false, request.targetConfig.globalHooks.includeDefaultSources)
+        assertEquals(true, request.targetConfig.globalHooks.includeCustomSources)
+        assertTrue(request.targetConfig.globalHooks.cppIncludes.single().endsWith("explicit.cpp"))
+        assertEquals(
+            null,
+            request.targetConfig.target(JParserTargets.WINDOWS64_JNI.targetName).includeDefaultSources
+        )
+    }
+
+    @Test
     fun projectReferenceInfersGeneratorInputsAndConsumerMetadata() {
         val rootDir = Files.createTempDirectory("jparser-project-reference").toFile()
         val root = ProjectBuilder.builder()

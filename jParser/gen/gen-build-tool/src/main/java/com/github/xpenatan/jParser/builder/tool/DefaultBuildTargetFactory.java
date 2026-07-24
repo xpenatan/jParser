@@ -317,12 +317,14 @@ public class DefaultBuildTargetFactory {
         addDefaultHeaders(target, sourceDir, customSourceDir, libBuildCPPPath, config, targetArg, androidTarget);
         DefaultBuildTargetConfig.TargetHooks hooks = hook(config, targetArg);
         DefaultBuildTargetConfig.TargetHooks androidHooks = androidHook(config, targetArg, androidTarget);
-        Boolean includeDefaultSourcesValue = androidHooks != null && androidHooks.includeDefaultSources != null
-            ? androidHooks.includeDefaultSources
-            : hooks.includeDefaultSources;
-        Boolean includeCustomSourcesValue = androidHooks != null && androidHooks.includeCustomSources != null
-            ? androidHooks.includeCustomSources
-            : hooks.includeCustomSources;
+        Boolean includeDefaultSourcesValue = resolveScopedValue(
+            config.globalHooks.includeDefaultSources,
+            hooks.includeDefaultSources,
+            androidHooks != null ? androidHooks.includeDefaultSources : null);
+        Boolean includeCustomSourcesValue = resolveScopedValue(
+            config.globalHooks.includeCustomSources,
+            hooks.includeCustomSources,
+            androidHooks != null ? androidHooks.includeCustomSources : null);
         boolean includeDefaultSources = includeDefaultSourcesValue != null ? includeDefaultSourcesValue.booleanValue() : true;
         boolean includeCustomSources = includeCustomSourcesValue != null ? includeCustomSourcesValue.booleanValue() : true;
         if(config.runtimeHelperMode && libBuildCPPPath != null && !libBuildCPPPath.trim().isEmpty()) {
@@ -334,6 +336,16 @@ public class DefaultBuildTargetFactory {
         if(includeCustomSources && customSourceDir != null && !customSourceDir.trim().isEmpty()) {
             target.cppInclude.add(customSourceDir + "*.cpp");
         }
+    }
+
+    private Boolean resolveScopedValue(Boolean globalValue, Boolean targetValue, Boolean platformValue) {
+        if(platformValue != null) {
+            return platformValue;
+        }
+        if(targetValue != null) {
+            return targetValue;
+        }
+        return globalValue;
     }
 
     private void addDefaultHeaders(DefaultBuildTarget target, String sourceDir, String customSourceDir, String libBuildCPPPath, DefaultBuildTargetConfig config, String targetArg) {

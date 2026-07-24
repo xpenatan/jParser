@@ -57,6 +57,46 @@ public class DefaultBuildTargetFactoryTest {
     }
 
     @Test
+    public void globalSourceSelectionDisablesAutomaticSources() throws Exception {
+        DefaultBuildTargetConfig config = new DefaultBuildTargetConfig();
+        config.globalHooks.includeDefaultSources = false;
+        config.globalHooks.includeCustomSources = false;
+        config.globalHooks.cppIncludes.add("explicit.cpp");
+
+        ArrayList<BuildMultiTarget> targets = targetsFor(config, "gen_jni", "windows64_jni");
+
+        assertTrue(targets.get(0).multiTarget.stream()
+                .map(target -> (DefaultBuildTarget)target)
+                .anyMatch(target -> target.cppInclude.contains("explicit.cpp")));
+        assertFalse(targets.get(0).multiTarget.stream()
+                .map(target -> (DefaultBuildTarget)target)
+                .anyMatch(target -> target.cppInclude.stream().anyMatch(path -> path.endsWith("**.cpp"))));
+        assertFalse(targets.get(0).multiTarget.stream()
+                .map(target -> (DefaultBuildTarget)target)
+                .anyMatch(target -> target.cppInclude.stream().anyMatch(path ->
+                        path.replace('\\', '/').contains("/src/main/cpp/custom/") && path.endsWith("*.cpp"))));
+    }
+
+    @Test
+    public void targetSourceSelectionOverridesGlobalSourceSelection() throws Exception {
+        DefaultBuildTargetConfig config = new DefaultBuildTargetConfig();
+        config.globalHooks.includeDefaultSources = false;
+        config.globalHooks.includeCustomSources = false;
+        config.target("windows64_jni").includeDefaultSources = true;
+        config.target("windows64_jni").includeCustomSources = true;
+
+        ArrayList<BuildMultiTarget> targets = targetsFor(config, "gen_jni", "windows64_jni");
+
+        assertTrue(targets.get(0).multiTarget.stream()
+                .map(target -> (DefaultBuildTarget)target)
+                .anyMatch(target -> target.cppInclude.stream().anyMatch(path -> path.endsWith("**.cpp"))));
+        assertTrue(targets.get(0).multiTarget.stream()
+                .map(target -> (DefaultBuildTarget)target)
+                .anyMatch(target -> target.cppInclude.stream().anyMatch(path ->
+                        path.replace('\\', '/').contains("/src/main/cpp/custom/") && path.endsWith("*.cpp"))));
+    }
+
+    @Test
     public void windowsForcedIncludesUseMsvcSyntax() throws Exception {
         String includePath = temporaryFolder.newFile("force.h").getAbsolutePath();
         DefaultBuildTargetConfig config = new DefaultBuildTargetConfig();
@@ -142,6 +182,7 @@ public class DefaultBuildTargetFactoryTest {
         params.packageName = "com.example.portable";
         params.webModuleName = "PortableLib";
         params.modulePath = temporaryFolder.newFolder().getAbsolutePath();
+        params.cppSourcePath = temporaryFolder.newFolder().getAbsolutePath();
 
         BuildToolOptions options = new BuildToolOptions(params, args);
         ArrayList<BuildMultiTarget> targets = new ArrayList<>();
