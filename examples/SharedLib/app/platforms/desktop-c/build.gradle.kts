@@ -16,9 +16,19 @@ dependencies {
     implementation(libs.bundles.teavmCompiler)
 }
 
-val runtimeTeaVMCBuildTask = JParserBuildTasks.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "teavm_c")
-val libATeaVMCBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "teavm_c")
-val libBTeaVMCBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "teavm_c")
+val hostOs = System.getProperty("os.name")
+val hostArch = System.getProperty("os.arch")
+val hostTarget = when {
+    hostOs.startsWith("Windows") -> "windows64"
+    hostOs == "Linux" && (hostArch == "x86_64" || hostArch == "amd64") -> "linux64"
+    hostOs.startsWith("Mac") && (hostArch == "aarch64" || hostArch == "arm64") -> "macArm"
+    hostOs.startsWith("Mac") && (hostArch == "x86_64" || hostArch == "amd64") -> "mac64"
+    else -> error("Unsupported desktop host: os=$hostOs arch=$hostArch")
+}
+
+val runtimeTeaVMCBuildTask = ":jParser:runtime:builder:runtime_helper_build_project_${hostTarget}_teavm_c"
+val libATeaVMCBuildTask = ":examples:SharedLib:libA:builder:LibA_build_project_${hostTarget}_teavm_c"
+val libBTeaVMCBuildTask = ":examples:SharedLib:libB:builder:LibB_build_project_${hostTarget}_teavm_c"
 
 tasks.register<JavaExec>("SharedLib_build_app_desktop_c") {
     group = "example-desktop"

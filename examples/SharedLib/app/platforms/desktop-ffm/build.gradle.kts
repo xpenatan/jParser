@@ -16,9 +16,19 @@ java {
 }
 
 val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
-val runtimeFfmBuildTask = JParserBuildTasks.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "ffm")
-val libAFfmBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "ffm")
-val libBFfmBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "ffm")
+val hostOs = System.getProperty("os.name")
+val hostArch = System.getProperty("os.arch")
+val hostTarget = when {
+    hostOs.startsWith("Windows") -> "windows64"
+    hostOs == "Linux" && (hostArch == "x86_64" || hostArch == "amd64") -> "linux64"
+    hostOs.startsWith("Mac") && (hostArch == "aarch64" || hostArch == "arm64") -> "macArm"
+    hostOs.startsWith("Mac") && (hostArch == "x86_64" || hostArch == "amd64") -> "mac64"
+    else -> error("Unsupported desktop host: os=$hostOs arch=$hostArch")
+}
+
+val runtimeFfmBuildTask = ":jParser:runtime:builder:runtime_helper_build_project_${hostTarget}_ffm"
+val libAFfmBuildTask = ":examples:SharedLib:libA:builder:LibA_build_project_${hostTarget}_ffm"
+val libBFfmBuildTask = ":examples:SharedLib:libB:builder:LibB_build_project_${hostTarget}_ffm"
 
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))

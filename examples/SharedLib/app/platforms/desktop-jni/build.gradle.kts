@@ -12,9 +12,19 @@ java {
 }
 
 val isMacOs = DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
-val runtimeJniBuildTask = JParserBuildTasks.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "jni")
-val libAJniBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:SharedLib:libA:builder", "LibA", "jni")
-val libBJniBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:SharedLib:libB:builder", "LibB", "jni")
+val hostOs = System.getProperty("os.name")
+val hostArch = System.getProperty("os.arch")
+val hostTarget = when {
+    hostOs.startsWith("Windows") -> "windows64"
+    hostOs == "Linux" && (hostArch == "x86_64" || hostArch == "amd64") -> "linux64"
+    hostOs.startsWith("Mac") && (hostArch == "aarch64" || hostArch == "arm64") -> "macArm"
+    hostOs.startsWith("Mac") && (hostArch == "x86_64" || hostArch == "amd64") -> "mac64"
+    else -> error("Unsupported desktop host: os=$hostOs arch=$hostArch")
+}
+
+val runtimeJniBuildTask = ":jParser:runtime:builder:runtime_helper_build_project_${hostTarget}_jni"
+val libAJniBuildTask = ":examples:SharedLib:libA:builder:LibA_build_project_${hostTarget}_jni"
+val libBJniBuildTask = ":examples:SharedLib:libB:builder:LibB_build_project_${hostTarget}_jni"
 
 dependencies {
     implementation(project(":examples:SharedLib:app:core"))

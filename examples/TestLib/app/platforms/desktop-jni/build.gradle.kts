@@ -8,8 +8,18 @@ plugins {
 // JNI and FFM app modules without duplicating test code.
 sourceSets["test"].java.srcDir(rootProject.file("examples/TestLib/app/core/src/test/java"))
 
-val runtimeJniBuildTask = JParserBuildTasks.hostBuildProjectTask(":jParser:runtime:builder", "runtime_helper", "jni")
-val testLibJniBuildTask = JParserBuildTasks.hostBuildProjectTask(":examples:TestLib:lib:builder", "TestLib", "jni")
+val hostOs = System.getProperty("os.name")
+val hostArch = System.getProperty("os.arch")
+val hostTarget = when {
+    hostOs.startsWith("Windows") -> "windows64"
+    hostOs == "Linux" && (hostArch == "x86_64" || hostArch == "amd64") -> "linux64"
+    hostOs.startsWith("Mac") && (hostArch == "aarch64" || hostArch == "arm64") -> "macArm"
+    hostOs.startsWith("Mac") && (hostArch == "x86_64" || hostArch == "amd64") -> "mac64"
+    else -> error("Unsupported desktop host: os=$hostOs arch=$hostArch")
+}
+
+val runtimeJniBuildTask = ":jParser:runtime:builder:runtime_helper_build_project_${hostTarget}_jni"
+val testLibJniBuildTask = ":examples:TestLib:lib:builder:TestLib_build_project_${hostTarget}_jni"
 
 // Configure headless tests for JNI module
 tasks.test {
