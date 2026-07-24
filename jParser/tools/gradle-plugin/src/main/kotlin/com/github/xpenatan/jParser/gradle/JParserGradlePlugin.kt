@@ -28,6 +28,9 @@ class JParserGradlePlugin : Plugin<Project> {
             registerVariantBuildTasks(project, extension)
             configureTaskDependencies(project, extension, buildTasks)
         }
+        project.gradle.projectsEvaluated {
+            configureReferenceJavaOutputs(project, extension, buildTasks)
+        }
     }
 
     private fun registerNativeBuildTasks(
@@ -99,6 +102,9 @@ class JParserGradlePlugin : Plugin<Project> {
         return project.tasks.register<JParserBuildTask>(taskName) {
             group = TASK_GROUP
             description = taskDescription
+            if(taskName != "jParser_generate") {
+                mustRunAfter("jParser_generate")
+            }
             this.extension = extension
             this.targetArg.set(targetArg)
             this.targetVariant.set(targetVariant)
@@ -207,6 +213,33 @@ class JParserGradlePlugin : Plugin<Project> {
                     dependency.native.targets.findByName(targetArg)?.let { hooks ->
                         dependsOn(hooks.taskDependencies)
                     }
+                }
+            }
+        }
+    }
+
+    private fun configureReferenceJavaOutputs(
+        project: Project,
+        extension: JParserExtension,
+        buildTasks: Map<String, TaskProvider<JParserBuildTask>>
+    ) {
+        for((targetArg, taskProvider) in buildTasks) {
+            for(dependency in extension.dependencies) {
+                val reference = resolveJParserProjectReference(project, dependency) ?: continue
+                val coreProject = reference.coreProject ?: continue
+                val referenceTaskName = if(targetArg.isBlank()) {
+                    "jParser_generate"
+                }
+                else {
+                    "jParser_build_$targetArg"
+                }
+                val referenceTaskPath = "${reference.builderProject.path}:$referenceTaskName"
+                val coreClasses = coreProject.tasks.named("classes")
+                coreClasses.configure {
+                    mustRunAfter(referenceTaskPath)
+                }
+                taskProvider.configure {
+                    dependsOn(coreClasses)
                 }
             }
         }

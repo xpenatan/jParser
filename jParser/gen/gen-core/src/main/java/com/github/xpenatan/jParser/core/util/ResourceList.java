@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -13,12 +15,27 @@ import java.util.zip.ZipFile;
 // Class from https://stackoverflow.com/questions/3923129/get-a-list-of-resources-from-classpath-directory
 public class ResourceList {
 
+    private static final ThreadLocal<List<String>> additionalClassPaths =
+            ThreadLocal.withInitial(Collections::emptyList);
+
+    public static void setAdditionalClassPaths(Collection<String> classPaths) {
+        additionalClassPaths.set(new ArrayList<>(classPaths));
+    }
+
+    public static void clearAdditionalClassPaths() {
+        additionalClassPaths.remove();
+    }
+
     public static Collection<String> getResources(
             final Pattern pattern){
         final ArrayList<String> retval = new ArrayList<>();
         final String classPath = System.getProperty("java.class.path", ".");
         final String[] classPathElements = classPath.split(System.getProperty("path.separator"));
         for(final String element : classPathElements){
+            Collection<String> resources = getResources(element, pattern);
+            retval.addAll(resources);
+        }
+        for(final String element : additionalClassPaths.get()) {
             Collection<String> resources = getResources(element, pattern);
             retval.addAll(resources);
         }
@@ -72,14 +89,24 @@ public class ResourceList {
     private static Collection<String> getResourcesFromDirectory(
             final File directory,
             final Pattern pattern){
+        return getResourcesFromDirectory(directory, directory, pattern);
+    }
+
+    private static Collection<String> getResourcesFromDirectory(
+            final File root,
+            final File directory,
+            final Pattern pattern){
         final ArrayList<String> retval = new ArrayList<String>();
         final File[] fileList = directory.listFiles();
         for(final File file : fileList){
             if(file.isDirectory()){
-                retval.addAll(getResourcesFromDirectory(file, pattern));
+                retval.addAll(getResourcesFromDirectory(root, file, pattern));
             } else{
                 try{
-                    final String fileName = file.getCanonicalPath();
+                    final String fileName = root.getCanonicalFile().toPath()
+                            .relativize(file.getCanonicalFile().toPath())
+                            .toString()
+                            .replace('\\', '/');
                     final boolean accept = pattern.matcher(fileName).matches();
                     if(accept){
                         retval.add(fileName);

@@ -10,6 +10,7 @@ public class JParserBuildRequest {
     public final ArrayList<String> additionalIDLRefPaths = new ArrayList<>();
     public final ArrayList<String> additionalSourceDirs = new ArrayList<>();
     public final ArrayList<String> additionalJavaImportPackages = new ArrayList<>();
+    public final ArrayList<String> additionalJavaClassPaths = new ArrayList<>();
     public final ArrayList<TeaVMCConsumerConfig> teaVMCConsumers = new ArrayList<>();
 
     public boolean keepGeneratedCommandComments;

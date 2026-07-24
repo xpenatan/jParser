@@ -5,6 +5,7 @@ import com.github.xpenatan.jParser.builder.targets.AndroidTarget;
 import com.github.xpenatan.jParser.builder.targets.SourceLanguage;
 import com.github.xpenatan.jParser.builder.targets.WindowsMSVCTarget;
 import com.github.xpenatan.jParser.core.JParser;
+import com.github.xpenatan.jParser.core.util.ResourceList;
 import com.github.xpenatan.jParser.cpp.JNIClassData;
 import com.github.xpenatan.jParser.ffm.FFMClassData;
 import com.github.xpenatan.jParser.idl.IDLReader;
@@ -21,6 +22,7 @@ public class JParserBuildRunner {
         validate(request);
         boolean previousRuntimeHelperMode = JParser.CREATE_RUNTIME_HELPER;
         try {
+            ResourceList.setAdditionalClassPaths(request.additionalJavaClassPaths);
             JParser.CREATE_RUNTIME_HELPER = request.targetConfig.runtimeHelperMode;
             WindowsMSVCTarget.DEBUG_BUILD = request.targetConfig.windowsDebugBuild;
             BuildToolOptions op = new BuildToolOptions(request.params, args);
@@ -65,6 +67,7 @@ public class JParserBuildRunner {
             }, request.idlRenaming);
         }
         finally {
+            ResourceList.clearAdditionalClassPaths();
             JParser.CREATE_RUNTIME_HELPER = previousRuntimeHelperMode;
         }
     }

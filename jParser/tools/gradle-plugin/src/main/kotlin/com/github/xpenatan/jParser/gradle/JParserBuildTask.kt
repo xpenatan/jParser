@@ -218,21 +218,46 @@ abstract class JParserBuildTask : DefaultTask() {
         request: JParserBuildRequest,
         config: DefaultBuildTargetConfig
     ) {
-        val libName = dependency.referenceLibName.orNull?.takeIf { it.isNotBlank() } ?: return
+        val projectReference = resolveJParserProjectReference(project, dependency)
+        val libName = dependency.referenceLibName.orNull?.takeIf { it.isNotBlank() }
+            ?: projectReference?.libName?.takeIf { it.isNotBlank() }
+            ?: return
         val referencePackageName = dependency.referencePackageName.orNull?.takeIf { it.isNotBlank() }
+            ?: projectReference?.packageName?.takeIf { it.isNotBlank() }
             ?: libName.substring(0, 1).lowercase() + libName.substring(1)
-        request.additionalJavaImportPackages.add(referencePackageName)
-        val modulePath = normalizeProjectPath(required(dependency.referenceModulePath.orNull, "dependency.${dependency.name}.referenceModulePath"))
-        val modulePrefix = dependency.referenceModulePrefix.orNull ?: "lib"
-        val moduleBuildPath = File(
-            modulePath,
-            resolveModuleName(modulePrefix, dependency.referenceModuleBuildSuffix.orNull, "-build")
-        ).absolutePath.replace('\\', '/')
+        val moduleBuildDirectory = projectReference?.builderProject?.projectDir ?: run {
+            val modulePath = normalizeProjectPath(required(
+                dependency.referenceModulePath.orNull,
+                "dependency.${dependency.name}.referenceModulePath"
+            ))
+            val modulePrefix = dependency.referenceModulePrefix.orNull ?: "lib"
+            File(modulePath, resolveModuleName(
+                modulePrefix,
+                dependency.referenceModuleBuildSuffix.orNull,
+                "-build"
+            ))
+        }
+        val moduleBuildPath = moduleBuildDirectory.absolutePath.replace('\\', '/')
         val nativeBuildPath = "$moduleBuildPath/build/c++"
+        val idlName = projectReference?.idlName?.takeIf { it.isNotBlank() } ?: libName
 
-        request.additionalIDLRefPaths.add("$moduleBuildPath/src/main/cpp/$libName.idl")
+        request.additionalIDLRefPaths.add("$moduleBuildPath/src/main/cpp/$idlName.idl")
         config.globalHooks.headerDirs.add("$moduleBuildPath/src/main/cpp/source")
         config.globalHooks.headerDirs.add("$moduleBuildPath/src/main/cpp/custom")
+        projectReference?.cppSourcePath?.takeIf { it.isNotBlank() }?.let { sourcePath ->
+            val sourceDirectory = if(File(sourcePath).isAbsolute) {
+                File(sourcePath)
+            }
+            else {
+                projectReference?.builderProject?.file(sourcePath) ?: project.file(sourcePath)
+            }
+            config.globalHooks.headerDirs.add(sourceDirectory.absolutePath.replace('\\', '/'))
+        }
+        projectReference?.coreProject?.let { coreProject ->
+            request.additionalJavaClassPaths.add(
+                coreProject.layout.buildDirectory.dir("classes/java/main").get().asFile.absolutePath
+            )
+        } ?: request.additionalJavaImportPackages.add(referencePackageName)
 
         config.target("windows64_jni").staticLinkerInputs.add("$nativeBuildPath/libs/windows/vc/jni/${libName}64.lib")
         config.target("windows64_ffm").staticLinkerInputs.add("$nativeBuildPath/libs/windows/vc/ffm/${libName}64.lib")

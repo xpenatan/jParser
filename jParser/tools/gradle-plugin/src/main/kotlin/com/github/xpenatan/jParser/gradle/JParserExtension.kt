@@ -325,6 +325,16 @@ open class JParserDependencyExtension @Inject constructor(
 
     override fun getName(): String = dependencyName
 
+    /**
+     * References another jParser Gradle project in this build.
+     *
+     * Its IDL, package layout, generated Java classes, native headers, libraries,
+     * and matching jParser task dependencies are inferred automatically.
+     */
+    fun referenceProject(projectPath: String) {
+        referenceProjectPath.set(projectPath)
+    }
+
     fun reference(
         libName: String,
         modulePath: String,

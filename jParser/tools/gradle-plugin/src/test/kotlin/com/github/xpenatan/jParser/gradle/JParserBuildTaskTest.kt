@@ -6,8 +6,90 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.File
+import java.nio.file.Files
 
 class JParserBuildTaskTest {
+
+    @Test
+    fun projectReferenceInfersGeneratorInputsAndConsumerMetadata() {
+        val rootDir = Files.createTempDirectory("jparser-project-reference").toFile()
+        val root = ProjectBuilder.builder()
+            .withName("root")
+            .withProjectDir(rootDir)
+            .build()
+        val library = ProjectBuilder.builder()
+            .withName("library")
+            .withParent(root)
+            .withProjectDir(File(rootDir, "library").apply(File::mkdirs))
+            .build()
+        val builder = ProjectBuilder.builder()
+            .withName("builder")
+            .withParent(library)
+            .withProjectDir(File(library.projectDir, "builder").apply(File::mkdirs))
+            .build()
+        val core = ProjectBuilder.builder()
+            .withName("core")
+            .withParent(library)
+            .withProjectDir(File(library.projectDir, "core").apply(File::mkdirs))
+            .build()
+        val consumer = ProjectBuilder.builder()
+            .withName("consumer")
+            .withParent(root)
+            .withProjectDir(File(rootDir, "consumer").apply(File::mkdirs))
+            .build()
+
+        builder.pluginManager.apply(JParserGradlePlugin::class.java)
+        builder.extensions.getByType(JParserExtension::class.java).apply {
+            libName.set("Referenced")
+            idlName.set("ReferencedApi")
+            modulePrefix.set("")
+            modulePath(library.projectDir)
+            moduleBuildSuffix.set("builder")
+            moduleCoreSuffix.set("core")
+            packageName.set("com.example.referenced")
+            cppSourcePath(File(library.projectDir, "native-source"))
+        }
+
+        val extension = JParserExtension(consumer, consumer.objects).apply {
+            libName.set("Consumer")
+            modulePrefix.set("")
+            packageName.set("com.example.consumer")
+            runtimeHelperMode.set(true)
+            dependency("referenced") {
+                referenceProject(":library:builder")
+            }
+        }
+        val task = consumer.tasks.register("testProjectReference", JParserBuildTask::class.java).get().apply {
+            this.extension = extension
+            buildArgs.set(emptyList())
+            targetArg.set(JParserTargets.WINDOWS64_JNI.targetName)
+            targetVariant.set("")
+            generateCore.set(true)
+        }
+
+        val createRequest = JParserBuildTask::class.java.getDeclaredMethod("createRequest")
+        createRequest.isAccessible = true
+        val request = createRequest.invoke(task) as JParserBuildRequest
+
+        assertEquals(
+            listOf(File(builder.projectDir, "src/main/cpp/ReferencedApi.idl").absolutePath.replace('\\', '/')),
+            request.additionalIDLRefPaths
+        )
+        assertEquals(
+            listOf(core.layout.buildDirectory.dir("classes/java/main").get().asFile.absolutePath),
+            request.additionalJavaClassPaths
+        )
+        assertTrue(request.additionalJavaImportPackages.isEmpty())
+        assertTrue(request.targetConfig.globalHooks.headerDirs.contains(
+            File(library.projectDir, "native-source").absolutePath.replace('\\', '/')
+        ))
+        assertEquals(
+            listOf(File(builder.projectDir, "build/c++/libs/windows/vc/jni/Referenced64.lib")
+                .absolutePath.replace('\\', '/')),
+            request.targetConfig.target(JParserTargets.WINDOWS64_JNI.targetName).staticLinkerInputs
+        )
+    }
 
     @Test
     fun teaVMCLinkageDefaultsToStaticAndFlowsIntoTaskRequest() {
