@@ -10,6 +10,100 @@ import java.nio.file.Files
 class JParserGradlePluginTest {
 
     @Test
+    fun projectReferenceIgnoresUnavailableNativeTargetForCoreClassOrdering() {
+        val projectDir = Files.createTempDirectory("jparser-project-reference-targets").toFile()
+        File(projectDir, "settings.gradle.kts").writeText(
+            """
+            rootProject.name = "project-reference-targets"
+            include(":libA:plugin", ":libA:core", ":libB:plugin", ":libB:core")
+            """.trimIndent()
+        )
+
+        val libA = File(projectDir, "libA")
+        val libAPlugin = File(libA, "plugin").apply(File::mkdirs)
+        File(libA, "core").apply(File::mkdirs)
+        File(libA, "core/build.gradle.kts").writeText("plugins { java }")
+        File(libAPlugin, "build.gradle.kts").writeText(
+            """
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("LibA")
+                modulePrefix.set("")
+                modulePath(file(".."))
+                moduleBuildSuffix.set("plugin")
+                moduleCoreSuffix.set("core")
+                packageName.set("libA")
+                cppSourcePath.set("source")
+
+                native {
+                    target(JParserTargets.ANDROID_JNI) {}
+                }
+            }
+            """.trimIndent()
+        )
+
+        val libB = File(projectDir, "libB")
+        val libBPlugin = File(libB, "plugin").apply(File::mkdirs)
+        File(libB, "core").apply(File::mkdirs)
+        File(libB, "core/build.gradle.kts").writeText("plugins { java }")
+        File(libBPlugin, "build.gradle.kts").writeText(
+            """
+            import com.github.xpenatan.jParser.gradle.JParserTargets
+
+            plugins {
+                id("com.github.xpenatan.jparser")
+            }
+
+            jParser {
+                libName.set("LibB")
+                modulePrefix.set("")
+                modulePath(file(".."))
+                moduleBuildSuffix.set("plugin")
+                moduleCoreSuffix.set("core")
+                packageName.set("libB")
+                cppSourcePath.set("source")
+
+                dependency("libA") {
+                    reference(
+                        libName = "LibA",
+                        modulePath = file("../../libA"),
+                        modulePrefix = "",
+                        moduleBuildSuffix = "plugin",
+                        projectPath = ":libA:plugin"
+                    )
+                }
+
+                native {
+                    target(JParserTargets.ANDROID_JNI) {}
+                    target(JParserTargets.IOS_JNI) {}
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result = runner(
+            projectDir,
+            ":libB:plugin:jParser_build_android_jni",
+            "--dry-run",
+            "--console=plain"
+        ).build()
+
+        assertContains(result.output, ":libA:plugin:jParser_build_android_jni SKIPPED")
+        assertContains(result.output, ":libA:core:classes SKIPPED")
+        assertContains(result.output, ":libB:plugin:jParser_build_android_jni SKIPPED")
+        assertFalse(result.output.contains(":libA:plugin:jParser_build_ios_jni"))
+        assertTrue(
+            result.output.indexOf(":libA:plugin:jParser_build_android_jni SKIPPED") <
+                result.output.indexOf(":libA:core:classes SKIPPED")
+        )
+    }
+
+    @Test
     fun registersGeneratedTasks() {
         val projectDir = createProject(
             """

@@ -233,10 +233,12 @@ class JParserGradlePlugin : Plugin<Project> {
                 else {
                     "jParser_build_$targetArg"
                 }
-                val referenceTaskPath = "${reference.builderProject.path}:$referenceTaskName"
                 val coreClasses = coreProject.tasks.named("classes")
-                coreClasses.configure {
-                    mustRunAfter(referenceTaskPath)
+                // Referenced projects may intentionally expose only a subset of the consumer's native targets.
+                reference.builderProject.tasks.findByName(referenceTaskName)?.let { referenceTask ->
+                    coreClasses.configure {
+                        mustRunAfter(referenceTask)
+                    }
                 }
                 taskProvider.configure {
                     dependsOn(coreClasses)
