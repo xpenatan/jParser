@@ -36,7 +36,7 @@ jParser {
             modulePath = file("../../libA").absolutePath,
             modulePrefix = "",
             moduleBuildSuffix = "builder",
-            projectPath = ":examples:SharedLib:libA:plugin"
+            projectPath = ":SharedLib:libA:plugin"
         )
 
         native {

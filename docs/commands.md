@@ -46,8 +46,8 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_mac64_ffm
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_macArm_ffm
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_teavm_c
-./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_teavm_c_mt
-./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_teavm_c_md
+./gradlew -p examples :TestLib:lib:plugin:jParser_build_windows64_teavm_c_mt
+./gradlew -p examples :TestLib:lib:plugin:jParser_build_windows64_teavm_c_md
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_linux64_teavm_c
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_mac64_teavm_c
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_macArm_teavm_c
@@ -177,7 +177,7 @@ Where applicable, replace `windows64` with `linux64`, `mac64`, or `macArm`.
 ## Publishing
 
 jParser uses the Easy Publishing plugin to coordinate the root-owned library
-modules and the standalone `gradle-plugin` build.
+modules and the `:gradle-plugin` project.
 
 ```text
 ./gradlew prepareSnapshot
@@ -204,25 +204,25 @@ publishing tasks in the same Gradle invocation.
 ## jParser Gradle plugin
 
 ```text
-./gradlew -p gradle-plugin check
-./gradlew -p gradle-plugin validatePlugins
+./gradlew :gradle-plugin:check
+./gradlew :gradle-plugin:validatePlugins
 
-./gradlew :examples:TestLib:lib:plugin:tasks --group jParser --all
-./gradlew :examples:TestLib:lib:plugin:jParser_generate
-./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_jni
-./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_ffm
-./gradlew :examples:TestLib:lib:plugin:jParser_build_android_jni
-./gradlew :examples:TestLib:lib:plugin:jParser_build_ios_teavm_c
-./gradlew :examples:TestLib:lib:plugin:jParser_build_web_wasm
+./gradlew -p examples :TestLib:lib:plugin:tasks --group jParser --all
+./gradlew -p examples :TestLib:lib:plugin:jParser_generate
+./gradlew -p examples :TestLib:lib:plugin:jParser_build_windows64_jni
+./gradlew -p examples :TestLib:lib:plugin:jParser_build_windows64_ffm
+./gradlew -p examples :TestLib:lib:plugin:jParser_build_android_jni
+./gradlew -p examples :TestLib:lib:plugin:jParser_build_ios_teavm_c
+./gradlew -p examples :TestLib:lib:plugin:jParser_build_web_wasm
 
-./gradlew :examples:SharedLib:libA:plugin:tasks --group jParser --all
-./gradlew :examples:SharedLib:libA:plugin:jParser_generate
-./gradlew :examples:SharedLib:libB:plugin:tasks --group jParser --all
-./gradlew :examples:SharedLib:libB:plugin:jParser_generate
-./gradlew :examples:SharedLib:libB:plugin:jParser_build_windows64_jni
-./gradlew :examples:SharedLib:libB:plugin:jParser_build_windows64_ffm
-./gradlew :examples:SharedLib:libB:plugin:jParser_build_android_jni
-./gradlew :examples:SharedLib:libB:plugin:jParser_build_web_wasm
+./gradlew -p examples :SharedLib:libA:plugin:tasks --group jParser --all
+./gradlew -p examples :SharedLib:libA:plugin:jParser_generate
+./gradlew -p examples :SharedLib:libB:plugin:tasks --group jParser --all
+./gradlew -p examples :SharedLib:libB:plugin:jParser_generate
+./gradlew -p examples :SharedLib:libB:plugin:jParser_build_windows64_jni
+./gradlew -p examples :SharedLib:libB:plugin:jParser_build_windows64_ffm
+./gradlew -p examples :SharedLib:libB:plugin:jParser_build_android_jni
+./gradlew -p examples :SharedLib:libB:plugin:jParser_build_web_wasm
 ```
 
 The plugin id is `com.github.xpenatan.jParser`; the Maven implementation artifact is `com.github.xpenatan.jParser:jparser-gradle-plugin`.
@@ -232,5 +232,5 @@ The plugin id is `com.github.xpenatan.jParser`; the Maven implementation artifac
 ```text
 ./gradlew :jParser:gen:gen-core:compileJava
 ./gradlew :jParser:gen:gen-build-tool:compileJava
-./gradlew -p gradle-plugin compileKotlin
+./gradlew :gradle-plugin:compileKotlin
 ```

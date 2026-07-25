@@ -26,10 +26,11 @@ A typical project has a hand-written `base` API and `builder` configuration. jPa
 Web builds use [Emscripten](https://emscripten.org/) and [TeaVM](https://github.com/konsoletyper/teavm).
 
 Repository development is fully local: the root build owns the `jParser`
-modules and includes only `gradle-plugin` as a plugin build. Applied
-plugin tasks use the local `:jParser:gen:gen-build-tool` project automatically,
-so changing the generator, plugin, and examples together requires no Maven
-publication.
+modules and the `:gradle-plugin` project. The plugin compiles against the local
+`gen-build`, `gen-idl`, and `gen-build-tool` projects. The plugin validation
+fixtures use the separate `examples/settings.gradle.kts` consumer build, which
+includes the root build for plugin resolution. Changing the generator, plugin,
+and fixtures together therefore requires no Maven publication.
 
 ## Quick Start
 

@@ -1,10 +1,12 @@
 pluginManagement {
+    includeBuild("..")
+
     repositories {
         google()
+        mavenCentral()
         maven {
             url = uri("https://central.sonatype.com/repository/maven-snapshots/")
         }
-        mavenCentral()
         gradlePluginPortal()
     }
 }
@@ -16,11 +18,8 @@ dependencyResolutionManagement {
         }
     }
 
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        maven {
-            url = uri(rootDir.resolve("../build/staging-deploy"))
-        }
+        mavenLocal()
         google()
         mavenCentral()
         maven {
@@ -33,4 +32,8 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "gradle-plugin"
+rootProject.name = "jParser-plugin-examples"
+
+include(":TestLib:lib:plugin")
+include(":SharedLib:libA:plugin")
+include(":SharedLib:libB:plugin")

@@ -71,7 +71,7 @@ Pattern repeats across `examples/`, `idl/`, `loader/`, and `jParser/` modules
 
 ## Gradle Plugin Support
 
-`gradle-plugin` is an included build that publishes the Maven artifact `com.github.xpenatan.jParser:jparser-gradle-plugin` and plugin id `com.github.xpenatan.jParser`.
+`:gradle-plugin` is a root subproject that publishes the Maven artifact `com.github.xpenatan.jParser:jparser-gradle-plugin` and plugin id `com.github.xpenatan.jParser`.
 
 The plugin is scoped to build-module orchestration: it creates one task namespace with `jParser_generate` and platform build tasks such as `jParser_build_windows64_jni`. The tasks reuse `BuilderTool`, `BuildToolOptions`, `BuildMultiTarget`, and the platform target classes through `JParserBuildRunner` and `DefaultBuildTargetFactory` in `jParser:gen:gen-build-tool`. Directly invoking `jParser_generate` generates core plus every configured binding family: JNI, FFM, TeaVM web, and TeaVM C. Each regular or variant `jParser_build_*` task generates core plus exactly the binding family required by its platform target and does not invoke the aggregate `jParser_generate` task. Native build task registration follows explicit `native { target(...) }` and `native { targetVariant(...) }` declarations when any are present; module suffixes are only used as the fallback for builds with no explicit native target list.
 
@@ -91,12 +91,12 @@ Path-like plugin DSL methods keep string properties for compatibility, but provi
 
 `jParser_generate` composes build-runner switches from `JParserGenerationTarget` instead of raw `gen_jni`, `gen_ffm`, `gen_web`, and `gen_teavm_c` strings inside the plugin. The runner still receives the original string args at the boundary.
 
-The repository root directly owns every `:jParser:*` and example project.
-`gradle-plugin` is the only included build, selected through root
-`pluginManagement`. The plugin build neither includes `jParser/` nor maps any
-jParser source directory as one of its own projects. Every physical source
-directory therefore has one Gradle owner, preventing IntelliJ from showing
-multiple qualified module identities beside one folder.
+The repository root directly owns every `:jParser:*` project, the regular
+example projects, and `:gradle-plugin`. The plugin validation fixtures are not
+root subprojects. They are owned by `examples/settings.gradle.kts`, which
+includes the repository root through `pluginManagement` and maps only the
+three existing plugin fixture directories. Every physical source directory
+therefore has one Gradle owner in either entry point.
 
 The plugin is a Gradle adapter over the canonical manual-builder API. It has
 normal dependencies on `gen-build`, `gen-idl`, and `gen-build-tool`, exposes
@@ -105,22 +105,21 @@ passes a canonical `JParserBuildRequest` directly to `JParserBuildRunner`.
 There is no plugin-owned copy of the builder request, generator enums, or IDL
 renaming contract, and no reflection/property translation protocol.
 
-The plugin build and the root generator build are separate Gradle builds.
-Generator dependencies therefore use the same Maven coordinates for plugin
-development and published consumption. Do not mirror the root generator
-projects into the plugin settings: assigning the same source directories to
-both builds creates duplicate IntelliJ modules and qualified folder labels.
-Gradle composite substitutions are build-local and cannot make an included
-plugin depend back on projects in the build that is applying it; doing so
-creates a circular script-classpath dependency.
+The plugin uses direct project dependencies on
+`:jParser:gen:gen-build`, `:jParser:gen:gen-idl`, and
+`:jParser:gen:gen-build-tool`. Local compilation therefore follows source
+changes without publishing or resolving a Maven snapshot. Gradle publication
+metadata converts those project dependencies to the corresponding
+`com.github.xpenatan.jParser` Maven coordinates for external consumers.
+Because `gen-build-tool` targets the Java FFM toolchain version, the directly
+linked plugin uses the same Java target.
 
-The standalone plugin build imports the root version catalog for version and
-publication data. Its published plugin artifact declares the canonical
-generator dependencies rather than embedding or reimplementing them. Because
-`gen-build-tool` targets the Java FFM toolchain version, the directly linked
-plugin uses the same Java target. Root Easy Publishing owns the jParser module
-publications and coordinates the plugin build through its nested-build
-lifecycle.
+Projects that apply a plugin cannot obtain it from another project in the same
+build while their build scripts are being evaluated. For this reason the
+plugin fixtures are a separate consumer build and include the main build only
+for plugin resolution. The main build does not include that consumer build,
+so there is no reverse/circular build relationship. Root Easy Publishing owns
+the library and plugin publications in one lifecycle.
 
 The TestLib and SharedLib desktop example Gradle files select their host target directly and depend on the matching generator task paths. Version and dependency data comes from `gradle/libs.versions.toml`; the root build does not use `buildSrc`.
 
@@ -130,7 +129,7 @@ Runtime helper generation remains owned by `jParser/runtime/builder`, which
 invokes `BuildRuntimeHelper` directly and exposes the
 `runtime_helper_build_project*` tasks.
 
-Shared-library examples use per-library plugin modules in `examples/SharedLib/libA/plugin` and `examples/SharedLib/libB/plugin`. These are normal root Gradle modules with only a `build.gradle.kts`; `libB` declares its `libA` module reference through `dependency("libA") { reference(...) }`, which expands IDL refs, header paths, native link inputs, and project task dependencies.
+Shared-library examples use per-library plugin modules in `examples/SharedLib/libA/plugin` and `examples/SharedLib/libB/plugin`. These are projects in the separate examples consumer build; `libB` declares its `libA` module reference through `dependency("libA") { reference(...) }`, which expands IDL refs, header paths, native link inputs, and project task dependencies.
 
 ## JNI vs FFM
 

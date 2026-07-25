@@ -1,6 +1,4 @@
 pluginManagement {
-    includeBuild("gradle-plugin")
-
     repositories {
         google()
         mavenCentral()
@@ -12,6 +10,8 @@ pluginManagement {
 }
 
 rootProject.name = "jParser"
+
+include(":gradle-plugin")
 
 include(":jParser:gen:gen-core")
 include(":jParser:gen:gen-build")
@@ -55,7 +55,6 @@ include(":examples:TestLib:lib:shared:TestLib-c")
 include(":examples:TestLib:lib:desktop:TestLib-desktop-c")
 include(":examples:TestLib:lib:android:TestLib-android-c")
 include(":examples:TestLib:lib:ios:TestLib-ios-c")
-include(":examples:TestLib:lib:plugin")
 
 include(":examples:TestLib:app:core")
 include(":examples:TestLib:app:platforms:desktop-jni")
@@ -78,7 +77,6 @@ include(":examples:SharedLib:libA:shared:LibA-c")
 include(":examples:SharedLib:libA:desktop:LibA-desktop-c")
 include(":examples:SharedLib:libA:android:LibA-android-c")
 include(":examples:SharedLib:libA:ios:LibA-ios-c")
-include(":examples:SharedLib:libA:plugin")
 
 include(":examples:SharedLib:libB:builder")
 include(":examples:SharedLib:libB:base")
@@ -92,7 +90,6 @@ include(":examples:SharedLib:libB:shared:LibB-c")
 include(":examples:SharedLib:libB:desktop:LibB-desktop-c")
 include(":examples:SharedLib:libB:android:LibB-android-c")
 include(":examples:SharedLib:libB:ios:LibB-ios-c")
-include(":examples:SharedLib:libB:plugin")
 
 include(":examples:SharedLib:app:core")
 include(":examples:SharedLib:app:platforms:desktop-jni")
