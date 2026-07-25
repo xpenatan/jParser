@@ -85,7 +85,7 @@ val nativeAars = androidAbis.map { abi ->
         }
         doFirst {
             if(!file(abi.nativeFile).isFile) {
-                throw GradleException("Missing Android TeaVM C native library for ${abi.abi}: ${abi.nativeFile}")
+                logger.warn("Missing Android TeaVM C native library for ${abi.abi}: ${abi.nativeFile}")
             }
         }
     }

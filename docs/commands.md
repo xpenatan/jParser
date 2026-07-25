@@ -188,9 +188,11 @@ the nested `jParser/tools/gradle-plugin` build.
 
 `prepareSnapshot` and `prepareRelease` create local Maven repositories in
 `build/snapshot-deploy` and `build/staging-deploy`, respectively. They do not
-upload artifacts. Build every cross-platform native payload before preparing a
-complete repository; native publication tasks fail when a required payload is
-missing.
+upload artifacts. Both tasks prepare every native platform publication.
+Missing native payloads are reported as warnings and omitted from the affected
+artifact, allowing local preparation to inspect the available outputs. Build
+and collect every cross-platform native payload before publishing a complete
+repository.
 
 `publishSnapshot` uploads to the configured Sonatype snapshot repository.
 `publishRelease` prepares the release repository, creates the Maven Central

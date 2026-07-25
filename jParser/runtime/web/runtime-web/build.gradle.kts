@@ -20,6 +20,14 @@ val wasmJar = tasks.register<Jar>("wasmJar") {
     from(emscriptenJS, emscriptenWASM)
     archiveBaseName.set("${moduleName}-wasm")
     archiveClassifier.set("")
+    doFirst {
+        val missingFiles = listOf(emscriptenJS, emscriptenWASM).filterNot { file(it).isFile }
+        if(missingFiles.isNotEmpty()) {
+            logger.warn(
+                "Missing TeaVM web runtime payloads:\n" + missingFiles.joinToString("\n")
+            )
+        }
+    }
 }
 
 tasks.named("compileJava") {

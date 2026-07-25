@@ -51,7 +51,7 @@ val nativeJars = platforms.map { (platform, nativePayloads) ->
         doFirst {
             val missingFiles = nativePayloads.map { it.first }.distinct().filterNot { file(it).isFile }
             if(missingFiles.isNotEmpty()) {
-                throw GradleException(
+                logger.warn(
                     "Missing desktop TeaVM C native payloads for $platform:\n" +
                         missingFiles.joinToString("\n")
                 )

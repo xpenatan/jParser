@@ -36,6 +36,11 @@ val nativeJars = platforms.map { (platform, nativeFile) ->
         from(nativeFile)
         archiveBaseName.set("${moduleName}-${platform}")
         archiveClassifier.set("")
+        doFirst {
+            if(!file(nativeFile).isFile) {
+                logger.warn("Missing desktop FFM native library for $platform: $nativeFile")
+            }
+        }
     }
 }
 

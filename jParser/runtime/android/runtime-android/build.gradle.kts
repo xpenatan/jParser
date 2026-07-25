@@ -84,7 +84,7 @@ val nativeAars = androidAbis.map { abi ->
         }
         doFirst {
             if(!file(abi.nativeFile).isFile) {
-                throw GradleException("Missing Android native library for ${abi.abi}: ${abi.nativeFile}")
+                logger.warn("Missing Android native library for ${abi.abi}: ${abi.nativeFile}")
             }
         }
     }

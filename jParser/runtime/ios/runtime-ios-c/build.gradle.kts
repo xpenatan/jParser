@@ -51,7 +51,7 @@ tasks.named<Jar>("jar") {
             "$libDir/ios/${slice.sdk}/${slice.architecture}/teavm_c/libruntime64_.a"
         }.filterNot { file(it).isFile }
         if(missingFiles.isNotEmpty()) {
-            throw GradleException(
+            logger.warn(
                 "Missing iOS TeaVM C runtime payloads:\n" + missingFiles.joinToString("\n")
             )
         }
