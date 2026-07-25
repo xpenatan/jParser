@@ -23,6 +23,11 @@ jParser projects are centered on a hand-written API, a generator entry point, an
 
 Edit the `base`, `builder`, and native packaging inputs. Regenerate derived Java instead of changing generated output directly.
 
+The repository root owns the generator, runtime, and example modules, while
+`gradle-plugin` is an included plugin build. Applied plugin tasks select
+the local `:jParser:gen:gen-build-tool` project automatically. Developing from
+this checkout does not require publishing jParser artifacts to Maven first.
+
 ## Build TestLib
 
 Run commands from the repository root. On Windows use `gradlew.bat`; on Linux and macOS use `./gradlew`.

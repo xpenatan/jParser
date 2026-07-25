@@ -75,7 +75,7 @@ easyPublishing {
     scmDeveloperConnection.set("scm:git:ssh://git@github.com/xpenatan/jParser.git")
 
     nestedBuild("gradle-plugin") {
-        directory.set(layout.projectDirectory.dir("jParser/tools/gradle-plugin"))
+        directory.set(layout.projectDirectory.dir("gradle-plugin"))
     }
 }
 

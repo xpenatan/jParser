@@ -1,5 +1,5 @@
 pluginManagement {
-    includeBuild("jParser/tools/gradle-plugin")
+    includeBuild("gradle-plugin")
 
     repositories {
         google()
@@ -10,6 +10,8 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+rootProject.name = "jParser"
 
 include(":jParser:gen:gen-core")
 include(":jParser:gen:gen-build")
@@ -36,7 +38,6 @@ include(":jParser:runtime:shared:runtime-c")
 include(":jParser:runtime:desktop:runtime-desktop-c")
 include(":jParser:runtime:android:runtime-android-c")
 include(":jParser:runtime:ios:runtime-ios-c")
-include(":jParser:runtime:plugin")
 
 include(":jParser:loader:loader-core")
 include(":jParser:loader:loader-c")

@@ -14,7 +14,7 @@ gdx = "1.14.2"
 gdxTeavm = "1.6.0"
 junit = "4.13.2"
 desugarJdkLibs = "2.0.3"
-easyPublishing = "0.1.1"
+easyPublishing = "0.1.2"
 androidGradlePlugin = "9.1.1"
 
 [libraries]
@@ -46,6 +46,6 @@ teavmWeb = ["teavmClasslib", "teavmJso", "teavmJsoApis", "teavmJsoImpl", "teavmE
 
 [plugins]
 easyPublishing = { id = "com.github.xpenatan.easy-publishing", version.ref = "easyPublishing" }
-jParser = { id = "com.github.xpenatan.jparser", version.ref = "jParserSnapshot" }
+jParser = { id = "com.github.xpenatan.jParser", version.ref = "jParserSnapshot" }
 androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 androidLibrary = { id = "com.android.library", version.ref = "androidGradlePlugin" }

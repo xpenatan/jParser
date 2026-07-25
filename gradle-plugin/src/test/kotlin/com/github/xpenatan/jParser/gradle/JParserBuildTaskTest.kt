@@ -1,7 +1,5 @@
 package com.github.xpenatan.jParser.gradle
 
-import com.github.xpenatan.jParser.builder.tool.JParserBuildRequest
-import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

@@ -59,9 +59,9 @@ Maintenance rule: when module/task names change, update `AGENTS.md` and related 
 - Example split Gradle paths follow the same pattern, such as `:examples:TestLib:lib:shared:TestLib-jni`, `:examples:TestLib:lib:shared:TestLib-c`, `:examples:TestLib:lib:desktop:TestLib-desktop-jni`, `:examples:TestLib:lib:desktop:TestLib-desktop-ffm`, `:examples:TestLib:lib:desktop:TestLib-desktop-c`, `:examples:TestLib:lib:web:TestLib-web`, `:examples:TestLib:lib:android:TestLib-android`, `:examples:TestLib:lib:android:TestLib-android-c`, and `:examples:TestLib:lib:ios:TestLib-ios-c`.
 - App platform modules in examples: `app:platforms:desktop-jni`, `app:platforms:desktop-ffm`, `app:platforms:desktop-c`, `app:platforms:web`, `app:platforms:android`, `app:platforms:android-c`, `app:platforms:ios-c`.
 - Runtime generator module: `jParser:runtime:builder` (tasks like `runtime_helper_build_project_<target>`).
-- Gradle plugin standalone nested build: `jParser/tools/gradle-plugin` (plugin id `com.github.xpenatan.jparser`, artifact `jparser-gradle-plugin`).
+- Gradle plugin standalone sibling build: `gradle-plugin` (plugin id `com.github.xpenatan.jParser`, artifact `jparser-gradle-plugin`).
 - TeaVM C loader modules: `jParser/loader/loader-core` provides the shared Java loader API, while `jParser/loader/loader-c` provides its `emu.c` substitution plus the portable C/C++ loader ABI and implementation.
-- Gradle plugin validation fixtures: `jParser/runtime/plugin`, `examples/TestLib/lib/plugin`, `examples/SharedLib/libA/plugin`, and `examples/SharedLib/libB/plugin`.
+- Gradle plugin validation fixtures: `examples/TestLib/lib/plugin`, `examples/SharedLib/libA/plugin`, and `examples/SharedLib/libB/plugin`.
 - Benchmark module namespace: `jParser:benchmark:benchmark-core`.
 
 ## 6) JNI / FFM Essentials

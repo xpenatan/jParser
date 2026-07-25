@@ -25,6 +25,12 @@ A typical project has a hand-written `base` API and `builder` configuration. jPa
 
 Web builds use [Emscripten](https://emscripten.org/) and [TeaVM](https://github.com/konsoletyper/teavm).
 
+Repository development is fully local: the root build owns the `jParser`
+modules and includes only `gradle-plugin` as a plugin build. Applied
+plugin tasks use the local `:jParser:gen:gen-build-tool` project automatically,
+so changing the generator, plugin, and examples together requires no Maven
+publication.
+
 ## Quick Start
 
 [`examples/TestLib`](examples/TestLib) is the smallest complete project to follow. From the repository root, a Windows JNI build is:

@@ -28,7 +28,7 @@ class JParserGradlePluginTest {
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -56,7 +56,7 @@ class JParserGradlePluginTest {
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -107,10 +107,10 @@ class JParserGradlePluginTest {
     fun registersGeneratedTasks() {
         val projectDir = createProject(
             """
-            import com.github.xpenatan.jParser.builder.tool.JParserSymbolNameMode
+            import com.github.xpenatan.jParser.gradle.JParserSymbolNameMode
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -142,7 +142,7 @@ class JParserGradlePluginTest {
         val projectDir = createProject(
             """
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
             """.trimIndent()
         )
@@ -159,7 +159,7 @@ class JParserGradlePluginTest {
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -193,7 +193,7 @@ class JParserGradlePluginTest {
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -228,13 +228,13 @@ class JParserGradlePluginTest {
     fun supportsAndroidAbiHooksOnNativeTargetVariants() {
         val projectDir = createProject(
             """
-            import com.github.xpenatan.jParser.builder.targets.AndroidTarget
-            import com.github.xpenatan.jParser.builder.tool.JParserBuildRequest
+            import com.github.xpenatan.jParser.gradle.AndroidTarget
             import com.github.xpenatan.jParser.gradle.JParserBuildTask
             import com.github.xpenatan.jParser.gradle.JParserTargets
+            import java.util.Properties
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -276,28 +276,29 @@ class JParserGradlePluginTest {
                 doLast {
                     check(tasks.findByName("jParser_build_android_jni") == null)
 
-                    fun request(taskName: String): JParserBuildRequest {
+                    fun request(taskName: String): Properties {
                         val task = tasks.named<JParserBuildTask>(taskName).get()
-                        val method = JParserBuildTask::class.java.getDeclaredMethod("createRequest")
+                        val method = JParserBuildTask::class.java.getDeclaredMethod("createProperties")
                         method.isAccessible = true
-                        return method.invoke(task) as JParserBuildRequest
+                        return method.invoke(task) as Properties
                     }
 
-                    fun compileFlags(request: JParserBuildRequest, targetName: String): List<String> {
-                        return request.targetConfig.findTarget(targetName)?.compileFlags?.toList().orEmpty()
+                    fun compileFlags(request: Properties, targetName: String): List<String> {
+                        val propertyName = "jparser.native." + targetName.replace(":", ".") + ".compileFlags"
+                        return request.getProperty(propertyName)?.lines().orEmpty()
                     }
 
                     val wgpu = request("jParser_build_android_jni_wgpu")
                     check(compileFlags(wgpu, "android_jni") == listOf("-DWGPU_ROOT"))
                     check(compileFlags(wgpu, "android_jni:arm64_v8a") == listOf("-DWGPU_ARM64"))
                     check(compileFlags(wgpu, "android_jni:x86_64") == listOf("-DWGPU_X86_64"))
-                    check(wgpu.targetConfig.findTarget("android_jni")?.outputDirectoryPrefix == "wgpu")
+                    check(wgpu.getProperty("jparser.native.android_jni.outputDirectoryPrefix") == "wgpu")
 
                     val dawn = request("jParser_build_android_jni_dawn")
                     check(compileFlags(dawn, "android_jni") == listOf("-DBASE_ROOT", "-DDAWN_ROOT"))
                     check(compileFlags(dawn, "android_jni:arm64_v8a") == listOf("-DBASE_ARM64", "-DDAWN_ARM64"))
                     check(compileFlags(dawn, "android_jni:x86_64") == listOf("-DBASE_X86_64"))
-                    check(dawn.targetConfig.findTarget("android_jni")?.outputDirectoryPrefix == "dawn")
+                    check(dawn.getProperty("jparser.native.android_jni.outputDirectoryPrefix") == "dawn")
 
                     println("Verified Android variant ABI hook inheritance")
                 }
@@ -317,7 +318,7 @@ class JParserGradlePluginTest {
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -347,7 +348,7 @@ class JParserGradlePluginTest {
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -406,7 +407,7 @@ class JParserGradlePluginTest {
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -490,11 +491,11 @@ class JParserGradlePluginTest {
     fun supportsTypedAndroidEnums() {
         val projectDir = createProject(
             """
-            import com.github.xpenatan.jParser.builder.targets.AndroidTarget
+            import com.github.xpenatan.jParser.gradle.AndroidTarget
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -540,7 +541,7 @@ class JParserGradlePluginTest {
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -588,7 +589,7 @@ class JParserGradlePluginTest {
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -640,7 +641,7 @@ class JParserGradlePluginTest {
         val projectDir = createProject(
             """
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -685,7 +686,7 @@ class JParserGradlePluginTest {
         val projectDir = createProject(
             """
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -729,7 +730,7 @@ class JParserGradlePluginTest {
             import com.github.xpenatan.jParser.gradle.JParserTargets
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -769,10 +770,10 @@ class JParserGradlePluginTest {
     fun supportsIDLMethodNameRenaming() {
         val projectDir = createProject(
             """
-            import com.github.xpenatan.jParser.idl.IDLRenaming
+            import com.github.xpenatan.jParser.gradle.IDLRenaming
 
             plugins {
-                id("com.github.xpenatan.jparser")
+                id("com.github.xpenatan.jParser")
             }
 
             jParser {
@@ -848,7 +849,25 @@ class JParserGradlePluginTest {
 
     private fun createProject(buildFile: String): File {
         val projectDir = Files.createTempDirectory("jparser-gradle-plugin-test").toFile()
-        File(projectDir, "settings.gradle.kts").writeText("")
+        val snapshotRepository = File(
+            System.getProperty("jparser.test.snapshotRepository")
+        ).toURI()
+        File(projectDir, "settings.gradle.kts").writeText(
+            """
+            dependencyResolutionManagement {
+                repositories {
+                    maven { url = uri("$snapshotRepository") }
+                    google()
+                    mavenCentral()
+                    maven { url = uri("https://central.sonatype.com/repository/maven-snapshots/") }
+                    maven {
+                        url = uri("http://teavm.org/maven/repository/")
+                        isAllowInsecureProtocol = true
+                    }
+                }
+            }
+            """.trimIndent()
+        )
         File(projectDir, "build.gradle.kts").writeText(buildFile)
         return projectDir
     }

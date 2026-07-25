@@ -1,4 +1,4 @@
-import com.github.xpenatan.jParser.builder.tool.JParserSymbolNameMode
+import com.github.xpenatan.jParser.gradle.JParserSymbolNameMode
 import com.github.xpenatan.jParser.gradle.JParserTargets
 
 plugins {

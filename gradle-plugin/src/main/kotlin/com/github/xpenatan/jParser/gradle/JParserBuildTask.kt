@@ -1,19 +1,20 @@
 package com.github.xpenatan.jParser.gradle
 
-import com.github.xpenatan.jParser.builder.tool.DefaultBuildTargetConfig
-import com.github.xpenatan.jParser.builder.tool.JParserBuildRequest
-import com.github.xpenatan.jParser.builder.tool.JParserBuildRunner
-import com.github.xpenatan.jParser.builder.tool.TeaVMCConsumerConfig
-import com.github.xpenatan.jParser.builder.targets.AndroidTarget
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import java.io.File
+import java.lang.reflect.InvocationTargetException
+import java.net.URLClassLoader
+import java.util.function.BiFunction
+import java.util.function.UnaryOperator
 
 @DisableCachingByDefault(because = "Generates Java sources and invokes external native toolchains")
 abstract class JParserBuildTask : DefaultTask() {
@@ -29,34 +30,104 @@ abstract class JParserBuildTask : DefaultTask() {
     @get:Input
     abstract val generateCore: Property<Boolean>
 
+    @get:Classpath
+    abstract val generatorClasspath: ConfigurableFileCollection
+
     @get:Internal
     lateinit var extension: JParserExtension
 
     @TaskAction
     fun build() {
         val request = createRequest()
-        JParserBuildRunner.build(request, *buildArgs.get().toTypedArray())
+        invokeGenerator(request)
+    }
+
+    private fun invokeGenerator(request: JParserBuildRequest) {
+        val classpathFiles = generatorClasspath.files
+        if(classpathFiles.isEmpty()) {
+            throw GradleException("The jParser generator classpath is empty for task $path")
+        }
+        val urls = classpathFiles.map { it.toURI().toURL() }.toTypedArray()
+        val previousContextClassLoader = Thread.currentThread().contextClassLoader
+        URLClassLoader(urls, ClassLoader.getPlatformClassLoader()).use { classLoader ->
+            Thread.currentThread().contextClassLoader = classLoader
+            try {
+                val runnerClass = classLoader.loadClass(GENERATOR_RUNNER_CLASS)
+                val method = runnerClass.getMethod(
+                    "build",
+                    java.util.Properties::class.java,
+                    UnaryOperator::class.java,
+                    UnaryOperator::class.java,
+                    BiFunction::class.java,
+                    Array<String>::class.java
+                )
+                val renaming = request.idlRenaming
+                val methodRenaming = renaming?.let { value ->
+                    UnaryOperator<String> { methodName -> value.getIDLMethodName(methodName) }
+                }
+                val enumRenaming = renaming?.let { value ->
+                    UnaryOperator<String> { enumName -> value.getIDLEnumName(enumName) }
+                }
+                val packageRenaming = renaming?.let { value ->
+                    BiFunction<Map<String, String>, String, String> { type, classPackage ->
+                        value.obtainNewPackage(
+                            IDLClassOrEnum(
+                                name = type["name"].orEmpty(),
+                                subPackage = type["subPackage"],
+                                classType = type["isClass"].toBoolean(),
+                                enumType = type["isEnum"].toBoolean()
+                            ),
+                            classPackage
+                        )
+                    }
+                }
+                method.invoke(
+                    null,
+                    request.toProperties(),
+                    methodRenaming,
+                    enumRenaming,
+                    packageRenaming,
+                    buildArgs.get().toTypedArray()
+                )
+            }
+            catch(exception: InvocationTargetException) {
+                val cause = exception.targetException ?: exception
+                throw GradleException("jParser generator failed for task $path: ${cause.message}", cause)
+            }
+            catch(exception: ReflectiveOperationException) {
+                throw GradleException(
+                    "The resolved jParser generator does not support the Gradle plugin request protocol. " +
+                        "Plugin version=${JParserPluginInfo.VERSION}.",
+                    exception
+                )
+            }
+            finally {
+                Thread.currentThread().contextClassLoader = previousContextClassLoader
+            }
+        }
     }
 
     private fun createRequest(): JParserBuildRequest {
         val request = JParserBuildRequest()
         request.generateCore = generateCore.get()
         request.params.libName = required(extension.libName.orNull, "libName")
-        request.params.modulePrefix = required(extension.modulePrefix.orNull, "modulePrefix", allowEmpty = true)
+        val modulePrefix = required(extension.modulePrefix.orNull, "modulePrefix", allowEmpty = true)
+        request.params.modulePrefix = modulePrefix
         request.params.packageName = required(extension.packageName.orNull, "packageName")
-        request.params.modulePath = normalizeProjectPath(extension.modulePath.orNull ?: project.projectDir.parentFile.absolutePath)
+        val modulePath = normalizeProjectPath(extension.modulePath.orNull ?: project.projectDir.parentFile.absolutePath)
+        request.params.modulePath = modulePath
         request.params.moduleBuildSuffix = extension.moduleBuildSuffix.orNull
         val runtimeHelperMode = extension.runtimeHelperMode.get()
         request.params.cppSourcePath = if(runtimeHelperMode) {
             extension.cppSourcePath.orNull?.takeIf { it.isNotBlank() }?.let { path ->
-                normalizeCppSourcePath(path, request.params.modulePath, request.params.modulePrefix, request.params.moduleBuildSuffix)
+                normalizeCppSourcePath(path, modulePath, modulePrefix, request.params.moduleBuildSuffix)
             }
         }
         else {
             normalizeCppSourcePath(
                 required(extension.cppSourcePath.orNull, "cppSourcePath"),
-                request.params.modulePath,
-                request.params.modulePrefix,
+                modulePath,
+                modulePrefix,
                 request.params.moduleBuildSuffix
             )
         }
@@ -87,13 +158,12 @@ abstract class JParserBuildTask : DefaultTask() {
         return request
     }
 
+    private fun createProperties(): java.util.Properties {
+        return createRequest().toProperties()
+    }
+
     private fun setIDLRenaming(request: JParserBuildRequest, renaming: Any?) {
-        if(renaming == null) {
-            return
-        }
-        val field = request.javaClass.fields.firstOrNull { it.name == "idlRenaming" }
-            ?: throw GradleException("jParser.idlRenaming requires a jParser gen-build-tool dependency with IDL renaming support")
-        field.set(request, renaming)
+        request.idlRenaming = renaming as IDLRenaming?
     }
 
     private fun configureTargetConfig(request: JParserBuildRequest, config: DefaultBuildTargetConfig) {
@@ -317,10 +387,8 @@ abstract class JParserBuildTask : DefaultTask() {
         return value.trim().replace('\\', '/').trim('/')
     }
 
-    private fun setOutputDirectoryPrefix(targetHooks: Any, value: String) {
-        val field = targetHooks.javaClass.fields.firstOrNull { it.name == "outputDirectoryPrefix" }
-            ?: throw GradleException("jParser native target variants require a gen-build-tool dependency with outputDirectoryPrefix support")
-        field.set(targetHooks, value)
+    private fun setOutputDirectoryPrefix(targetHooks: DefaultBuildTargetConfig.TargetHooks, value: String) {
+        targetHooks.outputDirectoryPrefix = value
     }
 
     private fun required(value: String?, name: String, allowEmpty: Boolean = false): String {
@@ -384,5 +452,9 @@ abstract class JParserBuildTask : DefaultTask() {
 
     private fun isPortableAbsolute(value: String): Boolean {
         return value.matches(Regex("^[A-Za-z]:[\\\\/].*")) || value.startsWith("\\\\")
+    }
+
+    private companion object {
+        const val GENERATOR_RUNNER_CLASS = "com.github.xpenatan.jParser.builder.tool.JParserBuildRunner"
     }
 }

@@ -8,14 +8,65 @@ import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.core.util.ResourceList;
 import com.github.xpenatan.jParser.cpp.JNIClassData;
 import com.github.xpenatan.jParser.ffm.FFMClassData;
+import com.github.xpenatan.jParser.idl.IDLClassOrEnum;
 import com.github.xpenatan.jParser.idl.IDLReader;
+import com.github.xpenatan.jParser.idl.IDLRenaming;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.BiFunction;
+import java.util.function.UnaryOperator;
 
 public class JParserBuildRunner {
 
+    private static final ThreadLocal<Properties> REQUEST_PROPERTIES = new ThreadLocal<>();
+
     public static void main(String[] args) {
         build(fromSystemProperties(), args);
+    }
+
+    /**
+     * Builds from the implementation-neutral request protocol used by the
+     * Gradle plugin's isolated generator classpath.
+     */
+    public static void build(
+            Properties properties,
+            UnaryOperator<String> methodRenaming,
+            UnaryOperator<String> enumRenaming,
+            BiFunction<Map<String, String>, String, String> packageRenaming,
+            String... args) {
+        JParserBuildRequest request = fromProperties(properties);
+        if(methodRenaming != null || enumRenaming != null || packageRenaming != null) {
+            request.idlRenaming = new IDLRenaming() {
+                @Override
+                public String obtainNewPackage(IDLClassOrEnum idlClassOrEnum, String classPackage) {
+                    if(packageRenaming == null) {
+                        return classPackage;
+                    }
+                    Map<String, String> type = new HashMap<>();
+                    type.put("name", idlClassOrEnum.name);
+                    if(idlClassOrEnum.subPackage != null) {
+                        type.put("subPackage", idlClassOrEnum.subPackage);
+                    }
+                    type.put("isClass", Boolean.toString(idlClassOrEnum.isClass()));
+                    type.put("isEnum", Boolean.toString(idlClassOrEnum.isEnum()));
+                    return packageRenaming.apply(type, classPackage);
+                }
+
+                @Override
+                public String getIDLMethodName(String methodName) {
+                    return methodRenaming == null ? methodName : methodRenaming.apply(methodName);
+                }
+
+                @Override
+                public String getIDLEnumName(String enumName) {
+                    return enumRenaming == null ? enumName : enumRenaming.apply(enumName);
+                }
+            };
+        }
+        build(request, args);
     }
 
     public static void build(JParserBuildRequest request, String... args) {
@@ -73,9 +124,27 @@ public class JParserBuildRunner {
     }
 
     static JParserBuildRequest fromSystemProperties() {
+        return fromProperties(System.getProperties());
+    }
+
+    public static JParserBuildRequest fromProperties(Properties properties) {
+        if(properties == null) {
+            throw new IllegalArgumentException("jParser request properties must not be null");
+        }
+        REQUEST_PROPERTIES.set(properties);
+        try {
+            return fromConfiguredProperties();
+        }
+        finally {
+            REQUEST_PROPERTIES.remove();
+        }
+    }
+
+    private static JParserBuildRequest fromConfiguredProperties() {
         JParserBuildRequest request = new JParserBuildRequest();
+        request.generateCore = booleanProperty("jparser.generateCore", request.generateCore);
         request.params.libName = property("jparser.libName", null);
-        request.params.idlName = property("jparser.idlName", request.params.libName);
+        request.params.idlName = propertyAllowBlank("jparser.idlName", request.params.libName);
         if(request.params.idlName != null && request.params.idlName.trim().isEmpty()) {
             request.params.idlName = null;
         }
@@ -114,6 +183,8 @@ public class JParserBuildRunner {
         request.targetConfig.webSideModule = intProperty("jparser.webSideModule", request.targetConfig.webSideModule);
         request.targetConfig.webForcedInclude = property("jparser.webForcedInclude", null);
         request.targetConfig.webMainModule = booleanProperty("jparser.webMainModule", request.targetConfig.webMainModule);
+        addLines(request.targetConfig.webExportedFunctions, property("jparser.webExportedFunctions", null));
+        addLines(request.targetConfig.webExportedRuntimeMethods, property("jparser.webExportedRuntimeMethods", null));
         request.targetConfig.androidApiLevel = AndroidTarget.ApiLevel.valueOf(property("jparser.androidApiLevel", request.targetConfig.androidApiLevel.name()));
         String androidTargets = property("jparser.androidTargets", null);
         if(androidTargets != null) {
@@ -131,6 +202,7 @@ public class JParserBuildRunner {
         addLines(request.additionalIDLRefPaths, property("jparser.additionalIDLRefPaths", null));
         addLines(request.additionalSourceDirs, property("jparser.additionalSourceDirs", null));
         addLines(request.additionalJavaImportPackages, property("jparser.additionalJavaImportPackages", null));
+        addLines(request.additionalJavaClassPaths, property("jparser.additionalJavaClassPaths", null));
         fillHooks(request.targetConfig.globalHooks, "jparser.native");
 
         String configuredTargets = property("jparser.native.targets", null);
@@ -145,7 +217,32 @@ public class JParserBuildRunner {
         }
         fillAndroidTargetHooks(request.targetConfig, "android_jni");
         fillAndroidTargetHooks(request.targetConfig, "android_teavm_c");
+        fillTeaVMCConsumers(request);
         return request;
+    }
+
+    private static void fillTeaVMCConsumers(JParserBuildRequest request) {
+        int consumerCount = intProperty("jparser.teaVMCConsumers.count", 0);
+        for(int consumerIndex = 0; consumerIndex < consumerCount; consumerIndex++) {
+            String prefix = "jparser.teaVMCConsumers." + consumerIndex;
+            TeaVMCConsumerConfig consumer = new TeaVMCConsumerConfig();
+            consumer.targetName = property(prefix + ".targetName", null);
+            consumer.variantName = property(prefix + ".variantName", null);
+            addLines(consumer.selectorResources, property(prefix + ".selectorResources", null));
+            addLines(consumer.headerDirs, property(prefix + ".headerDirs", null));
+            addLines(consumer.compileDefinitions, property(prefix + ".compileDefinitions", null));
+            addLines(consumer.compileOptions, property(prefix + ".compileOptions", null));
+            addLines(consumer.staticLinkLibraries, property(prefix + ".staticLinkLibraries", null));
+            addLines(consumer.staticLinkOptions, property(prefix + ".staticLinkOptions", null));
+            int libraryCount = intProperty(prefix + ".staticLibraries.count", 0);
+            for(int libraryIndex = 0; libraryIndex < libraryCount; libraryIndex++) {
+                String libraryPrefix = prefix + ".staticLibraries." + libraryIndex;
+                consumer.staticLibraries.add(new TeaVMCConsumerConfig.StaticLibrary(
+                        property(libraryPrefix + ".resourcePath", null),
+                        propertyAllowBlank(libraryPrefix + ".overrideVariable", "")));
+            }
+            request.teaVMCConsumers.add(consumer);
+        }
     }
 
     private static void fillAndroidTargetHooks(DefaultBuildTargetConfig config, String targetName) {
@@ -163,6 +260,8 @@ public class JParserBuildRunner {
         addLines(hooks.staticLinkerInputs, property(prefix + ".staticLinkerInputs", null));
         addLines(hooks.sharedLinkerInputs, property(prefix + ".sharedLinkerInputs", null));
         addLines(hooks.forcedIncludes, property(prefix + ".forcedIncludes", null));
+        addLines(hooks.webExportedFunctions, property(prefix + ".webExportedFunctions", null));
+        addLines(hooks.webExportedRuntimeMethods, property(prefix + ".webExportedRuntimeMethods", null));
         hooks.includeDefaultSources = optionalBooleanProperty(prefix + ".includeDefaultSources");
         hooks.includeCustomSources = optionalBooleanProperty(prefix + ".includeCustomSources");
         String sideModule = property(prefix + ".webSideModule", null);
@@ -196,7 +295,8 @@ public class JParserBuildRunner {
     }
 
     private static String property(String name, String fallback) {
-        String value = System.getProperty(name);
+        Properties properties = REQUEST_PROPERTIES.get();
+        String value = properties == null ? System.getProperty(name) : properties.getProperty(name);
         if(value == null || value.trim().isEmpty()) {
             return fallback;
         }
@@ -204,7 +304,8 @@ public class JParserBuildRunner {
     }
 
     private static String propertyAllowBlank(String name, String fallback) {
-        String value = System.getProperty(name);
+        Properties properties = REQUEST_PROPERTIES.get();
+        String value = properties == null ? System.getProperty(name) : properties.getProperty(name);
         if(value == null) {
             return fallback;
         }

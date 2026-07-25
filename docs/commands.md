@@ -61,7 +61,7 @@ The aggregate `runtime_helper_build_project` and `TestLib_build_project` tasks g
 The same `*_teavm_c` task names are used for every native linkage mode. Select the mode in the Gradle plugin extension:
 
 ```kotlin
-import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
+import com.github.xpenatan.jParser.gradle.TeaVMCLinkage
 
 jParser {
     teaVMCLinkage.set(TeaVMCLinkage.SHARED_LINKED)
@@ -176,8 +176,8 @@ Where applicable, replace `windows64` with `linux64`, `mac64`, or `macArm`.
 
 ## Publishing
 
-jParser uses the EasyPublishing plugin to coordinate the library modules and
-the nested `jParser/tools/gradle-plugin` build.
+jParser uses the Easy Publishing plugin to coordinate the root-owned library
+modules and the standalone `gradle-plugin` build.
 
 ```text
 ./gradlew prepareSnapshot
@@ -204,16 +204,8 @@ publishing tasks in the same Gradle invocation.
 ## jParser Gradle plugin
 
 ```text
-./gradlew -p jParser/tools/gradle-plugin check
-./gradlew -p jParser/tools/gradle-plugin validatePlugins
-
-./gradlew :jParser:runtime:plugin:tasks --group jParser --all
-./gradlew :jParser:runtime:plugin:jParser_generate
-./gradlew :jParser:runtime:plugin:jParser_build_windows64_jni
-./gradlew :jParser:runtime:plugin:jParser_build_windows64_ffm
-./gradlew :jParser:runtime:plugin:jParser_build_android_jni
-./gradlew :jParser:runtime:plugin:jParser_build_ios_teavm_c
-./gradlew :jParser:runtime:plugin:jParser_build_web_wasm
+./gradlew -p gradle-plugin check
+./gradlew -p gradle-plugin validatePlugins
 
 ./gradlew :examples:TestLib:lib:plugin:tasks --group jParser --all
 ./gradlew :examples:TestLib:lib:plugin:jParser_generate
@@ -233,12 +225,12 @@ publishing tasks in the same Gradle invocation.
 ./gradlew :examples:SharedLib:libB:plugin:jParser_build_web_wasm
 ```
 
-The plugin id is `com.github.xpenatan.jparser`; the Maven implementation artifact is `com.github.xpenatan.jParser:jparser-gradle-plugin`.
+The plugin id is `com.github.xpenatan.jParser`; the Maven implementation artifact is `com.github.xpenatan.jParser:jparser-gradle-plugin`.
 
 ## Quick compile sanity checks
 
 ```text
 ./gradlew :jParser:gen:gen-core:compileJava
 ./gradlew :jParser:gen:gen-build-tool:compileJava
-./gradlew -p jParser/tools/gradle-plugin compileKotlin
+./gradlew -p gradle-plugin compileKotlin
 ```
