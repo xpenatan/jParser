@@ -49,9 +49,8 @@ fun mapContainerProject(path: String) {
     project(path).projectDir = projectDirectory
 }
 
-// This plugin is developed together with the generator. Include the generator
-// projects directly so IDE sync and local plugin use never depend on a
-// previously published jParser snapshot.
+// This standalone build is developed together with the generator. Include the
+// generator projects directly so plugin development uses the current sources.
 includeJParserProject(":jParser:api:api-core", "jParser/api/api-core")
 includeJParserProject(":jParser:loader:loader-core", "jParser/loader/loader-core")
 includeJParserProject(":jParser:runtime:base", "jParser/runtime/base")

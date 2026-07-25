@@ -1,7 +1,7 @@
 import com.github.xpenatan.jParser.builder.tool.JParserSymbolNameMode
 
 plugins {
-    id("com.github.xpenatan.jparser")
+    alias(libs.plugins.jParser)
 }
 
 jParser {

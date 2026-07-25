@@ -1,10 +1,14 @@
 pluginManagement {
-    includeBuild("jParser/tools/gradle-plugin")
     repositories {
         google()
         mavenCentral()
         maven {
             url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+            metadataSources {
+                mavenPom()
+                artifact()
+                ignoreGradleMetadataRedirection()
+            }
         }
         gradlePluginPortal()
     }
