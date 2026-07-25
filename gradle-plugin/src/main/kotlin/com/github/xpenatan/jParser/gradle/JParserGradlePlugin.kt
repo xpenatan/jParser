@@ -2,22 +2,15 @@ package com.github.xpenatan.jParser.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.withType
 
 class JParserGradlePlugin : Plugin<Project> {
     override fun apply(project: Project) {
         project.pluginManager.apply(JavaPlugin::class.java)
-
-        val generatorClasspath = createGeneratorClasspath(project)
-        project.tasks.withType<JParserBuildTask>().configureEach {
-            this.generatorClasspath.from(generatorClasspath)
-        }
 
         val extension = project.extensions.create<JParserExtension>("jParser", project, project.objects)
         val buildTasks = linkedMapOf<String, TaskProvider<JParserBuildTask>>()
@@ -38,24 +31,6 @@ class JParserGradlePlugin : Plugin<Project> {
         project.gradle.projectsEvaluated {
             configureReferenceJavaOutputs(project, extension, buildTasks)
         }
-    }
-
-    private fun createGeneratorClasspath(project: Project): Configuration {
-        val configuration = project.configurations.create(GENERATOR_CLASSPATH_CONFIGURATION) {
-            description = "jParser generator implementation used by jParser build tasks."
-            isCanBeConsumed = false
-            isCanBeResolved = true
-        }
-        project.dependencies.add(configuration.name, generatorDependency(project))
-        return configuration
-    }
-
-    private fun generatorDependency(project: Project): Any {
-        val localProject = project.rootProject.findProject(GENERATOR_PROJECT_PATH)
-        if(localProject != null) {
-            return project.dependencies.project(mapOf("path" to localProject.path))
-        }
-        return "${JParserPluginInfo.GROUP}:gen-build-tool:${JParserPluginInfo.VERSION}"
     }
 
     private fun registerNativeBuildTasks(
@@ -282,8 +257,6 @@ class JParserGradlePlugin : Plugin<Project> {
 
     private companion object {
         const val TASK_GROUP = "jParser"
-        const val GENERATOR_CLASSPATH_CONFIGURATION = "jParserGeneratorClasspath"
-        const val GENERATOR_PROJECT_PATH = ":jParser:gen:gen-build-tool"
         val buildTargets = listOf(
             BuildTarget(JParserTargets.WEB_WASM, "Build jParser TeaVM web WASM side module."),
             BuildTarget(JParserTargets.WINDOWS64_JNI, "Build jParser Windows x64 JNI native library."),

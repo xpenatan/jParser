@@ -1,6 +1,3 @@
-import com.github.xpenatan.easypublishing.EasyPublishingExtension
-import com.github.xpenatan.easypublishing.EasyPublishingPlugin
-import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.publish.maven.MavenPublication
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -13,12 +10,22 @@ plugins {
 
 val moduleName = "jparser-gradle-plugin"
 val pluginId = "com.github.xpenatan.jParser"
+val generatorModules = listOf("gen-build", "gen-idl", "gen-build-tool")
+val generatorVersion = providers.provider { project.version.toString() }
 
 base {
     archivesName.set(moduleName)
 }
 
 dependencies {
+    generatorModules.forEach { generatorModule ->
+        implementation(
+            generatorVersion.map { version ->
+                "${libs.versions.jParserGroup.get()}:$generatorModule:$version"
+            }
+        )
+    }
+
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(libs.junit)
@@ -32,63 +39,14 @@ tasks.test {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
     withJavadocJar()
     withSourcesJar()
 }
 
-val generatedPluginInfoDir = layout.buildDirectory.dir("generated/sources/jParserPluginInfo/kotlin")
-val easyPublishingExtension = extensions.getByType<EasyPublishingExtension>()
-val generatedPluginVersion = providers.provider {
-    val releaseRequested = extensions.extraProperties
-        .get(EasyPublishingPlugin.RELEASE_REQUESTED_EXTRA) as Boolean
-    if(releaseRequested) {
-        easyPublishingExtension.releaseVersion.get()
-    }
-    else {
-        easyPublishingExtension.snapshotVersion.get()
-    }
-}
-
-val generateJParserPluginInfo = tasks.register("generateJParserPluginInfo") {
-    inputs.property("groupId", libs.versions.jParserGroup)
-    inputs.property("version", generatedPluginVersion)
-    outputs.dir(generatedPluginInfoDir)
-
-    doLast {
-        val groupId = libs.versions.jParserGroup.get()
-        val version = generatedPluginVersion.get()
-        val outputFile = generatedPluginInfoDir.get()
-            .file("com/github/xpenatan/jParser/gradle/JParserPluginInfo.kt")
-            .asFile
-        outputFile.parentFile.mkdirs()
-        outputFile.writeText(
-            """
-            package com.github.xpenatan.jParser.gradle
-
-            internal object JParserPluginInfo {
-                const val GROUP = "$groupId"
-                const val VERSION = "$version"
-            }
-            """.trimIndent() + "\n"
-        )
-    }
-}
-
-kotlin {
-    sourceSets.named("main") {
-        kotlin.srcDir(generatedPluginInfoDir)
-    }
-}
-
 tasks.withType<KotlinCompile>().configureEach {
-    dependsOn(generateJParserPluginInfo)
-    compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
-}
-
-tasks.withType<Jar>().matching { it.name == "sourcesJar" }.configureEach {
-    dependsOn(generateJParserPluginInfo)
+    compilerOptions.jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaFfm.get()))
 }
 
 gradlePlugin {

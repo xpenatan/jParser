@@ -61,7 +61,7 @@ The aggregate `runtime_helper_build_project` and `TestLib_build_project` tasks g
 The same `*_teavm_c` task names are used for every native linkage mode. Select the mode in the Gradle plugin extension:
 
 ```kotlin
-import com.github.xpenatan.jParser.gradle.TeaVMCLinkage
+import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
 
 jParser {
     teaVMCLinkage.set(TeaVMCLinkage.SHARED_LINKED)

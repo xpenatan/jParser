@@ -1,5 +1,10 @@
 package com.github.xpenatan.jParser.gradle
 
+import com.github.xpenatan.jParser.builder.tool.JParserSymbolNameMode
+import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
+import com.github.xpenatan.jParser.builder.targets.AndroidTarget
+import com.github.xpenatan.jParser.builder.targets.SourceLanguage
+import com.github.xpenatan.jParser.idl.IDLRenaming
 import org.gradle.api.Action
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile

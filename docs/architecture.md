@@ -98,20 +98,27 @@ jParser source directory as one of its own projects. Every physical source
 directory therefore has one Gradle owner, preventing IntelliJ from showing
 multiple qualified module identities beside one folder.
 
-The plugin implementation has no compile-time dependency on generator
-implementation classes. When applied, it creates the resolvable
-`jParserGeneratorClasspath` configuration. If
-`:jParser:gen:gen-build-tool` exists in the applied project's root build, the
-configuration uses that project directly; external consumers fall back to the
-matching published `gen-build-tool` coordinate. Build tasks load the runner
-from that classpath through an isolated request protocol. This is the same
-local-project-or-published pattern used by the gdxTeavm plugin and allows a
-clean checkout to change the generator, plugin, and examples without a Maven
-publication.
+The plugin is a Gradle adapter over the canonical manual-builder API. It has
+normal dependencies on `gen-build`, `gen-idl`, and `gen-build-tool`, exposes
+their existing types such as `SourceLanguage` and `IDLRenaming` in its DSL, and
+passes a canonical `JParserBuildRequest` directly to `JParserBuildRunner`.
+There is no plugin-owned copy of the builder request, generator enums, or IDL
+renaming contract, and no reflection/property translation protocol.
 
-The standalone plugin build imports the root version catalog only for normal
-version and publication data. Its published plugin artifact does not embed the
-generator implementation. Root Easy Publishing owns the jParser module
+The plugin build and the root generator build are separate Gradle builds.
+Generator dependencies therefore use the same Maven coordinates for plugin
+development and published consumption. Do not mirror the root generator
+projects into the plugin settings: assigning the same source directories to
+both builds creates duplicate IntelliJ modules and qualified folder labels.
+Gradle composite substitutions are build-local and cannot make an included
+plugin depend back on projects in the build that is applying it; doing so
+creates a circular script-classpath dependency.
+
+The standalone plugin build imports the root version catalog for version and
+publication data. Its published plugin artifact declares the canonical
+generator dependencies rather than embedding or reimplementing them. Because
+`gen-build-tool` targets the Java FFM toolchain version, the directly linked
+plugin uses the same Java target. Root Easy Publishing owns the jParser module
 publications and coordinates the plugin build through its nested-build
 lifecycle.
 

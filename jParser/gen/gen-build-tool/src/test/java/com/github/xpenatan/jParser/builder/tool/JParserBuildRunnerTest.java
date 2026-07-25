@@ -1,10 +1,7 @@
 package com.github.xpenatan.jParser.builder.tool;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 
-import java.util.Properties;
 import org.junit.Test;
 
 public class JParserBuildRunnerTest {
@@ -59,60 +56,4 @@ public class JParserBuildRunnerTest {
         }
     }
 
-    @Test
-    public void parsesGradlePluginRequestProtocol() {
-        Properties properties = new Properties();
-        properties.setProperty("jparser.generateCore", "false");
-        properties.setProperty("jparser.libName", "sample");
-        properties.setProperty("jparser.idlName", "");
-        properties.setProperty("jparser.modulePrefix", "");
-        properties.setProperty("jparser.webExportedFunctions", "_malloc\n_free");
-        properties.setProperty("jparser.additionalJavaClassPaths", "classes/a\nclasses/b");
-        properties.setProperty("jparser.native.targets", "windows64_teavm_c");
-        properties.setProperty(
-            "jparser.native.windows64_teavm_c.webExportedRuntimeMethods",
-            "ccall\ncwrap"
-        );
-        properties.setProperty("jparser.teaVMCConsumers.count", "1");
-        properties.setProperty(
-            "jparser.teaVMCConsumers.0.targetName",
-            "windows64_teavm_c"
-        );
-        properties.setProperty("jparser.teaVMCConsumers.0.variantName", "wgpu");
-        properties.setProperty(
-            "jparser.teaVMCConsumers.0.staticLibraries.count",
-            "1"
-        );
-        properties.setProperty(
-            "jparser.teaVMCConsumers.0.staticLibraries.0.resourcePath",
-            "lib/wgpu.lib"
-        );
-        properties.setProperty(
-            "jparser.teaVMCConsumers.0.staticLibraries.0.overrideVariable",
-            "WGPU_LIBRARY"
-        );
-
-        JParserBuildRequest request = JParserBuildRunner.fromProperties(properties);
-
-        assertFalse(request.generateCore);
-        assertNull(request.params.idlName);
-        assertEquals("", request.params.modulePrefix);
-        assertEquals(
-            java.util.List.of("_malloc", "_free"),
-            request.targetConfig.webExportedFunctions
-        );
-        assertEquals(
-            java.util.List.of("classes/a", "classes/b"),
-            request.additionalJavaClassPaths
-        );
-        assertEquals(
-            java.util.List.of("ccall", "cwrap"),
-            request.targetConfig.target("windows64_teavm_c").webExportedRuntimeMethods
-        );
-        assertEquals(1, request.teaVMCConsumers.size());
-        TeaVMCConsumerConfig consumer = request.teaVMCConsumers.get(0);
-        assertEquals("wgpu", consumer.variantName);
-        assertEquals("lib/wgpu.lib", consumer.staticLibraries.get(0).resourcePath);
-        assertEquals("WGPU_LIBRARY", consumer.staticLibraries.get(0).overrideVariable);
-    }
 }

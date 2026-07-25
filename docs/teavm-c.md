@@ -15,7 +15,7 @@ TeaVM C generates native imports plus portable C/C++ build resources for applica
 Configure the mode through the Gradle plugin:
 
 ```kotlin
-import com.github.xpenatan.jParser.gradle.TeaVMCLinkage
+import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
 
 jParser {
     teaVMCLinkage.set(TeaVMCLinkage.RUNTIME_LOADED)

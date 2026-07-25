@@ -8,65 +8,14 @@ import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.core.util.ResourceList;
 import com.github.xpenatan.jParser.cpp.JNIClassData;
 import com.github.xpenatan.jParser.ffm.FFMClassData;
-import com.github.xpenatan.jParser.idl.IDLClassOrEnum;
 import com.github.xpenatan.jParser.idl.IDLReader;
-import com.github.xpenatan.jParser.idl.IDLRenaming;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.function.BiFunction;
-import java.util.function.UnaryOperator;
 
 public class JParserBuildRunner {
 
-    private static final ThreadLocal<Properties> REQUEST_PROPERTIES = new ThreadLocal<>();
-
     public static void main(String[] args) {
         build(fromSystemProperties(), args);
-    }
-
-    /**
-     * Builds from the implementation-neutral request protocol used by the
-     * Gradle plugin's isolated generator classpath.
-     */
-    public static void build(
-            Properties properties,
-            UnaryOperator<String> methodRenaming,
-            UnaryOperator<String> enumRenaming,
-            BiFunction<Map<String, String>, String, String> packageRenaming,
-            String... args) {
-        JParserBuildRequest request = fromProperties(properties);
-        if(methodRenaming != null || enumRenaming != null || packageRenaming != null) {
-            request.idlRenaming = new IDLRenaming() {
-                @Override
-                public String obtainNewPackage(IDLClassOrEnum idlClassOrEnum, String classPackage) {
-                    if(packageRenaming == null) {
-                        return classPackage;
-                    }
-                    Map<String, String> type = new HashMap<>();
-                    type.put("name", idlClassOrEnum.name);
-                    if(idlClassOrEnum.subPackage != null) {
-                        type.put("subPackage", idlClassOrEnum.subPackage);
-                    }
-                    type.put("isClass", Boolean.toString(idlClassOrEnum.isClass()));
-                    type.put("isEnum", Boolean.toString(idlClassOrEnum.isEnum()));
-                    return packageRenaming.apply(type, classPackage);
-                }
-
-                @Override
-                public String getIDLMethodName(String methodName) {
-                    return methodRenaming == null ? methodName : methodRenaming.apply(methodName);
-                }
-
-                @Override
-                public String getIDLEnumName(String enumName) {
-                    return enumRenaming == null ? enumName : enumRenaming.apply(enumName);
-                }
-            };
-        }
-        build(request, args);
     }
 
     public static void build(JParserBuildRequest request, String... args) {
@@ -124,23 +73,6 @@ public class JParserBuildRunner {
     }
 
     static JParserBuildRequest fromSystemProperties() {
-        return fromProperties(System.getProperties());
-    }
-
-    public static JParserBuildRequest fromProperties(Properties properties) {
-        if(properties == null) {
-            throw new IllegalArgumentException("jParser request properties must not be null");
-        }
-        REQUEST_PROPERTIES.set(properties);
-        try {
-            return fromConfiguredProperties();
-        }
-        finally {
-            REQUEST_PROPERTIES.remove();
-        }
-    }
-
-    private static JParserBuildRequest fromConfiguredProperties() {
         JParserBuildRequest request = new JParserBuildRequest();
         request.generateCore = booleanProperty("jparser.generateCore", request.generateCore);
         request.params.libName = property("jparser.libName", null);
@@ -295,8 +227,7 @@ public class JParserBuildRunner {
     }
 
     private static String property(String name, String fallback) {
-        Properties properties = REQUEST_PROPERTIES.get();
-        String value = properties == null ? System.getProperty(name) : properties.getProperty(name);
+        String value = System.getProperty(name);
         if(value == null || value.trim().isEmpty()) {
             return fallback;
         }
@@ -304,8 +235,7 @@ public class JParserBuildRunner {
     }
 
     private static String propertyAllowBlank(String name, String fallback) {
-        Properties properties = REQUEST_PROPERTIES.get();
-        String value = properties == null ? System.getProperty(name) : properties.getProperty(name);
+        String value = System.getProperty(name);
         if(value == null) {
             return fallback;
         }

@@ -1,20 +1,19 @@
 package com.github.xpenatan.jParser.gradle
 
+import com.github.xpenatan.jParser.builder.tool.DefaultBuildTargetConfig
+import com.github.xpenatan.jParser.builder.tool.JParserBuildRequest
+import com.github.xpenatan.jParser.builder.tool.JParserBuildRunner
+import com.github.xpenatan.jParser.builder.tool.TeaVMCConsumerConfig
+import com.github.xpenatan.jParser.builder.targets.AndroidTarget
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import java.io.File
-import java.lang.reflect.InvocationTargetException
-import java.net.URLClassLoader
-import java.util.function.BiFunction
-import java.util.function.UnaryOperator
 
 @DisableCachingByDefault(because = "Generates Java sources and invokes external native toolchains")
 abstract class JParserBuildTask : DefaultTask() {
@@ -30,81 +29,13 @@ abstract class JParserBuildTask : DefaultTask() {
     @get:Input
     abstract val generateCore: Property<Boolean>
 
-    @get:Classpath
-    abstract val generatorClasspath: ConfigurableFileCollection
-
     @get:Internal
     lateinit var extension: JParserExtension
 
     @TaskAction
     fun build() {
         val request = createRequest()
-        invokeGenerator(request)
-    }
-
-    private fun invokeGenerator(request: JParserBuildRequest) {
-        val classpathFiles = generatorClasspath.files
-        if(classpathFiles.isEmpty()) {
-            throw GradleException("The jParser generator classpath is empty for task $path")
-        }
-        val urls = classpathFiles.map { it.toURI().toURL() }.toTypedArray()
-        val previousContextClassLoader = Thread.currentThread().contextClassLoader
-        URLClassLoader(urls, ClassLoader.getPlatformClassLoader()).use { classLoader ->
-            Thread.currentThread().contextClassLoader = classLoader
-            try {
-                val runnerClass = classLoader.loadClass(GENERATOR_RUNNER_CLASS)
-                val method = runnerClass.getMethod(
-                    "build",
-                    java.util.Properties::class.java,
-                    UnaryOperator::class.java,
-                    UnaryOperator::class.java,
-                    BiFunction::class.java,
-                    Array<String>::class.java
-                )
-                val renaming = request.idlRenaming
-                val methodRenaming = renaming?.let { value ->
-                    UnaryOperator<String> { methodName -> value.getIDLMethodName(methodName) }
-                }
-                val enumRenaming = renaming?.let { value ->
-                    UnaryOperator<String> { enumName -> value.getIDLEnumName(enumName) }
-                }
-                val packageRenaming = renaming?.let { value ->
-                    BiFunction<Map<String, String>, String, String> { type, classPackage ->
-                        value.obtainNewPackage(
-                            IDLClassOrEnum(
-                                name = type["name"].orEmpty(),
-                                subPackage = type["subPackage"],
-                                classType = type["isClass"].toBoolean(),
-                                enumType = type["isEnum"].toBoolean()
-                            ),
-                            classPackage
-                        )
-                    }
-                }
-                method.invoke(
-                    null,
-                    request.toProperties(),
-                    methodRenaming,
-                    enumRenaming,
-                    packageRenaming,
-                    buildArgs.get().toTypedArray()
-                )
-            }
-            catch(exception: InvocationTargetException) {
-                val cause = exception.targetException ?: exception
-                throw GradleException("jParser generator failed for task $path: ${cause.message}", cause)
-            }
-            catch(exception: ReflectiveOperationException) {
-                throw GradleException(
-                    "The resolved jParser generator does not support the Gradle plugin request protocol. " +
-                        "Plugin version=${JParserPluginInfo.VERSION}.",
-                    exception
-                )
-            }
-            finally {
-                Thread.currentThread().contextClassLoader = previousContextClassLoader
-            }
-        }
+        JParserBuildRunner.build(request, *buildArgs.get().toTypedArray())
     }
 
     private fun createRequest(): JParserBuildRequest {
@@ -143,7 +74,7 @@ abstract class JParserBuildTask : DefaultTask() {
         request.params.teaVMCLinkage = extension.teaVMCLinkage.get()
 
         request.keepGeneratedCommandComments = extension.keepGeneratedCommandComments.get()
-        setIDLRenaming(request, extension.idlRenaming.orNull)
+        request.idlRenaming = extension.idlRenaming.orNull
         request.jniSymbolNameMode = extension.jniSymbolNameMode.orNull
         request.ffmSymbolNameMode = extension.ffmSymbolNameMode.orNull
         request.teaVMCSymbolNameMode = extension.teaVMCSymbolNameMode.orNull
@@ -156,14 +87,6 @@ abstract class JParserBuildTask : DefaultTask() {
         configureTargetConfig(request, request.targetConfig)
         configureTeaVMCConsumers(request)
         return request
-    }
-
-    private fun createProperties(): java.util.Properties {
-        return createRequest().toProperties()
-    }
-
-    private fun setIDLRenaming(request: JParserBuildRequest, renaming: Any?) {
-        request.idlRenaming = renaming as IDLRenaming?
     }
 
     private fun configureTargetConfig(request: JParserBuildRequest, config: DefaultBuildTargetConfig) {
@@ -454,7 +377,4 @@ abstract class JParserBuildTask : DefaultTask() {
         return value.matches(Regex("^[A-Za-z]:[\\\\/].*")) || value.startsWith("\\\\")
     }
 
-    private companion object {
-        const val GENERATOR_RUNNER_CLASS = "com.github.xpenatan.jParser.builder.tool.JParserBuildRunner"
-    }
 }
