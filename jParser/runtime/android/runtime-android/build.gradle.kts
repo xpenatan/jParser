@@ -47,6 +47,30 @@ val generateNativeAarManifest by tasks.registering {
     }
 }
 
+val nativeAarManifests = androidAbis.associateWith { abi ->
+    layout.buildDirectory.file("generated/nativeAar/${abi.artifactSuffix}/AndroidManifest.xml")
+}
+val generateNativeAarManifests by tasks.registering {
+    outputs.files(nativeAarManifests.values)
+    doLast {
+        nativeAarManifests.forEach { (abi, manifestProvider) ->
+            val manifestFile = manifestProvider.get().asFile
+            manifestFile.parentFile.mkdirs()
+            manifestFile.writeText(
+                """
+                <?xml version="1.0" encoding="utf-8"?>
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                    package="com.github.xpenatan.jparser.runtime.${abi.artifactSuffix}" >
+
+                    <uses-sdk android:minSdkVersion="21" />
+
+                </manifest>
+                """.trimIndent() + System.lineSeparator()
+            )
+        }
+    }
+}
+
 val emptyAndroidClassesJar by tasks.registering(Jar::class) {
     archiveFileName.set("classes.jar")
     destinationDirectory.set(layout.buildDirectory.dir("generated/nativeAar/emptyClasses"))
@@ -73,9 +97,9 @@ val nativeAars = androidAbis.map { abi ->
         archiveBaseName.set("${moduleName}-${abi.artifactSuffix}")
         archiveClassifier.set("")
         archiveExtension.set("aar")
-        dependsOn(generateNativeAarManifest)
+        dependsOn(generateNativeAarManifests)
         dependsOn(emptyAndroidClassesJar)
-        from(nativeAarManifest)
+        from(nativeAarManifests.getValue(abi))
         from(emptyAndroidClassesJar.flatMap { it.archiveFile }) {
             rename { "classes.jar" }
         }
