@@ -61,6 +61,39 @@ Important WebIDL behaviors:
 - Methods marked `[Value]` return a cached wrapper. The cache is overwritten by the next value call, so callers must not retain it.
 - Classes marked `[NoDelete]` do not own their native object and must not call `dispose()` for it.
 
+## Binding Class Finality
+
+Generated IDL binding classes are `final` by default. Configure the global
+setting in the Gradle plugin DSL:
+
+```kotlin
+jParser {
+    finalClass.set(false)
+}
+```
+
+Override one class independently with a Boolean value:
+
+```kotlin
+jParser {
+    finalClass.set(false)
+    finalClass("WGPUBuffer", true)
+    finalClass("ExtensibleType", false)
+}
+```
+
+For manual builders, use the equivalent `BuildToolOptions` API:
+
+```java
+buildToolOptions.finalClass = false;
+buildToolOptions.setFinalClass("WGPUBuffer", true);
+buildToolOptions.setFinalClass("ExtensibleType", false);
+```
+
+The class-specific value takes precedence over the global value. Callback
+classes and binding classes that are extended by another class remain
+non-final.
+
 ## `IDLBase` Ownership
 
 Generated native wrappers extend `IDLBase`. jParser does not automatically dispose owned C++ objects: call `dispose()` when the object is no longer needed. Only objects you create or explicitly take ownership of should be disposed.

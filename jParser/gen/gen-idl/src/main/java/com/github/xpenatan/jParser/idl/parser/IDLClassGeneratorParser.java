@@ -14,7 +14,9 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.xpenatan.jParser.api.NativeEnum;
 import com.github.xpenatan.jParser.api.NativeObject;
@@ -37,8 +39,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -56,6 +62,17 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
     protected String includeDir;
 
     public IDLRenaming idlRenaming;
+
+    /**
+     * Global default for automatically making eligible IDL binding classes final.
+     *
+     * <p>Per-class values configured through {@link #setFinalClass(String, boolean)}
+     * take precedence. Callback classes and classes with a known child are never
+     * made final, regardless of either setting.</p>
+     */
+    public boolean finalClass = true;
+
+    private final Map<String, Boolean> finalClassOverrides = new LinkedHashMap<>();
 
     private final ArrayList<String> additionalJavaImportPackages = new ArrayList<>();
 
@@ -151,6 +168,19 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    /**
+     * Overrides the global {@link #finalClass} value for one IDL binding class.
+     *
+     * <p>An enabled override still cannot make a callback or a class with a known
+     * child final.</p>
+     */
+    public void setFinalClass(String className, boolean enabled) {
+        if(className == null || className.trim().isEmpty()) {
+            throw new IllegalArgumentException("Final-class override name must not be blank");
+        }
+        finalClassOverrides.put(className.trim(), enabled);
     }
 
     public void addAdditionalJavaImportPackage(String packageName) {
@@ -383,6 +413,7 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
     @Override
     public void onParserComplete(JParser jParser, ArrayList<JParserItem> parserItems) {
         // Fix existing IDL imports if it's used in base.
+        applyFinalClassPolicy(parserItems);
 
         for(int i = 0; i < parserItems.size(); i++) {
             JParserItem parserItem = parserItems.get(i);
@@ -473,6 +504,65 @@ public abstract class IDLClassGeneratorParser extends DefaultCodeParser {
             }
         }
 
+    }
+
+    private void applyFinalClassPolicy(ArrayList<JParserItem> parserItems) {
+        Set<String> extendedClassNames = new HashSet<>();
+        for(int i = 0; i < idlReader.fileArray.size(); i++) {
+            IDLFile idlFile = idlReader.fileArray.get(i);
+            for(int j = 0; j < idlFile.classArray.size(); j++) {
+                IDLClassOrEnum classOrEnum = idlFile.classArray.get(j);
+                if(classOrEnum.isClass()) {
+                    String parentClass = classOrEnum.asClass().extendClass;
+                    if(parentClass != null && !parentClass.isEmpty()) {
+                        extendedClassNames.add(parentClass);
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i < parserItems.size(); i++) {
+            CompilationUnit unit = parserItems.get(i).unit;
+            if(unit == null) {
+                continue;
+            }
+            List<ClassOrInterfaceDeclaration> declarations = unit.findAll(ClassOrInterfaceDeclaration.class);
+            for(int j = 0; j < declarations.size(); j++) {
+                ClassOrInterfaceDeclaration declaration = declarations.get(j);
+                NodeList<ClassOrInterfaceType> extendedTypes = declaration.getExtendedTypes();
+                for(int k = 0; k < extendedTypes.size(); k++) {
+                    extendedClassNames.add(extendedTypes.get(k).getNameAsString());
+                }
+            }
+            List<ObjectCreationExpr> objectCreations = unit.findAll(ObjectCreationExpr.class);
+            for(int j = 0; j < objectCreations.size(); j++) {
+                ObjectCreationExpr objectCreation = objectCreations.get(j);
+                if(objectCreation.getAnonymousClassBody().isPresent()) {
+                    extendedClassNames.add(objectCreation.getType().getNameAsString());
+                }
+            }
+        }
+
+        for(int i = 0; i < parserItems.size(); i++) {
+            ClassOrInterfaceDeclaration declaration = parserItems.get(i).getClassDeclaration();
+            if(declaration == null || declaration.isInterface()) {
+                continue;
+            }
+
+            String className = declaration.getNameAsString();
+            IDLClass idlClass = idlReader.getClass(className);
+            if(idlClass == null) {
+                continue;
+            }
+
+            Boolean classOverride = finalClassOverrides.get(className);
+            boolean requestedFinal = classOverride != null ? classOverride : finalClass;
+            boolean callbackClass = idlClass.isCallback || idlClass.callbackImpl != null;
+            boolean canBeFinal = !declaration.isAbstract()
+                    && !callbackClass
+                    && !extendedClassNames.contains(className);
+            declaration.setFinal(requestedFinal && canBeFinal);
+        }
     }
 
     private void addImport(JParser jParser, CompilationUnit unit, Type elementType) {

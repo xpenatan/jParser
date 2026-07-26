@@ -9,6 +9,9 @@ import com.github.xpenatan.jParser.idl.IDLReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class BuildToolOptions {
     private String modulePath;
@@ -20,8 +23,18 @@ public class BuildToolOptions {
     public boolean generateJNI = false;
     public boolean generateFFM = false;
     public boolean generateCore = true;
+    /**
+     * Global default for automatically making eligible IDL binding classes final.
+     *
+     * <p>Per-class values configured through {@link #setFinalClass(String, boolean)}
+     * take precedence. Callback classes and classes with a known child are never
+     * made final, regardless of either setting.</p>
+     */
+    public boolean finalClass = true;
     /** Keep parsed command comments like [-FFM;-REPLACE_BLOCK] in generated Java output. */
     public boolean keepGeneratedCommandComments = false;
+
+    private final Map<String, Boolean> finalClassOverrides = new LinkedHashMap<>();
 
     /** Optional build-time FFM critical policy used by FFMCodeParser generation. */
     public final FFMClassData ffmClassData = new FFMClassData();
@@ -293,6 +306,27 @@ public class BuildToolOptions {
         String [] packages = new String[additionalJavaImportPackages.size()];
         additionalJavaImportPackages.toArray(packages);
         return packages;
+    }
+
+    /**
+     * Overrides the global {@link #finalClass} setting for one binding class.
+     *
+     * <p>An enabled override still cannot make a callback or a class with a known
+     * child final.</p>
+     */
+    public void setFinalClass(String className, boolean enabled) {
+        finalClassOverrides.put(normalizeFinalClassName(className), enabled);
+    }
+
+    public Map<String, Boolean> getFinalClassOverrides() {
+        return Collections.unmodifiableMap(finalClassOverrides);
+    }
+
+    private static String normalizeFinalClassName(String className) {
+        if(className == null || className.trim().isEmpty()) {
+            throw new IllegalArgumentException("Final-class override name must not be blank");
+        }
+        return className.trim();
     }
 
     public String getModuleBaseJavaDir() {

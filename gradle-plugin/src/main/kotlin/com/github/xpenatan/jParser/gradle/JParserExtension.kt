@@ -13,6 +13,7 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import java.io.File
@@ -69,6 +70,16 @@ open class JParserExtension @Inject constructor(
     val runtimeHelperMode: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
     val windowsDebugBuild: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
     val keepGeneratedCommandComments: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
+
+    /**
+     * Whether eligible generated binding classes are final by default.
+     *
+     * Callback classes and classes with known subclasses remain non-final even when enabled.
+     */
+    val finalClass: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
+
+    internal val finalClassOverrides: MapProperty<String, Boolean> =
+        objects.mapProperty(String::class.java, Boolean::class.javaObjectType).convention(emptyMap())
 
     val jniSymbolNameMode: Property<JParserSymbolNameMode> = objects.property(JParserSymbolNameMode::class.java)
     val ffmSymbolNameMode: Property<JParserSymbolNameMode> = objects.property(JParserSymbolNameMode::class.java)
@@ -258,6 +269,17 @@ open class JParserExtension @Inject constructor(
 
     fun idlRenaming(value: IDLRenaming) {
         idlRenaming.set(value)
+    }
+
+    /**
+     * Overrides [finalClass] for one generated binding class.
+     *
+     * A `true` override is effective only when the class is not a callback and has no known subclass.
+     */
+    fun finalClass(className: String, value: Boolean) {
+        val normalizedClassName = className.trim()
+        require(normalizedClassName.isNotEmpty()) { "jParser final class name must not be empty" }
+        finalClassOverrides.put(normalizedClassName, value)
     }
 
     fun webExportedFunction(value: String) {

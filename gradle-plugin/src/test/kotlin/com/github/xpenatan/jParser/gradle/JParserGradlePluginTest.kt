@@ -636,6 +636,110 @@ class JParserGradlePluginTest {
     }
 
     @Test
+    fun finalClassPolicyAppliesToEveryGeneratedJavaTarget() {
+        val projectDir = createProject(
+            """
+            plugins {
+                id("com.github.xpenatan.jParser")
+            }
+
+            jParser {
+                libName.set("testlib")
+                modulePrefix.set("")
+                modulePath.set(layout.projectDirectory.asFile.absolutePath)
+                moduleBuildSuffix.set("builder")
+                moduleCoreSuffix.set("core")
+                moduleJNISuffix.set("shared/jni")
+                moduleFFMSuffix.set("desktop/ffm")
+                moduleWebSuffix.set("web/wasm")
+                moduleCSuffix.set("shared/c")
+                packageName.set("com.example.testlib")
+                cppSourcePath.set("source")
+
+                if(providers.gradleProperty("disableFinalClasses").isPresent) {
+                    finalClass.set(false)
+                    finalClass("ForcedFinal", true)
+                    finalClass("ParentObject", true)
+                    finalClass("CallbackObject", true)
+                }
+                else {
+                    finalClass("DisabledFinal", false)
+                }
+            }
+            """.trimIndent()
+        )
+        File(projectDir, "builder/src/main/cpp").mkdirs()
+        File(projectDir, "builder/src/main/cpp/testlib.idl").writeText(
+            """
+            interface DefaultFinal {
+                void DefaultFinal();
+            };
+
+            interface DisabledFinal {
+                void DisabledFinal();
+            };
+
+            interface ForcedFinal {
+                void ForcedFinal();
+            };
+
+            interface ParentObject {
+                void ParentObject();
+            };
+
+            interface ChildObject {
+                void ChildObject();
+            };
+            ChildObject implements ParentObject;
+
+            interface CallbackObject {
+            };
+
+            [JSImplementation="CallbackObject"]
+            interface CallbackObjectImpl {
+                void CallbackObjectImpl();
+                void OnCallback();
+            };
+            CallbackObjectImpl implements CallbackObject;
+            """.trimIndent()
+        )
+        File(projectDir, "base/src/main/java").mkdirs()
+        File(projectDir, "source").mkdirs()
+
+        runner(projectDir, "jParser_generate", "--console=plain").build()
+
+        val javaModuleRoots = listOf(
+            "core/src/main/java",
+            "shared/jni/src/main/java",
+            "desktop/ffm/src/main/java",
+            "web/wasm/src/main/java",
+            "shared/c/src/main/java"
+        )
+        javaModuleRoots.forEach { moduleRoot ->
+            assertGeneratedClassFinal(projectDir, moduleRoot, "DefaultFinal", true)
+            assertGeneratedClassFinal(projectDir, moduleRoot, "DisabledFinal", false)
+            assertGeneratedClassFinal(projectDir, moduleRoot, "ParentObject", false)
+            assertGeneratedClassFinal(projectDir, moduleRoot, "ChildObject", true)
+            assertGeneratedClassFinal(projectDir, moduleRoot, "CallbackObject", false)
+        }
+
+        runner(
+            projectDir,
+            "jParser_generate",
+            "-PdisableFinalClasses=true",
+            "--console=plain"
+        ).build()
+
+        javaModuleRoots.forEach { moduleRoot ->
+            assertGeneratedClassFinal(projectDir, moduleRoot, "DefaultFinal", false)
+            assertGeneratedClassFinal(projectDir, moduleRoot, "ForcedFinal", true)
+            assertGeneratedClassFinal(projectDir, moduleRoot, "ParentObject", false)
+            assertGeneratedClassFinal(projectDir, moduleRoot, "ChildObject", false)
+            assertGeneratedClassFinal(projectDir, moduleRoot, "CallbackObject", false)
+        }
+    }
+
+    @Test
     fun supportsPrefixlessModuleLayout() {
         val projectDir = createProject(
             """
@@ -891,6 +995,28 @@ class JParserGradlePluginTest {
 
     private fun assertGeneratedClass(projectDir: File, moduleJavaDir: String, className: String) {
         findGeneratedClass(projectDir, moduleJavaDir, className)
+    }
+
+    private fun assertGeneratedClassFinal(
+        projectDir: File,
+        moduleJavaDir: String,
+        className: String,
+        expectedFinal: Boolean
+    ) {
+        val generated = findGeneratedClass(projectDir, moduleJavaDir, "$className.java")
+        val declaration = generated.readLines().firstOrNull { line ->
+            Regex("""\bclass\s+${Regex.escape(className)}\b""").containsMatchIn(line)
+        }
+        assertTrue(
+            "Expected a class declaration for $className in ${generated.absolutePath}",
+            declaration != null
+        )
+        val isFinal = Regex("""\bfinal\s+class\s+${Regex.escape(className)}\b""")
+            .containsMatchIn(declaration!!)
+        assertTrue(
+            "Expected $className final=$expectedFinal in ${generated.absolutePath}, but declaration was: $declaration",
+            isFinal == expectedFinal
+        )
     }
 
     private fun findGeneratedClass(projectDir: File, moduleJavaDir: String, className: String): File {

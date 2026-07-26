@@ -74,6 +74,8 @@ abstract class JParserBuildTask : DefaultTask() {
         request.params.teaVMCLinkage = extension.teaVMCLinkage.get()
 
         request.keepGeneratedCommandComments = extension.keepGeneratedCommandComments.get()
+        request.finalClass = extension.finalClass.get()
+        extension.finalClassOverrides.get().forEach(request::setFinalClass)
         request.idlRenaming = extension.idlRenaming.orNull
         request.jniSymbolNameMode = extension.jniSymbolNameMode.orNull
         request.ffmSymbolNameMode = extension.ffmSymbolNameMode.orNull

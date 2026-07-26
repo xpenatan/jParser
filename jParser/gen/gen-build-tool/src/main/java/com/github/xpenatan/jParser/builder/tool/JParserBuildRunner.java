@@ -10,7 +10,9 @@ import com.github.xpenatan.jParser.cpp.JNIClassData;
 import com.github.xpenatan.jParser.ffm.FFMClassData;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Map;
 
 public class JParserBuildRunner {
 
@@ -28,6 +30,10 @@ public class JParserBuildRunner {
             BuildToolOptions op = new BuildToolOptions(request.params, args);
             op.generateCore = request.generateCore;
             op.keepGeneratedCommandComments = request.keepGeneratedCommandComments;
+            op.finalClass = request.finalClass;
+            for(Map.Entry<String, Boolean> entry : request.getFinalClassOverrides().entrySet()) {
+                op.setFinalClass(entry.getKey(), entry.getValue());
+            }
 
             if(request.jniSymbolNameMode != null) {
                 op.jniClassData.symbolNameMode = toJNISymbolNameMode(request.jniSymbolNameMode);
@@ -75,6 +81,7 @@ public class JParserBuildRunner {
     static JParserBuildRequest fromSystemProperties() {
         JParserBuildRequest request = new JParserBuildRequest();
         request.generateCore = booleanProperty("jparser.generateCore", request.generateCore);
+        request.finalClass = booleanProperty("jparser.finalClass", request.finalClass);
         request.params.libName = property("jparser.libName", null);
         request.params.idlName = propertyAllowBlank("jparser.idlName", request.params.libName);
         if(request.params.idlName != null && request.params.idlName.trim().isEmpty()) {
@@ -135,6 +142,7 @@ public class JParserBuildRunner {
         addLines(request.additionalSourceDirs, property("jparser.additionalSourceDirs", null));
         addLines(request.additionalJavaImportPackages, property("jparser.additionalJavaImportPackages", null));
         addLines(request.additionalJavaClassPaths, property("jparser.additionalJavaClassPaths", null));
+        fillFinalClasses(request);
         fillHooks(request.targetConfig.globalHooks, "jparser.native");
 
         String configuredTargets = property("jparser.native.targets", null);
@@ -151,6 +159,24 @@ public class JParserBuildRunner {
         fillAndroidTargetHooks(request.targetConfig, "android_teavm_c");
         fillTeaVMCConsumers(request);
         return request;
+    }
+
+    private static void fillFinalClasses(JParserBuildRequest request) {
+        String prefix = "jparser.finalClass.";
+        ArrayList<String> propertyNames = new ArrayList<>();
+        for(String propertyName : System.getProperties().stringPropertyNames()) {
+            if(propertyName.startsWith(prefix)) {
+                propertyNames.add(propertyName);
+            }
+        }
+        Collections.sort(propertyNames);
+        for(int i = 0; i < propertyNames.size(); i++) {
+            String propertyName = propertyNames.get(i);
+            String value = property(propertyName, null);
+            if(value != null) {
+                request.setFinalClass(propertyName.substring(prefix.length()), Boolean.parseBoolean(value));
+            }
+        }
     }
 
     private static void fillTeaVMCConsumers(JParserBuildRequest request) {

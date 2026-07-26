@@ -12,6 +12,65 @@ import java.nio.file.Files
 class JParserBuildTaskTest {
 
     @Test
+    fun finalClassDefaultsAndIndividualOverridesFlowIntoBuildRequest() {
+        val project = ProjectBuilder.builder().build()
+        val extension = JParserExtension(project, project.objects).apply {
+            libName.set("TestLib")
+            modulePrefix.set("")
+            packageName.set("com.example.testlib")
+            runtimeHelperMode.set(true)
+            finalClass("DisabledBinding", false)
+            finalClass("EnabledBinding", true)
+        }
+        val task = project.tasks.register("testJParserFinalClass", JParserBuildTask::class.java).get().apply {
+            this.extension = extension
+            buildArgs.set(emptyList())
+            targetArg.set("")
+            targetVariant.set("")
+            generateCore.set(true)
+        }
+
+        assertEquals(true, extension.finalClass.get())
+
+        val createRequest = JParserBuildTask::class.java.getDeclaredMethod("createRequest")
+        createRequest.isAccessible = true
+        val request = createRequest.invoke(task) as JParserBuildRequest
+
+        assertEquals(true, request.finalClass)
+        assertEquals(
+            mapOf("DisabledBinding" to false, "EnabledBinding" to true),
+            request.finalClassOverrides
+        )
+    }
+
+    @Test
+    fun globalFinalClassDisableFlowsIntoBuildRequest() {
+        val project = ProjectBuilder.builder().build()
+        val extension = JParserExtension(project, project.objects).apply {
+            libName.set("TestLib")
+            modulePrefix.set("")
+            packageName.set("com.example.testlib")
+            runtimeHelperMode.set(true)
+            finalClass.set(false)
+            finalClass("EnabledBinding", true)
+        }
+        val task = project.tasks.register("testJParserGlobalFinalClass", JParserBuildTask::class.java).get().apply {
+            this.extension = extension
+            buildArgs.set(emptyList())
+            targetArg.set("")
+            targetVariant.set("")
+            generateCore.set(true)
+        }
+
+        val createRequest = JParserBuildTask::class.java.getDeclaredMethod("createRequest")
+        createRequest.isAccessible = true
+        val request = createRequest.invoke(task) as JParserBuildRequest
+
+        assertEquals(false, request.finalClass)
+        assertEquals(mapOf("EnabledBinding" to true), request.finalClassOverrides)
+    }
+
+    @Test
     fun globalSourceSelectionFlowsIntoBuildRequest() {
         val project = ProjectBuilder.builder().build()
         val extension = JParserExtension(project, project.objects).apply {
