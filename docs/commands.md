@@ -31,6 +31,18 @@ Use `./gradlew` on Linux/macOS and `gradlew.bat` on Windows.
 ./gradlew :jParser:runtime:builder:runtime_helper_build_project_web_wasm
 ```
 
+Build and verify the host's `runtime_resources` classifiers:
+
+```text
+./gradlew :jParser:runtime:resources:verifyJParserResourcesPublication
+./gradlew :jParser:runtime:resources:publishJParserResourcesPublicationToMavenLocal
+```
+
+Select a local subset with
+`"-Pjparser.runtimeResources.variants=<classifier,...>"`. Aggregated release CI
+uses `-Pjparser.runtimeResources.complete=true` after collecting every
+platform archive.
+
 ### TestLib native generation
 
 ```text
@@ -168,7 +180,16 @@ Build libA before libB.
 ./gradlew :examples:SharedLib:app:platforms:android:assembleDebug
 ./gradlew :examples:SharedLib:app:platforms:android-c:SharedLib_build_app_android_c
 ./gradlew :examples:SharedLib:app:platforms:ios-c:SharedLib_build_app_ios_c
+
+./gradlew :examples:SharedLib:bundle:SharedLib_build_bundle_desktop_jni
+./gradlew :examples:SharedLib:bundle:SharedLib_build_bundle_desktop_mixed
+./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:test
+./gradlew :examples:SharedLib:app:platforms:desktop-bundle-mixed:test
 ```
+
+The two bundle tests load only `SharedLibFatJni` or `SharedLibFatMixed`
+through `JParserNativeBundleLoader`, reject standalone native files on the
+test classpath, and inspect the final DLL/SO/DYLIB dependencies.
 
 ## Cross-platform variants
 
@@ -193,6 +214,11 @@ Missing native payloads are reported as warnings and omitted from the affected
 artifact, allowing local preparation to inspect the available outputs. Build
 and collect every cross-platform native payload before publishing a complete
 repository.
+
+`runtime_resources` is stricter: remote snapshot/release publication requires
+the complete declared classifier matrix. The aggregate publishing job runs
+`verifyJParserResourcesPublication` before Easy Publishing prepares or uploads
+the coordinate.
 
 `publishSnapshot` uploads to the configured Sonatype snapshot repository.
 `publishRelease` prepares the release repository, creates the Maven Central

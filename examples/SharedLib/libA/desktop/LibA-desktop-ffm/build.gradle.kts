@@ -32,6 +32,22 @@ tasks.jar {
     from(macArmFile)
 }
 
+val fatModeClassesJar = tasks.register<Jar>("fatModeClassesJar") {
+    description = "Build the class-only binding artifact used by fat-mode applications."
+    archiveClassifier.set("classes")
+    from(sourceSets["main"].output)
+}
+
+val fatModeClasses by configurations.creating {
+    description = "Class-only LibA FFM binding for fat-mode applications."
+    isCanBeConsumed = true
+    isCanBeResolved = false
+}
+
+artifacts {
+    add(fatModeClasses.name, fatModeClassesJar)
+}
+
 tasks.named("clean") {
     doFirst {
         val srcPath = "$projectDir/src/main/"

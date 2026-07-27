@@ -151,7 +151,7 @@ public class BuildLibB {
         linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
         linkTarget.headerDirs.add("-I" + libASourcePath);
         linkTarget.headerDirs.add("-I" + libACustomPath);
-        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libALibPath + "/LibA64.lib");
+        linkTarget.linkerFlags.add(libALibPath + "/LibA64.lib");
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib");
         linkTarget.linkerFlags.add("-DLL");
         multiTarget.add(linkTarget);
@@ -247,22 +247,30 @@ public class BuildLibB {
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
-        WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
-        linkTarget.libDirSuffix += api;
+        WindowsMSVCTarget bridgeStaticTarget = new WindowsMSVCTarget();
+        bridgeStaticTarget.libDirSuffix += api;
+        bridgeStaticTarget.libName = op.libName + "_bridge";
+        bridgeStaticTarget.isStatic = true;
         if(isFFM) {
-            linkTarget.setupFFMGlueCode(libBuildCPPPath);
+            bridgeStaticTarget.setupFFMGlueCode(libBuildCPPPath);
         }
         else {
-            linkTarget.setupJNIGlueCode(libBuildCPPPath);
+            bridgeStaticTarget.setupJNIGlueCode(libBuildCPPPath);
         }
-        linkTarget.cppFlags.add("/std:c++11");
-        linkTarget.cppFlags.add(config);
-        linkTarget.headerDirs.add("-I" + sourceDir);
-        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
-        linkTarget.headerDirs.add("-I" + libASourcePath);
-        linkTarget.headerDirs.add("-I" + libACustomPath);
-        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libALibPath + "/LibA64.lib");
+        bridgeStaticTarget.cppFlags.add("/std:c++11");
+        bridgeStaticTarget.cppFlags.add(config);
+        bridgeStaticTarget.headerDirs.add("-I" + sourceDir);
+        bridgeStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        bridgeStaticTarget.headerDirs.add("-I" + libASourcePath);
+        bridgeStaticTarget.headerDirs.add("-I" + libACustomPath);
+        multiTarget.add(bridgeStaticTarget);
+
+        WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
+        linkTarget.libDirSuffix += api;
+        linkTarget.shouldCompile = false;
+        linkTarget.linkerFlags.add(libALibPath + "/LibA64.lib");
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "_bridge64_.lib");
         linkTarget.linkerFlags.add("-DLL");
         multiTarget.add(linkTarget);
 
@@ -296,24 +304,34 @@ public class BuildLibB {
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
-        LinuxTarget linkTarget = new LinuxTarget();
-        linkTarget.libDirSuffix += api;
+        LinuxTarget bridgeStaticTarget = new LinuxTarget();
+        bridgeStaticTarget.libDirSuffix += api;
+        bridgeStaticTarget.libName = op.libName + "_bridge";
+        bridgeStaticTarget.isStatic = true;
         if(isFFM) {
-            linkTarget.setupFFMGlueCode(libBuildCPPPath);
+            bridgeStaticTarget.setupFFMGlueCode(libBuildCPPPath);
         }
         else {
-            linkTarget.setupJNIGlueCode(libBuildCPPPath);
+            bridgeStaticTarget.setupJNIGlueCode(libBuildCPPPath);
         }
-        linkTarget.cppFlags.add("-std=c++11");
-        linkTarget.cppFlags.add(config);
-        linkTarget.cppFlags.add("-fPIC");
-        linkTarget.cppFlags.add("-fvisibility=hidden");
-        linkTarget.headerDirs.add("-I" + sourceDir);
-        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
-        linkTarget.headerDirs.add("-I" + libASourcePath);
-        linkTarget.headerDirs.add("-I" + libACustomPath);
+        bridgeStaticTarget.cppFlags.add("-std=c++11");
+        bridgeStaticTarget.cppFlags.add(config);
+        bridgeStaticTarget.cppFlags.add("-fPIC");
+        bridgeStaticTarget.cppFlags.add("-fvisibility=hidden");
+        bridgeStaticTarget.headerDirs.add("-I" + sourceDir);
+        bridgeStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        bridgeStaticTarget.headerDirs.add("-I" + libASourcePath);
+        bridgeStaticTarget.headerDirs.add("-I" + libACustomPath);
+        multiTarget.add(bridgeStaticTarget);
+
+        LinuxTarget linkTarget = new LinuxTarget();
+        linkTarget.libDirSuffix += api;
+        linkTarget.shouldCompile = false;
         linkTarget.linkerFlags.add(libALibPath + "/libLibA64.so");
+        linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/" + api + "/lib" + op.libName + "64_.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/" + api + "/lib" + op.libName + "_bridge64_.a");
+        linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
 
         multiTarget.add(linkTarget);
 
@@ -347,29 +365,41 @@ public class BuildLibB {
         compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
         multiTarget.add(compileStaticTarget);
 
-        MacTarget linkTarget = new MacTarget(isArm);
-        linkTarget.libDirSuffix += api;
+        MacTarget bridgeStaticTarget = new MacTarget(isArm);
+        bridgeStaticTarget.libDirSuffix += api;
+        bridgeStaticTarget.libName = op.libName + "_bridge";
+        bridgeStaticTarget.isStatic = true;
         if(isFFM) {
-            linkTarget.setupFFMGlueCode(libBuildCPPPath);
+            bridgeStaticTarget.setupFFMGlueCode(libBuildCPPPath);
         }
         else {
-            linkTarget.setupJNIGlueCode(libBuildCPPPath);
+            bridgeStaticTarget.setupJNIGlueCode(libBuildCPPPath);
         }
-        linkTarget.cppFlags.add("-std=c++11");
-        linkTarget.cppFlags.add(config);
-        linkTarget.cppFlags.add("-fPIC");
-        linkTarget.headerDirs.add("-I" + sourceDir);
-        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
-        linkTarget.headerDirs.add("-I" + libASourcePath);
-        linkTarget.headerDirs.add("-I" + libACustomPath);
+        bridgeStaticTarget.cppFlags.add("-std=c++11");
+        bridgeStaticTarget.cppFlags.add(config);
+        bridgeStaticTarget.cppFlags.add("-fPIC");
+        bridgeStaticTarget.headerDirs.add("-I" + sourceDir);
+        bridgeStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        bridgeStaticTarget.headerDirs.add("-I" + libASourcePath);
+        bridgeStaticTarget.headerDirs.add("-I" + libACustomPath);
+        multiTarget.add(bridgeStaticTarget);
 
+        MacTarget linkTarget = new MacTarget(isArm);
+        linkTarget.libDirSuffix += api;
+        linkTarget.shouldCompile = false;
         if(isArm) {
             linkTarget.linkerFlags.add(libALibArmPath + "/libLibAarm64.dylib");
+            linkTarget.linkerFlags.add("-Wl,-force_load");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/" + api + "/lib" + op.libName + "64_.a");
+            linkTarget.linkerFlags.add("-Wl,-force_load");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/" + api + "/lib" + op.libName + "_bridge64_.a");
         }
         else {
             linkTarget.linkerFlags.add(libALibPath + "/libLibA64.dylib");
+            linkTarget.linkerFlags.add("-Wl,-force_load");
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/" + api + "/lib" + op.libName + "64_.a");
+            linkTarget.linkerFlags.add("-Wl,-force_load");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/" + api + "/lib" + op.libName + "_bridge64_.a");
         }
 
         multiTarget.add(linkTarget);

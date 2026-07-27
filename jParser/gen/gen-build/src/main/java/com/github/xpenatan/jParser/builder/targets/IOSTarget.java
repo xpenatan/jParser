@@ -2,11 +2,14 @@ package com.github.xpenatan.jParser.builder.targets;
 
 import com.github.xpenatan.jParser.builder.BuildConfig;
 import com.github.xpenatan.jParser.builder.DefaultBuildTarget;
+import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
+import java.util.ArrayList;
 
 /** Builds a native library slice with the Apple iOS toolchain. */
 public class IOSTarget extends DefaultBuildTarget {
 
     public static final String MIN_IOS_VERSION = "14.0";
+    public final ArrayList<String> staticArchiveInputs = new ArrayList<>();
 
     public enum SDK {
         DEVICE("iphoneos", "device", "-miphoneos-version-min="),
@@ -150,6 +153,18 @@ public class IOSTarget extends DefaultBuildTarget {
         linkerFlags.add("-stdlib=libc++");
         libSuffix = "64.dylib";
         linkerOutputCommand = "-o";
+    }
+
+    @Override
+    protected void onLink(ArrayList<CustomFileDescriptor> compiledObjects, String objFilePath, String outputPath) {
+        if(isStatic && !staticArchiveInputs.isEmpty()) {
+            linkerCommands.addAll(linkerCompiler);
+            linkerCommands.addAll(linkerFlags);
+            linkerCommands.add(linkerOutputCommand + outputPath);
+            linkerCommands.addAll(staticArchiveInputs);
+            return;
+        }
+        super.onLink(compiledObjects, objFilePath, outputPath);
     }
 
     private void addXcrunTool(java.util.ArrayList<String> command, String tool) {

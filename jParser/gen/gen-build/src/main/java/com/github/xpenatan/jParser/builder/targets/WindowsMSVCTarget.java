@@ -27,7 +27,7 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
         cppCompiler.clear();
         linkerCompiler.clear();
 
-        String vcvarsall = findVcvarsall();
+        String vcvarsall = resolveVcvarsall();
         addMsvcSetup(cppCompiler, vcvarsall);
         cppCompiler.add("cl");
 
@@ -89,7 +89,11 @@ public class WindowsMSVCTarget extends DefaultBuildTarget {
         command.add("&&");
     }
 
-    private static String findVcvarsall() {
+    /**
+     * Resolves the Visual C++ environment script used by both the regular build targets and
+     * the Gradle-independent native bundle builder.
+     */
+    public static String resolveVcvarsall() {
         String override = firstExistingFile(
                 System.getProperty("jparser.vcvarsall"),
                 System.getenv("JPARSER_VCVARSALL"),

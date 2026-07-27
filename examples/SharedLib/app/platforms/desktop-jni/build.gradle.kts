@@ -73,6 +73,9 @@ tasks.register<JavaExec>("SharedLib_run_app_desktop_jni") {
     )
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath
+    providers.gradleProperty("jparser.nativeBundle").orNull?.let { bundleName ->
+        systemProperty("jparser.nativeBundle", bundleName)
+    }
     if(isMacOs) {
         jvmArgs("-XstartOnFirstThread")
     }

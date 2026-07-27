@@ -31,6 +31,7 @@ Runtime modules mirror the example and binding layout:
 
 - `runtime/base`: handwritten runtime helper source published as `runtime-base`.
 - `runtime/builder`: generator and native build driver.
+- `runtime/resources`: POM-only `runtime_resources` publication with classified static implementation/bridge inputs for fat bundles.
 - `runtime/core`: public/shared runtime API published as `runtime-core`.
 - `runtime/shared/runtime-jni`: generated JNI Java shared by desktop and Android, published as Java-only `runtime-jni`.
 - `runtime/shared/runtime-c`: generated `gen.c.*` TeaVM C implementations, the C substitution service, and portable build resources published as `runtime-c`; it exposes `runtime-core` as the public API.
@@ -44,7 +45,7 @@ Runtime modules mirror the example and binding layout:
 
 Loader modules provide one public API with target substitutions:
 
-- `loader/loader-core`: `JParserLibraryLoader`, its listener, and shared loader options used by the public binding loaders.
+- `loader/loader-core`: `JParserLibraryLoader`, `JParserNativeBundleLoader`, their listener, and shared loader options used by standalone and fat-mode applications.
 - `loader/loader-c`: TeaVM C's `emu.c` loader implementation plus the portable C/C++ loader header and source. `runtime-c` and generated binding C artifacts expose this module to TeaVM C applications.
 - `loader/loader-web`: the TeaVM web loader implementation.
 
@@ -60,6 +61,7 @@ Example app modules in examples use:
 - `app:assets` where an example has shared assets.
 - `app:platforms:desktop-jni`
 - `app:platforms:desktop-ffm`
+- `app:platforms:desktop-bundle-jni` and `app:platforms:desktop-bundle-mixed` in SharedLib for loader-only fat-bundle verification
 - `app:platforms:desktop-c`
 - `app:platforms:web`
 - `app:platforms:android`
@@ -130,6 +132,14 @@ invokes `BuildRuntimeHelper` directly and exposes the
 `runtime_helper_build_project*` tasks.
 
 Shared-library examples use per-library plugin modules in `examples/SharedLib/libA/plugin` and `examples/SharedLib/libB/plugin`. These are projects in the separate examples consumer build; `libB` declares its `libA` module reference through `dependency("libA") { reference(...) }`, which expands IDL refs, header paths, native link inputs, and project task dependencies.
+
+Fat bundles use the Gradle-independent `builder.bundle` API in
+`jParser:gen:gen-build-tool`. Standard native targets preserve an
+implementation static archive, compile generated JNI/FFM/TeaVM C glue into a
+separate bridge static archive, and link those same inputs into the existing
+standalone shared output. The plugin only maps producer/consumer DSL values to
+`NativeComponentRequest` and `NativeBundleRequest`. The complete publication
+and platform behavior is documented in [Fat Native Bundles](native-bundles.md).
 
 ## JNI vs FFM
 

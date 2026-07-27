@@ -7,6 +7,10 @@ public class Main {
 
     public static void main(String[] args) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        new Lwjgl3Application(new SharedLibApp(), config);
+        String bundleName = System.getProperty("jparser.nativeBundle", "").trim();
+        SharedLibApp app = bundleName.isEmpty()
+                ? new SharedLibApp()
+                : new SharedLibApp(bundleName);
+        new Lwjgl3Application(app, config);
     }
 }

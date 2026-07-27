@@ -1,6 +1,7 @@
 package com.github.xpenatan.jParser.example.app;
 
 import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
+import com.github.xpenatan.jParser.loader.JParserNativeBundleLoader;
 import com.github.xpenatan.jparser.runtime.RuntimeLoader;
 import libA.LibALoader;
 import libB.LibBLoader;
@@ -14,6 +15,17 @@ public class SharedLibTest {
 
     @BeforeClass
     public static void setUp() {
+        String bundleName = System.getProperty("jparser.nativeBundle", "").trim();
+        if(!bundleName.isEmpty()) {
+            JParserNativeBundleLoader.load(bundleName, (isSuccess, throwable) -> {
+                if(throwable != null) {
+                    throwable.printStackTrace();
+                    return;
+                }
+                libLoaded = isSuccess;
+            });
+            return;
+        }
         RuntimeLoader.init(new JParserLibraryLoaderListener() {
             @Override
             public void onLoad(boolean idl_isSuccess, Throwable idl_t) {

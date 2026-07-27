@@ -56,12 +56,25 @@ tasks.named<Jar>("jar") {
     }
 }
 
+val fatModeClassesJar = tasks.register<Jar>("fatModeClassesJar") {
+    description = "Build the class-only FFM runtime artifact used by fat-mode applications."
+    archiveClassifier.set("classes")
+    from(sourceSets["main"].output)
+}
+
+val fatModeClasses by configurations.creating {
+    description = "Class-only FFM runtime for fat-mode applications."
+    isCanBeConsumed = true
+    isCanBeResolved = false
+}
+
 val nativeRuntime by configurations.creating {
     isCanBeConsumed = true
     isCanBeResolved = false
 }
 
 artifacts {
+    add(fatModeClasses.name, fatModeClassesJar)
     nativeJars.forEach { add(nativeRuntime.name, it.second) }
 }
 

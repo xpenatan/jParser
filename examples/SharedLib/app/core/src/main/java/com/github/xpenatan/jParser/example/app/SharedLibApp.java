@@ -7,11 +7,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
+import com.github.xpenatan.jParser.loader.JParserNativeBundleLoader;
 import com.github.xpenatan.jparser.runtime.RuntimeLoader;
 import libA.LibALoader;
 import libB.LibBLoader;
 
 public class SharedLibApp extends ApplicationAdapter {
+    private final String nativeBundleName;
     private boolean init = false;
 
     private SpriteBatch batch;
@@ -21,33 +23,56 @@ public class SharedLibApp extends ApplicationAdapter {
 
     Color color = Color.GRAY;
 
+    public SharedLibApp() {
+        this(null);
+    }
+
+    /**
+     * Creates a fat-mode application when {@code nativeBundleName} is non-null.
+     * Fat mode deliberately bypasses every generated per-library loader.
+     */
+    public SharedLibApp(String nativeBundleName) {
+        this.nativeBundleName = nativeBundleName;
+    }
+
     @Override
     public void create() {
-        RuntimeLoader.init(new JParserLibraryLoaderListener() {
+        JParserLibraryLoaderListener loaded = new JParserLibraryLoaderListener() {
             @Override
-            public void onLoad(boolean idl_isSuccess, Throwable idl_t) {
-                if(idl_t != null) {
-                    idl_t.printStackTrace();
+            public void onLoad(boolean isSuccess, Throwable throwable) {
+                if(throwable != null) {
+                    throwable.printStackTrace();
                     return;
                 }
-                LibALoader.init((libA_isSuccess, libA_t) -> {
-                    if(libA_t != null) {
-                        libA_t.printStackTrace();
-                        return;
-                    }
-                    LibBLoader.init((libB_isSuccess, libB_t) -> {
-                        if(libB_t != null) {
-                            libB_t.printStackTrace();
-                            return;
-                        }
-                        init = true;
-                    });
-                });
+                init = isSuccess;
             }
-        });
+        };
+        if(nativeBundleName != null && !nativeBundleName.trim().isEmpty()) {
+            JParserNativeBundleLoader.load(nativeBundleName.trim(), loaded);
+        }
+        else {
+            loadStandaloneBindings(loaded);
+        }
 
         batch = new SpriteBatch();
         font = new BitmapFont();
+    }
+
+    private void loadStandaloneBindings(JParserLibraryLoaderListener loaded) {
+        RuntimeLoader.init((runtimeSuccess, runtimeFailure) -> {
+            if(runtimeFailure != null) {
+                loaded.onLoad(false, runtimeFailure);
+                return;
+            }
+            LibALoader.init((libASuccess, libAFailure) -> {
+                if(libAFailure != null) {
+                    loaded.onLoad(false, libAFailure);
+                    return;
+                }
+                LibBLoader.init((libBSuccess, libBFailure) ->
+                        loaded.onLoad(libBSuccess, libBFailure));
+            });
+        });
     }
 
     @Override

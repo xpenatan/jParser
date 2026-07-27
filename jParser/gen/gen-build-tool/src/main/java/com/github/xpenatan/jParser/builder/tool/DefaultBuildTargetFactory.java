@@ -74,14 +74,25 @@ public class DefaultBuildTargetFactory {
         applyCompileHooks(compileStaticTarget, config, targetArg);
         multiTarget.add(compileStaticTarget);
 
+        WindowsMSVCTarget bridgeStaticTarget = new WindowsMSVCTarget();
+        applyOutputDirectoryPrefix(bridgeStaticTarget, config, targetArg);
+        bridgeStaticTarget.libDirSuffix += api;
+        bridgeStaticTarget.libName = bridgeLibraryName(op);
+        bridgeStaticTarget.isStatic = true;
+        setupGlueCode(bridgeStaticTarget, api, libBuildCPPPath);
+        addCppStandard(bridgeStaticTarget.cppFlags, api, true, config);
+        applyFFMWindowsCompileFlags(bridgeStaticTarget, isFFM, config.ffmNative);
+        addDefaultHeaders(bridgeStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
+        applyGlueCompileHooks(bridgeStaticTarget, config, targetArg);
+        multiTarget.add(bridgeStaticTarget);
+
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
         applyOutputDirectoryPrefix(linkTarget, config, targetArg);
         linkTarget.libDirSuffix += api;
-        setupGlueCode(linkTarget, api, libBuildCPPPath);
-        addCppStandard(linkTarget.cppFlags, api, true, config);
-        applyFFMWindowsCompileFlags(linkTarget, isFFM, config.ffmNative);
-        addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
+        linkTarget.shouldCompile = false;
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + ownStaticLibPath(op, config, targetArg, "windows", api));
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + bridgeStaticLibPath(
+                op, config, targetArg, "windows", api));
         linkTarget.linkerFlags.add("-DLL");
         applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.WINDOWS_WHOLE_ARCHIVE);
         applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg);
@@ -107,16 +118,26 @@ public class DefaultBuildTargetFactory {
         applyCompileHooks(compileStaticTarget, config, targetArg);
         multiTarget.add(compileStaticTarget);
 
+        LinuxTarget bridgeStaticTarget = new LinuxTarget();
+        applyOutputDirectoryPrefix(bridgeStaticTarget, config, targetArg);
+        bridgeStaticTarget.libDirSuffix += api;
+        bridgeStaticTarget.libName = bridgeLibraryName(op);
+        bridgeStaticTarget.isStatic = true;
+        setupGlueCode(bridgeStaticTarget, api, libBuildCPPPath);
+        addCppStandard(bridgeStaticTarget.cppFlags, api, false, config);
+        addFlagIfMissing(bridgeStaticTarget.cppFlags, "-fPIC");
+        applyFFMUnixCompileFlags(bridgeStaticTarget.cppFlags, isFFM, config.ffmNative);
+        addDefaultHeaders(bridgeStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
+        applyGlueCompileHooks(bridgeStaticTarget, config, targetArg);
+        multiTarget.add(bridgeStaticTarget);
+
         LinuxTarget linkTarget = new LinuxTarget();
         applyOutputDirectoryPrefix(linkTarget, config, targetArg);
         linkTarget.libDirSuffix += api;
-        setupGlueCode(linkTarget, api, libBuildCPPPath);
-        addCppStandard(linkTarget.cppFlags, api, false, config);
-        addFlagIfMissing(linkTarget.cppFlags, "-fPIC");
-        applyFFMUnixCompileFlags(linkTarget.cppFlags, isFFM, config.ffmNative);
-        addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
+        linkTarget.shouldCompile = false;
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg, "linux", api));
+        linkTarget.linkerFlags.add(bridgeStaticLibPath(op, config, targetArg, "linux", api));
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.UNIX_WHOLE_ARCHIVE);
         applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg);
@@ -142,16 +163,28 @@ public class DefaultBuildTargetFactory {
         applyCompileHooks(compileStaticTarget, config, targetArg);
         multiTarget.add(compileStaticTarget);
 
+        MacTarget bridgeStaticTarget = new MacTarget(isArm);
+        applyOutputDirectoryPrefix(bridgeStaticTarget, config, targetArg);
+        bridgeStaticTarget.libDirSuffix += api;
+        bridgeStaticTarget.libName = bridgeLibraryName(op);
+        bridgeStaticTarget.isStatic = true;
+        setupGlueCode(bridgeStaticTarget, api, libBuildCPPPath);
+        addCppStandard(bridgeStaticTarget.cppFlags, api, false, config);
+        addFlagIfMissing(bridgeStaticTarget.cppFlags, "-fPIC");
+        applyFFMUnixCompileFlags(bridgeStaticTarget.cppFlags, isFFM, config.ffmNative);
+        addDefaultHeaders(bridgeStaticTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
+        applyGlueCompileHooks(bridgeStaticTarget, config, targetArg);
+        multiTarget.add(bridgeStaticTarget);
+
         MacTarget linkTarget = new MacTarget(isArm);
         applyOutputDirectoryPrefix(linkTarget, config, targetArg);
         linkTarget.libDirSuffix += api;
-        setupGlueCode(linkTarget, api, libBuildCPPPath);
-        addCppStandard(linkTarget.cppFlags, api, false, config);
-        addFlagIfMissing(linkTarget.cppFlags, "-fPIC");
-        applyFFMUnixCompileFlags(linkTarget.cppFlags, isFFM, config.ffmNative);
-        addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
+        linkTarget.shouldCompile = false;
         linkTarget.linkerFlags.add("-Wl,-force_load");
         linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg, isArm ? "macArm" : "mac", api));
+        linkTarget.linkerFlags.add("-Wl,-force_load");
+        linkTarget.linkerFlags.add(bridgeStaticLibPath(
+                op, config, targetArg, isArm ? "macArm" : "mac", api));
         applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.MAC_FORCE_LOAD);
         applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg);
         applyFFMUnixLinkFlags(linkTarget.linkerFlags, isFFM, config.ffmNative);
@@ -229,17 +262,30 @@ public class DefaultBuildTargetFactory {
             applyCompileHooks(compileStaticTarget, config, targetArg, target);
             multiTarget.add(compileStaticTarget);
 
+            AndroidTarget bridgeStaticTarget = new AndroidTarget(target, config.androidApiLevel);
+            applyOutputDirectoryPrefix(bridgeStaticTarget, config, targetArg);
+            if(api.equals("teavm_c")) {
+                bridgeStaticTarget.libDirSuffix += api;
+            }
+            bridgeStaticTarget.libName = bridgeLibraryName(op);
+            bridgeStaticTarget.isStatic = true;
+            setupGlueCode(bridgeStaticTarget, api, libBuildCPPPath);
+            addCppStandard(bridgeStaticTarget.cppFlags, api, false, config);
+            addFlagIfMissing(bridgeStaticTarget.cppFlags, "-fPIC");
+            addDefaultHeaders(bridgeStaticTarget, sourceDir, op.getCustomSourceDir(),
+                    libBuildCPPPath, config, targetArg, target);
+            applyGlueCompileHooks(bridgeStaticTarget, config, targetArg, target);
+            multiTarget.add(bridgeStaticTarget);
+
             AndroidTarget linkTarget = new AndroidTarget(target, config.androidApiLevel);
             applyOutputDirectoryPrefix(linkTarget, config, targetArg);
             if(api.equals("teavm_c")) {
                 linkTarget.libDirSuffix += api;
             }
-            setupGlueCode(linkTarget, api, libBuildCPPPath);
-            addCppStandard(linkTarget.cppFlags, api, false, config);
-            addFlagIfMissing(linkTarget.cppFlags, "-fPIC");
-            addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg, target);
+            linkTarget.shouldCompile = false;
             linkTarget.linkerFlags.add("-Wl,--whole-archive");
             linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg, target, api));
+            linkTarget.linkerFlags.add(bridgeStaticLibPath(op, config, targetArg, target, api));
             linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
             linkTarget.linkerFlags.add("-Wl,-z,max-page-size=16384");
             applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.UNIX_WHOLE_ARCHIVE, target);
@@ -273,16 +319,28 @@ public class DefaultBuildTargetFactory {
         applyCompileHooks(compileStaticTarget, config, targetArg);
         multiTarget.add(compileStaticTarget);
 
+        IOSTarget bridgeStaticTarget = new IOSTarget();
+        applyOutputDirectoryPrefix(bridgeStaticTarget, config, targetArg);
+        bridgeStaticTarget.libName = bridgeLibraryName(op);
+        bridgeStaticTarget.isStatic = true;
+        setupGlueCode(bridgeStaticTarget, api, libBuildCPPPath);
+        addCppStandard(bridgeStaticTarget.cppFlags, api, false, config);
+        addDefaultHeaders(bridgeStaticTarget, sourceDir, op.getCustomSourceDir(),
+                libBuildCPPPath, config, targetArg);
+        applyGlueCompileHooks(bridgeStaticTarget, config, targetArg);
+        multiTarget.add(bridgeStaticTarget);
+
         IOSTarget linkTarget = new IOSTarget();
         applyOutputDirectoryPrefix(linkTarget, config, targetArg);
         if(api.equals("teavm_c")) {
             linkTarget.libDirSuffix += api;
         }
-        setupGlueCode(linkTarget, api, libBuildCPPPath);
-        addCppStandard(linkTarget.cppFlags, api, false, config);
-        addDefaultHeaders(linkTarget, sourceDir, op.getCustomSourceDir(), libBuildCPPPath, config, targetArg);
+        linkTarget.shouldCompile = false;
         linkTarget.linkerFlags.add("-Wl,-force_load");
         linkTarget.linkerFlags.add(ownStaticLibPath(op, config, targetArg,
+                compileStaticTarget.getResourcePlatform(), api));
+        linkTarget.linkerFlags.add("-Wl,-force_load");
+        linkTarget.linkerFlags.add(bridgeStaticLibPath(op, config, targetArg,
                 compileStaticTarget.getResourcePlatform(), api));
         applyStaticLinkerInputs(linkTarget.linkerFlags, config, targetArg, LinkStyle.MAC_FORCE_LOAD);
         applySharedLinkerInputs(linkTarget.linkerFlags, config, targetArg);
@@ -298,15 +356,40 @@ public class DefaultBuildTargetFactory {
             BuildMultiTarget multiTarget,
             IOSTarget.SDK sdk,
             IOSTarget.Architecture architecture) {
-        IOSTarget target = new IOSTarget(config.sourceLanguage, sdk, architecture);
-        applyOutputDirectoryPrefix(target, config, targetArg);
-        target.libDirSuffix += "teavm_c";
-        target.isStatic = true;
-        addSourceStandard(target.cppFlags, "teavm_c", false, config);
-        addDefaultSources(target, op.getSourceDir(), op.getCustomSourceDir(),
+        IOSTarget implementationTarget = new IOSTarget(config.sourceLanguage, sdk, architecture);
+        applyOutputDirectoryPrefix(implementationTarget, config, targetArg);
+        implementationTarget.libDirSuffix += "teavm_c";
+        implementationTarget.libName = implementationLibraryName(op);
+        implementationTarget.isStatic = true;
+        addSourceStandard(implementationTarget.cppFlags, "teavm_c", false, config);
+        addDefaultSources(implementationTarget, op.getSourceDir(), op.getCustomSourceDir(),
                 op.getModuleBuildCPPPath(), config, targetArg);
-        applyCompileHooks(target, config, targetArg);
-        multiTarget.add(target);
+        applyCompileHooks(implementationTarget, config, targetArg);
+        multiTarget.add(implementationTarget);
+
+        IOSTarget bridgeTarget = new IOSTarget(SourceLanguage.CPP, sdk, architecture);
+        applyOutputDirectoryPrefix(bridgeTarget, config, targetArg);
+        bridgeTarget.libDirSuffix += "teavm_c";
+        bridgeTarget.libName = bridgeLibraryName(op);
+        bridgeTarget.isStatic = true;
+        setupGlueCode(bridgeTarget, "teavm_c", op.getModuleBuildCPPPath());
+        addCppStandard(bridgeTarget.cppFlags, "teavm_c", false, config);
+        addDefaultHeaders(bridgeTarget, op.getSourceDir(), op.getCustomSourceDir(),
+                op.getModuleBuildCPPPath(), config, targetArg);
+        applyGlueCompileHooks(bridgeTarget, config, targetArg);
+        multiTarget.add(bridgeTarget);
+
+        IOSTarget combinedTarget = new IOSTarget(SourceLanguage.CPP, sdk, architecture);
+        applyOutputDirectoryPrefix(combinedTarget, config, targetArg);
+        combinedTarget.libDirSuffix += "teavm_c";
+        combinedTarget.isStatic = true;
+        combinedTarget.shouldCompile = false;
+        combinedTarget.shouldUseRuntimeHelper = false;
+        combinedTarget.staticArchiveInputs.add(implementationStaticLibPath(
+                op, config, targetArg, combinedTarget.getResourcePlatform(), "teavm_c"));
+        combinedTarget.staticArchiveInputs.add(bridgeStaticLibPath(
+                op, config, targetArg, combinedTarget.getResourcePlatform(), "teavm_c"));
+        multiTarget.add(combinedTarget);
     }
 
     private void addDefaultSources(DefaultBuildTarget target, String sourceDir, String customSourceDir, String libBuildCPPPath, DefaultBuildTargetConfig config, String targetArg) {
@@ -405,6 +488,30 @@ public class DefaultBuildTargetFactory {
         if(androidHooks != null) {
             addAll(target.cppFlags, androidHooks.compileFlags);
             addAll(target.linkerFlags, androidHooks.linkerFlags);
+            applyForcedIncludes(target, androidHooks.forcedIncludes);
+        }
+    }
+
+    private void applyGlueCompileHooks(
+            DefaultBuildTarget target,
+            DefaultBuildTargetConfig config,
+            String targetArg) {
+        applyGlueCompileHooks(target, config, targetArg, null);
+    }
+
+    private void applyGlueCompileHooks(
+            DefaultBuildTarget target,
+            DefaultBuildTargetConfig config,
+            String targetArg,
+            AndroidTarget.Target androidTarget) {
+        addAll(target.cppFlags, config.globalHooks.compileFlags);
+        applyForcedIncludes(target, config.globalHooks.forcedIncludes);
+        DefaultBuildTargetConfig.TargetHooks hooks = hook(config, targetArg);
+        addAll(target.cppFlags, hooks.compileFlags);
+        applyForcedIncludes(target, hooks.forcedIncludes);
+        DefaultBuildTargetConfig.TargetHooks androidHooks = androidHook(config, targetArg, androidTarget);
+        if(androidHooks != null) {
+            addAll(target.cppFlags, androidHooks.compileFlags);
             applyForcedIncludes(target, androidHooks.forcedIncludes);
         }
     }
@@ -587,37 +694,92 @@ public class DefaultBuildTargetFactory {
     }
 
     private String ownStaticLibPath(BuildToolOptions op, DefaultBuildTargetConfig config, String targetArg, String platform, String api) {
+        return staticLibPath(op, config, targetArg, platform, api, op.libName);
+    }
+
+    private String bridgeStaticLibPath(
+            BuildToolOptions op,
+            DefaultBuildTargetConfig config,
+            String targetArg,
+            String platform,
+            String api) {
+        return staticLibPath(op, config, targetArg, platform, api, bridgeLibraryName(op));
+    }
+
+    private String implementationStaticLibPath(
+            BuildToolOptions op,
+            DefaultBuildTargetConfig config,
+            String targetArg,
+            String platform,
+            String api) {
+        return staticLibPath(op, config, targetArg, platform, api, implementationLibraryName(op));
+    }
+
+    private String staticLibPath(
+            BuildToolOptions op,
+            DefaultBuildTargetConfig config,
+            String targetArg,
+            String platform,
+            String api,
+            String libraryName) {
         String libBuildCPPPath = op.getModuleBuildCPPPath();
         String prefix = outputDirectoryPrefix(config, targetArg);
         if(platform.equals("emscripten")) {
-            return libBuildCPPPath + "/libs/" + prefix + "emscripten/" + op.libName + "_.a";
+            return libBuildCPPPath + "/libs/" + prefix + "emscripten/" + libraryName + "_.a";
         }
         if(platform.equals("windows")) {
-            return libBuildCPPPath + "/libs/" + prefix + "windows/vc/" + api + "/" + op.libName + "64_.lib";
+            return libBuildCPPPath + "/libs/" + prefix + "windows/vc/" + api + "/" + libraryName + "64_.lib";
         }
         if(platform.equals("linux")) {
-            return libBuildCPPPath + "/libs/" + prefix + "linux/" + api + "/lib" + op.libName + "64_.a";
+            return libBuildCPPPath + "/libs/" + prefix + "linux/" + api + "/lib" + libraryName + "64_.a";
         }
         if(platform.equals("macArm")) {
-            return libBuildCPPPath + "/libs/" + prefix + "mac/arm/" + api + "/lib" + op.libName + "64_.a";
+            return libBuildCPPPath + "/libs/" + prefix + "mac/arm/" + api + "/lib" + libraryName + "64_.a";
         }
         if(platform.equals("mac")) {
-            return libBuildCPPPath + "/libs/" + prefix + "mac/" + api + "/lib" + op.libName + "64_.a";
+            return libBuildCPPPath + "/libs/" + prefix + "mac/" + api + "/lib" + libraryName + "64_.a";
         }
         if(platform.startsWith("ios/")) {
             return libBuildCPPPath + "/libs/" + prefix + platform + "/"
                     + (api.equals("teavm_c") ? api + "/" : "")
-                    + "lib" + op.libName + "64_.a";
+                    + "lib" + libraryName + "64_.a";
         }
-        return libBuildCPPPath + "/libs/" + prefix + platform + "/" + api + "/lib" + op.libName + "64_.a";
+        return libBuildCPPPath + "/libs/" + prefix + platform + "/" + api + "/lib" + libraryName + "64_.a";
     }
 
     private String ownStaticLibPath(BuildToolOptions op, DefaultBuildTargetConfig config, String targetArg, AndroidTarget.Target target, String api) {
+        return staticLibPath(op, config, targetArg, target, api, op.libName);
+    }
+
+    private String bridgeStaticLibPath(
+            BuildToolOptions op,
+            DefaultBuildTargetConfig config,
+            String targetArg,
+            AndroidTarget.Target target,
+            String api) {
+        return staticLibPath(op, config, targetArg, target, api, bridgeLibraryName(op));
+    }
+
+    private String staticLibPath(
+            BuildToolOptions op,
+            DefaultBuildTargetConfig config,
+            String targetArg,
+            AndroidTarget.Target target,
+            String api,
+            String libraryName) {
         String staticLibPath = op.getModuleBuildCPPPath() + "/libs/" + outputDirectoryPrefix(config, targetArg) + "android/" + target.getFolder() + "/";
         if(api.equals("teavm_c")) {
             staticLibPath += api + "/";
         }
-        return staticLibPath + "lib" + op.libName + ".a";
+        return staticLibPath + "lib" + libraryName + ".a";
+    }
+
+    private String bridgeLibraryName(BuildToolOptions op) {
+        return op.libName + "_bridge";
+    }
+
+    private String implementationLibraryName(BuildToolOptions op) {
+        return op.libName + "_implementation";
     }
 
     private void applyOutputDirectoryPrefix(DefaultBuildTarget target, DefaultBuildTargetConfig config, String targetArg) {

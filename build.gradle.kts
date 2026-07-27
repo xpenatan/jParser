@@ -16,6 +16,7 @@ val publishedModules = listOf(
     ":jParser:api:api-core",
     ":jParser:api:api-web",
     ":jParser:runtime:base",
+    ":jParser:runtime:resources",
     ":jParser:runtime:core",
     ":jParser:runtime:web:runtime-web",
     ":jParser:runtime:shared:runtime-jni",

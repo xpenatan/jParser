@@ -20,6 +20,7 @@ jParser projects are centered on a hand-written API, a generator entry point, an
 | `android/<Lib>-android` | Android JNI packaging |
 | `android/<Lib>-android-c` | Android TeaVM C packaging |
 | `ios/<Lib>-ios-c` | iOS TeaVM C static archives for device ARM64 and simulator ARM64/x86_64 |
+| `<Lib>_resources` publication | Classified static implementation/bridge inputs for optional application-owned fat bundles |
 
 Edit the `base`, `builder`, and native packaging inputs. Regenerate derived Java instead of changing generated output directly.
 
@@ -69,5 +70,6 @@ iOS TeaVM C is intentionally split at the native application boundary. The bindi
 
 - Read [Binding Authoring](binding-authoring.md) before adding Java/native methods or WebIDL interfaces.
 - Read the [TeaVM C guide](teavm-c.md) when producing native TeaVM applications or packaged native dependencies.
+- Read the [fat native bundle guide](native-bundles.md) when combining multiple bindings into one native file.
 - Use the [command reference](commands.md) for web, Android, iOS, TeaVM C, packaging, and benchmark tasks.
 - Use the [architecture reference](architecture.md) when changing the generator or module pipeline.

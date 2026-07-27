@@ -81,6 +81,9 @@ tasks.register<JavaExec>("SharedLib_run_app_desktop_ffm") {
     )
     mainClass.set("com.github.xpenatan.jParser.example.app.Main")
     classpath = sourceSets["main"].runtimeClasspath
+    providers.gradleProperty("jparser.nativeBundle").orNull?.let { bundleName ->
+        systemProperty("jparser.nativeBundle", bundleName)
+    }
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(libs.versions.javaFfm.get()))
     })

@@ -8,6 +8,7 @@ Top-level runtime modules:
 
 - `jParser/runtime/base`
 - `jParser/runtime/builder`
+- `jParser/runtime/resources`
 - `jParser/runtime/core`
 - `jParser/runtime/shared/runtime-c`
 - `jParser/runtime/desktop/runtime-desktop-jni`
@@ -36,6 +37,12 @@ Existing JVM/web artifacts keep their names:
 - `runtime-desktop-ffm`
 - `runtime-web`
 - `runtime-android`
+
+Fat-bundle inputs are published independently as the POM-only
+`runtime_resources` coordinate. Its classifier JARs contain static
+implementation/bridge inputs and are never application runtime dependencies.
+See [Fat Native Bundles](native-bundles.md) for its classifier matrix,
+metadata attributes, and release workflow.
 
 Desktop JNI artifacts use separate modules for generated Java and platform native payloads:
 

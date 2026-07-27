@@ -2,13 +2,18 @@ package com.github.xpenatan.jParser.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.component.SoftwareComponentFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
+import java.io.File
+import javax.inject.Inject
 
-class JParserGradlePlugin : Plugin<Project> {
+class JParserGradlePlugin @Inject constructor(
+    private val softwareComponentFactory: SoftwareComponentFactory
+) : Plugin<Project> {
     override fun apply(project: Project) {
         project.pluginManager.apply(JavaPlugin::class.java)
 
@@ -27,6 +32,7 @@ class JParserGradlePlugin : Plugin<Project> {
             registerNativeBuildTasks(project, extension, buildTasks)
             registerVariantBuildTasks(project, extension)
             configureTaskDependencies(project, extension, buildTasks)
+            JParserNativeBundlePluginSupport.configure(project, extension, softwareComponentFactory)
         }
         project.gradle.projectsEvaluated {
             configureReferenceJavaOutputs(project, extension, buildTasks)
@@ -110,7 +116,34 @@ class JParserGradlePlugin : Plugin<Project> {
             this.targetVariant.set(targetVariant)
             this.buildArgs.convention(args)
             this.generateCore.set(true)
+            if(targetArg.isNotBlank()) {
+                outputs.dir(project.provider { nativeBuildOutputDirectory(project, extension) })
+            }
         }
+    }
+
+    private fun nativeBuildOutputDirectory(project: Project, extension: JParserExtension): File {
+        val modulePath = File(
+            extension.modulePath.orNull ?: project.projectDir.parentFile.absolutePath
+        )
+        val prefix = extension.modulePrefix.orNull?.trim().orEmpty()
+        val configuredSuffix = extension.moduleBuildSuffix.orNull?.trim()
+        val suffix = if(configuredSuffix.isNullOrEmpty()) {
+            "-build"
+        }
+        else if(configuredSuffix.startsWith("-")) {
+            configuredSuffix
+        }
+        else {
+            "-$configuredSuffix"
+        }
+        val moduleName = if(prefix.isEmpty()) {
+            suffix.trimStart('-', '/', '\\')
+        }
+        else {
+            prefix + suffix
+        }
+        return File(File(modulePath, moduleName), "build/c++")
     }
 
     private fun resolveGenerateTargets(extension: JParserExtension): List<JParserGenerationTarget> {
@@ -255,9 +288,9 @@ class JParserGradlePlugin : Plugin<Project> {
         val args: List<String> = listOf(target.generationTarget.arg, targetArg)
     }
 
-    private companion object {
-        const val TASK_GROUP = "jParser"
-        val buildTargets = listOf(
+    companion object {
+        internal const val TASK_GROUP = "jParser"
+        private val buildTargets = listOf(
             BuildTarget(JParserTargets.WEB_WASM, "Build jParser TeaVM web WASM side module."),
             BuildTarget(JParserTargets.WINDOWS64_JNI, "Build jParser Windows x64 JNI native library."),
             BuildTarget(JParserTargets.LINUX64_JNI, "Build jParser Linux x64 JNI native library."),

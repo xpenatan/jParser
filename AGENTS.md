@@ -55,10 +55,10 @@ Maintenance rule: when module/task names change, update `AGENTS.md` and related 
 ## 5) Current Module Naming (Examples)
 
 - Example library pipeline folders: `base`, `builder`, `core`, `shared/<Lib>-jni`, `shared/<Lib>-c`, `desktop/<Lib>-desktop-jni`, `desktop/<Lib>-desktop-ffm`, `desktop/<Lib>-desktop-c`, `web/<Lib>-web`, `android/<Lib>-android`, `android/<Lib>-android-c`, and `ios/<Lib>-ios-c`.
-- Runtime folders: `runtime/base`, `runtime/builder`, `runtime/core`, `runtime/shared/runtime-jni`, `runtime/shared/runtime-c`, `runtime/desktop/runtime-desktop-jni`, `runtime/desktop/runtime-desktop-ffm`, `runtime/desktop/runtime-desktop-c`, `runtime/web/runtime-web`, `runtime/android/runtime-android`, `runtime/android/runtime-android-c`, and `runtime/ios/runtime-ios-c`.
+- Runtime folders: `runtime/base`, `runtime/builder`, `runtime/resources`, `runtime/core`, `runtime/shared/runtime-jni`, `runtime/shared/runtime-c`, `runtime/desktop/runtime-desktop-jni`, `runtime/desktop/runtime-desktop-ffm`, `runtime/desktop/runtime-desktop-c`, `runtime/web/runtime-web`, `runtime/android/runtime-android`, `runtime/android/runtime-android-c`, and `runtime/ios/runtime-ios-c`.
 - Split Gradle project paths use the same artifact-style leaf names as the folders, for example `:jParser:runtime:shared:runtime-jni`, `:jParser:runtime:desktop:runtime-desktop-jni`, `:jParser:runtime:desktop:runtime-desktop-ffm`, `:jParser:runtime:web:runtime-web`, `:jParser:runtime:android:runtime-android`, `:jParser:runtime:shared:runtime-c`, `:jParser:runtime:desktop:runtime-desktop-c`, `:jParser:runtime:android:runtime-android-c`, and `:jParser:runtime:ios:runtime-ios-c`.
 - Example split Gradle paths follow the same pattern, such as `:examples:TestLib:lib:shared:TestLib-jni`, `:examples:TestLib:lib:shared:TestLib-c`, `:examples:TestLib:lib:desktop:TestLib-desktop-jni`, `:examples:TestLib:lib:desktop:TestLib-desktop-ffm`, `:examples:TestLib:lib:desktop:TestLib-desktop-c`, `:examples:TestLib:lib:web:TestLib-web`, `:examples:TestLib:lib:android:TestLib-android`, `:examples:TestLib:lib:android:TestLib-android-c`, and `:examples:TestLib:lib:ios:TestLib-ios-c`.
-- App platform modules in examples: `app:platforms:desktop-jni`, `app:platforms:desktop-ffm`, `app:platforms:desktop-c`, `app:platforms:web`, `app:platforms:android`, `app:platforms:android-c`, `app:platforms:ios-c`.
+- App platform modules in examples: `app:platforms:desktop-jni`, `app:platforms:desktop-ffm`, `app:platforms:desktop-c`, `app:platforms:web`, `app:platforms:android`, `app:platforms:android-c`, `app:platforms:ios-c`; SharedLib also has `desktop-bundle-jni` and `desktop-bundle-mixed` fat-bundle fixtures.
 - Runtime generator module: `jParser:runtime:builder` (tasks like `runtime_helper_build_project_<target>`).
 - Gradle plugin root subproject: `:gradle-plugin` (plugin id `com.github.xpenatan.jParser`, artifact `jparser-gradle-plugin`).
 - TeaVM C loader modules: `jParser/loader/loader-core` provides the shared Java loader API, while `jParser/loader/loader-c` provides its `emu.c` substitution plus the portable C/C++ loader ABI and implementation.
@@ -92,5 +92,6 @@ Canonical command matrices live in `docs/commands.md`.
 - `docs/getting-started.md` - project layout and first TestLib builds.
 - `docs/binding-authoring.md` - directive, WebIDL, and ownership guide.
 - `docs/teavm-c.md` - native TeaVM C linkage and packaging guide.
+- `docs/native-bundles.md` - `_resources` publication, fat-linking, and loader contract.
 
 Keep this file concise. Put verbose command tables and background detail in `docs/`.

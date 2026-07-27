@@ -154,6 +154,16 @@ open class JParserExtension @Inject constructor(
         objects.domainObjectContainer(JParserDependencyExtension::class.java) { name ->
             objects.newInstance(JParserDependencyExtension::class.java, name, objects)
         }
+    val resources: JParserResourcesExtension =
+        objects.newInstance(JParserResourcesExtension::class.java, project, objects).apply {
+            componentId.convention(libName)
+            componentVersion.convention(project.provider { project.version.toString() })
+            resourcesArtifactId.convention(libName.map { value -> "${value}_resources" })
+        }
+    val bundles: NamedDomainObjectContainer<JParserNativeBundleSpec> =
+        objects.domainObjectContainer(JParserNativeBundleSpec::class.java) { name ->
+            objects.newInstance(JParserNativeBundleSpec::class.java, name, project, objects)
+        }
 
     fun cppSourcePath(value: File) {
         cppSourcePath.set(value.toJParserPath())
@@ -296,6 +306,14 @@ open class JParserExtension @Inject constructor(
 
     fun dependency(name: String, action: Action<in JParserDependencyExtension>) {
         dependencies.create(name, action)
+    }
+
+    fun resources(action: Action<in JParserResourcesExtension>) {
+        action.execute(resources)
+    }
+
+    fun bundle(name: String, action: Action<in JParserNativeBundleSpec>) {
+        bundles.create(name, action)
     }
 }
 

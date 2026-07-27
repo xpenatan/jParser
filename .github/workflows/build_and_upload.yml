@@ -80,6 +80,9 @@ jobs:
       - name: Build Shared LibB FFM project
         run: ./gradlew LibB_build_project_windows64_ffm
 
+      - name: Test SharedLib JNI-only and mixed fat bundles
+        run: ./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:test :examples:SharedLib:app:platforms:desktop-bundle-mixed:test --no-daemon --console=plain
+
       - name: Upload natives
         uses: actions/upload-artifact@v7
         with:
@@ -140,6 +143,9 @@ jobs:
 
       - name: Build Shared LibB FFM project
         run: ./gradlew LibB_build_project_linux64_ffm
+
+      - name: Test SharedLib JNI-only and mixed fat bundles
+        run: ./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:test :examples:SharedLib:app:platforms:desktop-bundle-mixed:test --no-daemon --console=plain
 
       - name: Upload natives runtime
         uses: actions/upload-artifact@v7
@@ -210,6 +216,10 @@ jobs:
         run: |
           ./gradlew LibB_build_project_mac64_ffm
 
+      - name: Test SharedLib JNI-only and mixed fat bundles
+        run: |
+          ./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:test :examples:SharedLib:app:platforms:desktop-bundle-mixed:test --no-daemon --console=plain
+
       - name: Upload natives runtime
         uses: actions/upload-artifact@v7
         with:
@@ -278,6 +288,10 @@ jobs:
       - name: Build Shared LibB FFM project
         run: |
           ./gradlew LibB_build_project_macArm_ffm
+
+      - name: Test SharedLib JNI-only and mixed fat bundles
+        run: |
+          ./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:test :examples:SharedLib:app:platforms:desktop-bundle-mixed:test --no-daemon --console=plain
 
       - name: Upload natives runtime
         uses: actions/upload-artifact@v7
@@ -733,6 +747,14 @@ jobs:
 
       - name: Generate runtime project
         run: ./gradlew runtime_helper_build_project
+
+      - name: Verify complete runtime resources publication
+        run: >-
+          ./gradlew
+          :jParser:runtime:resources:verifyJParserResourcesPublication
+          -Pjparser.runtimeResources.complete=true
+          --no-daemon
+          --console=plain
 
       - name: Configure Git
         run: |

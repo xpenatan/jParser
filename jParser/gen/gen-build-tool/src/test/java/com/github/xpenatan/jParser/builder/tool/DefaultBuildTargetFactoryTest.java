@@ -22,7 +22,7 @@ public class DefaultBuildTargetFactoryTest {
         ArrayList<BuildMultiTarget> targets = targetsFor("gen_teavm_c", "windows64_teavm_c");
 
         assertTrue(targets.size() == 1);
-        assertTrue(targets.get(0).multiTarget.size() == 2);
+        assertTrue(targets.get(0).multiTarget.size() == 3);
         for(int i = 0; i < targets.get(0).multiTarget.size(); i++) {
             DefaultBuildTarget target = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
             assertFalse(target.cppFlags.contains("/MD"));
@@ -54,6 +54,25 @@ public class DefaultBuildTargetFactoryTest {
             assertFalse(target.cppFlags.contains("/MD"));
             assertFalse(target.cppFlags.contains("/MT"));
         }
+    }
+
+    @Test
+    public void desktopBuildCreatesPrecompiledBridgeArchiveBeforeStandaloneLibrary() throws Exception {
+        ArrayList<BuildMultiTarget> targets = targetsFor("gen_ffm", "linux64_ffm");
+
+        assertTrue(targets.size() == 1);
+        assertTrue(targets.get(0).multiTarget.size() == 3);
+        DefaultBuildTarget implementation = (DefaultBuildTarget)targets.get(0).multiTarget.get(0);
+        DefaultBuildTarget bridge = (DefaultBuildTarget)targets.get(0).multiTarget.get(1);
+        DefaultBuildTarget standalone = (DefaultBuildTarget)targets.get(0).multiTarget.get(2);
+
+        assertTrue(implementation.isStatic);
+        assertTrue(bridge.isStatic);
+        assertTrue(bridge.libName.equals("PortableLib_bridge"));
+        assertTrue(bridge.cppInclude.stream().anyMatch(path -> path.endsWith("/FFMGlue.cpp")));
+        assertFalse(standalone.shouldCompile);
+        assertTrue(standalone.linkerFlags.stream().anyMatch(path ->
+                path.endsWith("/libPortableLib_bridge64_.a")));
     }
 
     @Test
@@ -105,7 +124,7 @@ public class DefaultBuildTargetFactoryTest {
         ArrayList<BuildMultiTarget> targets = targetsFor(config, "gen_teavm_c", "windows64_teavm_c");
 
         assertTrue(targets.size() == 1);
-        assertTrue(targets.get(0).multiTarget.size() == 2);
+        assertTrue(targets.get(0).multiTarget.size() == 3);
         for(int i = 0; i < targets.get(0).multiTarget.size(); i++) {
             DefaultBuildTarget target = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
             assertTrue(target.headerDirs.contains("/FI" + includePath));
@@ -122,7 +141,7 @@ public class DefaultBuildTargetFactoryTest {
         ArrayList<BuildMultiTarget> targets = targetsFor(config, "gen_teavm_c", "linux64_teavm_c");
 
         assertTrue(targets.size() == 1);
-        assertTrue(targets.get(0).multiTarget.size() == 2);
+        assertTrue(targets.get(0).multiTarget.size() == 3);
         for(int i = 0; i < targets.get(0).multiTarget.size(); i++) {
             DefaultBuildTarget target = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
             assertTrue(target.headerDirs.contains("-include" + includePath));
@@ -135,13 +154,22 @@ public class DefaultBuildTargetFactoryTest {
         ArrayList<BuildMultiTarget> targets = targetsFor("gen_teavm_c", "ios_teavm_c");
 
         assertTrue(targets.size() == 1);
-        assertTrue(targets.get(0).multiTarget.size() == 3);
+        assertTrue(targets.get(0).multiTarget.size() == 9);
         assertIOSSlice((IOSTarget)targets.get(0).multiTarget.get(0),
                 IOSTarget.SDK.DEVICE, IOSTarget.Architecture.ARM64);
-        assertIOSSlice((IOSTarget)targets.get(0).multiTarget.get(1),
+        assertIOSSlice((IOSTarget)targets.get(0).multiTarget.get(3),
                 IOSTarget.SDK.SIMULATOR, IOSTarget.Architecture.ARM64);
-        assertIOSSlice((IOSTarget)targets.get(0).multiTarget.get(2),
+        assertIOSSlice((IOSTarget)targets.get(0).multiTarget.get(6),
                 IOSTarget.SDK.SIMULATOR, IOSTarget.Architecture.X86_64);
+        for(int i = 0; i < 9; i += 3) {
+            DefaultBuildTarget implementation = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
+            DefaultBuildTarget bridge = (DefaultBuildTarget)targets.get(0).multiTarget.get(i + 1);
+            IOSTarget combined = (IOSTarget)targets.get(0).multiTarget.get(i + 2);
+            assertTrue(implementation.libName.equals("PortableLib_implementation"));
+            assertTrue(bridge.libName.equals("PortableLib_bridge"));
+            assertFalse(combined.shouldCompile);
+            assertTrue(combined.staticArchiveInputs.size() == 2);
+        }
     }
 
     @Test
@@ -151,9 +179,11 @@ public class DefaultBuildTargetFactoryTest {
 
         ArrayList<BuildMultiTarget> targets = targetsFor(config, "gen_teavm_c", "ios_teavm_c");
 
-        for(int i = 0; i < targets.get(0).multiTarget.size(); i++) {
-            DefaultBuildTarget target = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
-            assertTrue(target.cppFlags.contains("-DPORTABLE_IOS=1"));
+        for(int i = 0; i < targets.get(0).multiTarget.size(); i += 3) {
+            DefaultBuildTarget implementation = (DefaultBuildTarget)targets.get(0).multiTarget.get(i);
+            DefaultBuildTarget bridge = (DefaultBuildTarget)targets.get(0).multiTarget.get(i + 1);
+            assertTrue(implementation.cppFlags.contains("-DPORTABLE_IOS=1"));
+            assertTrue(bridge.cppFlags.contains("-DPORTABLE_IOS=1"));
         }
     }
 

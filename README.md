@@ -68,6 +68,7 @@ Windows builds auto-detect `vcvarsall.bat` from `VCVARSALL_PATH`, `JPARSER_VCVAR
 | [Getting started](docs/getting-started.md) | Project layout and the first TestLib builds |
 | [Binding authoring](docs/binding-authoring.md) | Native directive blocks, WebIDL, and `IDLBase` ownership |
 | [TeaVM C](docs/teavm-c.md) | Linkage modes, packaged dependencies, consumer metadata, and MSVC runtime selection |
+| [Fat native bundles](docs/native-bundles.md) | `_resources` publications, variant resolution, final linking, and loading |
 | [Command reference](docs/commands.md) | Build, run, packaging, and benchmark commands |
 | [Architecture](docs/architecture.md) | Generator pipeline, module map, and runtime internals |
 | [Runtime Maven artifacts](docs/runtime-maven-artifacts.md) | Published modules, classifiers, and native resource layouts |

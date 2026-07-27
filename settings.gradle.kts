@@ -28,6 +28,7 @@ include(":jParser:benchmark:benchmark-core")
 
 include(":jParser:runtime:base")
 include(":jParser:runtime:builder")
+include(":jParser:runtime:resources")
 include(":jParser:runtime:core")
 include(":jParser:runtime:web:runtime-web")
 include(":jParser:runtime:shared:runtime-jni")
@@ -94,11 +95,14 @@ include(":examples:SharedLib:libB:ios:LibB-ios-c")
 include(":examples:SharedLib:app:core")
 include(":examples:SharedLib:app:platforms:desktop-jni")
 include(":examples:SharedLib:app:platforms:desktop-ffm")
+include(":examples:SharedLib:app:platforms:desktop-bundle-jni")
+include(":examples:SharedLib:app:platforms:desktop-bundle-mixed")
 include(":examples:SharedLib:app:platforms:desktop-c")
 include(":examples:SharedLib:app:platforms:ios-c")
 include(":examples:SharedLib:app:platforms:android-c")
 include(":examples:SharedLib:app:platforms:web")
 include(":examples:SharedLib:app:platforms:android")
+include(":examples:SharedLib:bundle")
 
 //includeBuild("E:\\Dev\\Projects\\java\\gdx-teavm") {
 //    dependencySubstitution {
