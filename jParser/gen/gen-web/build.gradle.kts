@@ -3,12 +3,15 @@ plugins {
 }
 
 val moduleName = "gen-web"
+fun jParserModule(name: String) = providers.provider {
+    "${libs.versions.jParserGroup.get()}:$name:${project.version}"
+}
 
 dependencies {
-    api(project(":jParser:gen:gen-idl"))
-    implementation(project(":jParser:runtime:base"))
-    implementation(project(":jParser:gen:gen-core"))
-    implementation(project(":jParser:api:api-core"))
+    api(project(":gen-idl"))
+    implementation(jParserModule("runtime-base"))
+    implementation(project(":gen-core"))
+    implementation(jParserModule("api-core"))
 }
 
 java {

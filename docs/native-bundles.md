@@ -262,6 +262,22 @@ files to another Gradle project.
 
 For a JNI-only desktop bundle, select `NativeBridge.JNI` for the runtime.
 Exactly one compatible runtime component is mandatory.
+Host-native desktop consumers can use `NativeTarget.currentDesktop()`; release
+matrices and cross-compilation should declare an explicit `NativeTarget`.
+
+The repository's TestLib fixture follows the same consumer model:
+`examples/TestLib/lib/resources` exposes the binding archives,
+`examples/TestLib/bundle` declares the runtime and binding components, and its
+ordinary JAR attaches the `jParserBundleDesktopJni` output. The desktop app
+depends only on that bundle project; it does not copy a build directory or
+scan the classpath for native files.
+
+The SharedLib fixture extends the model to multiple libraries and bridge
+combinations. `libA/resources` and `libB/resources` own the native input paths
+and producer tasks. `bundle` selects runtime, LibA, and LibB JNI components;
+`bundle-mixed` selects the FFM runtime, LibA JNI, and LibB FFM. Both modules
+attach the plugin output to a normal JAR, and each desktop app consumes exactly
+one corresponding project dependency.
 
 ## Manual Builder API
 

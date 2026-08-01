@@ -58,14 +58,16 @@ platform archive.
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_mac64_ffm
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_macArm_ffm
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_windows64_teavm_c
-./gradlew -p examples :TestLib:lib:plugin:jParser_build_windows64_teavm_c_mt
-./gradlew -p examples :TestLib:lib:plugin:jParser_build_windows64_teavm_c_md
+./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_teavm_c_mt
+./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_teavm_c_md
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_linux64_teavm_c
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_mac64_teavm_c
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_macArm_teavm_c
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_android_teavm_c
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_ios_teavm_c
 ./gradlew :examples:TestLib:lib:builder:TestLib_build_project_web_wasm
+./gradlew :examples:TestLib:lib:resources:jParserBuildResourceWindowsJni
+./gradlew :examples:TestLib:bundle:jar
 ```
 
 The aggregate `runtime_helper_build_project` and `TestLib_build_project` tasks generate core, JNI, FFM, TeaVM web, and TeaVM C outputs. Platform-specific `*_teavm_c` tasks also compile that platform's native output; use them when producing a TeaVM C native payload jar. The unsuffixed Windows runtime TeaVM C task builds both MT and MD variants; use its `_mt` or `_md` task when only one CRT family is needed. TestLib's plugin tasks demonstrate the general target-variant API and must both run before packaging its dual-runtime Windows native jar.
@@ -117,6 +119,7 @@ Replace `windows_x64` with `linux_x64`, `mac_x64`, or `mac_arm64` after building
 ```text
 ./gradlew :examples:TestLib:app:platforms:desktop-jni:TestLib_run_app_desktop_jni
 ./gradlew :examples:TestLib:app:platforms:desktop-ffm:TestLib_run_app_desktop_ffm
+./gradlew :examples:TestLib:app:platforms:desktop-bundle-jni:TestLib_run_app_desktop_bundle_jni
 ./gradlew :examples:TestLib:app:platforms:desktop-c:TestLib_build_app_desktop_c
 ./gradlew :examples:TestLib:app:platforms:web:TestLib_run_app_web
 ./gradlew :examples:TestLib:app:platforms:android:assembleDebug
@@ -132,6 +135,15 @@ The iOS command requires macOS, Xcode, and CMake. The committed TestLib and Shar
 ./gradlew :examples:TestLib:app:platforms:desktop-jni:test
 ./gradlew :examples:TestLib:app:platforms:desktop-ffm:test
 ```
+
+The `:examples:TestLib:lib:resources` producer exposes classified static
+implementation/bridge archives. The `:examples:TestLib:bundle` project
+declares that producer and `runtime:resources` through the jParser bundle DSL;
+the plugin selects the host variants, calls the manual bundle builder, and
+places the resulting single DLL/SO/DYLIB in the ordinary bundle JAR. The
+desktop application consumes it with a normal
+`implementation(project(":examples:TestLib:bundle"))` dependency and loads
+`TestLibFat` through `JParserNativeBundleLoader`.
 
 ### Benchmarks
 
@@ -173,6 +185,10 @@ Build libA before libB.
 ./gradlew :examples:SharedLib:libB:builder:LibB_build_project_ios_teavm_c
 ./gradlew :examples:SharedLib:libB:builder:LibB_build_project_web_wasm
 
+./gradlew :examples:SharedLib:libA:resources:jParserBuildResourceWindowsJni
+./gradlew :examples:SharedLib:libB:resources:jParserBuildResourceWindowsJni
+./gradlew :examples:SharedLib:libB:resources:jParserBuildResourceWindowsFfm
+
 ./gradlew :examples:SharedLib:app:platforms:desktop-jni:SharedLib_run_app_desktop_jni
 ./gradlew :examples:SharedLib:app:platforms:desktop-ffm:SharedLib_run_app_desktop_ffm
 ./gradlew :examples:SharedLib:app:platforms:desktop-c:SharedLib_build_app_desktop_c
@@ -181,15 +197,20 @@ Build libA before libB.
 ./gradlew :examples:SharedLib:app:platforms:android-c:SharedLib_build_app_android_c
 ./gradlew :examples:SharedLib:app:platforms:ios-c:SharedLib_build_app_ios_c
 
-./gradlew :examples:SharedLib:bundle:SharedLib_build_bundle_desktop_jni
-./gradlew :examples:SharedLib:bundle:SharedLib_build_bundle_desktop_mixed
-./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:test
-./gradlew :examples:SharedLib:app:platforms:desktop-bundle-mixed:test
+./gradlew :examples:SharedLib:bundle:jar
+./gradlew :examples:SharedLib:bundle-mixed:jar
+./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:SharedLib_run_app_desktop_bundle_jni
+./gradlew :examples:SharedLib:app:platforms:desktop-bundle-mixed:SharedLib_run_app_desktop_bundle_mixed
 ```
 
-The two bundle tests load only `SharedLibFatJni` or `SharedLibFatMixed`
-through `JParserNativeBundleLoader`, reject standalone native files on the
-test classpath, and inspect the final DLL/SO/DYLIB dependencies.
+The `libA:resources` and `libB:resources` projects own their classified static
+archives and native producer-task dependencies. The declarative `bundle` and
+`bundle-mixed` modules only select the required components and attach the
+plugin output to ordinary runtime JARs. Each JAR contains exactly one host
+native, `SharedLibFatJni` or `SharedLibFatMixed`, and exposes that mode's
+generated classes. The matching desktop application declares only its selected
+bundle project dependency and loads it once through
+`JParserNativeBundleLoader`.
 
 ## Cross-platform variants
 
@@ -198,7 +219,8 @@ Where applicable, replace `windows64` with `linux64`, `mac64`, or `macArm`.
 ## Publishing
 
 jParser uses the Easy Publishing plugin to coordinate the root-owned library
-modules and the `:gradle-plugin` project.
+modules with the generator and plugin publications in the nested `jParser/gen`
+build.
 
 ```text
 ./gradlew prepareSnapshot
@@ -233,30 +255,35 @@ publishing tasks in the same Gradle invocation.
 ./gradlew :gradle-plugin:check
 ./gradlew :gradle-plugin:validatePlugins
 
-./gradlew -p examples :TestLib:lib:plugin:tasks --group jParser --all
-./gradlew -p examples :TestLib:lib:plugin:jParser_generate
-./gradlew -p examples :TestLib:lib:plugin:jParser_build_windows64_jni
-./gradlew -p examples :TestLib:lib:plugin:jParser_build_windows64_ffm
-./gradlew -p examples :TestLib:lib:plugin:jParser_build_android_jni
-./gradlew -p examples :TestLib:lib:plugin:jParser_build_ios_teavm_c
-./gradlew -p examples :TestLib:lib:plugin:jParser_build_web_wasm
+./gradlew :examples:TestLib:lib:plugin:tasks --group jParser --all
+./gradlew :examples:TestLib:lib:plugin:jParser_generate
+./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_jni
+./gradlew :examples:TestLib:lib:plugin:jParser_build_windows64_ffm
+./gradlew :examples:TestLib:lib:plugin:jParser_build_android_jni
+./gradlew :examples:TestLib:lib:plugin:jParser_build_ios_teavm_c
+./gradlew :examples:TestLib:lib:plugin:jParser_build_web_wasm
 
-./gradlew -p examples :SharedLib:libA:plugin:tasks --group jParser --all
-./gradlew -p examples :SharedLib:libA:plugin:jParser_generate
-./gradlew -p examples :SharedLib:libB:plugin:tasks --group jParser --all
-./gradlew -p examples :SharedLib:libB:plugin:jParser_generate
-./gradlew -p examples :SharedLib:libB:plugin:jParser_build_windows64_jni
-./gradlew -p examples :SharedLib:libB:plugin:jParser_build_windows64_ffm
-./gradlew -p examples :SharedLib:libB:plugin:jParser_build_android_jni
-./gradlew -p examples :SharedLib:libB:plugin:jParser_build_web_wasm
+./gradlew :examples:SharedLib:libA:plugin:tasks --group jParser --all
+./gradlew :examples:SharedLib:libA:plugin:jParser_generate
+./gradlew :examples:SharedLib:libB:plugin:tasks --group jParser --all
+./gradlew :examples:SharedLib:libB:plugin:jParser_generate
+./gradlew :examples:SharedLib:libB:plugin:jParser_build_windows64_jni
+./gradlew :examples:SharedLib:libB:plugin:jParser_build_windows64_ffm
+./gradlew :examples:SharedLib:libB:plugin:jParser_build_android_jni
+./gradlew :examples:SharedLib:libB:plugin:jParser_build_web_wasm
 ```
 
-The plugin id is `com.github.xpenatan.jParser`; the Maven implementation artifact is `com.github.xpenatan.jParser:jparser-gradle-plugin`.
+The plugin fixtures are ordinary `:examples:...:plugin` projects in the
+repository-root Gradle import; no separate `examples` import or Maven-local
+publication is required. The local plugin source appears under the short
+`:gradle-plugin` path. The plugin id is `com.github.xpenatan.jParser`; the
+Maven implementation artifact is
+`com.github.xpenatan.jParser:jparser-gradle-plugin`.
 
 ## Quick compile sanity checks
 
 ```text
-./gradlew :jParser:gen:gen-core:compileJava
-./gradlew :jParser:gen:gen-build-tool:compileJava
+./gradlew :gradle-plugin:gen-core:compileJava
+./gradlew :gradle-plugin:gen-build-tool:compileJava
 ./gradlew :gradle-plugin:compileKotlin
 ```

@@ -16,6 +16,7 @@ Primary orchestration is in `jParser/jParser-build-tool` via `BuilderTool.build(
 
 - `base`: handwritten Java with target-specific comment blocks in examples
 - `builder`: Gradle entry for generation + native build in examples
+- `resources`: optional POM-only `_resources` producer with classified static implementation/bridge inputs for fat bundles
 - `core`: generated bridge-agnostic public API in examples
 - `shared/<Lib>-jni`: generated JNI Java shared by desktop and Android JNI examples
 - `shared/<Lib>-c`: generated `gen.c.*` TeaVM C implementations and portable build resources shared by TeaVM C consumers
@@ -49,7 +50,7 @@ Loader modules provide one public API with target substitutions:
 - `loader/loader-c`: TeaVM C's `emu.c` loader implementation plus the portable C/C++ loader header and source. `runtime-c` and generated binding C artifacts expose this module to TeaVM C applications.
 - `loader/loader-web`: the TeaVM web loader implementation.
 
-Split runtime Gradle project paths use the same artifact-style leaf names as the folders. Example split modules follow the same pattern, such as `:examples:TestLib:lib:shared:TestLib-jni` at `examples/TestLib/lib/shared/TestLib-jni` and `:examples:TestLib:lib:desktop:TestLib-desktop-jni` at `examples/TestLib/lib/desktop/TestLib-desktop-jni`.
+Split runtime Gradle project paths use the same artifact-style leaf names as the folders. Example split modules follow the same pattern, such as `:examples:TestLib:lib:resources` at `examples/TestLib/lib/resources`, `:examples:SharedLib:libA:resources` and `:examples:SharedLib:libB:resources` at their matching library roots, `:examples:TestLib:lib:shared:TestLib-jni` at `examples/TestLib/lib/shared/TestLib-jni`, and `:examples:TestLib:lib:desktop:TestLib-desktop-jni` at `examples/TestLib/lib/desktop/TestLib-desktop-jni`.
 
 `runtime-web` owns jParser's TeaVM web substitution service. Binding web modules should depend on `runtime-web`; the runtime policy maps any class to `emu.web.<original-class>` or `gen.web.<original-class>` only when that replacement class is present on the TeaVM classpath. The `emu.web` rule is evaluated before `gen.web`, so explicit emulation wins over generated substitutions. `loader-web` contains the web loader implementation classes but does not register a TeaVM substitution service itself.
 
@@ -61,7 +62,8 @@ Example app modules in examples use:
 - `app:assets` where an example has shared assets.
 - `app:platforms:desktop-jni`
 - `app:platforms:desktop-ffm`
-- `app:platforms:desktop-bundle-jni` and `app:platforms:desktop-bundle-mixed` in SharedLib for loader-only fat-bundle verification
+- `app:platforms:desktop-bundle-jni` in TestLib for consuming the runtime-plus-binding native JAR through one normal project dependency
+- `app:platforms:desktop-bundle-jni` and `app:platforms:desktop-bundle-mixed` in SharedLib for consuming the JNI-only or mixed multi-binding fat-native JAR through one normal project dependency
 - `app:platforms:desktop-c`
 - `app:platforms:web`
 - `app:platforms:android`
@@ -73,9 +75,12 @@ Pattern repeats across `examples/`, `idl/`, `loader/`, and `jParser/` modules
 
 ## Gradle Plugin Support
 
-`:gradle-plugin` is a root subproject that publishes the Maven artifact `com.github.xpenatan.jParser:jparser-gradle-plugin` and plugin id `com.github.xpenatan.jParser`.
+`:gradle-plugin` is the root-visible path of the included plugin source build.
+It publishes the Maven artifact
+`com.github.xpenatan.jParser:jparser-gradle-plugin` and plugin id
+`com.github.xpenatan.jParser`.
 
-The plugin is scoped to build-module orchestration: it creates one task namespace with `jParser_generate` and platform build tasks such as `jParser_build_windows64_jni`. The tasks reuse `BuilderTool`, `BuildToolOptions`, `BuildMultiTarget`, and the platform target classes through `JParserBuildRunner` and `DefaultBuildTargetFactory` in `jParser:gen:gen-build-tool`. Directly invoking `jParser_generate` generates core plus every configured binding family: JNI, FFM, TeaVM web, and TeaVM C. Each regular or variant `jParser_build_*` task generates core plus exactly the binding family required by its platform target and does not invoke the aggregate `jParser_generate` task. Native build task registration follows explicit `native { target(...) }` and `native { targetVariant(...) }` declarations when any are present; module suffixes are only used as the fallback for builds with no explicit native target list.
+The plugin is scoped to build-module orchestration: it creates one task namespace with `jParser_generate` and platform build tasks such as `jParser_build_windows64_jni`. The tasks reuse `BuilderTool`, `BuildToolOptions`, `BuildMultiTarget`, and the platform target classes through `JParserBuildRunner` and `DefaultBuildTargetFactory` in `jParser/gen/gen-build-tool`. Directly invoking `jParser_generate` generates core plus every configured binding family: JNI, FFM, TeaVM web, and TeaVM C. Each regular or variant `jParser_build_*` task generates core plus exactly the binding family required by its platform target and does not invoke the aggregate `jParser_generate` task. Native build task registration follows explicit `native { target(...) }` and `native { targetVariant(...) }` declarations when any are present; module suffixes are only used as the fallback for builds with no explicit native target list.
 
 Symbol naming is configured with the typed build-tool enum `JParserSymbolNameMode` (`DEFAULT` or `OBFUSCATED`) for `jniSymbolNameMode`, `ffmSymbolNameMode`, and `teaVMCSymbolNameMode`; plugin build scripts must not set these values with raw strings.
 
@@ -93,12 +98,15 @@ Path-like plugin DSL methods keep string properties for compatibility, but provi
 
 `jParser_generate` composes build-runner switches from `JParserGenerationTarget` instead of raw `gen_jni`, `gen_ffm`, `gen_web`, and `gen_teavm_c` strings inside the plugin. The runner still receives the original string args at the boundary.
 
-The repository root directly owns every `:jParser:*` project, the regular
-example projects, and `:gradle-plugin`. The plugin validation fixtures are not
-root subprojects. They are owned by `examples/settings.gradle.kts`, which
-includes the repository root through `pluginManagement` and maps only the
-three existing plugin fixture directories. Every physical source directory
-therefore has one Gradle owner in either entry point.
+The repository uses one non-circular local-source composite. The root build
+owns runtime, loader, and every regular or plugin-fixture project under
+`examples`. The included build rooted at `gradle-plugin` owns the plugin and
+maps all `gen-*` projects from their source directories under `jParser/gen`.
+It appears from the root as `:gradle-plugin`. The root uses that build for both
+plugin resolution and explicit dependency substitution of the published
+`gen-*` coordinates. Each physical source directory therefore has exactly one
+Gradle owner, and a single repository-root IDE import exposes the complete
+tree without qualified duplicate example module names.
 
 The plugin is a Gradle adapter over the canonical manual-builder API. It has
 normal dependencies on `gen-build`, `gen-idl`, and `gen-build-tool`, exposes
@@ -107,23 +115,33 @@ passes a canonical `JParserBuildRequest` directly to `JParserBuildRunner`.
 There is no plugin-owned copy of the builder request, generator enums, or IDL
 renaming contract, and no reflection/property translation protocol.
 
-The plugin uses direct project dependencies on
-`:jParser:gen:gen-build`, `:jParser:gen:gen-idl`, and
-`:jParser:gen:gen-build-tool`. Local compilation therefore follows source
-changes without publishing or resolving a Maven snapshot. Gradle publication
-metadata converts those project dependencies to the corresponding
+Inside the `gradle-plugin` build, the plugin uses direct project dependencies on
+`:gen-build`, `:gen-idl`, and `:gen-build-tool`. Local plugin compilation
+therefore follows current manual-builder sources without publishing or
+resolving a plugin snapshot. Root generator consumers declare the published
+`gen-*` coordinates; the root composite substitutes those dependencies with
+the matching projects from `:gradle-plugin`. Publication metadata retains the normal
 `com.github.xpenatan.jParser` Maven coordinates for external consumers.
 Because `gen-build-tool` targets the Java FFM toolchain version, the directly
 linked plugin uses the same Java target.
 
-Projects that apply a plugin cannot obtain it from another project in the same
-build while their build scripts are being evaluated. For this reason the
-plugin fixtures are a separate consumer build and include the main build only
-for plugin resolution. The main build does not include that consumer build,
-so there is no reverse/circular build relationship. Root Easy Publishing owns
-the library and plugin publications in one lifecycle.
+The root includes `gradle-plugin` once as a normal composite build. That single
+include contributes the project plugin and substitutes the `gen-*` module
+dependencies, so ordinary `:examples:...:plugin` projects can apply the current
+local plugin while their scripts are evaluated. No duplicate plugin-only
+include, examples-side settings file, or reverse include is required. Easy
+Publishing coordinates the root publications with the `gradle-plugin` nested
+build so library, generator, and plugin artifacts remain part of one release
+lifecycle.
 
-The TestLib and SharedLib desktop example Gradle files select their host target directly and depend on the matching generator task paths. Version and dependency data comes from `gradle/libs.versions.toml`; the root build does not use `buildSrc`.
+Standalone TestLib and SharedLib desktop packaging selects its host native and
+depends on the matching generator task. Fat-bundle projects instead declare
+runtime and binding resource projects in the jParser bundle DSL; variant
+attributes select the host archives and carry their producer task dependencies.
+SharedLib keeps all native paths and producer task ownership in
+`libA/resources` and `libB/resources`, leaving both `bundle` and
+`bundle-mixed` as small declarative consumers. Version and dependency data comes from
+`gradle/libs.versions.toml`; the root build does not use `buildSrc`.
 
 Example generated output modules use this layout: `core`, `shared/<Lib>-jni`, `shared/<Lib>-c`, `desktop/<Lib>-desktop-ffm`, and `web/<Lib>-web`, with native packaging under `desktop/<Lib>-desktop-jni`, `desktop/<Lib>-desktop-c`, `android/<Lib>-android`, `android/<Lib>-android-c`, and `ios/<Lib>-ios-c`. The plugin fixtures keep their separate `plugin` modules, but set suffix overrides so generation targets this layout.
 
@@ -131,15 +149,24 @@ Runtime helper generation remains owned by `jParser/runtime/builder`, which
 invokes `BuildRuntimeHelper` directly and exposes the
 `runtime_helper_build_project*` tasks.
 
-Shared-library examples use per-library plugin modules in `examples/SharedLib/libA/plugin` and `examples/SharedLib/libB/plugin`. These are projects in the separate examples consumer build; `libB` declares its `libA` module reference through `dependency("libA") { reference(...) }`, which expands IDL refs, header paths, native link inputs, and project task dependencies.
+Shared-library examples use ordinary root plugin projects at
+`examples/SharedLib/libA/plugin` and `examples/SharedLib/libB/plugin`. `libB`
+declares its `libA` module reference through
+`dependency("libA") { reference(...) }`, which expands IDL refs, header paths,
+native link inputs, and project task dependencies.
 
 Fat bundles use the Gradle-independent `builder.bundle` API in
-`jParser:gen:gen-build-tool`. Standard native targets preserve an
+`jParser/gen/gen-build-tool`. Standard native targets preserve an
 implementation static archive, compile generated JNI/FFM/TeaVM C glue into a
 separate bridge static archive, and link those same inputs into the existing
 standalone shared output. The plugin only maps producer/consumer DSL values to
-`NativeComponentRequest` and `NativeBundleRequest`. The complete publication
-and platform behavior is documented in [Fat Native Bundles](native-bundles.md).
+`NativeComponentRequest` and `NativeBundleRequest`. TestLib's
+`lib/resources` project demonstrates the single-binding producer boundary.
+SharedLib's `libA/resources` and `libB/resources` projects demonstrate the same
+boundary for a bundle spanning two independently generated bindings. Their
+bundle projects contain only Java API dependencies, resource component
+declarations, and normal JAR attachment. The complete publication and platform
+behavior is documented in [Fat Native Bundles](native-bundles.md).
 
 ## JNI vs FFM
 
@@ -162,7 +189,7 @@ For public configuration and deployment guidance, see the [TeaVM C guide](teavm-
 
 - Java side: static native methods annotated with `org.teavm.interop.Import`.
 - Native side: C ABI (`extern "C"`, `int64_t`, `int32_t`, no `JNIEnv*`).
-- Parser/generator: `TeaVMCCodeParser` with `TeaVMCGenerator` in `jParser:gen:gen-c`.
+- Parser/generator: `TeaVMCCodeParser` with `TeaVMCGenerator` in `jParser/gen/gen-c`.
 - Build option is off by default (`BuildToolOptions.generateTeaVMC=false`) unless enabled with `gen_teavm_c`.
 - Before generation, jParser clears the generated C Java output path so public-package files left by an older generator cannot survive an upgrade. New Java is written to `gen.c.<original-package>` below `BuildToolOptions.getCJavaOutputPath()`, not to the public package or the TeaVM web output path. Imports between generated binding classes are rewritten to the same `gen.c` namespace; native ABI symbol names continue to use the original public package.
 - Native libraries are selected by platform target args such as `windows64_teavm_c`, `android_teavm_c`, or `ios_teavm_c`.

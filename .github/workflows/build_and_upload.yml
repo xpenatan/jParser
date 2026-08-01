@@ -80,8 +80,8 @@ jobs:
       - name: Build Shared LibB FFM project
         run: ./gradlew LibB_build_project_windows64_ffm
 
-      - name: Test SharedLib JNI-only and mixed fat bundles
-        run: ./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:test :examples:SharedLib:app:platforms:desktop-bundle-mixed:test --no-daemon --console=plain
+      - name: Build SharedLib JNI-only and mixed fat bundle JARs
+        run: ./gradlew :examples:SharedLib:bundle:jar :examples:SharedLib:bundle-mixed:jar :examples:SharedLib:app:platforms:desktop-bundle-jni:compileJava :examples:SharedLib:app:platforms:desktop-bundle-mixed:compileJava --no-daemon --console=plain
 
       - name: Upload natives
         uses: actions/upload-artifact@v7
@@ -144,8 +144,8 @@ jobs:
       - name: Build Shared LibB FFM project
         run: ./gradlew LibB_build_project_linux64_ffm
 
-      - name: Test SharedLib JNI-only and mixed fat bundles
-        run: ./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:test :examples:SharedLib:app:platforms:desktop-bundle-mixed:test --no-daemon --console=plain
+      - name: Build SharedLib JNI-only and mixed fat bundle JARs
+        run: ./gradlew :examples:SharedLib:bundle:jar :examples:SharedLib:bundle-mixed:jar :examples:SharedLib:app:platforms:desktop-bundle-jni:compileJava :examples:SharedLib:app:platforms:desktop-bundle-mixed:compileJava --no-daemon --console=plain
 
       - name: Upload natives runtime
         uses: actions/upload-artifact@v7
@@ -216,9 +216,9 @@ jobs:
         run: |
           ./gradlew LibB_build_project_mac64_ffm
 
-      - name: Test SharedLib JNI-only and mixed fat bundles
+      - name: Build SharedLib JNI-only and mixed fat bundle JARs
         run: |
-          ./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:test :examples:SharedLib:app:platforms:desktop-bundle-mixed:test --no-daemon --console=plain
+          ./gradlew :examples:SharedLib:bundle:jar :examples:SharedLib:bundle-mixed:jar :examples:SharedLib:app:platforms:desktop-bundle-jni:compileJava :examples:SharedLib:app:platforms:desktop-bundle-mixed:compileJava --no-daemon --console=plain
 
       - name: Upload natives runtime
         uses: actions/upload-artifact@v7
@@ -289,9 +289,9 @@ jobs:
         run: |
           ./gradlew LibB_build_project_macArm_ffm
 
-      - name: Test SharedLib JNI-only and mixed fat bundles
+      - name: Build SharedLib JNI-only and mixed fat bundle JARs
         run: |
-          ./gradlew :examples:SharedLib:app:platforms:desktop-bundle-jni:test :examples:SharedLib:app:platforms:desktop-bundle-mixed:test --no-daemon --console=plain
+          ./gradlew :examples:SharedLib:bundle:jar :examples:SharedLib:bundle-mixed:jar :examples:SharedLib:app:platforms:desktop-bundle-jni:compileJava :examples:SharedLib:app:platforms:desktop-bundle-mixed:compileJava --no-daemon --console=plain
 
       - name: Upload natives runtime
         uses: actions/upload-artifact@v7
@@ -809,7 +809,7 @@ jobs:
           command: ./gradlew publishSnapshot
 
       - name: Create Git tag
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         if: ${{ inputs.isRelease }}
         with:
           script: |

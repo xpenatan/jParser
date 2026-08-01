@@ -3,13 +3,16 @@ plugins {
 }
 
 val moduleName = "gen-ffm"
+fun jParserModule(name: String) = providers.provider {
+    "${libs.versions.jParserGroup.get()}:$name:${project.version}"
+}
 
 dependencies {
-    implementation(project(":jParser:gen:gen-idl"))
-    implementation(project(":jParser:gen:gen-core"))
-    implementation(project(":jParser:api:api-core"))
+    implementation(project(":gen-idl"))
+    implementation(project(":gen-core"))
+    implementation(jParserModule("api-core"))
 
-    testImplementation(project(":jParser:loader:loader-core"))
+    testImplementation(jParserModule("loader-core"))
     testImplementation(libs.junit)
 }
 
@@ -31,5 +34,4 @@ publishing {
         }
     }
 }
-
 

@@ -3,12 +3,15 @@ plugins {
 }
 
 val moduleName = "gen-c"
+fun jParserModule(name: String) = providers.provider {
+    "${libs.versions.jParserGroup.get()}:$name:${project.version}"
+}
 
 dependencies {
-    implementation(project(":jParser:gen:gen-idl"))
-    implementation(project(":jParser:gen:gen-core"))
-    implementation(project(":jParser:gen:gen-ffm"))
-    implementation(project(":jParser:api:api-core"))
+    implementation(project(":gen-idl"))
+    implementation(project(":gen-core"))
+    implementation(project(":gen-ffm"))
+    implementation(jParserModule("api-core"))
 
     testImplementation(libs.junit)
 }

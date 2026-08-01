@@ -11,16 +11,21 @@ pluginManagement {
 
 rootProject.name = "jParser"
 
-include(":gradle-plugin")
-
-include(":jParser:gen:gen-core")
-include(":jParser:gen:gen-build")
-include(":jParser:gen:gen-build-tool")
-include(":jParser:gen:gen-idl")
-include(":jParser:gen:gen-jni")
-include(":jParser:gen:gen-web")
-include(":jParser:gen:gen-ffm")
-include(":jParser:gen:gen-c")
+// Include the plugin source build only once. It owns the plugin plus the
+// generator projects mapped from jParser/gen, and supplies both plugin
+// resolution and the gen-* dependency substitutions used by root projects.
+includeBuild("gradle-plugin") {
+    dependencySubstitution {
+        substitute(module("com.github.xpenatan.jParser:gen-core")).using(project(":gen-core"))
+        substitute(module("com.github.xpenatan.jParser:gen-build")).using(project(":gen-build"))
+        substitute(module("com.github.xpenatan.jParser:gen-build-tool")).using(project(":gen-build-tool"))
+        substitute(module("com.github.xpenatan.jParser:gen-idl")).using(project(":gen-idl"))
+        substitute(module("com.github.xpenatan.jParser:gen-jni")).using(project(":gen-jni"))
+        substitute(module("com.github.xpenatan.jParser:gen-web")).using(project(":gen-web"))
+        substitute(module("com.github.xpenatan.jParser:gen-ffm")).using(project(":gen-ffm"))
+        substitute(module("com.github.xpenatan.jParser:gen-c")).using(project(":gen-c"))
+    }
+}
 
 include(":jParser:api:api-core")
 include(":jParser:api:api-web")
@@ -45,6 +50,7 @@ include(":jParser:loader:loader-c")
 include(":jParser:loader:loader-web")
 
 include(":examples:TestLib:lib:builder")
+include(":examples:TestLib:lib:resources")
 include(":examples:TestLib:lib:base")
 include(":examples:TestLib:lib:core")
 include(":examples:TestLib:lib:shared:TestLib-jni")
@@ -56,17 +62,21 @@ include(":examples:TestLib:lib:shared:TestLib-c")
 include(":examples:TestLib:lib:desktop:TestLib-desktop-c")
 include(":examples:TestLib:lib:android:TestLib-android-c")
 include(":examples:TestLib:lib:ios:TestLib-ios-c")
+include(":examples:TestLib:lib:plugin")
 
 include(":examples:TestLib:app:core")
 include(":examples:TestLib:app:platforms:desktop-jni")
 include(":examples:TestLib:app:platforms:desktop-ffm")
+include(":examples:TestLib:app:platforms:desktop-bundle-jni")
 include(":examples:TestLib:app:platforms:desktop-c")
 include(":examples:TestLib:app:platforms:ios-c")
 include(":examples:TestLib:app:platforms:android-c")
 include(":examples:TestLib:app:platforms:web")
 include(":examples:TestLib:app:platforms:android")
+include(":examples:TestLib:bundle")
 
 include(":examples:SharedLib:libA:builder")
+include(":examples:SharedLib:libA:resources")
 include(":examples:SharedLib:libA:base")
 include(":examples:SharedLib:libA:core")
 include(":examples:SharedLib:libA:shared:LibA-jni")
@@ -78,8 +88,10 @@ include(":examples:SharedLib:libA:shared:LibA-c")
 include(":examples:SharedLib:libA:desktop:LibA-desktop-c")
 include(":examples:SharedLib:libA:android:LibA-android-c")
 include(":examples:SharedLib:libA:ios:LibA-ios-c")
+include(":examples:SharedLib:libA:plugin")
 
 include(":examples:SharedLib:libB:builder")
+include(":examples:SharedLib:libB:resources")
 include(":examples:SharedLib:libB:base")
 include(":examples:SharedLib:libB:core")
 include(":examples:SharedLib:libB:shared:LibB-jni")
@@ -91,6 +103,7 @@ include(":examples:SharedLib:libB:shared:LibB-c")
 include(":examples:SharedLib:libB:desktop:LibB-desktop-c")
 include(":examples:SharedLib:libB:android:LibB-android-c")
 include(":examples:SharedLib:libB:ios:LibB-ios-c")
+include(":examples:SharedLib:libB:plugin")
 
 include(":examples:SharedLib:app:core")
 include(":examples:SharedLib:app:platforms:desktop-jni")
@@ -103,6 +116,7 @@ include(":examples:SharedLib:app:platforms:android-c")
 include(":examples:SharedLib:app:platforms:web")
 include(":examples:SharedLib:app:platforms:android")
 include(":examples:SharedLib:bundle")
+include(":examples:SharedLib:bundle-mixed")
 
 //includeBuild("E:\\Dev\\Projects\\java\\gdx-teavm") {
 //    dependencySubstitution {

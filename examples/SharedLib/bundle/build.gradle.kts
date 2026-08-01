@@ -1,73 +1,41 @@
+import com.github.xpenatan.jParser.builder.bundle.NativeBridge
+import com.github.xpenatan.jParser.builder.bundle.NativeTarget
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 plugins {
-    java
+    `java-library`
+    alias(libs.plugins.jParser)
 }
 
 dependencies {
-    implementation(project(":jParser:gen:gen-build"))
-    implementation(project(":jParser:gen:gen-build-tool"))
+    api(project(":examples:SharedLib:libA:shared:LibA-jni"))
+    api(project(":examples:SharedLib:libB:shared:LibB-jni"))
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
-    targetCompatibility = JavaVersion.toVersion(libs.versions.javaFfm.get())
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
 }
 
-val hostOs = System.getProperty("os.name")
-val hostArch = System.getProperty("os.arch")
-val hostTarget = when {
-    hostOs.startsWith("Windows") -> "windows64"
-    hostOs == "Linux" && (hostArch == "x86_64" || hostArch == "amd64") -> "linux64"
-    hostOs.startsWith("Mac") && (hostArch == "aarch64" || hostArch == "arm64") -> "macArm"
-    hostOs.startsWith("Mac") && (hostArch == "x86_64" || hostArch == "amd64") -> "mac64"
-    else -> error("Unsupported SharedLib fat-bundle host: os=$hostOs arch=$hostArch")
-}
-
-fun registerBundleTask(
-    taskName: String,
-    mode: String,
-    runtimeBridge: String,
-    libABridge: String,
-    libBBridge: String
-) = tasks.register<JavaExec>(taskName) {
-    group = "verification"
-    description = "Build and inspect the SharedLib $mode fat native bundle."
-    dependsOn(
-        "classes",
-        ":jParser:runtime:builder:runtime_helper_build_project_${hostTarget}_$runtimeBridge",
-        ":examples:SharedLib:libA:builder:LibA_build_project_${hostTarget}_$libABridge",
-        ":examples:SharedLib:libB:builder:LibB_build_project_${hostTarget}_$libBBridge"
+val host = DefaultNativePlatform.host()
+val desktopTarget = NativeTarget.of(
+    NativeTarget.OperatingSystem.valueOf(host.operatingSystem.toFamilyName().uppercase()),
+    NativeTarget.Architecture.valueOf(
+        host.architecture.name.uppercase().replace("-", "_").replace("AARCH64", "ARM64")
     )
-    if(libBBridge == "ffm" && libABridge != "ffm") {
-        // LibB's preserved standalone output still links to LibA's FFM DLL.
-        dependsOn(
-            ":examples:SharedLib:libA:builder:LibA_build_project_${hostTarget}_ffm"
-        )
-    }
-    mainClass.set("BuildSharedLibBundle")
-    classpath = sourceSets["main"].runtimeClasspath
-    val output = layout.buildDirectory.dir("native/$mode")
-    outputs.dir(output)
-    outputs.upToDateWhen { false }
-    doFirst {
-        args = listOf(
-            rootProject.projectDir.absolutePath,
-            mode,
-            output.get().asFile.absolutePath
-        )
+)
+
+jParser {
+    bundle("desktopJni") {
+        bundleName.set("SharedLibFatJni")
+        target.set(desktopTarget)
+        component("runtime", project(":jParser:runtime:resources"), NativeBridge.JNI)
+        component("libA", project(":examples:SharedLib:libA:resources"), NativeBridge.JNI)
+        component("libB", project(":examples:SharedLib:libB:resources"), NativeBridge.JNI)
     }
 }
 
-registerBundleTask(
-    "SharedLib_build_bundle_desktop_jni",
-    "jni",
-    "jni",
-    "jni",
-    "jni"
-)
-registerBundleTask(
-    "SharedLib_build_bundle_desktop_mixed",
-    "mixed",
-    "ffm",
-    "jni",
-    "ffm"
-)
+tasks.named<Jar>("jar") {
+    archiveBaseName.set("SharedLib-bundle-jni")
+    from(tasks.matching { task -> task.name == "jParserBundleDesktopJni" })
+}

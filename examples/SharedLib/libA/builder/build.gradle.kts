@@ -3,18 +3,21 @@ plugins {
 }
 
 val mainClassName = "BuildLibA"
+fun jParserGenerator(name: String) = providers.provider {
+    "${libs.versions.jParserGroup.get()}:$name:${libs.versions.jParserSnapshot.get()}"
+}
 
 dependencies {
     implementation(project(":examples:SharedLib:libA:base"))
 
-    implementation(project(":jParser:gen:gen-core"))
-    implementation(project(":jParser:gen:gen-idl"))
-    implementation(project(":jParser:gen:gen-web"))
-    implementation(project(":jParser:gen:gen-c"))
-    implementation(project(":jParser:gen:gen-jni"))
-    implementation(project(":jParser:gen:gen-build"))
-    implementation(project(":jParser:gen:gen-build-tool"))
-    implementation(project(":jParser:gen:gen-ffm"))
+    implementation(jParserGenerator("gen-core"))
+    implementation(jParserGenerator("gen-idl"))
+    implementation(jParserGenerator("gen-web"))
+    implementation(jParserGenerator("gen-c"))
+    implementation(jParserGenerator("gen-jni"))
+    implementation(jParserGenerator("gen-build"))
+    implementation(jParserGenerator("gen-build-tool"))
+    implementation(jParserGenerator("gen-ffm"))
 
     implementation(project(":jParser:runtime:core"))
 }

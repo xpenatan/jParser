@@ -77,6 +77,19 @@ public final class NativeTarget {
         return new NativeTarget(operatingSystem, architecture, "", "");
     }
 
+    /**
+     * Returns the desktop target of the JVM running the builder.
+     *
+     * <p>This is a convenience for host-native development builds. Release
+     * matrices and cross-compilation should continue to declare their target
+     * explicitly.</p>
+     */
+    public static NativeTarget currentDesktop() {
+        return currentDesktop(
+                System.getProperty("os.name", ""),
+                System.getProperty("os.arch", ""));
+    }
+
     public static NativeTarget android(Architecture architecture, String abi) {
         return new NativeTarget(OperatingSystem.ANDROID, architecture, requireSegment("abi", abi), "");
     }
@@ -91,6 +104,49 @@ public final class NativeTarget {
 
     static NativeTarget fromManifest(String os, String architecture, String abi, String environment) {
         return new NativeTarget(OperatingSystem.fromId(os), Architecture.fromId(architecture), abi, environment);
+    }
+
+    static NativeTarget currentDesktop(String osName, String architectureName) {
+        String normalizedOS = osName.toLowerCase(Locale.ROOT);
+        OperatingSystem operatingSystem;
+        if(normalizedOS.contains("mac") || normalizedOS.contains("darwin")) {
+            operatingSystem = OperatingSystem.MACOS;
+        }
+        else if(normalizedOS.contains("win")) {
+            operatingSystem = OperatingSystem.WINDOWS;
+        }
+        else if(normalizedOS.contains("linux")) {
+            operatingSystem = OperatingSystem.LINUX;
+        }
+        else {
+            throw new IllegalStateException("Unsupported desktop operating system: " + osName);
+        }
+
+        String normalizedArchitecture = architectureName
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9]", "");
+        Architecture architecture;
+        if(normalizedArchitecture.equals("amd64")
+                || normalizedArchitecture.equals("x8664")
+                || normalizedArchitecture.equals("x64")) {
+            architecture = Architecture.X86_64;
+        }
+        else if(normalizedArchitecture.equals("x86")
+                || normalizedArchitecture.matches("i[3-6]86")) {
+            architecture = Architecture.X86;
+        }
+        else if(normalizedArchitecture.equals("aarch64")
+                || normalizedArchitecture.equals("arm64")) {
+            architecture = Architecture.ARM64;
+        }
+        else if(normalizedArchitecture.startsWith("armv7")
+                || normalizedArchitecture.equals("arm")) {
+            architecture = Architecture.ARMV7;
+        }
+        else {
+            throw new IllegalStateException("Unsupported desktop architecture: " + architectureName);
+        }
+        return of(operatingSystem, architecture);
     }
 
     public OperatingSystem getOperatingSystem() {

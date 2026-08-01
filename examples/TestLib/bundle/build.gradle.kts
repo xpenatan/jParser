@@ -1,0 +1,39 @@
+import com.github.xpenatan.jParser.builder.bundle.NativeBridge
+import com.github.xpenatan.jParser.builder.bundle.NativeTarget
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
+plugins {
+    `java-library`
+    alias(libs.plugins.jParser)
+}
+
+dependencies {
+    api(project(":examples:TestLib:lib:shared:TestLib-jni"))
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaMain.get())
+}
+
+val host = DefaultNativePlatform.host()
+val desktopTarget = NativeTarget.of(
+    NativeTarget.OperatingSystem.valueOf(host.operatingSystem.toFamilyName().uppercase()),
+    NativeTarget.Architecture.valueOf(
+        host.architecture.name.uppercase().replace("-", "_").replace("AARCH64", "ARM64")
+    )
+)
+
+jParser {
+    bundle("desktopJni") {
+        bundleName.set("TestLibFat")
+        target.set(desktopTarget)
+        component("runtime", project(":jParser:runtime:resources"), NativeBridge.JNI)
+        component("testLib", project(":examples:TestLib:lib:resources"), NativeBridge.JNI)
+    }
+}
+
+tasks.named<Jar>("jar") {
+    archiveBaseName.set("TestLib-bundle-jni")
+    from(tasks.matching { task -> task.name == "jParserBundleDesktopJni" })
+}

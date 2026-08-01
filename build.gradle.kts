@@ -4,15 +4,6 @@ plugins {
 }
 
 val publishedModules = listOf(
-    ":gradle-plugin",
-    ":jParser:gen:gen-core",
-    ":jParser:gen:gen-build",
-    ":jParser:gen:gen-build-tool",
-    ":jParser:gen:gen-idl",
-    ":jParser:gen:gen-jni",
-    ":jParser:gen:gen-ffm",
-    ":jParser:gen:gen-c",
-    ":jParser:gen:gen-web",
     ":jParser:api:api-core",
     ":jParser:api:api-web",
     ":jParser:runtime:base",
@@ -75,6 +66,10 @@ easyPublishing {
     scmUrl.set("https://github.com/xpenatan/jParser")
     scmConnection.set("scm:git:https://github.com/xpenatan/jParser.git")
     scmDeveloperConnection.set("scm:git:ssh://git@github.com/xpenatan/jParser.git")
+
+    nestedBuild("gradle-plugin") {
+        directory.set(layout.projectDirectory.dir("gradle-plugin"))
+    }
 }
 
 tasks.register("phase3_perf_smoke") {

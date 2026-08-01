@@ -8,33 +8,58 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.jParser.example.testlib.TestLibLoader;
+import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
+import com.github.xpenatan.jParser.loader.JParserNativeBundleLoader;
 import com.github.xpenatan.jparser.runtime.RuntimeLoader;
 
 public class AppTest extends ApplicationAdapter {
 
+    private final String nativeBundleName;
     private boolean init = false;
     private SpriteBatch batch;
     private BitmapFont font;
     private boolean testPass = false;
     private Color color = Color.GRAY;
 
+    public AppTest() {
+        this(null);
+    }
+
+    /**
+     * Creates a fat-mode application when {@code nativeBundleName} is non-null.
+     */
+    public AppTest(String nativeBundleName) {
+        this.nativeBundleName = nativeBundleName;
+    }
+
     @Override
     public void create() {
-        RuntimeLoader.init((idl_isSuccess, idl_e) -> {
-            if(idl_e != null) {
-                idl_e.printStackTrace();
+        JParserLibraryLoaderListener loaded = (isSuccess, throwable) -> {
+            if(throwable != null) {
+                throwable.printStackTrace();
                 return;
             }
-            TestLibLoader.init((isSuccess, e) -> {
-                if(e != null) {
-                    e.printStackTrace();
-                }
-                init = isSuccess;
-            });
-        });
+            init = isSuccess;
+        };
+        if(nativeBundleName != null && !nativeBundleName.trim().isEmpty()) {
+            JParserNativeBundleLoader.load(nativeBundleName.trim(), loaded);
+        }
+        else {
+            loadStandaloneBindings(loaded);
+        }
 
         batch = new SpriteBatch();
         font = new BitmapFont();
+    }
+
+    private void loadStandaloneBindings(JParserLibraryLoaderListener loaded) {
+        RuntimeLoader.init((runtimeSuccess, runtimeFailure) -> {
+            if(runtimeFailure != null) {
+                loaded.onLoad(false, runtimeFailure);
+                return;
+            }
+            TestLibLoader.init(loaded);
+        });
     }
 
     @Override

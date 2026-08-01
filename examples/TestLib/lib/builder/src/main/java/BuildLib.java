@@ -24,7 +24,7 @@ public class BuildLib {
         String basePackage = "com.github.xpenatan.jParser.example.testlib";
         String sourceDir = "/src/main/cpp/source/TestLib/src";
 
-        WindowsMSVCTarget.DEBUG_BUILD = true;
+        WindowsMSVCTarget.DEBUG_BUILD = false;
 //        NativeCPPGenerator.SKIP_GLUE_CODE = true;
 
         BuildToolOptions.BuildToolParams data = new BuildToolOptions.BuildToolParams();
@@ -135,14 +135,22 @@ public class BuildLib {
         compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
         multiTarget.add(compileStaticTarget);
 
+        WindowsMSVCTarget bridgeStaticTarget = new WindowsMSVCTarget();
+        bridgeStaticTarget.libDirSuffix += api;
+        bridgeStaticTarget.libName = op.libName + "_bridge";
+        bridgeStaticTarget.isStatic = true;
+        setupGlueCode(bridgeStaticTarget, api, libBuildCPPPath);
+        addCppStandard(bridgeStaticTarget.cppFlags, api, true);
+        applyFFMWindowsCompileFlags(bridgeStaticTarget, isFFM, ffmNativeBuildConfig);
+        bridgeStaticTarget.headerDirs.add("-I" + sourceDir);
+        bridgeStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        multiTarget.add(bridgeStaticTarget);
+
         WindowsMSVCTarget linkTarget = new WindowsMSVCTarget();
         linkTarget.libDirSuffix += api;
-        setupGlueCode(linkTarget, api, libBuildCPPPath);
-        addCppStandard(linkTarget.cppFlags, api, true);
-        applyFFMWindowsCompileFlags(linkTarget, isFFM, ffmNativeBuildConfig);
-        linkTarget.headerDirs.add("-I" + sourceDir);
-        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.shouldCompile = false;
         linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "64_.lib");
+        linkTarget.linkerFlags.add("/WHOLEARCHIVE:" + libBuildCPPPath + "/libs/windows/vc/" + api + "/" + op.libName + "_bridge64_.lib");
         linkTarget.linkerFlags.add("-DLL");
         applyFFMWindowsLinkFlags(linkTarget, isFFM, ffmNativeBuildConfig);
         multiTarget.add(linkTarget);
@@ -168,16 +176,24 @@ public class BuildLib {
         compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
         multiTarget.add(compileStaticTarget);
 
+        LinuxTarget bridgeStaticTarget = new LinuxTarget();
+        bridgeStaticTarget.libDirSuffix += api;
+        bridgeStaticTarget.libName = op.libName + "_bridge";
+        bridgeStaticTarget.isStatic = true;
+        setupGlueCode(bridgeStaticTarget, api, libBuildCPPPath);
+        addCppStandard(bridgeStaticTarget.cppFlags, api, false);
+        bridgeStaticTarget.cppFlags.add("-fPIC");
+        applyFFMUnixCompileFlags(bridgeStaticTarget.cppFlags, isFFM, ffmNativeBuildConfig);
+        bridgeStaticTarget.headerDirs.add("-I" + sourceDir);
+        bridgeStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        multiTarget.add(bridgeStaticTarget);
+
         LinuxTarget linkTarget = new LinuxTarget();
         linkTarget.libDirSuffix += api;
-        setupGlueCode(linkTarget, api, libBuildCPPPath);
-        addCppStandard(linkTarget.cppFlags, api, false);
-        linkTarget.cppFlags.add("-fPIC");
-        applyFFMUnixCompileFlags(linkTarget.cppFlags, isFFM, ffmNativeBuildConfig);
-        linkTarget.headerDirs.add("-I" + sourceDir);
-        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        linkTarget.shouldCompile = false;
         linkTarget.linkerFlags.add("-Wl,--whole-archive");
         linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/" + api + "/lib" + op.libName + "64_.a");
+        linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/linux/" + api + "/lib" + op.libName + "_bridge64_.a");
         linkTarget.linkerFlags.add("-Wl,--no-whole-archive");
         applyFFMUnixLinkFlags(linkTarget.linkerFlags, isFFM, ffmNativeBuildConfig);
 
@@ -204,21 +220,31 @@ public class BuildLib {
         compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
         multiTarget.add(compileStaticTarget);
 
+        MacTarget bridgeStaticTarget = new MacTarget(isArm);
+        bridgeStaticTarget.libDirSuffix += api;
+        bridgeStaticTarget.libName = op.libName + "_bridge";
+        bridgeStaticTarget.isStatic = true;
+        setupGlueCode(bridgeStaticTarget, api, libBuildCPPPath);
+        addCppStandard(bridgeStaticTarget.cppFlags, api, false);
+        bridgeStaticTarget.cppFlags.add("-fPIC");
+        applyFFMUnixCompileFlags(bridgeStaticTarget.cppFlags, isFFM, ffmNativeBuildConfig);
+        bridgeStaticTarget.headerDirs.add("-I" + sourceDir);
+        bridgeStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
+        multiTarget.add(bridgeStaticTarget);
+
         MacTarget linkTarget = new MacTarget(isArm);
         linkTarget.libDirSuffix += api;
-        setupGlueCode(linkTarget, api, libBuildCPPPath);
-        addCppStandard(linkTarget.cppFlags, api, false);
-        linkTarget.cppFlags.add("-fPIC");
-        applyFFMUnixCompileFlags(linkTarget.cppFlags, isFFM, ffmNativeBuildConfig);
-        linkTarget.headerDirs.add("-I" + sourceDir);
-        linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
-
+        linkTarget.shouldCompile = false;
         linkTarget.linkerFlags.add("-Wl,-force_load");
         if(isArm) {
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/" + api + "/lib" + op.libName + "64_.a");
+            linkTarget.linkerFlags.add("-Wl,-force_load");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/arm/" + api + "/lib" + op.libName + "_bridge64_.a");
         }
         else {
             linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/" + api + "/lib" + op.libName + "64_.a");
+            linkTarget.linkerFlags.add("-Wl,-force_load");
+            linkTarget.linkerFlags.add(libBuildCPPPath + "/libs/mac/" + api + "/lib" + op.libName + "_bridge64_.a");
         }
 
         applyFFMUnixLinkFlags(linkTarget.linkerFlags, isFFM, ffmNativeBuildConfig);

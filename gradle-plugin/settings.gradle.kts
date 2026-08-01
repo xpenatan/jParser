@@ -1,6 +1,4 @@
 pluginManagement {
-    includeBuild("..")
-
     repositories {
         google()
         mavenCentral()
@@ -18,7 +16,14 @@ dependencyResolutionManagement {
         }
     }
 
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        maven {
+            url = uri(rootDir.resolve("../build/snapshot-deploy"))
+        }
+        maven {
+            url = uri(rootDir.resolve("../build/staging-deploy"))
+        }
         mavenLocal()
         google()
         mavenCentral()
@@ -32,8 +37,20 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "jParser-plugin-examples"
+rootProject.name = "gradle-plugin"
 
-include(":TestLib:lib:plugin")
-include(":SharedLib:libA:plugin")
-include(":SharedLib:libB:plugin")
+val generatorProjects = listOf(
+    "gen-core",
+    "gen-build",
+    "gen-build-tool",
+    "gen-idl",
+    "gen-jni",
+    "gen-web",
+    "gen-ffm",
+    "gen-c"
+)
+
+generatorProjects.forEach { projectName ->
+    include(":$projectName")
+    project(":$projectName").projectDir = file("../jParser/gen/$projectName")
+}
