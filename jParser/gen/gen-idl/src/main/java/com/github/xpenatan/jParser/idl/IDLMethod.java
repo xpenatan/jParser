@@ -245,10 +245,8 @@ public class IDLMethod {
                     }
                 }
             }
-            return params;
         }
-        else {
-            return null;
-        }
+        IDLStringTransfer.configure(idlLine, out);
+        return params.isEmpty() ? null : params;
     }
 }

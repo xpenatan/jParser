@@ -1,5 +1,7 @@
 package com.github.xpenatan.jParser.idl;
 
+import java.util.Collections;
+
 /**
  * @author xpenatan
  */
@@ -22,6 +24,7 @@ public class IDLAttribute {
     }
 
     public void initAttribute(IDLLine idlLine) {
+        IDLStringTransfer.configure(idlLine, Collections.emptyList());
         this.idlLine = idlLine;
         String line = idlLine.line;
 

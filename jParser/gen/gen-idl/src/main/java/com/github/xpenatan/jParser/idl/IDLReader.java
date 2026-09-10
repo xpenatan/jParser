@@ -175,6 +175,9 @@ public class IDLReader {
                 parseFile(idlFile, classList);
                 idlFile.classArray.addAll(classList);
             }
+            catch(IllegalArgumentException e) {
+                throw e;
+            }
             catch(Throwable t) {
                 t.printStackTrace();
             }
@@ -259,6 +262,17 @@ public class IDLReader {
         ArrayList<IDLClassOrEnum> classList = idlReader.getAllClasses();
         configClassType(idlReader, classList);
         configCallbacks(idlReader, classList);
+        for(IDLClassOrEnum entry : classList) {
+            if(!entry.isClass()) continue;
+            IDLClass type = entry.asClass();
+            if(!type.isCallback && type.callbackImpl == null) continue;
+            for(IDLMethod method : type.methods) {
+                if(IDLStringTransfer.hasTransfers(method.parameters)) {
+                    throw new IllegalArgumentException("OWNED_STRING is not supported on callbacks: "
+                            + type.name + "." + method.name);
+                }
+            }
+        }
     }
 
     private static void configClassType(IDLReader idlReader, ArrayList<IDLClassOrEnum> classList) {

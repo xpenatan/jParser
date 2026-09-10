@@ -34,6 +34,7 @@ import com.github.xpenatan.jParser.idl.IDLClass;
 import com.github.xpenatan.jParser.idl.IDLMethod;
 import com.github.xpenatan.jParser.idl.IDLParameter;
 import com.github.xpenatan.jParser.idl.IDLReader;
+import com.github.xpenatan.jParser.idl.IDLStringTransfer;
 import com.github.xpenatan.jParser.idl.parser.IDLMethodOperation;
 import com.github.xpenatan.jParser.idl.parser.IDLMethodParser;
 import com.github.xpenatan.jParser.idl.parser.data.IDLParameterData;
@@ -266,6 +267,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
         String constructor = classTypeName + "(" + params + ")";
         String content = GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_CONSTRUCTOR, constructor);
+        content = prepareStringTransfers(idParameters, content, nativeMethodDeclaration);
 
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + content;
@@ -847,10 +849,17 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         }
 
         String header = "[-" + HEADER_CMD + ";" + CMD_NATIVE + "]";
-        String blockComment = header + content;
+        String blockComment = header + prepareStringTransfers(idlMethod.parameters, content, nativeMethod);
         nativeMethod.setBlockComment(blockComment);
     }
 
+    private String prepareStringTransfers(ArrayList<IDLParameter> parameters, String content, Node node) {
+        if(IDLStringTransfer.hasTransfers(parameters)) {
+            cppGenerator.addNativeCode(node, "#include \"RuntimeHelper.h\"");
+            return "\n" + IDLStringTransfer.declarations(parameters) + content;
+        }
+        return content;
+    }
     private static String getOperator(String operatorCode, String param) {
         String oper = "";
         if(!operatorCode.isEmpty()) {
@@ -877,6 +886,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             IDLParameter idlParameter = idParameters.get(i);
             Type type = parameter.getType();
             String paramName = getParam(idlParameter, type);
+            paramName = IDLStringTransfer.argument(idParameters, i, paramName);
             if(i > 0) {
                 param += ", ";
             }

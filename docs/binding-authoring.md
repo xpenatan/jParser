@@ -61,6 +61,59 @@ Important WebIDL behaviors:
 - Methods marked `[Value]` return a cached wrapper. The cache is overwritten by the next value call, so callers must not retain it.
 - Classes marked `[NoDelete]` do not own their native object and must not call `dispose()` for it.
 
+## Native String Input Lifetime
+
+Generated FFM calls encode Java `String` arguments in one confined arena owned
+by that call. All arguments remain valid through the native invocation and
+any conversion of its return value. The arena closes on return or exception;
+null arguments become null native pointers. Calls without String arguments
+do not create a string arena.
+
+By default, native functions borrow these pointers only for the duration of
+the call, matching the existing JNI input lifetime. A native object that needs
+the text afterward must copy it into owned storage, such as `std::string`,
+or explicitly accept transferred ownership as described below.
+
+Regenerate FFM bindings when upgrading from the cached conversion generator.
+The old `NativeUtils.toCString(String)` helper and `jparser.ffm.stringCacheSize`
+setting are removed. Previously generated calls to that helper must be
+regenerated together with the runtime upgrade.
+
+### Transferring a String input to C++
+
+Mark a scalar `DOMString` parameter on an IDL method or constructor with
+`OWNED_STRING=parameterName`:
+
+```webidl
+void retain(DOMString text); //[-OWNED_STRING=text]
+void retainPair(DOMString first, DOMString second); //[-OWNED_STRING=first, OWNED_STRING=second]
+```
+
+JNI, FFM, TeaVM C and Emscripten native glue copy each marked input into an
+independent `new char[]` buffer before calling C++. The original Java-to-native
+temporary still follows its normal cleanup. Ownership of the copy passes to
+the native callee when it is invoked; the binding does not free that copy.
+Unmarked parameters keep the default borrowed lifetime. `null` transfers a
+null pointer; an empty String transfers a separately allocated terminator.
+This command preserves the backend's existing string encoding.
+
+The C++ callee must eventually use **`delete[]`** in the compatible native
+allocation domain, including when replacing or rejecting a value. For example:
+
+```cpp
+std::unique_ptr<const char[]> text;
+void retain(const char* value) { text.reset(value); }
+```
+
+Only use this command for an API that takes ownership with that allocation
+contract. It does not make a container of raw pointers free its elements, and
+must not be used with an API that expects `free()` or another allocator.
+Callback inputs, attributes, arrays and non-string parameters do not support
+this command. Optional overloads retain the setting for parameters they expose.
+Handwritten native replacement blocks must implement their own ownership
+contract; the command applies to generated IDL calls. Regenerate the bindings
+and rebuild their native libraries when adding or removing it.
+
 ## Binding Class Finality
 
 Generated IDL binding classes are `final` by default. Configure the global

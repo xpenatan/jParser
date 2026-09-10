@@ -30,8 +30,6 @@ public class NativeUtils {
         }
     */
 
-    private static final Object NULL_SEGMENT = null;
-
     /*[-JNI;-NATIVE]
         #include <cstring>
     */
@@ -42,44 +40,6 @@ public class NativeUtils {
     */
     public static String getJSString(long addr) {
         return null;
-    }
-
-    /**
-     * Converts a Java String to a native UTF-8 C string segment.
-     * FFM path selects the encoder once at class init to avoid per-call strategy branching.
-     */
-    /*[-FFM;-ADD]
-        private static final int FFM_STRING_CACHE_SIZE = java.lang.Integer.getInteger("jparser.ffm.stringCacheSize", 256);
-    */
-    /*[-FFM;-ADD]
-        private static final ThreadLocal<java.util.LinkedHashMap<String, java.lang.foreign.MemorySegment>> FFM_STRING_SEGMENTS = ThreadLocal.withInitial(() -> new java.util.LinkedHashMap<String, java.lang.foreign.MemorySegment>(64, 0.75f, true) {
-            @Override
-            protected boolean removeEldestEntry(java.util.Map.Entry<String, java.lang.foreign.MemorySegment> eldest) {
-                return size() > FFM_STRING_CACHE_SIZE;
-            }
-        });
-    */
-    /*[-FFM;-ADD]
-        private static java.lang.foreign.MemorySegment toCStringCache(String value) {
-            java.util.LinkedHashMap<String, java.lang.foreign.MemorySegment> cache = FFM_STRING_SEGMENTS.get();
-            java.lang.foreign.MemorySegment segment = cache.get(value);
-            if(segment == null) {
-                segment = java.lang.foreign.Arena.global().allocateFrom(value);
-                cache.put(value, segment);
-            }
-            return segment;
-        }
-    */
-    /*[-FFM;-REPLACE]
-        public static java.lang.foreign.MemorySegment toCString(String value) {
-            if(value == null) {
-                return java.lang.foreign.MemorySegment.NULL;
-            }
-            return toCStringCache(value);
-        }
-    */
-    public static Object toCString(String value) {
-        return NULL_SEGMENT;
     }
 
     /**

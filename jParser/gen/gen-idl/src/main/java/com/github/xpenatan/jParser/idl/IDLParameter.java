@@ -19,6 +19,7 @@ public class IDLParameter {
     public boolean isConst;
     public boolean isValue;
     public boolean isNewParam;
+    public boolean isStringTransfer;
     public boolean isAny;
     public final ArrayList<String> tags = new ArrayList<>();
 
@@ -123,6 +124,7 @@ public class IDLParameter {
         clonedParam.isValue = isValue;
         clonedParam.isConst = isConst;
         clonedParam.isNewParam = isNewParam;
+        clonedParam.isStringTransfer = isStringTransfer;
         clonedParam.optional = optional;
         clonedParam.idlClassOrEnum = idlClassOrEnum;
         clonedParam.tags.addAll(tags);

@@ -3,6 +3,7 @@ package com.github.xpenatan.jParser.builder.targets;
 import com.github.xpenatan.jParser.builder.BuildConfig;
 import com.github.xpenatan.jParser.builder.DefaultBuildTarget;
 import com.github.xpenatan.jParser.builder.JProcess;
+import com.github.xpenatan.jParser.builder.util.EmscriptenStringTransfer;
 import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jParser.idl.IDLReader;
 import java.io.BufferedReader;
@@ -326,7 +327,10 @@ public class EmscriptenTarget extends DefaultBuildTarget {
         currentPythonPath += EMSCRIPTEN_ROOT;
         environment.put("PYTHONPATH", currentPythonPath);
 
-        return JProcess.startProcess(jsglueDir.file(), generateGlueCommand, environment);
+        if(!JProcess.startProcess(jsglueDir.file(), generateGlueCommand, environment)) return false;
+        CustomFileDescriptor glue = jsglueDir.child("glue.cpp");
+        glue.writeString(EmscriptenStringTransfer.apply(idlReader, glue.readString()), false);
+        return true;
     }
 
     private static String resolvePythonCommand() {

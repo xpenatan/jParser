@@ -27,6 +27,7 @@ import com.github.xpenatan.jParser.idl.IDLHelper;
 import com.github.xpenatan.jParser.idl.IDLMethod;
 import com.github.xpenatan.jParser.idl.IDLParameter;
 import com.github.xpenatan.jParser.idl.IDLReader;
+import com.github.xpenatan.jParser.idl.IDLStringTransfer;
 import com.github.xpenatan.jParser.idl.parser.IDLAttributeOperation;
 import com.github.xpenatan.jParser.idl.parser.IDLDefaultCodeParser;
 import com.github.xpenatan.jParser.idl.parser.IDLMethodOperation;
@@ -264,6 +265,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
 
         String constructor = classTypeName + "(" + params + ")";
         String content = GET_CONSTRUCTOR_OBJ_POINTER_TEMPLATE.replace(TEMPLATE_TAG_CONSTRUCTOR, constructor);
+        content = prepareStringTransfers(idParameters, content, nativeMethodDeclaration);
 
         String header = "[-" + nativeHeaderCMD + ";" + CMD_NATIVE + "]";
         String blockComment = header + content;
@@ -682,6 +684,11 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         // Build the invokeExact call arguments
         StringBuilder invokeArgs = new StringBuilder();
         NodeList<Parameter> parameters = methodDeclaration.getParameters();
+        boolean hasStringParameters = false;
+        String arenaName = "stringArena";
+        while(methodDeclaration.getParameterByName(arenaName).isPresent()) {
+            arenaName += "_";
+        }
         for(int i = 0; i < parameters.size(); i++) {
             Parameter parameter = parameters.get(i);
             if(i > 0) invokeArgs.append(", ");
@@ -689,8 +696,11 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             String paramType = parameter.getType().asString();
             // For String parameters, we need to convert to MemorySegment
             if(paramType.equals("String")) {
-                invokeArgs.append("com.github.xpenatan.jparser.runtime.helper.NativeUtils.toCString(")
-                          .append(parameter.getNameAsString()).append(")");
+                hasStringParameters = true;
+                String parameterName = parameter.getNameAsString();
+                // invokeExact needs an explicit carrier type for a conditional argument.
+                invokeArgs.append("(MemorySegment) (").append(parameterName).append(" == null ? MemorySegment.NULL : ")
+                          .append(arenaName).append(".allocateFrom(").append(parameterName).append("))");
             }
             else {
                 invokeArgs.append(parameter.getNameAsString());
@@ -700,7 +710,12 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         // Build method body
         StringBuilder bodyCode = new StringBuilder();
         bodyCode.append("{\n");
-        bodyCode.append("    try {\n");
+        if(hasStringParameters) {
+            bodyCode.append("    try(Arena ").append(arenaName).append(" = Arena.ofConfined()) {\n");
+        }
+        else {
+            bodyCode.append("    try {\n");
+        }
 
         if(isVoid) {
             bodyCode.append("        FFMHandles.").append(handleName)
@@ -1192,10 +1207,17 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
         }
 
         String header = "[-" + nativeHeaderCMD + ";" + CMD_NATIVE + "]";
-        String blockComment = header + content;
+        String blockComment = header + prepareStringTransfers(idlMethod.parameters, content, nativeMethod);
         nativeMethod.setBlockComment(blockComment);
     }
 
+    private String prepareStringTransfers(ArrayList<IDLParameter> parameters, String content, Node node) {
+        if(IDLStringTransfer.hasTransfers(parameters)) {
+            cppGenerator.addNativeCode(node, "#include \"RuntimeHelper.h\"");
+            return "\n" + IDLStringTransfer.declarations(parameters) + content;
+        }
+        return content;
+    }
     private static String getOperator(String operatorCode, String param) {
         String oper = "";
         if(!operatorCode.isEmpty()) {
@@ -1221,6 +1243,7 @@ public class FFMCodeParser extends IDLDefaultCodeParser {
             IDLParameter idlParameter = idParameters.get(i);
             Type type = parameter.getType();
             String paramName = getParam(idlParameter, type);
+            paramName = IDLStringTransfer.argument(idParameters, i, paramName);
             if(i > 0) param += ", ";
             param += paramName;
         }

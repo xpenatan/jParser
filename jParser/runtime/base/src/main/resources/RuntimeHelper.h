@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <cstring>
+#include <memory>
 //#include <vector>
 //#include <stddef.h>     // NULL
 //#include <stdint.h>     // intptr_t
@@ -9,6 +11,21 @@
 
 namespace Native
 {
+
+// The native callee owns released buffers and must destroy them with delete[].
+class StringTransfer {
+    std::unique_ptr<char[]> data;
+public:
+    explicit StringTransfer(const char* value) {
+        if(value != nullptr) {
+            const size_t size = std::strlen(value) + 1;
+            data.reset(new char[size]);
+            std::memcpy(data.get(), value, size);
+        }
+    }
+
+    char* release() { return data.release(); }
+};
 
 class NativeArray {
 public:
