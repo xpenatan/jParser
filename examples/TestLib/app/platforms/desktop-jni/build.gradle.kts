@@ -24,6 +24,7 @@ val testLibJniBuildTask = ":examples:TestLib:lib:builder:TestLib_build_project_$
 // Configure headless tests for JNI module
 tasks.test {
     useJUnit()
+    jvmArgs("-Xcheck:jni")
     systemProperty("java.awt.headless", "true")
     // Ensure JNI native artifacts are built before running tests
     dependsOn(

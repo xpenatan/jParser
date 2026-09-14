@@ -61,6 +61,35 @@ Important WebIDL behaviors:
 - Methods marked `[Value]` return a cached wrapper. The cache is overwritten by the next value call, so callers must not retain it.
 - Classes marked `[NoDelete]` do not own their native object and must not call `dispose()` for it.
 
+## JNI Callback Threads and Borrowed Values
+
+Generated JNI callbacks execute on the thread that invokes the native callback.
+They keep a `JavaVM` reference and obtain that thread's `JNIEnv` on each call.
+A detached native thread is attached for the callback and detached afterward;
+a thread already attached by Java or the native caller remains attached. This
+follows the [JNI invocation API](https://docs.oracle.com/en/java/javase/25/docs/specs/jni/invocation.html#attaching-to-the-vm).
+Temporary Java string references are released after each invocation.
+
+Exceptions remain pending for an existing Java caller or attached native caller
+to handle. If the callback attached the thread itself, an exception is reported
+through JNI's `ExceptionDescribe`, cleared before detachment, and a value-returning
+callback returns its zero/default value.
+
+The generated native callback owns a global reference to its Java target until
+native destruction. Stop callback producers and wait for active invocations to
+finish before disposing the callback. Disposal must precede JVM shutdown; garbage
+collection alone cannot release a target held by that global reference. Handwritten
+JNI callback blocks must implement equivalent thread and reference handling themselves.
+
+JNI by-value method and arithmetic-operator returns use one native temporary per
+method per thread. Another thread cannot overwrite it, but the next call to the
+same method on the same thread can; the temporary also expires when its thread
+exits. These remain borrowed values. This does not make shared Java wrapper caches
+or underlying native objects thread-safe: use independent wrappers and obey the
+native library's synchronization rules.
+
+Regenerate and rebuild JNI bindings to receive these generator changes.
+
 ## Native String Input Lifetime
 
 Generated FFM calls encode Java `String` arguments in one confined arena owned

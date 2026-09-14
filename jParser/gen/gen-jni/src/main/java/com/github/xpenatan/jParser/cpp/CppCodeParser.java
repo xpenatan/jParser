@@ -22,6 +22,7 @@ import com.github.javaparser.utils.Pair;
 import com.github.xpenatan.jParser.core.JParser;
 import com.github.xpenatan.jParser.core.JParserHelper;
 import com.github.xpenatan.jParser.core.JParserItem;
+import com.github.xpenatan.jParser.core.util.CustomFileDescriptor;
 import com.github.xpenatan.jParser.idl.IDLAttribute;
 import com.github.xpenatan.jParser.idl.IDLConstructor;
 import com.github.xpenatan.jParser.idl.IDLEnumClass;
@@ -156,18 +157,18 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
     protected static final String METHOD_GET_OBJ_VALUE_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
-            "static [COPY_TYPE] [COPY_PARAM];\n" +
+            "thread_local static [COPY_TYPE] [COPY_PARAM];\n" +
             "[COPY_PARAM] = nativeObject->[METHOD];\n" +
             "return (jlong)&[COPY_PARAM];";
 
     protected static final String METHOD_GET_OBJ_VALUE_ARITHMETIC_OPERATOR_TEMPLATE =
             "\n[TYPE]* nativeObject = ([TYPE]*)this_addr;\n" +
-                    "static [COPY_TYPE] [COPY_PARAM];\n" +
+                    "thread_local static [COPY_TYPE] [COPY_PARAM];\n" +
                     "[COPY_PARAM] = [OPERATOR];\n" +
                     "return (jlong)&[COPY_PARAM];";
 
     protected static final String METHOD_GET_OBJ_VALUE_STATIC_TEMPLATE =
-            "\nstatic [COPY_TYPE] [COPY_PARAM];\n" +
+            "\nthread_local static [COPY_TYPE] [COPY_PARAM];\n" +
             "[COPY_PARAM] = [TYPE]::[METHOD];\n" +
             "return (jlong)&[COPY_PARAM];";
 
@@ -221,6 +222,7 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     private final Map<String, HolderUnitData> holderUnitByOwner = new HashMap<>();
     private CompilationUnit currentCompilationUnit;
     private JParserItem currentParserItem;
+    private boolean callbackScopeAdded;
 
     public CppCodeParser(CppGenerator cppGenerator, String cppDir) {
         this(cppGenerator, null, "", cppDir);
@@ -492,17 +494,27 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         IDLClass callback = idlClass.callbackImpl;
         String cppClass = "";
 
-        String staticVariables = getStaticMethodsId(idlClass, methods);
+        if(!callbackScopeAdded) {
+            cppGenerator.addNativeCode(classDeclaration, new CustomFileDescriptor(
+                    "jni/JniCallbackScope.h", CustomFileDescriptor.FileType.Classpath).readString());
+            callbackScopeAdded = true;
+        }
+        String methodIds = getMethodsId(idlClass, methods);
         String callbackCode = generateSetupCallbackMethod(idlClass, callbackDeclaration, methods);
         String methodsCode = generateMethodCallers(idlClass, methods);
         cppClass += "" +
-                staticVariables + "\n" +
                 "class " + callback.getCPPName() + " : public " + idlClass.getCPPName() + " {\n" +
                 "private:\n" +
-                "\tJNIEnv* env;\n" +
-                "\tjobject obj;\n" +
+                "\tJavaVM* vm = nullptr;\n" +
+                "\tjobject obj = nullptr;\n" +
+                methodIds +
                 "public:\n";
         cppClass += callbackCode;
+        cppClass += "~" + callback.name + "() {\n" +
+                "\tJniCallbackScope scope(vm);\n" +
+                "\tJNIEnv* env = scope.getEnv();\n" +
+                "\tif(env != nullptr && obj != nullptr) env->DeleteGlobalRef(obj);\n" +
+                "}\n";
         cppClass += methodsCode;
         cppClass += "};\n";
 
@@ -515,15 +527,17 @@ public class CppCodeParser extends IDLDefaultCodeParser {
     private String generateSetupCallbackMethod(IDLClass idlClass, MethodDeclaration callbackDeclaration, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
         String contentTemplate = "" +
                 "void [METHOD](JNIEnv* env, jobject obj) {\n" +
-                "\tthis->env = env;\n" +
+                "\tif(env->GetJavaVM(&vm) != JNI_OK) return;\n" +
+                "\tif(this->obj != nullptr) env->DeleteGlobalRef(this->obj);\n" +
                 "\tthis->obj = env->NewGlobalRef(obj);\n" +
-                "\tstatic jclass jClassID = 0;\n" +
-                "\tif(jClassID == 0) {\n" +
-                "\t\tjClassID = (jclass)env->NewGlobalRef(env->GetObjectClass(obj));\n" +
+                "\tif(this->obj == nullptr) return;\n" +
+                "\tjclass jClassID = env->GetObjectClass(obj);\n" +
+                "\tif(jClassID == nullptr) return;\n" +
                 "[METHOD_IDS]" +
-                "\t}\n" +
+                "\tenv->DeleteLocalRef(jClassID);\n" +
                 "}\n";
-        String methodIdTemplate = "\t\t[CLASS_NAME]_[METHOD]_ID = env->GetMethodID(jClassID, \"[INTERNAL_METHOD]\", \"[PARAM_CODE]\");\n";
+        String methodIdTemplate = "\t[CLASS_NAME]_[METHOD]_ID = env->GetMethodID(jClassID, \"[INTERNAL_METHOD]\", \"[PARAM_CODE]\");\n" +
+                "\tif(env->ExceptionCheck()) { env->DeleteLocalRef(jClassID); return; }\n";
 
         IDLClass callbackClass = idlClass.callbackImpl;
         String className = callbackClass.name;
@@ -580,8 +594,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
         return content;
     }
 
-    private String getStaticMethodsId(IDLClass idlClass, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
-        String variableTemplate = "\tstatic jmethodID [CLASS_NAME]_[METHOD]_ID;\n";
+    private String getMethodsId(IDLClass idlClass, ArrayList<Pair<IDLMethod, Pair<MethodDeclaration, MethodDeclaration>>> methods) {
+        String variableTemplate = "\tjmethodID [CLASS_NAME]_[METHOD]_ID = nullptr;\n";
         String staticVariables = "";
 
         IDLClass callbackClass = idlClass.callbackImpl;
@@ -631,7 +645,13 @@ public class CppCodeParser extends IDLDefaultCodeParser {
 
         String methodTemplate = "" +
                 "virtual [RETURN_TYPE] [METHOD_NAME]([PARAMS])[CONST] {\n" +
-                "   [RETURN]env->[CALL_METHOD](obj, [CPP_CLASS]_[METHOD_ID]_ID[CALL_PARAMS]);\n" +
+                "   JniCallbackScope scope(vm, [LOCAL_CAPACITY]);\n" +
+                "   JNIEnv* env = scope.getEnv();\n" +
+                "   if(env == nullptr || env->ExceptionCheck() || obj == nullptr || [CPP_CLASS]_[METHOD_ID]_ID == nullptr) [DEFAULT_RETURN]\n" +
+                "[STRING_INPUTS]" +
+                "   [RESULT]env->[CALL_METHOD](obj, [CPP_CLASS]_[METHOD_ID]_ID[CALL_PARAMS]);\n" +
+                "   if(env->ExceptionCheck()) [DEFAULT_RETURN]\n" +
+                "   [RETURN]\n" +
                 "}\n";
 
         for(int i = 0; i < methods.size(); i++) {
@@ -650,6 +670,8 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             String methodName = idlMethod.getCPPName();
             String methodParams = "";
             String callParams = "";
+            String stringInputs = "";
+            int stringCount = 0;
             String constStr = idlMethod.isReturnConst ? " const" : "";
 
             NodeList<Parameter> publicMethodParameters = publicMethod.getParameters();
@@ -675,7 +697,10 @@ public class CppCodeParser extends IDLDefaultCodeParser {
                     }
                 }
                 else {
-                    callParamName = "env->NewStringUTF(" + paramName + ")";
+                    callParamName = "jniString" + i1;
+                    stringInputs += "   jstring " + callParamName + " = " + paramName + " == nullptr ? nullptr : env->NewStringUTF(" + paramName + ");\n" +
+                            "   if(env->ExceptionCheck()) [DEFAULT_RETURN]\n";
+                    stringCount++;
                 }
                 paramType = getCPPType(paramType);
                 if(idlParameter.isConst) {
@@ -703,8 +728,13 @@ public class CppCodeParser extends IDLDefaultCodeParser {
             if(isEnumReturnType) {
                 returnStr += "(" + typeStr + ")";
             }
+            returnStr += isVoidType ? "" : "result;";
             String methodStr = methodTemplate.replace("[CALL_METHOD]", callMethod).replace("[CPP_CLASS]", cppClassName)
                     .replace("[METHOD_NAME]", methodName).replace("[CALL_PARAMS]", callParams).replace("[RETURN]", returnStr).replace("[METHOD_ID]", methodName + methodCode);
+            methodStr = methodStr.replace("[RESULT]", isVoidType ? "" : "auto result = ")
+                    .replace("[LOCAL_CAPACITY]", Integer.toString(stringCount))
+                    .replace("[STRING_INPUTS]", stringInputs)
+                    .replace("[DEFAULT_RETURN]", isVoidType ? "return;" : "return {};");
             methodStr = methodStr.replace("[RETURN_TYPE]", typeStr).replace("[METHOD_NAME]", methodName).replace("[PARAMS]", methodParams).replace("[CONST]", constStr);
 
             cppMethods += methodStr;
