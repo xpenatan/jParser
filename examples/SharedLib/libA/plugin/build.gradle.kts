@@ -76,10 +76,12 @@ jParser {
             compileFlag(nativeUserConfig)
         }
         target(JParserTargets.ANDROID_JNI) {
+            compileFlag("-fPIC")
             compileFlag(nativeUserConfig)
             linkerFlag("-Wl,-soname,libLibA.so")
         }
         target(JParserTargets.ANDROID_TEAVM_C) {
+            compileFlag("-fPIC")
             compileFlag("-DLIBA_EXPORTS")
             compileFlag(nativeUserConfig)
         }

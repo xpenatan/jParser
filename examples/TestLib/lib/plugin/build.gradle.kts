@@ -45,7 +45,11 @@ jParser {
 
     native {
         defaultNativeTargets.forEach { targetName ->
-            target(targetName) {}
+            target(targetName) {
+                if(targetName == JParserTargets.ANDROID_JNI || targetName == JParserTargets.ANDROID_TEAVM_C) {
+                    compileFlag("-fPIC")
+                }
+            }
         }
         targetVariant(JParserTargets.WINDOWS64_TEAVM_C, "mt") {
             compileFlag("/MT")

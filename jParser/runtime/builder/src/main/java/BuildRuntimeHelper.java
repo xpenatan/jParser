@@ -286,6 +286,7 @@ public class BuildRuntimeHelper {
             }
             compileStaticTarget.isStatic = true;
             compileStaticTarget.cppFlags.add("-std=c++17");
+            compileStaticTarget.cppFlags.add("-fPIC");
             compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             compileStaticTarget.cppInclude.add(libBuildCPPPath + "/src/runtime/RuntimeHelper.cpp");
             compileStaticTarget.cppInclude.add(op.getCustomSourceDir() + "*.cpp");
@@ -297,6 +298,7 @@ public class BuildRuntimeHelper {
             }
             setupGlueCode(linkTarget, api, libBuildCPPPath);
             linkTarget.cppFlags.add("-std=c++17");
+            linkTarget.cppFlags.add("-fPIC");
             linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             linkTarget.linkerFlags.add("-Wl,--whole-archive");
             String staticLibPath = libBuildCPPPath + "/libs/android/" + target.getFolder() + "/";

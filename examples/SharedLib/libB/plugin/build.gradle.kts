@@ -79,10 +79,12 @@ jParser {
                 compileFlag(nativeUserConfig)
             }
             target(JParserTargets.ANDROID_JNI) {
+                compileFlag("-fPIC")
                 compileFlag(nativeUserConfig)
                 linkerFlag("-Wl,--allow-shlib-undefined")
             }
             target(JParserTargets.ANDROID_TEAVM_C) {
+                compileFlag("-fPIC")
                 compileFlag(nativeUserConfig)
                 linkerFlag("-Wl,--allow-shlib-undefined")
             }
