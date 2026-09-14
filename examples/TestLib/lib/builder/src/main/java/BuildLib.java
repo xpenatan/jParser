@@ -289,7 +289,7 @@ public class BuildLib {
             }
             compileStaticTarget.isStatic = true;
             addCppStandard(compileStaticTarget.cppFlags, api, false);
-            addPICForTeaVMC(compileStaticTarget.cppFlags, api);
+            compileStaticTarget.cppFlags.add("-fPIC");
             compileStaticTarget.headerDirs.add("-I" + sourceDir);
             compileStaticTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             compileStaticTarget.cppInclude.add(sourceDir + "**.cpp");
@@ -302,7 +302,7 @@ public class BuildLib {
             }
             setupGlueCode(linkTarget, api, libBuildCPPPath);
             addCppStandard(linkTarget.cppFlags, api, false);
-            addPICForTeaVMC(linkTarget.cppFlags, api);
+            linkTarget.cppFlags.add("-fPIC");
             linkTarget.headerDirs.add("-I" + sourceDir);
             linkTarget.headerDirs.add("-I" + op.getCustomSourceDir());
             linkTarget.linkerFlags.add("-Wl,--whole-archive");
@@ -454,12 +454,6 @@ public class BuildLib {
         }
         else {
             flags.add(api.equals("teavm_c") ? "-std=c++17" : "-std=c++11");
-        }
-    }
-
-    private static void addPICForTeaVMC(ArrayList<String> flags, String api) {
-        if(api.equals("teavm_c")) {
-            addFlagIfMissing(flags, "-fPIC");
         }
     }
 
