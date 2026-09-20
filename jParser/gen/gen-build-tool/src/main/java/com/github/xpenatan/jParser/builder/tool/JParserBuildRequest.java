@@ -1,5 +1,6 @@
 package com.github.xpenatan.jParser.builder.tool;
 
+import com.github.xpenatan.jParser.ffm.FFMCriticalMethodListener;
 import com.github.xpenatan.jParser.idl.IDLRenaming;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +26,7 @@ public class JParserBuildRequest {
     public JParserSymbolNameMode teaVMCSymbolNameMode;
     public boolean ffmLogMethod;
     public boolean ffmDefaultCritical;
+    public FFMCriticalMethodListener ffmCriticalMethodListener;
     public boolean generateCore = true;
 
     /**

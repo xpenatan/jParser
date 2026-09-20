@@ -18,6 +18,7 @@ base {
 dependencies {
     implementation(project(":jParser:gen:gen-build"))
     implementation(project(":jParser:gen:gen-idl"))
+    implementation(project(":jParser:gen:gen-ffm"))
     implementation(project(":jParser:gen:gen-build-tool"))
 
     testImplementation(gradleTestKit())

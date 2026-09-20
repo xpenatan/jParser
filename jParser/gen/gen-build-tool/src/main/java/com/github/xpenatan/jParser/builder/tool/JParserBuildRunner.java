@@ -46,6 +46,7 @@ public class JParserBuildRunner {
             }
             op.ffmClassData.logMethod = request.ffmLogMethod;
             op.ffmClassData.defaultCritical = request.ffmDefaultCritical;
+            op.ffmClassData.methodListener = request.ffmCriticalMethodListener;
             op.teaVMCConsumers.addAll(request.teaVMCConsumers);
 
             for(int i = 0; i < request.additionalIDLPaths.size(); i++) {

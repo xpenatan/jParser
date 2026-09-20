@@ -2,6 +2,8 @@ package com.github.xpenatan.jParser.gradle
 
 import com.github.xpenatan.jParser.builder.tool.JParserBuildRequest
 import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
+import com.github.xpenatan.jParser.ffm.FFMCriticalMethodData
+import com.github.xpenatan.jParser.ffm.FFMCriticalMode
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -10,6 +12,46 @@ import java.io.File
 import java.nio.file.Files
 
 class JParserBuildTaskTest {
+
+    @Test
+    fun perMethodCriticalOverrideFlowsIntoBuildRequestWithoutChangingDefaults() {
+        val project = ProjectBuilder.builder().build()
+        val extension = JParserExtension(project, project.objects).apply {
+            libName.set("TestLib")
+            modulePrefix.set("")
+            packageName.set("com.example.testlib")
+            runtimeHelperMode.set(true)
+        }
+        val task = project.tasks.register("testJParserCriticalOverride", JParserBuildTask::class.java).get().apply {
+            this.extension = extension
+            buildArgs.set(emptyList())
+            targetArg.set("")
+            targetVariant.set("")
+            generateCore.set(true)
+        }
+        val createRequest = JParserBuildTask::class.java.getDeclaredMethod("createRequest")
+        createRequest.isAccessible = true
+        val defaults = createRequest.invoke(task) as JParserBuildRequest
+        assertEquals(null, defaults.ffmCriticalMethodListener)
+        assertEquals(false, defaults.ffmDefaultCritical)
+
+        extension.ffmDefaultCritical.set(true)
+        extension.ffmCriticalMethodListener { method ->
+            if (method.className == "TestDevice" && method.javaMethodName == "createBuffer_addr") {
+                FFMCriticalMode.DISABLE
+            } else null
+        }
+        val request = createRequest.invoke(task) as JParserBuildRequest
+        assertEquals(true, request.ffmDefaultCritical)
+        for ((owner, name, expected) in listOf(
+            Triple("TestDevice", "createBuffer_addr", FFMCriticalMode.DISABLE),
+            Triple("TestDevice", "other_addr", null),
+            Triple("OtherDevice", "createBuffer_addr", null)
+        )) {
+            val method = FFMCriticalMethodData(owner, "symbol", name, "handle", "long", emptyList(), false, false)
+            assertEquals(expected, request.ffmCriticalMethodListener.onCriticalMode(method))
+        }
+    }
 
     @Test
     fun finalClassDefaultsAndIndividualOverridesFlowIntoBuildRequest() {

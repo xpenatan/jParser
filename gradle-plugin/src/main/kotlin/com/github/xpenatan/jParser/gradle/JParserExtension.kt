@@ -4,6 +4,7 @@ import com.github.xpenatan.jParser.builder.tool.JParserSymbolNameMode
 import com.github.xpenatan.jParser.builder.tool.TeaVMCLinkage
 import com.github.xpenatan.jParser.builder.targets.AndroidTarget
 import com.github.xpenatan.jParser.builder.targets.SourceLanguage
+import com.github.xpenatan.jParser.ffm.FFMCriticalMethodListener
 import com.github.xpenatan.jParser.idl.IDLRenaming
 import org.gradle.api.Action
 import org.gradle.api.file.Directory
@@ -89,6 +90,9 @@ open class JParserExtension @Inject constructor(
     val idlRenaming: Property<IDLRenaming> = objects.property(IDLRenaming::class.java)
     val ffmLogMethod: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
     val ffmDefaultCritical: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
+
+    /** Generation-time override: ENABLE/DISABLE force a method's mode; null preserves the default decision. */
+    val ffmCriticalMethodListener: Property<FFMCriticalMethodListener> = objects.property(FFMCriticalMethodListener::class.java)
 
     val jniCppStandard: Property<String> = objects.property(String::class.java).convention("c++11")
     val ffmCppStandard: Property<String> = objects.property(String::class.java).convention("c++11")
@@ -269,6 +273,10 @@ open class JParserExtension @Inject constructor(
 
     fun idlRenaming(value: IDLRenaming) {
         idlRenaming.set(value)
+    }
+
+    fun ffmCriticalMethodListener(value: FFMCriticalMethodListener) {
+        ffmCriticalMethodListener.set(value)
     }
 
     /**

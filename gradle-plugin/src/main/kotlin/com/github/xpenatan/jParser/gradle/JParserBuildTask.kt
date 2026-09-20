@@ -82,6 +82,7 @@ abstract class JParserBuildTask : DefaultTask() {
         request.teaVMCSymbolNameMode = extension.teaVMCSymbolNameMode.orNull
         request.ffmLogMethod = extension.ffmLogMethod.get()
         request.ffmDefaultCritical = extension.ffmDefaultCritical.get()
+        request.ffmCriticalMethodListener = extension.ffmCriticalMethodListener.orNull
         request.additionalIDLPaths.addAll(extension.additionalIDLPaths.get().map(::normalizeProjectPath))
         request.additionalIDLRefPaths.addAll(extension.additionalIDLRefPaths.get().map(::normalizeProjectPath))
         request.additionalSourceDirs.addAll(extension.additionalSourceDirs.get().map(::normalizeProjectPath))
